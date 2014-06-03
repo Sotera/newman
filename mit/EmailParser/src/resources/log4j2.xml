@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appenders>
+    <RollingFile name="LogFile" fileName="log/email-parser.log" filePattern="log/email-parser.%d{MM-dd-yyyy}.log.gz">
+      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"/>
+      <Policies>
+        <SizeBasedTriggeringPolicy size="100 MB"/>
+      </Policies>
+    </RollingFile>
+    <Console name="STDOUT" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"/>
+    </Console>
+  </appenders>
+  <loggers>
+    <logger name="mitll" level="info" additivity="false">
+      <appender-ref ref="LogFile"/>
+      <appender-ref ref="STDOUT" /> <!-- level="debug"/> -->
+    </logger>
+    <root level="warn">
+      <appender-ref ref="LogFile"/>
+      <appender-ref ref="STDOUT"/>
+    </root>
+  </loggers>
+</configuration>

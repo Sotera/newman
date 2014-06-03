@@ -1,0 +1,231 @@
+#!/bin/bash
+# File: mk
+# Description: Makefile for EmailParser
+# Author: Michael A. Coury (michael.coury@ll.mit.edu)
+# Copyright 2014 Massachusetts Institute of Technology, Lincoln Laboratory
+
+# Common aspects of all mk scripts. 
+# Calling scripts should define the following variables:
+#    PROJ_NAME: The name of the projects (e.g., hydec)
+#    SCALA_BUILD_CLASS: Set to the name of the main Build class (e.g., HydecBuild)
+#
+# Other interesting variables (see script for defaults) include:
+#    JOPTS: Can be used to override default java options.
+#    JENKINS: Run a non-interacive shell with no terminal fixes.
+#    ISBATCH: Run targets in batch mode: do not leave active terminal, and exit on target failure.
+#    BUILD_FILES: The set of build files to load into the interpreter.
+#
+PROJ_NAME=EmailParser
+SCALA_BUILD_CLASS=EmailParserBuild
+ISBATCH=true
+JENKINS=${JENKINS:-false}
+JOPTS="-Xms1536M -Xmx3g -Xss2M -XX:MaxPermSize=512M -XX:+UseParallelOldGC -XX:ReservedCodeCacheSize=128m -Dlog4j.configurationFile=log/log4j2.xml"
+
+###########################################
+# mk utility functions
+###########################################
+
+###########################################
+# Scala 2.9.0-specific terminal restoration
+###########################################
+scala_exit_status=127
+saved_stty=""
+
+# restore stty settings (echo in particular)
+function restoreSttySettings() {
+  if [[ -n $SCALA_RUNNER_DEBUG ]]; then
+    echo "restoring stty: $saved_stty"
+  fi
+  stty $saved_stty
+  saved_stty=""
+}
+
+function onExit() {
+  if [[ "$saved_stty" != "" ]]; then
+    restoreSttySettings
+  fi
+}
+
+if [ $JENKINS != true ]; then
+    # to reenable echo if we are interrupted before completing.
+    trap onExit INT
+    
+    # save terminal settings
+    saved_stty=$(stty -g 2>/dev/null)
+    
+    # clear on error so we don't later try to restore them
+    if [[ ! $? ]]; then  
+        saved_stty=""
+    fi
+fi
+
+#########################################
+# End Scala 2.9.0-specific terminal stuff
+#########################################
+
+#########################################
+# Downloader
+#########################################
+#function download() {
+#    local old_pwd=`pwd`
+#    local fn=$(basename $1)
+#    if [ -e "$2" ]; then
+#        cd $2
+#    else 
+#        echo "ERROR: target directory ($2) doesn't exist!"
+#        return
+#    fi
+#    if [ ! -e "$fn" ]; then
+#        echo "Downloading $fn from $1"
+#        curl -k -f -O -# "$1"
+#        status=$?
+#        if [ "$status" -ne "0" ]; then
+#            echo "ERROR: Unable to download $fn from $1"
+#        fi
+#    fi
+#    cd $old_pwd
+#}
+
+#########################################
+# link if not exist
+#########################################
+function lns {
+    if [[ ! -e "$2" ]]; then ln -s $1 $2; fi
+}
+
+#########################################
+# Arch
+#########################################
+function arch {
+    local OS=`uname -s`
+    local M=`uname -m`
+    local ARCH="unsupported"
+    if [ "$OS" == "Linux" ]; then
+        if [ "$M" == "x86_64" ]; then 
+            ARCH="linux64"
+        elif [ "$M" == "i686" -o "$M" == "i386" ]; then
+            ARCH="linux"
+        else
+            echo "ERROR: Unable to determine whether the platform is 32 or 64 bit: $M";
+        fi
+    elif [ `uname -s` == "Darwin" ]; then
+        ARCH="macos"
+    else
+        echo "ERROR: Unsupported architecture!"
+        #exit 1
+    fi
+    echo $ARCH
+}
+
+#########################################
+# Setup scala libs
+#########################################
+function init {
+#    mkdir -p tools/$ARCH
+#    download "$BASEURL/mitll/hlt/make/2.10.3/compiler-interface-sources.jar"            "tools"
+#    download "$BASEURL/mitll/hlt/make/2.10.3/make.jar"                                  "tools"
+#    download "$BASEURL/mitll/hlt/make/2.10.3/sbt-interface.jar"                         "tools"
+#    download "$BASEURL/org/scala-lang/scala-reflect/2.10.3/scala-reflect-2.10.3.jar"    "tools"
+#    download "$BASEURL/org/scala-lang/scala-compiler/2.10.3/scala-compiler-2.10.3.jar"  "tools"
+#    download "$BASEURL/org/scala-lang/scala-library/2.10.3/scala-library-2.10.3.jar"    "tools"
+    lns scala-reflect-2.10.3.jar tools/scala-reflect.jar
+    lns scala-compiler-2.10.3.jar tools/scala-compiler.jar
+    lns scala-library-2.10.3.jar tools/scala-library.jar
+    
+#    download "$BASEURL/7za/$ARCH/7za"                                                   "tools/$ARCH"
+#    chmod a+x tools/$ARCH/7za
+#    if [[ "$ARCH" != "macos" ]]; then 
+#        download "$BASEURL/java/jdk/$JAVA_VERS/jdk-$JAVA_VERS-$ARCH.7z"                 "tools/$ARCH"
+#        if [[ ! -e "jdk$JAVA_VERS" ]]; then 
+#            tools/$ARCH/7za x tools/$ARCH/jdk-$JAVA_VERS-$ARCH.7z;
+#        fi
+#    fi
+}
+
+function distclean {
+    rm tools/scala-reflect.jar
+    rm tools/scala-compiler.jar
+    rm tools/scala-library.jar
+}
+
+###########################################
+# Initialize Globals
+###########################################
+export ARCH=${ARCH:-$(arch)}
+export WIDTH=$(tput cols)
+
+###########################################
+# Initialize mk local settings
+###########################################
+BUILD_FILES=${BUILD_FILES:-"mk.scala"}
+# Setup batch mode (avoid terminal) when running as jenkins or provided by environment
+if [ -z "$ISBATCH" ]; then ISBATCH=${JENKINS:-false}; fi
+
+# export ARCH or WIDTH to override
+VERSION='$Id: 2750e172b557df8636e904b364e13af81afbd0c4 $'
+JOPTS=${JOPTS:-"-Xms1536M -Xmx3g -Xss2M -XX:MaxPermSize=512M -XX:+UseParallelOldGC -XX:ReservedCodeCacheSize=128m"}
+if [ "$ARCH" != "macos" ]; then 
+  JAVA_VERS=${JAVA_VERS:-1.6.0_30}
+  JAVA_CMD=jdk$JAVA_VERS/bin/java
+else
+  JAVA_VERS=$(java -version 2>&1 > /dev/null | head -1 | awk -F'"' '{print $2}')
+  JAVA_CMD=java
+fi
+
+#BASEURL='http://spooge.llan.ll.mit.edu/~swade/tools'
+#BASEURL='https://kws-bugs.ll.mit.edu/artifactory/simple/libs-release'
+
+echo "${P}$PROJ_NAME Build: Working in" `pwd` ...
+echo "${P}  + SCALA_BUILD_CLASS  = $SCALA_BUILD_CLASS"
+echo "${P}  + ARCH               = $ARCH"
+echo "${P}  + JAVA_VERS          = $JAVA_VERS"
+echo "${P}  + ISBATCH            = $ISBATCH"
+echo "${P}  + JOPTS              = $JOPTS"
+echo "${P}  + Arguments          = $@"
+echo "${P}"
+
+###########################################
+# mk-specific targets 
+# (bootstrap, init, setup, dist-clean, etc.)
+###########################################
+for target in "$@"; do
+  case "$target" in
+    dist-clean|distclean)
+      echo "INFO: running $target in $(pwd)"
+      distclean
+      UEXIT=$?
+      doBuild=false
+      shift
+      ;;
+    setup|init)
+      echo "INFO: running boostrap process in $(pwd)"
+      $target
+      UEXIT=$?
+      if [ "$UEXIT" == 0 ]; then
+        echo "INFO: Bootstrap process successful in $(pwd)"
+      else 
+        echo "ERROR: Unable to do bootstrap process in $(pwd)!"
+      fi
+      doBuild=false
+      shift
+      ;;
+    *)
+      args=(${@// /\\ })
+      doBuild=true
+      break;;
+  esac
+  # Exit on failure
+  [[ $UEXIT != 0 ]] && exit $UEXIT
+done
+
+###########################################
+# start make REPL or do batch build
+###########################################
+if ${doBuild:-true}; then
+  $JAVA_CMD -server $JOPTS -jar tools/make.jar -batch-mode $ISBATCH -eval "val builder = ${SCALA_BUILD_CLASS}(); builder(%s);" -init-targets "${args[*]}" $BUILD_FILES
+  UEXIT=$?
+fi
+
+# skip TTY workaround when running from Jenkins (no tty)
+if [ $JENKINS != true ]; then onExit; fi
+exit $UEXIT

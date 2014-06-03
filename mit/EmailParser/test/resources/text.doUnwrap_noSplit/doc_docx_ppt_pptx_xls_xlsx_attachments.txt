@@ -1,0 +1,165 @@
+Attachments (doc, docx, xls, xlsx, ppt, pptx)
+Here are the attachments:
+Sample
+*
+*
+Sample PowerPoint
+This is the subtitle
+*
+*
+Second Slide
+Bullet point 1
+Sub-point 1
+Sub-point 2
+Sub-point 3
+Sub-point 4
+Bullet point 2
+Sub-point 5
+Bullet point 3
+*
+*
+*
+*
+*
+*
+Picture
+Picture of the American Flag
+*
+*
+Chinese Poem
+和毛泽东 <<重上井冈山>>. 严永欣, 一九八八年
+和毛泽东 <<重上井冈山>>. 严永欣, 一九八八年.
+久有归天愿
+终过鬼门关
+千里来寻归宿
+春华变苍颜
+到处群魔乱舞
+更有妖雾盘绕
+暗道入阴间
+过了阎王殿
+险处不须看
+风雷动
+旌旗奋
+忆人寰
+八十三年过去
+弹指一挥间
+中原千军逐蒋
+城楼万众检阅
+褒贬满载还
+世上无难事
+只怕我癫痫
+These are notes from slide 1.
+*
+These are notes from slide 2.
+*
+*
+A Chinese poem:
+和毛泽东 <<重上井冈山>>. 严永欣, 一九八八年
+和毛泽东 <<重上井冈山>>. 严永欣, 一九八八年.
+久有归天愿
+终过鬼门关
+千里来寻归宿
+春华变苍颜
+到处群魔乱舞
+更有妖雾盘绕
+暗道入阴间
+过了阎王殿
+险处不须看
+风雷动
+旌旗奋
+忆人寰
+八十三年过去
+弹指一挥间
+中原千军逐蒋
+城楼万众检阅
+褒贬满载还
+世上无难事
+只怕我癫痫
+Sample PowerPoint
+This is the subtitle
+These are notes from slide 1.
+1
+Second Slide
+Bullet point 1
+Sub-point 1
+Sub-point 2
+Sub-point 3
+Sub-point 4
+Bullet point 2
+Sub-point 5
+Bullet point 3
+These are notes from slide 2.
+2
+Picture
+Picture of the American Flag
+5
+Chinese Poem
+和毛泽东 <<重上井冈山>>. 严永欣, 一九八八年
+和毛泽东 <<重上井冈山>>. 严永欣, 一九八八年.
+久有归天愿
+终过鬼门关
+千里来寻归宿
+春华变苍颜
+到处群魔乱舞
+更有妖雾盘绕
+暗道入阴间
+过了阎王殿
+险处不须看
+风雷动
+旌旗奋
+忆人寰
+八十三年过去
+弹指一挥间
+中原千军逐蒋
+城楼万众检阅
+褒贬满载还
+世上无难事
+只怕我癫痫
+Sheet1
+column 1	column 2	column 3	column 4	column 5	column 6	column 7	column 8	column 9	column 10	column 11	column 12	column 13	column 14	column 15	column 16	column 17	column 18	column 19	column 20
+128	657	657654	357	5347	357	33573	357	357	357	abc	def	ghi	jkl	mno	pqr	stu	vwx	yza	bcd
+657	687	3357	476867	475	5	763	7357	0	35	test	test	test	test	test	test	test	test	test	test
+46845	354	354	354	65	16	8357	21	554	35	practice	practice	practice	practice	practice	practice	practice	practice	practice	practice
+Sheet2
+column 1	column 2	column 3	column 4	column 5	column 6	column 7	column 8	column 9	column 10	column 11	column 12	column 13	column 14	column 15	column 16	column 17	column 18	column 19	column 20
+abc	def	ghi	jkl	mno	pqr	stu	vwx	yza	bcd	128	657	657654	357	5347	357	33573	357	357	357
+test	test	test	test	test	test	test	test	test	test	657	687	3357	476867	475	5	763	7357	0	35
+practice	practice	practice	practice	practice	practice	practice	practice	practice	practice	46845	354	354	354	65	16	8357	21	554	35
+A Chinese poem:
+和毛泽东 <<重上井冈山>>. 严永欣, 一九八八年
+和毛泽东 <<重上井冈山>>. 严永欣, 一九八八年.
+久有归天愿
+终过鬼门关
+千里来寻归宿
+春华变苍颜
+到处群魔乱舞
+更有妖雾盘绕
+暗道入阴间
+过了阎王殿
+险处不须看
+风雷动
+旌旗奋
+忆人寰
+八十三年过去
+弹指一挥间
+中原千军逐蒋
+城楼万众检阅
+褒贬满载还
+世上无难事
+只怕我癫痫
+Sheet1
+column 1	column 2	column 3	column 4	column 5	column 6	column 7	column 8	column 9	column 10	column 11	column 12	column 13	column 14	column 15	column 16	column 17	column 18	column 19	column 20
+128	657	657654	357	5347	357	33573	357	357	357	abc	def	ghi	jkl	mno	pqr	stu	vwx	yza	bcd
+657	687	3357	476867	475	5	763	7357	0	35	test	test	test	test	test	test	test	test	test	test
+46845	354	354	354	65	16	8357	21	554	35	practice	practice	practice	practice	practice	practice	practice	practice	practice	practice
+Sheet2
+column 1	column 2	column 3	column 4	column 5	column 6	column 7	column 8	column 9	column 10	column 11	column 12	column 13	column 14	column 15	column 16	column 17	column 18	column 19	column 20
+abc	def	ghi	jkl	mno	pqr	stu	vwx	yza	bcd	128	657	657654	357	5347	357	33573	357	357	357
+test	test	test	test	test	test	test	test	test	test	657	687	3357	476867	475	5	763	7357	0	35
+practice	practice	practice	practice	practice	practice	practice	practice	practice	practice	46845	354	354	354	65	16	8357	21	554	35
+Will they parse correctly?
+-Michael A. Coury
+Human Language Technology Group
+MIT Lincoln Laboratory
+(781) 981-6389
+michael.coury@ll.mit.edu

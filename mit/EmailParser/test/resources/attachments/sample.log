@@ -1,0 +1,3 @@
+This is a sample log file.
+I am using it as a test to make sure the file extension ".log" gets processed by EmailParser.
+If you see this text in the extracted message, then the test passed.
