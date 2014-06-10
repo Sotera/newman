@@ -1,3 +1,6 @@
+#!/usr/bin/env python 
+# -*- coding: utf-8 -*-
+
 output = open('better.csv','r')
 ranksfile = open('rankings','r')
 louvain = open('louvain_to_gephi/community_itr_1.nodes','r')
