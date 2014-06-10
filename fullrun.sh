@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 unzip sw_emails.zip
 python format.py
 python louvain.py
