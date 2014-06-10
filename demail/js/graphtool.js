@@ -111,6 +111,7 @@ function produceHTML(d) {
 
 function do_search(val,fields) {
   console.log('got here');
+  /* Fails Lint -  Use '===' to compare with 'undefined' */
   if (fields == undefined) { fields = 'All'; }
   d3.select("#result_table").select("tbody").selectAll("tr").remove();
   d3.select("#result_table").select("tbody").selectAll("td").remove();
@@ -160,6 +161,7 @@ function do_search(val,fields) {
       .style("font-size","10px")
       .style("fill","blue").append('text')
       .html(function(d,i) {
+        /* fails lint - Use '===' to compare with '0'. */
         if( i == 0 ) {
           return d.split('::')[0];
         }
@@ -228,9 +230,13 @@ window.onload = function () {
     });
 
   });
-  if( cluster != '')
-  {  do_search(cluster);}
-  else { do_search('');}
+  
+  /* fails lint - Use '!==' to compare with ''. */
+  if( cluster != '')  {  
+    do_search(cluster);
+  }  else { 
+    do_search('');
+  }
 };
 
 function tickCommunity() {
