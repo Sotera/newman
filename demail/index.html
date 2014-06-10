@@ -1,141 +1,118 @@
-<!doctype html>
-<meta charset=utf-8>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Email Graph Query Tool</title>
+    <link href="css/thirdparty/jquery-ui.css" rel="stylesheet">
+    <link href="css/ner.css" rel="stylesheet">
+    <link href="css/thirdparty/bootstrap.min.css" rel="stylesheet">
+    <link href="css/thirdparty/bootstrap-glyphicons.css" rel="stylesheet">
+    <link href="css/default.css" rel="stylesheet">
+  </head>
+  <body>
 
-<title>Email Graph Query Tool</title>
+    <div id="info-panel" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Information</h3>
+          </div>
 
-<script src=js/thirdparty/jquery-1.9.1.min.js></script>
-<script src=js/thirdparty/jquery-ui.min.js></script>
-<script src=js/thirdparty/d3.v3.min.js charset=utf-8></script>
-<script src=js/thirdparty/tangelo-0.2.0.js></script>
+          <div class="modal-body">
+    	    Will fill this in later...
+	  </div>
 
-<script src=js/graphtool.js></script>
-
-<link href=css/thirdparty/jquery-ui.css rel=stylesheet>
-<link href=css/ner.css rel=stylesheet>
-<link href=css/thirdparty/bootstrap.min.css rel=stylesheet>
-<link href=css/thirdparty/bootstrap-glyphicons.css rel=stylesheet>
-<script src=js/thirdparty/bootstrap.min.js></script>
-
-<style>
-    html, body, #graph {
-        width: 100%;
-        height: 100%;
-    }
-
-    body {
-        padding-top: 50px;
-    }
-
-    #control-panel {
-        background-color: lightgray;
-    }
-    #webpage {
-    overflow-y: auto;
-    }
-    
-    #graph {
-        position: fixed;
-        top: 0px;
-    }
-    
-    
-    .node {
-  		stroke: #fff;
-  		stroke-width: 1.5px;
-	}
-
-
-	.link {
-  		fill: none;
-  		stroke: #bbb;
-	}
-
-    
-
-.result_thead, .result_tbody { display: block; }
-
-.result_tbody {
-    height: 200px;       /* Just for the demo          */
-    width: 100%;
-    overflow-y: auto;    /* Trigger vertical scroll    */
-    overflow-x: auto;  /* Hide the horizontal scroll */
-}
-    
-    
-    
-</style>
-
-<div id=info-panel class="modal fade">
-    <div class=modal-dialog>
-        <div class=modal-content>
-            <div class=modal-header>
-                <h3>Information</h3>
-            </div>
-
-            <div class=modal-body>
-    		Will fill this in later...
-	    </div>
-
-            <div class=modal-footer>
-                <a class="btn btn-default" data-dismiss=modal>OK</a>
-            </div>
+          <div class="modal-footer">
+            <a class="btn btn-default" data-dismiss="modal">OK</a>
+          </div>
         </div>
-    </div>
-</div>
-
-<div class="navbar navbar-default navbar-fixed-top">
-    <div class=navbar-header>
-        <div class=navbar-brand>Email Graph Tool</div>
+      </div>
     </div>
 
-    <ul class="nav navbar-nav">
-        <li><a style=cursor:pointer data-toggle=modal data-target=#info-panel><span class="glyphicon glyphicon-info-sign"></span> Info</a>
-    </ul>
-</div>
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="navbar-header">
+        <div class="navbar-brand">Email Graph Tool</div>
+      </div>
+
+      <ul class="nav navbar-nav">
+        <li>
+          <a style="cursor:pointer" data-toggle="modal" data-target="#info-panel">
+            <span class="glyphicon glyphicon-info-sign"></span> Info
+          </a>
+      </ul>
+    </div>
+
+    <!-- Create a fullscreen SVG element -->
+    <div id="node_graph"  style="width:50%;height:100%;float: left"> </div>
+    <div id="webpage"  style="width:50%;height:100%;float: right">  </div>
+
+    <!-- Create an SVG element to represent the legend -->
+    <svg id="legend" height="100%" style="position:fixed; top:100px; right:0px; pointer-events:none;"></svg>
+
+    <!-- Create a drawer with the control panel in it -->
+    <div id="control-panel">
+      <div class="col-md-4">
+        <div style="width: 100%">
+          <div style="width: 100%">
+            <table>
+	      <tr>
+                <td>Color: 
+                  <label class="radio-inline">
+                    <input type="radio" name="optionRadios" id="colorby" value="node" checked>Node</input>
+                  </label>
+                  <label class="radio-inline">
+                    <input type="radio" name="optionRadios" id="colorby2"  value="comm">Community</input>
+                  </label>
+                  <label class="checkbox"> 
+                    <input type="checkbox" name="optionrank" id="rankval" value="rank">Rank</input>
+                  </label>
+                </td>
+              </tr>
+              <tr>
+                <td width="75%">
+                  <input  id="search_text" class="form-control" type="text"  placeholder="Search all..."></input>
+                </td>
+                <td>
+                  <a id="submit_search" class="btn btn-default">Search</a>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input id="email_text" class="form-control" type="text" width="200" placeholder="From/To/Cc/Bcc..."></input>
+                </td>
+                <td>
+                  <a id="submit_email" class="btn btn-default">Search</a>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
 
 
+        <div class="row">
+          <div class="col-md-6">
+            <label class="checkbox">
+              <input type="checkbox" id="usetext" onchange="toogle_labels(); graph.reset();"> Render text labels
+            </label>
+          </div>
+        </div>
+      </div>
 
-<!-- Create a fullscreen SVG element -->
-<div id=node_graph  style="width:50%;height:100%;float: left">
-</div>
-<div id=webpage  style="width:50%;height:100%;float: right">
-</div>
+      <div class="col-md-8">
+        <div id="search_status"></div>
+        
+        <table id="result_table" class="table table-striped table-hover">
+          <tbody class="result_tbody"></tbody>
+        </table>
+      </div>
+    </div>
 
-<!-- Create an SVG element to represent the legend -->
-<svg id=legend height=100% style="position:fixed; top:100px; right:0px; pointer-events:none;"></svg>
+    <script src="js/thirdparty/jquery-1.9.1.min.js"></script>
+    <script src="js/thirdparty/jquery-ui.min.js"></script>
+    <script src="js/thirdparty/d3.v3.min.js" charset="utf-8"></script>
+    <script src="js/thirdparty/tangelo-0.2.0.js"></script>
+    <script src="js/thirdparty/bootstrap.min.js"></script>
+    <script src="js/graphtool.js"></script>
 
-<!-- Create a drawer with the control panel in it -->
-<div id=control-panel>
-            <div class=col-md-4>
-                <div style="width: 100%">
-                    <div style="width: 100%">
-                        <table>
-		<tr><td>Color: <label class="radio-inline"><input type="radio" name="optionRadios" id="colorby" value="node" checked>Node</label><label class="radio-inline"><input type="radio" name="optionRadios" id="colorby2" value="comm">Community </label><label class="checkbox"> <input type="checkbox" name="optionrank" id="rankval" value="rank">Rank</label></td></tr>
-                        <tr>
-                        <td width="75%"><input  id=search_text class=form-control type=text  placeholder="Search all..."></input></td>
-                        <td><a id=submit_search class="btn btn-default ">Search</a></td>
-                        </tr>
-<tr>
-                        <td><input id=email_text class=form-control type=text width="200"  placeholder="From/To/Cc/Bcc..."></input></td><td><a id=submit_email class="btn btn-default">Search</a></td></tr></table>
-                    </div>
-                </div>
-
-
-                <div class=row>
-                    <div class=col-md-6>
-                        <label class=checkbox>
-                            <input type=checkbox id=usetext onchange="toogle_labels(); graph.reset();"> Render text labels
-                        </label>
-                    </div>
-
-                </div>
-            </div>
-
-            <div class=col-md-8>
-                <div id="search_status"></div>
-                
-                 <table id="result_table" class="table table-striped table-hover">
-                  <tbody class="result_tbody"></tbody>
-                </table>
-            </div>
-</div>
+  </body>
+</html>
