@@ -1,3 +1,9 @@
 
 *.pyc
 *.zip
+
+data/
+!data/.keep
+
+tmp/
+!tmp/.keep
