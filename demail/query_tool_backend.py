@@ -7,6 +7,7 @@ import pdb
 import cPickle as pickle
 import traceback
 import codecs
+import cherrypy
 
 
 def colorHash():
@@ -28,7 +29,7 @@ def colorHash():
   namelist = list(names)
   return namelist
 
-lines =  open('/usr/local/share/tangelo/web/demail/better.csv','r')
+lines =  open(cherrypy.config.get("webroot") + '/better.csv','r')
 text = lines.readlines()
 lines.close()
 mailhash = {}
@@ -41,7 +42,7 @@ lines.close()
 namelist = colorHash()
 print 'done with data load'
 
-nodelines = open('/usr/local/share/tangelo/web/demail/node_vals.csv','r')
+nodelines = open(cherrypy.config.get("webroot") + '/node_vals.csv','r')
 nodevals = {}
 for line in nodelines:
   node,num,comm,rank = line.strip().split('\t')
