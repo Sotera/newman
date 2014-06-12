@@ -19,7 +19,6 @@ var svg = d3.select("#node_graph").append("svg")
 var vis = svg.append('svg:g');
 
 var labels = false;
-var allow_large_graphs = false;
 
 var drag = d3.behavior.drag()
         .origin(function(d) { return d; }) //center of circle
@@ -27,12 +26,26 @@ var drag = d3.behavior.drag()
         .on("drag", dragged)
         .on("dragend", dragended);
 
+function tickCommunity() {
+  vis.selectAll(".link").attr("d", function(d) {
+    return "M" + d[0].x + "," + d[0].y +
+      "S" + d[1].x + "," + d[1].y +
+      " " + d[2].x + "," + d[2].y;
+  });
+  //vis.selectAll("svg:circle").attr("transform", function(d) {
+  //              return "translate(" + d.x + "," + d.y + ")";
+  //    });
+  vis.selectAll("circle").attr("cx", function(d) { return d.x; })
+    .attr("cy", function(d) { return d.y; });
+}
+
 /*** Configure drag behaviour ***/
 function dragstarted(d){
         d3.event.sourceEvent.stopPropagation();
         d3.select(this).classed("fixed", d.fixed = false);
         d3.select(this).classed("dragging", true);
 }
+
 function dragged(d){
         if (d.fixed) return; //root is fixed
         d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
@@ -40,6 +53,7 @@ function dragged(d){
         tickCommunity();//re-position this node and any links
         d.fixed = false;
 }
+
 function dragended(d){
         d3.select(this).classed("dragging", false);
         d3.select(this).classed("fixed", d.fixed = true);
@@ -70,8 +84,9 @@ function do_search(val,fields) {
   console.log('got here');
   /* Fails Lint -  Use '===' to compare with 'undefined' */
   if (fields == undefined) { fields = 'All'; }
+  
   d3.select("#result_table").select("tbody").selectAll("tr").remove();
-  d3.select("#result_table").select("tbody").selectAll("td").remove();
+  d3.select("#result_table").select("thead").selectAll("tr").remove();
   var text = val;
   
   d3.select("#search_status").text("Searching...");
@@ -80,15 +95,12 @@ function do_search(val,fields) {
     d3.select("#search_status").text("");
     
     // create the table header
-    var thead = d3.select("#result_table").select("tbody").selectAll("tr")
+    var thead = d3.select("#result_table").select("thead")
+      .append("tr")
+      .selectAll("tr")
     //.data(d3.keys(comp_data[0]))
       .data(['Source','Date','From','To','Cc','Bcc','Subject'])
-      .enter().append("td").text(function(d){return d;})
-      .style("border", "1px black solid")
-      .style("padding", "5px")
-      .style("font-size","10px")
-      .style("font-weight","bold")
-      .style("color","red");
+      .enter().append("th").text(function(d){return d;});
     
     // create rows   
     var tr = d3.select("#result_table").select("tbody").selectAll("tr").data(comp_data.rows).enter().append("tr");
@@ -139,19 +151,7 @@ function do_search(val,fields) {
   });
 }
 
-function tickCommunity() {
-  vis.selectAll(".link").attr("d", function(d) {
-    return "M" + d[0].x + "," + d[0].y +
-      "S" + d[1].x + "," + d[1].y +
-      " " + d[2].x + "," + d[2].y;
-  });
-  //vis.selectAll("svg:circle").attr("transform", function(d) {
-  //              return "translate(" + d.x + "," + d.y + ")";
-  //    });
-  vis.selectAll("circle").attr("cx", function(d) { return d.x; })
-    .attr("cy", function(d) { return d.y; });
 
-}
 
 
 // Draw a graph for a component
@@ -392,22 +392,6 @@ function redraw() {
   vis.attr("transform",
            "translate(" + d3.event.translate + ")" +
            " scale(" + d3.event.scale + ")");
-}
-
-function toogle_labels() {
-  if (labels) {
-    d3.selectAll("svg text").style("opacity","0");
-    labels = false;
-  }
-  else {
-    d3.selectAll("svg text").style("opacity","100");
-    labels = true;
-  }
-  
-}
-
-function toogle_large_graphs() {
-  allow_large_graphs = !allow_large_graphs;
 }
 
 /** document ready **/

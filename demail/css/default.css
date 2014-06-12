@@ -32,8 +32,6 @@ body {
 }
 
 
-.result_thead, .result_tbody { display: block; }
-
 .result_tbody {
     height: 200px;       /* Just for the demo          */
     width: 100%;
@@ -41,3 +39,16 @@ body {
     overflow-x: auto;  /* Hide the horizontal scroll */
 }
 
+.result_thead {
+    width: 100%;
+    overflow-y: auto;    /* Trigger vertical scroll    */
+    overflow-x: auto;  /* Hide the horizontal scroll */
+}
+
+.result_thead >tr >th {
+    border: 1px black solid;
+    padding: 5px;
+    font-size: 10px;
+    font-weight: bold;
+    color: red;
+}
