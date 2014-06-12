@@ -46,47 +46,44 @@ function dragended(d){
 }
 
 $(function () {
-    $("#submit_search").click(function(){
-      console.log('before here');
-      do_search($("#search_text").val(),'All');
-    });
+
+  /* attach event handlers after body loads */
+
+  $("#submit_search").click(function(){
+    console.log('before here');
+    do_search($("#search_text").val(),'All');
+  });
+
+  $("#submit_email").click(function(){
+    console.log($("#email_text").val());
+    do_search($("#email_text").val(),'email');
+  });
+
+  $("#colorby2").click(function(){
+    console.log($("#colorby2").val());
+    recolornodes('comm');
+  });
+
+  $("#colorby").click(function(){
+    console.log($("#colorby").val());
+    recolornodes('node');
+  });
+
+  $("#rankval").click(function(){
+    console.log(d3.select("#rankval").property("checked"));
+    if (d3.select("#rankval").property("checked")) {
+      d3.selectAll("circle").style("opacity",function(d) { return 0.2 + (d.rank); });
+      d3.selectAll("circle").style("stroke-width",function(d) { return 5 * (d.rank); });
+    }
+    else {
+      d3.selectAll("circle").style("opacity","100");
+      d3.selectAll("circle").style("stroke-width","0");
+    }
+    //recolornodes('rank');
+  });
+
 });
 
-$(function () {
-    $("#submit_email").click(function(){
-      console.log($("#email_text").val());
-      do_search($("#email_text").val(),'email');
-    });
-});
-
-$(function () {
-    $("#colorby2").click(function(){
-      console.log($("#colorby2").val());
-      recolornodes('comm');
-    });
-});
-
-$(function () {
-    $("#colorby").click(function(){
-      console.log($("#colorby").val());
-      recolornodes('node');
-    });
-});
-
-$(function () {
-    $("#rankval").click(function(){
-      console.log(d3.select("#rankval").property("checked"));
-      if (d3.select("#rankval").property("checked")) {
-        d3.selectAll("circle").style("opacity",function(d) { return 0.2 + (d.rank); });
-        d3.selectAll("circle").style("stroke-width",function(d) { return 5 * (d.rank); });
-      }
-      else {
-        d3.selectAll("circle").style("opacity","100");
-        d3.selectAll("circle").style("stroke-width","0");
-      }
-      //recolornodes('rank');
-    });
-});
 
 function recolornodes(how) {
   if( how == 'comm') {d3.selectAll("circle").style("fill", function(d) { return color(d.community); });}
