@@ -45,46 +45,6 @@ function dragended(d){
         d3.select(this).classed("fixed", d.fixed = true);
 }
 
-$(function () {
-
-  /* attach event handlers after body loads */
-
-  $("#submit_search").click(function(){
-    console.log('before here');
-    do_search($("#search_text").val(),'All');
-  });
-
-  $("#submit_email").click(function(){
-    console.log($("#email_text").val());
-    do_search($("#email_text").val(),'email');
-  });
-
-  $("#colorby2").click(function(){
-    console.log($("#colorby2").val());
-    recolornodes('comm');
-  });
-
-  $("#colorby").click(function(){
-    console.log($("#colorby").val());
-    recolornodes('node');
-  });
-
-  $("#rankval").click(function(){
-    console.log(d3.select("#rankval").property("checked"));
-    if (d3.select("#rankval").property("checked")) {
-      d3.selectAll("circle").style("opacity",function(d) { return 0.2 + (d.rank); });
-      d3.selectAll("circle").style("stroke-width",function(d) { return 5 * (d.rank); });
-    }
-    else {
-      d3.selectAll("circle").style("opacity","100");
-      d3.selectAll("circle").style("stroke-width","0");
-    }
-    //recolornodes('rank');
-  });
-
-});
-
-
 function recolornodes(how) {
   if( how == 'comm') {d3.selectAll("circle").style("fill", function(d) { return color(d.community); });}
   if( how == 'node') {d3.selectAll("circle").style("fill", function(d) { return color(d.group); });}
@@ -178,63 +138,6 @@ function do_search(val,fields) {
     drawGraph(comp_data.graph);
   });
 }
-
-
-
-window.onload = function () {
-  "use strict";
-
-  // Create control panel.
-  $("#control-panel").controlPanel();
-
-  var clusters = window.location.href.split('=');
-  var cluster = '';
-  if( clusters.length == 2) {
-    cluster = clusters[1];
-  }
-  tangelo.defaults("", function (config, status, error) {
-    var popover_cfg;
-
-    // Capture the console element.
-    GT.con = d3.select("#console");
-
-    // Enable the popover help items.
-    //
-    // First create a config object with the common options present.
-    popover_cfg = {
-      html: true,
-      container: "body",
-      placement: "top",
-      trigger: "hover",
-      title: null,
-      content: null,
-      delay: {
-        show: 100,
-        hide: 100
-      }
-    };
-
-    // Dataset pulldown help.
-    popover_cfg.content = "<b>Search:</b><br><br>" +  
-      "Global Search for everything.";
-    
-    $("#search_help").popover(popover_cfg);
-
-    $('#search_text').keyup(function (e){
-      if (e.keyCode === 13) {
-       	do_search($("#search_text").val());
-      }
-    });
-
-  });
-  
-  /* fails lint - Use '!==' to compare with ''. */
-  if( cluster != '')  {  
-    do_search(cluster);
-  }  else { 
-    do_search('');
-  }
-};
 
 function tickCommunity() {
   vis.selectAll(".link").attr("d", function(d) {
@@ -506,3 +409,96 @@ function toogle_labels() {
 function toogle_large_graphs() {
   allow_large_graphs = !allow_large_graphs;
 }
+
+/** document ready **/
+$(function () {
+  "use strict";
+
+  // Create control panel.
+  $("#control-panel").controlPanel();
+
+  var clusters = window.location.href.split('=');
+  var cluster = '';
+  if( clusters.length == 2) {
+    cluster = clusters[1];
+  }
+  tangelo.defaults("", function (config, status, error) {
+    var popover_cfg;
+
+    // Capture the console element.
+    GT.con = d3.select("#console");
+
+    // Enable the popover help items.
+    //
+    // First create a config object with the common options present.
+    popover_cfg = {
+      html: true,
+      container: "body",
+      placement: "top",
+      trigger: "hover",
+      title: null,
+      content: null,
+      delay: {
+        show: 100,
+        hide: 100
+      }
+    };
+
+    // Dataset pulldown help.
+    popover_cfg.content = "<b>Search:</b><br><br>" +  
+      "Global Search for everything.";
+    
+    $("#search_help").popover(popover_cfg);
+
+    $('#search_text').keyup(function (e){
+      if (e.keyCode === 13) {
+       	do_search($("#search_text").val());
+      }
+    });
+
+  });
+  
+  /* fails lint - Use '!==' to compare with ''. */
+  if( cluster != '')  {  
+    do_search(cluster);
+  }  else { 
+    do_search('');
+  }
+
+  /* attach element event handlers */
+
+  $("#submit_search").click(function(){
+    console.log('before here');
+    do_search($("#search_text").val(),'All');
+  });
+
+  $("#submit_email").click(function(){
+    console.log($("#email_text").val());
+    do_search($("#email_text").val(),'email');
+  });
+
+  $("#colorby2").click(function(){
+    console.log($("#colorby2").val());
+    recolornodes('comm');
+  });
+
+  $("#colorby").click(function(){
+    console.log($("#colorby").val());
+    recolornodes('node');
+  });
+
+  $("#rankval").click(function(){
+    console.log(d3.select("#rankval").property("checked"));
+    if (d3.select("#rankval").property("checked")) {
+      d3.selectAll("circle").style("opacity",function(d) { return 0.2 + (d.rank); });
+      d3.selectAll("circle").style("stroke-width",function(d) { return 5 * (d.rank); });
+    }
+    else {
+      d3.selectAll("circle").style("opacity","100");
+      d3.selectAll("circle").style("stroke-width","0");
+    }
+    //recolornodes('rank');
+  });
+
+});
+
