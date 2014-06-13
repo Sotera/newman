@@ -394,6 +394,20 @@ function redraw() {
            " scale(" + d3.event.scale + ")");
 }
 
+function toggle_labels() {
+  if (labels) {
+    d3.selectAll("svg text").style("opacity","0");
+    labels = false;
+  }
+  
+  else {
+    d3.selectAll("svg text").style("opacity","100");
+    labels = true;
+  }
+}
+
+
+
 /** document ready **/
 $(function () {
   "use strict";
@@ -470,6 +484,11 @@ $(function () {
     console.log($("#colorby").val());
     recolornodes('node');
   });
+
+  $("#usetext").on("change", function(){
+    toggle_labels(); 
+    graph.reset();
+  })
 
   $("#rankval").click(function(){
     console.log(d3.select("#rankval").property("checked"));
