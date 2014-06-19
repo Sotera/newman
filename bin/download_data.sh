@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+## paths relative to root of project
+## ie: ./bin/download_data.sh
+
 set -e 
 
 #wget https://www.dropbox.com/s/7eq6or39ttbes3l/sw_emails.zip -P tmp/
