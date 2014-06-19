@@ -12,7 +12,7 @@ Get raw Scott Walker data to work with at:
 
 
 
-<div style="clear:both" />
+<div style="clear:both;" />
 
 ## Dependencies
 
