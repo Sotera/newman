@@ -1,6 +1,6 @@
 # newman
 
-<div style="float:left;"><img src="http://www.seinfeldscripts.com/images/newman1.jpg" width="300" /></div>
+<img src="http://www.seinfeldscripts.com/images/newman1.jpg" width="300" align="left" />
 <div style="float:left;padding-left: 10px;">When you control the mail, you control...information.</div>
 
 
