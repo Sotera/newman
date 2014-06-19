@@ -13,7 +13,7 @@ Get raw Scott Walker data to work with at: [https://www.dropbox.com/s/7eq6or39tt
 
 <div style="clear:both;" />
 
-## Dependencies
+<h3>Dependencies</h3>
 
 MySQL
 [http://dev.mysql.com/downloads/mysql/](http://dev.mysql.com/downloads/mysql/)
