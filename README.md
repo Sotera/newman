@@ -1,7 +1,7 @@
 # newman
 
-<img src="http://www.seinfeldscripts.com/images/newman1.jpg" align="left" width="300" /><br>
-<div align="left">When you control the mail, you control...information.</div>
+<div style="float:left;"><img src="http://www.seinfeldscripts.com/images/newman1.jpg" width="300" /></div><br>
+<div style="float:left;padding-left: 10px;">When you control the mail, you control...information.</div>
 
 
 Look at the fullrun.bat/sh file to understand how to get the tangelo web app up and running initially.
