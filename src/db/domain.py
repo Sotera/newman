@@ -12,8 +12,10 @@ class Tx(object):
         self.conn = mysql_connection
 
     def next(self):
-        with execute_query(self.conn, 'select next_tx()') as qry:
-            return next(iter(qry.cursor().fetchone()))
+        with execute_nonquery(self.conn, 'insert into tx () values ()') as qry:
+            tx = qry.cursor().getlastrowid()
+            return tx
+
     def current(self):
         with execute_query(self.conn, 'select max(tx) from tx') as qry:
             return next(iter(qry.cursor().fetchone()))

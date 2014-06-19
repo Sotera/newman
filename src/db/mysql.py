@@ -66,6 +66,9 @@ class execute_nonquery(object):
         self.prepared_args = prepared_args
         self._cursor = None
 
+    def cursor(self):
+        return self._cursor
+
     def __enter__(self):
         self._cursor = self.conn.cursor()
         self._cursor.execute(self.stmt, self.prepared_args)

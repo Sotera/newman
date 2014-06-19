@@ -55,13 +55,48 @@ if __name__ == "__main__":
         with execute_nonquery(read_cnx.conn(), set_stmt) as set_len, execute_query(read_cnx.conn(), stmt_rollup_entities) as qry:
             for entities, typ, val, count in qry.cursor():
                 _id = "entity_rollup_%s" % (uuid.uuid4()) 
-                facts.addFact(_id, "entity_rollup", "type", val, txid) 
+                facts.addFact(_id, "entity_rollup", "value", val, txid) 
                 facts.addFact(_id, "entity_rollup", "type", typ, txid)
-                facts.addFact(_id, "entity_rollup", "total", count, txid) 
+                facts.addFact(_id, "entity_rollup", "total_entities", count, txid) 
                 for entity in entities.split(","):
                     facts.addFact(_id, "entity_rollup", "entity", entity, txid) 
 
         with execute_nonquery(read_cnx.conn(), ("drop table tmp_entity_rollup") ) as tmp_tbl:
             pass
             
+        write_cnx.commit()
+
+        txid = Tx(read_cnx.conn()).next()
+        print "tx: %s" % txid
+        print "add email reference to rollup" 
+
+        email_rollup_stmt = (
+            " insert into facts (subject, schema_name, predicate, obj, tx) "
+            " select t2.subject, t2.schema_name, t1.predicate, t1.obj, %s "
+            " from facts as t1 join facts as t2 on t1.subject = t2.obj "
+            " where t1.schema_name = 'entity' and t1.predicate = 'email' " 
+            " and t2.schema_name = 'entity_rollup' and t2.predicate = 'entity' "
+            " group by t2.subject, t1.obj "
+        )
+
+        with execute_nonquery(write_cnx.conn(), email_rollup_stmt, txid) as email_rollup:
+            pass
+
+        write_cnx.commit()
+
+        txid = Tx(read_cnx.conn()).next()
+        print "tx: %s" % txid
+        print "count emails per rollup" 
+
+        email_rollup_counts_stmt = (
+            "insert into facts (subject, schema_name, predicate, obj, tx) "
+            " select subject, schema_name, 'total_emails', count(obj), %s "
+            " from facts "
+            " where schema_name = 'entity_rollup' and predicate = 'email' "
+            " group by subject, schema_name "
+        )
+
+        with execute_nonquery(write_cnx.conn(), email_rollup_counts_stmt, txid) as email_rollup_count:
+            pass
+
         write_cnx.commit()

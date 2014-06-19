@@ -47,6 +47,8 @@ insert into `schema` (schema_name, predicate, type, cardinality) values ('entity
 insert into `schema` (schema_name, predicate, type, cardinality) values ('entity_rollup', 'value', 'string', 'one');
 insert into `schema` (schema_name, predicate, type, cardinality) values ('entity_rollup', 'type', 'string', 'one');
 insert into `schema` (schema_name, predicate, type, cardinality) values ('entity_rollup', 'entity', 'ref_entity', 'many');
-insert into `schema` (schema_name, predicate, type, cardinality) values ('entity_rollup', 'total', 'number', 'one');
+insert into `schema` (schema_name, predicate, type, cardinality) values ('entity_rollup', 'email', 'ref_email', 'many');
+insert into `schema` (schema_name, predicate, type, cardinality) values ('entity_rollup', 'total_entities', 'number', 'one');
+insert into `schema` (schema_name, predicate, type, cardinality) values ('entity_rollup', 'total_emails', 'number', 'one');
 
 commit;
