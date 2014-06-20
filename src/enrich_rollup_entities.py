@@ -103,14 +103,8 @@ if __name__ == "__main__":
         print "create rollup entity table" 
 
         entity_rollup_tbl_stmt = (
-            "create table entity_rollup ("
-            "   subject varchar(1024) not null,"
-            "   `type` varchar(1024) not null,"
-            "   val varchar(8192) not null,"
-            "   total_entities int not null,"
-            "   total_emails int not null"
-            " )"
-"select subject,"
+            "insert into entity_rollup (subject, `type`, val, total_entities, total_emails) "
+" select subject,"
             "       max(case when predicate = 'type' then obj end) as `type`,"
             "       max(case when predicate = 'value' then obj end) as val,"
             "      max(case when predicate = 'total_entities' then convert(obj, unsigned int) end) as total_entities,"

@@ -28,7 +28,7 @@ call drop_index_if_exists('large_text', 'idx_text_subject');
 call drop_index_if_exists('large_text', 'idx_text_sha');
 call drop_index_if_exists('large_text', 'idx_text_tx');
 
-create index idx_facts_subject on facts (subject(255));
+create index idx_facts_subject on facts (subject(1000));
 create index idx_facts_schema on facts(schema_name);
 create index idx_facts_schema_pred on facts(schema_name, predicate);
 create index idx_facts_pred on facts(predicate);
