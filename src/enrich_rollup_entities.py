@@ -45,7 +45,7 @@ if __name__ == "__main__":
     with newman_connector() as read_cnx, newman_connector() as write_cnx:
         txid = Tx(read_cnx.conn()).next()
         print "tx: %s" % txid
-        print "entity roll up" 
+        print "entity rollup" 
         facts = Fact(write_cnx.conn(), autocommit=False)
         with execute_nonquery(read_cnx.conn(), stmt_create_tmp_rollup ) as tmp_tbl:
             pass
@@ -100,3 +100,29 @@ if __name__ == "__main__":
             pass
 
         write_cnx.commit()
+        print "create rollup entity table" 
+
+        entity_rollup_tbl_stmt = (
+            "create table entity_rollup ("
+            "   subject varchar(1024) not null,"
+            "   `type` varchar(1024) not null,"
+            "   val varchar(8192) not null,"
+            "   total_entities int not null,"
+            "   total_emails int not null"
+            " )"
+"select subject,"
+            "       max(case when predicate = 'type' then obj end) as `type`,"
+            "       max(case when predicate = 'value' then obj end) as val,"
+            "      max(case when predicate = 'total_entities' then convert(obj, unsigned int) end) as total_entities,"
+            "       max(case when predicate = 'total_emails' then convert(obj, unsigned int) end) as total_emails"
+            " from facts"
+            " where schema_name = 'entity_rollup'"
+            " and predicate in ('value', 'type', 'total_entities', 'total_emails')"
+            " group by subject;" 
+        )
+        
+        with execute_nonquery(write_cnx.conn(), entity_rollup_tbl_stmt) as entity_rollup_tbl:
+            pass
+
+        write_cnx.commit()
+
