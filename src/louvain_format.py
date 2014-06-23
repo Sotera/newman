@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import argparse
-
-from db.newman_db import newman_connector
-from db.mysql import execute_query, execute_nonquery
-from utils.file import spit
-
+import argparse, sys
 from functools import partial
 
+sys.path.append("./demail")
+
+from newman.db.newman_db import newman_connector
+from newman.db.mysql import execute_query, execute_nonquery
+from newman.utils.file import spit
 
 stmt = (
     " SELECT source, group_concat(concat(target, ':', weight)) as input  "

@@ -4,9 +4,11 @@ import sys
 import re
 from functools import partial
 
-from db.domain import Tx, Fact
-from db.mysql import execute_query, execute_nonquery
-from db.newman_db import newman_connector
+sys.path.append("./demail")
+
+from newman.db.domain import Tx, Fact
+from newman.db.mysql import execute_query, execute_nonquery
+from newman.db.newman_db import newman_connector
 
 sys.path.append("/srv/software/MITIE/mitielib")
 from mitie import *

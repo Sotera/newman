@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import argparse, re, uuid
+import argparse, re, uuid, sys, os
 
-from db.newman_db import newman_connector
-from db.domain import Tx, EmailRow, Fact, Text
-from db.mysql import execute_nonquery
-from utils.file import slurpA, spit
+sys.path.append("./demail")
+
+from newman.db.newman_db import newman_connector
+from newman.db.domain import Tx, EmailRow, Fact, Text
+from newman.db.mysql import execute_nonquery
+from newman.utils.file import slurpA, spit
 
 
 def inc(n):

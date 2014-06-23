@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import sys
 
-from utils.file import slurpA
-from db.domain import Tx, Fact
-#from db.mysql import execute_query, execute_nonquery
-from db.newman_db import newman_connector
+sys.path.append("./demail")
+
+from newmman.utils.file import slurpA
+from newman.db.domain import Tx, Fact
+from newman.db.newman_db import newman_connector
 
 if __name__ == "__main__":
     lines = slurpA("tmp/louvain_to_gephi/community_itr_1.nodes")

@@ -5,8 +5,10 @@
 
 set -e 
 
-RUN_DIR= $(pwd)
+RUN_DIR=$(pwd)
 LOUVAIN_DIR=/srv/software/distributed-louvain-modularity/
+printf "working dir $RUN_DIR\n"
+printf "louvain dir $LOUVAIN_DIR\n"
 
 printf "ingest data\n"
 ./src/ingest_walker.py data/walker/output.csv

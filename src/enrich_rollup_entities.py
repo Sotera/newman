@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import argparse, uuid
+import argparse, uuid, sys
 
-from db.domain import Tx, Fact
-from db.mysql import execute_query, execute_nonquery
-from db.newman_db import newman_connector
+sys.path.append("./demail")
+
+from newman.db.domain import Tx, Fact
+from newman.db.mysql import execute_query, execute_nonquery
+from newman.db.newman_db import newman_connector
 
 
 stmt_create_tmp_rollup = (

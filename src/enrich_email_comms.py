@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import argparse
+import argparse, sys
 
-from db.domain import Tx, Fact
-from db.mysql import execute_query
-from db.newman_db import newman_connector
+sys.path.append("./demail")
+from newman.db.domain import Tx, Fact
+from newman.db.mysql import execute_query
+from newman.db.newman_db import newman_connector
 
 stmt = (
     " select distinct t1.obj, t2.predicate, t2.obj "
