@@ -22,6 +22,10 @@ printf "entity rollup\n"
 printf "enrich email comms\n"
 ./src/enrich_email_comms.py
 
+if [ -e tmp/louvain.csv ]; then
+    rm -f tmp/louvain.csv
+fi
+
 printf "create louvian input file\n"
 ./src/louvain_format.py -o tmp/ -f louvain.csv
 
