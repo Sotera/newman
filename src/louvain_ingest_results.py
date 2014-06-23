@@ -4,7 +4,7 @@ import sys
 
 sys.path.append("./demail")
 
-from newmman.utils.file import slurpA
+from newman.utils.file import slurpA
 from newman.db.domain import Tx, Fact
 from newman.db.newman_db import newman_connector
 
