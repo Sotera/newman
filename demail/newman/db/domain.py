@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from db.mysql import execute_nonquery, execute_query
-from db.connection import connection_info
+from newman.db.mysql import execute_nonquery, execute_query
+from newman.db.connection import connection_info
 
 def query_obj(statement='', args=()):
     return dict(connection_info(), **{'statement': statement, 'prepared_args': args})

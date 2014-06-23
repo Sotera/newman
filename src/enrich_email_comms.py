@@ -34,6 +34,14 @@ stmt_total_received = (
     " group by obj "
 )
 
+stmt_total_sent = (
+    " select obj, count(1) "
+    " from facts "
+    " where schema_name = 'email' " 
+    " and predicate in ('from') "
+    " group by obj "
+)
+
 stmt_email_sent_time = (
     " select t1.subject, t1.obj as email, t2.obj as dt "
     " from facts t1 join facts t2 "
@@ -52,6 +60,10 @@ stmt_email_received_time = (
     " and t2.predicate = 'datetime' "
 )
 
+
+
+#TODO most of these can be changed to insert into statements instead
+#of reading the results to python and writing back to the database
 
 if __name__ == "__main__":
 
@@ -84,6 +96,16 @@ if __name__ == "__main__":
         with execute_query(read_cnx.conn(), stmt_total_received) as qry:
             for email_addr, count in qry.cursor():
                 facts.addFact(email_addr, "email_addr", "total_received", count, txid)
+
+        write_cnx.commit()
+
+
+        txid = Tx(read_cnx.conn()).next()
+        print "tx: %s" % txid
+        print "enrich total sent "
+        with execute_query(read_cnx.conn(), stmt_total_sent) as qry:
+            for email_addr, count in qry.cursor():
+                facts.addFact(email_addr, "email_addr", "total_sent", count, txid)
 
         write_cnx.commit()
 
