@@ -5,6 +5,9 @@
 
 set -e 
 
+RUN_DIR= $(pwd)
+LOUVAIN_DIR=/srv/software/distributed-louvain-modularity/
+
 printf "ingest data\n"
 ./src/ingest_walker.py data/walker/output.csv
 
@@ -20,9 +23,30 @@ printf "enrich email comms\n"
 printf "create louvian input file\n"
 ./src/louvain_format.py -o tmp/ -f louvain.csv
 
-#do the louvain 
-## put lovain file in hdfs
+### louvain 
+##TODO fix how louvain is run 
+
+#rebuild hdfs for newman
+if hadoop fs -test -d /tmp/newman; then
+    hadoop fs -rm -r /tmp/newman
+fi
+
+hadoop fs -mkdir -p /tmp/newman/input
+hadoop fs -mkdir -p /tmp/newman/output
+
+hadoop fs -put tmp/louvain.csv /tmp/newman/input/
+
 ## kick off louvain
-## pull data from hdfs (louvain to gephi?)
-## ingest louvain data
+cd $LOUVAIN_DIR
+python louvain.py /tmp/newman/input /tmp/newman/output
+
+python louvain_to_gephi.py
+
+mv louvain_to_gephi $RUN_DIR/tmp/
+
+cd -
+
+###
+
+
 
