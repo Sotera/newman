@@ -54,5 +54,6 @@ cd -
 
 ###
 
-
+printf "ingest louvain results\n"
+./src/louvain_ingest_results.py 
 
