@@ -22,6 +22,7 @@ MySQL
 
 ```
 pip install mysql-connector-python
+pip install tangelo
 ```
 
 MITIE: MIT Information Extraction - [https://github.com/mit-nlp/MITIE](https://github.com/mit-nlp/MITIE)
