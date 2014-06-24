@@ -53,10 +53,20 @@ mv tmp/louvain.csv $LOUVAIN_DIR/louvain.csv
 cd $LOUVAIN_DIR
 python louvain.py /tmp/newman/input /tmp/newman/output
 
+if [ -d output ]; then
+    rm -rf output
+fi
+
+hadoop fs -copyToLocal . /tmp/newman/output
+
+if [ -d louvain_to_gephi ]; then
+    rm -rf louvain_to_gephi
+fi
+
 python louvain_to_gephi.py
 
-if [ -d tmp/louvain_to_gephi ]; then
-    rm -rf tmp/louvain_to_gephi
+if [ -d $RUN_DIR/tmp/louvain_to_gephi ]; then
+    rm -rf $RUN_DIR/tmp/louvain_to_gephi
 fi
 
 mv louvain_to_gephi $RUN_DIR/tmp/
