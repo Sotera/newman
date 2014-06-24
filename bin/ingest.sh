@@ -42,11 +42,22 @@ hadoop fs -mkdir -p /tmp/newman/output
 
 hadoop fs -put tmp/louvain.csv /tmp/newman/input/
 
+if [ -e  $LOUVAIN_DIR/louvain.csv ]; then
+    rm -f $LOUVAIN_DIR/louvain.csv
+fi
+
+# for louvain_to_gephi
+mv tmp/louvain.csv $LOUVAIN_DIR/louvain.csv
+
 ## kick off louvain
 cd $LOUVAIN_DIR
 python louvain.py /tmp/newman/input /tmp/newman/output
 
 python louvain_to_gephi.py
+
+if [ -d tmp/louvain_to_gephi ]; then
+    rm -rf tmp/louvain_to_gephi
+fi
 
 mv louvain_to_gephi $RUN_DIR/tmp/
 
