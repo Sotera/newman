@@ -31,7 +31,6 @@ stmt = (
     " and t2.predicate in ('to', 'cc', 'bcc') "
     " group by t1.obj, t2.obj "
     " ) as bi_dir "
-    " WHERE source != target "
     " GROUP BY source, target "
     " ) as lvn "
     " group by source "
