@@ -13,10 +13,11 @@ import json
 stmt_node_vals = (
     "select subject, "
     "       group_concat(case predicate when 'community' then obj end) as comm, "
+    "       group_concat(case predicate when 'rank' then obj end) as rank, "
     "       sum(coalesce(case predicate when 'total_received' then obj end, 0)) as total_rcv, "
     "       sum(coalesce(case predicate when 'total_sent' then obj end, 0)) as total_sent "
     " from facts where schema_name = 'email_addr' "
-    " and predicate in ('community', 'total_received', 'total_sent') "
+    " and predicate in ('community', 'total_received', 'total_sent', 'rank') "
     " group by subject "
 )
 
@@ -42,10 +43,11 @@ stmt_node_edges = (
 )
 
 def getNodeVals():
+    cherrypy.log(stmt_node_vals)
     with newman_connector() as read_cnx:
         with execute_query(read_cnx.conn(), stmt_node_vals) as qry:
             return {item[0]: 
-                    {'color': i, 'num': int(item[2]+item[3]), 'comm': item[1], 'rank': 0.5 } 
+                    {'color': i, 'num': int(item[3]+item[4]), 'comm': item[1], 'rank': item[2] } 
                     for i, item in enumerate(qry.cursor()) }
 
 def getEdges(node_idx):
@@ -83,6 +85,7 @@ def createResults():
     return results
 
 def search(*args):
+    print 'here'
     cherrypy.log("args: %s" % str(args))
     cherrypy.log("args-len: %s" % len(args))
     text=nth(args, 0, '')

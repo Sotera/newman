@@ -26,6 +26,11 @@ if [ -e tmp/louvain.csv ]; then
     rm -f tmp/louvain.csv
 fi
 
+printf "enrich email ranking\n"
+./src/rank_ingest_results.py
+./email_detector2.py kmrindfleisch@gmail.com > tmp/rankings
+./src/rank_results.py
+
 printf "create louvian input file\n"
 ./src/louvain_format.py -o tmp/ -f louvain.csv
 
