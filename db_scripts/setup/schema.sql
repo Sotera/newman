@@ -34,6 +34,7 @@ insert into `schema` (schema_name, predicate, type, cardinality) values ('email'
 /** email_addr **/
 insert into `schema` (schema_name, predicate, type, cardinality) values ('email_addr', 'to', 'string', 'many');
 insert into `schema` (schema_name, predicate, type, cardinality) values ('email_addr', 'community', 'string', 'one');
+insert into `schema` (schema_name, predicate, type, cardinality) values ('email_addr', 'rank', 'number', 'one');
 insert into `schema` (schema_name, predicate, type, cardinality) values ('email_addr', 'cc', 'string', 'many');
 insert into `schema` (schema_name, predicate, type, cardinality) values ('email_addr', 'bcc', 'string', 'many');
 insert into `schema` (schema_name, predicate, type, cardinality) values ('email_addr', 'total_recipients', 'number', 'one');

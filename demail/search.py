@@ -14,9 +14,10 @@ stmt_node_vals = (
     "       group_concat(case predicate when 'community_id' then obj end) as comm_id, "
     "       group_concat(case predicate when 'group_id' then obj end) as group_id, "
     "       sum(coalesce(case predicate when 'total_received' then obj end, 0)) as total_rcv, "
-    "       sum(coalesce(case predicate when 'total_sent' then obj end, 0)) as total_sent "
+    "       sum(coalesce(case predicate when 'total_sent' then obj end, 0)) as total_sent, "
+    "       group_concat(case predicate when 'rank' then obj end) as rank "
     " from facts where schema_name = 'email_addr' "
-    " and predicate in ('community','community_id', 'group_id', 'total_received', 'total_sent') "
+    " and predicate in ('community','community_id', 'group_id', 'total_received', 'total_sent', 'rank') "
     " group by subject "
 )
 
@@ -26,7 +27,8 @@ stmt_node_vals_filter_email_addr = (
     "           group_concat(case predicate when 'community_id' then obj end) as comm_id, "
     "           group_concat(case predicate when 'group_id' then obj end) as group_id, "
     "           sum(coalesce(case predicate when 'total_received' then obj end, 0)) as total_rcv, "
-    "           sum(coalesce(case predicate when 'total_sent' then obj end, 0)) as total_sent "
+    "           sum(coalesce(case predicate when 'total_sent' then obj end, 0)) as total_sent, "
+    "           group_concat(case predicate when 'rank' then obj end) as rank "
     "     from facts as t join (select f.subject from facts f join facts f2 on f.obj = f2.subject  "
     "             where f.schema_name = 'email_addr' and f.predicate = 'email'  "
     "                and f2.schema_name = 'email'  "
@@ -34,7 +36,7 @@ stmt_node_vals_filter_email_addr = (
     "                and f2.obj = %s group by f.subject) as t2"
     "                on t.subject = t2.subject"
     "     where t.schema_name = 'email_addr' "
-    "     and t.predicate in ('community', 'community_id', 'group_id', 'total_received', 'total_sent') "
+    "     and t.predicate in ('community', 'community_id', 'group_id', 'total_received', 'total_sent', 'rank') "
     "     group by t.subject"
 )
 
@@ -44,14 +46,15 @@ stmt_node_vals_filter_text = (
     "           group_concat(case predicate when 'community_id' then obj end) as comm_id, "
     "           group_concat(case predicate when 'group_id' then obj end) as group_id, "
     "           sum(coalesce(case predicate when 'total_received' then obj end, 0)) as total_rcv, "
-    "           sum(coalesce(case predicate when 'total_sent' then obj end, 0)) as total_sent "
+    "           sum(coalesce(case predicate when 'total_sent' then obj end, 0)) as total_sent, "
+    "           group_concat(case predicate when 'rank' then obj end) as rank "
     "     from facts as t join (select f.subject from facts f join email f2 on f.obj = f2.id  "
     "             where f.schema_name = 'email_addr' and f.predicate = 'email'  "
     "                and (lower(f2.subject) like %s or lower(f2.body) like %s) "
     "                ) as t2"
     "                on t.subject = t2.subject"
     "     where t.schema_name = 'email_addr' "
-    "     and t.predicate in ('community', 'community_id', 'group_id', 'total_received', 'total_sent') "
+    "     and t.predicate in ('community', 'community_id', 'group_id', 'total_received', 'total_sent', 'rank') "
     "     group by t.subject"
 )
 
@@ -180,11 +183,10 @@ def getNodeVals(text, field):
     nodes should be the all of the emails an email addr is a part of and then all of then all of the email addr associated with that set of emails 
     """
     with newman_connector() as read_cnx:
-
         with execute_query(*nodeQueryObj(read_cnx.conn(), text, field)) as qry:
             tangelo.log("node-vals: %s" % qry.stmt)
             return {item[0]: 
-                    { 'num': int(item[4]+item[5]), 'comm_id': item[2], 'group_id': item[3], 'comm': item[1], 'rank': 0.5 } for item in qry.cursor() }
+                    { 'num': int(item[4]+item[5]), 'comm_id': item[2], 'group_id': item[3], 'comm': item[1], 'rank': item[6] } for item in qry.cursor() }
 
 def edgeQueryObj(conn, text, field):
     if field.lower() == "email": return (conn, stmt_node_edges_filter_email_addr, text, text)
@@ -244,6 +246,7 @@ def createResults(text, field):
 
 #GET /serach/<fields>/<text>
 def search(*args):
+    print 'here'
     cherrypy.log("args: %s" % str(args))
     cherrypy.log("args-len: %s" % len(args))
     fields=nth(args, 0, 'all')
