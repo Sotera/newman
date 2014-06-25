@@ -18,8 +18,11 @@ insert into `schema` (schema_name, predicate, type, cardinality) values ('email'
 insert into `schema` (schema_name, predicate, type, cardinality) values ('email', 'datetime', 'date', 'one');
 insert into `schema` (schema_name, predicate, type, cardinality) values ('email', 'from', 'string', 'one');
 insert into `schema` (schema_name, predicate, type, cardinality) values ('email', 'tos', 'string', 'one');
+insert into `schema` (schema_name, predicate, type, cardinality) values ('email', 'to', 'string', 'many');
 insert into `schema` (schema_name, predicate, type, cardinality) values ('email', 'ccs', 'string', 'one');
+insert into `schema` (schema_name, predicate, type, cardinality) values ('email', 'cc', 'string', 'many');
 insert into `schema` (schema_name, predicate, type, cardinality) values ('email', 'bccs', 'string', 'one');
+insert into `schema` (schema_name, predicate, type, cardinality) values ('email', 'bcc', 'string', 'many');
 insert into `schema` (schema_name, predicate, type, cardinality) values ('email', 'subject', 'string', 'one');
 insert into `schema` (schema_name, predicate, type, cardinality) values ('email', 'body', 'ref_large_text', 'one');
 insert into `schema` (schema_name, predicate, type, cardinality) values ('email', 'tosize', 'number', 'one');
@@ -37,6 +40,9 @@ insert into `schema` (schema_name, predicate, type, cardinality) values ('email_
 insert into `schema` (schema_name, predicate, type, cardinality) values ('email_addr', 'total_received', 'number', 'one');
 insert into `schema` (schema_name, predicate, type, cardinality) values ('email_addr', 'sent_time', 'date', 'many');
 insert into `schema` (schema_name, predicate, type, cardinality) values ('email_addr', 'received_time', 'date', 'many');
+insert into `schema` (schema_name, predicate, type, cardinality) values ('email_addr', 'group_id', 'string', 'one');
+insert into `schema` (schema_name, predicate, type, cardinality) values ('email_addr', 'community_id', 'string', 'one');
+insert into `schema` (schema_name, predicate, type, cardinality) values ('email_addr', 'email', 'ref_email', 'many');
 
 /** entity **/
 insert into `schema` (schema_name, predicate, type, cardinality) values ('entity', 'value', 'string', 'one');
