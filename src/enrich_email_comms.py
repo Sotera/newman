@@ -67,6 +67,13 @@ stmt_email_received_time = (
     " and t2.predicate = 'datetime' "
 )
 
+stmt_email_addr_to_email = (
+    " insert into facts (subject, schema_name, predicate, obj, tx) "    
+    " select distinct obj, 'email_addr', 'email', subject, %s "
+    " from facts "
+    " where schema_name = 'email' and predicate in ('to', 'from', 'cc', 'bcc') "
+)
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Enrich Emails Communications')
@@ -117,3 +124,13 @@ if __name__ == "__main__":
         with execute_query(read_cnx.conn(), stmt_email_received_time, txid) as qry:
             pass
         write_cnx.commit()        
+
+
+        txid = Tx(read_cnx.conn()).next()
+        print "tx: %s" % txid
+        print "associated emails with email addresses "
+        with execute_query(read_cnx.conn(), stmt_email_addr_to_email, txid) as qry:
+            pass
+        write_cnx.commit()        
+
+
