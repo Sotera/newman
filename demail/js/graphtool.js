@@ -90,9 +90,8 @@ function do_search(val,fields) {
   var text = val;
   
   d3.select("#search_status").text("Searching...");
-  
-  //"search_comp_service?text=" + encodeURIComponent(text) + '&fields=' + fields
-  $.getJSON("search/search/" + encodeURIComponent(text) + '/' + fields, function (comp_data) {
+
+  $.getJSON("search/search/" + fields +'/' + encodeURIComponent(text) , function (comp_data) {
     d3.select("#search_status").text("");
     
     // create the table header
