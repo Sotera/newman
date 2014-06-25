@@ -57,7 +57,7 @@ if [ -d output ]; then
     rm -rf output
 fi
 
-hadoop fs -copyToLocal . /tmp/newman/output
+hadoop fs -copyToLocal /tmp/newman/output .
 
 if [ -d louvain_to_gephi ]; then
     rm -rf louvain_to_gephi
