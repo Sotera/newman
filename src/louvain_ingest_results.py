@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sys
+import sys, argparse
 
 sys.path.append("./demail")
 
@@ -19,7 +19,14 @@ def counter(start=0):
         n = inc(n)
 
 if __name__ == "__main__":
-    lines = slurpA("tmp/louvain_to_gephi/community_itr_1.nodes")
+
+    parser = argparse.ArgumentParser(description='Ingest Louvain Communities')
+    parser.add_argument("louvain_dir", help="ouput of louvain to gephi directory")
+    args= parser.parse_args()
+
+    print "louvain to gephi path %s " % args.louvain_dir
+
+    lines = slurpA("{0}/community_itr_1.nodes".format(args.louvain_dir))
     count = counter(1)
     with newman_connector() as read_cnx, newman_connector() as write_cnx:
         txid = Tx(read_cnx.conn()).next()
