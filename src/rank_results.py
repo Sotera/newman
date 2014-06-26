@@ -20,9 +20,9 @@ def writeRanks(ids):
             txid = Tx(read_cnx.conn()).next()
             print "tx: %s" % txid
             facts = Fact(write_cnx.conn(), autocommit=False)
-            #print "assigning ranks"
+            print "assigning ranks"
             for mail in qry.cursor():
-                print mail[0] #, "email_addr", "rank", ids.get(mail,'0'), txid
+                #print mail[0] #, "email_addr", "rank", ids.get(mail,'0'), txid
                 facts.addFact(mail[0], "email_addr", "rank", ids.get(mail[0],'0'), txid)            
 
             print "commit"
