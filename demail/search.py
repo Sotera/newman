@@ -51,6 +51,7 @@ stmt_node_vals_filter_text = (
     "     from facts as t join (select f.subject from facts f join email f2 on f.obj = f2.id  "
     "             where f.schema_name = 'email_addr' and f.predicate = 'email'  "
     "                and (lower(f2.subject) like %s or lower(f2.body) like %s) "
+    "                group by f.subject "  
     "                ) as t2"
     "                on t.subject = t2.subject"
     "     where t.schema_name = 'email_addr' "
@@ -60,12 +61,12 @@ stmt_node_vals_filter_text = (
 
 ## Email Rows
 stmt_find_emails = (
-    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, body, attach "
+    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, 'body', attach "
     " from email "
 )
 
 stmt_find_emails_filter_email_addr = (
-    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, body, attach "
+    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, 'body', attach "
     " from email "
     " where id in ( " 
     "   select subject from facts " 
@@ -75,7 +76,7 @@ stmt_find_emails_filter_email_addr = (
 ) 
 
 stmt_find_emails_filter_text = (
-    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, body, attach "
+    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, 'body', attach "
     " from email "
     " where (lower(subject) like %s or lower(body) like %s) "
 ) 
@@ -183,6 +184,7 @@ def getNodeVals(text, field):
     nodes should be the all of the emails an email addr is a part of and then all of then all of the email addr associated with that set of emails 
     """
     with newman_connector() as read_cnx:
+        tangelo.log("start node query")
         with execute_query(*nodeQueryObj(read_cnx.conn(), text, field)) as qry:
             tangelo.log("node-vals: %s" % qry.stmt)
             return {item[0]: 
@@ -197,9 +199,9 @@ def edgeQueryObj(conn, text, field):
 
 def getEdges(node_idx, text, field):
     with newman_connector() as read_cnx:
+        tangelo.log("start edge query")
         with execute_query(*edgeQueryObj(read_cnx.conn(), text, field)) as qry:    
             tangelo.log("edges : %s" % qry.stmt)
-
             return [{"source": node_idx.get(from_), "target": node_idx.get(to_), "value": int(weight)} 
                     for from_, to_, weight in qry.cursor()]
 
@@ -215,6 +217,7 @@ def getEmails(colors, text, field):
     cols = ('num', 'directory', 'datetime', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach')
     rows = []
     with newman_connector() as read_cnx:    
+        tangelo.log("start email query")
         with execute_query(*emailQueryObj(read_cnx.conn(), text, field)) as qry:
             tangelo.log("emails : %s" % qry.stmt)
             for item in qry.cursor():
@@ -244,7 +247,7 @@ def createResults(text, field):
 
     return results
 
-#GET /serach/<fields>/<text>
+#GET /search/<fields>/<text>
 def search(*args):
     print 'here'
     cherrypy.log("args: %s" % str(args))
