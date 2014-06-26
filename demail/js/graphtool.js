@@ -64,8 +64,8 @@ function recolornodes(how) {
   if( how == 'node') {d3.selectAll("circle").style("fill", function(d) { return color(d.group); });}
 }
 
-function produceHTML(d) {
-
+function produceHTML(arr) {
+  d = _.object(['num', 'directory','datetime', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], arr);
   console.log(d);
   html = '';
   html += "<b>ID: </b>" + d.num + "<BR>";
@@ -107,8 +107,15 @@ function do_search(val,fields) {
     
     tr.on("click",function(d){
       console.log(d.directory);
-      // $("#webpage").load('emails/' + d.directory + '/' + d.directory.split('/')[1] + '.txt');
-      $("#webpage").html(produceHTML(d));
+      // $("#webpage").load('emails/' + d.directory + '/' +
+      // d.directory.split('/')[1] + '.txt');
+      $.get("email/email/" + encodeURIComponent(d.num)).then(
+        function(row) {
+          if(row.length > 0){
+            $("#webpage").html(produceHTML(row));
+          }
+        })
+
     }).on("mouseover", function(d) {
       tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(',');
       for (i = 0; i < tos.length; i++) {
