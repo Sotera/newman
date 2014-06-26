@@ -43,8 +43,8 @@
     </div>
 
     <!-- Create a fullscreen SVG element -->
-    <div id="node_graph"  style="width:50%;height:100%;float: left"> </div>
-    <div id="webpage"  style="width:50%;height:100%;float: right">  </div>
+    <div id="node_graph"  style="width:50%;height:80%;float: left"> </div>
+    <div id="webpage"  style="width:50%;height:80%;float: right">  </div>
 
     <!-- Create an SVG element to represent the legend -->
     <svg id="legend" height="100%" style="position:fixed; top:100px; right:0px; pointer-events:none;"></svg>
@@ -63,9 +63,14 @@
                   <label class="radio-inline">
                     <input type="radio" name="optionRadios" id="colorby2"  value="comm">Community</input>
                   </label>
-                  <label class="checkbox"> 
-                    <input type="checkbox" name="optionrank" id="rankval" value="rank">Rank</input>
-                  </label>
+                  <div class="form-inline">
+                    <label class="checkbox" style="padding-right: 10px;"> 
+                      <input type="checkbox" name="optionrank" id="rankval" value="rank"> Rank   </input>
+                    </label>
+                    <label class="checkbox">
+                      <input type="checkbox" id="usetext"> Render text labels
+                    </label>
+                  </div>
                 </td>
               </tr>
               <tr>
@@ -91,9 +96,7 @@
 
         <div class="row">
           <div class="col-md-6">
-            <label class="checkbox">
-              <input type="checkbox" id="usetext"> Render text labels
-            </label>
+
           </div>
         </div>
       </div>
