@@ -12,6 +12,7 @@ body {
 }
 #webpage {
     overflow-y: auto;
+    max-height: 800px;
 }
 
 #graph {
