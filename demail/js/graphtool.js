@@ -64,6 +64,15 @@ function recolornodes(how) {
   if( how == 'node') {d3.selectAll("circle").style("fill", function(d) { return color(d.group); });}
 }
 
+function splitItemCount(str){
+  if (str.trim().length == 0) return 0
+  return str.split(',').length;
+}
+
+function recipientCount(to, cc, bcc){
+  return _.reduce(_.map([to, cc, bcc], splitItemCount), function(a,b){ return a+b;}, 0);
+}
+
 function produceHTML(arr) {
   d = _.object(['num', 'directory','datetime', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], arr);
   console.log(d);
@@ -93,15 +102,41 @@ function do_search(val,fields) {
 
   $.getJSON("search/search/" + fields +'/' + encodeURIComponent(text) , function (comp_data) {
     d3.select("#search_status").text("");
-    
+    var lastSort = "";
     // create the table header
     var thead = d3.select("#result_table").select("thead")
       .append("tr")
       .selectAll("tr")
-    //.data(d3.keys(comp_data[0]))
-      .data(['Source','Date','From','To','Cc','Bcc','Subject'])
-      .enter().append("th").text(function(d){return d;});
+    // .data(['Source','Date','From','To','Cc','Bcc','Subject'])
+      .data(['Date','From','Recipient Count','Body Size','Attachment Count', 'Subject'])
+      .enter().append("th").text(function(d){return d;})
+      .on("click", function(k, i){
+        console.log(arguments);
+        var direction = (lastSort == k) ? -1 : 1;
+        lastSort = (direction == -1) ? "" : k; //toggle
+        d3.select("#result_table").select("tbody").selectAll("tr").sort(function(a, b) { 
+          if (i == 0) {
+            return a.datetime.localeCompare(b.datetime) * direction;
+          }             
+          if (i == 1) {
+            return a.from.localeCompare(b.from) * direction;
+          }
+          if (i == 2) {
+            return (recipientCount(a.to, a.cc, a.bcc) - recipientCount(b.to, b.cc, b.bcc)) * direction;
+          }
+          if (i == 3){
+            return (a.bodysize - b.bodysize) * direction;
+          }
+          if (i == 4){
+            return (splitItemCount(a.attach) - splitItemCount(b.attach)) * direction;
+          }
+          if (i == 5) {
+            return a.subject.localeCompare(b.subject) * direction;
+          }             
+        });
+      });
     
+
     // create rows   
     var tr = d3.select("#result_table").select("tbody").selectAll("tr").data(comp_data.rows).enter().append("tr");
     
@@ -113,8 +148,9 @@ function do_search(val,fields) {
         function(row) {
           if(row.length > 0){
             $("#webpage").html(produceHTML(row));
+            $(document).scrollTop(0);
           }
-        })
+        });
 
     }).on("mouseover", function(d) {
       tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(',');
@@ -129,28 +165,42 @@ function do_search(val,fields) {
     // cells
     var td = tr.selectAll("td")
       .data(function(d){
-        return [d.num + '::' + d.from + '::' + d.directory, d.datetime, d.from +'::' + d.fromcolor,d.to,d.cc,d.bcc,d.subject];})
+        var recipient_count = recipientCount(d.to, d.cc, d.bcc);
+        var attach_count = splitItemCount(d.attach)
+        return [d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject ];
+        //return [d.num + '::' + d.from + '::' + d.directory, d.datetime, d.from +'::' + d.fromcolor,d.to,d.cc,d.bcc,d.subject];
+      })
       .enter().append("td")
     //.text(function(d){return ['no'];})
     //.html(function(d) {return ["<a href='"+d.directory+"'>"+d.directory+"</a>"]; })
       .style("padding", "5px")
       .style("font-size","10px")
-      .style("fill","blue").append('text')
+      .style("fill","blue")
+      .append('div')
       .html(function(d,i) {
-        /* fails lint - Use '===' to compare with '0'. */
-        if( i == 0 ) {
+        if( i == 1 ) {
           return d.split('::')[0];
         }
-        else if ( i == 2) { 
-          return d.split('::')[0];
-        } else {
-          return d.replace(/,/g,', ');
-        }})
+        if (i == 2) {
+          var px = d > 100 ? 100 : d;
+          return "<div style='background-color: blue;height: 10px;width: " +px +"px;' />"
+        }
+        if (i == 3) {
+          var px = (d / 1000.0) > 100 ? 100 : (d / 1000.0);
+          return "<div style='background-color: green;height: 10px;width: " +px +"px;' />"
+        }
+        if (i == 4) {
+          var px = (d * 10) > 100 ? 100 : (d * 10);
+          return "<div style='background-color: orange;height: 10px;width: " +px +"px;' />"
+        }
+
+        return d;
+      })
       .style("color", function(d,i) { 
-        if( i == 2) { 
+        if( i == 1) { 
           return color(d.split('::')[1]); 
         } else { 
-          return 'black';
+           return 'black';
         } 
       })
       .style("stroke","#FFFFFF");

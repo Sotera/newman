@@ -15,6 +15,7 @@ stmt_email_by_id = (
     " where id = %s "
 )
 
+
 #GET /email/<id>
 def getEmail(*args):
     email=urllib.unquote(nth(args, 0, ''))

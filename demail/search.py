@@ -61,12 +61,12 @@ stmt_node_vals_filter_text = (
 
 ## Email Rows
 stmt_find_emails = (
-    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, 'body', attach "
+    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
     " from email "
 )
 
 stmt_find_emails_filter_email_addr = (
-    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, 'body', attach "
+    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
     " from email "
     " where id in ( " 
     "   select subject from facts " 
@@ -76,7 +76,7 @@ stmt_find_emails_filter_email_addr = (
 ) 
 
 stmt_find_emails_filter_text = (
-    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, 'body', attach "
+    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
     " from email "
     " where (lower(subject) like %s or lower(body) like %s) "
 ) 
@@ -214,7 +214,7 @@ def emailQueryObj(conn, text, field):
     return  (conn, stmt_find_emails)
 
 def getEmails(colors, text, field):
-    cols = ('num', 'directory', 'datetime', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach')
+    cols = ('num', 'directory', 'datetime', 'from', 'to', 'cc', 'bcc', 'subject', 'attach', 'bodysize')
     rows = []
     with newman_connector() as read_cnx:    
         tangelo.log("start email query")
@@ -249,7 +249,6 @@ def createResults(text, field):
 
 #GET /search/<fields>/<text>
 def search(*args):
-    print 'here'
     cherrypy.log("args: %s" % str(args))
     cherrypy.log("args-len: %s" % len(args))
     fields=nth(args, 0, 'all')
