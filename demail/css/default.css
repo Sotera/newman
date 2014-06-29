@@ -15,6 +15,18 @@ body {
     max-height: 800px;
 }
 
+.body-view > p {
+    margin: 0 0 5px;
+}
+.body-view .bold {
+    font-weight: bold;
+}
+
+.body-view .person { padding: 2px; background-color: #00ccff; }
+.body-view .location {  padding: 2px; background-color: #00ff00; }
+.body-view .organization {  padding: 2px; background-color: #ffcc33; }
+.body-view .misc { padding: 2px; background-color: #c0c0c0; }
+
 #graph {
     position: fixed;
     top: 0px;

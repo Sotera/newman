@@ -26,6 +26,17 @@ var drag = d3.behavior.drag()
         .on("drag", dragged)
         .on("dragend", dragended);
 
+var waiting_bar = $('<img>', {
+  'src' : 'imgs/loading-cylon.svg',
+  'width' : 256,
+  'height' : 32}).css('padding-top', 10);
+
+var waiting_spin = $('<img>', {
+  'src' : 'imgs/loading-spin.svg',
+  'width' : 256,
+  'height' : 32});
+
+
 function tickCommunity() {
   vis.selectAll(".link").attr("d", function(d) {
     return "M" + d[0].x + "," + d[0].y +
@@ -41,22 +52,22 @@ function tickCommunity() {
 
 /*** Configure drag behaviour ***/
 function dragstarted(d){
-        d3.event.sourceEvent.stopPropagation();
-        d3.select(this).classed("fixed", d.fixed = false);
-        d3.select(this).classed("dragging", true);
+  d3.event.sourceEvent.stopPropagation();
+  d3.select(this).classed("fixed", d.fixed = false);
+  d3.select(this).classed("dragging", true);
 }
 
 function dragged(d){
-        if (d.fixed) return; //root is fixed
-        d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
-        d.fixed = true;
-        tickCommunity();//re-position this node and any links
-        d.fixed = false;
+  if (d.fixed) return; //root is fixed
+  d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+  d.fixed = true;
+  tickCommunity();//re-position this node and any links
+  d.fixed = false;
 }
 
 function dragended(d){
-        d3.select(this).classed("dragging", false);
-        d3.select(this).classed("fixed", d.fixed = true);
+  d3.select(this).classed("dragging", false);
+  d3.select(this).classed("fixed", d.fixed = true);
 }
 
 function recolornodes(how) {
@@ -73,20 +84,56 @@ function recipientCount(to, cc, bcc){
   return _.reduce(_.map([to, cc, bcc], splitItemCount), function(a,b){ return a+b;}, 0);
 }
 
-function produceHTML(arr) {
-  d = _.object(['num', 'directory','datetime', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], arr);
+function produceHTMLView(emailObj) {
+  var d = _.object(['num', 'directory','datetime', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], emailObj.email);
   console.log(d);
-  html = '';
-  html += "<b>ID: </b>" + d.num + "<BR>";
-  html += "<b>From: </b>" + d.from + "<BR>";
-  html += "<b>To: </b>" + d.to + "<BR>";
-  html += "<b>Cc: </b>" + d.cc + "<BR>";
-  html += "<b>Bcc: </b>" + d.bcc + "<BR>";
-  html += "<b>Subject: </b>" + d.subject + "<BR>";
-  html += "<b>Date: </b>" + d.datetime + "<BR>";
-  html += "<b>Attachments: </b>" + "<a href='emails/" + d.directory + "/attachments/" + d.attach + "'>" + d.attach + "</a><BR><BR>";
-  html += d.body.replace(/\[:newline:\]/g,"<BR>");
-  return html;
+  var el = $('<div>').addClass('body-view');
+  //html += "<b>ID: </b>" + d.num + "<BR>";
+  var items = _.zip(['ID','From','To','Cc','Bcc','Subject','Date'], 
+        [d.num, d.from, d.to, d.cc, d.bcc, d.subject, d.datetime]);
+  _.each(items, function(item){
+    el.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
+                      .append(item[1]) );
+  });
+
+//  html += "<b>Attachments: </b>" + "<a href='emails/" + d.directory
+//  + "/attachments/" + d.attach + "'>" + d.attach + "</a><BR><BR>";
+  el.append($('<p>').append($('<span>').addClass('bold').text("Attachments: "))
+                    .append($('<a>', { "href" : d.attach }).html(d.attach)));
+  el.append($('<p>'));
+  
+  var cleanBody = d.body.replace(/\[:newline:\]/g,"\n");
+
+  //sort by index
+  var ents = _.sortBy(emailObj.entities, function(o){ return o[2]});
+
+  var body = "";
+  _.each(ents, function(entity){
+    var rxstr = entity[3].replace(/\s/g,"(\\.|\\s|\\n)+").replace(/\*/g,'\\*').replace(/\(/g,'\\(').replace(/\)/g,'\\)')
+    console.log(rxstr);
+    var rx = new RegExp(rxstr);
+    var idx = cleanBody.search(rx)
+    //var idx = cleanBody.indexOf(entity[3]);
+    body += _.first(cleanBody, idx).join('');
+    body += $('<span>', { "data-id": entity[0] })
+      .addClass(entity[1]).html(entity[3])[0].outerHTML
+    var rest = _.rest(cleanBody, idx).join('');
+    cleanBody = rest.replace(rx, "");
+  });
+
+  body += cleanBody;
+
+  // var uniqueEntities = _.unique(emailObj.entities, false, function(o){
+  //   return o[1] + o[3];
+  // });
+
+  // _.each(uniqueEntities, function(o){
+  //   cleanBody = cleanBody.replace(o[3], $('<span>').addClass(o[1]).html(o[3])[0].outerHTML);
+  // });
+  //el.append($('<p>').html(d.body.replace(/\[:newline:\]/g, "<br/>")));
+  el.append($('<p>').html(body.replace(/\n/g, "<br/>")));
+
+  return el;
 }
 
 function do_search(val,fields) {
@@ -98,10 +145,13 @@ function do_search(val,fields) {
   d3.select("#result_table").select("thead").selectAll("tr").remove();
   var text = val;
   
-  d3.select("#search_status").text("Searching...");
+  //d3.select("#search_status").text("Searching...");
+  $('#search_status').empty();
+  $('#search_status').append($('<span>',{ 'text': 'Searching... ' })).append(waiting_bar);  
 
   $.getJSON("search/search/" + fields +'/' + encodeURIComponent(text) , function (comp_data) {
-    d3.select("#search_status").text("");
+    $('#search_status').empty();
+    //d3.select("#search_status").text("");
     var lastSort = "";
     // create the table header
     var thead = d3.select("#result_table").select("thead")
@@ -122,13 +172,13 @@ function do_search(val,fields) {
             return a.from.localeCompare(b.from) * direction;
           }
           if (i == 2) {
-            return (recipientCount(a.to, a.cc, a.bcc) - recipientCount(b.to, b.cc, b.bcc)) * direction;
+            return (recipientCount(a.to, a.cc, a.bcc) - recipientCount(b.to, b.cc, b.bcc)) * direction; //desc first
           }
           if (i == 3){
-            return (a.bodysize - b.bodysize) * direction;
+            return (a.bodysize - b.bodysize) * direction * -1; //desc first
           }
           if (i == 4){
-            return (splitItemCount(a.attach) - splitItemCount(b.attach)) * direction;
+            return (splitItemCount(a.attach) - splitItemCount(b.attach)) * direction; //desc first
           }
           if (i == 5) {
             return a.subject.localeCompare(b.subject) * direction;
@@ -144,11 +194,15 @@ function do_search(val,fields) {
       console.log(d.directory);
       // $("#webpage").load('emails/' + d.directory + '/' +
       // d.directory.split('/')[1] + '.txt');
+      $(document).scrollTop(0);            
+      $("#webpage").empty();
+      $("#webpage").append($('<span>').text('Loading... ')).append(waiting_bar);
+      
       $.get("email/email/" + encodeURIComponent(d.num)).then(
-        function(row) {
-          if(row.length > 0){
-            $("#webpage").html(produceHTML(row));
-            $(document).scrollTop(0);
+        function(resp) {
+          if(resp.email.length > 0){
+            $("#webpage").empty();
+            $("#webpage").append(produceHTMLView(resp));
           }
         });
 
