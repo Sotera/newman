@@ -30,10 +30,10 @@ def extract_entities(ner, email_id, body):
         (email_id, tag, " ".join([tokens[i] for i in rng]))
         for rng, tag in entities ]
 
-def ingest_entity(conn, subject, entity_type, idx, value):
-    stmt = ("insert into entity (subject, entity_type, idx, value) " 
-            "values (%s, %s, %s, %s)")
-    with execute_nonquery(conn, stmt, subject, entity_type, idx, value, autocommit=False) as insert:
+def ingest_entity(conn, subject, entity_type, idx, value, email_id):
+    stmt = ("insert into entity (subject, entity_type, idx, value, email_id) " 
+            "values (%s, %s, %s, %s, %s) ")
+    with execute_nonquery(conn, stmt, subject, entity_type, idx, value, email_id, autocommit=False) as insert:
         pass
 
 def inc(n):
@@ -77,7 +77,7 @@ if __name__ == "__main__":
                     facts.addFact("%s_entity_%s" % (email_id, i), "entity", 
                                   "email", str(email_id), txid)
 
-                    ingest(email_id, tag_name.lower(), i, entity)
+                    ingest(email_id, tag_name.lower(), i, entity, email_id)
 
         print "commit"
         write_cnx.commit()
