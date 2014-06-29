@@ -31,6 +31,7 @@ create table entity (
    entity_type varchar(1000) not null, 
    idx int not null, 
    value varchar(1000) character set utf8 not null,
+   email_id varchar(1000) not null,
    created timestamp not null default current_timestamp,
    primary key (rownum)
 ) ENGINE=MyISAM;
