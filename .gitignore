@@ -2,6 +2,8 @@
 *.pyc
 *.zip
 
+demail/emails
+
 data/
 !data/.keep
 
