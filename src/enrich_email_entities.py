@@ -68,16 +68,12 @@ if __name__ == "__main__":
                 r = extract(email_id, body)
                 for i, item in enumerate(r):
                     email_id, tag_name, entity = item
-                    facts.addFact("%s_entity_%s" % (email_id, i), "entity", 
-                                  "value", entity, txid)
-                    facts.addFact("%s_entity_%s" % (email_id, i), "entity", 
-                                  "type", tag_name.lower(), txid)
-                    facts.addFact("%s_entity_%s" % (email_id, i), "entity", 
-                                  "idx", i, txid)
-                    facts.addFact("%s_entity_%s" % (email_id, i), "entity", 
-                                  "email", str(email_id), txid)
-
-                    ingest(email_id, tag_name.lower(), i, entity, email_id)
+                    entity_id = "%s_entity_%s" % (email_id, i)
+                    facts.addFact(entity_id, "entity", "value", entity, txid)
+                    facts.addFact(entity_id, "entity", "type", tag_name.lower(), txid)
+                    facts.addFact(entity_id, "entity", "idx", i, txid)
+                    facts.addFact(entity_id, "entity", "email", str(email_id), txid)
+                    ingest(entity_id, tag_name.lower(), i, entity, email_id)
 
         print "commit"
         write_cnx.commit()
