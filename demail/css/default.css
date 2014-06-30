@@ -49,7 +49,7 @@ body {
 .chart text.label {
     fill: black;
     font: 10px sans-serif;
-    text-anchor: middle;
+    text-anchor: start;
 }
 
 #graph {

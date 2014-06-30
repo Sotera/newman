@@ -590,22 +590,29 @@ $(function () {
   }  else { 
     //do_search('');
   }
+  $('#webpage').append(waiting_bar);
 
   // test bar
-  $.get('entity/top/30').then(function(resp){
-    $('#init-load').remove();
+  $.get('entity/top/25').then(function(resp){
+    $('#webpage').empty();
     var entities = resp.entities; 
 
-    var width = 420, barHeight = 20;
+    var width = 600, barHeight = 20;
+    var margin = {top: 20, right: 10, bottom: 20, left: 100};
+    width = width - margin.left - margin.right;
+ 
     var x = d3.scale.linear().range([0, width]);
-    var chart = d3.select(".chart").attr("width", width);
+    var chart = d3.select("#webpage").append('svg')
+      .attr('class', 'chart')
+      .attr("width", width + margin.left + margin.right);
+    
     x.domain([0, _.first(entities)[3]]);
     chart.attr("height", barHeight * entities.length);
 
     var bar = chart.selectAll("g")
       .data(entities).enter()
       .append("g")
-      .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")";});
+      .attr("transform", function(d, i) { return "translate(" + margin.left + "," + (+(i * barHeight) + +margin.top) + ")";});
 
     bar.append("rect")
       .attr("width", function(d) { return x(+d[3]);})
@@ -613,7 +620,7 @@ $(function () {
       .attr("class", function(d) { return d[1];})
       .on("click", function(d){ 
         do_search(d[0], 'entity');
-      });
+      }).append('title').text(function(d) { return d[2];});
 
     bar.append("text")
       .attr("x", function(d) { return x(+d[3]) - 3;})
@@ -622,11 +629,11 @@ $(function () {
       .text(function(d) { return +d[3];});
 
     bar.append("text")
-      .attr("x", function(d) { return x(+d[3]) - 3;})
+      .attr("x", function(d) { return -margin.left;})
       .attr("y", barHeight / 2)
-      .attr("dy", ".35em")
       .attr("class", "label")
-      .text(function(d) { return d[2];});
+      .text(function(d) { return (d[2].length > 15) ? d[2].substr(0,15) + ".." : d[2]; })
+      .append('title').text(function(d) { return d[2];});
 
     //$('#webpage').text(x.domain());
   });
