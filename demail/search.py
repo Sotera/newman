@@ -59,6 +59,25 @@ stmt_node_vals_filter_text = (
     "     group by t.subject"
 )
 
+stmt_node_vals_filter_entity = (
+    "    select t.subject, "
+    "           group_concat(case predicate when 'community' then obj end) as comm, "
+    "           group_concat(case predicate when 'community_id' then obj end) as comm_id, "
+    "           group_concat(case predicate when 'group_id' then obj end) as group_id, "
+    "           sum(coalesce(case predicate when 'total_received' then obj end, 0)) as total_rcv, "
+    "           sum(coalesce(case predicate when 'total_sent' then obj end, 0)) as total_sent, "
+    "           group_concat(case predicate when 'rank' then obj end) as rank "
+    "     from facts as t join (select f.subject from facts f join facts f2 on f.obj = f2.obj  "
+    "             where f.schema_name = 'email_addr' and f.predicate = 'email'  "
+    "                and f2.schema_name = 'entity_rollup'  "
+    "                and f2.predicate = 'email'  "
+    "                and f2.subject = %s group by f.subject) as t2"
+    "                on t.subject = t2.subject"
+    "     where t.schema_name = 'email_addr' "
+    "     and t.predicate in ('community', 'community_id', 'group_id', 'total_received', 'total_sent', 'rank') "
+    "     group by t.subject"
+)
+
 ## Email Rows
 stmt_find_emails = (
     " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
@@ -79,6 +98,17 @@ stmt_find_emails_filter_text = (
     " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
     " from email "
     " where (lower(subject) like %s or lower(body) like %s) "
+) 
+
+stmt_find_emails_filter_entity = (
+    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
+    " from email "
+    " where id in ("
+    "   select obj from facts "
+    "   where subject = %s " 
+    "   and schema_name = 'entity_rollup' "
+    "   and predicate = 'email' "
+    ") "
 ) 
 
 
@@ -170,9 +200,42 @@ stmt_node_edges_filter_text = (
     " group by source, target "
 )
 
+stmt_node_edges_filter_entity = (
+    " select source, target, sum(weight) "
+    " from ( select f.obj as source, f2.obj as target, count(f2.obj) as weight"
+    " from facts f join facts f2 on f.subject = f2.subject"
+    " where f.schema_name = 'email'"
+    " and f2.schema_name = f.schema_name"
+    " and f.predicate = 'from'"
+    " and f2.predicate in ('to', 'cc', 'bcc')"
+    " and f.subject in ("
+    "   select obj from facts "
+    "   where subject = %s " 
+    "   and schema_name = 'entity_rollup' "
+    "   and predicate = 'email' "
+    " ) "
+    " group by f.obj, f2.obj"
+    " union all "
+    " select f2.obj as source, f.obj as target, count(f2.obj) as weight"
+    " from facts f join facts f2 on f.subject = f2.subject"
+    " where f.schema_name = 'email'"
+    " and f2.schema_name = f.schema_name"
+    " and f.predicate = 'from'"
+    " and f2.predicate in ('to', 'cc', 'bcc')"
+    " and f.subject in ("
+    "   select obj from facts "
+    "   where subject = %s " 
+    "   and schema_name = 'entity_rollup' "
+    "   and predicate = 'email' "
+    " ) "
+    " group by f.obj, f2.obj) as t1 "
+    " group by source, target "
+)
+
 
 def nodeQueryObj(conn, text, field):
     if field.lower() == "email": return (conn, stmt_node_vals_filter_email_addr, text)
+    if field.lower() == "entity": return (conn, stmt_node_vals_filter_entity, text)
     # filter by text
     if text: return (conn, stmt_node_vals_filter_text, "%{0}%".format(text), "%{0}%".format(text))
     # all
@@ -192,6 +255,7 @@ def getNodeVals(text, field):
 
 def edgeQueryObj(conn, text, field):
     if field.lower() == "email": return (conn, stmt_node_edges_filter_email_addr, text, text)
+    if field.lower() == "entity": return (conn, stmt_node_edges_filter_entity, text, text)
     # filter by text
     if text: return (conn, stmt_node_edges_filter_text, "%{0}%".format(text), "%{0}%".format(text), "%{0}%".format(text), "%{0}%".format(text))
     # all
@@ -208,6 +272,7 @@ def getEdges(node_idx, text, field):
 def emailQueryObj(conn, text, field):
     # filter by email
     if field.lower() == "email": return (conn, stmt_find_emails_filter_email_addr, text)
+    if field.lower() == "entity": return (conn, stmt_find_emails_filter_entity, text)
     # filter by text
     if text: return (conn, stmt_find_emails_filter_text, "%{0}%".format(text), "%{0}%".format(text))
     # all

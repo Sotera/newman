@@ -84,6 +84,16 @@ function recipientCount(to, cc, bcc){
   return _.reduce(_.map([to, cc, bcc], splitItemCount), function(a,b){ return a+b;}, 0);
 }
 
+function searchByEntity(entityid, type, value){
+  console.log(entityid);
+  console.log(type);
+  console.log(value);
+  $.get("entity/rollup/" + encodeURIComponent(entityid)).then(
+    function(resp) {
+      do_search(resp.rollupId, 'entity');
+    });
+}
+
 function produceHTMLView(emailObj) {
   var d = _.object(['num', 'directory','datetime', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], emailObj.email);
   console.log(d);
@@ -99,7 +109,7 @@ function produceHTMLView(emailObj) {
 //  html += "<b>Attachments: </b>" + "<a href='emails/" + d.directory
 //  + "/attachments/" + d.attach + "'>" + d.attach + "</a><BR><BR>";
   el.append($('<p>').append($('<span>').addClass('bold').text("Attachments: "))
-                    .append($('<a>', { "href" : d.attach }).html(d.attach)));
+                    .append($('<a>', { "target": "_blank" ,"href" : 'emails/' + d.directory + "/attachments/" + encodeURIComponent(d.attach) }).html(d.attach)));
   el.append($('<p>'));
   
   var cleanBody = d.body.replace(/\[:newline:\]/g,"\n");
@@ -107,21 +117,22 @@ function produceHTMLView(emailObj) {
   //sort by index
   var ents = _.sortBy(emailObj.entities, function(o){ return o[2]});
 
-  var body = "";
+  var body = $('<div>');
   _.each(ents, function(entity){
-    var rxstr = entity[3].replace(/\s/g,"(\\.|\\s|\\n)+").replace(/\*/g,'\\*').replace(/\(/g,'\\(').replace(/\)/g,'\\)')
+    var rxstr = entity[3].replace(/\s/g,"(\\.|\\s|\\n)+").replace(/\+/g,'\\+').replace(/\*/g,'\\*').replace(/\(/g,'\\(').replace(/\)/g,'\\)')
     console.log(rxstr);
     var rx = new RegExp(rxstr);
     var idx = cleanBody.search(rx)
     //var idx = cleanBody.indexOf(entity[3]);
-    body += _.first(cleanBody, idx).join('');
-    body += $('<span>', { "data-id": entity[0] })
-      .addClass(entity[1]).html(entity[3])[0].outerHTML
+    //body += _.first(cleanBody, idx).join('');
+    body.append($('<span>').html(_.first(cleanBody, idx).join('').replace(/\n/g,'<br/>')));
+    //body += $('<span>', { "data-id": entity[0] }).addClass(entity[1]).html(entity[3])[0].outerHTML
+    body.append($('<span>', { "data-id": entity[0] }).addClass(entity[1]).html(entity[3]).on('click', _.partial(searchByEntity, entity[0], entity[1], entity[3])));
     var rest = _.rest(cleanBody, idx).join('');
     cleanBody = rest.replace(rx, "");
   });
 
-  body += cleanBody;
+  body.append($('<span>').html(cleanBody.replace(/\n/g,'<br/>')));
 
   // var uniqueEntities = _.unique(emailObj.entities, false, function(o){
   //   return o[1] + o[3];
@@ -131,13 +142,14 @@ function produceHTMLView(emailObj) {
   //   cleanBody = cleanBody.replace(o[3], $('<span>').addClass(o[1]).html(o[3])[0].outerHTML);
   // });
   //el.append($('<p>').html(d.body.replace(/\[:newline:\]/g, "<br/>")));
-  el.append($('<p>').html(body.replace(/\n/g, "<br/>")));
+
+  el.append(body)
+  //el.append($('<p>').html(body.replace(/\n/g, "<br/>")));
 
   return el;
 }
 
 function do_search(val,fields) {
-  console.log('got here');
   /* Fails Lint -  Use '===' to compare with 'undefined' */
   if (fields == undefined) { fields = 'All'; }
   
@@ -172,13 +184,13 @@ function do_search(val,fields) {
             return a.from.localeCompare(b.from) * direction;
           }
           if (i == 2) {
-            return (recipientCount(a.to, a.cc, a.bcc) - recipientCount(b.to, b.cc, b.bcc)) * direction; //desc first
+            return (recipientCount(a.to, a.cc, a.bcc) - recipientCount(b.to, b.cc, b.bcc)) * direction * -1; //desc first
           }
           if (i == 3){
             return (a.bodysize - b.bodysize) * direction * -1; //desc first
           }
           if (i == 4){
-            return (splitItemCount(a.attach) - splitItemCount(b.attach)) * direction; //desc first
+            return (splitItemCount(a.attach) - splitItemCount(b.attach)) * direction * -1; //desc first
           }
           if (i == 5) {
             return a.subject.localeCompare(b.subject) * direction;
@@ -571,7 +583,7 @@ $(function () {
   if( cluster != '')  {  
     do_search(cluster);
   }  else { 
-    do_search('');
+    //do_search('');
   }
 
   /* attach element event handlers */
