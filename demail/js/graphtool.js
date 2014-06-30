@@ -470,7 +470,6 @@ function get_component_by_number(comp){
       .enter().append("g")
       .attr("class", "node");
     
-    
     node.append("svg:circle")
       .attr("r", 5)
       .style("fill", function(d) { return color(d.group); })
@@ -538,6 +537,15 @@ function draw_entity_chart() {
 
   $.get('entity/top/25').then(function(resp){
     $('#webpage').empty();
+    var legend_items = ["Person", "Location", "Organization", "Misc"];
+    $('#webpage').append($('<div>').append('<h3>').text("Top Entities"));
+    
+    var legend = $('<div>');
+    _.each(legend_items, function(item){
+      legend.append($('<div>').css({'display':'inline-block', 'width': '20px', 'height': '12px', 'padding-left': '5px', 'padding-right': '5px;'}).addClass(item.toLowerCase()))
+        .append($('<span>').css({'padding-left': '5px', 'padding-right': '5px'}).text(item))
+    });
+    $('#webpage').append(legend);
     var entities = resp.entities; 
 
     var width = 600, barHeight = 20;
