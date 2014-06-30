@@ -373,11 +373,13 @@ function drawGraph(graph){
     });
 
   node.on("click", function(n){
-    //console.log(n.name);	
-    //console.log($('#email_text').val());
+    var last = $("#email_text").val();
+    console.log(last);
+    console.log(n.name);
+    if (last.localeCompare(n.name) == 0){
+      do_search(n.name, 'all');        
+    }
     $('#email_text').val(n.name);
-    //d3.select("#email_text").attr("value",n.name);
-    //console.log($('#email_text').val());
   });
 			
   node.on("mouseover", function() { d3.select(this).select("svg text").style("opacity","100"); });
@@ -432,8 +434,7 @@ function get_component_by_number(comp){
     svg.remove();
     svg = d3.select("#node_graph").append("svg")
       .attr({
-       	"width": "100%",
-     	"height": "100%"
+       	"width": "100%", "height": "100%"
       })
       .attr("viewBox", "0 0 " + width + " " + height )
       .attr("preserveAspectRatio", "xMidYMid meet")
@@ -475,9 +476,15 @@ function get_component_by_number(comp){
       .style("fill", function(d) { return color(d.group); })
       .call(force.drag);
     
-    vis.selectAll("svg:circle").on("click", function(n){
-      $("#selected_node_text").text(n.name);
-    });
+    // vis.selectAll("svg:circle").on("click", function(n){
+    //   var last = $("#selected_node_text").val();
+    //   console.log(last);
+    //   console.log(n.name);
+    //   if (last.localeCompare(n.name) == 0){
+    //     do_search(n.name, 'all');        
+    //   }
+    //   $("#selected_node_text").val(n.name);
+    // });
 			
     vis.selectAll("svg:circle")
       .on("mouseover", function() { 
