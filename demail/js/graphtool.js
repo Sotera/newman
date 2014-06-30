@@ -99,8 +99,13 @@ function produceHTMLView(emailObj) {
   console.log(d);
   var el = $('<div>').addClass('body-view');
   //html += "<b>ID: </b>" + d.num + "<BR>";
-  var items = _.zip(['ID','From','To','Cc','Bcc','Subject','Date'], 
-        [d.num, d.from, d.to, d.cc, d.bcc, d.subject, d.datetime]);
+
+  el.append(
+    $('<p>').append($('<span>').addClass('bold').text("ID: "))
+      .append($('<a>', { 'target': '_blank', 'href' : 'emails/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.txt'}).text(d.num)));
+
+  var items = _.zip(['From','To','Cc','Bcc','Subject','Date'], 
+        [d.from, d.to, d.cc, d.bcc, d.subject, d.datetime]);
   _.each(items, function(item){
     el.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
                       .append(item[1]) );
@@ -585,6 +590,47 @@ $(function () {
   }  else { 
     //do_search('');
   }
+
+  // test bar
+  $.get('entity/top/30').then(function(resp){
+    $('#init-load').remove();
+    var entities = resp.entities; 
+
+    var width = 420, barHeight = 20;
+    var x = d3.scale.linear().range([0, width]);
+    var chart = d3.select(".chart").attr("width", width);
+    x.domain([0, _.first(entities)[3]]);
+    chart.attr("height", barHeight * entities.length);
+
+    var bar = chart.selectAll("g")
+      .data(entities).enter()
+      .append("g")
+      .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")";});
+
+    bar.append("rect")
+      .attr("width", function(d) { return x(+d[3]);})
+      .attr("height", barHeight - 1)
+      .attr("class", function(d) { return d[1];})
+      .on("click", function(d){ 
+        do_search(d[0], 'entity');
+      });
+
+    bar.append("text")
+      .attr("x", function(d) { return x(+d[3]) - 3;})
+      .attr("y", barHeight / 2)
+      .attr("dy", ".35em")
+      .text(function(d) { return +d[3];});
+
+    bar.append("text")
+      .attr("x", function(d) { return x(+d[3]) - 3;})
+      .attr("y", barHeight / 2)
+      .attr("dy", ".35em")
+      .attr("class", "label")
+      .text(function(d) { return d[2];});
+
+    //$('#webpage').text(x.domain());
+  });
+
 
   /* attach element event handlers */
 

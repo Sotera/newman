@@ -27,6 +27,31 @@ body {
 .body-view .organization {  padding: 2px; background-color: #ffcc33; }
 .body-view .misc { padding: 2px; background-color: #c0c0c0; }
 
+.chart rect.organization {
+    fill: #ffcc33; 
+}
+.chart rect.location {
+    fill: #00ff00; 
+}
+.chart rect.misc { 
+    fill: #c0c0c0; 
+}
+.chart rect.person {
+    fill: #00ccff;
+}
+
+.chart text {
+    fill: white;
+    font: 10px sans-serif;
+    text-anchor: end;
+}
+
+.chart text.label {
+    fill: black;
+    font: 10px sans-serif;
+    text-anchor: middle;
+}
+
 #graph {
     position: fixed;
     top: 0px;
