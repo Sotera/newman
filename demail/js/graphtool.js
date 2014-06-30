@@ -26,6 +26,17 @@ var drag = d3.behavior.drag()
         .on("drag", dragged)
         .on("dragend", dragended);
 
+var waiting_bar = $('<img>', {
+  'src' : 'imgs/loading-cylon.svg',
+  'width' : 256,
+  'height' : 32}).css('padding-top', 10);
+
+var waiting_spin = $('<img>', {
+  'src' : 'imgs/loading-spin.svg',
+  'width' : 256,
+  'height' : 32});
+
+
 function tickCommunity() {
   vis.selectAll(".link").attr("d", function(d) {
     return "M" + d[0].x + "," + d[0].y +
@@ -41,22 +52,22 @@ function tickCommunity() {
 
 /*** Configure drag behaviour ***/
 function dragstarted(d){
-        d3.event.sourceEvent.stopPropagation();
-        d3.select(this).classed("fixed", d.fixed = false);
-        d3.select(this).classed("dragging", true);
+  d3.event.sourceEvent.stopPropagation();
+  d3.select(this).classed("fixed", d.fixed = false);
+  d3.select(this).classed("dragging", true);
 }
 
 function dragged(d){
-        if (d.fixed) return; //root is fixed
-        d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
-        d.fixed = true;
-        tickCommunity();//re-position this node and any links
-        d.fixed = false;
+  if (d.fixed) return; //root is fixed
+  d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+  d.fixed = true;
+  tickCommunity();//re-position this node and any links
+  d.fixed = false;
 }
 
 function dragended(d){
-        d3.select(this).classed("dragging", false);
-        d3.select(this).classed("fixed", d.fixed = true);
+  d3.select(this).classed("dragging", false);
+  d3.select(this).classed("fixed", d.fixed = true);
 }
 
 function recolornodes(how) {
@@ -64,24 +75,86 @@ function recolornodes(how) {
   if( how == 'node') {d3.selectAll("circle").style("fill", function(d) { return color(d.group); });}
 }
 
-function produceHTML(d) {
+function splitItemCount(str){
+  if (str.trim().length == 0) return 0
+  return str.split(',').length;
+}
 
+function recipientCount(to, cc, bcc){
+  return _.reduce(_.map([to, cc, bcc], splitItemCount), function(a,b){ return a+b;}, 0);
+}
+
+function searchByEntity(entityid, type, value){
+  console.log(entityid);
+  console.log(type);
+  console.log(value);
+  $.get("entity/rollup/" + encodeURIComponent(entityid)).then(
+    function(resp) {
+      do_search(resp.rollupId, 'entity');
+    });
+}
+
+function produceHTMLView(emailObj) {
+  var d = _.object(['num', 'directory','datetime', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], emailObj.email);
   console.log(d);
-  html = '';
-  html += "<b>ID: </b>" + d.num + "<BR>";
-  html += "<b>From: </b>" + d.from + "<BR>";
-  html += "<b>To: </b>" + d.to + "<BR>";
-  html += "<b>Cc: </b>" + d.cc + "<BR>";
-  html += "<b>Bcc: </b>" + d.bcc + "<BR>";
-  html += "<b>Subject: </b>" + d.subject + "<BR>";
-  html += "<b>Date: </b>" + d.datetime + "<BR>";
-  html += "<b>Attachments: </b>" + "<a href='emails/" + d.directory + "/attachments/" + d.attach + "'>" + d.attach + "</a><BR><BR>";
-  html += d.body.replace(/\[:newline:\]/g,"<BR>");
-  return html;
+  var el = $('<div>').addClass('body-view');
+  //html += "<b>ID: </b>" + d.num + "<BR>";
+
+  el.append(
+    $('<p>').append($('<span>').addClass('bold').text("ID: "))
+      .append($('<a>', { 'target': '_blank', 'href' : 'emails/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.txt'}).text(d.num)));
+
+  var items = _.zip(['From','To','Cc','Bcc','Subject','Date'], 
+        [d.from, d.to, d.cc, d.bcc, d.subject, d.datetime]);
+  _.each(items, function(item){
+    el.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
+                      .append(item[1]) );
+  });
+
+//  html += "<b>Attachments: </b>" + "<a href='emails/" + d.directory
+//  + "/attachments/" + d.attach + "'>" + d.attach + "</a><BR><BR>";
+  el.append($('<p>').append($('<span>').addClass('bold').text("Attachments: "))
+                    .append($('<a>', { "target": "_blank" ,"href" : 'emails/' + d.directory + "/attachments/" + encodeURIComponent(d.attach) }).html(d.attach)));
+  el.append($('<p>'));
+  
+  var cleanBody = d.body.replace(/\[:newline:\]/g,"\n");
+
+  //sort by index
+  var ents = _.sortBy(emailObj.entities, function(o){ return o[2]});
+
+  var body = $('<div>');
+  _.each(ents, function(entity){
+    var rxstr = entity[3].replace(/\s/g,"(\\.|\\s|\\n)+").replace(/\+/g,'\\+').replace(/\*/g,'\\*').replace(/\(/g,'\\(').replace(/\)/g,'\\)')
+    console.log(rxstr);
+    var rx = new RegExp(rxstr);
+    var idx = cleanBody.search(rx)
+    //var idx = cleanBody.indexOf(entity[3]);
+    //body += _.first(cleanBody, idx).join('');
+    body.append($('<span>').html(_.first(cleanBody, idx).join('').replace(/\n/g,'<br/>')));
+    //body += $('<span>', { "data-id": entity[0] }).addClass(entity[1]).html(entity[3])[0].outerHTML
+    body.append($('<span>', { "data-id": entity[0] }).addClass(entity[1]).html(entity[3]).on('click', _.partial(searchByEntity, entity[0], entity[1], entity[3])));
+    var rest = _.rest(cleanBody, idx).join('');
+    cleanBody = rest.replace(rx, "");
+  });
+
+  body.append($('<span>').html(cleanBody.replace(/\n/g,'<br/>')));
+
+  // var uniqueEntities = _.unique(emailObj.entities, false, function(o){
+  //   return o[1] + o[3];
+  // });
+
+  // _.each(uniqueEntities, function(o){
+  //   cleanBody = cleanBody.replace(o[3], $('<span>').addClass(o[1]).html(o[3])[0].outerHTML);
+  // });
+  //el.append($('<p>').html(d.body.replace(/\[:newline:\]/g, "<br/>")));
+
+  el.append(body)
+  //el.append($('<p>').html(body.replace(/\n/g, "<br/>")));
+
+  return el;
 }
 
 function do_search(val,fields) {
-  console.log('got here');
   /* Fails Lint -  Use '===' to compare with 'undefined' */
   if (fields == undefined) { fields = 'All'; }
   
@@ -89,26 +162,67 @@ function do_search(val,fields) {
   d3.select("#result_table").select("thead").selectAll("tr").remove();
   var text = val;
   
-  d3.select("#search_status").text("Searching...");
-  
-  $.getJSON("search_comp_service?text=" + encodeURIComponent(text) + '&fields=' + fields, function (comp_data) {
-    d3.select("#search_status").text("");
-    
+  //d3.select("#search_status").text("Searching...");
+  $('#search_status').empty();
+  $('#search_status').append($('<span>',{ 'text': 'Searching... ' })).append(waiting_bar);  
+
+  $.getJSON("search/search/" + fields +'/' + encodeURIComponent(text) , function (comp_data) {
+    $('#search_status').empty();
+    //d3.select("#search_status").text("");
+    var lastSort = "";
     // create the table header
     var thead = d3.select("#result_table").select("thead")
       .append("tr")
       .selectAll("tr")
-    //.data(d3.keys(comp_data[0]))
-      .data(['Source','Date','From','To','Cc','Bcc','Subject'])
-      .enter().append("th").text(function(d){return d;});
+    // .data(['Source','Date','From','To','Cc','Bcc','Subject'])
+      .data(['Date','From','Recipient Count','Body Size','Attachment Count', 'Subject'])
+      .enter().append("th").text(function(d){return d;})
+      .on("click", function(k, i){
+        console.log(arguments);
+        var direction = (lastSort == k) ? -1 : 1;
+        lastSort = (direction == -1) ? "" : k; //toggle
+        d3.select("#result_table").select("tbody").selectAll("tr").sort(function(a, b) { 
+          if (i == 0) {
+            return a.datetime.localeCompare(b.datetime) * direction;
+          }             
+          if (i == 1) {
+            return a.from.localeCompare(b.from) * direction;
+          }
+          if (i == 2) {
+            return (recipientCount(a.to, a.cc, a.bcc) - recipientCount(b.to, b.cc, b.bcc)) * direction * -1; //desc first
+          }
+          if (i == 3){
+            return (a.bodysize - b.bodysize) * direction * -1; //desc first
+          }
+          if (i == 4){
+            return (splitItemCount(a.attach) - splitItemCount(b.attach)) * direction * -1; //desc first
+          }
+          if (i == 5) {
+            return a.subject.localeCompare(b.subject) * direction;
+          }             
+        });
+      });
     
+
     // create rows   
     var tr = d3.select("#result_table").select("tbody").selectAll("tr").data(comp_data.rows).enter().append("tr");
     
     tr.on("click",function(d){
       console.log(d.directory);
-      // $("#webpage").load('emails/' + d.directory + '/' + d.directory.split('/')[1] + '.txt');
-      $("#webpage").html(produceHTML(d));
+      // $("#webpage").load('emails/' + d.directory + '/' +
+      // d.directory.split('/')[1] + '.txt');
+      $(document).scrollTop(0);            
+      $("#webpage").empty();
+      $("#webpage").append($('<span>').text('Loading... ')).append(waiting_bar);
+      
+      $.get("email/email/" + encodeURIComponent(d.num)).then(
+        function(resp) {
+          if(resp.email.length > 0){
+            $("#webpage").empty();
+            $("#webpage").append(produceHTMLView(resp));
+          }
+        });
+
     }).on("mouseover", function(d) {
       tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(',');
       for (i = 0; i < tos.length; i++) {
@@ -122,28 +236,42 @@ function do_search(val,fields) {
     // cells
     var td = tr.selectAll("td")
       .data(function(d){
-        return [d.num + '::' + d.from + '::' + d.directory, d.datetime, d.from +'::' + d.fromcolor,d.to,d.cc,d.bcc,d.subject];})
+        var recipient_count = recipientCount(d.to, d.cc, d.bcc);
+        var attach_count = splitItemCount(d.attach)
+        return [d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject ];
+        //return [d.num + '::' + d.from + '::' + d.directory, d.datetime, d.from +'::' + d.fromcolor,d.to,d.cc,d.bcc,d.subject];
+      })
       .enter().append("td")
     //.text(function(d){return ['no'];})
     //.html(function(d) {return ["<a href='"+d.directory+"'>"+d.directory+"</a>"]; })
       .style("padding", "5px")
       .style("font-size","10px")
-      .style("fill","blue").append('text')
+      .style("fill","blue")
+      .append('div')
       .html(function(d,i) {
-        /* fails lint - Use '===' to compare with '0'. */
-        if( i == 0 ) {
+        if( i == 1 ) {
           return d.split('::')[0];
         }
-        else if ( i == 2) { 
-          return d.split('::')[0];
-        } else {
-          return d.replace(/,/g,', ');
-        }})
+        if (i == 2) {
+          var px = d > 100 ? 100 : d;
+          return "<div style='background-color: blue;height: 10px;width: " +px +"px;' />"
+        }
+        if (i == 3) {
+          var px = (d / 1000.0) > 100 ? 100 : (d / 1000.0);
+          return "<div style='background-color: green;height: 10px;width: " +px +"px;' />"
+        }
+        if (i == 4) {
+          var px = (d * 10) > 100 ? 100 : (d * 10);
+          return "<div style='background-color: orange;height: 10px;width: " +px +"px;' />"
+        }
+
+        return d;
+      })
       .style("color", function(d,i) { 
-        if( i == 2) { 
+        if( i == 1) { 
           return color(d.split('::')[1]); 
         } else { 
-          return 'black';
+           return 'black';
         } 
       })
       .style("stroke","#FFFFFF");
@@ -245,11 +373,13 @@ function drawGraph(graph){
     });
 
   node.on("click", function(n){
-    //console.log(n.name);	
-    //console.log($('#email_text').val());
+    var last = $("#email_text").val();
+    console.log(last);
+    console.log(n.name);
+    if (last.localeCompare(n.name) == 0){
+      do_search(n.name, 'all');        
+    }
     $('#email_text').val(n.name);
-    //d3.select("#email_text").attr("value",n.name);
-    //console.log($('#email_text').val());
   });
 			
   node.on("mouseover", function() { d3.select(this).select("svg text").style("opacity","100"); });
@@ -304,8 +434,7 @@ function get_component_by_number(comp){
     svg.remove();
     svg = d3.select("#node_graph").append("svg")
       .attr({
-       	"width": "100%",
-     	"height": "100%"
+       	"width": "100%", "height": "100%"
       })
       .attr("viewBox", "0 0 " + width + " " + height )
       .attr("preserveAspectRatio", "xMidYMid meet")
@@ -342,15 +471,20 @@ function get_component_by_number(comp){
       .enter().append("g")
       .attr("class", "node");
     
-    
     node.append("svg:circle")
       .attr("r", 5)
       .style("fill", function(d) { return color(d.group); })
       .call(force.drag);
     
-    vis.selectAll("svg:circle").on("click", function(n){
-      $("#selected_node_text").text(n.name);
-    });
+    // vis.selectAll("svg:circle").on("click", function(n){
+    //   var last = $("#selected_node_text").val();
+    //   console.log(last);
+    //   console.log(n.name);
+    //   if (last.localeCompare(n.name) == 0){
+    //     do_search(n.name, 'all');        
+    //   }
+    //   $("#selected_node_text").val(n.name);
+    // });
 			
     vis.selectAll("svg:circle")
       .on("mouseover", function() { 
@@ -396,14 +530,70 @@ function redraw() {
 
 function toggle_labels() {
   if (labels) {
-    d3.selectAll("svg text").style("opacity","0");
+    d3.selectAll("#node_graph svg text").style("opacity","0");
     labels = false;
   }
   
   else {
-    d3.selectAll("svg text").style("opacity","100");
+    d3.selectAll("#node_graph svg text").style("opacity","100");
     labels = true;
   }
+}
+
+function draw_entity_chart() {
+
+  $.get('entity/top/25').then(function(resp){
+    $('#webpage').empty();
+    var legend_items = ["Person", "Location", "Organization", "Misc"];
+    $('#webpage').append($('<div>').append('<h3>').text("Top Entities"));
+    
+    var legend = $('<div>');
+    _.each(legend_items, function(item){
+      legend.append($('<div>').css({'display':'inline-block', 'width': '20px', 'height': '12px', 'padding-left': '5px', 'padding-right': '5px;'}).addClass(item.toLowerCase()))
+        .append($('<span>').css({'padding-left': '5px', 'padding-right': '5px'}).text(item))
+    });
+    $('#webpage').append(legend);
+    var entities = resp.entities; 
+
+    var width = 600, barHeight = 20;
+    var margin = {top: 20, right: 10, bottom: 20, left: 100};
+    width = width - margin.left - margin.right;
+ 
+    var x = d3.scale.linear().range([0, width]);
+    var chart = d3.select("#webpage").append('svg')
+      .attr('class', 'chart')
+      .attr("width", width + margin.left + margin.right);
+    
+    x.domain([0, _.first(entities)[3]]);
+    chart.attr("height", barHeight * entities.length);
+
+    var bar = chart.selectAll("g")
+      .data(entities).enter()
+      .append("g")
+      .attr("transform", function(d, i) { return "translate(" + margin.left + "," + (+(i * barHeight) + +margin.top) + ")";});
+
+    bar.append("rect")
+      .attr("width", function(d) { return x(+d[3]);})
+      .attr("height", barHeight - 1)
+      .attr("class", function(d) { return d[1];})
+      .on("click", function(d){ 
+        do_search(d[0], 'entity');
+      }).append('title').text(function(d) { return d[2];});
+
+    bar.append("text")
+      .attr("x", function(d) { return x(+d[3]) - 3;})
+      .attr("y", barHeight / 2)
+      .attr("dy", ".35em")
+      .text(function(d) { return +d[3];});
+
+    bar.append("text")
+      .attr("x", function(d) { return -margin.left;})
+      .attr("y", barHeight / 2)
+      .attr("class", "label")
+      .text(function(d) { return (d[2].length > 15) ? d[2].substr(0,15) + ".." : d[2]; })
+      .append('title').text(function(d) { return d[2];});
+
+  });
 }
 
 
@@ -420,48 +610,40 @@ $(function () {
   if( clusters.length == 2) {
     cluster = clusters[1];
   }
-  tangelo.defaults("", function (config, status, error) {
-    var popover_cfg;
 
-    // Capture the console element.
-    GT.con = d3.select("#console");
+  GT.con = d3.select("#console");
 
-    // Enable the popover help items.
-    //
-    // First create a config object with the common options present.
-    popover_cfg = {
-      html: true,
-      container: "body",
-      placement: "top",
-      trigger: "hover",
-      title: null,
-      content: null,
-      delay: {
-        show: 100,
-        hide: 100
-      }
-    };
-
-    // Dataset pulldown help.
-    popover_cfg.content = "<b>Search:</b><br><br>" +  
-      "Global Search for everything.";
-    
-    $("#search_help").popover(popover_cfg);
-
-    $('#search_text').keyup(function (e){
-      if (e.keyCode === 13) {
-       	do_search($("#search_text").val());
-      }
-    });
-
+  $('#search_text').keyup(function (e){
+    if (e.keyCode === 13) {
+      do_search($("#search_text").val());
+    }
   });
   
   /* fails lint - Use '!==' to compare with ''. */
   if( cluster != '')  {  
     do_search(cluster);
   }  else { 
-    do_search('');
+    //do_search('');
   }
+  $('#webpage').append(waiting_bar);
+  draw_entity_chart();
+
+  var open=false;
+  $("#tab").on("click", function(){
+    if (open) {
+      $("#hover-menu").animate({left: -375}, 500).promise().done(function(){
+        $("#tab-icon").removeClass("glyphicon-chevron-left");
+        $("#tab-icon").addClass("glyphicon-chevron-right");
+        open=false;
+      });
+    } else {
+      $("#hover-menu").animate({left: 0}, 500).promise().done(function(){
+        $("#tab-icon").removeClass("glyphicon-chevron-right");
+        $("#tab-icon").addClass("glyphicon-chevron-left");
+        open=true;
+      });
+    }
+  });
 
   /* attach element event handlers */
 

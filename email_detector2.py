@@ -8,7 +8,7 @@ import pdb
 import math
 import sys
 
-fin = open('exploded.csv', 'r')
+fin = open('./tmp/exploded.csv', 'r')
 fin.readline()
 
 hash_date = {}
@@ -25,7 +25,7 @@ SourceEmail = sys.argv[1]
 
 #in the first hours for every day, track the first emails outbound from source email address
 for line in fin:
-    (c, dt, src, target, numattach) = line.strip().split('\t')
+    (dt,src,target) = line.strip().split('\t')
     if src != SourceEmail:
         continue
 
