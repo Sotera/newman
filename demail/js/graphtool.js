@@ -524,14 +524,61 @@ function redraw() {
 
 function toggle_labels() {
   if (labels) {
-    d3.selectAll("svg text").style("opacity","0");
+    d3.selectAll("#node_graph svg text").style("opacity","0");
     labels = false;
   }
   
   else {
-    d3.selectAll("svg text").style("opacity","100");
+    d3.selectAll("#node_graph svg text").style("opacity","100");
     labels = true;
   }
+}
+
+function draw_entity_chart() {
+
+  $.get('entity/top/25').then(function(resp){
+    $('#webpage').empty();
+    var entities = resp.entities; 
+
+    var width = 600, barHeight = 20;
+    var margin = {top: 20, right: 10, bottom: 20, left: 100};
+    width = width - margin.left - margin.right;
+ 
+    var x = d3.scale.linear().range([0, width]);
+    var chart = d3.select("#webpage").append('svg')
+      .attr('class', 'chart')
+      .attr("width", width + margin.left + margin.right);
+    
+    x.domain([0, _.first(entities)[3]]);
+    chart.attr("height", barHeight * entities.length);
+
+    var bar = chart.selectAll("g")
+      .data(entities).enter()
+      .append("g")
+      .attr("transform", function(d, i) { return "translate(" + margin.left + "," + (+(i * barHeight) + +margin.top) + ")";});
+
+    bar.append("rect")
+      .attr("width", function(d) { return x(+d[3]);})
+      .attr("height", barHeight - 1)
+      .attr("class", function(d) { return d[1];})
+      .on("click", function(d){ 
+        do_search(d[0], 'entity');
+      }).append('title').text(function(d) { return d[2];});
+
+    bar.append("text")
+      .attr("x", function(d) { return x(+d[3]) - 3;})
+      .attr("y", barHeight / 2)
+      .attr("dy", ".35em")
+      .text(function(d) { return +d[3];});
+
+    bar.append("text")
+      .attr("x", function(d) { return -margin.left;})
+      .attr("y", barHeight / 2)
+      .attr("class", "label")
+      .text(function(d) { return (d[2].length > 15) ? d[2].substr(0,15) + ".." : d[2]; })
+      .append('title').text(function(d) { return d[2];});
+
+  });
 }
 
 
@@ -591,53 +638,7 @@ $(function () {
     //do_search('');
   }
   $('#webpage').append(waiting_bar);
-
-  // test bar
-  $.get('entity/top/25').then(function(resp){
-    $('#webpage').empty();
-    var entities = resp.entities; 
-
-    var width = 600, barHeight = 20;
-    var margin = {top: 20, right: 10, bottom: 20, left: 100};
-    width = width - margin.left - margin.right;
- 
-    var x = d3.scale.linear().range([0, width]);
-    var chart = d3.select("#webpage").append('svg')
-      .attr('class', 'chart')
-      .attr("width", width + margin.left + margin.right);
-    
-    x.domain([0, _.first(entities)[3]]);
-    chart.attr("height", barHeight * entities.length);
-
-    var bar = chart.selectAll("g")
-      .data(entities).enter()
-      .append("g")
-      .attr("transform", function(d, i) { return "translate(" + margin.left + "," + (+(i * barHeight) + +margin.top) + ")";});
-
-    bar.append("rect")
-      .attr("width", function(d) { return x(+d[3]);})
-      .attr("height", barHeight - 1)
-      .attr("class", function(d) { return d[1];})
-      .on("click", function(d){ 
-        do_search(d[0], 'entity');
-      }).append('title').text(function(d) { return d[2];});
-
-    bar.append("text")
-      .attr("x", function(d) { return x(+d[3]) - 3;})
-      .attr("y", barHeight / 2)
-      .attr("dy", ".35em")
-      .text(function(d) { return +d[3];});
-
-    bar.append("text")
-      .attr("x", function(d) { return -margin.left;})
-      .attr("y", barHeight / 2)
-      .attr("class", "label")
-      .text(function(d) { return (d[2].length > 15) ? d[2].substr(0,15) + ".." : d[2]; })
-      .append('title').text(function(d) { return d[2];});
-
-    //$('#webpage').text(x.domain());
-  });
-
+  draw_entity_chart();
 
   /* attach element event handlers */
 
