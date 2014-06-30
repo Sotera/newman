@@ -595,40 +595,13 @@ $(function () {
   if( clusters.length == 2) {
     cluster = clusters[1];
   }
-  tangelo.defaults("", function (config, status, error) {
-    var popover_cfg;
 
-    // Capture the console element.
-    GT.con = d3.select("#console");
+  GT.con = d3.select("#console");
 
-    // Enable the popover help items.
-    //
-    // First create a config object with the common options present.
-    popover_cfg = {
-      html: true,
-      container: "body",
-      placement: "top",
-      trigger: "hover",
-      title: null,
-      content: null,
-      delay: {
-        show: 100,
-        hide: 100
-      }
-    };
-
-    // Dataset pulldown help.
-    popover_cfg.content = "<b>Search:</b><br><br>" +  
-      "Global Search for everything.";
-    
-    $("#search_help").popover(popover_cfg);
-
-    $('#search_text').keyup(function (e){
-      if (e.keyCode === 13) {
-       	do_search($("#search_text").val());
-      }
-    });
-
+  $('#search_text').keyup(function (e){
+    if (e.keyCode === 13) {
+      do_search($("#search_text").val());
+    }
   });
   
   /* fails lint - Use '!==' to compare with ''. */
@@ -639,6 +612,23 @@ $(function () {
   }
   $('#webpage').append(waiting_bar);
   draw_entity_chart();
+
+  var open=false;
+  $("#tab").on("click", function(){
+    if (open) {
+      $("#hover-menu").animate({left: -375}, 500).promise().done(function(){
+        $("#tab-icon").removeClass("glyphicon-chevron-left");
+        $("#tab-icon").addClass("glyphicon-chevron-right");
+        open=false;
+      });
+    } else {
+      $("#hover-menu").animate({left: 0}, 500).promise().done(function(){
+        $("#tab-icon").removeClass("glyphicon-chevron-right");
+        $("#tab-icon").addClass("glyphicon-chevron-left");
+        open=true;
+      });
+    }
+  });
 
   /* attach element event handlers */
 

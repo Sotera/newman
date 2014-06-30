@@ -69,6 +69,49 @@ body {
     stroke: #bbb;
 }
 
+#hover-menu {
+    height: 200px;
+    width: 400px;
+    z-index: 99;
+    float: left;
+    top: 60px;
+    position: absolute;
+    left: -375px;
+}
+
+#hover-menu .hover-body {
+    background-color: #f0f0f0;
+    width: 375px;
+    height: 100%;
+    float: left;
+    border-top: 2px solid;
+    border-right: 2px solid;
+    border-bottom: 2px solid;
+    border-bottom-right-radius: 7px;
+}
+
+#hover-menu .hover-tab {
+    background-color: transparent;
+    width: 25px;
+    height: 40px;
+    float: left;
+}
+#hover-menu .hover-tab > div{
+    border-top: 2px solid;
+    border-right: 2px solid;
+    border-bottom: 2px solid;
+    border-top-right-radius: 7px;
+    border-bottom-right-radius: 7px;
+    height: 40px;
+    width: 25px;
+    background-color: #f0f0f0;
+    left: -2px;
+}
+
+#hover-menu .hover-tab span {
+    padding-top: 9px;
+    padding-left: 3px;
+}
 
 .result_tbody {
     height: 200px;       /* Just for the demo          */
