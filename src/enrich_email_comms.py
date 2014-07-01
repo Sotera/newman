@@ -74,6 +74,17 @@ stmt_email_addr_to_email = (
     " where schema_name = 'email' and predicate in ('to', 'from', 'cc', 'bcc') "
 )
 
+stmt_email_populate_xref = (
+    " insert into xref_recipients (`from`, recipient, `type`, email_id)"
+    " select f.obj as `from`, f2.obj as recipient, f2.predicate, f.subject as email_id"
+    " from facts f join facts f2 "
+    "     on f.subject = f2.subject"
+    " where f.schema_name = 'email'"
+    " and f2.schema_name = f.schema_name"
+    " and f.predicate = 'from'"
+    " and f2.predicate in ('to', 'cc', 'bcc')"
+)
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Enrich Emails Communications')
@@ -133,4 +144,7 @@ if __name__ == "__main__":
             pass
         write_cnx.commit()        
 
-
+        print "populate xref recipients"
+        with execute_query(write_cnx.conn(), stmt_email_populate_xref) as qry:
+            pass
+        write_cnx.commit()        

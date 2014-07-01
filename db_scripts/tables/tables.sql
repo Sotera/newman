@@ -22,6 +22,44 @@ create table email (
    location mediumtext
 );
 
+drop table if exists email_addr;
+
+create table email_addr (
+   rownum bigint not null auto_increment,       
+   community varchar(1000) not null,
+   rank varchar(1000) not null,
+   group_id varchar(1000) not null,
+   community_id varchar(1000) not null,
+   primary key (rownum)   
+);
+
+drop table if exists xref_recipients;
+
+create table xref_recipients(
+   `from` varchar(1000) not null,   
+   recipient varchar(1000) not null,   
+   `type` varchar(1000) not null,   
+   email_id varchar(1000) not null
+);
+
+drop table if exists xref_entity_email;
+
+create table xref_entity_email(
+   `from` varchar(1000) not null,   
+   recipient varchar(1000) not null,   
+   `type` varchar(1000) not null,   
+   email_id varchar(1000) not null
+);
+
+drop table if exists xref_emailaddr_email;
+
+create table xref_emailaddr_email (
+   `from` varchar(1000) not null,   
+   recipient varchar(1000) not null,   
+   `type` varchar(1000) not null,   
+   email_id varchar(1000) not null
+);
+
 
 drop table if exists entity;
 

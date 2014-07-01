@@ -41,4 +41,13 @@ create index idx_text_sha on large_text(sha512);
 create index idx_text_tx on large_text(tx);
 
 
+call drop_index_if_exists('xref_recipients', 'idx_xref_recipients_from');
+call drop_index_if_exists('xref_recipients', 'idx_xref_recipients_recipient');
+call drop_index_if_exists('xref_recipients', 'idx_xref_recipients_email');
+
+create index idx_xref_recipients_from on xref_recipients(`from`);
+create index idx_xref_recipients_recipient on xref_recipients(recipient);
+create index idx_xref_recipients_email on xref_recipients(email_id);
+
+
 drop procedure if exists drop_index_if_exists;
