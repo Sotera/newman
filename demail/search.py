@@ -85,14 +85,10 @@ stmt_find_emails = (
 )
 
 stmt_find_emails_filter_email_addr = (
-    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
-    " from email "
-    " where id in ( " 
-    "   select subject from facts " 
-    "   where schema_name = 'email' " 
-    "   and predicate in ('to', 'from', 'cc', 'bcc') " 
-    "   and obj = %s )"
-) 
+    " select distinct id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
+    " from email e join xref_recipients x on e.id = x.email_id"
+    " where (x.`from` = %s or x.recipient = %s) "
+)
 
 stmt_find_emails_filter_text = (
     " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
@@ -114,90 +110,63 @@ stmt_find_emails_filter_entity = (
 
 ## all edges
 stmt_node_edges = (
-    " select source, target, sum(weight) "
-    " from ( select f.obj as source, f2.obj as target, count(f2.obj) as weight"
-    " from facts f join facts f2 on f.subject = f2.subject"
-    " where f.schema_name = 'email'"
-    " and f2.schema_name = f.schema_name"
-    " and f.predicate = 'from'"
-    " and f2.predicate in ('to', 'cc', 'bcc')"
-    " group by f.obj, f2.obj"
-    " union all "
-    " select f2.obj as source, f.obj as target, count(f2.obj) as weight"
-    " from facts f join facts f2 on f.subject = f2.subject"
-    " where f.schema_name = 'email'"
-    " and f2.schema_name = f.schema_name"
-    " and f.predicate = 'from'"
-    " and f2.predicate in ('to', 'cc', 'bcc')"
-    " group by f.obj, f2.obj) as t1 "
-    " group by source, target "
+    " select source, target, sum(weight)"
+    " from ("
+    "    select `from` as source, recipient as target, count(1) as weight "
+    "    from xref_recipients"
+    "    group by `from`, recipient"
+    "    union all"
+    "    select recipient as source, `from` as target, count(1) as weight "
+    "    from xref_recipients"
+    "    group by `from`, recipient"
+    "   ) as t "
+    "  group by source, target"
 )
 
 ## add edges filtered by source email
 stmt_node_edges_filter_email_addr = (
-    " select source, target, sum(weight) "
-    " from ( select f.obj as source, f2.obj as target, count(f2.obj) as weight"
-    " from facts f join facts f2 on f.subject = f2.subject"
-    " where f.schema_name = 'email'"
-    " and f2.schema_name = f.schema_name"
-    " and f.predicate = 'from'"
-    " and f2.predicate in ('to', 'cc', 'bcc')"
-    " and f.subject in ("
-    "   select subject"
-    "   from facts "
-    "   where schema_name = 'email'"
-    "   and predicate in ('to', 'from', 'cc', 'bcc')   "
-    "   and obj = %s "
-    "   group by subject"
-    " ) "
-    " group by f.obj, f2.obj"
-    " union all "
-    " select f2.obj as source, f.obj as target, count(f2.obj) as weight"
-    " from facts f join facts f2 on f.subject = f2.subject"
-    " where f.schema_name = 'email'"
-    " and f2.schema_name = f.schema_name"
-    " and f.predicate = 'from'"
-    " and f2.predicate in ('to', 'cc', 'bcc')"
-    " and f.subject in ("
-    "   select subject"
-    "   from facts "
-    "   where schema_name = 'email'"
-    "   and predicate in ('to', 'from', 'cc', 'bcc')  "
-    "   and obj = %s "
-    "   group by subject"
-    " ) "
-    " group by f.obj, f2.obj) as t1 "
-    " group by source, target "
+    "  select source, target, sum(weight)"
+    "  from ("
+    "    select `from` as source, recipient as target, count(1) as weight "
+    "    from xref_recipients"
+    "    where email_id in ("
+    "      select email_id "
+    "      from xref_recipients "
+    "      where (`from` = %s or recipient = %s))"
+    "   group by `from`, recipient"
+    "   union all"
+    "   select recipient as source, `from` as target, count(1) as weight "
+    "   from xref_recipients"
+    "   where email_id in ("
+    "      select email_id "
+    "      from xref_recipients "
+    "      where (`from` = %s or recipient = %s))"
+    "   group by `from`, recipient"
+    "   ) as t "
+    "   group by source, target"
 )
 
 stmt_node_edges_filter_text = (
     " select source, target, sum(weight) "
-    " from ( select f.obj as source, f2.obj as target, count(f2.obj) as weight"
-    " from facts f join facts f2 on f.subject = f2.subject"
-    " where f.schema_name = 'email'"
-    " and f2.schema_name = f.schema_name"
-    " and f.predicate = 'from'"
-    " and f2.predicate in ('to', 'cc', 'bcc')"
-    " and f.subject in ("
-    "   select id "
-    "   from email "
-    "   where (lower(subject) like %s or lower(body) like %s) "
-    " ) "
-    " group by f.obj, f2.obj"
-    " union all "
-    " select f2.obj as source, f.obj as target, count(f2.obj) as weight"
-    " from facts f join facts f2 on f.subject = f2.subject"
-    " where f.schema_name = 'email'"
-    " and f2.schema_name = f.schema_name"
-    " and f.predicate = 'from'"
-    " and f2.predicate in ('to', 'cc', 'bcc')"
-    " and f.subject in ("
-    "   select id "
-    "   from email "
-    "   where (lower(subject) like %s or lower(body) like %s) "
-    " ) "
-    " group by f.obj, f2.obj) as t1 "
-    " group by source, target "
+    " from ("
+    " select `from` as source, recipient as target, count(1) as weight "
+    " from xref_recipients"
+    " where email_id in ("
+    "       select id "
+    "       from email "
+    "       where (lower(subject) like %s or lower(body) like %s) "
+    " )" 
+    " group by `from`, recipient"
+    " union all"
+    " select recipient as source, `from` as target, count(1) as weight "
+    " from xref_recipients"
+    " where email_id in ("
+    "       select id "
+    "       from email "
+    "       where (lower(subject) like %s or lower(body) like %s) "
+    " ) group by `from`, recipient"
+    " ) as t "
+    " group by source, target"
 )
 
 stmt_node_edges_filter_entity = (
@@ -254,7 +223,7 @@ def getNodeVals(text, field):
                     { 'num': int(item[4]+item[5]), 'comm_id': item[2], 'group_id': item[3], 'comm': item[1], 'rank': item[6] } for item in qry.cursor() }
 
 def edgeQueryObj(conn, text, field):
-    if field.lower() == "email": return (conn, stmt_node_edges_filter_email_addr, text, text)
+    if field.lower() == "email": return (conn, stmt_node_edges_filter_email_addr, text, text, text, text)
     if field.lower() == "entity": return (conn, stmt_node_edges_filter_entity, text, text)
     # filter by text
     if text: return (conn, stmt_node_edges_filter_text, "%{0}%".format(text), "%{0}%".format(text), "%{0}%".format(text), "%{0}%".format(text))
@@ -271,7 +240,7 @@ def getEdges(node_idx, text, field):
 
 def emailQueryObj(conn, text, field):
     # filter by email
-    if field.lower() == "email": return (conn, stmt_find_emails_filter_email_addr, text)
+    if field.lower() == "email": return (conn, stmt_find_emails_filter_email_addr, text, text)
     if field.lower() == "entity": return (conn, stmt_find_emails_filter_entity, text)
     # filter by text
     if text: return (conn, stmt_find_emails_filter_text, "%{0}%".format(text), "%{0}%".format(text))
