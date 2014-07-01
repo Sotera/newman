@@ -105,7 +105,7 @@ if __name__ == "__main__":
         print "create rollup entity table" 
 
         entity_rollup_tbl_stmt = (
-            "insert into entity_rollup (subject, `type`, val, total_entities, total_emails) "
+            "insert into entity_rollup (rollup_id, `type`, val, total_entities, total_emails) "
 " select subject,"
             "       max(case when predicate = 'type' then obj end) as `type`,"
             "       max(case when predicate = 'value' then obj end) as val,"

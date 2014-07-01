@@ -78,7 +78,7 @@ create table entity_rollup (
    val varchar(8192) not null,
    total_entities int not null,
    total_emails int not null,
-   primary key (subject)
+   primary key (rollup_id)
 ) ENGINE=MyISAM;
 
 drop table if exists tx;
