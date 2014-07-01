@@ -90,3 +90,4 @@ fi
 ./email_detector2.py kmrindfleisch@gmail.com > tmp/rankings
 ./src/rank_results.py
 
+./src/post_process.py
