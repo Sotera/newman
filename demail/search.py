@@ -9,73 +9,29 @@ import json
 
 ## node vals
 stmt_node_vals = (
-    "select subject, "
-    "       group_concat(case predicate when 'community' then obj end) as comm, "
-    "       group_concat(case predicate when 'community_id' then obj end) as comm_id, "
-    "       group_concat(case predicate when 'group_id' then obj end) as group_id, "
-    "       sum(coalesce(case predicate when 'total_received' then obj end, 0)) as total_rcv, "
-    "       sum(coalesce(case predicate when 'total_sent' then obj end, 0)) as total_sent, "
-    "       group_concat(case predicate when 'rank' then obj end) as rank "
-    " from facts where schema_name = 'email_addr' "
-    " and predicate in ('community','community_id', 'group_id', 'total_received', 'total_sent', 'rank') "
-    " group by subject "
+    " select e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
+     " from email_addr e "
 )
 
 stmt_node_vals_filter_email_addr = (
-    "    select t.subject, "
-    "           group_concat(case predicate when 'community' then obj end) as comm, "
-    "           group_concat(case predicate when 'community_id' then obj end) as comm_id, "
-    "           group_concat(case predicate when 'group_id' then obj end) as group_id, "
-    "           sum(coalesce(case predicate when 'total_received' then obj end, 0)) as total_rcv, "
-    "           sum(coalesce(case predicate when 'total_sent' then obj end, 0)) as total_sent, "
-    "           group_concat(case predicate when 'rank' then obj end) as rank "
-    "     from facts as t join (select f.subject from facts f join facts f2 on f.obj = f2.subject  "
-    "             where f.schema_name = 'email_addr' and f.predicate = 'email'  "
-    "                and f2.schema_name = 'email'  "
-    "                and f2.predicate in ('to', 'from', 'cc', 'bcc')  "
-    "                and f2.obj = %s group by f.subject) as t2"
-    "                on t.subject = t2.subject"
-    "     where t.schema_name = 'email_addr' "
-    "     and t.predicate in ('community', 'community_id', 'group_id', 'total_received', 'total_sent', 'rank') "
-    "     group by t.subject"
+    " select distinct e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
+    " from email_addr e join xref_emailaddr_email xaddr on e.email_addr = xaddr.email_addr "
+    " join xref_recipients x on xaddr.email_id = x.email_id "
+    " where (x.`from` = %s or x.recipient =  %s )"
 )
 
 stmt_node_vals_filter_text = (
-    "    select t.subject, "
-    "           group_concat(case predicate when 'community' then obj end) as comm, "
-    "           group_concat(case predicate when 'community_id' then obj end) as comm_id, "
-    "           group_concat(case predicate when 'group_id' then obj end) as group_id, "
-    "           sum(coalesce(case predicate when 'total_received' then obj end, 0)) as total_rcv, "
-    "           sum(coalesce(case predicate when 'total_sent' then obj end, 0)) as total_sent, "
-    "           group_concat(case predicate when 'rank' then obj end) as rank "
-    "     from facts as t join (select f.subject from facts f join email f2 on f.obj = f2.id  "
-    "             where f.schema_name = 'email_addr' and f.predicate = 'email'  "
-    "                and (lower(f2.subject) like %s or lower(f2.body) like %s) "
-    "                group by f.subject "  
-    "                ) as t2"
-    "                on t.subject = t2.subject"
-    "     where t.schema_name = 'email_addr' "
-    "     and t.predicate in ('community', 'community_id', 'group_id', 'total_received', 'total_sent', 'rank') "
-    "     group by t.subject"
+    " select distinct e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
+    " from email_addr e join xref_emailaddr_email xaddr on e.email_addr = xaddr.email_addr "
+    " join email eml on xaddr.email_id = eml.id "
+    " where (lower(eml.subject) like %s or lower(eml.body) like %s) "
 )
 
 stmt_node_vals_filter_entity = (
-    "    select t.subject, "
-    "           group_concat(case predicate when 'community' then obj end) as comm, "
-    "           group_concat(case predicate when 'community_id' then obj end) as comm_id, "
-    "           group_concat(case predicate when 'group_id' then obj end) as group_id, "
-    "           sum(coalesce(case predicate when 'total_received' then obj end, 0)) as total_rcv, "
-    "           sum(coalesce(case predicate when 'total_sent' then obj end, 0)) as total_sent, "
-    "           group_concat(case predicate when 'rank' then obj end) as rank "
-    "     from facts as t join (select f.subject from facts f join facts f2 on f.obj = f2.obj  "
-    "             where f.schema_name = 'email_addr' and f.predicate = 'email'  "
-    "                and f2.schema_name = 'entity_rollup'  "
-    "                and f2.predicate = 'email'  "
-    "                and f2.subject = %s group by f.subject) as t2"
-    "                on t.subject = t2.subject"
-    "     where t.schema_name = 'email_addr' "
-    "     and t.predicate in ('community', 'community_id', 'group_id', 'total_received', 'total_sent', 'rank') "
-    "     group by t.subject"
+    " select distinct e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
+    " from email_addr e join xref_emailaddr_email xaddr on e.email_addr = xaddr.email_addr "
+    " join xref_entity_email x on x.email_id = xaddr.email_id "
+    " where x.rollup_id = %s "
 )
 
 ## Email Rows
@@ -168,7 +124,7 @@ stmt_node_edges_filter_entity = (
 
 
 def nodeQueryObj(conn, text, field):
-    if field.lower() == "email": return (conn, stmt_node_vals_filter_email_addr, text)
+    if field.lower() == "email": return (conn, stmt_node_vals_filter_email_addr, text, text)
     if field.lower() == "entity": return (conn, stmt_node_vals_filter_entity, text)
     # filter by text
     if text: return (conn, stmt_node_vals_filter_text, "%{0}%".format(text), "%{0}%".format(text))
