@@ -21,7 +21,7 @@ stmt_top_rollup_entities = (
     "   select subject,"
     "    max(case when predicate = 'type' then obj end) as type,"
     "    max(case when predicate = 'value' then obj end) as val,"
-    "    max(case when predicate = 'total_entities' then convert(obj, int)end) as total "
+    "    max(case when predicate = 'total_entities' then convert(obj, unsigned integer) end) as total "
     "    from facts"
     "    where schema_name = 'entity_rollup'"
     "    group by subject"
