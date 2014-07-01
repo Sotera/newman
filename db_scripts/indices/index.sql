@@ -49,5 +49,20 @@ create index idx_xref_recipients_from on xref_recipients(`from`);
 create index idx_xref_recipients_recipient on xref_recipients(recipient);
 create index idx_xref_recipients_email on xref_recipients(email_id);
 
+call drop_index_if_exists('xref_entity_email', 'idx_xref_entity_email_ids');
+call drop_index_if_exists('xref_entity_email', 'idx_xref_entity_email_rollup');
+call drop_index_if_exists('xref_entity_email', 'idx_xref_entity_email_email');
+
+create index idx_xref_entity_email_ids on xref_entity_email(rollup_id, email_id);
+create index idx_xref_entity_email_rollup on xref_entity_email(rollup_id);
+create index idx_xref_entity_email_email on xref_entity_email(email_id);
+
+call drop_index_if_exists('xref_emailaddr_email', 'idx_xref_emailaddr_email_addr_id');
+call drop_index_if_exists('xref_emailaddr_email', 'idx_xref_emailaddr_email_addr');
+call drop_index_if_exists('xref_emailaddr_email', 'idx_xref_emailaddr_email_id');
+
+create index idx_xref_emailaddr_email_addr_id on xref_emailaddr_email(email_addr, email_id);
+create index idx_xref_emailaddr_email_addr on xref_emailaddr_email(email_addr);
+create index idx_xref_emailaddr_email_id on xref_emailaddr_email(email_id);
 
 drop procedure if exists drop_index_if_exists;
