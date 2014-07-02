@@ -685,5 +685,10 @@ $(function () {
     //recolornodes('rank');
   });
 
+  $("#show_top_entities").on("click", function(){
+    $('#webpage').append(waiting_bar);
+    draw_entity_chart();
+  });
+
 });
 
