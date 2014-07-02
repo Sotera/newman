@@ -124,7 +124,7 @@ body {
 .result_tbody {
     height: 200px;       /* Just for the demo          */
     width: 100%;
-    overflow-y: auto;    /* Trigger vertical scroll    */
+   /* overflow-y: auto; */   /* Trigger vertical scroll    */
     overflow-x: auto;  /* Hide the horizontal scroll */
 }
 
