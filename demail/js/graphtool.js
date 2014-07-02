@@ -125,7 +125,7 @@ function produceHTMLView(emailObj) {
   var body = $('<div>');
   _.each(ents, function(entity){
     var rxstr = entity[3].replace(/\s/g,"(\\.|\\s|\\n)+").replace(/\+/g,'\\+').replace(/\*/g,'\\*').replace(/\(/g,'\\(').replace(/\)/g,'\\)')
-    console.log(rxstr);
+    //console.log(rxstr);
     var rx = new RegExp(rxstr, "m");
     var idx = cleanBody.search(rx)
     //var idx = cleanBody.indexOf(entity[3]);
