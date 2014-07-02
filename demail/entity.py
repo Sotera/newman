@@ -17,16 +17,9 @@ stmt_entity_rollup_id = (
 )
 
 stmt_top_rollup_entities = (
-    " select t.subject, t.type, t.val, t.total from ( "
-    "   select subject,"
-    "    max(case when predicate = 'type' then obj end) as type,"
-    "    max(case when predicate = 'value' then obj end) as val,"
-    "    max(case when predicate = 'total_entities' then convert(obj, unsigned integer) end) as total "
-    "    from facts"
-    "    where schema_name = 'entity_rollup'"
-    "    group by subject"
-    ") as t"
-    " order by t.total desc "
+    " select rollup_id, `type`, val, total_entities "
+    " from entity_rollup "
+    " order by total_entities desc "
 )
 
 #GET /top/<amt>
