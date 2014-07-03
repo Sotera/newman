@@ -33,7 +33,6 @@ def queryEntity(email):
         with execute_query(read_cnx.conn(), stmt_email_entities_by_id, email) as qry:
             tangelo.log("node-vals: %s" % qry.stmt)
             rtn = [r for r in qry.cursor()]
-
             return rtn if rtn else []
 
 #GET /email/<id>
@@ -53,11 +52,24 @@ def getEntities(*args):
     tangelo.content_type("application/json")    
     return queryEntity(email)
 
-    
+#GET /rank
+def getRankedEmails(*args):
+    tangelo.content_type("application/json")    
+    stmt = (
+        " select email_addr, community, community_id, group_id, rank, total_received, total_sent "
+        " from email_addr "
+        " where rank > 0 "
+        " order by cast(rank as decimal(4,4)) desc" 
+    )
+    with newman_connector() as read_cnx:
+        with execute_query(read_cnx.conn(), stmt) as qry:
+            rtn = [[str(val) for val in row] for row in qry.cursor()]
+            return { "emails" : rtn }
 
 actions = {
     "email": getEmail,
-    "entities" : getEntities
+    "entities" : getEntities,
+    "rank" : getRankedEmails
 }
 
 def unknown(*args):

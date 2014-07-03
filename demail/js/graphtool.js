@@ -71,8 +71,16 @@ function dragended(d){
 }
 
 function recolornodes(how) {
-  if( how == 'comm') {d3.selectAll("circle").style("fill", function(d) { return color(d.community); });}
-  if( how == 'node') {d3.selectAll("circle").style("fill", function(d) { return color(d.group); });}
+  if( how == 'comm') {
+    d3.selectAll("circle").style("fill", function(d) { 
+      return color(d.community); 
+    });
+  }
+  if( how == 'node') {
+    d3.selectAll("circle").style("fill", function(d) { 
+      return color(d.group); 
+    });
+  }
 }
 
 function splitItemCount(str){
@@ -211,15 +219,16 @@ function do_search(val,fields) {
       console.log(d.directory);
       // $("#webpage").load('emails/' + d.directory + '/' +
       // d.directory.split('/')[1] + '.txt');
+      $('#tab-list li:eq(2) a').tab('show')
       $(document).scrollTop(0);            
-      $("#webpage").empty();
-      $("#webpage").append($('<span>').text('Loading... ')).append(waiting_bar);
+      $("#email-body").empty();
+      $("#email-body").append($('<span>').text('Loading... ')).append(waiting_bar);
       
       $.get("email/email/" + encodeURIComponent(d.num)).then(
         function(resp) {
           if(resp.email.length > 0){
-            $("#webpage").empty();
-            $("#webpage").append(produceHTMLView(resp));
+            $("#email-body").empty();
+            $("#email-body").append(produceHTMLView(resp));
           }
         });
 
@@ -337,10 +346,14 @@ function drawGraph(graph){
     .enter().append("path")
     .attr("class", "link").attr("marker-end", "url(#end)")
     .style("stroke", "black")
-    .style("stroke-width", function(d) { return 0.25 + (d[3] / 400); })
+    .style("stroke-width", function(d) { 
+      var w = 0.15 + (d[3] / 500);  
+      return ( w > 3 ) ? 3 : w;
+    })
     .attr("id",function(d) {
       return d[0].name.replace(/\./g,'_').replace(/@/g,'_') + '_' + 
-        d[2].name.replace(/\./g,'_').replace(/@/g,'_');});
+        d[2].name.replace(/\./g,'_').replace(/@/g,'_');
+    });
       			
   var node = vis.selectAll(".node")
     .data(graph.nodes)
@@ -349,6 +362,7 @@ function drawGraph(graph){
   
   node.append("svg:circle")
     .attr("r", function(d) { return Math.log((d.num * 100 ));  })
+    .attr("id", function(d) { return "g_circle_" + d.group; })
     .style("fill", function(d) { 
       if (d3.select("#colorby").property("checked")) {
         return color(d.group);
@@ -540,27 +554,102 @@ function toggle_labels() {
   }
 }
 
-function draw_entity_chart() {
-
-  $.get('entity/top/25').then(function(resp){
-    $('#webpage').empty();
-    var legend_items = ["Person", "Location", "Organization", "Misc"];
-    $('#webpage').append($('<div>').append('<h3>').text("Top Entities"));
-    
-    var legend = $('<div>');
-    _.each(legend_items, function(item){
-      legend.append($('<div>').css({'display':'inline-block', 'width': '20px', 'height': '12px', 'padding-left': '5px', 'padding-right': '5px;'}).addClass(item.toLowerCase()))
-        .append($('<span>').css({'padding-left': '5px', 'padding-right': '5px'}).text(item))
+function draw_rank_chart() {
+  $.get('email/rank').then(function(resp){
+    $('#top-rank').empty();
+    var emails = _.map(resp.emails, function(email) {
+      return _.object(["email", "community", "communityId", "groupId", "rank", "totalReceived", "totalSent"], email);
     });
-    $('#webpage').append(legend);
-    var entities = resp.entities; 
 
-    var width = 600, barHeight = 20;
-    var margin = {top: 20, right: 10, bottom: 20, left: 100};
+    var width = 400, barHeight = 20;
+    var margin = {top: 20, right: 10, bottom: 20, left: 150};
     width = width - margin.left - margin.right;
  
     var x = d3.scale.linear().range([0, width]);
-    var chart = d3.select("#webpage").append('svg')
+    var chart = d3.select("#top-rank").append('svg')
+      .attr('class', 'chart')
+      .attr("width", width + margin.left + margin.right);
+
+    x.domain([0, 100]);
+    chart.attr("height", barHeight * emails.length);
+
+    var bar = chart.selectAll("g")
+      .data(emails).enter()
+      .append("g")
+      .attr("transform", function(d, i) { return "translate(" + margin.left + "," + (+(i * barHeight) + +margin.top) + ")";});
+
+    bar.append("rect")
+      .attr("width", function(d) { 
+        return x((+d.rank * 100));
+      })
+      .attr("height", barHeight - 1)
+      .style("fill", function(d) {
+        return color(+d.communityId); 
+      })
+      .on("click", function(d){ })
+      .append('title').text(function(d) { return d.email;});
+
+    bar.append("text")
+      .attr("x", function(d) { return x((+d.rank * 100)) - 3;})
+      .attr("y", barHeight / 2)
+      .attr("dy", ".35em")
+      .text(function(d) { return +d.rank;});
+
+    bar.append("text")
+      .attr("x", function(d) { return -margin.left;})
+      .attr("y", barHeight / 2)
+      .attr("class", "label")
+      .style("fill", function(d) {
+        return color(+d.groupId); 
+      })
+      .text(function(d) { return (d.email.length > 25) ? d.email.substr(0,25) + ".." : d.email; })
+
+      .on("click", function(d){ 
+        $("#email_text").val(d.email)
+        do_search($("#email_text").val(),'email');        
+      })
+      .on("mouseover", function(d){
+        d3.select("#g_circle_" + d.groupId).style("stroke","ffff00");  
+        d3.select("#g_circle_" + d.groupId).style("stroke-width",function(d) { return 10 * (d.rank); });
+      })
+      .on("mouseout", function(d){
+        d3.select("#g_circle_" + d.groupId).style("stroke","ff0000");  
+        if (d3.select("#rankval").property("checked")) {
+          d3.select("#g_circle_" + d.groupId).style("opacity",function(d) { return 0.2 + (d.rank); });
+          d3.select("#g_circle_" + d.groupId).style("stroke-width",function(d) { return 5 * (d.rank); });
+        }
+        else {
+          d3.select("#g_circle_" + d.groupId).style("opacity","100");
+          d3.select("#g_circle_" + d.groupId).style("stroke-width","0");
+        }
+      })
+      .append('title').text(function(d) { return d.email; });
+  });
+
+}
+
+
+function draw_entity_chart() {
+
+  $.get('entity/top/20').then(function(resp){
+    $('#top-entities').empty();
+    var legend_items = ["Person", "Location", "Organization", "Misc"];
+    
+    var legend = $('<div>').css('padding-top', '15px');
+    _.each(legend_items, function(item){
+      legend.append($('<div>').css({'display':'inline-block', 'width': '20px', 'height': '12px', 'padding-left': '5px', 'padding-right': '5px;'}).addClass(item.toLowerCase()))
+        .append($('<span>').css({'padding-left': '5px', 'padding-right': '5px'}).text(item))
+        .append($('<br/>'));
+    });
+
+    var entities = resp.entities; 
+
+    var width = 400, barHeight = 20;
+    var margin = {top: 20, right: 10, bottom: 20, left: 150};
+    width = width - margin.left - margin.right;
+ 
+    var x = d3.scale.linear().range([0, width]);
+    var chart = d3.select("#top-entities").append('svg')
       .attr('class', 'chart')
       .attr("width", width + margin.left + margin.right);
     
@@ -590,10 +679,12 @@ function draw_entity_chart() {
       .attr("x", function(d) { return -margin.left;})
       .attr("y", barHeight / 2)
       .attr("class", "label")
-      .text(function(d) { return (d[2].length > 15) ? d[2].substr(0,15) + ".." : d[2]; })
+      .text(function(d) { return (d[2].length > 25) ? d[2].substr(0,25) + ".." : d[2]; })
       .append('title').text(function(d) { return d[2];});
 
+    $('#top-entities').append(legend);
   });
+
 }
 
 
@@ -625,8 +716,9 @@ $(function () {
   }  else { 
     //do_search('');
   }
-  $('#webpage').append(waiting_bar);
+  $('#top-entities').append(waiting_bar);
   draw_entity_chart();
+  draw_rank_chart();
 
   var open=false;
   $("#tab").on("click", function(){
@@ -684,11 +776,5 @@ $(function () {
     }
     //recolornodes('rank');
   });
-
-  $("#show_top_entities").on("click", function(){
-    $('#webpage').append(waiting_bar);
-    draw_entity_chart();
-  });
-
 });
 

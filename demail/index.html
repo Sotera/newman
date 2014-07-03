@@ -70,11 +70,6 @@
                 <a id="submit_email" class="btn btn-default">Search</a>
               </td>
             </tr>
-            <tr>
-              <td colspan="2">
-                <a id="show_top_entities">Show Top Entities</a>
-              </td>
-            </tr>
           </table>
         </div>
 
@@ -102,15 +97,28 @@
     </div>
 
     <!-- body -->
-    <div class="container-fluid">
+    <div class="container-fluid" style="margin-top: 5px;">
       <div class="row">
         <div class="col-lg-6">
           <!-- Create a fullscreen SVG element -->
           <div id="node_graph"> </div>
         </div>
         <div class="col-lg-6">
-          <div id="webpage"></div>
+          <div>
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist" id="tab-list">
+              <li class="active"><a href="#top-rank" role="tab" data-toggle="tab">Rank</a></li>
+              <li><a href="#top-entities" role="tab" data-toggle="tab">Entities</a></li>
+              <li><a href="#email-body" role="tab" data-toggle="tab">Email</a></li>
+            </ul>
 
+            <!-- Tab panes -->
+            <div class="tab-content">
+              <div class="tab-pane active" id="top-rank"> </div>
+              <div class="tab-pane" id="top-entities"></div>
+              <div class="tab-pane" id="email-body"> Select an Email to preview</div>
+            </div>
+          </div>
           <!-- Create an SVG element to represent the legend -->
           <svg id="legend" style="position:fixed; top:100px; right:0px; pointer-events:none;"></svg>
         </div>

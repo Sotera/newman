@@ -90,23 +90,25 @@ body {
     width: 375px;
     height: 100%;
     float: left;
-    border-top: 2px solid;
-    border-right: 2px solid;
-    border-bottom: 2px solid;
+    border-top: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
     border-bottom-right-radius: 7px;
+    border-top-right-radius: 7px;
 }
 
 #hover-menu .hover-tab {
     background-color: transparent;
     width: 25px;
     height: 40px;
-
     float: left;
+    margin-top: 25px;
 }
 #hover-menu .hover-tab > div{
-    border-top: 2px solid;
-    border-right: 2px solid;
-    border-bottom: 2px solid;
+    border-top: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+
     border-top-right-radius: 7px;
     border-bottom-right-radius: 7px;
     margin-left: -2px;
@@ -117,7 +119,7 @@ body {
 }
 
 #hover-menu .hover-tab span {
-    padding-top: 9px;
+    padding-top: 10px;
     padding-left: 3px;
 }
 
@@ -140,4 +142,8 @@ body {
     font-size: 10px;
     font-weight: bold;
     color: red;
+}
+
+.tab-content div {
+    margin-top: 3px;
 }
