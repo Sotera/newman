@@ -183,7 +183,7 @@ def getEmails(colors, text, field):
 
 def createResults(text, field):
     node_vals = getNodeVals(text, field)
-    colors = {k:i for i, k in enumerate(set(node_vals.keys() + [v.get("comm") for k,v in node_vals.iteritems()])) }
+    colors = {k:v.get("group_id") for k,v in node_vals.iteritems()}
 
     for k,v in node_vals.iteritems():
         node_vals[k]["color"] = colors.get(k)
