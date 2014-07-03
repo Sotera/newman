@@ -625,7 +625,6 @@ function draw_rank_chart() {
       })
       .append('title').text(function(d) { return d.email; });
   });
-
 }
 
 
@@ -714,7 +713,7 @@ $(function () {
   if( cluster != '')  {  
     do_search(cluster);
   }  else { 
-    //do_search('');
+    do_search('');
   }
   $('#top-entities').append(waiting_bar);
   draw_entity_chart();
