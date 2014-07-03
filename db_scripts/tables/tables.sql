@@ -57,6 +57,13 @@ create table xref_entity_email(
    email_id varchar(250) not null
 );
 
+drop table if exists xref_rollup_entity;
+
+create table xref_rollup_entity (
+   rollup_id varchar(250) not null,   
+   entity_id varchar(250) not null
+);
+
 drop table if exists entity;
 
 create table entity (

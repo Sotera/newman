@@ -65,4 +65,12 @@ create index idx_xref_emailaddr_email_addr_id on xref_emailaddr_email(email_addr
 create index idx_xref_emailaddr_email_addr on xref_emailaddr_email(email_addr);
 create index idx_xref_emailaddr_email_id on xref_emailaddr_email(email_id);
 
+call drop_index_if_exists('xref_rollup_entity', 'idx_xref_emailaddr_email_addr_id');
+call drop_index_if_exists('xref_rollup_entity', 'idx_xref_emailaddr_email_addr');
+call drop_index_if_exists('xref_rollup_entity', 'idx_xref_emailaddr_email_id');
+
+create index idx_xref_rollup_entity_rollup_entity on xref_rollup_entity(rollup_id, entity_id);
+create index idx_xref_rollup_entity_rollup on xref_rollup_entity(rollup_id);
+create index idx_xref_rollup_entity_entity on xref_rollup_entity(entity_id);
+
 drop procedure if exists drop_index_if_exists;

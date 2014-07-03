@@ -122,3 +122,17 @@ if __name__ == "__main__":
 
         write_cnx.commit()
 
+        stmt_populate_xref_rollup_entity = (
+            "     insert into xref_rollup_entity (rollup_id, entity_id)"
+            "     select distinct subject as rollup_id, obj as entity_id "
+            "     from facts "
+            "     where schema_name = 'entity_rollup' "
+            "     and predicate = 'entity'"
+        )
+        
+        print "populate xref_rollup_entity"
+        with execute_nonquery(write_cnx.conn(), stmt_populate_xref_rollup_entity) as populate:
+            pass
+
+        write_cnx.commit()
+
