@@ -125,27 +125,27 @@ function produceHTMLView(emailObj) {
                     .append($('<a>', { "target": "_blank" ,"href" : 'emails/' + d.directory + "/attachments/" + encodeURIComponent(d.attach) }).html(d.attach)));
   el.append($('<p>'));
   
-  var cleanBody = d.body.replace(/\[:newline:\]/g,"\n");
+  var cleanBody = d.body.replace(/\[:newline:\]/g,"\t");
 
   //sort by index
   var ents = _.sortBy(emailObj.entities, function(o){ return o[2]});
 
   var body = $('<div>');
   _.each(ents, function(entity){
-    var rxstr = entity[3].replace(/\s/g,"(\\.|\\s|\\n)+").replace(/\+/g,'\\+').replace(/\*/g,'\\*').replace(/\(/g,'\\(').replace(/\)/g,'\\)')
+    var rxstr = entity[3].replace(/\./g,"\.").replace(/\s/g,"(\\.|\\s|\\t)+").replace(/\+/g,'\\+').replace(/\*/g,'\\*').replace(/\(/g,'\\(').replace(/\)/g,'\\)')
     //console.log(rxstr);
-    var rx = new RegExp(rxstr, "m");
+    var rx = new RegExp(rxstr);
     var idx = cleanBody.search(rx)
     //var idx = cleanBody.indexOf(entity[3]);
     //body += _.first(cleanBody, idx).join('');
-    body.append($('<span>').html(_.first(cleanBody, idx).join('').replace(/\n/g,'<br/>')));
+    body.append($('<span>').html(_.first(cleanBody, idx).join('').replace(/\t/g,'<br/>')));
     //body += $('<span>', { "data-id": entity[0] }).addClass(entity[1]).html(entity[3])[0].outerHTML
     body.append($('<span>', { "data-id": entity[0] }).addClass(entity[1]).html(entity[3]).on('click', _.partial(searchByEntity, entity[0], entity[1], entity[3])));
     var rest = _.rest(cleanBody, idx).join('');
     cleanBody = rest.replace(rx, "");
   });
 
-  body.append($('<span>').html(cleanBody.replace(/\n/g,'<br/>')));
+  body.append($('<span>').html(cleanBody.replace(/\t/g,'<br/>')));
 
   // var uniqueEntities = _.unique(emailObj.entities, false, function(o){
   //   return o[1] + o[3];
