@@ -19,7 +19,8 @@ create table email (
    attachsize smallint,
    attach mediumtext,
    bodysize smallint,
-   location mediumtext
+   location mediumtext,
+   line_num int not null
 );
 
 drop table if exists email_addr;

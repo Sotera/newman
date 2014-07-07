@@ -48,17 +48,17 @@ class EmailRow(object):
     def __init__(self, mysql_connection):
         self.conn = mysql_connection
 
-    def addEmail(self, id, threadid, dir, category, datetime, from_addr, tos, ccs, bccs, subject, body, tosize, ccsize, bccsize, attachsize, attach, bodysize, location):
+    def addEmail(self, id, threadid, dir, category, datetime, from_addr, tos, ccs, bccs, subject, body, tosize, ccsize, bccsize, attachsize, attach, bodysize, location, line_num):
 
         stmt = ("insert into email " 
                 "(id, threadid, dir, category, datetime, from_addr, tos, "
                 "ccs, bccs, subject, body, tosize, ccsize, bccsize, attachsize, "
-                "attach, bodysize, location) " 
+                "attach, bodysize, location, line_num) " 
                 "values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,"
-                " %s, %s, %s, %s, %s, %s, %s, %s)")
+                " %s, %s, %s, %s, %s, %s, %s, %s, %s)")
         
         with execute_nonquery(self.conn, stmt, id, threadid, dir, category, datetime, 
                               from_addr, tos, ccs, bccs, subject, body, tosize, ccsize, 
-                              bccsize, attachsize, attach, bodysize, location) as insert:
+                              bccsize, attachsize, attach, bodysize, location, line_num) as insert:
             pass
 
