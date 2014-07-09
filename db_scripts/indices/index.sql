@@ -23,6 +23,7 @@ call drop_index_if_exists('facts', 'idx_facts_obj');
 call drop_index_if_exists('facts', 'idx_facts_tx');
 
 call drop_index_if_exists('email', 'idx_email_id');
+call drop_index_if_exists('email', 'idx_email_line_num');
 
 call drop_index_if_exists('large_text', 'idx_text_subject');
 call drop_index_if_exists('large_text', 'idx_text_sha');
@@ -36,6 +37,8 @@ create index idx_facts_obj on facts(obj(8192));
 create index idx_facts_tx on facts(tx);
 
 create index idx_email_id on email(id);
+create index idx_email_line_num on email(line_num);
+
 create index idx_text_subject on large_text(subject);
 create index idx_text_sha on large_text(sha512);
 create index idx_text_tx on large_text(tx);

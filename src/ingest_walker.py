@@ -29,7 +29,8 @@ if __name__ == "__main__":
 
     headers = ["id","threadid", "dir","category","datetime","from","tos","ccs","bccs","subject","body","tosize","ccsize","attachsize","attach","bodysize","location"]
 
-    c = counter(1)
+    #skip header row for counting
+    c = counter(-1)
 
     with newman_connector() as cnx:
 
@@ -48,7 +49,7 @@ if __name__ == "__main__":
             num,dir,category,utc_date,importance,fromemail,ip,toemail,ccemail,bccemail,attach,messageid,inreplyto,references,subject,body = row
             network = ''
             threadid = mid = messageid if messageid != '' else num
-
+            #skip header 
             if num == 'num' or utc_date == '' or utc_date == None:
                 continue
 		
@@ -63,9 +64,12 @@ if __name__ == "__main__":
             bodysize = len(body)
             
             # ingest in to Email table
-            EmailRow(cnx.conn()).addEmail(str(num), threadid, dir, category, utc_date, fromemail, toemail, ccemail, bccemail, subject, body, str(tosize), str(ccsize), str(bccsize), str(attachsize), attach, bodysize, "")
+            EmailRow(cnx.conn()).addEmail(str(num), threadid, dir, category, utc_date, fromemail, toemail, ccemail, bccemail, subject, body, str(tosize), str(ccsize), str(bccsize), str(attachsize), attach, bodysize, "", count)
 
-            outrow = zip(headers, [str(num), threadid, dir, category, utc_date, fromemail, toemail, ccemail, bccemail, subject, body, str(tosize), str(ccsize), str(bccsize), str(attachsize), attach, bodysize, ""])
+            outrow = zip(headers, [str(num), threadid, dir, category, utc_date, fromemail, toemail, ccemail, bccemail, subject, body, str(tosize), str(ccsize), str(bccsize), str(attachsize), attach, bodysize, "", count])
+
+            #line number 
+            fact.addFact(num, "email", "line_num", count, tx)
 
             #ingest email in to stage table
             for header, val in outrow:
