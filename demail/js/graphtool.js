@@ -664,9 +664,7 @@ function draw_entity_chart() {
       .attr("width", function(d) { return x(+d[3]);})
       .attr("height", barHeight - 1)
       .attr("class", function(d) { return d[1];})
-      .on("click", function(d){ 
-        do_search(d[0], 'entity');
-      }).append('title').text(function(d) { return d[2];});
+      .append('title').text(function(d) { return d[2];});
 
     bar.append("text")
       .attr("x", function(d) { return x(+d[3]) - 3;})
@@ -678,6 +676,9 @@ function draw_entity_chart() {
       .attr("x", function(d) { return -margin.left;})
       .attr("y", barHeight / 2)
       .attr("class", "label")
+      .on("click", function(d){ 
+        do_search(d[0], 'entity');
+      })
       .text(function(d) { return (d[2].length > 25) ? d[2].substr(0,25) + ".." : d[2]; })
       .append('title').text(function(d) { return d[2];});
 
