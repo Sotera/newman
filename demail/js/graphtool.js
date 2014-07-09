@@ -36,6 +36,13 @@ var waiting_spin = $('<img>', {
   'width' : 256,
   'height' : 32});
 
+var current_email = null;
+
+function update_current(val){
+  console.log("showing current email: " + val)
+  current_email = val;
+}
+
 
 function tickCommunity() {
   vis.selectAll(".link").attr("d", function(d) {
@@ -226,6 +233,7 @@ function do_search(val,fields) {
       
       $.get("email/email/" + encodeURIComponent(d.num)).then(
         function(resp) {
+          update_current(d.num);
           if(resp.email.length > 0){
             $("#email-body").empty();
             $("#email-body").append(produceHTMLView(resp));
@@ -713,7 +721,7 @@ $(function () {
   if( cluster != '')  {  
     do_search(cluster);
   }  else { 
-    do_search('');
+    //do_search('');
   }
   $('#top-entities').append(waiting_bar);
   draw_entity_chart();
@@ -748,6 +756,68 @@ $(function () {
     do_search($("#email_text").val(),'email');
   });
 
+  $("#submit_activesearch_like").click(function(){
+    if (current_email == null) {
+      alert('please select an email to seed');
+      return;
+    }
+    $("#email-body").empty();
+    $("#email-body").append(waiting_bar);
+    $.get("activesearch/like").then(
+      function(resp){
+      update_current(resp);
+      $.get("email/email/" + encodeURIComponent(resp)).then(
+        function(resp) {
+          if(resp.email.length > 0){
+            $("#email-body").empty();
+            $("#email-body").append(produceHTMLView(resp));
+          }
+        }); 
+      });
+  });
+
+  $("#submit_activesearch_dislike").click(function(){
+    if (current_email == null) {
+      alert('please select an email to seed');
+      return;
+    }
+    $("#email-body").empty();
+    $("#email-body").append(waiting_bar);
+    $.get("activesearch/dislike").then(
+      function(resp){
+        update_current(resp);
+        $.get("email/email/" + encodeURIComponent(resp)).then(
+          function(resp) {
+            if(resp.email.length > 0){
+              $("#email-body").empty();
+              $("#email-body").append(produceHTMLView(resp));
+            }
+          });
+      });
+  });
+
+  $("#submit_activesearch").click(function(){
+    console.log("seed active search for email_id... ");
+    if (current_email == null) {
+      alert('please select an email to seed');
+      return;
+    }
+    var id = current_email;
+    $("#email-body").empty();
+    $("#email-body").append(waiting_bar);
+    $.get("activesearch/seed/" + encodeURIComponent(id)).then(
+      function(resp) {
+        update_current(resp);
+        $.get("email/email/" + encodeURIComponent(resp)).then(
+          function(resp) {
+            if(resp.email.length > 0){
+              $("#email-body").empty();
+              $("#email-body").append(produceHTMLView(resp));
+            }
+          });
+      });
+  });
+  
   $("#colorby2").click(function(){
     console.log($("#colorby2").val());
     recolornodes('comm');
@@ -762,6 +832,8 @@ $(function () {
     toggle_labels(); 
     graph.reset();
   })
+
+
 
   $("#rankval").click(function(){
     console.log(d3.select("#rankval").property("checked"));

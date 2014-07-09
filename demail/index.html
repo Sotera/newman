@@ -109,14 +109,20 @@
             <ul class="nav nav-tabs" role="tablist" id="tab-list">
               <li class="active"><a href="#top-rank" role="tab" data-toggle="tab">Rank</a></li>
               <li><a href="#top-entities" role="tab" data-toggle="tab">Entities</a></li>
-              <li><a href="#email-body" role="tab" data-toggle="tab">Email</a></li>
+              <li><a href="#email-body-tab" role="tab" data-toggle="tab">Email</a></li>
             </ul>
 
             <!-- Tab panes -->
             <div class="tab-content">
               <div class="tab-pane active" id="top-rank"> </div>
               <div class="tab-pane" id="top-entities"></div>
-              <div class="tab-pane" id="email-body"> Select an Email to preview</div>
+              <div class="tab-pane" id="email-body-tab"> 
+                <div style="margins: 5px 0;">
+                  <a id="submit_activesearch" class="btn btn-default">Seed Active Search</a>
+                  <a id="submit_activesearch_like" class="btn btn-default" style="background-color: #00ff00"><span class="glyphicon glyphicon-thumbs-up" style="color: #000;"/></a>
+                  <a id="submit_activesearch_dislike" class="btn btn-default" style="background-color: #ff0000"><span class="glyphicon glyphicon-thumbs-down" style="color: #000"/></a>
+                </div>
+                <div id="email-body"> Select an Email to preview </div>
             </div>
           </div>
           <!-- Create an SVG element to represent the legend -->
