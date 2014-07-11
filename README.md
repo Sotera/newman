@@ -35,6 +35,14 @@ Downloads:
 - https://metacpan.org/pod/DBI
 - https://metacpan.org/pod/DBD::mysql
 
+jblas - (For ActiveSearch)
+- make sure fortran compiler is installed
+  https://github.com/mikiobraun/jblas/wiki/Missing-Libraries
+    - `sudo apt-get install libgfortran3`
+    
+- download jblas 1.2.3.jar http://mikiobraun.github.io/jblas/
+- install in m2 `mvn install:install-file -Dfile=jblas-1.2.3.jar -DgroupId=org.jblas -DartifactId=jblas -Dversion=1.2.3 --Dpackaging=jar`
+      
 
 
 MITIE: MIT Information Extraction - [https://github.com/mit-nlp/MITIE](https://github.com/mit-nlp/MITIE)<br/>
