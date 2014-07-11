@@ -26,6 +26,7 @@ Perl - (Only for ingest of ActiveSearch)
 - DBI
 - DBD:mysql 
 
+Perl Manual Dependency Install 
 http://search.cpan.org/~capttofu/DBD-mysql-4.027/lib/DBD/mysql.pm#Manual_Installation
 
 Perl Dependency Downloads:
