@@ -37,6 +37,6 @@ Downloads:
 
 
 
-MITIE: MIT Information Extraction - [https://github.com/mit-nlp/MITIE](https://github.com/mit-nlp/MITIE)
-Topic Clustering - [https://github.com/mitll/topic-clustering](https://github.com/mitll/topic-clustering)
+MITIE: MIT Information Extraction - [https://github.com/mit-nlp/MITIE](https://github.com/mit-nlp/MITIE)<br/>
+Topic Clustering - [https://github.com/mitll/topic-clustering](https://github.com/mitll/topic-clustering)<br/>
 ActiveSearch - [https://github.com/AutonlabCMU/ActiveSearch](https://github.com/AutonlabCMU/ActiveSearch)
