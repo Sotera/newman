@@ -41,7 +41,7 @@ jblas - (For ActiveSearch)
     - `sudo apt-get install libgfortran3`
     
 - download jblas 1.2.3.jar http://mikiobraun.github.io/jblas/
-- install in m2 `mvn install:install-file -Dfile=jblas-1.2.3.jar -DgroupId=org.jblas -DartifactId=jblas -Dversion=1.2.3 --Dpackaging=jar`
+- install in m2 `mvn install:install-file -Dfile=jblas-1.2.3.jar -DgroupId=org.jblas -DartifactId=jblas -Dversion=1.2.3 -Dpackaging=jar`
       
 
 
