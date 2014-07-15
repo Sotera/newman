@@ -9,25 +9,8 @@ from newman.db.domain import Tx, Fact
 from newman.db.mysql import execute_query, execute_nonquery
 from newman.db.newman_db import newman_connector
 
-
-stmt_create_tmp_rollup = (
-    "create temporary table tmp_entity_rollup ( "
-    "  s varchar(1024) not null, "
-    "  t varchar(1024) not null, "
-    "  val varchar(8192) not null "
-    " ) "
-    " select t1.subject as s, "
-    " t1.obj as t, "
-    " t2.obj as val "
-    " from facts as t1 join facts as t2 "
-    " on t1.subject = t2.subject and t1.schema_name = t2.schema_name "
-    " where t1.schema_name = 'entity' "
-    " and t1.predicate = 'type' "
-    " and t2.predicate = 'value' "
-)
-
 stmt_rollup_entities = (
-    "select group_concat(s), t, val, count(s) from tmp_entity_rollup group by t, val"
+    "select group_concat(subject), entity_type, value, count(subject) from entity group by entity_type, value"
 )
 
 def inc(n):
@@ -49,8 +32,6 @@ if __name__ == "__main__":
         print "tx: %s" % txid
         print "entity rollup" 
         facts = Fact(write_cnx.conn(), autocommit=False)
-        with execute_nonquery(read_cnx.conn(), stmt_create_tmp_rollup ) as tmp_tbl:
-            pass
 
         set_stmt = ("set session group_concat_max_len = 1000000")
 
@@ -63,9 +44,6 @@ if __name__ == "__main__":
                 for entity in entities.split(","):
                     facts.addFact(_id, "entity_rollup", "entity", entity, txid) 
 
-        with execute_nonquery(read_cnx.conn(), ("drop table tmp_entity_rollup") ) as tmp_tbl:
-            pass
-            
         write_cnx.commit()
 
         txid = Tx(read_cnx.conn()).next()

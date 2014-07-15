@@ -29,11 +29,11 @@ python run_all.py -num_topics $NUM_TOPIC -r email_ingester $RUN_DIR/data/walker/
 
 cd $RUN_DIR
 
-if [ -e tmp/topic_cluster_scores.dat ]; then
-    rm -rf tmp/topic_cluster_scores.dat
+if [ -e tmp/topic_cluster.scores ]; then
+    rm -rf tmp/topic_cluster.scores
 fi
 
-paste <(cat $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.counts.txt | awk '{ print $1 }') <(sed 's/^[ ]*//' $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.d2z.txt) > tmp/topic_cluster_scores.dat
+paste <(cat $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.counts.txt | awk '{ print $1 }') <(sed 's/^[ ]*//' $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.d2z.txt) > tmp/topic_cluster.scores
 
 if [ -e tmp/topic_cluster.idx ]; then
     rm -rf tmp/topic_cluster.idx
@@ -41,3 +41,7 @@ fi
 
 tail -$NUM_TOPIC $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.summary.txt | cut -c 33- > tmp/topic_cluster.idx
 #tail -$NUM_TOPIC $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.summary.txt | cut -c 33- | nl -n ln -v 0 > tmp/topic_cluster.idx
+
+./topic/ingest_topics_scores.py tmp/topic_cluster.idx tmp/topic_cluster.scores
+
+

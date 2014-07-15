@@ -10,10 +10,9 @@ import urllib
 
 
 stmt_entity_rollup_id = (
-    "select subject from facts "
-    " where schema_name = 'entity_rollup' "
-    " and predicate = 'entity' "
-    " and obj = %s " 
+    " select rollup_id "
+    " from xref_rollup_entity "
+    " where entity_id = %s "
 )
 
 stmt_top_rollup_entities = (

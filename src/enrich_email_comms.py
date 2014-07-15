@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-import argparse, sys
+import sys, argparse
 
 sys.path.append("./demail")
 from newman.db.domain import Tx, Fact

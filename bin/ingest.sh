@@ -10,17 +10,25 @@ LOUVAIN_DIR=/srv/software/distributed-louvain-modularity/
 printf "working dir $RUN_DIR\n"
 printf "louvain dir $LOUVAIN_DIR\n"
 
-if [ "$1" != "skip" ]; then 
+printf "ingest data\n"
+./src/ingest_walker.py data/walker/output.csv
 
-    printf "ingest data\n"
-    ./src/ingest_walker.py data/walker/output.csv
-
-    printf "entity extraction\n"
-    ./src/enrich_email_entities.py
+if [ -e  tmp/entity_facts_ingest.tsv ]; then
+    rm -rf tmp/entity_facts_ingest.tsv
 fi
 
+if [ -e  tmp/entity_ingest.tsv ]; then
+    rm -rf tmp/entity_ingest.tsv
+fi
+
+printf "entity extraction\n"
+./mitie/mitie_entity_ingest_file.py
+
+printf "entity bulk ingest\n"
+./mitie/mitie_bulk_ingest.py tmp/entity_ingest.tsv
+
 printf "entity rollup\n"
-./src/enrich_rollup_entities.py
+./mitie/mitie_entity_rollup.py
 
 printf "enrich email comms\n"
 ./src/enrich_email_comms.py
@@ -91,3 +99,8 @@ fi
 ./src/rank_results.py
 
 ./src/post_process.py
+
+
+printf "topic clustering\n"
+
+./topic/run_topic_clustering.sh
