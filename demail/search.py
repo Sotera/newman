@@ -1,6 +1,6 @@
 
 from newman.db.newman_db import newman_connector
-from newman.db.mysql import execute_query, execute_nonquery
+from newman.db.mysql import execute_query
 from newman.utils.functions import nth
 
 import tangelo
