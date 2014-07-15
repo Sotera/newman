@@ -110,8 +110,10 @@ function searchByEntity(entityid, type, value){
 }
 
 function produceHTMLView(emailObj) {
+
   var d = _.object(['num', 'directory','datetime', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], emailObj.email);
   console.log(d);
+  draw_mini_topic_chart(d.num);
   var el = $('<div>').addClass('body-view');
   //html += "<b>ID: </b>" + d.num + "<BR>";
 
@@ -448,102 +450,6 @@ function drawGraph(graph){
   });
 }
 
-// Draw a graph for a component
-function get_component_by_number(comp){
-  var text = comp;
-  $.getJSON("get_comp_service?text=" + encodeURIComponent(text), function (graph) {
-
-    svg.remove();
-    svg = d3.select("#node_graph").append("svg")
-      .attr({
-       	"width": "100%", "height": "100%"
-      })
-      .attr("viewBox", "0 0 " + width + " " + height )
-      .attr("preserveAspectRatio", "xMidYMid meet")
-      .attr("pointer-events", "all")
-      .call(d3.behavior.zoom().on("zoom", redraw));
-    
-    vis = svg.append('svg:g');
-    
-    //.attr("width", width)
-    //.attr("height", height);
-    
-    var nodes = graph.nodes.slice();
-    var links = [];
-    var bilinks = [];
-            
-    graph.links.forEach(function(link) {
-      var s = nodes[link.source],
-      t = nodes[link.target],
-      i = {}; // intermediate node
-      nodes.push(i);
-      links.push({source: s, target: i}, {source: i, target: t});
-      bilinks.push([s, i, t]);
-    });
-    
-    force.nodes(nodes).links(links).start();
-    
-    var link = vis.selectAll(".link")
-      .data(bilinks)
-      .enter().append("path")
-      .attr("class", "link");
-    
-    var node = vis.selectAll(".node")
-      .data(graph.nodes)
-      .enter().append("g")
-      .attr("class", "node");
-    
-    node.append("svg:circle")
-      .attr("r", 5)
-      .style("fill", function(d) { return color(d.group); })
-      .call(force.drag);
-    
-    // vis.selectAll("svg:circle").on("click", function(n){
-    //   var last = $("#selected_node_text").val();
-    //   console.log(last);
-    //   console.log(n.name);
-    //   if (last.localeCompare(n.name) == 0){
-    //     do_search(n.name, 'all');        
-    //   }
-    //   $("#selected_node_text").val(n.name);
-    // });
-			
-    vis.selectAll("svg:circle")
-      .on("mouseover", function() { 
-        d3.select(this).select("svg text").style("opacity","100");
-      });
-
-    vis.selectAll("svg:circle").on("mouseout", function() {
-      if (!labels){
- 	d3.select(this).select("svg text").style("opacity","0");
-      }
-    });
-    
-    node.append("svg:text")
-      .text(function(d) {return d.name;})
-      .attr("fill","black")
-      .attr("stroke","black")
-      .attr("font-size","5pt")
-      .attr("stroke-width","0.5px")
-      .style("opacity",function() {
- 	if (labels) return 100;
- 	else return 0;
-      });
- 				
-    force.on("tick", function() {
-      link.attr("d", function(d) {
-      	return "M" + d[0].x + "," + d[0].y +
-          "S" + d[1].x + "," + d[1].y +
-          " " + d[2].x + "," + d[2].y;
-      });
-
-      node.attr("transform", function(d) {
-      	return "translate(" + d.x + "," + d.y + ")";
-      });
-    });
-  });
-}
-
 function redraw() {
   vis.attr("transform",
            "translate(" + d3.event.translate + ")" +
@@ -560,6 +466,50 @@ function toggle_labels() {
     d3.selectAll("#node_graph svg text").style("opacity","100");
     labels = true;
   }
+}
+
+function draw_mini_topic_chart(email_id){
+  $.when( $.ajax('topic/email/' + encodeURIComponent(email_id)), $.ajax('topic/category'))
+    .done(function(resp_scores, resp_topics){
+      var scores = _.first(resp_scores).scores;
+      var topics = _.first(resp_topics).categories;
+      $('#topic_mini_chart').empty();
+    
+      var width = 200, height=40, barHeight = 10;
+      var margin = {top: 0, right: 0, bottom: 0, left: 0};
+      width = width - margin.left - margin.right;
+
+      var y = d3.scale.linear().range([height, 0]);
+
+      var chart = d3.select("#topic_mini_chart").append('svg')
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height);
+
+      y.domain([0, 100]);
+
+      var barWidth = width / scores.length;
+
+      var bar = chart.selectAll("g")
+        .data(scores)
+        .enter().append("g")
+        .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)";});
+
+      bar.append("rect")
+        .attr("y", function(d) { return y(+d*100);})
+        .attr("height", function(d) { return height - y(+d*100);})
+        .attr("width", barWidth - 1)
+        .style("fill", function(d,i) { return color(i); })
+        .on("click", function(d, i){ alert((d*100) + "% \n" + topics[i]); })
+        .on("mouseover", function(d, i){ })
+        .on("mouseout", function(d, i){ })
+
+      // bar.append("text")
+      //   .attr("x", barWidth / 2)
+      //   .attr("y", function(d) { return y(+d*100) + 3;})
+      //   .attr("dy", ".75em")
+      //   .text(function(d, i) { return topics[i]; });
+
+  });
 }
 
 function draw_rank_chart() {
