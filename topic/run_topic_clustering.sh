@@ -42,6 +42,10 @@ fi
 tail -$NUM_TOPIC $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.summary.txt | cut -c 33- > tmp/topic_cluster.idx
 #tail -$NUM_TOPIC $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.summary.txt | cut -c 33- | nl -n ln -v 0 > tmp/topic_cluster.idx
 
+if [ -e tmp/bulk_topic_score ]; then
+    rm -rf tmp/bulk_topic_score.dat
+fi
+
 ./topic/ingest_topics_scores.py tmp/topic_cluster.idx tmp/topic_cluster.scores
 
 
