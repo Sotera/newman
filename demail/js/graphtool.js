@@ -20,6 +20,31 @@ var vis = svg.append('svg:g');
 
 var labels = false;
 
+var topics_popover = (function(){ 
+  //init
+  $('#topic_mini_chart').popover({ placement: 'left', trigger: 'manual', content: 'test', html: true});
+  var pop = $('#topic_mini_chart').data('bs.popover');
+  var timer = null;
+  
+  var show = function(content){
+    if (timer){ clearTimeout(timer); }
+    pop.options.content = content;
+    pop.show();
+  };
+  var hide = function(){
+    if (timer){ clearTimeout(timer); }
+    var fn = function(){ pop.hide();};
+    timer = _.delay(fn, 300);
+  };
+
+  return { show: show, hide: hide };
+  
+})();
+
+
+
+
+
 var drag = d3.behavior.drag()
         .origin(function(d) { return d; }) //center of circle
         .on("dragstart", dragstarted)
@@ -521,8 +546,13 @@ function draw_mini_topic_chart(email_id){
             });
           console.log((d*100) + "% \n" + topics[i]); 
         })
-        .on("mouseover", function(d, i){ })
-        .on("mouseout", function(d, i){ })
+        .on("mouseover", function(d, i){ 
+          var str = "topic: " + i + "<br/>" + Math.floor(100 * d) + '%';
+          topics_popover.show(str);
+        })
+        .on("mouseout", function(d, i){ 
+          topics_popover.hide();
+        });
 
       // bar.append("text")
       //   .attr("x", barWidth / 2)
@@ -611,8 +641,7 @@ function draw_topic_tab(){
     var categories = _.map(resp.categories, function(r){
       return _.object(["idx", "value","score","purity","docs"], r);
     });
-    
-    console.log(categories);
+
     var thead = d3.select("#topics-table").select("thead").append("tr").selectAll("tr").data(['Index', 'Topic', 'Score', 'Purity', 'Docs']).enter().append("th").text(function(d){ return d; });
     var tr = d3.select("#topics-table").select("tbody").selectAll("tr").data(categories).enter().append("tr");
     tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td").text(function(d){ return d; });
@@ -710,6 +739,7 @@ $(function () {
     //do_search('');
   }
   $('#top-entities').append(waiting_bar);
+
   draw_entity_chart();
   draw_rank_chart();
   draw_topic_tab();
@@ -834,5 +864,6 @@ $(function () {
     }
     //recolornodes('rank');
   });
+
 });
 
