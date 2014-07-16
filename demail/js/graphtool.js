@@ -650,6 +650,7 @@ function draw_topic_tab(){
     var thead = d3.select("#topics-table").select("thead").append("tr").selectAll("tr").data(['Index', 'Topic', 'Score', 'Purity', 'Docs']).enter().append("th").text(function(d){ return d; });
     var tr = d3.select("#topics-table").select("tbody").selectAll("tr").data(categories).enter().append("tr")
       .on("click", function(d, i){ 
+        control_panel.open();
         do_search('topic','all', d.idx, '0.5');
       });
     tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td").text(function(d){ return d; });
