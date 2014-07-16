@@ -476,14 +476,21 @@ function draw_mini_topic_chart(email_id){
       $('#topic_mini_chart').empty();
     
       var width = 200, height=40, barHeight = 10;
-      var margin = {top: 0, right: 0, bottom: 0, left: 0};
+      var margin = {top: 20, right: 0, bottom: 0, left: 0};
       width = width - margin.left - margin.right;
 
       var y = d3.scale.linear().range([height, 0]);
 
       var chart = d3.select("#topic_mini_chart").append('svg')
         .attr("width", width + margin.left + margin.right)
-        .attr("height", height);
+        .attr("height", height + margin.top + margin.bottom);
+      
+      chart.append("text")
+        .attr("x", (width / 2))             
+        .attr("y", (margin.top / 2))
+        .attr("text-anchor", "middle")  
+        .style("font-size", "10px") 
+        .text("Topic Scores");
 
       y.domain([0, 100]);
 
@@ -495,7 +502,7 @@ function draw_mini_topic_chart(email_id){
         .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)";});
 
       bar.append("rect")
-        .attr("y", function(d) { return y(+d*100);})
+        .attr("y", function(d) { return margin.top + y(+d*100);})
         .attr("height", function(d) { return height - y(+d*100);})
         .attr("width", barWidth - 1)
         .style("fill", function(d,i) { return color(i); })
