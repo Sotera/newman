@@ -68,14 +68,11 @@ create table xref_rollup_entity (
 drop table if exists entity;
 
 create table entity (
-   rownum bigint not null auto_increment,       
-   subject varchar(1000) not null,
+   subject varchar(250) not null,
    entity_type varchar(250) not null, 
    idx int not null, 
    value varchar(1000) character set utf8 not null,
-   email_id varchar(1000) not null,
-   created timestamp not null default current_timestamp,
-   primary key (rownum)
+   email_id varchar(250) not null
 ) ENGINE=MyISAM;
 
 drop table if exists entity_rollup;
@@ -83,7 +80,7 @@ drop table if exists entity_rollup;
 create table entity_rollup (
    rollup_id varchar(250) not null,
    `type` varchar(250) not null,
-   val varchar(8192) not null,
+   val varchar(1000) not null,
    total_entities int not null,
    total_emails int not null,
    primary key (rollup_id)
@@ -101,28 +98,12 @@ create table tx (
 drop table if exists facts;
 
 create table facts (
-   rownum bigint not null auto_increment,       
    subject varchar(1000) not null,
    schema_name varchar(256) not null,
    predicate varchar(512) not null,
    obj varchar(8192) character set utf8, 
-   tx bigint not null,    
-   created timestamp not null default current_timestamp,
-   primary key (rownum)
+   tx bigint not null    
 ) ENGINE=MyISAM;
-
-drop table if exists large_text;
-
-create table large_text (
-   rownum bigint not null auto_increment,       
-   subject varchar(1000) not null,
-   sha512 varchar(1000),
-   obj longtext character set utf8 not null,
-   tx bigint not null,    
-   created timestamp not null default current_timestamp,
-   primary key (rownum)
-) ENGINE=MyISAM;
-
 
 drop table if exists `schema`;
 
@@ -136,4 +117,22 @@ create table `schema` (
    primary key (rownum)
 ) ENGINE=MyISAM;
 
+drop table if exists topic_category;
 
+create table topic_category (
+   category_id varchar(64) not null,
+   idx int not null,
+   value varchar(1000) not null,
+   score varchar(32) not null,
+   purity varchar(32) not null,
+   docs varchar(32) not null
+) ENGINE=MyISAM;
+
+drop table if exists xref_email_topic_score;
+
+create table xref_email_topic_score (
+   category_id varchar(64) not null,
+   email_id varchar(250) not null,
+   idx int not null,
+   score varchar(64) not null   
+) ENGINE=MyISAM;

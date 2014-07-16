@@ -36,7 +36,6 @@ if __name__ == "__main__":
 
         tx = Tx(cnx.conn()).next()
         print "tx: %s" % tx        
-        text = Text(cnx.conn(), autocommit=False)
         fact = Fact(cnx.conn(), autocommit=False)
 
         for line in slurpA(args.input_tsv):
@@ -76,9 +75,7 @@ if __name__ == "__main__":
                 #do not bother with empty string
                 if val:
                     if header == "body":
-                        _id = "%s_%s" % (num, uuid.uuid4())
-                        text.addText(_id, val, tx)
-                        fact.addFact(num, "email", "body", _id, tx)
+                        pass
                     else:
                         fact.addFact(num, "email", header, val, tx)
 

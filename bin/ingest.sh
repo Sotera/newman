@@ -10,17 +10,25 @@ LOUVAIN_DIR=/srv/software/distributed-louvain-modularity/
 printf "working dir $RUN_DIR\n"
 printf "louvain dir $LOUVAIN_DIR\n"
 
-if [ "$1" != "skip" ]; then 
+printf "ingest data\n"
+./src/ingest_walker.py data/walker/output.csv
 
-    printf "ingest data\n"
-    ./src/ingest_walker.py data/walker/output.csv
-
-    printf "entity extraction\n"
-    ./src/enrich_email_entities.py
+if [ -e  tmp/entity_facts_ingest.tsv ]; then
+    rm -rf tmp/entity_facts_ingest.tsv
 fi
 
+if [ -e  tmp/entity_ingest.tsv ]; then
+    rm -rf tmp/entity_ingest.tsv
+fi
+
+printf "entity extraction\n"
+./mitie/mitie_entity_ingest_file.py
+
+printf "entity bulk ingest\n"
+./mitie/mitie_bulk_ingest.py tmp/entity_ingest.tsv
+
 printf "entity rollup\n"
-./src/enrich_rollup_entities.py
+./mitie/mitie_entity_rollup.py
 
 printf "enrich email comms\n"
 ./src/enrich_email_comms.py
@@ -32,45 +40,43 @@ fi
 printf "create louvian input file\n"
 ./src/louvain_format.py -o tmp/ -f louvain.csv
 
-if [ "$2" != "skip" ]; then 
-    ### run louvain 
+### run louvain 
 
-    #rebuild hdfs for newman
-    if hadoop fs -test -d /tmp/newman; then
-        hadoop fs -rm -r /tmp/newman
-    fi
-
-    hadoop fs -mkdir -p /tmp/newman/input
-    hadoop fs -mkdir -p /tmp/newman/output
-
-    hadoop fs -put tmp/louvain.csv /tmp/newman/input/
-
-    if [ -e  $LOUVAIN_DIR/louvain.csv ]; then
-        rm -f $LOUVAIN_DIR/louvain.csv
-    fi
-
-    # for louvain_to_gephi
-    mv tmp/louvain.csv $LOUVAIN_DIR/louvain.csv
-
-    ## kick off louvain
-    cd $LOUVAIN_DIR
-    python louvain.py /tmp/newman/input /tmp/newman/output
-
-    if [ -d output ]; then
-        rm -rf output
-    fi
-
-    hadoop fs -copyToLocal /tmp/newman/output .
-
-    if [ -d louvain_to_gephi ]; then
-        rm -rf louvain_to_gephi
-    fi
-
-    python louvain_to_gephi.py
-
-    cd -
-
+#rebuild hdfs for newman
+if hadoop fs -test -d /tmp/newman; then
+    hadoop fs -rm -r /tmp/newman
 fi
+
+hadoop fs -mkdir -p /tmp/newman/input
+hadoop fs -mkdir -p /tmp/newman/output
+
+hadoop fs -put tmp/louvain.csv /tmp/newman/input/
+
+if [ -e  $LOUVAIN_DIR/louvain.csv ]; then
+    rm -f $LOUVAIN_DIR/louvain.csv
+fi
+
+# for louvain_to_gephi
+mv tmp/louvain.csv $LOUVAIN_DIR/louvain.csv
+
+## kick off louvain
+cd $LOUVAIN_DIR
+python louvain.py /tmp/newman/input /tmp/newman/output
+
+if [ -d output ]; then
+    rm -rf output
+fi
+
+hadoop fs -copyToLocal /tmp/newman/output .
+
+if [ -d louvain_to_gephi ]; then
+    rm -rf louvain_to_gephi
+fi
+
+python louvain_to_gephi.py
+
+cd -
+
 
 printf "ingest louvain results\n"
 ./src/louvain_ingest_results.py $LOUVAIN_DIR/louvain_to_gephi/
@@ -87,7 +93,12 @@ if [ -e tmp/exploded.csv ]; then
 fi
 
 ./src/rank_ingest_results.py
-./email_detector2.py kmrindfleisch@gmail.com > tmp/rankings
+./src/email_detector2.py kmrindfleisch@gmail.com > tmp/rankings
 ./src/rank_results.py
 
 ./src/post_process.py
+
+
+printf "topic clustering\n"
+
+./topic/run_topic_clustering.sh

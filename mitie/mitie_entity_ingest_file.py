@@ -6,18 +6,15 @@ from functools import partial
 
 sys.path.append("./demail")
 
-from newman.db.domain import Tx, Fact
-from newman.db.mysql import execute_query, execute_nonquery
+from newman.db.mysql import execute_query
 from newman.db.newman_db import newman_connector
+from newman.utils.file import spit
 
 sys.path.append("/srv/software/MITIE/mitielib")
 from mitie import *
 
 stmt = (
-    'SELECT f.subject, t.obj ' 
-    ' FROM facts f '
-    ' JOIN large_text t on t.subject = f.obj '
-    ' WHERE f.predicate = "body"'
+    'select id, body from email'
 )
 
 def extract_entities(ner, email_id, body):
@@ -30,12 +27,6 @@ def extract_entities(ner, email_id, body):
         (email_id, tag, " ".join([tokens[i] for i in rng]))
         for rng, tag in entities ]
 
-def ingest_entity(conn, subject, entity_type, idx, value, email_id):
-    stmt = ("insert into entity (subject, entity_type, idx, value, email_id) " 
-            "values (%s, %s, %s, %s, %s) ")
-    with execute_nonquery(conn, stmt, subject, entity_type, idx, value, email_id, autocommit=False) as insert:
-        pass
-
 def inc(n):
     return n+1
 
@@ -44,6 +35,11 @@ def counter(start=0):
     while True:
         yield n
         n = inc(n)
+
+def flush_buffer(f, buffer):
+    if len(buffer) > 0:
+        spit(f, "\n".join(buffer) + "\n")
+
 
 if __name__ == "__main__":
 
@@ -54,26 +50,25 @@ if __name__ == "__main__":
     print "\nTags output by this NER model:", ner.get_possible_ner_tags()
     c = counter(1)
 
-    with newman_connector() as read_cnx, newman_connector() as write_cnx:
-        txid = Tx(read_cnx.conn()).next()
-        print "tx: %s" % txid
-        facts = Fact(write_cnx.conn(), autocommit=False)
-        ingest = partial(ingest_entity, write_cnx.conn())
-        
+    flush_entity = partial(flush_buffer, "tmp/entity_ingest.tsv")
+
+    with newman_connector() as read_cnx:
         with execute_query(read_cnx.conn(), stmt) as qry:
+            buffer_entity=[]
+            
             for email_id, body in qry.cursor():
                 count = c.next()
-                if count % 100 == 0:
+                if count % 1000 == 0:
                     print "processed: %s " % count
                 r = extract(email_id, body)
                 for i, item in enumerate(r):
                     email_id, tag_name, entity = item
                     entity_id = "%s_entity_%s" % (email_id, i)
-                    facts.addFact(entity_id, "entity", "value", entity, txid)
-                    facts.addFact(entity_id, "entity", "type", tag_name.lower(), txid)
-                    facts.addFact(entity_id, "entity", "idx", i, txid)
-                    facts.addFact(entity_id, "entity", "email", str(email_id), txid)
-                    ingest(entity_id, tag_name.lower(), i, entity, email_id)
+                    buffer_entity.append("\t".join([entity_id, tag_name.lower(), str(i), entity, email_id]))
+                    if len(buffer_entity) > 1000:
+                        flush_entity(buffer_entity)
+                        buffer_entity=[]
 
-        print "commit"
-        write_cnx.commit()
+            flush_entity(buffer_entity)
+
+

@@ -22,13 +22,6 @@ call drop_index_if_exists('facts', 'idx_facts_pred');
 call drop_index_if_exists('facts', 'idx_facts_obj');
 call drop_index_if_exists('facts', 'idx_facts_tx');
 
-call drop_index_if_exists('email', 'idx_email_id');
-call drop_index_if_exists('email', 'idx_email_line_num');
-
-call drop_index_if_exists('large_text', 'idx_text_subject');
-call drop_index_if_exists('large_text', 'idx_text_sha');
-call drop_index_if_exists('large_text', 'idx_text_tx');
-
 create index idx_facts_subject on facts (subject(1000));
 create index idx_facts_schema on facts(schema_name);
 create index idx_facts_schema_pred on facts(schema_name, predicate);
@@ -36,13 +29,19 @@ create index idx_facts_pred on facts(predicate);
 create index idx_facts_obj on facts(obj(8192));
 create index idx_facts_tx on facts(tx);
 
+call drop_index_if_exists('email', 'idx_email_id');
+call drop_index_if_exists('email', 'idx_email_line_num');
+
 create index idx_email_id on email(id);
 create index idx_email_line_num on email(line_num);
 
-create index idx_text_subject on large_text(subject);
-create index idx_text_sha on large_text(sha512);
-create index idx_text_tx on large_text(tx);
+call drop_index_if_exists('entity', 'idx_entity_subject');
+call drop_index_if_exists('entity', 'idx_entity_type');
+call drop_index_if_exists('entity', 'idx_entity_val');
 
+create index idx_entity_subject on entity(subject);
+create index idx_entity_type on entity(entity_type);
+create index idx_entity_val on entity(value);
 
 call drop_index_if_exists('xref_recipients', 'idx_xref_recipients_from');
 call drop_index_if_exists('xref_recipients', 'idx_xref_recipients_recipient');
@@ -75,5 +74,20 @@ call drop_index_if_exists('xref_rollup_entity', 'idx_xref_emailaddr_email_id');
 create index idx_xref_rollup_entity_rollup_entity on xref_rollup_entity(rollup_id, entity_id);
 create index idx_xref_rollup_entity_rollup on xref_rollup_entity(rollup_id);
 create index idx_xref_rollup_entity_entity on xref_rollup_entity(entity_id);
+
+
+call drop_index_if_exists('topic_category', 'idx_topic_category_id');
+
+create index idx_topic_category_id on topic_category(category_id);
+
+
+call drop_index_if_exists('xref_email_topic_score', 'idx_xref_email_topic_score_email');
+call drop_index_if_exists('xref_email_topic_score', 'idx_xref_email_topic_score_email_category');
+call drop_index_if_exists('xref_email_topic_score', 'idx_xref_email_topic_score_category');
+
+create index idx_xref_email_topic_score_email on xref_email_topic_score(email_id);
+create index idx_xref_email_topic_score_email_category on xref_email_topic_score(category_id, email_id);
+create index idx_xref_email_topic_score_category on xref_email_topic_score(category_id);
+
 
 drop procedure if exists drop_index_if_exists;

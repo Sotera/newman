@@ -144,6 +144,36 @@ body {
     color: red;
 }
 
+#topics-table thead >tr >th {
+    border: 1px black solid;
+    padding: 5px;
+    font-size: 12px;
+    font-weight: bold;
+    color: red;
+}
+
+#topics-table tbody >tr >td {
+    font-size: 12px;
+}
+
+#topics-table tbody >tr >td:first-child {
+    text-align: center;
+}
+
+#topics-table tbody tr:nth-child(even) {
+    background-color: #f0f0f0; 
+}
+
+.row-highlight {
+    background-color: #ffffae; 
+}
+
+#topics-table tbody tr:hover {
+    background-color: #ffffae; 
+    font-size: 12px;
+}
+
+
 .tab-content div {
     margin-top: 3px;
 }

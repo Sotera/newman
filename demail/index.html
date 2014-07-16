@@ -109,15 +109,31 @@
             <ul class="nav nav-tabs" role="tablist" id="tab-list">
               <li class="active"><a href="#top-rank" role="tab" data-toggle="tab">Rank</a></li>
               <li><a href="#top-entities" role="tab" data-toggle="tab">Entities</a></li>
-              <li><a href="#email-body" role="tab" data-toggle="tab">Email</a></li>
+              <li><a href="#email-body-tab" role="tab" data-toggle="tab">Email</a></li>
+              <li><a href="#topics-tab" role="tab" data-toggle="tab">Topics</a></li>
             </ul>
 
             <!-- Tab panes -->
             <div class="tab-content">
               <div class="tab-pane active" id="top-rank"> </div>
               <div class="tab-pane" id="top-entities"></div>
-              <div class="tab-pane" id="email-body"> Select an Email to preview</div>
-            </div>
+              <div class="tab-pane" id="email-body-tab"> 
+                <div style="display: table;">
+                  <div style="display: inline-block;float:left;margin-top: 15px;">
+                  <a id="submit_activesearch" class="btn btn-default">Seed Active Search</a>
+                  <a id="submit_activesearch_like" class="btn btn-default" style="background-color: #00ff00"><span class="glyphicon glyphicon-thumbs-up" style="color: #000;"/></a>
+                  <a id="submit_activesearch_dislike" class="btn btn-default" style="background-color: #ff0000"><span class="glyphicon glyphicon-thumbs-down" style="color: #000"/></a>
+                  </div>
+                  <div style="background-color: #f0f0f0; padding: 5px; margin-left: 50px; float: left; display: inline-block;" id="topic_mini_chart"></div>
+                </div>
+                <div id="email-body"> Select an Email to preview </div>
+              </div>
+              <div class="tab-pane" id="topics-tab">
+                <table id="topics-table">
+                  <thead></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
           </div>
           <!-- Create an SVG element to represent the legend -->
           <svg id="legend" style="position:fixed; top:100px; right:0px; pointer-events:none;"></svg>
@@ -138,7 +154,7 @@
         </div>
       </div>
     </div>
-
+    
     <script src="js/thirdparty/jquery-1.9.1.min.js"></script>
     <script src="js/thirdparty/jquery-ui.min.js"></script>
     <script src="js/thirdparty/d3.v3.min.js" charset="utf-8"></script>

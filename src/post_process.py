@@ -31,9 +31,10 @@ stmt_xref_emailaddr_email = (
 
 stmt_xref_entity_email = (
     " insert into xref_entity_email (rollup_id, email_id) "
-    "  select distinct subject, obj from facts "
-    "  where schema_name = 'entity_rollup' "
-    "  and predicate = 'email' "
+    " select distinct r.rollup_id, e.email_id " 
+    " from entity_rollup r join xref_rollup_entity x " 
+    " on r.rollup_id = x.rollup_id join entity e " 
+    " on x.entity_id = e.subject "
 )
 
 if __name__ == "__main__":
