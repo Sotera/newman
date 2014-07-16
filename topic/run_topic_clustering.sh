@@ -42,7 +42,7 @@ fi
 tail -$NUM_TOPIC $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.summary.txt | cut -c 13- | sed 's/^[ ]*//' > tmp/topic_cluster.idx
 #tail -$NUM_TOPIC $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.summary.txt | cut -c 33- | nl -n ln -v 0 > tmp/topic_cluster.idx
 
-if [ -e tmp/bulk_topic_score ]; then
+if [ -e tmp/bulk_topic_score.dat ]; then
     rm -rf tmp/bulk_topic_score.dat
 fi
 

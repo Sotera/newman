@@ -38,7 +38,7 @@ def counter(start=0):
 
 def flush_buffer(f, buffer):
     if len(buffer) > 0:
-        spit(f, "\n".join(buffer))
+        spit(f, "\n".join(buffer) + "\n")
 
 
 if __name__ == "__main__":

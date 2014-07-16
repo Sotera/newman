@@ -24,7 +24,7 @@ def counter(start=0):
 
 def flush_buffer(f, buffer):
     if len(buffer) > 0:
-        spit(f, "\n".join(buffer))
+        spit(f, "\n".join(buffer) + "\n")
 
 def bulk_insert_scores(file_ref, table):
     # this is the only way I can get --local-infile flag to work with python
