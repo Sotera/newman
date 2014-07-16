@@ -585,6 +585,20 @@ function draw_rank_chart() {
   });
 }
 
+function draw_topic_tab(){
+  $.ajax('topic/category/all').then(function(resp){
+    var categories = _.map(resp.categories, function(r){
+      return _.object(["idx", "value","score","purity","docs"], r);
+    });
+    
+    console.log(categories);
+    var thead = d3.select("#topics-table").select("thead").append("tr").selectAll("tr").data(['Index', 'Topic', 'Score', 'Purity', 'Docs']).enter().append("th").text(function(d){ return d; });
+    var tr = d3.select("#topics-table").select("tbody").selectAll("tr").data(categories).enter().append("tr");
+    tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td").text(function(d){ return d; });
+  
+  });
+}
+
 
 function draw_entity_chart() {
 
@@ -677,6 +691,7 @@ $(function () {
   $('#top-entities').append(waiting_bar);
   draw_entity_chart();
   draw_rank_chart();
+  draw_topic_tab();
 
   var open=false;
   $("#tab").on("click", function(){

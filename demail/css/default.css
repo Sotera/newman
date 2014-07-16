@@ -144,6 +144,18 @@ body {
     color: red;
 }
 
+#topics-table thead >tr >th {
+    border: 1px black solid;
+    padding: 5px;
+    font-size: 12px;
+    font-weight: bold;
+    color: red;
+}
+
+#topics-table tbody >tr >td {
+    font-size: 12px;
+}
+
 .tab-content div {
     margin-top: 3px;
 }

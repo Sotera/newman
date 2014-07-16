@@ -110,6 +110,7 @@
               <li class="active"><a href="#top-rank" role="tab" data-toggle="tab">Rank</a></li>
               <li><a href="#top-entities" role="tab" data-toggle="tab">Entities</a></li>
               <li><a href="#email-body-tab" role="tab" data-toggle="tab">Email</a></li>
+              <li><a href="#topics-tab" role="tab" data-toggle="tab">Topics</a></li>
             </ul>
 
             <!-- Tab panes -->
@@ -126,7 +127,13 @@
                   <div style="background-color: #f0f0f0; padding: 5px; margin-left: 5px; float: left; display: inline-block;" id="topic_mini_chart"></div>
                 </div>
                 <div id="email-body"> Select an Email to preview </div>
-            </div>
+              </div>
+              <div class="tab-pane" id="topics-tab">
+                <table id="topics-table">
+                  <thead></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
           </div>
           <!-- Create an SVG element to represent the legend -->
           <svg id="legend" style="position:fixed; top:100px; right:0px; pointer-events:none;"></svg>

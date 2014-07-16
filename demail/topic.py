@@ -17,12 +17,12 @@ def topic_list(*args):
     category=nth(args, 0, 'all')
     with newman_connector() as read_cnx:
         stmt = (
-            " select value from topic_category "
+            " select idx, value, score, purity, docs from topic_category "
             " where category_id = %s "
             " order by idx "
         ) 
         with execute_query(read_cnx.conn(), stmt, category) as qry:
-            rtn = [head(r) for r in qry.cursor()]
+            rtn = [r for r in qry.cursor()]
             tangelo.content_type("application/json")
             return { "categories" : rtn }
 

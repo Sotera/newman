@@ -35,9 +35,10 @@ def bulk_insert_scores(file_ref, table):
     #print " ".join(cmd)
     subprocess.call(cmd)
 
-def insert_topic_category(conn, category_id, idx, value):
-    stmt = ("insert into topic_category (category_id, idx, value) values (%s, %s, %s)")
-    with execute_nonquery(conn, stmt, category_id, idx, value) as qry:
+def insert_topic_category(conn, category_id, idx, value, score, purity, docs):
+    stmt = ("insert into topic_category (category_id, idx, value, score, purity, docs) "
+            " values (%s, %s, %s, %s, %s, %s)")
+    with execute_nonquery(conn, stmt, category_id, idx, value, score, purity, docs) as qry:
         pass
 
 if __name__ == "__main__":
@@ -56,7 +57,8 @@ if __name__ == "__main__":
         print "import topics "
         for k,v in topics.iteritems():
             idx = k.replace("topic_", "")
-            insert_topic(idx, v)
+            score, purity, docs, summary = v.split(None, 3)
+            insert_topic(idx, summary, score, purity, docs)
 
         buffer=[]
         for line in slurpA(args.topic_scores):

@@ -122,7 +122,10 @@ drop table if exists topic_category;
 create table topic_category (
    category_id varchar(64) not null,
    idx int not null,
-   value varchar(1000) not null
+   value varchar(1000) not null,
+   score varchar(32) not null,
+   purity varchar(32) not null,
+   docs varchar(32) not null
 ) ENGINE=MyISAM;
 
 drop table if exists xref_email_topic_score;
