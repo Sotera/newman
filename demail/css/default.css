@@ -160,7 +160,19 @@ body {
     text-align: center;
 }
 
-#topics-table tbody tr:nth-child(even) {background: #f0f0f0; }
+#topics-table tbody tr:nth-child(even) {
+    background-color: #f0f0f0; 
+}
+
+.row-highlight {
+    background-color: #ffffae; 
+}
+
+#topics-table tbody tr:hover {
+    background-color: #ffffae; 
+    font-size: 12px;
+}
+
 
 .tab-content div {
     margin-top: 3px;
