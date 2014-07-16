@@ -42,9 +42,6 @@ var topics_popover = (function(){
 })();
 
 
-
-
-
 var drag = d3.behavior.drag()
         .origin(function(d) { return d; }) //center of circle
         .on("dragstart", dragstarted)
@@ -130,7 +127,7 @@ function searchByEntity(entityid, type, value){
   console.log(value);
   $.get("entity/rollup/" + encodeURIComponent(entityid)).then(
     function(resp) {
-      do_search(resp.rollupId, 'entity');
+      do_search('entity', resp.rollupId);
     });
 }
 
@@ -196,9 +193,9 @@ function produceHTMLView(emailObj) {
   return el;
 }
 
-function do_search(val,fields) {
+function do_search(fields, val) {
   /* Fails Lint -  Use '===' to compare with 'undefined' */
-  if (fields == undefined) { fields = 'All'; }
+  if (fields == undefined) { fields = 'all'; }
   
   d3.select("#result_table").select("tbody").selectAll("tr").remove();
   d3.select("#result_table").select("thead").selectAll("tr").remove();
@@ -207,8 +204,11 @@ function do_search(val,fields) {
   //d3.select("#search_status").text("Searching...");
   $('#search_status').empty();
   $('#search_status').append($('<span>',{ 'text': 'Searching... ' })).append(waiting_bar);  
+  var args = _.map(_.rest(arguments), function(s){ return encodeURIComponent(s); })
+  var rest_url = args.join('/');
+  console.log(rest_url);
 
-  $.getJSON("search/search/" + fields +'/' + encodeURIComponent(text) , function (comp_data) {
+  $.getJSON("search/search/" + fields +'/' + rest_url , function (comp_data) {
     $('#search_status').empty();
     //d3.select("#search_status").text("");
     var lastSort = "";
@@ -426,7 +426,7 @@ function drawGraph(graph){
     console.log(last);
     console.log(n.name);
     if (last.localeCompare(n.name) == 0){
-      do_search(n.name, 'all');        
+      do_search('all', n.name);        
     }
     $('#email_text').val(n.name);
   });
@@ -615,7 +615,7 @@ function draw_rank_chart() {
 
       .on("click", function(d){ 
         $("#email_text").val(d.email)
-        do_search($("#email_text").val(),'email');        
+        do_search('email', $("#email_text").val());        
       })
       .on("mouseover", function(d){
         d3.select("#g_circle_" + d.groupId).style("stroke","ffff00");  
@@ -643,7 +643,10 @@ function draw_topic_tab(){
     });
 
     var thead = d3.select("#topics-table").select("thead").append("tr").selectAll("tr").data(['Index', 'Topic', 'Score', 'Purity', 'Docs']).enter().append("th").text(function(d){ return d; });
-    var tr = d3.select("#topics-table").select("tbody").selectAll("tr").data(categories).enter().append("tr");
+    var tr = d3.select("#topics-table").select("tbody").selectAll("tr").data(categories).enter().append("tr")
+      .on("click", function(d, i){ 
+        do_search('topic','all', d.idx, '0.5');
+      });
     tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td").text(function(d){ return d; });
   
   });
@@ -699,7 +702,7 @@ function draw_entity_chart() {
       .attr("y", barHeight / 2)
       .attr("class", "label")
       .on("click", function(d){ 
-        do_search(d[0], 'entity');
+        do_search('entity', d[0]);
       })
       .text(function(d) { return (d[2].length > 25) ? d[2].substr(0,25) + ".." : d[2]; })
       .append('title').text(function(d) { return d[2];});
@@ -708,8 +711,6 @@ function draw_entity_chart() {
   });
 
 }
-
-
 
 /** document ready **/
 $(function () {
@@ -728,15 +729,15 @@ $(function () {
 
   $('#search_text').keyup(function (e){
     if (e.keyCode === 13) {
-      do_search($("#search_text").val());
+      do_search('all', $("#search_text").val());
     }
   });
   
   /* fails lint - Use '!==' to compare with ''. */
   if( cluster != '')  {  
-    do_search(cluster);
+    do_search('all', cluster);
   }  else { 
-    //do_search('');
+    //do_search('all','');
   }
   $('#top-entities').append(waiting_bar);
 
@@ -765,12 +766,12 @@ $(function () {
 
   $("#submit_search").click(function(){
     console.log('before here');
-    do_search($("#search_text").val(),'All');
+    do_search('all', $("#search_text").val());
   });
 
   $("#submit_email").click(function(){
     console.log($("#email_text").val());
-    do_search($("#email_text").val(),'email');
+    do_search('email', $("#email_text").val());
   });
 
   $("#submit_activesearch_like").click(function(){
