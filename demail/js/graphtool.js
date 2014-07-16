@@ -20,6 +20,8 @@ var vis = svg.append('svg:g');
 
 var labels = false;
 
+var control_panel=null;
+
 var topics_popover = (function(){ 
   //init
   $('#topic_mini_chart').popover({ placement: 'left', trigger: 'manual', content: 'test', html: true});
@@ -40,7 +42,6 @@ var topics_popover = (function(){
   return { show: show, hide: hide };
   
 })();
-
 
 var drag = d3.behavior.drag()
         .origin(function(d) { return d; }) //center of circle
@@ -539,7 +540,11 @@ function draw_mini_topic_chart(email_id){
               var idx = $(this).find('td:first-child').html();
               if (parseInt(idx, 10) === i){
                 var bgcolor = row.css('background-color');
-                var fn = function(){ row.animate({backgroundColor: bgcolor }, 1000); };
+                var fn = function(){ 
+                  row.animate({backgroundColor: bgcolor }, 
+                              {duration: 1000, complete: function(){
+                                row.css('background-color','');
+                              }}); };
                 _.delay(fn, 4000);
                 row.animate({ backgroundColor: '#ffff66'}, 1000);
               }
@@ -718,6 +723,40 @@ $(function () {
 
   // Create control panel.
   $("#control-panel").controlPanel();
+
+  _.defer(function(){
+    control_panel = (function(){
+      var el = $('[id^=tangelo-drawer-handle]');
+
+      var toggle = function(){
+        el.click();
+      };
+
+      var open = function(){
+        var classes= el.find('span').attr('class').split(/\s+/);
+        if (_.any(classes, function(class_){
+          return class_.indexOf('up') > -1;
+        })){
+          toggle();
+        }
+      };
+
+      var close = function(){
+        var classes= el.find('span').attr('class').split(/\s+/);
+        if (_.any(classes, function(class_){
+          return class_.indexOf('down') > -1;
+        })){
+          toggle();
+        }
+      }
+
+      return {
+        open: open,
+        close: close,
+        toggle: toggle
+      };
+    }());
+  });
 
   var clusters = window.location.href.split('=');
   var cluster = '';
