@@ -156,6 +156,12 @@ body {
     font-size: 12px;
 }
 
+#topics-table tbody >tr >td:first-child {
+    text-align: center;
+}
+
+#topics-table tbody tr:nth-child(even) {background: #f0f0f0; }
+
 .tab-content div {
     margin-top: 3px;
 }

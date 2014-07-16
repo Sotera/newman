@@ -506,7 +506,21 @@ function draw_mini_topic_chart(email_id){
         .attr("height", function(d) { return height - y(+d*100);})
         .attr("width", barWidth - 1)
         .style("fill", function(d,i) { return color(i); })
-        .on("click", function(d, i){ alert((d*100) + "% \n" + topics[i]); })
+        .on("click", function(d, i){ 
+          $('#tab-list li:eq(3) a').tab('show');
+          var rows = $('#topics-table')
+            .find('tbody tr').each(function(){
+              var row = $(this);
+              var idx = $(this).find('td:first-child').html();
+              if (parseInt(idx, 10) === i){
+                var bgcolor = row.css('background-color');
+                var fn = function(){ row.animate({backgroundColor: bgcolor }, 1000); };
+                _.delay(fn, 4000);
+                row.animate({ backgroundColor: '#ffff66'}, 1000);
+              }
+            });
+          console.log((d*100) + "% \n" + topics[i]); 
+        })
         .on("mouseover", function(d, i){ })
         .on("mouseout", function(d, i){ })
 
