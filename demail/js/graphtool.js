@@ -144,8 +144,17 @@ function produceHTMLView(emailObj) {
     $('<p>').append($('<span>').addClass('bold').text("ID: "))
       .append($('<a>', { 'target': '_blank', 'href' : 'emails/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.txt'}).text(d.num)));
 
-  var items = _.zip(['From','To','Cc','Bcc','Subject','Date'], 
-        [d.from, d.to, d.cc, d.bcc, d.subject, d.datetime]);
+  el.append(
+    $('<p>').append($('<span>').addClass('bold').text("From: "))
+      .append($('<a>').on("click", function(){
+        draw_attachments_table(d.from).done(function(){
+          $('#tab-list li:eq(4) a').tab('show');          
+        });
+        return false;
+      }).text(d.from)));
+
+  var items = _.zip(['To','Cc','Bcc','Subject','Date'], 
+        [d.to, d.cc, d.bcc, d.subject, d.datetime]);
   _.each(items, function(item){
     el.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
                       .append(item[1]) );
@@ -566,6 +575,40 @@ function draw_mini_topic_chart(email_id){
       //   .text(function(d, i) { return topics[i]; });
 
   });
+}
+
+
+function draw_attachments_table(email_addr){
+  var deferred = $.Deferred();
+  $.ajax('email/attachments/' + email_addr).done(function(resp){
+    var emails = _.map(resp.email_attachments, function(r){
+      var o = _.object(["id", "dir", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"], r);
+      return o;
+    });
+    $('#attach-sender').html(resp.sender);
+    $('#attach-table').empty();
+    $('#attach-table').append($('<thead>')).append($('<tbody>'));
+
+    var thead = d3.select("#attach-table").select("thead").append("tr").selectAll("tr").data(['Date', 'Subject', 'Attachments']).enter().append("th").text(function(d){ return d; });
+    var tr = d3.select("#attach-table").select("tbody").selectAll("tr").data(emails).enter().append("tr").on("click", function(d, i){
+      $.get("email/email/" + encodeURIComponent(d.id)).then(
+        function(resp) {
+          update_current(d.id);
+          $('#tab-list li:eq(2) a').tab('show');          
+          if(resp.email.length > 0){
+            $("#email-body").empty();
+            $("#email-body").append(produceHTMLView(resp));
+          }
+        });
+    });
+
+    tr.selectAll("td").data(function(d){
+      return [d.datetime, d.subject, d.attach]
+    }).enter().append("td").text(function(d){ return d; });
+
+    deferred.resolve();
+  });
+  return deferred.promise();
 }
 
 function draw_rank_chart() {

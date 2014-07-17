@@ -66,10 +66,28 @@ def getRankedEmails(*args):
             rtn = [[str(val) for val in row] for row in qry.cursor()]
             return { "emails" : rtn }
 
+#GET /attachments/<sender>
+def getAttachmentsSender(*args):
+    sender=urllib.unquote(nth(args, 0, ''))
+    if not sender:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing id")
+
+    tangelo.content_type("application/json")        
+    stmt = (
+        " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
+        " from email "
+        " where from_addr = %s and attach != '' "
+    )
+    with newman_connector() as read_cnx:
+        with execute_query(read_cnx.conn(), stmt, sender) as qry:
+            rtn = [[str(val) for val in row] for row in qry.cursor()]
+            return { "sender": sender, "email_attachments" : rtn }
+
 actions = {
     "email": getEmail,
     "entities" : getEntities,
-    "rank" : getRankedEmails
+    "rank" : getRankedEmails,
+    "attachments" : getAttachmentsSender
 }
 
 def unknown(*args):
