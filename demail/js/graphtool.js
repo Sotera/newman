@@ -589,22 +589,48 @@ function draw_attachments_table(email_addr){
     $('#attach-table').empty();
     $('#attach-table').append($('<thead>')).append($('<tbody>'));
 
-    var thead = d3.select("#attach-table").select("thead").append("tr").selectAll("tr").data(['Date', 'Subject', 'Attachments']).enter().append("th").text(function(d){ return d; });
-    var tr = d3.select("#attach-table").select("tbody").selectAll("tr").data(emails).enter().append("tr").on("click", function(d, i){
-      $.get("email/email/" + encodeURIComponent(d.id)).then(
-        function(resp) {
-          update_current(d.id);
-          $('#tab-list li:eq(2) a').tab('show');          
-          if(resp.email.length > 0){
-            $("#email-body").empty();
-            $("#email-body").append(produceHTMLView(resp));
-          }
+    var lastSort = "";
+    var thead = d3.select("#attach-table").select("thead").append("tr").selectAll("tr").data(['Date', 'Subject', 'Attachments', 'Email']).enter().append("th")
+      .text(function(d){ 
+        return d; 
+      }).on("click", function(k, i){
+        var direction = (lastSort == k) ? -1 : 1;
+        lastSort = (direction == -1) ? "" : k; //toggle
+        d3.select("#attach-table").select("tbody").selectAll("tr").sort(function(a,b){
+          var fields = ["datetime", "subject", "attach", "datetime"];
+          return a[fields[i]].localeCompare(b[fields[i]]) * direction;
         });
-    });
+      });
+
+    var tr = d3.select("#attach-table").select("tbody").selectAll("tr").data(emails).enter().append("tr");
 
     tr.selectAll("td").data(function(d){
-      return [d.datetime, d.subject, d.attach]
-    }).enter().append("td").text(function(d){ return d; });
+      return [d.datetime, d.subject, [d.dir, d.attach], d.id]
+    }).enter()
+      .append("td")
+      .on("click", function(d, i){
+        if (i != 3) return;
+        $.get("email/email/" + encodeURIComponent(d)).then(
+          function(resp) {
+            update_current(d);
+            $('#tab-list li:eq(2) a').tab('show');          
+            if(resp.email.length > 0){
+              $("#email-body").empty();
+              $("#email-body").append(produceHTMLView(resp));
+            }
+          });
+      })
+      .html(function(d, i){
+        if (i == 2){
+          var el = $('<div>').append($('<a>', { "target": "_blank" ,"href" : 'emails/' + d[0] + "/attachments/" + encodeURIComponent(d[1]) }).html(d[1]));
+          return el.html();
+        }
+        if (i == 3){
+          var el = $('<div>').append($('<span>').addClass("glyphicon").addClass("glyphicon-share-alt"));
+          return el.html();
+        }
+        return d; 
+      });
 
     deferred.resolve();
   });
