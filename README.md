@@ -26,7 +26,7 @@ pip install tangelo
 - DBI
 - DBD:mysql 
 
-Perl Manual Dependency Install <br/>
+_Perl Manual Dependency Install_ <br/>
 http://search.cpan.org/~capttofu/DBD-mysql-4.027/lib/DBD/mysql.pm#Manual_Installation
 
 _Perl Dependency Downloads_:
