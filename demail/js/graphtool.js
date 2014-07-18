@@ -1065,8 +1065,7 @@ $(function () {
 
   $("#usetext").on("change", function(){
     toggle_labels(); 
-    graph.reset();
-  })
+  });
 
 
 
