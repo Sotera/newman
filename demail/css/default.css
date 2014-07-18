@@ -177,3 +177,15 @@ body {
 .tab-content div {
     margin-top: 3px;
 }
+
+
+/** override bootstrap **/
+.alert-success {
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+    color: #468847;
+}
+
+div.bootstrap-growl >span.close {
+    color: #000;
+}
