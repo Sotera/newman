@@ -42,7 +42,7 @@ _Perl Dependency Downloads_:
 - install in m2 `mvn install:install-file -Dfile=jblas-1.2.3.jar -DgroupId=org.jblas -DartifactId=jblas -Dversion=1.2.3 -Dpackaging=jar`
       
 
-
+**Distributed Louvain Modularity** - https://github.com/Sotera/distributed-louvain-modularity
 **MITIE: MIT Information Extraction** - [https://github.com/mit-nlp/MITIE](https://github.com/mit-nlp/MITIE)<br/>
 **Topic Clustering** - [https://github.com/mitll/topic-clustering](https://github.com/mitll/topic-clustering)<br/>
 **ActiveSearch** - [https://github.com/AutonlabCMU/ActiveSearch](https://github.com/AutonlabCMU/ActiveSearch)
