@@ -12,28 +12,28 @@ Get raw Scott Walker data to work with at: https://www.dropbox.com/s/7eq6or39ttb
 
 <h3>Dependencies</h3>
 
-MySQL [http://dev.mysql.com/downloads/mysql/](http://dev.mysql.com/downloads/mysql/)
+**MySQL** [http://dev.mysql.com/downloads/mysql/](http://dev.mysql.com/downloads/mysql/)
 <br/>
 > admin set as u: root p: root
 
-Python 2.7.x
+**Python 2.7.x**
 ```
 pip install mysql-connector-python
 pip install tangelo
 ```
 
-Perl - (Only for ingest of ActiveSearch)
+**Perl** - (Only for ingest of ActiveSearch)
 - DBI
 - DBD:mysql 
 
 Perl Manual Dependency Install <br/>
 http://search.cpan.org/~capttofu/DBD-mysql-4.027/lib/DBD/mysql.pm#Manual_Installation
 
-Perl Dependency Downloads:
+_Perl Dependency Downloads_:
 - https://metacpan.org/pod/DBI
 - https://metacpan.org/pod/DBD::mysql
 
-jblas - (For ActiveSearch)
+**jblas** - (For ActiveSearch)
 - make sure fortran compiler is installed
   https://github.com/mikiobraun/jblas/wiki/Missing-Libraries
     - `sudo apt-get install libgfortran3`
@@ -43,6 +43,6 @@ jblas - (For ActiveSearch)
       
 
 
-MITIE: MIT Information Extraction - [https://github.com/mit-nlp/MITIE](https://github.com/mit-nlp/MITIE)<br/>
-Topic Clustering - [https://github.com/mitll/topic-clustering](https://github.com/mitll/topic-clustering)<br/>
-ActiveSearch - [https://github.com/AutonlabCMU/ActiveSearch](https://github.com/AutonlabCMU/ActiveSearch)
+**MITIE: MIT Information Extraction** - [https://github.com/mit-nlp/MITIE](https://github.com/mit-nlp/MITIE)<br/>
+**Topic Clustering** - [https://github.com/mitll/topic-clustering](https://github.com/mitll/topic-clustering)<br/>
+**ActiveSearch** - [https://github.com/AutonlabCMU/ActiveSearch](https://github.com/AutonlabCMU/ActiveSearch)
