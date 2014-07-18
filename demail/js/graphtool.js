@@ -191,7 +191,7 @@ function searchByEntity(entityid, type, value){
   console.log(value);
   $.get("entity/rollup/" + encodeURIComponent(entityid)).then(
     function(resp) {
-      do_search('entity', resp.rollupId);
+      do_search('entity', resp.rollupId, value);
     });
 }
 
@@ -266,9 +266,40 @@ function produceHTMLView(emailObj) {
   return el;
 }
 
+// takes field + varargs ... now
 function do_search(fields, val) {
+  var varargs = arguments;
   /* Fails Lint -  Use '===' to compare with 'undefined' */
   if (fields == undefined) { fields = 'all'; }
+
+  var search_msg = (function(varargs){
+    var ops = {
+      'all': function(args){
+        var text = _.first(args);
+        if (text.trim() === ""){
+          return "Searching all";
+        }
+        return "Searching text for <br/><b>" + text +"</b>";
+      },
+      'email': function(args){
+        var email = _.first(args);        
+        return "Searching on email <br/><b>" + email +"</b>";
+      },
+      'topic': function(args){
+        var topic = _.first(_.rest(args));       
+        var score = _.first(_.rest(args, 2));
+        return "Searchring on topic index <b>" + topic +"</b><br/> with score greater than " + Math.floor(100.0 * score) + "%";
+      },
+      'entity': function(args){
+        var entity = _.first(_.rest(args));
+        return "Searching on entity <br/><b>" + entity +"</b>";
+      }
+    };
+    var field = _.first(varargs);
+    return ops[field](_.rest(varargs));
+  }(varargs));
+
+  $.bootstrapGrowl(search_msg, {type : "success"});
   
   d3.select("#result_table").select("tbody").selectAll("tr").remove();
   d3.select("#result_table").select("thead").selectAll("tr").remove();
@@ -499,7 +530,7 @@ function drawGraph(graph){
     console.log(last);
     console.log(n.name);
     if (last.localeCompare(n.name) == 0){
-      do_search('all', n.name);        
+      do_search('email', n.name);        
     }
     $('#email_text').val(n.name);
   });
@@ -854,7 +885,7 @@ function draw_entity_chart() {
       .attr("y", barHeight / 2)
       .attr("class", "label")
       .on("click", function(d){ 
-        do_search('entity', d[0]);
+        do_search('entity', d[0], d[2]);
       })
       .text(function(d) { return (d[2].length > 25) ? d[2].substr(0,25) + ".." : d[2]; })
       .append('title').text(function(d) { return d[2];});
