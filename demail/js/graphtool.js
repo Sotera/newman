@@ -43,6 +43,69 @@ var topics_popover = (function(){
   
 })();
 
+
+var image_preview_popover = function(){
+  var cache = {};
+    var show = function(target_id, img_url, height, width){
+      if (cache[target_id]){
+        clearTimeout(cache[target_id].timer);
+      } else {
+        var img = $('<div>').append($('<img>', { 'src': img_url, 'height': height, 'width': width }));
+        $(target_id).popover({ placement: 'left', trigger: 'manual', content: img.html(), html: true});
+        var pop = $(target_id).data('bs.popover');
+        cache[target_id] = {
+          timer : null,
+          pop : pop 
+        };
+      }
+      var keys = _.keys(cache);
+      _.each(keys, function(key){
+        if (key != target_id){
+          clearTimeout(cache[key].timer());
+          cache[key].pop.hide();
+          delete cache[key];
+        }
+      });
+
+      cache[target_id].pop.show();
+    };
+    var hide = function(target_id){
+      if (cache[target_id]){
+        var fn = function(){
+          if (cache[target_id]){
+            cache[target_id].pop.hide();
+            delete cache[target_id];
+          }
+        };
+        cache[target_id].timer = _.delay(fn, 100);
+      }
+    };
+
+    return { show: show, hide: hide };
+};
+
+var image_preview_popover2 = function(target_id, img_url, height, width){ 
+  var img = $('<div>').append($('<img>', { 'src': img_url, 'height': height, 'width': width }));
+  //init
+  $(target_id).popover({ placement: 'left', trigger: 'manual', content: img.html(), html: true});
+  var pop = $(target_id).data('bs.popover');
+  var timer = null;
+  
+  var show = function(){
+    if (timer){ clearTimeout(timer); }
+    pop.show();
+  };
+  var hide = function(){
+    if (timer){ clearTimeout(timer); }
+    var fn = function(){ pop.destory();};
+    timer = _.delay(fn, 100);
+  };
+
+  return { show: show, hide: hide };
+  
+};
+
+
 var drag = d3.behavior.drag()
         .origin(function(d) { return d; }) //center of circle
         .on("dragstart", dragstarted)
@@ -144,8 +207,17 @@ function produceHTMLView(emailObj) {
     $('<p>').append($('<span>').addClass('bold').text("ID: "))
       .append($('<a>', { 'target': '_blank', 'href' : 'emails/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.txt'}).text(d.num)));
 
-  var items = _.zip(['From','To','Cc','Bcc','Subject','Date'], 
-        [d.from, d.to, d.cc, d.bcc, d.subject, d.datetime]);
+  el.append(
+    $('<p>').append($('<span>').addClass('bold').text("From: "))
+      .append($('<a>').on("click", function(){
+        draw_attachments_table(d.from).done(function(){
+          $('#tab-list li:eq(4) a').tab('show');          
+        });
+        return false;
+      }).text(d.from)));
+
+  var items = _.zip(['To','Cc','Bcc','Subject','Date'], 
+        [d.to, d.cc, d.bcc, d.subject, d.datetime]);
   _.each(items, function(item){
     el.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
                       .append(item[1]) );
@@ -568,6 +640,80 @@ function draw_mini_topic_chart(email_id){
   });
 }
 
+
+function draw_attachments_table(email_addr){
+  var deferred = $.Deferred();
+  $.ajax('email/attachments/' + email_addr).done(function(resp){
+    var emails = _.map(resp.email_attachments, function(r){
+      var o = _.object(["id", "dir", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"], r);
+      return o;
+    });
+    $('#attach-sender').html(resp.sender);
+    $('#attach-table').empty();
+    $('#attach-table').append($('<thead>')).append($('<tbody>'));
+
+    var lastSort = "";
+    var thead = d3.select("#attach-table").select("thead").append("tr").selectAll("tr").data(['Date', 'Subject', 'Attachments', 'Email']).enter().append("th")
+      .text(function(d){ 
+        return d; 
+      }).on("click", function(k, i){
+        var direction = (lastSort == k) ? -1 : 1;
+        lastSort = (direction == -1) ? "" : k; //toggle
+        d3.select("#attach-table").select("tbody").selectAll("tr").sort(function(a,b){
+          var fields = ["datetime", "subject", "attach", "datetime"];
+          return a[fields[i]].localeCompare(b[fields[i]]) * direction;
+        });
+      });
+
+    var tr = d3.select("#attach-table").select("tbody").selectAll("tr").data(emails).enter().append("tr");
+
+    var popover = image_preview_popover();
+
+    tr.selectAll("td").data(function(d){
+      return [d.datetime, d.subject, [d.dir, d.attach], d.id]
+    }).enter()
+      .append("td")
+      .on("click", function(d, i){
+        if (i != 3) return;
+        $.get("email/email/" + encodeURIComponent(d)).then(
+          function(resp) {
+            update_current(d);
+            $('#tab-list li:eq(2) a').tab('show');          
+            if(resp.email.length > 0){
+              $("#email-body").empty();
+              $("#email-body").append(produceHTMLView(resp));
+            }
+          });
+      }).on("mouseover", function(d, i){
+        if (i == 2){
+          if (_.any(['jpg','jpeg','png','bmp','tiff','png'], function(ext){
+            return d[1].toLowerCase().indexOf(ext) > -1;
+          })){
+            popover.show($(this), 'emails/' + d[0] + "/attachments/" + encodeURIComponent(d[1]), 200, 200);
+          }
+        }
+      }).on("mouseout", function(d, i){
+        if (i == 2){
+          popover.hide($(this));
+        }
+      })
+      .html(function(d, i){
+        if (i == 2){
+          var el = $('<div>').append($('<a>', { "target": "_blank" ,"href" : 'emails/' + d[0] + "/attachments/" + encodeURIComponent(d[1]) }).html(d[1]));
+          return el.html();
+        }
+        if (i == 3){
+          var el = $('<div>').append($('<span>').addClass("glyphicon").addClass("glyphicon-share-alt"));
+          return el.html();
+        }
+        return d; 
+      });
+
+    deferred.resolve();
+  });
+  return deferred.promise();
+}
+
 function draw_rank_chart() {
   $.get('email/rank').then(function(resp){
     $('#top-rank').empty();
@@ -647,7 +793,7 @@ function draw_topic_tab(){
       return _.object(["idx", "value","score","purity","docs"], r);
     });
 
-    var thead = d3.select("#topics-table").select("thead").append("tr").selectAll("tr").data(['Index', 'Topic', 'Score', 'Purity', 'Docs']).enter().append("th").text(function(d){ return d; });
+    var thead = d3.select("#topics-table").select("thead").append("tr").selectAll("tr").data(['Index', 'Topic', '% of Docs']).enter().append("th").text(function(d){ return d; });
     var tr = d3.select("#topics-table").select("tbody").selectAll("tr").data(categories).enter().append("tr")
       .on("click", function(d, i){ 
         control_panel.open();

@@ -17,7 +17,7 @@ def topic_list(*args):
     category=nth(args, 0, 'all')
     with newman_connector() as read_cnx:
         stmt = (
-            " select idx, value, score, purity, docs from topic_category "
+            " select idx, value, docs from topic_category "
             " where category_id = %s "
             " order by idx "
         ) 

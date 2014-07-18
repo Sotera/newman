@@ -111,6 +111,7 @@
               <li><a href="#top-entities" role="tab" data-toggle="tab">Entities</a></li>
               <li><a href="#email-body-tab" role="tab" data-toggle="tab">Email</a></li>
               <li><a href="#topics-tab" role="tab" data-toggle="tab">Topics</a></li>
+              <li><a href="#attach-tab" role="tab" data-toggle="tab">Attachments</a></li>
             </ul>
 
             <!-- Tab panes -->
@@ -129,10 +130,14 @@
                 <div id="email-body"> Select an Email to preview </div>
               </div>
               <div class="tab-pane" id="topics-tab">
-                <table id="topics-table">
+                <table id="topics-table" class="info-table">
                   <thead></thead>
                   <tbody></tbody>
                 </table>
+              </div>
+              <div class="tab-pane" id="attach-tab">
+                <div style="padding-bottom: 10px;"><span>Attachments for sender: </span><span id="attach-sender" style="font-weight: bold;"></span></div>
+                <table id="attach-table" class="info-table"></table>                
               </div>
           </div>
           <!-- Create an SVG element to represent the legend -->
