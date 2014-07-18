@@ -205,11 +205,11 @@ function produceHTMLView(emailObj) {
 
   el.append(
     $('<p>').append($('<span>').addClass('bold').text("ID: "))
-      .append($('<a>', { 'target': '_blank', 'href' : 'emails/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.txt'}).text(d.num)));
+      .append($('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'emails/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.txt'}).text(d.num)));
 
   el.append(
     $('<p>').append($('<span>').addClass('bold').text("From: "))
-      .append($('<a>').on("click", function(){
+      .append($('<a>', { 'class': 'clickable'}).on("click", function(){
         draw_attachments_table(d.from).done(function(){
           $('#tab-list li:eq(4) a').tab('show');          
         });
@@ -226,7 +226,7 @@ function produceHTMLView(emailObj) {
 //  html += "<b>Attachments: </b>" + "<a href='emails/" + d.directory
 //  + "/attachments/" + d.attach + "'>" + d.attach + "</a><BR><BR>";
   el.append($('<p>').append($('<span>').addClass('bold').text("Attachments: "))
-                    .append($('<a>', { "target": "_blank" ,"href" : 'emails/' + d.directory + "/attachments/" + encodeURIComponent(d.attach) }).html(d.attach)));
+                    .append($('<a>', { 'class': 'clickable', "target": "_blank" ,"href" : 'emails/' + d.directory + "/attachments/" + encodeURIComponent(d.attach) }).html(d.attach)));
   el.append($('<p>'));
   
   var cleanBody = d.body.replace(/\[:newline:\]/g,"\t");
@@ -244,7 +244,7 @@ function produceHTMLView(emailObj) {
     //body += _.first(cleanBody, idx).join('');
     body.append($('<span>').html(_.first(cleanBody, idx).join('').replace(/\t/g,'<br/>')));
     //body += $('<span>', { "data-id": entity[0] }).addClass(entity[1]).html(entity[3])[0].outerHTML
-    body.append($('<span>', { "data-id": entity[0] }).addClass(entity[1]).html(entity[3]).on('click', _.partial(searchByEntity, entity[0], entity[1], entity[3])));
+    body.append($('<span>', { "data-id": entity[0] }).addClass(entity[1]).html(entity[3]).addClass('clickable').on('click', _.partial(searchByEntity, entity[0], entity[1], entity[3])));
     var rest = _.rest(cleanBody, idx).join('');
     cleanBody = rest.replace(rx, "");
   });
@@ -322,7 +322,7 @@ function do_search(fields, val) {
       .selectAll("tr")
     // .data(['Source','Date','From','To','Cc','Bcc','Subject'])
       .data(['Date','From','Recipient Count','Body Size','Attachment Count', 'Subject'])
-      .enter().append("th").text(function(d){return d;})
+      .enter().append("th").text(function(d){return d;}).attr('class', 'clickable')
       .on("click", function(k, i){
         console.log(arguments);
         var direction = (lastSort == k) ? -1 : 1;
@@ -353,7 +353,7 @@ function do_search(fields, val) {
     // create rows   
     var tr = d3.select("#result_table").select("tbody").selectAll("tr").data(comp_data.rows).enter().append("tr");
     
-    tr.on("click",function(d){
+    tr.attr('class', 'clickable').on("click",function(d){
       console.log(d.directory);
       // $("#webpage").load('emails/' + d.directory + '/' +
       // d.directory.split('/')[1] + '.txt');
@@ -635,6 +635,7 @@ function draw_mini_topic_chart(email_id){
         .attr("height", function(d) { return height - y(+d*100);})
         .attr("width", barWidth - 1)
         .style("fill", function(d,i) { return color(i); })
+        .attr('class', 'clickable')
         .on("click", function(d, i){ 
           $('#tab-list li:eq(3) a').tab('show');
           var rows = $('#topics-table')
@@ -687,7 +688,7 @@ function draw_attachments_table(email_addr){
     var thead = d3.select("#attach-table").select("thead").append("tr").selectAll("tr").data(['Date', 'Subject', 'Attachments', 'Email']).enter().append("th")
       .text(function(d){ 
         return d; 
-      }).on("click", function(k, i){
+      }).attr('class', 'clickable').on("click", function(k, i){
         var direction = (lastSort == k) ? -1 : 1;
         lastSort = (direction == -1) ? "" : k; //toggle
         d3.select("#attach-table").select("tbody").selectAll("tr").sort(function(a,b){
@@ -734,7 +735,7 @@ function draw_attachments_table(email_addr){
           return el.html();
         }
         if (i == 3){
-          var el = $('<div>').append($('<span>').addClass("glyphicon").addClass("glyphicon-share-alt"));
+          var el = $('<div>').append($('<span>').addClass("glyphicon").addClass("glyphicon-share-alt").addClass('clickable'));
           return el.html();
         }
         return d; 
@@ -789,12 +790,11 @@ function draw_rank_chart() {
     bar.append("text")
       .attr("x", function(d) { return -margin.left;})
       .attr("y", barHeight / 2)
-      .attr("class", "label")
+      .attr("class", "label clickable")
       .style("fill", function(d) {
         return color(+d.groupId); 
       })
       .text(function(d) { return (d.email.length > 25) ? d.email.substr(0,25) + ".." : d.email; })
-
       .on("click", function(d){ 
         $("#email_text").val(d.email)
         do_search('email', $("#email_text").val());        
@@ -825,7 +825,7 @@ function draw_topic_tab(){
     });
 
     var thead = d3.select("#topics-table").select("thead").append("tr").selectAll("tr").data(['Index', 'Topic', '% of Docs']).enter().append("th").text(function(d){ return d; });
-    var tr = d3.select("#topics-table").select("tbody").selectAll("tr").data(categories).enter().append("tr")
+    var tr = d3.select("#topics-table").select("tbody").selectAll("tr").data(categories).enter().append("tr").attr('class', 'clickable')
       .on("click", function(d, i){ 
         control_panel.open();
         do_search('topic','all', d.idx, '0.5');
@@ -883,7 +883,7 @@ function draw_entity_chart() {
     bar.append("text")
       .attr("x", function(d) { return -margin.left;})
       .attr("y", barHeight / 2)
-      .attr("class", "label")
+      .attr("class", "label clickable")
       .on("click", function(d){ 
         do_search('entity', d[0], d[2]);
       })

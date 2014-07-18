@@ -23,6 +23,8 @@ body {
     font-weight: bold;
 }
 
+.clickable { cursor: pointer; }
+
 .body-view .person { padding: 2px; background-color: #00ccff; }
 .body-view .location {  padding: 2px; background-color: #00ff00; }
 .body-view .organization {  padding: 2px; background-color: #ffcc33; }
