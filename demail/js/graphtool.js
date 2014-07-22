@@ -533,9 +533,27 @@ function drawGraph(graph){
       }
     });
 
+  var click_node = function(){
+    var timer = null, clicks=0, last="";
+    return function(n){
+      clicks++;
+      var fn = function(){
+        console.log(clicks);
+        if (clicks > 1){
+          do_search('email', $('#txt_search').val());
+        }
+        clicks=0;
+      };
+      if (clicks == 1){
+        $('#txt_search').val(n.name);
+        _.delay(fn, 300, n.name);
+      }
+    };
+  }();
+
   node.on("click", function(n){
     setSearchType('email');
-    $('#txt_search').val(n.name);
+    click_node(n);
   });
 			
   node.on("mouseover", function() { d3.select(this).select("svg text").style("opacity","100"); });
