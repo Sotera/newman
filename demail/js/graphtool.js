@@ -724,12 +724,12 @@ function draw_attachments_table(email_addr){
           if (_.any(['jpg','jpeg','png','bmp','tiff','png'], function(ext){
             return d[1].toLowerCase().indexOf(ext) > -1;
           })){
-            popover.show($(this), 'emails/' + d[0] + "/attachments/" + encodeURIComponent(d[1]), 200, 200);
+            popover.show($(this).find('a').first(), 'emails/' + d[0] + "/attachments/" + encodeURIComponent(d[1]), 200, 200);
           }
         }
       }).on("mouseout", function(d, i){
         if (i == 2){
-          popover.hide($(this));
+          popover.hide($(this).find('a').first());
         }
       })
       .html(function(d, i){
