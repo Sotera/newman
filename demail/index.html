@@ -32,69 +32,50 @@
       </div>
     </div>
 
-    <div id="hover-menu">
-      <div class="hover-body">
-        <div style="padding-left: 15px;padding-top: 20px;">
-          <table>
-	    <tr>
-              <td>Color:
-                <label class="radio-inline">
-                  <input type="radio" name="optionRadios" id="colorby" value="node" checked /> Node
-                </label>
-                <label class="radio-inline">
-                  <input type="radio" name="optionRadios" id="colorby2"  value="comm" />Community
-                </label>
-                <div class="form-inline">
-                  <label class="checkbox" style="padding-right: 10px;">
-                    <input type="checkbox" name="optionrank" id="rankval" value="rank" /> Rank
-                  </label>
-                  <label class="checkbox">
-                    <input type="checkbox" id="usetext" /> Render text labels
-                  </label>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td width="75%">
-                <input  id="search_text" class="form-control" type="text"  placeholder="Search all..." />
-              </td>
-              <td>
-                <a id="submit_search" class="btn btn-default">Search</a>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <input id="email_text" class="form-control" type="text" width="200" placeholder="From/To/Cc/Bcc..." />
-              </td>
-              <td>
-                <a id="submit_email" class="btn btn-default">Search</a>
-              </td>
-            </tr>
-          </table>
-        </div>
-
-      </div>
-      <div id="tab" class="hover-tab">
-        <div>
-          <span id="tab-icon" class="glyphicon glyphicon-chevron-right"></span>
-        </div>
-      </div>
-    </div>
-
-
     <!-- nav bar -->
     <div class="navbar navbar-default navbar-fixed-top">
       <div class="navbar-header">
         <div class="navbar-brand">newman</div>
       </div>
 
-      <ul class="nav navbar-nav">
-        <li>
-          <a style="cursor:pointer" data-toggle="modal" data-target="#info-panel">
-            <span class="glyphicon glyphicon-info-sign"></span> Info
-          </a>
-          </li>
-      </ul>
+      <!-- <ul class="nav navbar-nav"> -->
+      <!--   <li> -->
+      <!--     <a style="cursor:pointer" data-toggle="modal" data-target="#info-panel"> -->
+      <!--       <span class="glyphicon glyphicon-info-sign"></span> Info -->
+      <!--     </a> -->
+      <!--   </li> -->
+      <!-- </ul> -->
+      <div style="padding-right: 20px;">
+          <form id="search_form" class="navbar-form navbar-right" role="search" style="color: white;">
+            <label class="radio-inline" >
+              <input type="radio" name="searchType" value="all" checked /> Free text
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="searchType" value="email" /> Email
+            </label>
+            <div class="form-group" style="padding-left: 10px;">
+              <input id="txt_search" type="text" class="form-control" 
+                     placeholder="Search text..." 
+                     autocomplete="off"
+                     style="border-radius: 15px;width: 300px;background-color: rgba(255,255,255,0.9);">
+            </div>
+          </form>
+      </div>
+    </div>
+    <div style="position: absolute;top: 50px;background-color: rgba(240,240,240,0.8);padding: 15px;z-index: 999;font-size: 12px; border-bottom-right-radius: 10px;">
+      <div style="padding-bottom: 7px;">
+        <span>Color:&nbsp;&nbsp;</span>
+        <label class="radio-inline"><input type="radio" name="optionRadios" id="colorby" value="node" style="margin: 2px 0 0 -20px;" checked /> Node </label>
+        <label class="radio-inline"><input type="radio" name="optionRadios" id="colorby2"  value="comm" style="margin: 2px 0 0 -20px;"  /> Community </label>
+      </div>
+      <div class="form-inline">
+        <label class="checkbox" style="padding-right: 10px;">
+          <input type="checkbox" name="optionrank" id="rankval" value="rank" /> Rank
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" id="usetext" /> Render text labels
+        </label>
+      </div>
     </div>
 
     <!-- body -->
