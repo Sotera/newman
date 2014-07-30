@@ -146,6 +146,11 @@ body {
     color: red;
 }
 
+#attach-table tbody > tr >td:last-child {
+    vertical-align: middle;
+    text-align: center;
+}
+
 .info-table thead >tr >th {
     border: 1px black solid;
     padding: 5px;
