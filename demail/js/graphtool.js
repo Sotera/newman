@@ -694,6 +694,42 @@ function draw_mini_topic_chart(email_id){
 }
 
 
+function document_type(ext){
+  var fn = (function(ext, matches){
+    return _.any(matches, function(img){
+      return ext.localeCompare(img) === 0;
+    });
+  });
+
+  //img
+  if (fn(ext,['jpg','jpeg','png','bmp','tiff','png'])){
+    return "image";
+  }
+  
+  //pdf
+  if(fn(ext, ['pdf'])){
+    return "pdf";
+  }
+
+  //ppt
+  if(fn(ext, ['ppt', 'pptx'])){
+    return "powerpoint";
+  }
+
+  //word
+  if(fn(ext, ['doc', 'docx'])){
+    return "word";
+  }
+  
+  //excel
+  if(fn(ext, ['xls', 'xlx', 'xlsx'])){
+    return "excel";
+  }
+
+  return "other";
+}
+
+
 function draw_attachments_table(email_addr){
   var deferred = $.Deferred();
   $.ajax('email/attachments/' + email_addr).done(function(resp){
@@ -706,14 +742,23 @@ function draw_attachments_table(email_addr){
     $('#attach-table').append($('<thead>')).append($('<tbody>'));
 
     var lastSort = "";
-    var thead = d3.select("#attach-table").select("thead").append("tr").selectAll("tr").data(['Date', 'Subject', 'Attachments', 'Email']).enter().append("th")
+    var thead = d3.select("#attach-table").select("thead").append("tr").selectAll("tr").data(['Date', 'Subject', 'Attachments', 'Type','Email']).enter().append("th")
       .text(function(d){ 
         return d; 
       }).attr('class', 'clickable').on("click", function(k, i){
         var direction = (lastSort == k) ? -1 : 1;
         lastSort = (direction == -1) ? "" : k; //toggle
         d3.select("#attach-table").select("tbody").selectAll("tr").sort(function(a,b){
-          var fields = ["datetime", "subject", "attach", "datetime"];
+          if (i === 3 ){
+            var extfn = (function(d){
+              var i = d.attach.toLowerCase().lastIndexOf(".");
+              var l = d.attach.length;
+              return d.attach.toLowerCase().substr(i+1, l - i);
+            });
+            var exta = extfn(a), extb = extfn(b);
+            return exta.localeCompare(extb) * direction;
+          }
+          var fields = ["datetime", "subject", "attach", "datetime", "datetime"];
           return a[fields[i]].localeCompare(b[fields[i]]) * direction;
         });
       });
@@ -723,7 +768,7 @@ function draw_attachments_table(email_addr){
     var popover = image_preview_popover();
 
     tr.selectAll("td").data(function(d){
-      return [d.datetime, d.subject, [d.dir, d.attach], d.id]
+      return [d.datetime, d.subject, [d.dir, d.attach], [d.dir, d.attach], d.id]
     }).enter()
       .append("td")
       .on("click", function(d, i){
@@ -756,6 +801,29 @@ function draw_attachments_table(email_addr){
           return el.html();
         }
         if (i == 3){
+          var ext = (function(){
+            var i = d[1].toLowerCase().lastIndexOf(".");
+            var l = d[1].length;
+            return d[1].toLowerCase().substr(i+1, l - i);
+          }());
+          var img = (function(){
+            var img = $('<img>').css('height', '40px').css('width','40px');
+            
+            switch (document_type(ext)){
+              case "image" : return img.attr('src', 'emails/' + d[0] + "/attachments/" + encodeURIComponent(d[1]));
+              case "pdf" : return img.attr('src', 'imgs/document-icons/pdf-2.png');
+              case "powerpoint" : return img.attr('src', 'imgs/document-icons/powerpoint-2.png');
+              case "word" : return img.attr('src', 'imgs/document-icons/word-2.png');
+              case "excel" : return img.attr('src', 'imgs/document-icons/excel-2.png');
+              default : return img.attr('src', 'imgs/document-icons/text-2.png');
+            }
+
+          }());
+          
+          var el = $('<div>').append(img);
+          return el.html();
+        }
+        if (i == 4){
           var el = $('<div>').append($('<span>').addClass("glyphicon").addClass("glyphicon-share-alt").addClass('clickable'));
           return el.html();
         }
