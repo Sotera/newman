@@ -137,6 +137,20 @@ function update_current(val){
   current_email = val;
 }
 
+var domain_set = {};
+
+function colorByDomain(email){
+  var domain = email.replace(/.*@/, "");
+
+  if (domain in domain_set){
+    return color(domain_set[domain]);
+  }
+
+  var idx = _.keys(domain_set).length + 1;
+  domain_set[domain] = idx;
+  return idx;
+}
+
 
 function tickCommunity() {
   vis.selectAll(".link").attr("d", function(d) {
@@ -179,7 +193,8 @@ function recolornodes(how) {
   }
   if( how == 'node') {
     d3.selectAll("circle").style("fill", function(d) { 
-      return color(d.group); 
+      return color(colorByDomain(d.name));
+      //return color(d.group); 
     });
   }
 }
@@ -512,7 +527,8 @@ function drawGraph(graph){
     .attr("id", function(d) { return "g_circle_" + d.group; })
     .style("fill", function(d) { 
       if (d3.select("#colorby").property("checked")) {
-        return color(d.group);
+        return color(colorByDomain(d.name));
+        //return color(d.group);
       } else {
         return color(d.community);
       }})
@@ -881,7 +897,8 @@ function draw_rank_chart() {
       .attr("y", barHeight / 2)
       .attr("class", "label clickable")
       .style("fill", function(d) {
-        return color(+d.groupId); 
+        return color(colorByDomain(d.email));        
+        //return color(+d.groupId); 
       })
       .text(function(d) { return (d.email.length > 25) ? d.email.substr(0,25) + ".." : d.email; })
       .on("click", function(d){ 
