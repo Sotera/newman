@@ -1040,6 +1040,7 @@ $(function () {
         toggle: toggle
       };
     }());
+    control_panel.close();
   });
 
   var clusters = window.location.href.split('=');
@@ -1052,7 +1053,11 @@ $(function () {
 
   $('#txt_search').keyup(function (e){
     if (e.keyCode === 13) {
-      do_search($("input:radio[name ='searchType']:checked").val(), $("#txt_search").val());
+      var txt = $("#txt_search").val();
+      if (txt.length == 0){
+        setSearchType('all');
+      }
+      do_search($("input:radio[name ='searchType']:checked").val(), txt);
     }
     e.preventDefault();
   });
