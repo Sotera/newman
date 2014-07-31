@@ -148,7 +148,7 @@ function colorByDomain(email){
 
   var idx = _.keys(domain_set).length + 1;
   domain_set[domain] = idx;
-  return idx;
+  return color(idx);
 }
 
 
@@ -193,7 +193,7 @@ function recolornodes(how) {
   }
   if( how == 'node') {
     d3.selectAll("circle").style("fill", function(d) { 
-      return color(colorByDomain(d.name));
+      return colorByDomain(d.name);
       //return color(d.group); 
     });
   }
@@ -527,7 +527,7 @@ function drawGraph(graph){
     .attr("id", function(d) { return "g_circle_" + d.group; })
     .style("fill", function(d) { 
       if (d3.select("#colorby").property("checked")) {
-        return color(colorByDomain(d.name));
+        return colorByDomain(d.name);
         //return color(d.group);
       } else {
         return color(d.community);
@@ -897,7 +897,7 @@ function draw_rank_chart() {
       .attr("y", barHeight / 2)
       .attr("class", "label clickable")
       .style("fill", function(d) {
-        return color(colorByDomain(d.email));        
+        return colorByDomain(d.email);
         //return color(+d.groupId); 
       })
       .text(function(d) { return (d.email.length > 25) ? d.email.substr(0,25) + ".." : d.email; })
