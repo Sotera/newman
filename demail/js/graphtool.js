@@ -693,7 +693,8 @@ function draw_mini_topic_chart(email_id){
           console.log((d*100) + "% \n" + topics[i]); 
         })
         .on("mouseover", function(d, i){ 
-          var str = "topic: " + i + "<br/>" + Math.floor(100 * d) + '%';
+          //var str = "topic: " + i + "<br/>" + Math.floor(100 * d) + '%';
+          var str = "<ul><li>" + _.take(topics[i][1].split(' '), 5).join('</li><li>') + "</li></ul>";
           topics_popover.show(str);
         })
         .on("mouseout", function(d, i){ 
@@ -928,7 +929,9 @@ function draw_rank_chart() {
 function draw_topic_tab(){
   $.ajax('topic/category/all').then(function(resp){
     var categories = _.map(resp.categories, function(r){
-      return _.object(["idx", "value","score","purity","docs"], r);
+      var o =  _.object(["idx", "value","score","purity","docs"], r);
+      o.value = _.take(o.value.split(' '), 5).join(' ');
+      return o;
     });
 
     var thead = d3.select("#topics-table").select("thead").append("tr").selectAll("tr").data(['Index', 'Topic', '% of Docs']).enter().append("th").text(function(d){ return d; });
