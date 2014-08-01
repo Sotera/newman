@@ -311,7 +311,7 @@ function do_search(fields, val) {
       'topic': function(args){
         var topic = _.first(_.rest(args));       
         var score = _.first(_.rest(args, 2));
-        return "Searchring on topic index <b>" + topic +"</b><br/> with score greater than " + Math.floor(100.0 * score) + "%";
+        return "Searching on topic index <b>" + topic +"</b><br/> with score greater than " + Math.floor(100.0 * score) + "%";
       },
       'entity': function(args){
         var entity = _.first(_.rest(args));
