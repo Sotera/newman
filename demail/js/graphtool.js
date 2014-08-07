@@ -929,11 +929,11 @@ function draw_rank_chart() {
         do_search('email', $("#txt_search").val());        
       })
       .on("mouseover", function(d){
-        d3.select("#g_circle_" + d.groupId).style("stroke","ffff00");  
+        d3.select("#g_circle_" + d.groupId).style("stroke","#ffff00");  
         d3.select("#g_circle_" + d.groupId).style("stroke-width",function(d) { return 10 * (d.rank); });
       })
       .on("mouseout", function(d){
-        d3.select("#g_circle_" + d.groupId).style("stroke","ff0000");  
+        d3.select("#g_circle_" + d.groupId).style("stroke","#ff0000");  
         if (d3.select("#rankval").property("checked")) {
           d3.select("#g_circle_" + d.groupId).style("opacity",function(d) { return 0.2 + (d.rank); });
           d3.select("#g_circle_" + d.groupId).style("stroke-width",function(d) { return 5 * (d.rank); });
