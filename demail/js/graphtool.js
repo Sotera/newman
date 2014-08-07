@@ -204,6 +204,11 @@ function splitItemCount(str){
   return str.split(',').length;
 }
 
+function splitAttachCount(str){
+  if (str.trim().length == 0) return 0
+  return str.split(';').length;
+}
+
 function recipientCount(to, cc, bcc){
   return _.reduce(_.map([to, cc, bcc], splitItemCount), function(a,b){ return a+b;}, 0);
 }
@@ -241,9 +246,9 @@ function produceHTMLView(emailObj) {
 
   var recipients = _.zip(['To', 'Cc', 'Bcc'], [d.to, d.cc, d.bcc]);
   _.each(recipients, function(item){
-    var emails = _.uniq(item[1].split(','));
+    var emails = _.uniq(item[1].split(';'));
     el.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
-                      .append(emails.join(', ')));
+                      .append(emails.join('; ')));
   });
   
 
@@ -256,10 +261,16 @@ function produceHTMLView(emailObj) {
 
 //  html += "<b>Attachments: </b>" + "<a href='emails/" + d.directory
 //  + "/attachments/" + d.attach + "'>" + d.attach + "</a><BR><BR>";
-  el.append($('<p>').append($('<span>').addClass('bold').text("Attachments: "))
-                    .append($('<a>', { 'class': 'clickable', "target": "_blank" ,"href" : 'emails/' + d.directory + "/attachments/" + encodeURIComponent(d.attach) }).html(d.attach)));
-  el.append($('<p>'));
-  
+
+  var attachments = $('<p>').append($('<span>').addClass('bold').text("Attachments: "));
+  _.each(d.attach.split(','), 
+         function(attach){ 
+           attachments.append($('<a>', { 'class': 'clickable', "target": "_blank" ,"href" : 'emails/' + d.directory + "/attachments/" + encodeURIComponent(attach) }).html(attach));
+           attachments.append($('<span>').html(';&nbsp'));
+         });
+
+  el.append(attachments);
+  el.append($('<p>'));  
   var cleanBody = d.body.replace(/\[:newline:\]/g,"\t");
 
   //sort by index
@@ -372,7 +383,7 @@ function do_search(fields, val) {
             return (a.bodysize - b.bodysize) * direction * -1; //desc first
           }
           if (i == 4){
-            return (splitItemCount(a.attach) - splitItemCount(b.attach)) * direction * -1; //desc first
+            return (splitAttachCount(a.attach) - splitAttachCount(b.attach)) * direction * -1; //desc first
           }
           if (i == 5) {
             return a.subject.localeCompare(b.subject) * direction;
@@ -416,7 +427,7 @@ function do_search(fields, val) {
     var td = tr.selectAll("td")
       .data(function(d){
         var recipient_count = recipientCount(d.to, d.cc, d.bcc);
-        var attach_count = splitItemCount(d.attach)
+        var attach_count = splitAttachCount(d.attach)
         return [d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject ];
         //return [d.num + '::' + d.from + '::' + d.directory, d.datetime, d.from +'::' + d.fromcolor,d.to,d.cc,d.bcc,d.subject];
       })
