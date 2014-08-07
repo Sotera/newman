@@ -66,6 +66,13 @@ def getRankedEmails(*args):
             rtn = [[str(val) for val in row] for row in qry.cursor()]
             return { "emails" : rtn }
 
+#GET /target
+def getTarget(*args):
+    # returns the users who's email is being analyzed
+    #todo: read from file or config 
+    tangelo.content_type("application/json")        
+    return { "email" : "kmrindfleisch@gmail.com" }
+
 #GET /attachments/<sender>
 def getAttachmentsSender(*args):
     sender=urllib.unquote(nth(args, 0, ''))
@@ -84,6 +91,7 @@ def getAttachmentsSender(*args):
             return { "sender": sender, "email_attachments" : rtn }
 
 actions = {
+    "target" : getTarget, 
     "email": getEmail,
     "entities" : getEntities,
     "rank" : getRankedEmails,
