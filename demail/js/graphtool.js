@@ -433,15 +433,15 @@ function do_search(fields, val) {
         }
         if (i == 2) {
           var px = d > 100 ? 100 : d;
-          return "<div style='background-color: blue;height: 10px;width: " +px +"px;' />"
+          return "<div style='background-color: blue;height: 10px;width: " +px +"px;' title='" + +d + "'/>"
         }
         if (i == 3) {
           var px = (d / 1000.0) > 100 ? 100 : (d / 1000.0);
-          return "<div style='background-color: green;height: 10px;width: " +px +"px;' />"
+          return "<div style='background-color: green;height: 10px;width: " +px +"px;' title='" + +d + "'/>" 
         }
         if (i == 4) {
           var px = (d * 10) > 100 ? 100 : (d * 10);
-          return "<div style='background-color: orange;height: 10px;width: " +px +"px;' />"
+          return "<div style='background-color: orange;height: 10px;width: " +px +"px;' title='" + +d + "'/>"
         }
 
         return d;
@@ -586,6 +586,8 @@ function drawGraph(graph){
       d3.select(this).select("svg text").style("opacity","0");
     }
   });
+
+
   link.append("svg:text")
     .text(function(d) { return 'yes';})
     .attr("fill","black")
