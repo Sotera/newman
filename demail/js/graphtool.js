@@ -239,8 +239,16 @@ function produceHTMLView(emailObj) {
         return false;
       }).text(d.from)));
 
-  var items = _.zip(['To','Cc','Bcc','Subject','Date'], 
-        [d.to, d.cc, d.bcc, d.subject, d.datetime]);
+  var recipients = _.zip(['To', 'Cc', 'Bcc'], [d.to, d.cc, d.bcc]);
+  _.each(recipients, function(item){
+    var emails = _.uniq(item[1].split(','));
+    el.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
+                      .append(emails.join(', ')));
+  });
+  
+
+  var items = _.zip(['Subject','Date'], 
+        [d.subject, d.datetime]);
   _.each(items, function(item){
     el.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
                       .append(item[1]) );
