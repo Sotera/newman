@@ -183,6 +183,16 @@ ul {
     font-size: 12px;
 }
 
+
+#result_table tbody tr:nth-child(odd) {
+    background-color: #f0f0f0; 
+}
+
+#result_table tbody tr:hover {
+    background-color: #ffffae; 
+}
+
+
 .row-highlight {
     background-color: #ffffae; 
 }
