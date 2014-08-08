@@ -20,6 +20,7 @@ stmt_email_entities_by_id = (
     " where email_id = %s "
 )
 
+
 def queryEmail(email):
     with newman_connector() as read_cnx:
         with execute_query(read_cnx.conn(), stmt_email_by_id, email) as qry:
@@ -70,8 +71,17 @@ def getRankedEmails(*args):
 def getTarget(*args):
     # returns the users who's email is being analyzed
     #todo: read from file or config 
+    target = "kmrindfleisch@gmail.com" 
+    stmt = (
+        " select e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
+        " from email_addr e "
+        " where e.email_addr = %s "
+    )
     tangelo.content_type("application/json")        
-    return { "email" : "kmrindfleisch@gmail.com" }
+    with newman_connector() as read_cnx:
+        with execute_query(read_cnx.conn(), stmt, target) as qry:
+            rtn = [[str(val) for val in row] for row in qry.cursor()]
+            return { "email" : rtn }
 
 #GET /attachments/<sender>
 def getAttachmentsSender(*args):

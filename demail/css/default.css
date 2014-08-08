@@ -83,6 +83,14 @@ ul {
     stroke: #bbb;
 }
 
+#target_email_a:hover {
+    color: #ffff00;
+}
+
+.highlight-td {
+    background-color: #ffff00;
+}
+
 #hover-menu {
     height: 200px;
     width: 400px;

@@ -19,6 +19,7 @@ var svg = d3.select("#node_graph").append("svg")
 var vis = svg.append('svg:g');
 
 var labels = false;
+var TARGET_EMAIL = null;
 
 var control_panel=null;
 
@@ -1032,194 +1033,256 @@ $(function () {
   // Create control panel.
   $("#control-panel").controlPanel();
 
-  _.defer(function(){
-    control_panel = (function(){
-      var el = $('[id^=tangelo-drawer-handle]');
+  $.get("email/target").done(function(resp){
+    TARGET_EMAIL = _.object(
+      ['email', 'community', 'community_id', 'group', 'total_received', 'total_sent', 'rank'], 
+      _.first(resp.email)
+    );
+    
+    $('#target_email').html(TARGET_EMAIL.email);
 
-      var toggle = function(){
-        el.click();
-      };
+    _.defer(function(){
+      control_panel = (function(){
+        var el = $('[id^=tangelo-drawer-handle]');
 
-      var open = function(){
-        var classes= el.find('span').attr('class').split(/\s+/);
-        if (_.any(classes, function(class_){
-          return class_.indexOf('up') > -1;
-        })){
-          toggle();
+        var toggle = function(){
+          el.click();
+        };
+
+        var open = function(){
+          var classes= el.find('span').attr('class').split(/\s+/);
+          if (_.any(classes, function(class_){
+            return class_.indexOf('up') > -1;
+          })){
+            toggle();
+          }
+        };
+
+        var close = function(){
+          var classes= el.find('span').attr('class').split(/\s+/);
+          if (_.any(classes, function(class_){
+            return class_.indexOf('down') > -1;
+          })){
+            toggle();
+          }
         }
-      };
 
-      var close = function(){
-        var classes= el.find('span').attr('class').split(/\s+/);
-        if (_.any(classes, function(class_){
-          return class_.indexOf('down') > -1;
-        })){
-          toggle();
+        return {
+          open: open,
+          close: close,
+          toggle: toggle
+        };
+      }());
+      control_panel.close();
+    });
+
+    var clusters = window.location.href.split('=');
+    var cluster = '';
+    if( clusters.length == 2) {
+      cluster = clusters[1];
+    }
+
+    GT.con = d3.select("#console");
+
+    $('#txt_search').keyup(function (e){
+      if (e.keyCode === 13) {
+        var txt = $("#txt_search").val();
+        if (txt.length == 0){
+          setSearchType('all');
         }
+        do_search($("input:radio[name ='searchType']:checked").val(), txt);
       }
+      e.preventDefault();
+    });
+
+    $("#search_form").submit(function(e){
+      return false;
+    });
+
+    // $('#target_email').on('click', function(){
+    //   setSearchType('email');
+    //   $("#txt_search").val(TARGET_EMAIL);
+    // });
+
+    $('#target_email_a').on('dblclick', function(){
+      setSearchType('email');
+      $("#txt_search").val(TARGET_EMAIL.email);
+      do_search('email', TARGET_EMAIL.email);
+    });
+
+    var highlight_target = (function(){
+      var groupId = TARGET_EMAIL.group;
+      var highlight = function(){
+        //graph
+        d3.select("#g_circle_" + groupId).style("stroke","#ffff00");  
+        d3.select("#g_circle_" + groupId).style("stroke-width",function(d) { return 10; });
+        //email-table
+        $('#result_table tbody tr td:nth-child(2)').each(function(i, el){
+          if (TARGET_EMAIL.email.localeCompare(el.innerText.trim()) == 0) {
+            $(el).addClass('highlight-td');
+          }
+        });
+      }
+
+      var unhighlight = function(){
+        //graph
+        d3.select("#g_circle_" + groupId).style("stroke","#ff0000");  
+        if (d3.select("#rankval").property("checked")) {
+          d3.select("#g_circle_" + groupId).style("opacity",function(d) { return 0.2 + (rank); });
+          d3.select("#g_circle_" + groupId).style("stroke-width",function(d) { return 5 * (rank); });
+        }
+        else {
+          d3.select("#g_circle_" + groupId).style("opacity","100");
+          d3.select("#g_circle_" + groupId).style("stroke-width","0");
+        }
+        //email-table
+        $('#result_table tbody tr td:nth-child(2)').each(function(i, el){
+          $(el).removeClass('highlight-td');
+        });
+      };
 
       return {
-        open: open,
-        close: close,
-        toggle: toggle
-      };
-    }());
-    control_panel.close();
-  });
-
-  var clusters = window.location.href.split('=');
-  var cluster = '';
-  if( clusters.length == 2) {
-    cluster = clusters[1];
-  }
-
-  GT.con = d3.select("#console");
-
-  $('#txt_search').keyup(function (e){
-    if (e.keyCode === 13) {
-      var txt = $("#txt_search").val();
-      if (txt.length == 0){
-        setSearchType('all');
+        highlight: highlight,
+        unhighlight: unhighlight
       }
-      do_search($("input:radio[name ='searchType']:checked").val(), txt);
+    }());
+
+    $('#target_email_a').on('mouseover', highlight_target.highlight);
+    $('#target_email_a').on('mouseout', highlight_target.unhighlight);    
+    
+    /* fails lint - Use '!==' to compare with ''. */
+    if( cluster != '')  {  
+      do_search('all', cluster);
+    }  else { 
+      //do_search('all','');
     }
-    e.preventDefault();
-  });
+    $('#top-entities').append(waiting_bar);
 
-  $("#search_form").submit(function(e){
-    return false;
-  });
-  
-  /* fails lint - Use '!==' to compare with ''. */
-  if( cluster != '')  {  
-    do_search('all', cluster);
-  }  else { 
-    //do_search('all','');
-  }
-  $('#top-entities').append(waiting_bar);
+    draw_entity_chart();
+    draw_rank_chart();
+    draw_topic_tab();
 
-  draw_entity_chart();
-  draw_rank_chart();
-  draw_topic_tab();
+    // var open=false;
+    // $("#tab").on("click", function(){
+    //   if (open) {
+    //     $("#hover-menu").animate({left: -375}, 500).promise().done(function(){
+    //       $("#tab-icon").removeClass("glyphicon-chevron-left");
+    //       $("#tab-icon").addClass("glyphicon-chevron-right");
+    //       open=false;
+    //     });
+    //   } else {
+    //     $("#hover-menu").animate({left: 0}, 500).promise().done(function(){
+    //       $("#tab-icon").removeClass("glyphicon-chevron-right");
+    //       $("#tab-icon").addClass("glyphicon-chevron-left");
+    //       open=true;
+    //     });
+    //   }
+    // });
 
-  // var open=false;
-  // $("#tab").on("click", function(){
-  //   if (open) {
-  //     $("#hover-menu").animate({left: -375}, 500).promise().done(function(){
-  //       $("#tab-icon").removeClass("glyphicon-chevron-left");
-  //       $("#tab-icon").addClass("glyphicon-chevron-right");
-  //       open=false;
-  //     });
-  //   } else {
-  //     $("#hover-menu").animate({left: 0}, 500).promise().done(function(){
-  //       $("#tab-icon").removeClass("glyphicon-chevron-right");
-  //       $("#tab-icon").addClass("glyphicon-chevron-left");
-  //       open=true;
-  //     });
-  //   }
-  // });
+    /* attach element event handlers */
+    $("#submit_search").click(function(){
+      do_search('all', $("#search_text").val());
+    });
 
-  /* attach element event handlers */
-  $("#submit_search").click(function(){
-    do_search('all', $("#search_text").val());
-  });
+    $("input[name='searchType']").change(function(e){
+      if ($(this).val() == 'email'){
+        $('#txt_search').attr('placeholder', 'From/To/Cc/Bcc...');
+      } else {
+        $('#txt_search').attr('placeholder', 'Search text...');
+      }
+      $('#txt_search').val('');
+    });
 
-  $("input[name='searchType']").change(function(e){
-    if ($(this).val() == 'email'){
-      $('#txt_search').attr('placeholder', 'From/To/Cc/Bcc...');
-    } else {
-      $('#txt_search').attr('placeholder', 'Search text...');
-    }
-    $('#txt_search').val('');
-  });
+    $("#submit_activesearch_like").click(function(){
+      if (current_email == null) {
+        alert('please select an email to seed');
+        return;
+      }
+      $("#email-body").empty();
+      $("#email-body").append(waiting_bar);
+      $.get("activesearch/like").then(
+        function(resp){
+          update_current(resp);
+          $.get("email/email/" + encodeURIComponent(resp)).then(
+            function(resp) {
+              if(resp.email.length > 0){
+                $("#email-body").empty();
+                $("#email-body").append(produceHTMLView(resp));
+              }
+            }); 
+        });
+    });
 
-  $("#submit_activesearch_like").click(function(){
-    if (current_email == null) {
-      alert('please select an email to seed');
-      return;
-    }
-    $("#email-body").empty();
-    $("#email-body").append(waiting_bar);
-    $.get("activesearch/like").then(
-      function(resp){
-      update_current(resp);
-      $.get("email/email/" + encodeURIComponent(resp)).then(
+    $("#submit_activesearch_dislike").click(function(){
+      if (current_email == null) {
+        alert('please select an email to seed');
+        return;
+      }
+      $("#email-body").empty();
+      $("#email-body").append(waiting_bar);
+      $.get("activesearch/dislike").then(
+        function(resp){
+          update_current(resp);
+          $.get("email/email/" + encodeURIComponent(resp)).then(
+            function(resp) {
+              if(resp.email.length > 0){
+                $("#email-body").empty();
+                $("#email-body").append(produceHTMLView(resp));
+              }
+            });
+        });
+    });
+
+    $("#submit_activesearch").click(function(){
+      console.log("seed active search for email_id... ");
+      if (current_email == null) {
+        alert('please select an email to seed');
+        return;
+      }
+      var id = current_email;
+      $("#email-body").empty();
+      $("#email-body").append(waiting_bar);
+      $.get("activesearch/seed/" + encodeURIComponent(id)).then(
         function(resp) {
-          if(resp.email.length > 0){
-            $("#email-body").empty();
-            $("#email-body").append(produceHTMLView(resp));
-          }
-        }); 
-      });
-  });
+          update_current(resp);
+          $.get("email/email/" + encodeURIComponent(resp)).then(
+            function(resp) {
+              if(resp.email.length > 0){
+                $("#email-body").empty();
+                $("#email-body").append(produceHTMLView(resp));
+              }
+            });
+        });
+    });
+    
+    $("#colorby2").click(function(){
+      console.log($("#colorby2").val());
+      recolornodes('comm');
+    });
 
-  $("#submit_activesearch_dislike").click(function(){
-    if (current_email == null) {
-      alert('please select an email to seed');
-      return;
-    }
-    $("#email-body").empty();
-    $("#email-body").append(waiting_bar);
-    $.get("activesearch/dislike").then(
-      function(resp){
-        update_current(resp);
-        $.get("email/email/" + encodeURIComponent(resp)).then(
-          function(resp) {
-            if(resp.email.length > 0){
-              $("#email-body").empty();
-              $("#email-body").append(produceHTMLView(resp));
-            }
-          });
-      });
-  });
+    $("#colorby").click(function(){
+      console.log($("#colorby").val());
+      recolornodes('node');
+    });
 
-  $("#submit_activesearch").click(function(){
-    console.log("seed active search for email_id... ");
-    if (current_email == null) {
-      alert('please select an email to seed');
-      return;
-    }
-    var id = current_email;
-    $("#email-body").empty();
-    $("#email-body").append(waiting_bar);
-    $.get("activesearch/seed/" + encodeURIComponent(id)).then(
-      function(resp) {
-        update_current(resp);
-        $.get("email/email/" + encodeURIComponent(resp)).then(
-          function(resp) {
-            if(resp.email.length > 0){
-              $("#email-body").empty();
-              $("#email-body").append(produceHTMLView(resp));
-            }
-          });
-      });
-  });
-  
-  $("#colorby2").click(function(){
-    console.log($("#colorby2").val());
-    recolornodes('comm');
-  });
+    $("#usetext").on("change", function(){
+      toggle_labels(); 
+    });
 
-  $("#colorby").click(function(){
-    console.log($("#colorby").val());
-    recolornodes('node');
-  });
+    $("#rankval").click(function(){
+      console.log(d3.select("#rankval").property("checked"));
+      if (d3.select("#rankval").property("checked")) {
+        d3.selectAll("circle").style("opacity",function(d) { return 0.2 + (d.rank); });
+        d3.selectAll("circle").style("stroke-width",function(d) { return 5 * (d.rank); });
+      }
+      else {
+        d3.selectAll("circle").style("opacity","100");
+        d3.selectAll("circle").style("stroke-width","0");
+      }
+      //recolornodes('rank');
+    });
 
-  $("#usetext").on("change", function(){
-    toggle_labels(); 
-  });
-
-  $("#rankval").click(function(){
-    console.log(d3.select("#rankval").property("checked"));
-    if (d3.select("#rankval").property("checked")) {
-      d3.selectAll("circle").style("opacity",function(d) { return 0.2 + (d.rank); });
-      d3.selectAll("circle").style("stroke-width",function(d) { return 5 * (d.rank); });
-    }
-    else {
-      d3.selectAll("circle").style("opacity","100");
-      d3.selectAll("circle").style("stroke-width","0");
-    }
-    //recolornodes('rank');
+    
   });
 
 });
