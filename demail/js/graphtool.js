@@ -1112,6 +1112,7 @@ $(function () {
 
     var highlight_target = (function(){
       var groupId = TARGET_EMAIL.group;
+      var rank = TARGET_EMAIL.rank;
       var highlight = function(){
         //graph
         d3.select("#g_circle_" + groupId).style("stroke","#ffff00");  
