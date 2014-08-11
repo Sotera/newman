@@ -9,9 +9,9 @@ import urllib
 
 
 stmt_email_by_id = (
-    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, body, attach "
-    " from email "
-    " where id = %s "
+    " select e.id, e.dir, e.datetime, e.from_addr, e.tos, e.ccs, e.bccs, e.subject, html.body_html, e.attach "
+    " from email e join email_html html on e.id = html.id"
+    " where e.id = %s "
 )
 
 stmt_email_entities_by_id = (

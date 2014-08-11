@@ -23,6 +23,14 @@ var TARGET_EMAIL = null;
 
 var control_panel=null;
 
+var htmlDecode = function(str){
+  return $('<div/>').html(str).text();
+};
+
+var htmlEncode = function(str){
+  return $('<div/>').text(str).html();
+};
+
 var topics_popover = (function(){ 
   //init
   $('#topic_mini_chart').popover({ placement: 'left', trigger: 'manual', content: 'test', html: true});
@@ -272,39 +280,16 @@ function produceHTMLView(emailObj) {
 
   el.append(attachments);
   el.append($('<p>'));  
-  var cleanBody = d.body.replace(/\[:newline:\]/g,"\t");
 
   //sort by index
   var ents = _.sortBy(emailObj.entities, function(o){ return o[2]});
 
-  var body = $('<div>');
-  _.each(ents, function(entity){
-    var rxstr = entity[3].replace(/\./g,"\.").replace(/\s/g,"(\\.|\\s|\\t)+").replace(/\+/g,'\\+').replace(/\*/g,'\\*').replace(/\(/g,'\\(').replace(/\)/g,'\\)')
-    //console.log(rxstr);
-    var rx = new RegExp(rxstr);
-    var idx = cleanBody.search(rx)
-    //var idx = cleanBody.indexOf(entity[3]);
-    //body += _.first(cleanBody, idx).join('');
-    body.append($('<span>').html(_.first(cleanBody, idx).join('').replace(/\t/g,'<br/>')));
-    //body += $('<span>', { "data-id": entity[0] }).addClass(entity[1]).html(entity[3])[0].outerHTML
-    body.append($('<span>', { "data-id": entity[0] }).addClass(entity[1]).html(entity[3]).addClass('clickable').on('click', _.partial(searchByEntity, entity[0], entity[1], entity[3])));
-    var rest = _.rest(cleanBody, idx).join('');
-    cleanBody = rest.replace(rx, "");
+  el.append(d.body)
+  
+  el.find(".mitie").each(function(i,el){
+    var jqel = $(el);
+    jqel.on('click', _.partial(searchByEntity, jqel.attr('mitie-id'), jqel.attr('mitie-type'), jqel.attr('mitie-value')));
   });
-
-  body.append($('<span>').html(cleanBody.replace(/\t/g,'<br/>')));
-
-  // var uniqueEntities = _.unique(emailObj.entities, false, function(o){
-  //   return o[1] + o[3];
-  // });
-
-  // _.each(uniqueEntities, function(o){
-  //   cleanBody = cleanBody.replace(o[3], $('<span>').addClass(o[1]).html(o[3])[0].outerHTML);
-  // });
-  //el.append($('<p>').html(d.body.replace(/\[:newline:\]/g, "<br/>")));
-
-  el.append(body)
-  //el.append($('<p>').html(body.replace(/\n/g, "<br/>")));
 
   return el;
 }
@@ -335,7 +320,7 @@ function do_search(fields, val) {
       },
       'entity': function(args){
         var entity = _.first(_.rest(args));
-        return "Searching on entity <br/><b>" + entity +"</b>";
+        return "Searching on entity <br/><b>" + htmlEncode(entity) + "</b>";
       }
     };
     var field = _.first(varargs);
