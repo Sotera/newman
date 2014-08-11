@@ -35,6 +35,10 @@ call drop_index_if_exists('email', 'idx_email_line_num');
 create index idx_email_id on email(id);
 create index idx_email_line_num on email(line_num);
 
+call drop_index_if_exists('email_html', 'idx_email_html_id');
+
+create index idx_email_html_id on email_html(id);
+
 call drop_index_if_exists('entity', 'idx_entity_subject');
 call drop_index_if_exists('entity', 'idx_entity_type');
 call drop_index_if_exists('entity', 'idx_entity_val');

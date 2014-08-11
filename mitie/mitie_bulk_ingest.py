@@ -20,10 +20,11 @@ def bulk_insert_scores(file_ref, table):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Ingest MITIE data')
-    parser.add_argument("entity_dat", help="entity file")
+    parser.add_argument("dat", help="file")
+    parser.add_argument("table", help="table")
     args= parser.parse_args()
 
-    print "bulk insert entity"
-    bulk_insert_scores(args.entity_dat, "entity")
+    print "bulk ingest into " + args.table
+    bulk_insert_scores(args.dat, args.table)
 
 

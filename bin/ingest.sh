@@ -24,11 +24,21 @@ fi
 printf "entity extraction\n"
 ./mitie/mitie_entity_ingest_file.py
 
-printf "entity bulk ingest\n"
-./mitie/mitie_bulk_ingest.py tmp/entity_ingest.tsv
+printf "entity bulk ingest entity\n"
+./mitie/mitie_bulk_ingest.py tmp/entity_ingest.tsv entity
 
 printf "entity rollup\n"
 ./mitie/mitie_entity_rollup.py
+
+if [ -e  tmp/email_markup.tsv ]; then
+    rm -rf tmp/email_markup.tsv
+fi
+
+printf "entity email markups\n"
+./mitie/mitie_markup_email.py
+
+printf "entity bulk ingest markup\n"
+./mitie/mitie_bulk_ingest.py tmp/email_markup.tsv email_html
 
 printf "enrich email comms\n"
 ./src/enrich_email_comms.py

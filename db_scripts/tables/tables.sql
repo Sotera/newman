@@ -23,6 +23,13 @@ create table email (
    line_num int not null
 );
 
+drop table if exists email_html;
+
+create table email_html (
+   id varchar(250) not null,
+   body_html longtext not null
+);
+
 drop table if exists email_addr;
 
 create table email_addr (
@@ -72,7 +79,8 @@ create table entity (
    entity_type varchar(250) not null, 
    idx int not null, 
    value varchar(1000) character set utf8 not null,
-   email_id varchar(250) not null
+   email_id varchar(250) not null,
+   offset varchar(64) not null
 ) ENGINE=MyISAM;
 
 drop table if exists entity_rollup;

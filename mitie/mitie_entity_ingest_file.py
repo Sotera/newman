@@ -18,14 +18,16 @@ stmt = (
 )
 
 def extract_entities(ner, email_id, body):
-    body = body.replace("[:newline:]", "\n")
-    body = re.sub(r'[^\x00-\x7F]+',' ', body)
+    body = re.sub(r'[^\x00-\x7F]',' ', body)
+    body = body.replace("[:newline:]", "           ")
     body = body.encode("ascii")
-    tokens = tokenize(body)
+    #tokens = tokenize(body)
+    tokens = tokenize_with_offsets(body)
     entities = ner.extract_entities(tokens)
-    return [
-        (email_id, tag, " ".join([tokens[i] for i in rng]))
+    rtn = [
+        (email_id, tag, " ".join([tokens[i][0] for i in rng]), ",".join([str(tokens[i][1]) for i in rng]))
         for rng, tag in entities ]
+    return rtn
 
 def inc(n):
     return n+1
@@ -44,7 +46,7 @@ def flush_buffer(f, buffer):
 if __name__ == "__main__":
 
     print "loading NER model..."
-    ner = named_entity_extractor('/srv/software/MITIE/MITIE-models/ner_model.dat')
+    ner = named_entity_extractor('/srv/software/MITIE/MITIE-models/english/ner_model.dat')
     extract = partial(extract_entities, ner)    
 
     print "\nTags output by this NER model:", ner.get_possible_ner_tags()
@@ -62,12 +64,9 @@ if __name__ == "__main__":
                     print "processed: %s " % count
                 r = extract(email_id, body)
                 for i, item in enumerate(r):
-                    email_id, tag_name, entity = item
+                    email_id, tag_name, entity, offset = item
                     entity_id = "%s_entity_%s" % (email_id, i)
-                    buffer_entity.append("\t".join([entity_id, tag_name.lower(), str(i), entity, email_id]))
-                    if len(buffer_entity) > 1000:
-                        flush_entity(buffer_entity)
-                        buffer_entity=[]
+                    buffer_entity.append("\t".join([entity_id, tag_name.lower(), str(i), entity, email_id, str(offset)]))
 
             flush_entity(buffer_entity)
 
