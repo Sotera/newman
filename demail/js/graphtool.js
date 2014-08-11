@@ -255,7 +255,7 @@ function produceHTMLView(emailObj) {
 
   var recipients = _.zip(['To', 'Cc', 'Bcc'], [d.to, d.cc, d.bcc]);
   _.each(recipients, function(item){
-    var emails = _.uniq(item[1].split(';'));
+    var emails = _.uniq(item[1].split(','));
     el.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
                       .append(emails.join('; ')));
   });
