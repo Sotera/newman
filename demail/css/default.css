@@ -13,6 +13,10 @@ ul {
     padding: 0;
 }
 
+.highlight {  
+    background-color: #ffff00;
+}
+
 #control-panel {
     background-color: lightgray;
 }

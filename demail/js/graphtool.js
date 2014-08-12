@@ -291,6 +291,11 @@ function produceHTMLView(emailObj) {
     jqel.on('click', _.partial(searchByEntity, jqel.attr('mitie-id'), jqel.attr('mitie-type'), jqel.attr('mitie-value')));
   });
 
+  //highlight searched text 
+  if (searchType() == 'all'){
+    el.highlight($('#txt_search').val());
+  }
+
   return el;
 }
 
@@ -328,6 +333,10 @@ function do_search(fields, val) {
   }(varargs));
 
   $.bootstrapGrowl(search_msg, {type : "success", offset: {from: 'bottom', amount: 10 }});  
+
+  // change highlighting
+  $('.body-view').removeHighlight();
+  $('.body-view').highlight($('#txt_search').val());
 
   d3.select("#result_table").select("tbody").selectAll("tr").remove();
   d3.select("#result_table").select("thead").selectAll("tr").remove();
