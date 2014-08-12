@@ -454,7 +454,7 @@ function do_search(fields, val) {
       })
       .style("color", function(d,i) { 
         if( i == 1) { 
-          return color(d.split('::')[1]); 
+          return colorByDomain(d.split('::')[0]);
         } else { 
            return 'black';
         } 
