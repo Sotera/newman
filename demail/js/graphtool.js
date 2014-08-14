@@ -805,7 +805,7 @@ function draw_attachments_table(email_addr){
     }).enter()
       .append("td")
       .on("click", function(d, i){
-        if (i != 3) return;
+        if (i != 4) return;
         $.get("email/email/" + encodeURIComponent(d)).then(
           function(resp) {
             update_current(d);
