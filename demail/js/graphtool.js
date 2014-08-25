@@ -6,6 +6,7 @@ var width = 400,
     height = 500;
 
 var color = d3.scale.category20();
+var colorDomain = d3.scale.category20();
 
 var force = d3.layout.force()
     .linkDistance(10)
@@ -148,16 +149,13 @@ function update_current(val){
 
 var domain_set = {};
 
+function emailsDomain(email){
+  return email.replace(/.*@/, "");
+}
+
 function colorByDomain(email){
-  var domain = email.replace(/.*@/, "");
-
-  if (domain in domain_set){
-    return color(domain_set[domain]);
-  }
-
-  var idx = _.keys(domain_set).length + 1;
-  domain_set[domain] = idx;
-  return color(idx);
+  var domain = emailsDomain(email);
+  return domain_set[domain].color;
 }
 
 
@@ -961,6 +959,69 @@ function draw_topic_tab(){
 }
 
 
+function draw_domains_table(){
+  var lastSort = "";
+  var thead = d3.select("#domain-table").select("thead").append("tr").selectAll("tr").data(['Domain', 'Count', 'Color']).enter().append("th")
+    .text(function(d){ return d; })
+    .attr('class', 'clickable')
+  .on('click', function(k, i){
+    var direction = (lastSort == k) ? -1 : 1;
+    lastSort = (direction == -1) ? "" : k; //toggle
+    d3.select("#domain-table").select("tbody").selectAll("tr").sort(function(a,b){
+      if (i == 1){
+        return (parseInt(a[i]) - parseInt(b[i])) * direction;
+      }
+      return a[i].localeCompare(b[i]) * direction;
+    });
+  });
+
+  var domains = _.map(domain_set, function(value, key, l){
+    return [key, value.count, value.color];
+  });
+
+  var tr = d3.select("#domain-table").select("tbody").selectAll("tr")
+    .data(domains).enter().append("tr")
+    //.attr('class', 'clickable')
+    .on("click", function(d, i){ 
+      console.log(d);
+    })
+    .on("mouseover", function(d, i){
+      var hoverDomain = d[0];
+      d3.selectAll("circle").style("stroke","#ffff00");  
+      d3.selectAll("circle").each(function(d, i){
+        if (hoverDomain.localeCompare(emailsDomain(d.name)) == 0) {
+          d3.select(this).style("stroke-width",function(d) { 
+            return 5;
+          });
+        }
+      });
+    })
+    .on("mouseout", function(d, i){
+      d3.selectAll("circle").style("stroke","#ff0000");        
+      if (d3.select("#rankval").property("checked")) {
+        d3.selectAll("circle").each(function(d, i){
+          d3.select(this).style("opacity",function(d) { return 0.2 + (d.rank); });
+          d3.select(this).style("stroke-width",function(d) { return 5 * (d.rank); });
+        });
+      }
+      else {
+        d3.selectAll("circle").each(function(d, i){
+          d3.select(this).style("opacity","100");
+          d3.select(this).style("stroke-width","0");
+        });
+      }
+    });
+
+
+  tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td")
+    .html(function(d, i){ 
+      if (i == 2){
+        return $('<div>').append($('<div>').css({ 'min-height': '14px', 'width' : '100%', 'background-color' : d})).html();
+      }
+      return d; 
+    });  
+}
+
 function draw_entity_chart() {
 
   $.get('entity/top/20').then(function(resp){
@@ -1027,12 +1088,20 @@ $(function () {
   // Create control panel.
   $("#control-panel").controlPanel();
 
-  $.get("email/target").done(function(resp){
+  $.when($.get("email/target"), $.get("email/domains")).done(function(resp1, resp2){
     TARGET_EMAIL = _.object(
       ['email', 'community', 'community_id', 'group', 'total_received', 'total_sent', 'rank'], 
-      _.first(resp.email)
+      _.first(resp1[0].email)
     );
     
+    _.each(resp2[0].domains, function(o, i){
+      domain_set[o[0]] = {
+        count: o[1],
+        color: colorDomain(i),
+        domain: o[0]
+      }
+    });
+
     $('#target_email').html(TARGET_EMAIL.email);
 
     _.defer(function(){
@@ -1145,34 +1214,15 @@ $(function () {
     $('#target_email_a').on('mouseover', highlight_target.highlight);
     $('#target_email_a').on('mouseout', highlight_target.unhighlight);    
     
-    /* fails lint - Use '!==' to compare with ''. */
-    if( cluster != '')  {  
-      do_search('all', cluster);
-    }  else { 
-      //do_search('all','');
-    }
+    //init
+    //do_search('all','');
+
     $('#top-entities').append(waiting_bar);
 
     draw_entity_chart();
     draw_rank_chart();
     draw_topic_tab();
-
-    // var open=false;
-    // $("#tab").on("click", function(){
-    //   if (open) {
-    //     $("#hover-menu").animate({left: -375}, 500).promise().done(function(){
-    //       $("#tab-icon").removeClass("glyphicon-chevron-left");
-    //       $("#tab-icon").addClass("glyphicon-chevron-right");
-    //       open=false;
-    //     });
-    //   } else {
-    //     $("#hover-menu").animate({left: 0}, 500).promise().done(function(){
-    //       $("#tab-icon").removeClass("glyphicon-chevron-right");
-    //       $("#tab-icon").addClass("glyphicon-chevron-left");
-    //       open=true;
-    //     });
-    //   }
-    // });
+    draw_domains_table();
 
     /* attach element event handlers */
     $("#submit_search").click(function(){
