@@ -628,6 +628,7 @@ function drawGraph(graph){
       return "translate(" + d.x + "," + d.y + ")";
     });
   });
+  redraw_domains_table();
 }
 
 function redraw() {
@@ -959,8 +960,11 @@ function draw_topic_tab(){
 }
 
 
-function draw_domains_table(){
+function redraw_domains_table(){
   var lastSort = "";
+  $("#domain-table tbody").empty();
+  $("#domain-table thead").empty();
+
   var thead = d3.select("#domain-table").select("thead").append("tr").selectAll("tr").data(['Domain', 'Count', 'Color']).enter().append("th")
     .text(function(d){ return d; })
     .attr('class', 'clickable')
@@ -975,9 +979,22 @@ function draw_domains_table(){
     });
   });
 
-  var domains = _.map(domain_set, function(value, key, l){
+  var d = _.uniq(_.map(d3.selectAll("circle").data(), 
+                       function(d){
+                         return emailsDomain(d.name);
+                       }));
+
+  var domains = _.map(d, function(v){
+    return [v, domain_set[v].count, domain_set[v].color];
+  });
+
+  var domains2 = _.map(domain_set, function(value, key, l){
     return [key, value.count, value.color];
   });
+
+  // var domains = _.map(domain_set, function(value, key, l){
+  //   return [key, value.count, value.color];
+  // });
 
   var tr = d3.select("#domain-table").select("tbody").selectAll("tr")
     .data(domains).enter().append("tr")
@@ -1222,7 +1239,7 @@ $(function () {
     draw_entity_chart();
     draw_rank_chart();
     draw_topic_tab();
-    draw_domains_table();
+    //draw_domains_table();
 
     /* attach element event handlers */
     $("#submit_search").click(function(){
