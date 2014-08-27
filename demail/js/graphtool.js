@@ -1,7 +1,6 @@
 
 /*globals tangelo, CryptoJS, $, d3, escape, FileReader, console */
 
-var GT = {};
 var width = 400,
     height = 500;
 
@@ -22,7 +21,44 @@ var vis = svg.append('svg:g');
 var labels = false;
 var TARGET_EMAIL = null;
 
-var control_panel=null;
+var control_panel= (function(){
+    var container = $('#cp-toggle div:first-child');
+    var btn = $('#cp-toggle div:first-child').find("div").first();
+    var table_panel = $('#cp-toggle div:first-child div:nth-child(2)').first();
+    var open_css = "glyphicon-chevron-up";
+    var close_css = "glyphicon-chevron-down";
+    var open = function(){ 
+      container.find("span").first().switchClass(open_css, close_css);
+      var h = table_panel.height() + 25;
+      container.css("top", "calc(100% - "+ h +"px)");
+    };
+    var close = function(){ 
+      container.find("span").first().switchClass(close_css, open_css);
+      container.css("top", "calc(100% - 25px)")
+    };
+
+    var isOpen = function(){ 
+      return _.contains(container.find("span").first().attr('class').split(/\s+/), close_css);
+    };
+
+    var toggle = function(){
+      if (isOpen()){
+        close();
+      } else {
+        open();
+      }
+    };
+
+    btn.on('click', toggle);
+
+    return {
+      open: open,
+      close: close,
+      toggle: toggle, 
+      isOpen : isOpen 
+    };
+  }());
+
 
 var htmlDecode = function(str){
   return $('<div/>').html(str).text();
@@ -282,7 +318,7 @@ function produceHTMLView(emailObj) {
   //sort by index
   var ents = _.sortBy(emailObj.entities, function(o){ return o[2]});
 
-  el.append(d.body)
+  el.append($('<div>').addClass("email-body-view").append(d.body));
   
   el.find(".mitie").each(function(i,el){
     var jqel = $(el);
@@ -458,11 +494,14 @@ function do_search(fields, val) {
         } 
       })
       .style("stroke","#FFFFFF");
+    
+    if (control_panel.isOpen()){
+      //resizes control panel 
+      control_panel.open();
+    }
     drawGraph(comp_data.graph);
   });
 }
-
-
 
 
 // Draw a graph for a component
@@ -470,20 +509,14 @@ function drawGraph(graph){
 	  
   svg.remove();
   svg = d3.select("#node_graph").append("svg")
-    .attr({
-      "width": "100%",
-      "height": "100%"
-    })
-    .attr("viewBox", "0 0 " + width + " " + height )
+    .attr("height", "100%")
+    .attr("width", "100%")
+  //  .attr("viewBox", "0 0 " + width + " " + height )
     .attr("preserveAspectRatio", "xMidYMid meet")
     .attr("pointer-events", "all")
     .call(d3.behavior.zoom().on("zoom", redraw));
   
   vis = svg.append('svg:g');
-
-  
-  //.attr("width", width)
-  //.attr("height", height);
   
   var nodes = graph.nodes.slice();
   var links = [];
@@ -1102,9 +1135,6 @@ function draw_entity_chart() {
 $(function () {
   "use strict";
 
-  // Create control panel.
-  $("#control-panel").controlPanel();
-
   $.when($.get("email/target"), $.get("email/domains")).done(function(resp1, resp2){
     TARGET_EMAIL = _.object(
       ['email', 'community', 'community_id', 'group', 'total_received', 'total_sent', 'rank'], 
@@ -1120,49 +1150,6 @@ $(function () {
     });
 
     $('#target_email').html(TARGET_EMAIL.email);
-
-    _.defer(function(){
-      control_panel = (function(){
-        var el = $('[id^=tangelo-drawer-handle]');
-
-        var toggle = function(){
-          el.click();
-        };
-
-        var open = function(){
-          var classes= el.find('span').attr('class').split(/\s+/);
-          if (_.any(classes, function(class_){
-            return class_.indexOf('up') > -1;
-          })){
-            toggle();
-          }
-        };
-
-        var close = function(){
-          var classes= el.find('span').attr('class').split(/\s+/);
-          if (_.any(classes, function(class_){
-            return class_.indexOf('down') > -1;
-          })){
-            toggle();
-          }
-        }
-
-        return {
-          open: open,
-          close: close,
-          toggle: toggle
-        };
-      }());
-      control_panel.close();
-    });
-
-    var clusters = window.location.href.split('=');
-    var cluster = '';
-    if( clusters.length == 2) {
-      cluster = clusters[1];
-    }
-
-    GT.con = d3.select("#console");
 
     $('#txt_search').keyup(function (e){
       if (e.keyCode === 13) {
@@ -1239,7 +1226,6 @@ $(function () {
     draw_entity_chart();
     draw_rank_chart();
     draw_topic_tab();
-    //draw_domains_table();
 
     /* attach element event handlers */
     $("#submit_search").click(function(){

@@ -53,20 +53,20 @@
       <!--   </li> -->
       <!-- </ul> -->
       <div style="padding-right: 20px;">
-          <form id="search_form" class="navbar-form navbar-right" role="search" style="color: white;">
-            <label class="radio-inline" >
-              <input type="radio" name="searchType" value="all" checked /> Free text
-            </label>
-            <label class="radio-inline">
-              <input type="radio" name="searchType" value="email" /> Email
-            </label>
-            <div class="form-group" style="padding-left: 10px;">
-              <input id="txt_search" type="text" class="form-control" 
-                     placeholder="Search text..." 
-                     autocomplete="off"
-                     style="border-radius: 15px;width: 300px;background-color: rgba(255,255,255,0.9);">
-            </div>
-          </form>
+        <form id="search_form" class="navbar-form navbar-right" role="search" style="color: white;">
+          <label class="radio-inline" >
+            <input type="radio" name="searchType" value="all" checked /> Free text
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="searchType" value="email" /> Email
+          </label>
+          <div class="form-group" style="padding-left: 10px;">
+            <input id="txt_search" type="text" class="form-control" 
+                   placeholder="Search text..." 
+                   autocomplete="off"
+                   style="border-radius: 15px;width: 300px;background-color: rgba(255,255,255,0.9);">
+          </div>
+        </form>
       </div>
     </div>
     <div style="position: fixed;top: 50px;background-color: rgba(240,240,240,0.8);padding: 10px 10px;z-index: 999;font-size: 12px; border-bottom-right-radius: 10px;">
@@ -83,7 +83,7 @@
           </td>
         </tr>
         <tr>
-          <td><div style="padding-right: 10px;">Display:<div></td>
+          <td><div style="padding-right: 10px;">Display:</div></td>
           <td>
             <label class="checkbox" style="padding-right: 10px;margin: 0;">
               <input type="checkbox" name="optionrank" id="rankval" value="rank" /> Rank
@@ -99,14 +99,13 @@
     </div>
 
     <!-- body -->
-    <div class="container-fluid" style="margin-top: 5px;">
-      <div class="row">
-        <div class="col-lg-6">
-          <!-- Create a fullscreen SVG element -->
-          <div id="node_graph"> </div>
+    <div class="container-fluid" style="margin-top: 5px;height: calc(100% - 52px);">
+      <div class="row" style= "height: 100%;">
+        <div class="col-lg-6"  style= "height: 100%;">
+          <div id="node_graph"  style= "height: 100%;"> </div>
         </div>
-        <div class="col-lg-6">
-          <div>
+        <div class="col-lg-6" style= "height: calc(100% - 52px);">
+          <div style= "height: 100%;">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist" id="tab-list">
               <li class="active"><a href="#top-rank" role="tab" data-toggle="tab">Rank</a></li>
@@ -118,15 +117,15 @@
             </ul>
 
             <!-- Tab panes -->
-            <div class="tab-content">
+            <div class="tab-content" style= "height: 100%;">
               <div class="tab-pane active" id="top-rank"> </div>
               <div class="tab-pane" id="top-entities"></div>
-              <div class="tab-pane" id="email-body-tab"> 
+              <div class="tab-pane" id="email-body-tab" style="height: 100%;"> 
                 <div style="display: table;">
                   <div style="display: inline-block;float:left;margin-top: 15px;">
-                  <a id="submit_activesearch" class="btn btn-default">Seed Active Search</a>
-                  <a id="submit_activesearch_like" class="btn btn-default" style="background-color: #00ff00"><span class="glyphicon glyphicon-thumbs-up" style="color: #000;"/></a>
-                  <a id="submit_activesearch_dislike" class="btn btn-default" style="background-color: #ff0000"><span class="glyphicon glyphicon-thumbs-down" style="color: #000"/></a>
+                    <a id="submit_activesearch" class="btn btn-default">Seed Active Search</a>
+                    <a id="submit_activesearch_like" class="btn btn-default" style="background-color: #00ff00"><span class="glyphicon glyphicon-thumbs-up" style="color: #000;"/></a>
+                    <a id="submit_activesearch_dislike" class="btn btn-default" style="background-color: #ff0000"><span class="glyphicon glyphicon-thumbs-down" style="color: #000"/></a>
                   </div>
                   <div style="background-color: #f0f0f0; padding: 5px; margin-left: 50px; float: left; display: inline-block;" id="topic_mini_chart"></div>
                 </div>
@@ -139,42 +138,53 @@
                 </table>
               </div>
               <div class="tab-pane" id="attach-tab">
-                <div style="padding-bottom: 10px;"><span>Attachments for sender: </span><span id="attach-sender" style="font-weight: bold;"></span></div>
-                <table id="attach-table" class="info-table"></table>                
+                <div style="padding-bottom: 10px;">
+                  <span>Attachments for sender: </span><span id="attach-sender" style="font-weight: bold;"></span>
+                </div>
+                <div style="height: calc(100% - 30px);overflow-y: scroll;">
+                  <table id="attach-table" class="info-table"></table>                
+                </div>
               </div>
               <div class="tab-pane" id="email-domain-tab"> 
-                <div style="max-height: 800px; overflow: scroll;">
+                <div style="height: 100%; overflow: scroll;">
                   <table id="domain-table" class="info-table">
                     <thead></thead>
                     <tbody></tbody>
                   </table>
                 </div>
               </div>
+            </div>
+            <!-- Create an SVG element to represent the legend -->
+            <svg id="legend" style="position:fixed; top:100px; right:0px; pointer-events:none;"></svg>
           </div>
-          <!-- Create an SVG element to represent the legend -->
-          <svg id="legend" style="position:fixed; top:100px; right:0px; pointer-events:none;"></svg>
         </div>
       </div>
-
-      <div class="row" id="control-panel">
+      <div class="row" id="cp-toggle">
         <div class="col-lg-12">
-          <div id="search_status"></div>
-          <div style="max-height: 250px;overflow-y: scroll;">
-            <div>
-              <table id="result_table" class="table" style="display:table;height: 100px;" >
-                <thead class="result_thead"></thead>
-                <tbody class="result_tbody"></tbody>
-              </table>
+          <div class="col-md-2 col-md-offset-5 toggle-button">
+            <a><span class="glyphicon glyphicon-chevron-up"></span></a>
+          </div>
+          <div class="col-lg-12" style="height: calc(100% - 25px);max-height: 250px;background-color:#d3d3d3;">
+            <div style="height: 100%;max-height: 250px;">
+              <div style="height: 25px;padding-top: 4px;"> 
+                <!-- <div style="float: right;padding-right: 9px;"><span class="glyphicon glyphicon-folder-open" /></div> -->
+                <!-- <div style="float: right;padding-right: 9px;"><span class="glyphicon glyphicon-tasks" /></div> -->
+              </div>
+              <div style="overflow-y: scroll;height: 100%;max-height: 225px;">
+                <table id="result_table" class="table" style="display:table;" >
+                  <thead class="result_thead"></thead>
+                  <tbody class="result_tbody"></tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    
+
     <script src="js/thirdparty/jquery-1.9.1.min.js"></script>
     <script src="js/thirdparty/jquery-ui.min.js"></script>
     <script src="js/thirdparty/d3.v3.min.js" charset="utf-8"></script>
-    <script src="js/thirdparty/tangelo-0.6.1.js"></script>
     <script src="js/thirdparty/bootstrap.min.js"></script>
     <script src="js/thirdparty/underscore-min.js"></script>
     <script src="js/thirdparty/jquery.bootstrap-growl.js"></script>
