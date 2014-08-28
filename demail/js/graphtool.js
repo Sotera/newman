@@ -333,6 +333,61 @@ function produceHTMLView(emailObj) {
   return el;
 }
 
+
+function group_email_conversation(){
+
+  var arr= d3.select("#result_table").select("tbody").selectAll("tr").data();
+  var conv = function(s){
+    return s.toLowerCase().replace(/fw[d]?:/g,"").replace(/re:/g,"").trim();
+  };
+  var grouped = _.groupBy(arr, function(d){
+    return conv(d.subject);
+  });
+
+  var group_color = d3.scale.category20();
+  var c=0;
+
+  var conv_sorted = _.map(grouped, function(v, k){
+    var values = v.sort(function(a,b){
+      return a.datetime.localeCompare(b.datetime) * -1;
+    });
+    return [values[0].datetime, values, group_color(++c)];
+  });
+
+  var conv_reverse_sort = conv_sorted.sort(function(a,b){
+    return a[0].localeCompare(b[0]) * -1;
+  });
+
+  console.log(conv_reverse_sort);
+
+  //assign mapping of key to conversation_index;
+  var i=0;
+  var map = {};
+  _.each(conv_reverse_sort, function(values){
+    _.each(values[1], function(v){
+      map[v.num] = { idx: ++i, color: values[2] };
+    });
+  });
+
+  d3.select("#result_table").select("tbody").selectAll("tr").sort(function(a,b){
+    return map[a.num].idx - map[b.num].idx; 
+  });
+
+  d3.select("#result_table").select("tbody").selectAll("tr").each(function(d){
+    var jqel = $(d3.select(this)[0]).find("td:first-child").first();
+    // if this was already tagged removed it
+    jqel.find(".conversation-group").remove();
+    jqel.prepend($("<div>")
+                 .height(15)
+                 .width(8)
+                 .addClass("conversation-group")
+                 .css("float","left")
+                 .css("margin-right", "2px")
+                 .css("background-color", map[d.num].color));
+  });
+
+}
+
 // takes field + varargs ... now
 function do_search(fields, val) {
   var varargs = arguments;
@@ -473,15 +528,15 @@ function do_search(fields, val) {
         }
         if (i == 2) {
           var px = d > 100 ? 100 : d;
-          return "<div style='background-color: blue;height: 10px;width: " +px +"px;' title='" + +d + "'/>"
+          return "<div style='background-color: blue;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
         }
         if (i == 3) {
           var px = (d / 1000.0) > 100 ? 100 : (d / 1000.0);
-          return "<div style='background-color: green;height: 10px;width: " +px +"px;' title='" + +d + "'/>" 
+          return "<div style='background-color: green;height: 10px;width: " +px +"px;' title='" + +d + "'/>"; 
         }
         if (i == 4) {
           var px = (d * 10) > 100 ? 100 : (d * 10);
-          return "<div style='background-color: orange;height: 10px;width: " +px +"px;' title='" + +d + "'/>"
+          return "<div style='background-color: orange;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
         }
 
         return d;
@@ -489,9 +544,9 @@ function do_search(fields, val) {
       .style("color", function(d,i) { 
         if( i == 1) { 
           return colorByDomain(d.split('::')[0]);
-        } else { 
-           return 'black';
-        } 
+        } else {
+          return 'black';
+        }
       })
       .style("stroke","#FFFFFF");
     
@@ -1217,6 +1272,8 @@ $(function () {
 
     $('#target_email_a').on('mouseover', highlight_target.highlight);
     $('#target_email_a').on('mouseout', highlight_target.unhighlight);    
+
+    $('#email_group_conversation').on('click', group_email_conversation);
     
     //init
     //do_search('all','');
