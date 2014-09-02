@@ -225,3 +225,30 @@ ul {
 div.bootstrap-growl >span.close {
     color: #000;
 }
+
+#cp-toggle > div:first-child {
+    top: calc(100% - 25px);
+    position: fixed;
+    z-index: 25;
+}
+
+.toggle-button {
+    height: 25px;
+    padding-top: 3px;
+    background-color: #d3d3d3;
+    border-top-right-radius: 7px;
+    border-top-left-radius: 7px; 
+    text-align: center;
+    cursor: pointer;
+}
+
+#cp-toggle a {
+    color: #111;
+}
+
+#cp-toggle a:hover {
+    color: #777;
+}
+.tab-pane { height: 100%;}
+#email-body { height: calc(100% - 80px); }
+.body-view { height: 100%; overflow-y: scroll; }

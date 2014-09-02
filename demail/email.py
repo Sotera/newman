@@ -83,6 +83,17 @@ def getTarget(*args):
             rtn = [[str(val) for val in row] for row in qry.cursor()]
             return { "email" : rtn }
 
+#GET /domains
+def getDomains(*args):
+    stmt = (
+        "SELECT SUBSTRING_INDEX(email_addr, '@', -1) as eml, count(1) from email_addr group by eml"
+    )
+    tangelo.content_type("application/json")        
+    with newman_connector() as read_cnx:
+        with execute_query(read_cnx.conn(), stmt) as qry:
+            rtn = [[str(val) for val in row] for row in qry.cursor()]
+            return { "domains" : rtn }
+
 #GET /attachments/<sender>
 def getAttachmentsSender(*args):
     sender=urllib.unquote(nth(args, 0, ''))
@@ -103,6 +114,7 @@ def getAttachmentsSender(*args):
 actions = {
     "target" : getTarget, 
     "email": getEmail,
+    "domains" : getDomains,
     "entities" : getEntities,
     "rank" : getRankedEmails,
     "attachments" : getAttachmentsSender
