@@ -1,8 +1,0 @@
-Chinese MSWord Attachment
-Attached is a Microsoft Word document containing a Chinese poem.
--- 
-Michael A. Coury
-Human Language Technology Group
-MIT Lincoln Laboratory
-(781) 981-6389
-michael.coury@ll.mit.edu

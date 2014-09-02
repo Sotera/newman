@@ -1,4 +1,0 @@
-sample.cfg.filename=sample.cfg
-sample.cfg.dir=/a/b/c
-sample.property="def"
-another.property=6

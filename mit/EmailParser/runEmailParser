@@ -1,5 +1,0 @@
-#!/bin/bash
-log4jDir=src/resources
-classpath=EmailParser.jar:$log4jDir
-
-java -Xmx3g -Dfile.encoding=UTF-8 -cp $classpath mitll.hlt.clir.EmailParser "$@"

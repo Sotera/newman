@@ -1,8 +1,0 @@
-This is a sample email that I am using to test the EmailParser program.  It is encoded in the ISO-8859-1 character set, and it contains the following ISO-8859-1 characters: àèìòùñ¡¿Åçýμß±©£¬æ
-This is the second paragraph of the test email.
--- 
-Michael A. Coury
-Human Language Technology Group
-MIT Lincoln Laboratory
-(781) 981-6389
-michael.coury@ll.mit.edu

@@ -1,1 +1,0 @@
-plain text body, content-transfer-encoding=base64, charset=utf-8. decoded charset=Big5

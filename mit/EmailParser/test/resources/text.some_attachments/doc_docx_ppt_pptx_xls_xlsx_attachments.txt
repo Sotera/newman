@@ -1,9 +1,0 @@
-Attachments (doc, docx, xls, xlsx, ppt, pptx)
-Here are the attachments:
-Will they parse correctly?
--- 
-Michael A. Coury
-Human Language Technology Group
-MIT Lincoln Laboratory
-(781) 981-6389
-michael.coury@ll.mit.edu
