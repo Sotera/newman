@@ -306,7 +306,7 @@ function produceHTMLView(emailObj) {
 //  + "/attachments/" + d.attach + "'>" + d.attach + "</a><BR><BR>";
 
   var attachments = $('<p>').append($('<span>').addClass('bold').text("Attachments: "));
-  _.each(d.attach.split(','), 
+  _.each(d.attach.split(';'), 
          function(attach){ 
            attachments.append($('<a>', { 'class': 'clickable', "target": "_blank" ,"href" : 'emails/' + d.directory + "/attachments/" + encodeURIComponent(attach) }).html(attach));
            attachments.append($('<span>').html(';&nbsp'));
@@ -853,10 +853,16 @@ function document_type(ext){
 function draw_attachments_table(email_addr){
   var deferred = $.Deferred();
   $.ajax('email/attachments/' + email_addr).done(function(resp){
-    var emails = _.map(resp.email_attachments, function(r){
+    var emails = _.mapcat(resp.email_attachments, function(r){
       var o = _.object(["id", "dir", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"], r);
-      return o;
+      var copy = _.omit(o, "attach");
+      var attachments = _.map(o.attach.split(';'), function(attach){
+        return _.extend(_.clone(copy), {'attach': attach });
+      });
+      return attachments;
     });
+
+    
     $('#attach-sender').html(resp.sender);
     $('#attach-table').empty();
     $('#attach-table').append($('<thead>')).append($('<tbody>'));
