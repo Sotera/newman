@@ -108,7 +108,7 @@ def getAttachmentsSender(*args):
     )
     with newman_connector() as read_cnx:
         with execute_query(read_cnx.conn(), stmt, sender) as qry:
-            rtn = [[str(val) for val in row] for row in qry.cursor()]
+            rtn = [[ val.encode('utf-8') if isinstance(val, basestring) else str(val) for val in row] for row in qry.cursor()]
             return { "sender": sender, "email_attachments" : rtn }
 
 actions = {
