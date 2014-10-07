@@ -2,6 +2,13 @@
 
 set -e 
 
+if [[ $# -lt 1 ]]; then
+    printf "missing configuration path\n"
+    exit 1
+fi
+
+source $1
+
 RUN_DIR=$(pwd)
 TOPIC_DIR=/srv/software/topic-clustering/topic
 
@@ -25,7 +32,7 @@ mkdir tmp-newman
 #needs to match the number of topics
 NUM_TOPIC=20
 
-python run_all.py -num_topics $NUM_TOPIC -r email_ingester $RUN_DIR/data/walker/output.csv tmp/
+python run_all.py -num_topics $NUM_TOPIC -r email_ingester $RUN_DIR/data/$EMAIL_TARGET/output.csv tmp/
 
 cd $RUN_DIR
 

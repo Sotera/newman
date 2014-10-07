@@ -5,13 +5,23 @@
 
 set -e 
 
+
+if [[ $# -lt 1 ]]; then
+    printf "missing configuration path\n"
+    exit 1
+fi
+
+source $1
+
+printf  "ingesting - $EMAIL_TARGET \n"
+
 RUN_DIR=$(pwd)
 LOUVAIN_DIR=/srv/software/distributed-louvain-modularity/
 printf "working dir $RUN_DIR\n"
 printf "louvain dir $LOUVAIN_DIR\n"
 
 printf "ingest data\n"
-./src/ingest_walker.py data/walker/output.csv
+./src/ingest_walker.py data/$EMAIL_TARGET/output.csv
 
 if [ -e  tmp/entity_facts_ingest.tsv ]; then
     rm -rf tmp/entity_facts_ingest.tsv
@@ -103,7 +113,7 @@ if [ -e tmp/exploded.csv ]; then
 fi
 
 ./src/rank_ingest_results.py
-./src/email_detector2.py kmrindfleisch@gmail.com > tmp/rankings
+./src/email_detector2.py $EMAIL_TARGET > tmp/rankings
 ./src/rank_results.py
 
 ./src/post_process.py
@@ -111,4 +121,4 @@ fi
 
 printf "topic clustering\n"
 
-./topic/run_topic_clustering.sh
+./topic/run_topic_clustering.sh $1
