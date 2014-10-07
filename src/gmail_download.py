@@ -6,6 +6,7 @@ import re
 import imaplib
 import email
 from email.utils import getaddresses
+import quopri
 import dateutil.parser 
 import dateutil.tz
 import datetime
@@ -111,8 +112,10 @@ def createRow(uid, email_dir, email, attach, msg_body):
     ccs = email.get_all('cc', [])
     bccs = email.get_all('bcc', [])
 
-    subject = one(subject).replace('\n', '[:newline:]').replace('\r', '').replace('\t', ' ')
-    body = msg_body.replace('\n', '[:newline:]').replace('\r', '').replace('\t', ' ')
+    subject = quopri.decodestring(one(subject)).replace('\n', '[:newline:]').replace('\r', '').replace('\t', ' ')
+    body = quopri.decodestring(msg_body).replace('\n', '[:newline:]').replace('\r', '').replace('\t', ' ')
+    subject = re.sub(r'[^\x00-\x7F]',' ', subject)
+    body = re.sub(r'[^\x00-\x7F]',' ', body)
 
     return "\t".join([uid, email_dir, '', dateToUTCstr(first(mail_date)) if mail_date else 'NODATE' , '', addr_tostr(senders), '', addr_tostr(tos), addr_tostr(ccs), addr_tostr(bccs), scolon_sep(attach), one(msgid), csv_sep(inreplyto), '', subject, body])
 
@@ -168,6 +171,7 @@ def download(srv, outdir, limit):
             fp.write(part.get_payload(decode=True))
             fp.close()
 
+        msg = re.sub(r'[^\x00-\x7F]',' ', msg)
         spit("{}/{}.txt".format(fldr, uid), msg)
         row = createRow(uid, fldr, mail, attach, msg)
         spit("{}/output.csv".format(outdir), row + "\n")
