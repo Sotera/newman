@@ -20,6 +20,8 @@ def counter(start=0):
         yield n
         n = inc(n)
 
+def lower(s):
+   return s.lower() if s else ''
 
 if __name__ == "__main__":
 
@@ -46,6 +48,12 @@ if __name__ == "__main__":
             row = (c.strip() for c in row)
             
             num,dir,category,utc_date,importance,fromemail,ip,toemail,ccemail,bccemail,attach,messageid,inreplyto,references,subject,body = row
+
+            fromemail = lower(fromemail)
+            toemail = lower(toemail)
+            ccemail = lower(ccemail)
+            bccemail = lower(bccemail)
+            
             network = ''
             threadid = mid = messageid if messageid != '' else num
             #skip header 
