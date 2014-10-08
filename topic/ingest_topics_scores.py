@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     scores_items = [line.split('\t') for line in slurpA(args.topic_idx)[1:]]
     scores_items = [map(lambda s: s.strip(), line) for line in scores_items]
-    scores_items = [(i[0], i[1], i[2], i[3], " ".join(i[3:])) for i in scores_items]
+    scores_items = [(i[0], i[1], i[2], i[3], " ".join(i[4:])) for i in scores_items]
 
     topics = {"topic_{0}".format(i[0]):i[1:] for i in scores_items}
     #topics = {"topic_{0}".format(i):v for i,v in enumerate(slurpA(args.topic_idx)) }
