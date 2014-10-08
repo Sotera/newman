@@ -137,8 +137,8 @@ def download(srv, outdir, limit):
     l = len(msgids)
     for msgid in msgids:
         uid = getUIDForMessage(srv, msgid)
-        fldr ="{}/emails/{}".format(outdir, uid) 
-        mkdir(fldr)
+        fldr ="emails/{}".format(uid) 
+        mkdir("{}/{}".format(outdir, fldr))
 
         i = c.next()
         if i % 200 == 0:
@@ -149,7 +149,7 @@ def download(srv, outdir, limit):
             raise Exception("Bad response: %s %s" % (resp, msgParts))
 
         emailBody = msgParts[0][1]
-        spit("{}/{}.eml".format(fldr, uid), emailBody)
+        spit("{}/{}/{}.eml".format(outdir,fldr, uid), emailBody)
         mail = email.message_from_string(emailBody)
         attach = []
         msg=""
@@ -164,14 +164,14 @@ def download(srv, outdir, limit):
             fileName = part.get_filename()
             fileName = fileName if fileName else "Attach_{}".format(attach_count.next())
             attach.append(fileName)
-            filePath = "{}/{}".format(fldr, fileName)
+            filePath = "{}/{}/{}".format(outdir, fldr, fileName)
 
             fp = open(filePath, 'wb')
             fp.write(part.get_payload(decode=True))
             fp.close()
 
         msg = re.sub(r'[^\x00-\x7F]',' ', msg)
-        spit("{}/{}.txt".format(fldr, uid), msg)
+        spit("{}/{}/{}.txt".format(outdir,fldr, uid), msg)
         row = createRow(uid, fldr, mail, attach, msg)
         spit("{}/output.csv".format(outdir), row + "\n")
 
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     passwd = getpass.getpass('Enter your password: ')
 
     with login(username, passwd) as conn:    
-        fldr = "data/{}".format(username)
+        fldr = "demail/emails/{}".format(username)
 
         if not os.path.exists(fldr):
             mkdir(fldr)
