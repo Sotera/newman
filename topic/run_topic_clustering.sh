@@ -32,7 +32,7 @@ mkdir tmp
 #needs to match the number of topics
 NUM_TOPIC=20
 
-python run_all.py -num_topics $NUM_TOPIC -r email_ingester $RUN_DIR/data/$EMAIL_TARGET/output.csv tmp/
+python run_all.py -num_topics $NUM_TOPIC -r email_ingester $RUN_DIR/demail/emails/$EMAIL_TARGET/output.csv tmp/
 
 cd $RUN_DIR
 

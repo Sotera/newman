@@ -21,7 +21,7 @@ printf "working dir $RUN_DIR\n"
 printf "louvain dir $LOUVAIN_DIR\n"
 
 printf "ingest data\n"
-./src/ingest_walker.py data/$EMAIL_TARGET/output.csv
+./src/ingest_walker.py demail/emails/$EMAIL_TARGET/output.csv
 
 if [ -e  tmp/entity_facts_ingest.tsv ]; then
     rm -rf tmp/entity_facts_ingest.tsv
