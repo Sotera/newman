@@ -40,7 +40,7 @@ if [ -e tmp/topic_cluster.scores ]; then
     rm -rf tmp/topic_cluster.scores
 fi
 
-cp $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.counts.txt tmp/topic_cluster.scores
+cp $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.d2z.txt tmp/topic_cluster.scores
 
 #paste <(cat $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.counts.txt | awk '{ print $1 }') <(sed 's/^[ ]*//' $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.d2z.txt) > tmp/topic_cluster.scores
 
