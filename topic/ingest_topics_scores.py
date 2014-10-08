@@ -48,7 +48,16 @@ if __name__ == "__main__":
     args= parser.parse_args()
 
     flush = partial(flush_buffer, "tmp/bulk_topic_score.dat")
-    topics = {"topic_{0}".format(i):v for i,v in enumerate(slurpA(args.topic_idx)) }
+    
+    #index   topic_score     doc_purity      percent_docs    summary0        summary1  etc... 
+    #0     8.09   0.557   14.54   governor        state   jobs    candidate       rail    ad      gubernatorial   primary election        race
+
+    scores_items = [line.split('\t') for line in slurpA(args.topic_idx)[1:]]
+    scores_items = [map(lambda s: s.strip(), line) for line in scores_items]
+    scores_items = [(i[0], i[1], i[2], i[3], " ".join(i[3:])) for i in scores_items]
+
+    topics = {"topic_{0}".format(i[0]):i[1:] for i in scores_items}
+    #topics = {"topic_{0}".format(i):v for i,v in enumerate(slurpA(args.topic_idx)) }
 
     c = counter(0)
 
@@ -57,12 +66,14 @@ if __name__ == "__main__":
         print "import topics "
         for k,v in topics.iteritems():
             idx = k.replace("topic_", "")
-            score, purity, docs, summary = v.split(None, 3)
+            #score, purity, docs, summary = v.split(None, 3)
+            score, purity, docs, summary = v 
             insert_topic(idx, summary, score, purity, docs)
 
         buffer=[]
         for line in slurpA(args.topic_scores):
-            email_id, values = line.split('\t')
+            email_id, values = line.split('\t', 1)
+            values = " ".join(values.split('\t'))
             for i,v in enumerate(values.strip().split()):
                 count = c.next()
                 buffer.append("\t".join(["all", email_id, str(i), v]))

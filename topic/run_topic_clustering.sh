@@ -23,11 +23,11 @@ cp topic/email_ingester.py $TOPIC_DIR/Ingest/
 
 cd $TOPIC_DIR
 
-if [ -d tmp-newman/ ]; then
-    rm -rf tmp-newman/
+if [ -d tmp/ ]; then
+    rm -rf tmp/
 fi
 
-mkdir tmp-newman
+mkdir tmp
 
 #needs to match the number of topics
 NUM_TOPIC=20
@@ -40,13 +40,17 @@ if [ -e tmp/topic_cluster.scores ]; then
     rm -rf tmp/topic_cluster.scores
 fi
 
-paste <(cat $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.counts.txt | awk '{ print $1 }') <(sed 's/^[ ]*//' $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.d2z.txt) > tmp/topic_cluster.scores
+cp $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.counts.txt tmp/topic_cluster.scores
+
+#paste <(cat $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.counts.txt | awk '{ print $1 }') <(sed 's/^[ ]*//' $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.d2z.txt) > tmp/topic_cluster.scores
 
 if [ -e tmp/topic_cluster.idx ]; then
     rm -rf tmp/topic_cluster.idx
 fi
 
-tail -$NUM_TOPIC $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.summary.txt | cut -c 13- | sed 's/^[ ]*//' > tmp/topic_cluster.idx
+cp $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.summary.txt tmp/topic_cluster.idx
+
+#tail -$NUM_TOPIC $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.summary.txt | cut -c 13- | sed 's/^[ ]*//' > tmp/topic_cluster.idx
 #tail -$NUM_TOPIC $TOPIC_DIR/tmp/output.csv.$NUM_TOPIC.summary.txt | cut -c 33- | nl -n ln -v 0 > tmp/topic_cluster.idx
 
 if [ -e tmp/bulk_topic_score.dat ]; then
