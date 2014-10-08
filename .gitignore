@@ -3,6 +3,7 @@
 *.zip
 
 demail/emails
+!demail/emails/.keep
 
 data/
 !data/.keep
