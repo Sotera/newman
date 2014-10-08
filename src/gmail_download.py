@@ -12,7 +12,6 @@ import dateutil.tz
 import datetime
 import getpass
 import argparse
-from bs4 import BeautifulSoup
 
 
 # functions
