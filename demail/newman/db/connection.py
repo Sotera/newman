@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
+from newman.settings import CONFIG
 
-#TODO: load from somewhere
 def connection_info():
     return {
-        'user':'root', 
-        'password': 'root', 
-        'host':'127.0.0.1', 
-        'database':'newman'
+        'user': CONFIG.get('user'), 
+        'password': CONFIG.get('password'), 
+        'host': CONFIG.get('host'), 
+        'database': CONFIG.get('database')
     }
