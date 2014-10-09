@@ -302,13 +302,10 @@ function produceHTMLView(emailObj) {
                       .append(item[1]) );
   });
 
-//  html += "<b>Attachments: </b>" + "<a href='emails/" + d.directory
-//  + "/attachments/" + d.attach + "'>" + d.attach + "</a><BR><BR>";
-
   var attachments = $('<p>').append($('<span>').addClass('bold').text("Attachments: "));
   _.each(d.attach.split(';'), 
          function(attach){ 
-           attachments.append($('<a>', { 'class': 'clickable', "target": "_blank" ,"href" : 'emails/' + d.directory + "/attachments/" + encodeURIComponent(attach) }).html(attach));
+           attachments.append($('<a>', { 'class': 'clickable', "target": "_blank" ,"href" : 'emails/' + TARGET_EMAIL.email + '/' + d.directory + '/' + encodeURIComponent(attach) }).html(attach));
            attachments.append($('<span>').html(';&nbsp'));
          });
 
@@ -913,7 +910,7 @@ function draw_attachments_table(email_addr){
           if (_.any(['jpg','jpeg','png','bmp','tiff','png'], function(ext){
             return d[1].toLowerCase().indexOf(ext) > -1;
           })){
-            popover.show($(this).find('a').first(), 'emails/' + d[0] + "/attachments/" + encodeURIComponent(d[1]), 200, 200);
+            popover.show($(this).find('a').first(), 'emails/' + TARGET_EMAIL.email + '/' + d[0] + '/' + encodeURIComponent(d[1]), 200, 200);
           }
         }
       }).on("mouseout", function(d, i){
@@ -923,7 +920,7 @@ function draw_attachments_table(email_addr){
       })
       .html(function(d, i){
         if (i == 2){
-          var el = $('<div>').append($('<a>', { "target": "_blank" ,"href" : 'emails/' + d[0] + "/attachments/" + encodeURIComponent(d[1]) }).html(d[1]));
+          var el = $('<div>').append($('<a>', { "target": "_blank" ,"href" : 'emails/' + TARGET_EMAIL.email + '/' + d[0] + '/' + encodeURIComponent(d[1]) }).html(d[1]));
           return el.html();
         }
         if (i == 3){
@@ -936,7 +933,7 @@ function draw_attachments_table(email_addr){
             var img = $('<img>').css('height', '40px').css('width','40px');
             
             switch (document_type(ext)){
-              case "image" : return img.attr('src', 'emails/' + d[0] + "/attachments/" + encodeURIComponent(d[1]));
+              case "image" : return img.attr('src', 'emails/' + TARGET_EMAIL.email + '/' + d[0] + '/' + encodeURIComponent(d[1]));
               case "pdf" : return img.attr('src', 'imgs/document-icons/pdf-2.png');
               case "powerpoint" : return img.attr('src', 'imgs/document-icons/powerpoint-2.png');
               case "word" : return img.attr('src', 'imgs/document-icons/word-2.png');
