@@ -52,3 +52,9 @@ def partition(l, n):
             yield l[i:i+n]
     #I prefer it to be a list instead of generator
     return [i for i in _part()]
+
+def counter(start=0):
+    n = start
+    while True:
+        yield n
+        n = inc(n)

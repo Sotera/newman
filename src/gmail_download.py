@@ -183,12 +183,13 @@ if __name__ == "__main__":
         description="GMail Downloader", 
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=desc)
-
+    parser.add_argument("-u", "--user", help="gmail user email")
+    parser.add_argument("-p", "--passwd", help="gmail passwd ")
     parser.add_argument("-l", "--limit", type=int, default=2000, help="limit the number of messages downloaded, default 2000, -1 for all messages")
 
     args = parser.parse_args()
-    username = raw_input('Enter your GMail username:')
-    passwd = getpass.getpass('Enter your password: ')
+    username = args.user if args.user else raw_input('Enter your GMail username:')
+    passwd = args.passwd if args.passwd else getpass.getpass('Enter your password: ')
 
     with login(username, passwd) as conn:    
         fldr = "demail/emails/{}".format(username)

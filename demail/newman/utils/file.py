@@ -23,6 +23,10 @@ def rm(filePath):
     if os.path.isfile(filePath):
         os.remove(filePath)
 
+def rmrf(directory):
+    ignore_errors = True
+    shutil.rmtree(directory, ignore_errors)
+
 def cp(src, dest):
     shutil.copyfile(src,dest)
 
