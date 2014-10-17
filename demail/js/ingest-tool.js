@@ -1,9 +1,77 @@
 
-var click_handler = function(evt){
+var FORM = (function(){
+  var items = ['txt_email', 'txt_pass', 'btn-download', 'btn-ingest', 'ingest-options'];
+  var enable = _.partial(_.each, items, function(item){ 
+     $('#' + item).removeAttr('disabled');
+  });
+
+  var disable = _.partial(_.each, items, function(item){ 
+     $('#' + item).attr('disabled', 'disabled');
+  });
+
+  return {
+    enable : enable,
+    disable : disable
+  };
+
+})();
+
+var refresh_ingest_options = function(){
+  $.ajax({
+    'url' : 'ingest/list', 
+    'type': 'GET',
+    'dataType' : 'json'
+  }).then(function(resp){
+    $('#ingest-options').empty();    
+    
+    _.each(resp.items, function(item){
+      $('#ingest-options').append($('<option>').html(item));
+    });
+  });
+}
+
+var parseStatus = function(sz){
+  var parts = sz.trim().split("\n");
+  var statusline = _.last(parts);
+  var res = /^\[(.*?)\]/i.exec(statusline)
+  return res[1];
+};
+
+var pollForStatus = function(url, statuses, callback){
+  return function(){
+    (function poll(){
+      var success = function(resp){
+        var status = parseStatus(resp.log);        
+        console.log(status);
+        var b = _.some(statuses, function(s){
+          return s.toLowerCase() == status.toLowerCase();
+        });
+
+        if (b){
+          callback(status)
+        } else {
+          _.delay(poll, 30 * 1000);
+        }
+      };
+
+      $.ajax({ url : url, dataType: 'json'}).then(success);
+    })();
+  };
+};
+
+var click_handler_download = function(evt){
   evt.preventDefault();
   var user =  $('#txt_email').val();
   var pass =  $('#txt_pass').val();
   var postObj = { 'user' : user, 'pass' : pass };
+
+  FORM.disable();
+
+  var poll = pollForStatus('ingest/state/' + user, ['Completed Download','Error'], function(status){
+    FORM.enable();
+    refresh_ingest_options();
+    alert(status);
+  });
 
   $.ajax({
     url: 'ingest/download',
@@ -13,17 +81,34 @@ var click_handler = function(evt){
     dataType:"json"
   })
     .done(function(resp){
-      alert(resp);
       console.log("success");
+      poll();
     })
     .fail(function(resp){
       alert('fail');
       console.log("fail");      
+      FORM.enable();
     });
 
   return false;
 };
 
+var click_handler_ingest = function(evt){
+  evt.preventDefault();
+  var email = $('#ingest-options').val();
 
-$('#btn-ingest').on('click', click_handler);
+  FORM.disable();
 
+  _.delay(FORM.enable, 5000);
+
+  return false;
+};
+
+$('#btn-download').on('click', click_handler_download);
+$('#btn-ingest').on('click', click_handler_ingest);
+
+
+
+//init
+
+refresh_ingest_options();

@@ -20,11 +20,20 @@
         <p>
           <input id="txt_pass" type="password" class="form-control" placeholder="Password" required>
         </p>
-        <button id="btn-ingest" class="btn btn-lg btn-primary btn-block">Ingest</button>
+        <button id="btn-download" class="btn btn-lg btn-primary btn-block">Download</button>
       </form>
-
     </div> <!-- /container -->
-
+    <div class="container">
+      <div class="form-ingest">
+        <h2 class="form-signin-heading">Ingest Account</h2>
+        <p>
+          <select class="form-control" id="ingest-options"></select>
+        </p>
+        <p>
+          <button id="btn-ingest" class="btn btn-lg btn-primary btn-block">Ingest</button>     
+        </p>
+      </div>
+    </div>
     <script src="js/thirdparty/jquery-1.9.1.min.js"></script>
     <script src="js/thirdparty/jquery-ui.min.js"></script>
     <script src="js/thirdparty/d3.v3.min.js" charset="utf-8"></script>
