@@ -11,12 +11,18 @@ import cherrypy
 import json
 import os
 import sys
+import datetime
 
 
 
 webroot = cherrypy.config.get("webroot")
 base_dir = os.path.abspath("{}/../".format(webroot))
 work_dir = os.path.abspath("{}/../work_dir/".format(webroot))
+
+IO_PIPES = {'stdout': subprocess.PIPE, 'stderr': subprocess.PIPE}
+
+def fmtNow():
+    return datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')
 
 def download(data):
     user = data.get("user")
@@ -69,7 +75,7 @@ def download(data):
     tangelo.content_type("application/json")
     return { "id" : user }
 
-def ingest(data):
+def changeConfig(data):
     target = data.get('target', None)
     database = data.get('database', None)
     host = data.get('host', None)    
@@ -89,6 +95,45 @@ def ingest(data):
     tangelo.content_type("application/json")    
     return { 'target' : config["target"], 'config' : filename + ".cfg" }
 
+def ingest(data):
+    cfg = "{}/conf/{}".format(base_dir, data.get('conf', 'target.cfg'))
+    logname = "ingest_{}".format(fmtNow())
+    logfile = "{}/{}.log".format(work_dir, logname)
+
+    cherrypy.log("Ingest config: {}".format(cfg))
+    cherrypy.log("Ingest logfile: {}".format(logfile))
+
+    def ingest_thread():
+        cherrypy.log("Ingest Started:")
+        try:
+            args = ["./bin/ingest.sh", cfg]
+            cherrypy.log("running: {}".format(" ".join(args)))
+            spit(logfile, "running: {} \n".format(" ".join(args)))
+            cherrypy.log("started: {}".format(fmtNow()))
+            spit(logfile, "started: {} \n".format(fmtNow()))
+            kwargs = dict(IO_PIPES, **{'cwd': base_dir })
+            subp = subprocess.Popen(args, **kwargs)
+            out, err = subp.communicate()
+            spit(logfile, out)
+            spit(logfile, "\n")
+            rtn = subp.returncode
+            if rtn != 0:
+                spit(logfile, "return with non-zero code: {} \n".format(rtn))
+                spit(logfile, err)
+                spit(logfile, "\n")
+                spit(logfile, "[Failed]")
+            else:
+                spit(logfile, "[Complete]")
+        except:
+            error_info = sys.exc_info()[0]
+            cherrypy.log(error_info)
+            spit(logfile, "[Error] {}\n".format(error_info.replace('\n', ' ')))
+
+    thr = threading.Thread(target=ingest_thread, args=())
+    thr.start()
+    tangelo.content_type("application/json")    
+    return {'log' : logname }
+
 def getState(*args):
     email_addr = nth(args, 0)
     logfile = "{}/{}.log".format(work_dir, email_addr)
@@ -104,6 +149,7 @@ def getList(*args):
 
 post_actions = {
     "download" : download,
+    "config" : changeConfig,
     "ingest" : ingest
 }
 
