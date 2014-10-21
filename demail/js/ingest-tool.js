@@ -59,6 +59,42 @@ var pollForStatus = function(url, statuses, callback){
   };
 };
 
+
+var run_ingest = function(str){
+
+  FORM.disable();
+
+  var config = $.ajax({
+    'url' : 'ingest/config', 
+    'type': 'POST',
+    'dataType' : 'json',
+    'data': JSON.stringify({ 'target' : str, 'filename' : str }),
+    'contentType':"application/json; charset=utf-8"    
+  });
+
+  var ingest = function(cfg){
+    $.ajax({
+      'url' : 'ingest/ingest', 
+      'type': 'POST',
+      'dataType' : 'json',
+      'data': JSON.stringify({ 'conf' : cfg.config }),
+      'contentType':"application/json; charset=utf-8"    
+    });
+  };
+
+  var fail = function(){
+    console.log(arguments);
+    alert('error');
+    FORM.enable();
+  };
+
+  config.then(ingest, fail).then(function(resp){
+    FORM.enable();
+    console.log(resp);
+  }, fail);
+
+};
+
 var click_handler_download = function(evt){
   evt.preventDefault();
   var user =  $('#txt_email').val();
@@ -98,8 +134,7 @@ var click_handler_ingest = function(evt){
   var email = $('#ingest-options').val();
 
   FORM.disable();
-
-  _.delay(FORM.enable, 5000);
+  run_ingest(email);
 
   return false;
 };

@@ -98,7 +98,9 @@ def changeConfig(data):
 def ingest(data):
     cfg = "{}/conf/{}".format(base_dir, data.get('conf', 'target.cfg'))
     logname = "ingest_{}".format(fmtNow())
-    logfile = "{}/{}.log".format(work_dir, logname)
+    teefile = "{}/{}.tee.log".format(work_dir, logname)
+    errfile = "{}/{}.err.log".format(work_dir, logname)
+    logfile = "{}/{}.status.log".format(work_dir, logname)
 
     cherrypy.log("Ingest config: {}".format(cfg))
     cherrypy.log("Ingest logfile: {}".format(logfile))
@@ -106,24 +108,37 @@ def ingest(data):
     def ingest_thread():
         cherrypy.log("Ingest Started:")
         try:
-            args = ["./bin/ingest.sh", cfg]
-            cherrypy.log("running: {}".format(" ".join(args)))
-            spit(logfile, "running: {} \n".format(" ".join(args)))
             cherrypy.log("started: {}".format(fmtNow()))
-            spit(logfile, "started: {} \n".format(fmtNow()))
-            kwargs = dict(IO_PIPES, **{'cwd': base_dir })
-            subp = subprocess.Popen(args, **kwargs)
-            out, err = subp.communicate()
-            spit(logfile, out)
-            spit(logfile, "\n")
-            rtn = subp.returncode
-            if rtn != 0:
-                spit(logfile, "return with non-zero code: {} \n".format(rtn))
-                spit(logfile, err)
-                spit(logfile, "\n")
-                spit(logfile, "[Failed]")
-            else:
-                spit(logfile, "[Complete]")
+            spit(logfile, "[Started] {} \n".format(fmtNow()))
+
+            args = ["./bin/rebuild_all.sh"]
+            cherrypy.log("running: {}".format(" ".join(args)))
+            spit(logfile, "[Running] {} \n".format(" ".join(args)))
+
+            with open(teefile, 'w') as t, open(errfile, 'w') as e:
+                kwargs = {'stdout': t, 'stderr': e, 'cwd': base_dir }
+                rebuildp = subprocess.Popen(args, **kwargs)
+                out, err = rebuildp.communicate()
+                cherrypy.log("rebuild complete: {}".format(fmtNow()))
+                rtn = rebuildp.returncode
+                if rtn != 0:
+                    spit(logfile, "[Error] rebuild return with non-zero code: {} \n".format(rtn))
+                    return
+                    
+            args = ["./bin/ingest.sh", cfg]
+            cherrypy.log("running ingest: {}".format(" ".join(args)))
+            spit(logfile, "[Running] {} \n".format(" ".join(args)))
+
+            with open(teefile, 'w') as t, open(errfile, 'w') as e:
+                kwargs = {'stdout': t, 'stderr': e, 'cwd': base_dir }
+                subp = subprocess.Popen(args, **kwargs)
+                out, err = subp.communicate()
+                cherrypy.log("complete: {}".format(fmtNow()))
+                rtn = subp.returncode
+                if rtn != 0:
+                    spit(logfile, "[Error] return with non-zero code: {} \n".format(rtn))
+                else:
+                    spit(logfile, "[Complete]")
         except:
             error_info = sys.exc_info()[0]
             cherrypy.log(error_info)
