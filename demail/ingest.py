@@ -14,7 +14,6 @@ import sys
 import datetime
 
 
-
 webroot = cherrypy.config.get("webroot")
 base_dir = os.path.abspath("{}/../".format(webroot))
 work_dir = os.path.abspath("{}/../work_dir/".format(webroot))
@@ -130,7 +129,7 @@ def ingest(data):
             spit(logfile, "[Running] {} \n".format(" ".join(args)))
 
             with open(teefile, 'w') as t, open(errfile, 'w') as e:
-                kwargs = {'stdout': t, 'stderr': e, 'cwd': base_dir }
+                kwargs = {'stdout': t, 'stderr': e, 'cwd': base_dir, 'bufsize' : 1 }
                 subp = subprocess.Popen(args, **kwargs)
                 out, err = subp.communicate()
                 cherrypy.log("complete: {}".format(fmtNow()))
