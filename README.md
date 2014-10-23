@@ -7,7 +7,7 @@ When you control the mail, you control...information.
 
 Look at the fullrun.bat/sh file to understand how to get the tangelo web app up and running initially.
 
-Get raw Scott Walker data to work with at: https://www.dropbox.com/s/7eq6or39ttbes3l/sw_emails.zip
+Get raw Scott Walker data to work with at: https://www.dropbox.com/s/q9fydjmcon1l8me/kmrindfleisch%40gmail.com.tar.gz?dl=0
 </div>
 
 <h3>Dependencies</h3>
