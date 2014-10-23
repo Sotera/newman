@@ -122,3 +122,9 @@ fi
 printf "topic clustering\n"
 
 ./topic/run_topic_clustering.sh $1
+
+printf "active search ingest\n"
+
+./activesearch/ingest.sh
+
+
