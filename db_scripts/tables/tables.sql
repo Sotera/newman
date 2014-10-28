@@ -144,3 +144,10 @@ create table xref_email_topic_score (
    idx int not null,
    score varchar(64) not null   
 ) ENGINE=MyISAM;
+
+
+drop table if exists search_results;
+
+create table search_results (
+   email_id varchar(250) not null
+) ENGINE=MyISAM;

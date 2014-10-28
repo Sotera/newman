@@ -93,5 +93,8 @@ create index idx_xref_email_topic_score_email on xref_email_topic_score(email_id
 create index idx_xref_email_topic_score_email_category on xref_email_topic_score(category_id, email_id);
 create index idx_xref_email_topic_score_category on xref_email_topic_score(category_id);
 
+call drop_index_if_exists('search_results', 'idx_search_results_email_id');
+create index idx_search_results_email_id on search_results(email_id);
+
 
 drop procedure if exists drop_index_if_exists;
