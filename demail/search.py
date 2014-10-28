@@ -1,7 +1,9 @@
 
 from newman.db.newman_db import newman_connector
 from newman.db.mysql import execute_query
-from newman.utils.functions import nth, rest, head
+from newman.utils.functions import nth, rest, head, jsonGet
+
+from elasticsearch import Elasticsearch
 
 import tangelo
 import cherrypy
@@ -24,7 +26,7 @@ stmt_node_vals_filter_text = (
     " select distinct e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
     " from email_addr e join xref_emailaddr_email xaddr on e.email_addr = xaddr.email_addr "
     " join email eml on xaddr.email_id = eml.id "
-    " where (lower(eml.subject) like %s or lower(eml.body) like %s) "
+   "  join search_results x on x.email_id = eml.id "    
 )
 
 stmt_node_vals_filter_entity = (
@@ -55,8 +57,7 @@ stmt_find_emails_filter_email_addr = (
 
 stmt_find_emails_filter_text = (
     " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
-    " from email "
-    " where (lower(subject) like %s or lower(body) like %s) "
+   "  from email e join search_results x on x.email_id = e.id "
 ) 
 
 stmt_find_emails_filter_entity = (
@@ -107,13 +108,11 @@ stmt_node_edges_filter_text = (
     " select source, target, sum(weight) "
     " from ("
    "  select `from` as source, recipient as target, count(1) as weight "
-   "  from xref_recipients x join email e on x.email_id = e.id "
-   "  where (lower(e.subject) like %s or lower(e.body) like %s) "
+   "  from xref_recipients x join search_results e on x.email_id = e.email_id "
    "  group by `from`, recipient "
     " union all"
    "  select recipient as source, `from` as target, count(1) as weight "
-   "  from xref_recipients x join email e on x.email_id = e.id "
-   "  where (lower(e.subject) like %s or lower(e.body) like %s) "
+   "  from xref_recipients x join search_results e on x.email_id = e.email_id "
    "  group by `from`, recipient "
     " ) as t "
     " group by source, target"
@@ -162,7 +161,7 @@ def nodeQueryObj(conn, field, args_array):
     if field.lower() == "email":  return (conn, stmt_node_vals_filter_email_addr, text, text)
     if field.lower() == "entity": return (conn, stmt_node_vals_filter_entity, text)
     # filter by text
-    if text: return (conn, stmt_node_vals_filter_text, "%{0}%".format(text), "%{0}%".format(text))
+    if text: return (conn, stmt_node_vals_filter_text)
     # all
     return  (conn, stmt_node_vals)
 
@@ -189,7 +188,7 @@ def edgeQueryObj(conn, field, args_array):
     if field.lower() == "email": return (conn, stmt_node_edges_filter_email_addr, text, text, text, text)
     if field.lower() == "entity": return (conn, stmt_node_edges_filter_entity, text, text)
     # filter by text
-    if text: return (conn, stmt_node_edges_filter_text, "%{0}%".format(text), "%{0}%".format(text), "%{0}%".format(text), "%{0}%".format(text))
+    if text: return (conn, stmt_node_edges_filter_text)
     # all
     return  (conn, stmt_node_edges)
 
@@ -213,7 +212,7 @@ def emailQueryObj(conn, field, args_array):
     if field.lower() == "email": return (conn, stmt_find_emails_filter_email_addr, text, text)
     if field.lower() == "entity": return (conn, stmt_find_emails_filter_entity, text)
     # filter by text
-    if text: return (conn, stmt_find_emails_filter_text, "%{0}%".format(text), "%{0}%".format(text))
+    if text: return (conn, stmt_find_emails_filter_text)
     # all
     return  (conn, stmt_find_emails)
 
@@ -230,7 +229,29 @@ def getEmails(colors, field, args_array):
                 rows.append(row)
     return rows
 
+def ingestESTextResults(hits):
+    stmt = ("insert into search_results (email_id) values (%s)")
+
+    with newman_connector() as cnx:        
+        with execute_query(cnx.conn(), ("delete from search_results")) as _:
+            pass
+        for hit in hits:
+            with execute_query(cnx.conn(), stmt, hit["_id"]) as qry:        
+                pass
+
+        cnx.commit()
+
 def createResults(field, args_array):
+
+    ## is text search 
+    if not field.lower() in ["email", "entity"]:
+        text = head(args_array)    
+        if text:
+            tangelo.log("text search : %s" % text)        
+            es = Elasticsearch()
+            res = es.search(index="newman", doc_type="emails", size=1000, q=text, body= {"fields": ["_id"], "query": {"match_all": {}}})
+            
+            ingestESTextResults(jsonGet(['hits','hits'], res, []))
     
     node_vals = getNodeVals(field, args_array)
     colors = {k:v.get("group_id") for k,v in node_vals.iteritems()}
