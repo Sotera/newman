@@ -58,3 +58,13 @@ def counter(start=0):
     while True:
         yield n
         n = inc(n)
+
+
+def jsonGet(arraypath, j, default=None):
+    if not j:
+        return j 
+    if not arraypath:
+        return j
+    else:
+        return jsonGet(arraypath[1:], j.get(arraypath[0]), default) \
+            if j.get(arraypath[0]) else default
