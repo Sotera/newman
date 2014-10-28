@@ -155,6 +155,21 @@ def getState(*args):
     tangelo.content_type("application/json")    
     return {'log' : sz }
 
+
+def getStateIngest(*args):
+    job_id = nth(args, 0)
+    logfile = "{}/{}.status.log".format(work_dir, job_id)    
+    sz = slurp(logfile)
+    tangelo.content_type("application/json")    
+    return {'log' : sz }
+
+def getIngestLog(*args):
+    job_id = nth(args, 0)
+    logfile = "{}/{}.tee.log".format(work_dir, job_id)    
+    sz = slurp(logfile)
+    tangelo.content_type("application/json")    
+    return {'log' : sz }
+
 def getList(*args):
     path = "{}/{}".format(webroot, "emails")
     _, dirnames, _ = os.walk(path).next()
@@ -169,6 +184,8 @@ post_actions = {
 
 get_actions = {
     "state" : getState,
+    "ingeststate": getStateIngest,
+    "ingestlog" : getIngestLog,
     "list" : getList
 }
 

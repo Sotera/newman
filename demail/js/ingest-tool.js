@@ -59,6 +59,39 @@ var pollForStatus = function(url, statuses, callback){
   };
 };
 
+var pollForStatusIngest = function(logname, statuses, callback){
+  var url = 'ingest/ingeststate/' + logname;
+  var log_url = 'ingest/ingestlog/' + logname;
+  return function(){
+    (function poll(){
+      var success = function(resp){
+        var status = parseStatus(resp.log);        
+        console.log(status);
+        var b = _.some(statuses, function(s){
+          return s.toLowerCase() == status.toLowerCase();
+        });
+
+        if (b){
+          callback(status)
+        } else {
+          _.delay(poll, 30 * 1000);
+        }
+
+        $.ajax({ url : log_url , dataType: 'json'}).then(function(resp){
+          $('#div-ts').html("refeshed: " + (new Date()).toISOString());
+          var rows = _.map(_.last(resp.log.split("\n"), 15), function(str){
+            return $('<div>').html(str);
+          });
+          $('#div-log').empty();
+          $('#div-log').append(rows);
+        });
+      };
+
+      $.ajax({ url : url, dataType: 'json'}).then(success);
+    })();
+  };
+}
+
 
 var run_ingest = function(str){
 
@@ -73,7 +106,7 @@ var run_ingest = function(str){
   });
 
   var ingest = function(cfg){
-    $.ajax({
+    return $.ajax({
       'url' : 'ingest/ingest', 
       'type': 'POST',
       'dataType' : 'json',
@@ -89,7 +122,13 @@ var run_ingest = function(str){
   };
 
   config.then(ingest, fail).then(function(resp){
-    FORM.enable();
+    console.log(resp);
+    var logname = resp.log;
+    var poll = pollForStatusIngest(logname, ['Complete', 'Error'], function(status){
+      FORM.enable();
+      alert(status);
+    });
+    poll();
     console.log(resp);
   }, fail);
 
