@@ -1,7 +1,7 @@
 from newman.db.newman_db import newman_connector
 from newman.db.mysql import execute_query, execute_nonquery
 from newman.utils.functions import nth
-from newman.settings import CONFIG 
+from newman.settings import getOpt 
 
 import tangelo
 import cherrypy
@@ -72,7 +72,7 @@ def getRankedEmails(*args):
 def getTarget(*args):
     # returns the users who's email is being analyzed
     #todo: read from file or config 
-    target = CONFIG.get('target')
+    target = getOpt('target')
     stmt = (
         " select e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
         " from email_addr e "

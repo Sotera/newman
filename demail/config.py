@@ -1,17 +1,17 @@
 
-from newman.settings import CONFIG 
+from newman.settings import reloadConfig 
 
 import tangelo
 import cherrypy
 
 
-def reloadConfig(*args):
-    CONFIG.reloadConfig()
+def reload_(*args):
+    reloadConfig()
     tangelo.content_type("application/json")
     return { "result" : 'SUCCESS' }
 
 actions = {
-    "reload" : reloadConfig
+    "reload" : reload_
 }
 
 def unknown(*args):
