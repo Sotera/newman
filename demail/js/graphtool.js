@@ -965,6 +965,10 @@ function draw_rank_chart() {
       return _.object(["email", "community", "communityId", "groupId", "rank", "totalReceived", "totalSent"], email);
     });
 
+    if (emails.length < 1) {
+      $('#top-rank').append($('<p>').html("No results for rank."));
+    }
+
     var width = 400, barHeight = 20;
     var margin = {top: 20, right: 10, bottom: 20, left: 150};
     width = width - margin.left - margin.right;
