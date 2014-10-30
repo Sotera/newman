@@ -123,13 +123,12 @@ printf "topic clustering\n"
 
 ./topic/run_topic_clustering.sh $1
 
-
 printf "attachments extract\n"
 
 ./attachments/run_attach_extract.sh $1
 
-# printf "active search ingest\n"
+printf "active search ingest\n"
 
-# ./activesearch/ingest.sh $1
+./activesearch/ingest.sh $1
 
 
