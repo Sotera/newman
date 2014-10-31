@@ -121,7 +121,9 @@ def download(srv, outdir, limit, logfile):
                 continue
 
             fileName = part.get_filename()
+            #escape file name
             fileName = fileName if fileName else "Attach_{}".format(attach_count.next())
+            fileName = fileName.replace('/','_')
             attach.append(fileName)
             filePath = "{}/{}/{}".format(outdir, fldr, fileName)
 

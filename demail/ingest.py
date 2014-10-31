@@ -56,7 +56,12 @@ def download(data):
                 newman_email.download(session, fldr, int(limit), logfile)
 
                 spit(logfile, "[Completed Download] {}\n".format(user))
+            except Exception as ex:
+                spit(logfile, "[Error] {}\n".format(ex))
+                cherrypy.log("[Error] {}\n".format(ex))
             except:
+                spit(logfile, "[Error]")
+                cherrypy.log("[Error]")
                 error_info = sys.exc_info()[0]
                 cherrypy.log(error_info)
                 spit(logfile, "[Error] {}\n".format(error_info.replace('\n', ' ')))
