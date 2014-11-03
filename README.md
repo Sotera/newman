@@ -1,51 +1,42 @@
-# newman
+[!http://s2.quickmeme.com/img/2c/2cc68b7c1ba0a12bb8bc3438ecfea4d118bdefa65989dfa74825af5f85919739.jpg](Hello Newman)
 
-<img src="http://www.seinfeldscripts.com/images/newman1.jpg" height="400" align="right" />
+# Quick Start
+Install [Vagrant](http://www.vagrantup.com/)  
+Install [Virtual Box] (https://www.virtualbox.org/wiki/Downloads)  
+Download [XData-VM v0.2.1] (http://goo.gl/5jCBem)  
+Install XData-VM v0.2.1	  
 
-<div>
-When you control the mail, you control...information.
-
-Look at the fullrun.bat/sh file to understand how to get the tangelo web app up and running initially.
-
-Get raw Scott Walker data to work with at: https://www.dropbox.com/s/q9fydjmcon1l8me/kmrindfleisch%40gmail.com.tar.gz?dl=0
-</div>
-
-<h3>Dependencies</h3>
-
-**MySQL** [http://dev.mysql.com/downloads/mysql/](http://dev.mysql.com/downloads/mysql/)
-<br/>
-> admin set as u: root p: root
-
-**Python 2.7.x**
-```
-pip install mysql-connector-python
-pip install tangelo
-```
-
-**Perl** - (Only for ingest of ActiveSearch)
-- DBI
-- DBD:mysql 
-
-_Perl Manual Dependency Install_ <br/>
-http://search.cpan.org/~capttofu/DBD-mysql-4.027/lib/DBD/mysql.pm#Manual_Installation
-
-_Perl Dependency Downloads_:
-- https://metacpan.org/pod/DBI
-- https://metacpan.org/pod/DBD::mysql
-
-**jblas** - (For ActiveSearch)
-- make sure fortran compiler is installed
-  https://github.com/mikiobraun/jblas/wiki/Missing-Libraries
-    - `sudo apt-get install libgfortran3`
+    $ vagrant box add xdata-vm-[version] xdata-vm-[version].box  
+    $ mkdir -p ~/vm/xdata-vm/version/  
+    $ cd ~/vm/xdata-vm/version/  
+    $ vagrant init xdata-vm-[version]  
     
-- download jblas 1.2.3.jar http://mikiobraun.github.io/jblas/
-- install in m2 `mvn install:install-file -Dfile=jblas-1.2.3.jar -DgroupId=org.jblas -DartifactId=jblas -Dversion=1.2.3 -Dpackaging=jar`
-      
+Download Newman-VM  
+    
+    $ git clone https://github.com/Sotera/newman-vm  
+    $ cd newman-vm  
+    $ vagrant up  
+    $ vagrant ssh  
+    $ cd /srv/software  
+    $ git clone https://github.com/Sotera/newman  
+    $ tangelo restart  
+    
 
-**Distributed Louvain Modularity** - https://github.com/Sotera/distributed-louvain-modularity <br />
-**MITIE: MIT Information Extraction** - [https://github.com/mit-nlp/MITIE](https://github.com/mit-nlp/MITIE)<br/>
-**Topic Clustering** - [https://github.com/mitll/topic-clustering](https://github.com/mitll/topic-clustering)<br/>
-**ActiveSearch** - [https://github.com/AutonlabCMU/ActiveSearch](https://github.com/AutonlabCMU/ActiveSearch)
+In a browser goto [http://localhost:8787/ingest](http://localhost:8787/ingest)  
+Enter your gmail username and password and click download  
+Once download has completed, click ingest  
+Once ingest has completed, goto [http://localhost:8787/](http://localhost:8787/)  
 
+#GMail Download troubleshooting:  
+Make sure that Google 2-Step authentication is turned off  
+	GMail-> Account-> Security-> 2-Step Verification  
+Make sure Access for less secure applications is turned on.  
+	GMail-> Account-> Security-> Access for less secure apps.  
+	
 
-**icons** - https://www.iconfinder.com/iconsets/document-icons-2 
+[Distributed Louvain Modularity](https://github.com/Sotera/distributed-louvain-modularity)
+[MITIE: MIT Information Extraction](https://github.com/mit-nlp/MITIE)
+[Topic Clustering](https://github.com/mitll/topic-clustering)
+[ActiveSearch](https://github.com/AutonlabCMU/ActiveSearch)
+
+[icons](https://www.iconfinder.com/iconsets/document-icons-2)
