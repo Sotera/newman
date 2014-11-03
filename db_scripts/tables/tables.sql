@@ -7,6 +7,7 @@ create table email (
    dir varchar(1000) character set utf8 not null,
    category varchar(1000) character set utf8 not null,
    datetime varchar(1000) not null,
+   exportable ENUM('true', 'false') NOT NULL DEFAULT 'false',
    from_addr varchar(1000) character set utf8 not null,
    tos mediumtext,
    ccs mediumtext,

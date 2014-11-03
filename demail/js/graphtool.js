@@ -177,9 +177,10 @@ var waiting_spin = $('<img>', {
   'height' : 32});
 
 var current_email = null;
+var current_export = null;
 
 function update_current(val){
-  console.log("showing current email: " + val)
+  console.log("showing current email: " + val);
   current_email = val;
 }
 
@@ -268,7 +269,7 @@ function searchByEntity(entityid, type, value){
 
 function produceHTMLView(emailObj) {
 
-  var d = _.object(['num', 'directory','datetime', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], emailObj.email);
+  var d = _.object(['num', 'directory','datetime', 'exportable', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], emailObj.email);
   console.log(d);
   draw_mini_topic_chart(d.num);
   var el = $('<div>').addClass('body-view');
@@ -325,6 +326,15 @@ function produceHTMLView(emailObj) {
   //highlight searched text 
   if (searchType() == 'all'){
     el.highlight($('#txt_search').val());
+  }
+  
+  // exportable text (when email is initially loaded)
+  $("#submit_toggleExport").empty();
+  if (d.exportable === 'true') {
+    $("#submit_toggleExport").append('<span class="glyphicon glyphicon-minus"/> Export');
+  }
+  else {
+    $("#submit_toggleExport").append('<span class="glyphicon glyphicon-plus"/> Export');
   }
 
   return el;
@@ -1366,6 +1376,139 @@ $(function () {
             });
         });
     });
+	
+	$("#submit_clearExportable").click(function() {
+		console.log("clear export flag for all emails... ");
+		$.ajax({
+		  url: 'email/exportable',
+		    type: "POST",
+		    data: JSON.stringify({}),
+			contentType:"application/json; charset=utf-8",
+			dataType:"json"
+		  })
+		  .done(function(resp){
+			console.log(resp);
+			$('#exportModal').modal('hide');
+		  })
+		  .fail(function(resp){
+		    alert('fail');
+		    console.log("fail");  
+			$('#exportModal').modal('hide');			
+		  });	
+	});
+	
+	$("#submit_downloadExportable").click(function() {
+		console.log("download for for all exportable emails... ");
+		$.ajax({
+		  url: 'email/download',
+		    type: "POST",
+		    data: JSON.stringify({}),
+			contentType:"application/json; charset=utf-8",
+			dataType:"json"
+		  })
+		  .done(function(resp){
+			console.log(resp);
+			$('#exportModal').modal('hide');
+		  })
+		  .fail(function(resp){
+		    alert('fail');
+		    console.log("fail");  
+			$('#exportModal').modal('hide');			
+		  });	
+	});	
+	
+	$("#submit_toggleExport").click(function() {
+		console.log("toggle export flag for email_id... ");
+		if (current_email == null) {
+			alert("please select an email first");
+			return;
+		}
+		var id = current_email;
+		
+        $.get("email/email/" + encodeURIComponent(id)).then(
+		  function(resp) {
+            if(resp.email.length > 0){
+			  var d = _.object(['num', 'directory','datetime', 'exportable', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], resp.email);
+			  var exportable = d.exportable;
+			  
+			  $("#submit_toggleExport").empty();
+			  if (exportable === 'true') {
+				$("#submit_toggleExport").append('<span class="glyphicon glyphicon-plus"/> Export');
+			    $.ajax({
+				  url: 'email/exportable',
+			      type: "POST",
+			  	  data: JSON.stringify({"email": id, "exportable": "false"}),
+				  contentType:"application/json; charset=utf-8",
+				  dataType:"json"
+			    })
+			    .done(function(resp){
+				  console.log(resp);
+			    })
+			    .fail(function(resp){
+				  alert('fail');
+			      console.log("fail");      
+			    });
+			  }
+			  else if (exportable === 'false') {
+				$("#submit_toggleExport").append('<span class="glyphicon glyphicon-minus"/> Export');
+			    $.ajax({
+				  url: 'email/exportable',
+			      type: "POST",
+			  	  data: JSON.stringify({"email": id, "exportable": "true"}),
+				  contentType:"application/json; charset=utf-8",
+				  dataType:"json"
+			    })
+			    .done(function(resp){
+				  console.log(resp);
+				  $('#exportModal').modal('hide');
+			    })
+			    .fail(function(resp){
+				  alert('fail');
+			      console.log("fail");   
+				  $('#exportModal').modal('hide');				  
+			    });
+			  }
+			  
+
+			  
+            }
+        });		
+	});
+		
+	$("#view_exportList").click(function() {
+      $.get("email/exportable").then(
+        function(resp) {
+          console.log(resp);
+
+		  var template = "\
+			{{#each emails}} \
+				<p> {{1}} // <a on-click='exportEmailView' href='view/{{0}}'>view</a> </p> \
+			{{/each}} \
+		  ";
+		  var ractive = new Ractive({
+			el: "#exportList",
+			template: template,
+			data: { "emails": resp.emails }
+		  });
+		  ractive.on('exportEmailView', function(event) {
+			event.original.preventDefault();
+			$('#exportModal').modal('hide');
+		    $('#tab-list li:eq(2) a').tab('show')
+		    $(document).scrollTop(0);            
+		    $("#email-body").empty();
+		    $("#email-body").append($('<span>').text('Loading... ')).append(waiting_bar);
+			var id = event.context[0];
+			$.get("email/email/" + encodeURIComponent(id)).then(
+			function(resp) {
+			  update_current(id);
+			  if(resp.email.length > 0){
+				$("#email-body").empty();
+				$("#email-body").append(produceHTMLView(resp));
+			  }
+			});		  
+		  });		  
+        });		
+	});
     
     $("#colorby2").click(function(){
       console.log($("#colorby2").val());

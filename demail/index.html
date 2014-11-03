@@ -31,6 +31,26 @@
         </div>
       </div>
     </div>
+	
+	<!-- modal email download/export -->
+	<div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-labelledby="exportModal" aria-hidden="true">
+	  <div class="modal-dialog">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+			<h4 class="modal-title" id="exportModal">Download Emails (.ZIP File)</h4>
+		  </div>
+		  <div id="exportList" class="modal-body">
+			...
+		  </div>
+		  <div class="modal-footer">
+			<button id="submit_downloadExportable" type="button" class="btn btn-primary">Download</button>
+			<button id="submit_clearExportable" type="button" class="btn btn-secondary">Clear All</button>
+			<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		  </div>
+		</div>
+	  </div>
+	</div>	
 
     <!-- nav bar -->
     <div class="navbar navbar-default navbar-fixed-top">
@@ -45,6 +65,16 @@
           </a>
         </li>
       </ul>
+	  <ul class="nav navbar-nav navbar-right">
+		<li>
+			<!-- <a id="view_exportList" class="btn btn-default">Email Export <span class="glyphicon glyphicon-list-alt"/> </a> -->
+			
+			<button id="view_exportList" type="button" class="btn btn-default" data-toggle="modal" data-target="#exportModal">Email Export <span class="glyphicon glyphicon-list-alt"/></button>
+
+
+
+		</li>
+	  </ul>
       <!-- <ul class="nav navbar-nav"> -->
       <!--   <li> -->
       <!--     <a style="cursor:pointer" data-toggle="modal" data-target="#info-panel"> -->
@@ -127,7 +157,10 @@
                     <a id="submit_activesearch_like" class="btn btn-default" style="background-color: #00ff00"><span class="glyphicon glyphicon-thumbs-up" style="color: #000;"/></a>
                     <a id="submit_activesearch_dislike" class="btn btn-default" style="background-color: #ff0000"><span class="glyphicon glyphicon-thumbs-down" style="color: #000"/></a>
                   </div>
-                  <div style="background-color: #f0f0f0; padding: 5px; margin-left: 50px; float: left; display: inline-block;" id="topic_mini_chart"></div>
+                  <div style="background-color: #f0f0f0; padding: 5px; margin-left: 20px; float: left; display: inline-block;" id="topic_mini_chart"></div>
+				  <div style="display: inline-block;float:left;margin-top: 15px;margin-left: 20px;" class="active">
+					<a id="submit_toggleExport" class="btn btn-default"><span class="glyphicon glyphicon-plus"/> Export</a>
+				  </div>
                 </div>
                 <div id="email-body"> Select an Email to preview </div>
               </div>
@@ -193,6 +226,7 @@
     <script src="js/thirdparty/jquery-1.9.1.min.js"></script>
     <script src="js/thirdparty/jquery-ui.min.js"></script>
     <script src="js/thirdparty/d3.v3.min.js" charset="utf-8"></script>
+	<script src="js/thirdparty/ractive.min.js"></script>
     <script src="js/thirdparty/bootstrap.min.js"></script>
     <script src="js/thirdparty/underscore-min.js"></script>
     <script src="js/thirdparty/underscore-contrib.min.js"></script>
