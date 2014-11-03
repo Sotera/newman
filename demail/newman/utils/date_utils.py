@@ -16,3 +16,7 @@ def dateToUTCstr(str_date):
         dt = dt.replace(tzinfo=dateutil.tz.tzlocal())
     dt_tz = dt.astimezone(dateutil.tz.tzutc())
     return dt_tz.strftime('%Y-%m-%dT%H:%M:%S')
+
+
+def fmtNow():
+    return datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')

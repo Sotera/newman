@@ -2,6 +2,8 @@ from newman.db.newman_db import newman_connector
 from newman.db.mysql import execute_query, execute_nonquery
 from newman.utils.functions import nth
 from newman.settings import getOpt 
+from newman.utils.file import rmrf, mkdir, mv 
+from newman.utils.date_utils import fmtNow
 
 import tangelo
 import cherrypy
@@ -149,37 +151,42 @@ def setExportable(data):
             return { "email" : queryEmail(email) }
  
 #POST /download
-def buildExportable(data):
-    # TODO #
-    # note: skipping listed/individual downloads for now (assume global download)
+def buildExportable(*args):
+    webroot = cherrypy.config.get("webroot")
+    target = getOpt('target')	
+    base_src = "{}/emails/{}".format(webroot,target)
+    tmp_dir = os.path.abspath("{}/../tmp/".format(webroot))
+    download_dir = "{}/downloads/".format(webroot)
+    tar_gz = "export_{}".format(fmtNow())
+    base_dest = os.path.abspath("{}/../tmp/newman_dl".format(webroot))
 
-    try:
-        shutil.rmtree('/tmp/newman_dl')
-    except:
-        msg = 'Folder directory does not exist.'
+    if os.path.exists(base_dest):
+        rmrf(base_dest)
+    if not os.path.exists(download_dir):
+        mkdir(download_dir)
+    mkdir(base_dest)
 	
-    base_src = '/srv/software/newman/demail/emails/kmrindfleisch@gmail.com/'
-    base_dest = '/tmp/newman_dl/'
-	
-	# Get list of paths... 
+    # Get list of paths... 
     stmt = (
-        " SELECT id FROM email WHERE exportable='true' "
+        " SELECT id, dir FROM email WHERE exportable='true' "
     )
     msg = ''
     paths_to_copy = []
     tangelo.content_type("application/json")        
     with newman_connector() as read_cnx:
         with execute_query(read_cnx.conn(), stmt) as qry:
-            for row in qry.cursor():
-                for val in row:
-				    # ... for each path, copy to /tmp/newman_dl
-                    src = base_src + "" + val
-                    dest = base_dest + "" + val
-                    shutil.copytree(src, dest)
-    # ... zip up directory.
-    # ... move directory to global space
-    # ... serve download as zip file via http response.
-	return { "msg" : "service not completed" }
+            for email_id, val in qry.cursor():
+                src = "{}/{}/".format(base_src,val)
+                dest = "{}/{}/".format(base_dest, val)
+                shutil.copytree(src, dest)
+
+    # compress dir
+    shutil.make_archive(tar_gz, "gztar", root_dir=base_dest) 
+
+    # move to web downloads
+    mv("{}/{}.tar.gz".format(tmp_dir, tar_gz), "{}/{}.tar.gz".format(download_dir, tar_gz))
+
+    return { "file" : "downloads/{}.tar.gz".format(tar_gz) }
 	
 get_actions = {
     "target" : getTarget, 
@@ -188,12 +195,12 @@ get_actions = {
     "entities" : getEntities,
     "rank" : getRankedEmails,
     "attachments" : getAttachmentsSender,
-	"exportable" : getExportable
+    "exportable" : getExportable,
+    "download" : buildExportable
 }
 
 post_actions = {
-	"exportable" : setExportable,
-	"download" : buildExportable
+    "exportable" : setExportable
 }
 
 def unknown(*args):
