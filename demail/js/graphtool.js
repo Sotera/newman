@@ -1397,6 +1397,11 @@ $(function () {
 	  $('#exportModal').modal('hide');			
 	});	
     });
+
+    //on modal close event
+    $('#exportModal').on('hidden.bs.modal', function () {
+      $('#export_download_link').hide();      
+    });
     
     $("#submit_downloadExportable").click(function() {
       console.log("download for for all exportable emails... ");
@@ -1408,7 +1413,8 @@ $(function () {
       })
 	.done(function(resp){
 	  console.log(resp);
-	  $('#exportModal').modal('hide');
+          $('#export_download_link a').attr('href', resp.file);
+          $('#export_download_link').show();
 	})
 	.fail(function(resp){
 	  alert('fail');
