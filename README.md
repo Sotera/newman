@@ -36,8 +36,9 @@ Make sure Access for less secure applications is turned on.
 
 ## Applied Technology
 [Distributed Louvain Modularity](https://github.com/Sotera/distributed-louvain-modularity)  
-[MITIE: MIT Information Extraction](https://github.com/mit-nlp/MITIE)  
+[MITIE: MIT Information Extraction](https://github.com/mitll/MITIE)  
 [Topic Clustering](https://github.com/mitll/topic-clustering)  
 [ActiveSearch](https://github.com/AutonlabCMU/ActiveSearch)  
+[Tangelo](http://tangelo.kitware.com)
 
 [icons](https://www.iconfinder.com/iconsets/document-icons-2)  
