@@ -1,5 +1,7 @@
+# Newman
+A tool to quickly explore the history and network created by your email.
 ![Hello Newman](http://s2.quickmeme.com/img/2c/2cc68b7c1ba0a12bb8bc3438ecfea4d118bdefa65989dfa74825af5f85919739.jpg)
-# Quick Start
+## Quick Start
 Install [Vagrant](http://www.vagrantup.com/)  
 Install [Virtual Box] (https://www.virtualbox.org/wiki/Downloads)  
 Download [XData-VM v0.2.1] (http://goo.gl/5jCBem)  
@@ -32,7 +34,7 @@ Make sure that Google 2-Step authentication is turned off
 Make sure Access for less secure applications is turned on.  
     GMail-> Account-> Security-> Access for less secure apps.  
 
-
+## Applied Technology
 [Distributed Louvain Modularity](https://github.com/Sotera/distributed-louvain-modularity)  
 [MITIE: MIT Information Extraction](https://github.com/mit-nlp/MITIE)  
 [Topic Clustering](https://github.com/mitll/topic-clustering)  
