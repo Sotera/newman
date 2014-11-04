@@ -1,6 +1,8 @@
 
 *.pyc
 *.zip
+.DS_Store
+work_dir
 
 demail/emails/
 !demail/emails/.keep
