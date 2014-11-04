@@ -23,7 +23,7 @@ Download Newman-VM
     $ tangelo restart  
 
 
-In a browser goto [http://localhost:8787/ingest](http://localhost:8787/ingest)  
+In a browser goto [http://localhost:8787/ingest.html](http://localhost:8787/ingest.html)  
 Enter your gmail username and password and click download  
 Once download has completed, click ingest  
 Once ingest has completed, goto [http://localhost:8787/](http://localhost:8787/)  
