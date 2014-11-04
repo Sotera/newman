@@ -330,12 +330,10 @@ function produceHTMLView(emailObj) {
   }
   
   // exportable text (when email is initially loaded)
-  $("#submit_toggleExport").empty();
   if (d.exportable === 'true') {
-    $("#submit_toggleExport").append('<span class="glyphicon glyphicon-minus"/> Export');
-  }
-  else {
-    $("#submit_toggleExport").append('<span class="glyphicon glyphicon-plus"/> Export');
+    $("#submit_toggleExport").addClass('marked')
+  } else {
+    $("#submit_toggleExport").removeClass('marked')
   }
 
   return el;
@@ -1426,56 +1424,31 @@ $(function () {
     $("#submit_toggleExport").click(function() {
       console.log("toggle export flag for email_id... ");
       if (current_email == null) {
-	alert("please select an email first");
+	//alert("please select an email first");
 	return;
       }
       var id = current_email;
       
-      $.get("email/email/" + encodeURIComponent(id)).then(
-	function(resp) {
-          if(resp.email.length > 0){
-	    var d = _.object(['num', 'directory','datetime', 'exportable', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], resp.email);
-	    var exportable = d.exportable;
-	    
-	    $("#submit_toggleExport").empty();
-	    if (exportable === 'true') {
-	      $("#submit_toggleExport").append('<span class="glyphicon glyphicon-plus"/> Export');
-	      $.ajax({
-		url: 'email/exportable',
-		type: "POST",
-		data: JSON.stringify({"email": id, "exportable": "false"}),
-		contentType:"application/json; charset=utf-8",
-		dataType:"json"
-	      })
-		.done(function(resp){
-		  console.log(resp);
-		})
-		.fail(function(resp){
-		  alert('fail');
-		  console.log("fail");      
-		});
-	    }
-	    else if (exportable === 'false') {
-	      $("#submit_toggleExport").append('<span class="glyphicon glyphicon-minus"/> Export');
-	      $.ajax({
-		url: 'email/exportable',
-		type: "POST",
-		data: JSON.stringify({"email": id, "exportable": "true"}),
-		contentType:"application/json; charset=utf-8",
-		dataType:"json"
-	      })
-		.done(function(resp){
-		  console.log(resp);
-		  $('#exportModal').modal('hide');
-		})
-		.fail(function(resp){
-		  alert('fail');
-		  console.log("fail");   
-		  $('#exportModal').modal('hide');				  
-		});
-	    }
-          }
-        });		
+      var ajaxToggle = function(id, exportable){
+	$.ajax({
+	  url: 'email/exportable',
+	  type: "POST",
+	  data: JSON.stringify({"email": id, "exportable": !exportable}),
+	  contentType:"application/json; charset=utf-8",
+	  dataType:"json"
+	})
+	  .done(function(resp){
+            $("#submit_toggleExport").toggleClass('marked');
+	    console.log(resp);
+	  })
+	  .fail(function(resp){
+	    alert('fail');
+	    console.log("fail");   
+	  });
+      };
+
+      ajaxToggle(id, $("#submit_toggleExport").hasClass('marked'));
+
     });
     
     $("#view_exportList").click(function() {
@@ -1485,7 +1458,7 @@ $(function () {
 
 	  var template = "\
 {{#each emails}} \
-<p> {{1}} // <a on-click='exportEmailView' href='view/{{0}}'>view</a> </p> \
+<p>  <a on-click='exportEmailView' href='view/{{0}}'>{{0}}</a> : {{1}} </p> \
 {{/each}} \
 ";
 	  var ractive = new Ractive({

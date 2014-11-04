@@ -252,3 +252,10 @@ div.bootstrap-growl >span.close {
 .tab-pane { height: 100%;}
 #email-body { height: calc(100% - 80px); }
 .body-view { height: 100%; overflow-y: scroll; }
+
+.marked {
+    color: #ffd700;
+}
+.marked:hover {
+    color: #ffd700;
+}
