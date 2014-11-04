@@ -181,7 +181,7 @@ def buildExportable(*args):
                 shutil.copytree(src, dest)
 
     # compress dir
-    shutil.make_archive(tar_gz, "gztar", root_dir=base_dest) 
+    shutil.make_archive("{}/{}".format(tmp_dir, tar_gz), "gztar", root_dir=base_dest) 
 
     # move to web downloads
     mv("{}/{}.tar.gz".format(tmp_dir, tar_gz), "{}/{}.tar.gz".format(download_dir, tar_gz))
