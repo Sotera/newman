@@ -4,13 +4,8 @@ A tool to quickly explore the history and network created by your email.
 ## Quick Start
 Install [Vagrant](http://www.vagrantup.com/)  
 Install [Virtual Box] (https://www.virtualbox.org/wiki/Downloads)  
-Download [XData-VM v0.2.1] (http://goo.gl/5jCBem)  
-Install XData-VM v0.2.1
-
-    $ vagrant box add xdata-vm-[version] xdata-vm-[version].box  
-    $ mkdir -p ~/vm/xdata-vm/version/  
-    $ cd ~/vm/xdata-vm/version/  
-    $ vagrant init xdata-vm-[version]  
+Download [XData-VM v0.2.1] (http://goo.gl/5jCBem) to your home directory
+    $ vagrant box add xdata-0.2.1 xdata-0.2.1.box  
 
 Download Newman-VM  
 
