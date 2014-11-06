@@ -9,14 +9,15 @@ Download [XData-VM v0.2.1] (http://goo.gl/5jCBem) to your home directory
 
 Download Newman-VM  
 
-    $ git clone https://github.com/Sotera/newman-vm  
-    $ cd newman-vm  
-    $ vagrant up  
-    $ vagrant ssh  
-    $ cd /srv/software  
-    $ git clone https://github.com/Sotera/newman  
-    $ tangelo restart  
-
+``` shell
+$ git clone https://github.com/Sotera/newman-vm
+$ cd newman-vm
+$ vagrant up
+$ vagrant ssh
+$ cd /srv/software
+$ git clone https://github.com/Sotera/newman
+$ tangelo restart
+```
 
 In a browser goto [http://localhost:8787/ingest.html](http://localhost:8787/ingest.html)  
 Enter your gmail username and password and click download  
