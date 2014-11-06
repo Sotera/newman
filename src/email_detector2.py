@@ -21,6 +21,8 @@ hash_first_hour = {}
 
 max_value = 0
 
+minimum_activity = 1
+
 SourceEmail = sys.argv[1]
 
 #in the first hours for every day, track the first emails outbound from source email address
@@ -46,7 +48,7 @@ fin.close()
 
 for dt in date_list:
     #Make sure there was a base level of activity
-    if date_list[dt] > 5:
+    if date_list[dt] > minimum_activity:
         kylist = hash_date[dt].keys()
         kylist.sort()
         for tm in kylist:
@@ -59,9 +61,15 @@ for dt in date_list:
                     max_value = hash_score[target]
             break
 
+# #Lets figure out the base activity
+# activity_level = {}
+# for dt in date_list:
+#     if date_list[dt] > minimum_activity:
+
+
 for dt in date_list:
     #Make sure there was a base level of activity (3 emails that day)
-    if date_list[dt] > 3:
+    if date_list[dt] > minimum_activity:
         kylist = hash_date[dt].keys()
         kylist.sort()
         firstemailtime = ''
@@ -83,8 +91,8 @@ for dt in date_list:
 
 for entry in hash_score:
 
-    # if hash_score[entry] < 4:
-    #     continue
+    if hash_score[entry] <= 1:
+        continue
 
     score = str(float(math.floor(float(hash_score[entry]/float(hash_first_hour[entry]))*100)/100.0))
     if score not in hash_sorted:
