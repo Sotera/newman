@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import datetime
@@ -28,7 +28,6 @@ for line in fin:
     (dt,src,target) = line.strip().split('\t')
     if src != SourceEmail:
         continue
-
     dtconv = datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S')
     if dtconv.date() not in date_list:
         date_list[dtconv.date()] = 0
@@ -61,8 +60,8 @@ for dt in date_list:
             break
 
 for dt in date_list:
-    #Make sure there was a base level of activity (2 emails that day)
-    if date_list[dt] > 5:
+    #Make sure there was a base level of activity (3 emails that day)
+    if date_list[dt] > 3:
         kylist = hash_date[dt].keys()
         kylist.sort()
         firstemailtime = ''
@@ -81,20 +80,17 @@ for dt in date_list:
                     hash_first_hour[target] = 0
                 hash_first_hour[target] += partialscore
             partialscore = partialscore/(float)(2.0)
-                        
 
-
-        
 for entry in hash_score:
-    if hash_score[entry] < 4:
-        continue
-    
-    
+
+    # if hash_score[entry] < 4:
+    #     continue
+
     score = str(float(math.floor(float(hash_score[entry]/float(hash_first_hour[entry]))*100)/100.0))
     if score not in hash_sorted:
         hash_sorted[score] = []
     hash_sorted[score].append(entry)
-    
+
 
 kys = hash_sorted.keys()
 kys.sort(reverse=True)
