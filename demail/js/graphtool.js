@@ -1292,7 +1292,7 @@ $(function () {
     $('#email_group_conversation').on('click', group_email_conversation);
     
     //init
-    //do_search('all','');
+    do_search('all','');
 
     $('#top-entities').append(waiting_bar);
 
