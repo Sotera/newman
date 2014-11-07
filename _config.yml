@@ -1,0 +1,14 @@
+# Site settings
+title: Newman
+email: newman@usps.gov
+description: > # this means to ignore newlines until "baseurl:"
+    "When you control the mail, you control... information"
+baseurl: "/testPages" # the subpath of your site, e.g. /blog/
+url: "http://bwhiteman.github.io" # the base hostname & protocol for your site
+twitter_username: newmanusps
+github_username:  newmanusps
+highlighter: pygments
+github: [Repository metadata]
+
+# Build settings
+markdown: kramdown
