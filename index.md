@@ -1,6 +1,5 @@
 ---
-layout: default
-title: Newman
+layout: page
 ---
 
 # Welcome to Newman
