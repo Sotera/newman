@@ -125,6 +125,17 @@
           </td>
         </tr>
       </table>
+      
+      <div style="border-top: 1px solid #000;text-align:center;">
+        <div id="toggle_domains"><span class="glyphicon glyphicon-chevron-up"></span></div>
+        <div id="domains_list"style="height: 350px;max-height:400px;overflow-y: scroll;">
+          <table id="domain-table" class="table">
+            <thead />
+            <tbody />
+          </table>
+        </div>
+      </div>
+      
     </div>
 
     <!-- body -->
@@ -142,7 +153,6 @@
               <li><a href="#email-body-tab" role="tab" data-toggle="tab">Email</a></li>
               <li><a href="#topics-tab" role="tab" data-toggle="tab">Topics</a></li>
               <li><a href="#attach-tab" role="tab" data-toggle="tab">Attachments</a></li>
-              <li><a href="#email-domain-tab" role="tab" data-toggle="tab">Email Domains</a></li>
             </ul>
 
             <!-- Tab panes -->
@@ -177,14 +187,6 @@
                 </div>
                 <div style="height: calc(100% - 30px);overflow-y: scroll;">
                   <table id="attach-table" class="info-table"></table>                
-                </div>
-              </div>
-              <div class="tab-pane" id="email-domain-tab"> 
-                <div style="height: 100%; overflow: scroll;">
-                  <table id="domain-table" class="info-table">
-                    <thead></thead>
-                    <tbody></tbody>
-                  </table>
                 </div>
               </div>
             </div>

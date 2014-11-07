@@ -60,6 +60,45 @@ var control_panel= (function(){
 }());
 
 
+var toggle_domains = (function(){
+  var btn = $('#toggle_domains');
+  var panel = $('#domains_list');
+  var open_css = "glyphicon-chevron-down";
+  var close_css = "glyphicon-chevron-up";
+
+  var open = function(){
+    btn.find("span").first().switchClass(open_css, close_css);
+    panel.css("height", "350px");
+  };
+
+  var close = function(){
+    btn.find("span").first().switchClass(close_css, open_css);
+    panel.css("height", "0px");
+  };
+
+  var isOpen = function(){ 
+    return btn.find("span").first().hasClass(close_css);
+  };
+
+  var toggle = function(){
+    if (isOpen()){
+      close();
+    } else {
+      open();
+    }
+  };
+  
+
+  btn.on('click', toggle);
+
+  return {
+    open: open,
+    close: close,
+    toggle: toggle,
+    isOpen: isOpen
+  };
+}());
+
 var htmlDecode = function(str){
   return $('<div/>').html(str).text();
 };
@@ -1069,7 +1108,8 @@ function redraw_domains_table(){
   $("#domain-table tbody").empty();
   $("#domain-table thead").empty();
 
-  var thead = d3.select("#domain-table").select("thead").append("tr").selectAll("tr").data(['Domain', 'Count', 'Color']).enter().append("th")
+  var thead = d3.select("#domain-table").select("thead").append("tr").selectAll("tr").data(
+    ['Color', 'Count', 'Domain']).enter().append("th")
     .text(function(d){ return d; })
     .attr('class', 'clickable')
     .on('click', function(k, i){
@@ -1089,7 +1129,8 @@ function redraw_domains_table(){
                        }));
 
   var domains = _.map(d, function(v){
-    return [v, domain_set[v].count, domain_set[v].color];
+    return [domain_set[v].color, domain_set[v].count, v];
+    //return [v, domain_set[v].count, domain_set[v].color];
   });
 
   var domains2 = _.map(domain_set, function(value, key, l){
@@ -1107,7 +1148,7 @@ function redraw_domains_table(){
       console.log(d);
     })
     .on("mouseover", function(d, i){
-      var hoverDomain = d[0];
+      var hoverDomain = d[2];
       d3.selectAll("circle").style("stroke","#ffff00");  
       d3.selectAll("circle").each(function(d, i){
         if (hoverDomain.localeCompare(emailsDomain(d.name)) == 0) {
@@ -1136,7 +1177,7 @@ function redraw_domains_table(){
 
   tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td")
     .html(function(d, i){ 
-      if (i == 2){
+      if (i == 0){
         return $('<div>').append($('<div>').css({ 'min-height': '14px', 'width' : '100%', 'background-color' : d})).html();
       }
       return d; 
