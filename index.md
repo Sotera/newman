@@ -3,4 +3,7 @@ layout: default
 title: Newman
 ---
 
-A tool to quickly explore the history and network created by your email.
+# Welcome to Newman
+When you control the mail, you control...information.
+
+[Learn More](about/)
