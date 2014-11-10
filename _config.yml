@@ -1,15 +1,18 @@
 # Site settings
 title: Newman
+baseurl: "/newman"
 safe: true
 lsi: false
-# email: newman@usps.gov
+highlighter: pygments
+email: newman@soteradefense.com
+website: http://www.soteradefense.com
 description: > # this means to ignore newlines until "baseurl:"
     "When you control the mail, you control... information"
-baseurl: "/testPages" # the subpath of your site, e.g. /blog/
-url: "http://bwhiteman.github.io" # the base hostname & protocol for your site
-# twitter_username: newmanusps
+
+url: "http://sotera.github.io"
 github_username:  Sotera
-highlighter: pygments
+repository_url: https://github.com/Sotera/newman
+
 show_downloads: true
 zip_url: https://github.com/Sotera/newman/zipball/master
 tar_url: https://github.com/Sotera/newman/tarball/master

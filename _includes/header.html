@@ -19,12 +19,15 @@
           <a class="page-link" href="{{ page.url | prepend: site.baseurl }}">{{ page.title }}</a>
           {% endif %}
         {% endfor %}
-        <!-- <ul class="dropdown-menu">
-            <li><a href="https://github.com/Sotera/newman/zipball/master">Download <strong>ZIP File</strong></a></li>
-            <li><a href="https://github.com/Sotera/newman/tarball/master">Download <strong>TAR Ball</strong></a></li>
-            <li><a href="https://github.com/Sotera/newman">View On <strong>GitHub</strong></a></li>
-            <li><a href="https://github.com/Sotera/newman/fork">Fork on <strong>Github</strong></a></li>
-        </ul> -->
+          <ul>
+            <li><a class="page-link" href="#">Source</a>
+              <ul>
+                <li><a href="{{site.tar_url}}">Download Tarball</a></li>
+                <li><a href="{{site.zip_url}}">Download Zip</a></li>
+                <li><a href="{{site.repository_url}}">View on Github</a></li>
+              </ul>
+            </li>
+          </ul>
       </div>
     </nav>
 

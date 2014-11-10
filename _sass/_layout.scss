@@ -40,6 +40,19 @@
             margin-left: 20px;
         }
     }
+    ul {
+      list-style: none;
+      margin-left: 20px;
+      display: inline-block;
+    }
+    ul ul {
+      display: none;
+      position: absolute;
+    }
+    ul li:hover > ul {
+      display: list-item;
+    }
+
 
     @include media-query($on-palm) {
         position: absolute;
