@@ -6,12 +6,13 @@ permalink: /how-to/
 
 ## Quick Start
 Install [Vagrant](http://www.vagrantup.com/)  
-Install [Virtual Box] (https://www.virtualbox.org/wiki/Downloads)  
-Download [XData-VM v0.2.1] (http://goo.gl/5jCBem) to your home directory
-    $ vagrant box add xdata-0.2.1 xdata-0.2.1.box  
+Install [Virtual Box](https://www.virtualbox.org/wiki/Downloads)  
+Download [XData-VM v0.2.1](http://goo.gl/5jCBem) to your home directory
+{% highlight bash %}
+$ vagrant box add xdata-0.2.1 ~/xdata-0.2.1.box  
+{% endhighlight %}
 
-Download Newman-VM  
-
+Install Newman  
 {% highlight bash %}  
 $ git clone https://github.com/Sotera/newman-vm  
 $ cd newman-vm  
@@ -28,7 +29,7 @@ Once download has completed, click ingest
 Once ingest has completed, goto [http://localhost:8787/](http://localhost:8787/)  
 
 #GMail Download troubleshooting:  
-Make sure that Google 2-Step authentication is turned off  
-    GMail-> Account-> Security-> 2-Step Verification  
-Make sure Access for less secure applications is turned on.  
-    GMail-> Account-> Security-> Access for less secure apps.  
+Goto [Google Security](https://security.google.com)  
+Make sure "2-Step Verification" is **Disabled**.  
+Make sure "Access for less secure applications" is **Enabled**.  
+<img class="expandable" alt="Google Security Pane" src="../img/google_security.png">
