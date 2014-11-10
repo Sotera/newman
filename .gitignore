@@ -9,3 +9,6 @@ demail/emails/
 
 tmp/
 !tmp/.keep
+
+
+conf/*.cfg
