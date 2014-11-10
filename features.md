@@ -6,34 +6,47 @@ permalink: /features/
 
 ## Graph
 
+The graph shows all of the communications between email addresses in
+the current view.  It is built by directing the **From** to each
+**To/Cc/Bcc**.  The thickness of the line shows more communications
+between the two nodes. 
+
 # Domains  
-The domain graph shows all of the resulting email addresses and there communication with each other. Each node is colored by domain.
+With **Domains** selected all of the nodes are colored by domain.  
 
 <img class="expandable" alt="Domain Graph" src="../img/graph_domain.png">
 
-# community
+# Community
 
-The community graph shows all of the resulting email addresses and there communication with each other. Each node is colored by domain.  
+With **Community** selected all of the nodes are colored by domain.  
 
 <img class="expandable" alt="Community Graph" src="../img/graph_community.png">
 
 ## Email Table
 
-The email tab at the bottom can be expanded and collapsed. It shows a table meta data view of the emails and can be sorted by each column. It also can be sorted in to conversations by the icon.  
+The tab at the bottom of the window can be expanded and collapsed.
+This shows a meta data view of the emails and can be sorted by each
+column. It also can be sorted in to conversations by the icon. By
+selecting one of the rows the contents of that email will be displayed
+in the [Email View](#email-view) pane.
 
-<img class="expandable" alt="Email Table" src"../img/email_table_01.png">
-
+<img class="expandable" alt="Email Table" src="../img/email_table_01.png">
 
 ## Search
 
 # Free Text
 
-Free text search allows the user to search all emails and attachments for text. It is backed by elasticsearch.  
+Free text allows the user to search all emails and attachments for
+text.  The search is backed by
+[elasticsearch](http://www.elasticsearch.org) and will result all
+of the matching emails.
 
 <img class="expandable" alt="Free Text Search" src="../img/search_free_text.png">
 
 # Email Address
-Email Address search allows the user to search for a specific email address. This will filter the emails where this email address is in either the from/to/cc/bcc.  
+Email Address search allows the user to search for a specific email
+address. This will filter the emails where this email address is in
+either the **From/To/Cc/Bcc**.  
 
 <img class="expandable" alt="Email Address Search" src="../img/search_email_addr.png">
 
@@ -51,8 +64,7 @@ The topics tab shows the topics among all of the emails. Clicking on one of the 
 
 <img class="expandable" alt="Topics" src="../img/topics_tab.png">
 
-
-## Email View
+## Email View 
 
 # Active Search Recommendation
 
