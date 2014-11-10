@@ -41,10 +41,21 @@ ul, ol, dl, figure,
  * Images
  */
 img {
-    max-width: 50%;
+    max-width: 100%;
     vertical-align: middle;
 }
 
+.expandable {
+  max-width: 60%;
+  vertical-align: middle;
+}
+
+.expandable:hover {
+  outline: none;
+  -webkit-transform: scale(2); -moz-transform: scale(2);
+   -webkit-box-shadow: 0 3px 10px #666; -moz-box-shadow: 0 3px 10px #666;
+  z-index: 9999;
+}
 
 
 /**

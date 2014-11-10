@@ -13,8 +13,3 @@ highlighter: pygments
 show_downloads: true
 zip_url: https://github.com/Sotera/newman/zipball/master
 tar_url: https://github.com/Sotera/newman/tarball/master
-
-# Build settings
-# markdown: redcarpet
-# redcarpet:
-#   extensions: [no_fenced_code_blocks,]
