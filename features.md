@@ -16,6 +16,12 @@ With **Domains** selected all of the nodes are colored by domain.
 
 <img class="expandable" alt="Domain Graph" src="../img/graph_domain.png">
 
+# Domains Legend
+Email Domains shows a list of all of the visible domains on the screen with the count for each along with the color. Hovering over one of the rows will highlight all of the emails for that domain in the graph.  
+
+<img class="expandable" alt="Email Domains" src="../img/email_domains_highlighted.png">
+
+
 # Community
 
 With **Community** selected all of the nodes are colored by domain.  
@@ -52,6 +58,17 @@ either the **From/To/Cc/Bcc**.
 
 ## Rank
 
+Rank uses a custom algorithm to determine _important_ email addresses
+in the data set. 
+
+<img class="expandable" alt="Rank" src="../img/rank.png">
+
+Checking the **Rank** option in the graph will highlight the ranked
+nodes in red on the graph.  Hovering over an email address will
+highlight that node in the graph in yellow.
+
+<img class="expandable" alt="Rank" src="../img/rank_graph.png">
+
 ## Entities
 
 The entities tab shows the highest occurring entities extracted by [MITIE](https://github.com/mitll/MITIE) Clicking on one of the entities will requery for emails which contain that entity.  
@@ -66,7 +83,18 @@ The topics tab shows the topics among all of the emails. Clicking on one of the 
 
 ## Email View 
 
-# Active Search Recommendation
+# ActiveSearch Recommendation
+
+Seeding [ActiveSearch](https://github.com/AutonlabCMU/ActiveSearch) by clicking the **Seed Active Search** button.
+This will start the recommendation by using the current email as the
+seed. 
+
+<img class="expandable" alt="active_search" src="../img/activesearch.png">
+
+**Interested**/**Not Interested** - clicking the _thumbs up_ icon will
+  tell ActiveSearch the current email is interesting and to show more
+  emails like this.  The _thumbs down_ says the current email is not
+  interesting and to not show emails similar to it.
 
 # Entities
 
@@ -78,7 +106,3 @@ The topics tab shows the topics among all of the emails. Clicking on one of the 
 
 ## Export
 
-## Email Domains
-Email Domains shows a list of all of the visible domains on the screen with the count for each along with the color. Hovering over one of the rows will highlight all of the emails for that domain in the graph.  
-
-<img class="expandable" alt="Email Domains" src="../img/email_domains_highlighted.png">
