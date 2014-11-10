@@ -33,6 +33,12 @@ fi
 
 cat <(cat /etc/activesearch.cfg | sed '/search_main_dimensions/d') <(printf "search_main_dimensions=$LINES\n") > $RUN_DIR/tmp/activesearch.cfg
 
+
+cp $RUN_DIR/tmp/activesearch.cfg /etc/activesearch.cfg
+
+# tomcat needs to be reloaded for AS 
+sudo /etc/init.d/tomcat7 restart
+
 printf "\nupdate config\n"
 
 curl localhost:1337/ActiveSearchDaemon/rest/readConfigFile?configfile=$RUN_DIR/tmp/activesearch.cfg
