@@ -50,7 +50,11 @@
       position: absolute;
     }
     ul li:hover > ul {
+      margin-left: -4px;
+      position: absolute;
       display: list-item;
+      border: 1px solid;
+      padding: 4px;
     }
 
 
