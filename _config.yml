@@ -8,10 +8,11 @@ url: "http://bwhiteman.github.io" # the base hostname & protocol for your site
 # twitter_username: newmanusps
 github_username:  Sotera
 highlighter: pygments
-github:
-    user:Sotera
-    repo:newman
-downloadUrl: https://github.com/Sotera/newman/archive/master.zip
+show_downloads: true
+zip_url: https://github.com/Sotera/newman/zipball/master
+tar_url: https://github.com/Sotera/newman/tarball/master
 
 # Build settings
-markdown: kramdown
+# markdown: redcarpet
+# redcarpet:
+#   extensions: [no_fenced_code_blocks,]
