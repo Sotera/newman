@@ -317,7 +317,7 @@ function produceHTMLView(emailObj) {
 
   el.append(
     $('<p>').append($('<span>').addClass('bold').text("ID: "))
-      .append($('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'emails/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.txt'}).text(d.num)));
+      .append($('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'emails/' + TARGET_EMAIL.email + '/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.txt'}).text(d.num)));
 
   el.append(
     $('<p>').append($('<span>').addClass('bold').text("From: "))
