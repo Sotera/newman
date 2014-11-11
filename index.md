@@ -5,9 +5,7 @@ layout: page
 # Welcome to Newman
 A tool to quickly explore the history and network created by your email.
 
-<img class="expandable" alt="Screenshot" src="img/newman_home.png">
-
-
+<img class="expandable" alt="Screenshot" src="img/newman_home.png">  
 
 ## Applied Technology
 [Distributed Louvain Modularity](https://github.com/Sotera/distributed-louvain-modularity)  
