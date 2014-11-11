@@ -17,7 +17,9 @@ With **Domains** selected all of the nodes are colored by domain.
 <img class="expandable" alt="Domain Graph" src="../img/graph_domain.png">
 
 # Domains Legend
-Email Domains shows a list of all of the visible domains on the screen with the count for each along with the color. Hovering over one of the rows will highlight all of the emails for that domain in the graph.  
+Email Domains shows a list of all of the visible domains on the screen
+with the count for each along with the color. Hovering over one of the
+rows will highlight all of the emails for that domain in the graph.   
 
 <img class="expandable" alt="Email Domains" src="../img/email_domains_highlighted.png">
 
@@ -71,13 +73,18 @@ highlight that node in the graph in yellow.
 
 ## Entities
 
-The entities tab shows the highest occurring entities extracted by [MITIE](https://github.com/mitll/MITIE) Clicking on one of the entities will requery for emails which contain that entity.  
+The entities tab shows the highest occurring entities extracted by
+[MITIE](https://github.com/mitll/MITIE) Clicking on one of the
+entities will requery for emails which contain that entity.
 
 <img class="expandable" alt="Entities" src="../img/entities.png">
 
 ## Topics
 
-The topics tab shows the topics among all of the emails. Clicking on one of the topics will requery for all of the emails that score greater than 50% on that topic.  
+The topics tab shows the topics among all of the emails. Clicking on
+one of the topics will requery for all of the emails that score
+greater than 50% on that topic.
+
 
 <img class="expandable" alt="Topics" src="../img/topics_tab.png">
 
@@ -85,9 +92,9 @@ The topics tab shows the topics among all of the emails. Clicking on one of the 
 
 # ActiveSearch Recommendation
 
-Seeding [ActiveSearch](https://github.com/AutonlabCMU/ActiveSearch) by clicking the **Seed Active Search** button.
-This will start the recommendation by using the current email as the
-seed. 
+Seeding [ActiveSearch](https://github.com/AutonlabCMU/ActiveSearch) by
+clicking the **Seed Active Search** button. This will start the
+recommendation by using the current email as the seed. 
 
 <img class="expandable" alt="active_search" src="../img/activesearch.png">
 
@@ -96,13 +103,51 @@ seed.
   emails like this.  The _thumbs down_ says the current email is not
   interesting and to not show emails similar to it.
 
-# Entities
+# Email Body Entities
+
+Each email has entities extracted by
+[MITIE](https://github.com/mitll/MITIE) highlighted in the body of the
+text.  Clicking on one of the tagged entities will requery for all of
+the emails that contain that entity.
+
+<img class="expandable" alt="Email Entities" src="../img/email_entities.png">
 
 # Mark Pertinent
 
-# Topics
+At the top right of the [Email View](#email-view) you can mark and
+email pertinent by clicking the star
 
-# Attachment
+<img class="expandable" alt="Pertinent Star" src="../img/email_star.png">
+
+The list of marked emails can be viewed in [Export](#export)
+
+# Email Topics
+
+At the top of each email view is a bar chart showing the topic scores
+from
+[MIT-LL Topic Clustering](https://github.com/mitll/topic-clustering)
+each bar shows the percentage the current email scored in that topic.
+Clicking on one of the bars will take you back to the
+[Topics](#topics) view and highlight the specific topic clicked.
+
+<img class="expandable" alt="Email Topics" src="../img/email_topics.png">
+
+## Attachments
+
+In the [Email View](#email-view) you can click on the senders name
+this will populate the attachments tab with all of the attachments
+ever sent by that email address. Images are shown as previews and
+clicking on the title of the attachment will allow you to download it.
+You can also click the arrow to take you to that email. 
+
+<img class="expandable" alt="Attachments" src="../img/attachments.png">
 
 ## Export
 
+Export lists all of the emails [marked pertinent](#mark-pertinent).
+Each email is listed with their id and the subject of the email.  The
+user can click on the id of an email to [view](#email-view) that
+email.  Also by clicking the create export a tarball of the original
+emails and their attachments will be bundled and made available to download.  
+
+<img class="expandable" alt="Export" src="../img/export.png">
