@@ -19,13 +19,13 @@ def getExploded():
     with newman_connector() as read_cnx:
         with execute_query(read_cnx.conn(), stmt) as qry:
             for dt, frome, to, cc, bcc in qry.cursor():
-                for r in to.split(','):
+                for r in to.split(';'):
                     if r:
                         output.write('\t'.join((dt,frome,r.strip())) + '\n')
-                for r in cc.split(','):
+                for r in cc.split(';'):
                     if r:
                         output.write('\t'.join((dt,frome,r.strip())) + '\n')
-                for r in bcc.split(','):
+                for r in bcc.split(';'):
                     if r:
                         output.write('\t'.join((dt,frome,r.strip())) + '\n')
             output.close()
