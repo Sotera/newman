@@ -285,7 +285,7 @@ function recolornodes(how) {
 
 function splitItemCount(str){
   if (str.trim().length == 0) return 0
-  return str.split(',').length;
+  return str.split(';').length;
 }
 
 function splitAttachCount(str){
@@ -330,7 +330,7 @@ function produceHTMLView(emailObj) {
 
   var recipients = _.zip(['To', 'Cc', 'Bcc'], [d.to, d.cc, d.bcc]);
   _.each(recipients, function(item){
-    var emails = _.uniq(item[1].split(','));
+    var emails = _.uniq(item[1].split(';'));
     el.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
               .append(emails.join('; ')));
   });

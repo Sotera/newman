@@ -64,9 +64,9 @@ if __name__ == "__main__":
                 print references
 		threadid = references.split()[0]
 
-            tosize = len(toemail.split(','))
-            ccsize = len(ccemail.split(',')) - 1
-            bccsize = len(bccemail.split(',')) - 1
+            tosize = len(toemail.split(';'))
+            ccsize = len(ccemail.split(';')) - 1
+            bccsize = len(bccemail.split(';')) - 1
             attachsize = len(attach.split(';')) - 1
             bodysize = len(body)
             
@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
             #ingest individual to, cc, bcc into stage table
             for header, addrs in (("to", toemail), ("cc", ccemail), ("bcc", bccemail)):
-                for addr in addrs.split(','):
+                for addr in addrs.split(';'):
                     if addr:
                         fact.addFact(num, "email", header, addr, tx)                        
 
