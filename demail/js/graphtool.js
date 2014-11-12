@@ -543,11 +543,11 @@ function do_search(fields, val) {
         });
 
     }).on("mouseover", function(d) {
-      tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(',');
+      tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(';');
       for (i = 0; i < tos.length; i++) {
         d3.select("#" + d.from.replace(/\./g,'_').replace(/@/g,'_') + '_' + tos[i]).style("stroke", "red"); }})
       .on("mouseout", function(d){ 
-        tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(',');
+        tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(';');
         for (i = 0; i < tos.length; i++) {
           d3.select("#" + d.from.replace(/\./g,'_').replace(/@/g,'_') + '_' + tos[i]).style("stroke", "#bbb");
         }});
