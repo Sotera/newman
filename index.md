@@ -7,7 +7,7 @@ Newman is a tool to quickly analyze and explore email using advanced analytics a
 
 This work was funded by [DARPA's XDATA](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx) program and leverages several technologies from [DARPA's Open Catalog](http://www.darpa.mil/opencatalog/).
 
-<a href="http://www.youtube.com/embed/E9zAR9Uoo3Q" target="_blank"><img alt="Screenshot" src="img/newman_home.png" href="http://www.youtube.com/embed/E9zAR9Uoo3Q"></a>
+<iframe src="http://www.youtube.com/embed/E9zAR9Uoo3Q" width="964" height="723" allowfullscreen="" frameborder="0"></iframe>
 
 # Applied Technology
 [Distributed Louvain Modularity](https://github.com/Sotera/distributed-louvain-modularity) - Sotera  
