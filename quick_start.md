@@ -29,9 +29,10 @@ Once ingest has completed, goto [http://localhost:8787/](http://localhost:8787/)
 
 # Video Demonstration  
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=E9zAR9Uoo3Q" target="_blank"><img src="http://img.youtube.com/vi/E9zAR9Uoo3Q/0.jpg" alt="Introduction Video" width="430"  border="5" /> </a>
+<iframe src="http://www.youtube.com/embed/E9zAR9Uoo3Q" width="740" height="600" allowfullscreen="" frameborder="0"></iframe>  
 
-#GMail Download troubleshooting:  
+
+# GMail Download troubleshooting:  
 Goto [Google Security](https://security.google.com)  
 Make sure "2-Step Verification" is **Disabled**.  
 Make sure "Access for less secure applications" is **Enabled**.  
