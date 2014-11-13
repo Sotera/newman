@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Quick Start
-permalink: /how-to/
+permalink: /quick-start/
 ---
 
 Install [Vagrant](http://www.vagrantup.com/)  
@@ -41,7 +41,7 @@ Once ingest has completed, goto [http://localhost:8787/](http://localhost:8787/)
   1. Click Forwarding and POP/IMAP.
   1. Select Enable IMAP.
   1. Click Save Changes.  
-  
+
 ## Update your Google Security settings:  
 Goto [Google Security](https://security.google.com)  
 Make sure "2-Step Verification" is **Disabled**.  
