@@ -32,7 +32,7 @@ Once ingest has completed, goto [http://localhost:8787/](http://localhost:8787/)
 <iframe src="http://www.youtube.com/embed/E9zAR9Uoo3Q" width="964" height="723" allowfullscreen="" frameborder="0"></iframe>  
 
 
-# GMail Download troubleshooting:  
+# Setting Up Your Gmail Account:  
 Goto [Google Security](https://security.google.com)  
 Make sure "2-Step Verification" is **Disabled**.  
 Make sure "Access for less secure applications" is **Enabled**.  
