@@ -953,21 +953,7 @@ function draw_attachments_table(email_addr){
               $("#email-body").append(produceHTMLView(resp));
             }
           });
-      })
-      // .on("mouseover", function(d, i){
-      //   if (i == 2){
-      //     if (_.any(['jpg','jpeg','png','bmp','tiff','png'], function(ext){
-      //       return d[1].toLowerCase().indexOf(ext) > -1;
-      //     })){
-      //       popover.show($(this).find('a').first(), 'emails/' + TARGET_EMAIL.email + '/' + d[0] + '/' + encodeURIComponent(d[1]), 200, 200);
-      //     }
-      //   }
-      // }).on("mouseout", function(d, i){
-      //   if (i == 2){
-      //     popover.hide($(this).find('a').first());
-      //   }
-      // })
-      .html(function(d, i){
+      }).html(function(d, i){
         if (i == 2){
           var el = $('<div>').append($('<a>', { "target": "_blank" ,"href" : 'emails/' + TARGET_EMAIL.email + '/' + d[0] + '/' + encodeURIComponent(d[1]) }).html(d[1]));
           return el.html();
