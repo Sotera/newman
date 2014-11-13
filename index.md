@@ -3,7 +3,7 @@ layout: page
 ---
 
 ## Hellllllooooooo Newman...
-A tool to quickly analyze and explore email using advanced analytics and visulaization techniques.
+Newman is a tool to quickly analyze and explore email using advanced analytics and visulaization techniques - things not possible with traditional email applications.
 
 This work was funded by [DARPA's XDATA](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx) program and leverages several technologies from [DARPA's Open Catalog](http://www.darpa.mil/opencatalog/).
 
