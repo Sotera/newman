@@ -44,4 +44,4 @@ Once ingest has completed, goto [http://localhost:8787/](http://localhost:8787/)
 Goto [Google Security](https://security.google.com)
 Make sure "2-Step Verification" is **Disabled**.  
 Make sure "Access for less secure applications" is **Enabled**.  
-<img class="expandable" alt="Google Security Pane" src="../img/google_security.png">
+![Google Security Pane](../img/google_security.png)
