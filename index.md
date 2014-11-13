@@ -2,7 +2,7 @@
 layout: page
 ---
 
-# Welcome to Newman
+# Hellllllooooooo Newman...
 A tool to quickly explore the history and network created by your email.
 
 <img class="expandable" alt="Screenshot" src="img/newman_home.png">  
