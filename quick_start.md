@@ -33,7 +33,8 @@ Once ingest has completed, goto [http://localhost:8787/](http://localhost:8787/)
 
 
 # Setting Up Your Gmail Account:  
-## Enable IMAP in your Gmail settings.
+ 
+## Enable IMAP in your Gmail settings.  
   1. Sign in to Gmail.
   1. Click the gear in the top right corner.
   1. Select Settings.
