@@ -18,68 +18,79 @@
     </div>
 
     <div class="container" style="margin-top: 45px;">
+
       <div class="row">
         <div class="col-md-8">
-          <div class="row">
-            <div class="col-md-12">
-              <p>
-                Before you start, check you GMail security settings to
-                make sure the application will be able to access your
-                account.  Instructions can be found at 
-                <a href="http://sotera.github.io/newman/how-to/#gmail-download-troubleshooting"
-                   target="_blank">
-                  <span class="bold">Setting up your GMail Account</span>
-                </a>
-              </p>
-            </div>
-          </div>
-          <div class="row" style="margin-top: 20px;">
-            <div class="col-md-6">
-              <p>
-                <span class="bold">Step 1.</span> Enter
-                your <span class="bold">GMail Account Information</span>
-                and download up to the last 2000 emails to your local VM
-                <br/><span class="bold">(All of the emails are only stored
-                  locally to your VM)</span>
-              </p>
-            </div>
-            <div class="col-md-6">
-              <p>
-                <span class="bold">Step 2.</span> Select an email address
-                to ingest and analyze
-              </p>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6">
-              <form class="form-signin" role="form">
-                <p>
-                  <input id="txt_email" type="email" class="form-control"
-                         placeholder="Email address" required autofocus>
-                </p>
-                <p>
-                  <input id="txt_pass" type="password" class="form-control" placeholder="Password" required>
-                </p>
-                <p>
-                  <button id="btn-download" class="btn btn-md  btn-primary">Download</button>     
-                </p>
-              </form>
-            </div>
-            <div class="col-md-6">
-              <div class="form-ingest">
-                <p>
-                  <select class="form-control" id="ingest-options"></select>
-                </p>
-                <p>
-                  <button id="btn-ingest" class="btn btn-md btn-primary">Ingest</button>     
-                </p>
-              </div>
-            </div>
+          <p>
+            Before you start, check you GMail security settings to
+            make sure the application will be able to access your
+            account.  Instructions can be found at 
+            <a href="http://sotera.github.io/newman/how-to/#setting-up-your-gmail-account"
+               target="_blank">
+              <span class="bold">Setting up your GMail Account</span>
+            </a>
+          </p>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top: 20px;">
+
+        <div class="col-md-4">
+          <p>
+            <span class="bold">Step 1.</span> Enter
+            your <span class="bold">GMail Account Information</span>
+            and download up to the last 2000 emails to your local VM
+            <br/><span class="bold">(All of the emails are only stored
+              locally to your VM)</span>
+          </p>
+        </div>
+
+        <div class="col-md-4">
+          <p>
+            <span class="bold">Step 2.</span> Select an email address
+            to ingest and analyze
+          </p>
+        </div>
+        
+        <div class="col-md-4">
+          <span class="bold">Step 3.</span> Once the ingest has
+          completed successfully click <a href="//localhost:8787/"
+                                          target="_blank">here</a> to analyze the results. 
+        </div>
+      </div>
+
+      <div class="row">
+
+        <div class="col-md-4">
+          <form class="form-signin" role="form">
+            <p>
+              <input id="txt_email" type="email" class="form-control"
+                     placeholder="Email address" required autofocus>
+            </p>
+            <p>
+              <input id="txt_pass" type="password" class="form-control" placeholder="Password" required>
+            </p>
+            <p>
+              <button id="btn-download" class="btn btn-md  btn-primary">Download</button>     
+            </p>
+          </form>
+        </div>
+
+        <div class="col-md-4">
+          <div class="form-ingest">
+            <p>
+              <select class="form-control" id="ingest-options"></select>
+            </p>
+            <p>
+              <button id="btn-ingest" class="btn btn-md btn-primary">Ingest</button>     
+            </p>
           </div>
         </div>
+
         <div class="col-md-4">
           <div id="div-msg"></div>
         </div>
+
       </div>
     </div>
 

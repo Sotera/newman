@@ -11,7 +11,8 @@ var FORM = (function(){
   });
 
   var disable = _.partial(_.each, items, function(item){ 
-     $('#' + item).attr('disabled', 'disabled');
+    $("#div-ingest-complete").hide();
+    $('#' + item).attr('disabled', 'disabled');
   });
 
   return {
@@ -24,9 +25,9 @@ var FORM = (function(){
 var logMsgs = function (step, status, msgs){
   $('#div-msg').empty();
   $('#div-msg').append(
-    [$('<p>').html("<span class='bold'>Refeshed: " + (new Date()).toLocaleTimeString()),
-     $('<p>').append($("<span class='bold'>").html(step)),
-     $('<p>').html("Status: " + status)
+    [$('<p>').html("<span class='bold'>Last Refesh:</span> " + (new Date()).toLocaleTimeString()),
+     $('<p>').html("<span class='bold'>Process:</span> " + step),
+     $('<p>').html("<span class='bold'>Status:</span> " + status)
     ]);
   _.each(msgs, function(msg){ console.log(msg); });
 };
@@ -77,16 +78,6 @@ var pollForStatus = function(url, statuses, callback){
   };
 };
 
-var refreshLogItems = function(items){
-  $('#div-msg').html("refeshed: " + (new Date()).toLocaleTimeString());
-  // var rows = _.map(items, function(str){
-  //   return $('<div>').html(str);
-  // });
-  //  $('#div-log').empty();
-  //  $('#div-log').append(rows);
-  _.each(items, console.log);
-};
-
 var pollForStatusIngest = function(logname, statuses, callback){
   var url = 'ingest/ingeststate/' + logname;
   var log_url = 'ingest/ingestlog/' + logname;
@@ -114,8 +105,11 @@ var pollForStatusIngest = function(logname, statuses, callback){
       $.ajax({ url : url, dataType: 'json'}).then(success);
     })();
   };
-}
+};
 
+var ingestComplete = function(){
+  $("#div-ingest-complete").show();
+};
 
 var run_ingest = function(str){
 
@@ -160,6 +154,9 @@ var run_ingest = function(str){
     var poll = pollForStatusIngest(logname, ['Complete', 'Error'], function(status){
       FORM.enable();
       reload();
+      if (status == 'Complete'){
+        $("#div-ingest-complete").show();
+      }
       alert(status);
     });
     poll();
