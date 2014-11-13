@@ -2,12 +2,12 @@
 layout: page
 ---
 
-# Welcome to Newman
+## Hellllllooooooo Newman...
 A tool to quickly explore the history and network created by your email.
 
 <a href="http://www.youtube.com/embed/E9zAR9Uoo3Q" target="_blank"><img alt="Screenshot" src="img/newman_home.png" href="http://www.youtube.com/embed/E9zAR9Uoo3Q"></a>
 
-## Applied Technology
+# Applied Technology
 [Distributed Louvain Modularity](https://github.com/Sotera/distributed-louvain-modularity)  
 [MITIE: MIT Information Extraction](https://github.com/mitll/MITIE)  
 [Topic Clustering](https://github.com/mitll/topic-clustering)  
