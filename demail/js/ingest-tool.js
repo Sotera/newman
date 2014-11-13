@@ -22,7 +22,7 @@ var FORM = (function(){
 })();
 
 var logMsgs = function (step, status, msgs){
-  $('#div-msg').empty():
+  $('#div-msg').empty();
   $('#div-msg').append(
     [$('<p>').html("Refeshed: " + (new Date()).toISOString()),
      $('<p>').append($('<span>').html(step)),
