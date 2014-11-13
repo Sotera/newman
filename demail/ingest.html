@@ -17,33 +17,108 @@
       </div>
     </div>
 
-    <div class="container">
-      <form class="form-signin" role="form">
-        <h2 class="form-signin-heading">Enter your Gmail Account Information</h2>
-        <p>
-          <input id="txt_email" type="email" class="form-control" placeholder="Email address" required autofocus>
-        </p>
-        <p>
-          <input id="txt_pass" type="password" class="form-control" placeholder="Password" required>
-        </p>
-        <button id="btn-download" class="btn btn-lg btn-primary btn-block">Download</button>
-      </form>
-    </div> <!-- /container -->
-    <div class="container">
-      <div class="form-ingest">
-        <h2 class="form-signin-heading">Ingest Account</h2>
-        <p>
-          <select class="form-control" id="ingest-options"></select>
-        </p>
-        <p>
-          <button id="btn-ingest" class="btn btn-lg btn-primary btn-block">Ingest</button>     
-        </p>
+    <div class="container" style="margin-top: 45px;">
+      <div class="row">
+        <div class="col-md-8">
+          <div class="row">
+            <div class="col-md-12">
+              <p>
+                Before you start, check you GMail security settings to
+                make sure the application will be able to access your
+                account.  Instructions can be found at 
+                <a href="http://sotera.github.io/newman/how-to/#gmail-download-troubleshooting"
+                   target="_blank">
+                  <span class="bold">Setting up your GMail Account</span>
+                </a>
+              </p>
+            </div>
+          </div>
+          <div class="row" style="margin-top: 20px;">
+            <div class="col-md-6">
+              <p>
+                <span class="bold">Step 1.</span> Enter
+                your <span class="bold">GMail Account Information</span>
+                and download up to the last 2000 emails to your local VM
+                <br/><span class="bold">(All of the emails are only stored
+                  locally to your VM)</span>
+              </p>
+            </div>
+            <div class="col-md-6">
+              <p>
+                <span class="bold">Step 2.</span> Select an email address
+                to ingest and analyze
+              </p>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <form class="form-signin" role="form">
+                <p>
+                  <input id="txt_email" type="email" class="form-control"
+                         placeholder="Email address" required autofocus>
+                </p>
+                <p>
+                  <input id="txt_pass" type="password" class="form-control" placeholder="Password" required>
+                </p>
+                <p>
+                  <button id="btn-download" class="btn btn-md  btn-primary">Download</button>     
+                </p>
+              </form>
+            </div>
+            <div class="col-md-6">
+              <div class="form-ingest">
+                <p>
+                  <select class="form-control" id="ingest-options"></select>
+                </p>
+                <p>
+                  <button id="btn-ingest" class="btn btn-md btn-primary">Ingest</button>     
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div id="div-msg"></div>
+        </div>
       </div>
-    </div> 
+    </div>
+
+    <hr style="width: 90%;border-top: dashed 1px #000; margin-top: 20px;margin-bottom: 20px;" />
+
     <div class="container">
-      <div id="div-ts"></div>      
-      <div id="div-log"></div>
-    </div> 
+      <div class="row">
+        <div class="col-md-8">
+          <p>
+            The download and ingest process may take up to 30 minutes to
+            complete.  You will receive an alert that the process has
+            completed. In the mean time you may check out the features
+            and an introduction video of the application.
+          </p>
+          <p>
+          </p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4">
+          <a href="http://sotera.github.io/newman/features/"
+             target="_blank">
+            <h3>Features</h3>
+            <img src="http://sotera.github.io/newman/img/graph_domain.png"
+                 width="300" />
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a href="http://www.youtube.com/watch?feature=player_embedded&amp;v=E9zAR9Uoo3Q"
+             target="_blank">
+            <h3>Introduction Video</h3>
+            <img src="http://img.youtube.com/vi/E9zAR9Uoo3Q/0.jpg"
+                 alt="Introduction Video" width="400" border="5"> 
+          </a>
+        </div>
+      </div>
+    </div>
+
     <script src="js/thirdparty/jquery-1.9.1.min.js"></script>
     <script src="js/thirdparty/jquery-ui.min.js"></script>
     <script src="js/thirdparty/d3.v3.min.js" charset="utf-8"></script>

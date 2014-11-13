@@ -1,4 +1,9 @@
 
+var validateEmail = function(email) { 
+    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+};
+ 
 var FORM = (function(){
   var items = ['txt_email', 'txt_pass', 'btn-download', 'btn-ingest', 'ingest-options'];
   var enable = _.partial(_.each, items, function(item){ 
@@ -15,6 +20,16 @@ var FORM = (function(){
   };
 
 })();
+
+var logMsgs = function (step, status, msgs){
+  $('#div-msg').empty();
+  $('#div-msg').append(
+    [$('<p>').html("<span class='bold'>Refeshed: " + (new Date()).toLocaleTimeString()),
+     $('<p>').append($("<span class='bold'>").html(step)),
+     $('<p>').html("Status: " + status)
+    ]);
+  _.each(msgs, function(msg){ console.log(msg); });
+};
 
 var refresh_ingest_options = function(){
   $.ajax({
@@ -47,12 +62,13 @@ var pollForStatus = function(url, statuses, callback){
           return s.toLowerCase() == status.toLowerCase();
         });
 
-        refreshLogItems(_.last(resp.log.split("\n"), 15));
+        logMsgs('Downloading', status, _.last(resp.log.split("\n"), 15));
+        //refreshLogItems(_.last(resp.log.split("\n"), 15));
 
         if (b){
           callback(status)
         } else {
-          _.delay(poll, 30 * 1000);
+          _.delay(poll, 15 * 1000);
         }
       };
 
@@ -62,12 +78,13 @@ var pollForStatus = function(url, statuses, callback){
 };
 
 var refreshLogItems = function(items){
-  $('#div-ts').html("refeshed: " + (new Date()).toISOString());
-  var rows = _.map(items, function(str){
-    return $('<div>').html(str);
-  });
-  $('#div-log').empty();
-  $('#div-log').append(rows);
+  $('#div-msg').html("refeshed: " + (new Date()).toLocaleTimeString());
+  // var rows = _.map(items, function(str){
+  //   return $('<div>').html(str);
+  // });
+  //  $('#div-log').empty();
+  //  $('#div-log').append(rows);
+  _.each(items, console.log);
 };
 
 var pollForStatusIngest = function(logname, statuses, callback){
@@ -85,11 +102,12 @@ var pollForStatusIngest = function(logname, statuses, callback){
         if (b){
           callback(status)
         } else {
-          _.delay(poll, 30 * 1000);
+          _.delay(poll, 15 * 1000);
         }
 
         $.ajax({ url : log_url , dataType: 'json'}).then(function(resp){
-          refreshLogItems(_.last(resp.log.split("\n"), 15));
+          logMsgs("Ingesting", status, _.last(resp.log.split("\n"), 15));
+          //refreshLogItems(_.last(resp.log.split("\n"), 15));
         });
       };
 
@@ -153,6 +171,12 @@ var run_ingest = function(str){
 var click_handler_download = function(evt){
   evt.preventDefault();
   var user =  $('#txt_email').val();
+
+  if (!validateEmail(user)){
+    alert(user + " is not a valid email address. \nPlease enter a valid email \nexample: sample@gmail.com")
+    return;
+  };
+
   var pass =  $('#txt_pass').val();
   var postObj = { 'user' : user, 'pass' : pass };
 

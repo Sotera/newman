@@ -4,14 +4,18 @@ body {
   background-color: #eee;
 }
 
+span.bold {
+    font-weight: bold;
+}
+
 .form-control {
     border-radius: 4px;
 }
 
 .form-signin {
   max-width: 300px;
-  padding: 15px;
-  margin: 0 auto;
+/*  padding: 15px;
+  margin: 0 auto; */
 }
 .form-signin .form-signin-heading,
 .form-signin .checkbox {
@@ -45,9 +49,9 @@ body {
 }
 
 .form-ingest {
-    max-width: 400px;
-    padding: 15px;
-    margin: 0 auto;
+    max-width: 350px;
+/*    padding: 15px;
+    margin: 0 auto; */
 }
 
 #div-ts {
