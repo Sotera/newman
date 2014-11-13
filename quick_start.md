@@ -33,7 +33,15 @@ Once ingest has completed, goto [http://localhost:8787/](http://localhost:8787/)
 
 
 # Setting Up Your Gmail Account:  
-Goto [Google Security](https://security.google.com)  
+## Enable IMAP in your Gmail settings.
+  1. Sign in to Gmail.
+  1. Click the gear in the top right corner.
+  1. Select Settings.
+  1. Click Forwarding and POP/IMAP.
+  1. Select Enable IMAP.
+  1. Click Save Changes.
+## Update your Google Security settings
+Goto [Google Security](https://security.google.com)
 Make sure "2-Step Verification" is **Disabled**.  
 Make sure "Access for less secure applications" is **Enabled**.  
 <img class="expandable" alt="Google Security Pane" src="../img/google_security.png">
