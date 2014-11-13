@@ -7,7 +7,7 @@ A tool to quickly explore the history and network created by your email.
 
 <img class="expandable" alt="Screenshot" src="img/newman_home.png">  
 
-## Applied Technology
+#### Applied Technology
 [Distributed Louvain Modularity](https://github.com/Sotera/distributed-louvain-modularity)  
 [MITIE: MIT Information Extraction](https://github.com/mitll/MITIE)  
 [Topic Clustering](https://github.com/mitll/topic-clustering)  
