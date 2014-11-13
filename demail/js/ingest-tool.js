@@ -24,11 +24,11 @@ var FORM = (function(){
 var logMsgs = function (step, status, msgs){
   $('#div-msg').empty();
   $('#div-msg').append(
-    [$('<p>').html("Refeshed: " + (new Date()).toISOString()),
-     $('<p>').append($('<span>').html(step)),
+    [$('<p>').html("<span class='bold'>Refeshed: " + (new Date()).toLocaleTimeString()),
+     $('<p>').append($("<span class='bold'>").html(step)),
      $('<p>').html("Status: " + status)
     ]);
-  _.each(msgs, console.log);
+  _.each(msgs, function(msg){ console.log(msg); });
 };
 
 var refresh_ingest_options = function(){
@@ -68,7 +68,7 @@ var pollForStatus = function(url, statuses, callback){
         if (b){
           callback(status)
         } else {
-          _.delay(poll, 30 * 1000);
+          _.delay(poll, 15 * 1000);
         }
       };
 
@@ -78,7 +78,7 @@ var pollForStatus = function(url, statuses, callback){
 };
 
 var refreshLogItems = function(items){
-  $('#div-msg').html("refeshed: " + (new Date()).toISOString());
+  $('#div-msg').html("refeshed: " + (new Date()).toLocaleTimeString());
   // var rows = _.map(items, function(str){
   //   return $('<div>').html(str);
   // });
@@ -102,7 +102,7 @@ var pollForStatusIngest = function(logname, statuses, callback){
         if (b){
           callback(status)
         } else {
-          _.delay(poll, 30 * 1000);
+          _.delay(poll, 15 * 1000);
         }
 
         $.ajax({ url : log_url , dataType: 'json'}).then(function(resp){
