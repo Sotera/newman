@@ -27,17 +27,17 @@ var control_panel= (function(){
   var table_panel = $('#cp-toggle div:first-child div:nth-child(2)').first();
   var open_css = "glyphicon-chevron-up";
   var close_css = "glyphicon-chevron-down";
-  var open = function(){ 
+  var open = function(){
     container.find("span").first().switchClass(open_css, close_css);
     var h = table_panel.height() + 25;
     container.css("top", "calc(100% - "+ h +"px)");
   };
-  var close = function(){ 
+  var close = function(){
     container.find("span").first().switchClass(close_css, open_css);
     container.css("top", "calc(100% - 25px)")
   };
 
-  var isOpen = function(){ 
+  var isOpen = function(){
     return _.contains(container.find("span").first().attr('class').split(/\s+/), close_css);
   };
 
@@ -54,8 +54,8 @@ var control_panel= (function(){
   return {
     open: open,
     close: close,
-    toggle: toggle, 
-    isOpen : isOpen 
+    toggle: toggle,
+    isOpen : isOpen
   };
 }());
 
@@ -76,7 +76,7 @@ var toggle_domains = (function(){
     panel.css("height", "0px");
   };
 
-  var isOpen = function(){ 
+  var isOpen = function(){
     return btn.find("span").first().hasClass(close_css);
   };
 
@@ -87,7 +87,7 @@ var toggle_domains = (function(){
       open();
     }
   };
-  
+
 
   btn.on('click', toggle);
 
@@ -107,12 +107,12 @@ var htmlEncode = function(str){
   return $('<div/>').text(str).html();
 };
 
-var topics_popover = (function(){ 
+var topics_popover = (function(){
   //init
   $('#topic_mini_chart').popover({ placement: 'left', trigger: 'manual', content: 'test', html: true});
   var pop = $('#topic_mini_chart').data('bs.popover');
   var timer = null;
-  
+
   var show = function(content){
     if (timer){ clearTimeout(timer); }
     pop.options.content = content;
@@ -126,7 +126,7 @@ var topics_popover = (function(){
   };
 
   return { show: show, hide: hide };
-  
+
 })();
 
 var setSearchType = function(which){
@@ -149,7 +149,7 @@ var image_preview_popover = function(){
       var pop = $(target_id).data('bs.popover');
       cache[target_id] = {
         timer : null,
-        pop : pop 
+        pop : pop
       };
     }
     var keys = _.keys(cache);
@@ -178,13 +178,13 @@ var image_preview_popover = function(){
   return { show: show, hide: hide };
 };
 
-var image_preview_popover2 = function(target_id, img_url, height, width){ 
+var image_preview_popover2 = function(target_id, img_url, height, width){
   var img = $('<div>').append($('<img>', { 'src': img_url, 'height': height, 'width': width }));
   //init
   $(target_id).popover({ placement: 'left', trigger: 'manual', content: img.html(), html: true});
   var pop = $(target_id).data('bs.popover');
   var timer = null;
-  
+
   var show = function(){
     if (timer){ clearTimeout(timer); }
     pop.show();
@@ -196,7 +196,7 @@ var image_preview_popover2 = function(target_id, img_url, height, width){
   };
 
   return { show: show, hide: hide };
-  
+
 };
 
 
@@ -271,14 +271,14 @@ function dragended(d){
 
 function recolornodes(how) {
   if( how == 'comm') {
-    d3.selectAll("circle").style("fill", function(d) { 
-      return color(d.community); 
+    d3.selectAll("circle").style("fill", function(d) {
+      return color(d.community);
     });
   }
   if( how == 'node') {
-    d3.selectAll("circle").style("fill", function(d) { 
+    d3.selectAll("circle").style("fill", function(d) {
       return colorByDomain(d.name);
-      //return color(d.group); 
+      //return color(d.group);
     });
   }
 }
@@ -323,7 +323,7 @@ function produceHTMLView(emailObj) {
     $('<p>').append($('<span>').addClass('bold').text("From: "))
       .append($('<a>', { 'class': 'clickable'}).on("click", function(){
         draw_attachments_table(d.from).done(function(){
-          $('#tab-list li:eq(4) a').tab('show');          
+          $('#tab-list li:eq(4) a').tab('show');
         });
         return false;
       }).text(d.from)));
@@ -334,9 +334,9 @@ function produceHTMLView(emailObj) {
     el.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
               .append(emails.join('; ')));
   });
-  
 
-  var items = _.zip(['Subject','Date'], 
+
+  var items = _.zip(['Subject','Date'],
                     [d.subject, d.datetime]);
   _.each(items, function(item){
     el.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
@@ -344,30 +344,30 @@ function produceHTMLView(emailObj) {
   });
 
   var attachments = $('<p>').append($('<span>').addClass('bold').text("Attachments: "));
-  _.each(d.attach.split(';'), 
-         function(attach){ 
+  _.each(d.attach.split(';'),
+         function(attach){
            attachments.append($('<a>', { 'class': 'clickable', "target": "_blank" ,"href" : 'emails/' + TARGET_EMAIL.email + '/' + d.directory + '/' + encodeURIComponent(attach) }).html(attach));
            attachments.append($('<span>').html(';&nbsp'));
          });
 
   el.append(attachments);
-  el.append($('<p>'));  
+  el.append($('<p>'));
 
   //sort by index
   var ents = _.sortBy(emailObj.entities, function(o){ return o[2]});
 
   el.append($('<div>').addClass("email-body-view").append(d.body));
-  
+
   el.find(".mitie").each(function(i,el){
     var jqel = $(el);
     jqel.on('click', _.partial(searchByEntity, jqel.attr('mitie-id'), jqel.attr('mitie-type'), jqel.attr('mitie-value')));
   });
 
-  //highlight searched text 
+  //highlight searched text
   if (searchType() == 'all'){
     el.highlight($('#txt_search').val());
   }
-  
+
   // exportable text (when email is initially loaded)
   if (d.exportable === 'true') {
     $("#submit_toggleExport").addClass('marked')
@@ -415,7 +415,7 @@ function group_email_conversation(){
   });
 
   d3.select("#result_table").select("tbody").selectAll("tr").sort(function(a,b){
-    return map[a.num].idx - map[b.num].idx; 
+    return map[a.num].idx - map[b.num].idx;
   });
 
   d3.select("#result_table").select("tbody").selectAll("tr").each(function(d){
@@ -449,11 +449,11 @@ function do_search(fields, val) {
         return "Searching text for <br/><b>" + text +"</b>";
       },
       'email': function(args){
-        var email = _.first(args);        
+        var email = _.first(args);
         return "Searching on email <br/><b>" + email +"</b>";
       },
       'topic': function(args){
-        var topic = _.first(_.rest(args));       
+        var topic = _.first(_.rest(args));
         var score = _.first(_.rest(args, 2));
         return "Searching on topic index <b>" + topic +"</b><br/> with score greater than " + Math.floor(100.0 * score) + "%";
       },
@@ -466,7 +466,7 @@ function do_search(fields, val) {
     return ops[field](_.rest(varargs));
   }(varargs));
 
-  $.bootstrapGrowl(search_msg, {type : "success", offset: {from: 'bottom', amount: 10 }});  
+  $.bootstrapGrowl(search_msg, {type : "success", offset: {from: 'bottom', amount: 10 }});
 
   // change highlighting
   $('.body-view').removeHighlight();
@@ -475,10 +475,10 @@ function do_search(fields, val) {
   d3.select("#result_table").select("tbody").selectAll("tr").remove();
   d3.select("#result_table").select("thead").selectAll("tr").remove();
   var text = val;
-  
+
   //d3.select("#search_status").text("Searching...");
   $('#search_status').empty();
-  $('#search_status').append($('<span>',{ 'text': 'Searching... ' })).append(waiting_bar);  
+  $('#search_status').append($('<span>',{ 'text': 'Searching... ' })).append(waiting_bar);
   var args = _.map(_.rest(arguments), function(s){ return encodeURIComponent(s); })
   var rest_url = args.join('/');
   console.log(rest_url);
@@ -498,10 +498,10 @@ function do_search(fields, val) {
         console.log(arguments);
         var direction = (lastSort == k) ? -1 : 1;
         lastSort = (direction == -1) ? "" : k; //toggle
-        d3.select("#result_table").select("tbody").selectAll("tr").sort(function(a, b) { 
+        d3.select("#result_table").select("tbody").selectAll("tr").sort(function(a, b) {
           if (i == 0) {
             return a.datetime.localeCompare(b.datetime) * direction;
-          }             
+          }
           if (i == 1) {
             return a.from.localeCompare(b.from) * direction;
           }
@@ -516,23 +516,23 @@ function do_search(fields, val) {
           }
           if (i == 5) {
             return a.subject.localeCompare(b.subject) * direction;
-          }             
+          }
         });
       });
-    
 
-    // create rows   
+
+    // create rows
     var tr = d3.select("#result_table").select("tbody").selectAll("tr").data(comp_data.rows).enter().append("tr");
-    
+
     tr.attr('class', 'clickable').on("click",function(d){
       console.log(d.directory);
       // $("#webpage").load('emails/' + d.directory + '/' +
       // d.directory.split('/')[1] + '.txt');
       $('#tab-list li:eq(2) a').tab('show')
-      $(document).scrollTop(0);            
+      $(document).scrollTop(0);
       $("#email-body").empty();
       $("#email-body").append($('<span>').text('Loading... ')).append(waiting_bar);
-      
+
       $.get("email/email/" + encodeURIComponent(d.num)).then(
         function(resp) {
           update_current(d.num);
@@ -546,12 +546,12 @@ function do_search(fields, val) {
       tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(';');
       for (i = 0; i < tos.length; i++) {
         d3.select("#" + d.from.replace(/\./g,'_').replace(/@/g,'_') + '_' + tos[i]).style("stroke", "red"); }})
-      .on("mouseout", function(d){ 
+      .on("mouseout", function(d){
         tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(';');
         for (i = 0; i < tos.length; i++) {
           d3.select("#" + d.from.replace(/\./g,'_').replace(/@/g,'_') + '_' + tos[i]).style("stroke", "#bbb");
         }});
-    
+
     // cells
     var td = tr.selectAll("td")
       .data(function(d){
@@ -577,7 +577,7 @@ function do_search(fields, val) {
         }
         if (i == 3) {
           var px = (d / 1000.0) > 100 ? 100 : (d / 1000.0);
-          return "<div style='background-color: green;height: 10px;width: " +px +"px;' title='" + +d + "'/>"; 
+          return "<div style='background-color: green;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
         }
         if (i == 4) {
           var px = (d * 10) > 100 ? 100 : (d * 10);
@@ -586,17 +586,17 @@ function do_search(fields, val) {
 
         return d;
       })
-      .style("color", function(d,i) { 
-        if( i == 1) { 
+      .style("color", function(d,i) {
+        if( i == 1) {
           return colorByDomain(d.split('::')[0]);
         } else {
           return 'black';
         }
       })
       .style("stroke","#FFFFFF");
-    
+
     if (control_panel.isOpen()){
-      //resizes control panel 
+      //resizes control panel
       control_panel.open();
     }
     drawGraph(comp_data.graph);
@@ -606,7 +606,7 @@ function do_search(fields, val) {
 
 // Draw a graph for a component
 function drawGraph(graph){
-  
+
   svg.remove();
   svg = d3.select("#node_graph").append("svg")
     .attr("height", "100%")
@@ -615,13 +615,13 @@ function drawGraph(graph){
     .attr("preserveAspectRatio", "xMidYMid meet")
     .attr("pointer-events", "all")
     .call(d3.behavior.zoom().on("zoom", redraw));
-  
+
   vis = svg.append('svg:g');
-  
+
   var nodes = graph.nodes.slice();
   var links = [];
   var bilinks = [];
-  
+
   graph.links.forEach(function(link) {
     var s = nodes[link.source];
     t = nodes[link.target];
@@ -631,9 +631,9 @@ function drawGraph(graph){
     links.push({source: s, target: i}, {source: i, target: t});
     bilinks.push([s, i, t, w]);
   });
-  
+
   force.nodes(nodes).links(links).start();
-  
+
   vis.append("svg:defs").selectAll("marker")
     .data(["end"])
     .enter()
@@ -653,24 +653,24 @@ function drawGraph(graph){
     .enter().append("path")
     .attr("class", "link").attr("marker-end", "url(#end)")
     .style("stroke", "black")
-    .style("stroke-width", function(d) { 
-      var w = 0.15 + (d[3] / 500);  
+    .style("stroke-width", function(d) {
+      var w = 0.15 + (d[3] / 500);
       return ( w > 3 ) ? 3 : w;
     })
     .attr("id",function(d) {
-      return d[0].name.replace(/\./g,'_').replace(/@/g,'_') + '_' + 
+      return d[0].name.replace(/\./g,'_').replace(/@/g,'_') + '_' +
         d[2].name.replace(/\./g,'_').replace(/@/g,'_');
     });
-  
+
   var node = vis.selectAll(".node")
     .data(graph.nodes)
     .enter().append("g")
     .attr("class", "node");
-  
+
   node.append("svg:circle")
     .attr("r", function(d) { return Math.log((d.num * 100 ));  })
     .attr("id", function(d) { return "g_circle_" + d.group; })
-    .style("fill", function(d) { 
+    .style("fill", function(d) {
       if (d3.select("#colorby").property("checked")) {
         return colorByDomain(d.name);
         //return color(d.group);
@@ -687,8 +687,8 @@ function drawGraph(graph){
     })
     .call(force.drag)
     .style("opacity", function(d) {
-      if (d3.select("#rankval").property("checked")) { 
-        return 0.2 + (d.rank); 
+      if (d3.select("#rankval").property("checked")) {
+        return 0.2 + (d.rank);
       } else {
         return "1";
       }
@@ -716,7 +716,7 @@ function drawGraph(graph){
     setSearchType('email');
     click_node(n);
   });
-  
+
   node.on("mouseover", function() { d3.select(this).select("svg text").style("opacity","100"); });
   node.on("mouseout", function() {
     if (!labels){
@@ -737,8 +737,8 @@ function drawGraph(graph){
       return 100;
     });
 
-  link.on("click", function(n) { console.log(n); });	
-  
+  link.on("click", function(n) { console.log(n); });
+
   node.append("svg:text")
     .text(function(d) {return d.name;})
     .attr("fill","blue")
@@ -749,14 +749,14 @@ function drawGraph(graph){
       if (labels) return 100;
       else return 0;
     });
-  
+
   force.on("tick", function() {
     link.attr("d", function(d) {
       return "M" + d[0].x + "," + d[0].y +
         "S" + d[1].x + "," + d[1].y +
         " " + d[2].x + "," + d[2].y;
     });
-    
+
     node.attr("transform", function(d) {
       return "translate(" + d.x + "," + d.y + ")";
     });
@@ -775,7 +775,7 @@ function toggle_labels() {
     d3.selectAll("#node_graph svg text").style("opacity","0");
     labels = false;
   }
-  
+
   else {
     d3.selectAll("#node_graph svg text").style("opacity","100");
     labels = true;
@@ -788,7 +788,7 @@ function draw_mini_topic_chart(email_id){
       var scores = _.first(resp_scores).scores;
       var topics = _.first(resp_topics).categories;
       $('#topic_mini_chart').empty();
-      
+
       var width = 200, height=40, barHeight = 10;
       var margin = {top: 20, right: 0, bottom: 0, left: 0};
       width = width - margin.left - margin.right;
@@ -798,12 +798,12 @@ function draw_mini_topic_chart(email_id){
       var chart = d3.select("#topic_mini_chart").append('svg')
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom);
-      
+
       chart.append("text")
-        .attr("x", (width / 2))             
+        .attr("x", (width / 2))
         .attr("y", (margin.top / 2))
-        .attr("text-anchor", "middle")  
-        .style("font-size", "10px") 
+        .attr("text-anchor", "middle")
+        .style("font-size", "10px")
         .text("Topic Scores");
 
       y.domain([0, 100]);
@@ -821,7 +821,7 @@ function draw_mini_topic_chart(email_id){
         .attr("width", barWidth - 1)
         .style("fill", function(d,i) { return color(i); })
         .attr('class', 'clickable')
-        .on("click", function(d, i){ 
+        .on("click", function(d, i){
           $('#tab-list li:eq(3) a').tab('show');
           var rows = $('#topics-table')
             .find('tbody tr').each(function(){
@@ -829,8 +829,8 @@ function draw_mini_topic_chart(email_id){
               var idx = $(this).find('td:first-child').html();
               if (parseInt(idx, 10) === i){
                 var bgcolor = row.css('background-color');
-                var fn = function(){ 
-                  row.animate({backgroundColor: bgcolor }, 
+                var fn = function(){
+                  row.animate({backgroundColor: bgcolor },
                               {duration: 1000, complete: function(){
                                 row.css('background-color','');
                               }}); };
@@ -838,14 +838,14 @@ function draw_mini_topic_chart(email_id){
                 row.animate({ backgroundColor: '#ffff66'}, 1000);
               }
             });
-          console.log((d*100) + "% \n" + topics[i]); 
+          console.log((d*100) + "% \n" + topics[i]);
         })
-        .on("mouseover", function(d, i){ 
+        .on("mouseover", function(d, i){
           //var str = "topic: " + i + "<br/>" + Math.floor(100 * d) + '%';
           var str = "<ul><li>" + _.take(topics[i][1].split(' '), 5).join('</li><li>') + "</li></ul>";
           topics_popover.show(str);
         })
-        .on("mouseout", function(d, i){ 
+        .on("mouseout", function(d, i){
           topics_popover.hide();
         });
 
@@ -870,7 +870,7 @@ function document_type(ext){
   if (fn(ext,['jpg','jpeg','png','bmp','tiff','png'])){
     return "image";
   }
-  
+
   //pdf
   if(fn(ext, ['pdf'])){
     return "pdf";
@@ -885,7 +885,7 @@ function document_type(ext){
   if(fn(ext, ['doc', 'docx'])){
     return "word";
   }
-  
+
   //excel
   if(fn(ext, ['xls', 'xlx', 'xlsx'])){
     return "excel";
@@ -907,15 +907,15 @@ function draw_attachments_table(email_addr){
       return attachments;
     });
 
-    
+
     $('#attach-sender').html(resp.sender);
     $('#attach-table').empty();
     $('#attach-table').append($('<thead>')).append($('<tbody>'));
 
     var lastSort = "";
     var thead = d3.select("#attach-table").select("thead").append("tr").selectAll("tr").data(['Date', 'Subject', 'Attachments', 'Type','Email']).enter().append("th")
-      .text(function(d){ 
-        return d; 
+      .text(function(d){
+        return d;
       }).attr('class', 'clickable').on("click", function(k, i){
         var direction = (lastSort == k) ? -1 : 1;
         lastSort = (direction == -1) ? "" : k; //toggle
@@ -947,25 +947,26 @@ function draw_attachments_table(email_addr){
         $.get("email/email/" + encodeURIComponent(d)).then(
           function(resp) {
             update_current(d);
-            $('#tab-list li:eq(2) a').tab('show');          
+            $('#tab-list li:eq(2) a').tab('show');
             if(resp.email.length > 0){
               $("#email-body").empty();
               $("#email-body").append(produceHTMLView(resp));
             }
           });
-      }).on("mouseover", function(d, i){
-        if (i == 2){
-          if (_.any(['jpg','jpeg','png','bmp','tiff','png'], function(ext){
-            return d[1].toLowerCase().indexOf(ext) > -1;
-          })){
-            popover.show($(this).find('a').first(), 'emails/' + TARGET_EMAIL.email + '/' + d[0] + '/' + encodeURIComponent(d[1]), 200, 200);
-          }
-        }
-      }).on("mouseout", function(d, i){
-        if (i == 2){
-          popover.hide($(this).find('a').first());
-        }
       })
+      // .on("mouseover", function(d, i){
+      //   if (i == 2){
+      //     if (_.any(['jpg','jpeg','png','bmp','tiff','png'], function(ext){
+      //       return d[1].toLowerCase().indexOf(ext) > -1;
+      //     })){
+      //       popover.show($(this).find('a').first(), 'emails/' + TARGET_EMAIL.email + '/' + d[0] + '/' + encodeURIComponent(d[1]), 200, 200);
+      //     }
+      //   }
+      // }).on("mouseout", function(d, i){
+      //   if (i == 2){
+      //     popover.hide($(this).find('a').first());
+      //   }
+      // })
       .html(function(d, i){
         if (i == 2){
           var el = $('<div>').append($('<a>', { "target": "_blank" ,"href" : 'emails/' + TARGET_EMAIL.email + '/' + d[0] + '/' + encodeURIComponent(d[1]) }).html(d[1]));
@@ -979,9 +980,9 @@ function draw_attachments_table(email_addr){
           }());
           var img = (function(){
             var img = $('<img>').css('height', '40px').css('width','40px');
-            
+
             switch (document_type(ext)){
-            case "image" : return img.attr('src', 'emails/' + TARGET_EMAIL.email + '/' + d[0] + '/' + encodeURIComponent(d[1]));
+            case "image" : return img.attr('src', 'emails/' + TARGET_EMAIL.email + '/' + d[0] + '/' + encodeURIComponent(d[1])).attr('class','expandable');
             case "pdf" : return img.attr('src', 'imgs/document-icons/pdf-2.png');
             case "powerpoint" : return img.attr('src', 'imgs/document-icons/powerpoint-2.png');
             case "word" : return img.attr('src', 'imgs/document-icons/word-2.png');
@@ -990,7 +991,7 @@ function draw_attachments_table(email_addr){
             }
 
           }());
-          
+
           var el = $('<div>').append(img);
           return el.html();
         }
@@ -998,7 +999,7 @@ function draw_attachments_table(email_addr){
           var el = $('<div>').append($('<span>').addClass("glyphicon").addClass("glyphicon-share-alt").addClass('clickable'));
           return el.html();
         }
-        return d; 
+        return d;
       });
 
     deferred.resolve();
@@ -1020,7 +1021,7 @@ function draw_rank_chart() {
     var width = 400, barHeight = 20;
     var margin = {top: 20, right: 10, bottom: 20, left: 150};
     width = width - margin.left - margin.right;
-    
+
     var x = d3.scale.linear().range([0, width]);
     var chart = d3.select("#top-rank").append('svg')
       .attr('class', 'chart')
@@ -1035,12 +1036,12 @@ function draw_rank_chart() {
       .attr("transform", function(d, i) { return "translate(" + margin.left + "," + (+(i * barHeight) + +margin.top) + ")";});
 
     bar.append("rect")
-      .attr("width", function(d) { 
+      .attr("width", function(d) {
         return x((+d.rank * 100));
       })
       .attr("height", barHeight - 1)
       .style("fill", function(d) {
-        return color(+d.communityId); 
+        return color(+d.communityId);
       })
       .on("click", function(d){ })
       .append('title').text(function(d) { return d.email;});
@@ -1057,20 +1058,20 @@ function draw_rank_chart() {
       .attr("class", "label clickable")
       .style("fill", function(d) {
         return colorByDomain(d.email);
-        //return color(+d.groupId); 
+        //return color(+d.groupId);
       })
       .text(function(d) { return (d.email.length > 25) ? d.email.substr(0,25) + ".." : d.email; })
-      .on("click", function(d){ 
+      .on("click", function(d){
         setSearchType('email');
         $("#txt_search").val(d.email)
-        do_search('email', $("#txt_search").val());        
+        do_search('email', $("#txt_search").val());
       })
       .on("mouseover", function(d){
-        d3.select("#g_circle_" + d.groupId).style("stroke","#ffff00");  
+        d3.select("#g_circle_" + d.groupId).style("stroke","#ffff00");
         d3.select("#g_circle_" + d.groupId).style("stroke-width",function(d) { return 10 * (d.rank); });
       })
       .on("mouseout", function(d){
-        d3.select("#g_circle_" + d.groupId).style("stroke","#ff0000");  
+        d3.select("#g_circle_" + d.groupId).style("stroke","#ff0000");
         if (d3.select("#rankval").property("checked")) {
           d3.select("#g_circle_" + d.groupId).style("opacity",function(d) { return 0.2 + (d.rank); });
           d3.select("#g_circle_" + d.groupId).style("stroke-width",function(d) { return 5 * (d.rank); });
@@ -1094,7 +1095,7 @@ function draw_topic_tab(){
 
     var thead = d3.select("#topics-table").select("thead").append("tr").selectAll("tr").data(['Index', 'Topic', '% of Docs']).enter().append("th").text(function(d){ return d; });
     var tr = d3.select("#topics-table").select("tbody").selectAll("tr").data(categories).enter().append("tr").attr('class', 'clickable')
-      .on("click", function(d, i){ 
+      .on("click", function(d, i){
         control_panel.open();
         do_search('topic','all', d.idx, '0.5');
       });
@@ -1123,7 +1124,7 @@ function redraw_domains_table(){
       });
     });
 
-  var d = _.uniq(_.map(d3.selectAll("circle").data(), 
+  var d = _.uniq(_.map(d3.selectAll("circle").data(),
                        function(d){
                          return emailsDomain(d.name);
                        }));
@@ -1144,22 +1145,22 @@ function redraw_domains_table(){
   var tr = d3.select("#domain-table").select("tbody").selectAll("tr")
     .data(domains).enter().append("tr")
   //.attr('class', 'clickable')
-    .on("click", function(d, i){ 
+    .on("click", function(d, i){
       console.log(d);
     })
     .on("mouseover", function(d, i){
       var hoverDomain = d[2];
-      d3.selectAll("circle").style("stroke","#ffff00");  
+      d3.selectAll("circle").style("stroke","#ffff00");
       d3.selectAll("circle").each(function(d, i){
         if (hoverDomain.localeCompare(emailsDomain(d.name)) == 0) {
-          d3.select(this).style("stroke-width",function(d) { 
+          d3.select(this).style("stroke-width",function(d) {
             return 5;
           });
         }
       });
     })
     .on("mouseout", function(d, i){
-      d3.selectAll("circle").style("stroke","#ff0000");        
+      d3.selectAll("circle").style("stroke","#ff0000");
       if (d3.select("#rankval").property("checked")) {
         d3.selectAll("circle").each(function(d, i){
           d3.select(this).style("opacity",function(d) { return 0.2 + (d.rank); });
@@ -1176,12 +1177,12 @@ function redraw_domains_table(){
 
 
   tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td")
-    .html(function(d, i){ 
+    .html(function(d, i){
       if (i == 0){
         return $('<div>').append($('<div>').css({ 'min-height': '14px', 'width' : '100%', 'background-color' : d})).html();
       }
-      return d; 
-    });  
+      return d;
+    });
 }
 
 function draw_entity_chart() {
@@ -1189,7 +1190,7 @@ function draw_entity_chart() {
   $.get('entity/top/20').then(function(resp){
     $('#top-entities').empty();
     var legend_items = ["Person", "Location", "Organization", "Misc"];
-    
+
     var legend = $('<div>').css('padding-top', '15px');
     _.each(legend_items, function(item){
       legend.append($('<div>').css({'display':'inline-block', 'width': '20px', 'height': '12px', 'padding-left': '5px', 'padding-right': '5px;'}).addClass(item.toLowerCase()))
@@ -1197,17 +1198,17 @@ function draw_entity_chart() {
         .append($('<br/>'));
     });
 
-    var entities = resp.entities; 
+    var entities = resp.entities;
 
     var width = 400, barHeight = 20;
     var margin = {top: 20, right: 10, bottom: 20, left: 150};
     width = width - margin.left - margin.right;
-    
+
     var x = d3.scale.linear().range([0, width]);
     var chart = d3.select("#top-entities").append('svg')
       .attr('class', 'chart')
       .attr("width", width + margin.left + margin.right);
-    
+
     x.domain([0, _.first(entities)[3]]);
     chart.attr("height", barHeight * entities.length);
 
@@ -1232,7 +1233,7 @@ function draw_entity_chart() {
       .attr("x", function(d) { return -margin.left;})
       .attr("y", barHeight / 2)
       .attr("class", "label clickable")
-      .on("click", function(d){ 
+      .on("click", function(d){
         do_search('entity', d[0], d[2]);
       })
       .text(function(d) { return (d[2].length > 25) ? d[2].substr(0,25) + ".." : d[2]; })
@@ -1249,10 +1250,10 @@ $(function () {
 
   $.when($.get("email/target"), $.get("email/domains")).done(function(resp1, resp2){
     TARGET_EMAIL = _.object(
-      ['email', 'community', 'community_id', 'group', 'total_received', 'total_sent', 'rank'], 
+      ['email', 'community', 'community_id', 'group', 'total_received', 'total_sent', 'rank'],
       _.first(resp1[0].email)
     );
-    
+
     _.each(resp2[0].domains, function(o, i){
       domain_set[o[0]] = {
         count: o[1],
@@ -1294,7 +1295,7 @@ $(function () {
       var rank = TARGET_EMAIL.rank;
       var highlight = function(){
         //graph
-        d3.select("#g_circle_" + groupId).style("stroke","#ffff00");  
+        d3.select("#g_circle_" + groupId).style("stroke","#ffff00");
         d3.select("#g_circle_" + groupId).style("stroke-width",function(d) { return 10; });
         //email-table
         $('#result_table tbody tr td:nth-child(2)').each(function(i, el){
@@ -1306,7 +1307,7 @@ $(function () {
 
       var unhighlight = function(){
         //graph
-        d3.select("#g_circle_" + groupId).style("stroke","#ff0000");  
+        d3.select("#g_circle_" + groupId).style("stroke","#ff0000");
         if (d3.select("#rankval").property("checked")) {
           d3.select("#g_circle_" + groupId).style("opacity",function(d) { return 0.2 + (rank); });
           d3.select("#g_circle_" + groupId).style("stroke-width",function(d) { return 5 * (rank); });
@@ -1328,10 +1329,10 @@ $(function () {
     }());
 
     $('#target_email_a').on('mouseover', highlight_target.highlight);
-    $('#target_email_a').on('mouseout', highlight_target.unhighlight);    
+    $('#target_email_a').on('mouseout', highlight_target.unhighlight);
 
     $('#email_group_conversation').on('click', group_email_conversation);
-    
+
     //init
     do_search('all','');
 
@@ -1371,7 +1372,7 @@ $(function () {
                 $("#email-body").empty();
                 $("#email-body").append(produceHTMLView(resp));
               }
-            }); 
+            });
         });
     });
 
@@ -1416,7 +1417,7 @@ $(function () {
             });
         });
     });
-    
+
     $("#submit_clearExportable").click(function() {
       console.log("clear export flag for all emails... ");
       $.ajax({
@@ -1432,16 +1433,16 @@ $(function () {
 	})
 	.fail(function(resp){
 	  alert('fail');
-	  console.log("fail");  
-	  $('#exportModal').modal('hide');			
-	});	
+	  console.log("fail");
+	  $('#exportModal').modal('hide');
+	});
     });
 
     //on modal close event
     $('#exportModal').on('hidden.bs.modal', function () {
-      $('#export_download_link').hide();      
+      $('#export_download_link').hide();
     });
-    
+
     $("#submit_downloadExportable").click(function() {
       console.log("download for for all exportable emails... ");
       $.ajax({
@@ -1457,11 +1458,11 @@ $(function () {
 	})
 	.fail(function(resp){
 	  alert('fail');
-	  console.log("fail");  
-	  $('#exportModal').modal('hide');			
-	});	
-    });	
-    
+	  console.log("fail");
+	  $('#exportModal').modal('hide');
+	});
+    });
+
     $("#submit_toggleExport").click(function() {
       console.log("toggle export flag for email_id... ");
       if (current_email == null) {
@@ -1469,7 +1470,7 @@ $(function () {
 	return;
       }
       var id = current_email;
-      
+
       var ajaxToggle = function(id, exportable){
 	$.ajax({
 	  url: 'email/exportable',
@@ -1484,14 +1485,14 @@ $(function () {
 	  })
 	  .fail(function(resp){
 	    alert('fail');
-	    console.log("fail");   
+	    console.log("fail");
 	  });
       };
 
       ajaxToggle(id, $("#submit_toggleExport").hasClass('marked'));
 
     });
-    
+
     $("#view_exportList").click(function() {
       $.get("email/exportable").then(
         function(resp) {
@@ -1511,7 +1512,7 @@ $(function () {
 	    event.original.preventDefault();
 	    $('#exportModal').modal('hide');
 	    $('#tab-list li:eq(2) a').tab('show')
-	    $(document).scrollTop(0);            
+	    $(document).scrollTop(0);
 	    $("#email-body").empty();
 	    $("#email-body").append($('<span>').text('Loading... ')).append(waiting_bar);
 	    var id = event.context[0];
@@ -1522,11 +1523,11 @@ $(function () {
 		  $("#email-body").empty();
 		  $("#email-body").append(produceHTMLView(resp));
 		}
-	      });		  
-	  });		  
-        });		
+	      });
+	  });
+        });
     });
-    
+
     $("#colorby2").click(function(){
       console.log($("#colorby2").val());
       recolornodes('comm');
@@ -1538,7 +1539,7 @@ $(function () {
     });
 
     $("#usetext").on("change", function(){
-      toggle_labels(); 
+      toggle_labels();
     });
 
     $("#rankval").click(function(){
@@ -1554,8 +1555,7 @@ $(function () {
       //recolornodes('rank');
     });
 
-    
+
   });
 
 });
-

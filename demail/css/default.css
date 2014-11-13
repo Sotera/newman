@@ -13,7 +13,7 @@ ul {
     padding: 0;
 }
 
-.highlight {  
+.highlight {
     background-color: #ffff00;
 }
 
@@ -47,13 +47,13 @@ ul {
 .misc { padding: 2px; background-color: #c0c0c0; }
 
 .chart rect.organization {
-    fill: #ffcc33; 
+    fill: #ffcc33;
 }
 .chart rect.location {
-    fill: #00ff00; 
+    fill: #00ff00;
 }
-.chart rect.misc { 
-    fill: #c0c0c0; 
+.chart rect.misc {
+    fill: #c0c0c0;
 }
 .chart rect.person {
     fill: #00ccff;
@@ -178,6 +178,13 @@ ul {
     color: red;
 }
 
+.expandable:hover {
+  outline: none;
+  -webkit-transform: scale(6); -moz-transform: scale(6);
+   -webkit-box-shadow: 0 3px 10px #666; -moz-box-shadow: 0 3px 10px #666;
+  z-index: 9999;
+}
+
 .info-table tbody >tr >td {
     padding: 2px;
     font-size: 12px;
@@ -188,26 +195,26 @@ ul {
 }
 
 .info-table tbody tr:nth-child(even) {
-    background-color: #f0f0f0; 
+    background-color: #f0f0f0;
 }
 
 .info-table tbody tr:hover {
-    background-color: #ffffae; 
+    background-color: #ffffae;
     font-size: 12px;
 }
 
 
 #result_table tbody tr:nth-child(odd) {
-    background-color: #f0f0f0; 
+    background-color: #f0f0f0;
 }
 
 #result_table tbody tr:hover {
-    background-color: #ffffae; 
+    background-color: #ffffae;
 }
 
 
 .row-highlight {
-    background-color: #ffffae; 
+    background-color: #ffffae;
 }
 
 .tab-content div {
@@ -237,7 +244,7 @@ div.bootstrap-growl >span.close {
     padding-top: 3px;
     background-color: #d3d3d3;
     border-top-right-radius: 7px;
-    border-top-left-radius: 7px; 
+    border-top-left-radius: 7px;
     text-align: center;
     cursor: pointer;
 }
