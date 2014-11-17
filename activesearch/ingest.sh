@@ -39,6 +39,11 @@ cp $RUN_DIR/tmp/activesearch.cfg /etc/activesearch.cfg
 # tomcat needs to be reloaded for AS 
 sudo /etc/init.d/tomcat7 restart
 
+if [ ! -d /tmp/activesearch ]; then
+    mkdir -p /tmp/activesearch
+    chmod 777 /tmp/activesearch 
+fi
+
 printf "\nupdate config\n"
 
 curl localhost:1337/ActiveSearchDaemon/rest/readConfigFile?configfile=$RUN_DIR/tmp/activesearch.cfg
