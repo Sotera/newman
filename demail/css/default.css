@@ -178,14 +178,6 @@ ul {
     color: red;
 }
 
-.expandable:hover {
-  margin: -150px;
-  outline: none;
-  -webkit-transform: scale(6); -moz-transform: scale(6);
-   -webkit-box-shadow: 0 3px 10px #666; -moz-box-shadow: 0 3px 10px #666;
-  z-index: 9999;
-}
-
 .info-table tbody >tr >td {
     padding: 2px;
     font-size: 12px;
