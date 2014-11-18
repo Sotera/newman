@@ -6,19 +6,11 @@ permalink: /quick-start/
 
 Install [Vagrant](http://www.vagrantup.com/)  
 Install [Virtual Box](https://www.virtualbox.org/wiki/Downloads)  
-Download [XData-VM v0.2.1](http://goo.gl/5jCBem) to your home directory
+Download [Newman-VM-1.0](http://goo.gl/tpSfcW) to your home directory
 {% highlight bash %}
-$ vagrant box add xdata-0.2.1 ~/xdata-0.2.1.box  
-{% endhighlight %}
-
-Install Newman  
-{% highlight bash %}  
-$ git clone https://github.com/Sotera/newman-vm  
-$ cd newman-vm  
+$ vagrant init newman-vm-v1.0 ~/newman-vm-v1.0.box  
 $ vagrant up  
 $ vagrant ssh  
-$ cd /srv/software  
-$ git clone https://github.com/Sotera/newman  
 $ tangelo restart  
 {% endhighlight %}
 
