@@ -18,5 +18,5 @@ This work was funded by [DARPA's XDATA](http://www.darpa.mil/Our_Work/I2O/Progra
 [Topic Clustering](https://github.com/mitll/topic-clustering) - MIT-LL  
 [ActiveSearch](https://github.com/AutonlabCMU/ActiveSearch) - CMU  
 [Tangelo](http://tangelo.kitware.com) - Kitware  
-[Tika](http://tika.apache.org/) - Apache
-[Icons](https://www.iconfinder.com/iconsets/document-icons-2)
+[Tika](http://tika.apache.org/) - Apache 
+
