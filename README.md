@@ -8,11 +8,11 @@ Checkout the **Quick Start** at [http://sotera.github.io/newman/](http://sotera.
 
 ## Applied Technology
 
-[Distributed Louvain Modularity](https://github.com/Sotera/distributed-louvain-modularity)- Sotera
-[MITIE: MIT Information Extraction](https://github.com/mitll/MITIE) -MIT-LL
-[Topic Clustering](https://github.com/mitll/topic-clustering) - MIT-LL
-[ActiveSearch](https://github.com/AutonlabCMU/ActiveSearch) - CMU
-[Tangelo](http://tangelo.kitware.com) - Kitware
+[Distributed Louvain Modularity](https://github.com/Sotera/distributed-louvain-modularity)- Sotera <br/>
+[MITIE: MIT Information Extraction](https://github.com/mitll/MITIE) -MIT-LL <br/>
+[Topic Clustering](https://github.com/mitll/topic-clustering) - MIT-LL <br/>
+[ActiveSearch](https://github.com/AutonlabCMU/ActiveSearch) - CMU <br/>
+[Tangelo](http://tangelo.kitware.com) - Kitware <br/>
 [Tika](http://tika.apache.org/) - Apache
 
 
