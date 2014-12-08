@@ -8,7 +8,6 @@ Checkout the **Quick Start** at [http://sotera.github.io/newman/](http://sotera.
 
 ## Applied Technology
 
-[Distributed Louvain Modularity](https://github.com/Sotera/distributed-louvain-modularity)- Sotera <br/>
 [MITIE: MIT Information Extraction](https://github.com/mitll/MITIE) -MIT-LL <br/>
 [Topic Clustering](https://github.com/mitll/topic-clustering) - MIT-LL <br/>
 [ActiveSearch](https://github.com/AutonlabCMU/ActiveSearch) - CMU <br/>
