@@ -53,54 +53,6 @@ printf "entity bulk ingest markup\n"
 printf "enrich email comms\n"
 ./src/enrich_email_comms.py
 
-#DISTRIBUTED LOUVAIN
-# if [ -e tmp/louvain.csv ]; then
-#     rm -f tmp/louvain.csv
-# fi
-
-# printf "create louvian input file\n"
-# ./src/louvain_format.py -o tmp/ -f louvain.csv
-
-# ### run louvain 
-
-# #rebuild hdfs for newman
-# if hadoop fs -test -d /tmp/newman; then
-#     hadoop fs -rm -r /tmp/newman
-# fi
-
-# hadoop fs -mkdir -p /tmp/newman/input
-# hadoop fs -mkdir -p /tmp/newman/output
-
-# hadoop fs -put tmp/louvain.csv /tmp/newman/input/
-
-# if [ -e  $LOUVAIN_DIR/louvain.csv ]; then
-#     rm -f $LOUVAIN_DIR/louvain.csv
-# fi
-
-# # for louvain_to_gephi
-# mv tmp/louvain.csv $LOUVAIN_DIR/louvain.csv
-
-# ## kick off louvain
-# cd $LOUVAIN_DIR
-# python louvain.py /tmp/newman/input /tmp/newman/output
-
-# if [ -d output ]; then
-#     rm -rf output
-# fi
-
-# hadoop fs -copyToLocal /tmp/newman/output .
-
-# if [ -d louvain_to_gephi ]; then
-#     rm -rf louvain_to_gephi
-# fi
-
-# python louvain_to_gephi.py
-
-# cd -
-
-# printf "ingest louvain results\n"
-# ./src/louvain_ingest_results.py $LOUVAIN_DIR/louvain_to_gephi/
-
 printf "community assignment\n"
 
 ./src/community_assign.py 
