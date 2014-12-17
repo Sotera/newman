@@ -315,8 +315,14 @@ function produceHTMLView(emailObj) {
   //html += "<b>ID: </b>" + d.num + "<BR>";
 
   el.append(
-    $('<p>').append($('<span>').addClass('bold').text("ID: "))
-      .append($('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'emails/' + TARGET_EMAIL.email + '/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.txt'}).text(d.num)));
+    $('<div>').append(
+));
+      
+  el.append(
+    $('<p>').append(
+      $('<span>').addClass('bold').text("ID: "))
+      .append($('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'emails/' + TARGET_EMAIL.email + '/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.txt'}).text(d.num), $('<span>').text('    '),        
+              $('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'emails/' + TARGET_EMAIL.email + '/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.html'}).append($('<span>').addClass('glyphicon glyphicon-print'))));
 
   el.append(
     $('<p>').append($('<span>').addClass('bold').text("From: "))

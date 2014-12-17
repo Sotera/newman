@@ -1,0 +1,163 @@
+{#- template documentation http://jinja.pocoo.org/docs/dev/templates/ -#}  
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title> {{ doc.id }} </title>
+    <style>
+      * { margin: 0 }
+
+      body {
+        margin: 20px;
+      }
+
+      table {
+      border-collapse: collapse;
+      border-spacing: 0;
+      }
+
+      table thead tr th {
+      border: 1px black solid;
+      padding: 5px;
+      font-size: 12px;
+      font-weight: bold;
+      color: red;
+      text-transform: capitalize;
+      }
+
+      tbody {
+      display: table-row-group;
+      vertical-align: middle;
+      }
+
+      table tbody tr td {
+      padding-left: 5px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      padding-right: 20px;
+      }
+
+      tbody tr:nth-child(even) {
+      background-color: #f0f0f0;
+      }
+      
+      .pad {
+        margin-top: 15px;
+      }
+
+      .mitie {
+      -webkit-print-color-adjust: exact;
+      }
+      .bar {
+      -webkit-print-color-adjust: exact;
+      display: inline-block; 
+      width: 20px; 
+      height: 12px;
+      padding-left: 5px;
+      }
+      .bar-label {
+      padding-left: 5px; 
+      padding-right: 5px;
+      text-transform: capitalize;
+      }
+      .person, .mitie-person {
+      background-color: #00ccff;
+      -webkit-print-color-adjust: exact;
+      }
+      .location, .mitie-location {  background-color: #00ff00;
+      -webkit-print-color-adjust: exact;
+      }
+      .mitie-organization, .organization {  background-color: #ffcc33;
+      -webkit-print-color-adjust: exact;
+      }
+      .mitie-misc, .misc {
+      background-color: #c0c0c0;
+      -webkit-print-color-adjust: exact;
+      }
+
+      .bold {
+       font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div>
+        <h2>{{ doc.id }}</h2>
+      </div>
+      <!-- topic scores --> 
+      <div class="pad">
+        <h3>Topics</h3>
+        {% if doc.topics %}
+        <div class="pad">
+          <table>
+            <thead>
+              <tr><th>topic</th><th>score</th></tr>
+            </thead>
+            <tbody>
+              {% for topic in doc.topics -%}
+              <tr><td>{{ topic.name }}</td><td>{{ topic.score }}</td></tr>
+              {%- endfor %} 
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div><p> No topic scores for this document </p></div>
+        {% endif %}
+      </div>
+      <!-- entity legend --> 
+      <div style="padding-top: 15px;">
+        <h3>Entity Types</h3>
+        <div class="pad">
+          {% for l in ["person", "location", "organization", "misc"] -%}
+          <div class="bar {{ l }}"></div>
+          <span class="bar-label">{{ l }}</span>
+          <br/>
+          {% endfor %} 
+        </div>
+      </div>
+      <div class="pad">
+        <h3> Message </h3>
+      </div>
+      <div style="padding-top: 15px;">
+        <div class="header-view">
+          <p>
+            <span class="bold">ID: </span>
+            <span>{{ doc.id }}</span>
+          </p>          
+          <p>
+            <span class="bold">From: </span>
+            <span>{{ doc.from }}</span>
+          </p>
+          <p>
+            <span class="bold">To: </span>
+            <span>{{ doc.to }}</span>
+          </p>
+          <p>
+            <span class="bold">Cc: </span>
+            <span>{{ doc.cc }}</span>
+          </p>
+          <p>
+            <span class="bold">Bcc: </span>
+            <span>{{ doc.bcc }}</span>
+          </p>
+          <p>
+            <span class="bold">Subject: </span>
+            <span>{{ doc.subject }}</span>
+          </p>
+          <p>
+            <span class="bold">Date: </span>
+            <span>{{ doc.date }}</span>
+          </p>
+          <p>
+            <span class="bold">Attachments: </span>
+            <span>{{ doc.attachments }}</span>
+          </p>
+        </div>
+        <div class="body-view">
+          {{ doc.body }}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
