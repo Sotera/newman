@@ -82,6 +82,10 @@ printf "attachments extract\n"
 
 ./attachments/run_attach_extract.sh $1
 
+printf "printable views\n"
+
+./printview/printview.py $EMAIL_TARGET printview/report.tmpl.html
+
 printf "active search ingest\n"
 
 ./activesearch/ingest.sh $1
