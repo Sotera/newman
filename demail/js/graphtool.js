@@ -383,6 +383,26 @@ function produceHTMLView(emailObj) {
   return el;
 }
 
+function add_view_to_export(){
+
+  var arr= d3.select("#result_table").select("tbody").selectAll("tr").data();
+  var emails = _.map(arr, function(o){  return o.num; });
+
+  $.ajax({
+    url: 'email/exportmany',
+    type: "POST",
+    data: JSON.stringify({'emails': emails}),
+    contentType:"application/json; charset=utf-8",
+    dataType:"json"
+  })
+    .done(function(resp){
+      console.log(resp);
+    })
+    .fail(function(resp){
+      alert('fail');
+      console.log("fail");
+    });  
+}
 
 function group_email_conversation(){
 
@@ -1324,6 +1344,7 @@ $(function () {
     $('#target_email_a').on('mouseout', highlight_target.unhighlight);
 
     $('#email_group_conversation').on('click', group_email_conversation);
+    $('#email_view_export_all').on('click', add_view_to_export);    
 
     //init
     do_search('all','');
