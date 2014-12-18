@@ -511,6 +511,8 @@ function do_search(fields, val) {
   $.getJSON("search/search/" + fields +'/' + rest_url , function (comp_data) {
     $('#search_status').empty();
     //d3.select("#search_status").text("");
+    $('#document_count').text(comp_data.rows.length);
+
     var lastSort = "";
     // create the table header
     var thead = d3.select("#result_table").select("thead")
