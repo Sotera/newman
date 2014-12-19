@@ -508,125 +508,148 @@ function do_search(fields, val) {
   var rest_url = args.join('/');
   console.log(rest_url);
 
-  $.getJSON("search/search/" + fields +'/' + rest_url , function (comp_data) {
-    $('#search_status').empty();
-    //d3.select("#search_status").text("");
-    $('#document_count').text(comp_data.rows.length);
+  $.get("email/exportable").then(function(resp_export){
+    $.getJSON("search/search/" + fields +'/' + rest_url , function (comp_data) {
+      //var exported = _.indexBy(resp_export.emails, _.identity);
+      var exported = _.object(resp_export.emails);
 
-    var lastSort = "";
-    // create the table header
-    var thead = d3.select("#result_table").select("thead")
-      .append("tr")
-      .selectAll("tr")
-    // .data(['Source','Date','From','To','Cc','Bcc','Subject'])
-      .data(['Date','From','Recipient Count','Body Size','Attachment Count', 'Subject'])
-      .enter().append("th").text(function(d){return d;}).attr('class', 'clickable')
-      .on("click", function(k, i){
-        console.log(arguments);
-        var direction = (lastSort == k) ? -1 : 1;
-        lastSort = (direction == -1) ? "" : k; //toggle
-        d3.select("#result_table").select("tbody").selectAll("tr").sort(function(a, b) {
-          if (i == 0) {
-            return a.datetime.localeCompare(b.datetime) * direction;
-          }
-          if (i == 1) {
-            return a.from.localeCompare(b.from) * direction;
-          }
-          if (i == 2) {
-            return (recipientCount(a.to, a.cc, a.bcc) - recipientCount(b.to, b.cc, b.bcc)) * direction * -1; //desc first
-          }
-          if (i == 3){
-            return (a.bodysize - b.bodysize) * direction * -1; //desc first
-          }
-          if (i == 4){
-            return (splitAttachCount(a.attach) - splitAttachCount(b.attach)) * direction * -1; //desc first
-          }
-          if (i == 5) {
-            return a.subject.localeCompare(b.subject) * direction;
-          }
-        });
-      });
+      $('#search_status').empty();
+      //d3.select("#search_status").text("");
+      $('#document_count').text(comp_data.rows.length);
 
-
-    // create rows
-    var tr = d3.select("#result_table").select("tbody").selectAll("tr").data(comp_data.rows).enter().append("tr");
-
-    tr.attr('class', 'clickable').on("click",function(d){
-      console.log(d.directory);
-      // $("#webpage").load('emails/' + d.directory + '/' +
-      // d.directory.split('/')[1] + '.txt');
-      $('#tab-list li:eq(2) a').tab('show')
-      $(document).scrollTop(0);
-      $("#email-body").empty();
-      $("#email-body").append($('<span>').text('Loading... ')).append(waiting_bar);
-
-      $.get("email/email/" + encodeURIComponent(d.num)).then(
-        function(resp) {
-          update_current(d.num);
-          if(resp.email.length > 0){
-            $("#email-body").empty();
-            $("#email-body").append(produceHTMLView(resp));
+      var lastSort = "";
+      // create the table header
+      var thead = d3.select("#result_table").select("thead")
+        .append("tr")
+        .selectAll("tr")
+      // .data(['Source','Date','From','To','Cc','Bcc','Subject'])
+        .data(['Date','From','Recipient Count','Body Size','Attachment Count', 'Subject', " "])
+        .enter().append("th")
+        .html(function(d, i){
+          if (i == 6){ 
+            return "<span class='glyphicon glyphicon-star' ></span>";
           }
+          return d;
+        }).attr('class', 'clickable')
+        .on("click", function(k, i){
+          console.log(arguments);
+          var direction = (lastSort == k) ? -1 : 1;
+          lastSort = (direction == -1) ? "" : k; //toggle
+          d3.select("#result_table").select("tbody").selectAll("tr").sort(function(a, b) {
+            if (i == 0) {
+              return a.datetime.localeCompare(b.datetime) * direction;
+            }
+            if (i == 1) {
+              return a.from.localeCompare(b.from) * direction;
+            }
+            if (i == 2) {
+              return (recipientCount(a.to, a.cc, a.bcc) - recipientCount(b.to, b.cc, b.bcc)) * direction * -1; //desc first
+            }
+            if (i == 3){
+              return (a.bodysize - b.bodysize) * direction * -1; //desc first
+            }
+            if (i == 4){
+              return (splitAttachCount(a.attach) - splitAttachCount(b.attach)) * direction * -1; //desc first
+            }
+            if (i == 5) {
+              return a.subject.localeCompare(b.subject) * direction;
+            }
+            if (i == 6){
+              return (+(a.num in exported) - +(b.num in exported)) * direction * -1; //put the marked items on top first
+            }
+          });
         });
 
-    }).on("mouseover", function(d) {
-      tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(';');
-      for (i = 0; i < tos.length; i++) {
-        d3.select("#" + d.from.replace(/\./g,'_').replace(/@/g,'_') + '_' + tos[i]).style("stroke", "red"); }})
-      .on("mouseout", function(d){
+
+      // create rows
+      var tr = d3.select("#result_table").select("tbody").selectAll("tr").data(comp_data.rows).enter().append("tr");
+
+      tr.attr('class', 'clickable').on("click",function(d){
+        console.log(d.directory);
+        // $("#webpage").load('emails/' + d.directory + '/' +
+        // d.directory.split('/')[1] + '.txt');
+        $('#tab-list li:eq(2) a').tab('show')
+        $(document).scrollTop(0);
+        $("#email-body").empty();
+        $("#email-body").append($('<span>').text('Loading... ')).append(waiting_bar);
+
+        $.get("email/email/" + encodeURIComponent(d.num)).then(
+          function(resp) {
+            update_current(d.num);
+            if(resp.email.length > 0){
+              $("#email-body").empty();
+              $("#email-body").append(produceHTMLView(resp));
+            }
+          });
+
+      }).on("mouseover", function(d) {
         tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(';');
         for (i = 0; i < tos.length; i++) {
-          d3.select("#" + d.from.replace(/\./g,'_').replace(/@/g,'_') + '_' + tos[i]).style("stroke", "#bbb");
-        }});
+          d3.select("#" + d.from.replace(/\./g,'_').replace(/@/g,'_') + '_' + tos[i]).style("stroke", "red"); }})
+        .on("mouseout", function(d){
+          tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(';');
+          for (i = 0; i < tos.length; i++) {
+            d3.select("#" + d.from.replace(/\./g,'_').replace(/@/g,'_') + '_' + tos[i]).style("stroke", "#bbb");
+          }});
 
-    // cells
-    var td = tr.selectAll("td")
-      .data(function(d){
-        var recipient_count = recipientCount(d.to, d.cc, d.bcc);
-        var attach_count = splitAttachCount(d.attach)
-        return [d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject ];
-        //return [d.num + '::' + d.from + '::' + d.directory, d.datetime, d.from +'::' + d.fromcolor,d.to,d.cc,d.bcc,d.subject];
-      })
-      .enter().append("td")
-    //.text(function(d){return ['no'];})
-    //.html(function(d) {return ["<a href='"+d.directory+"'>"+d.directory+"</a>"]; })
-      .style("padding", "5px")
-      .style("font-size","10px")
-      .style("fill","blue")
-      .append('div')
-      .html(function(d,i) {
-        if( i == 1 ) {
-          return d.split('::')[0];
-        }
-        if (i == 2) {
-          var px = d > 100 ? 100 : d;
-          return "<div style='background-color: blue;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
-        }
-        if (i == 3) {
-          var px = (d / 1000.0) > 100 ? 100 : (d / 1000.0);
-          return "<div style='background-color: green;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
-        }
-        if (i == 4) {
-          var px = (d * 10) > 100 ? 100 : (d * 10);
-          return "<div style='background-color: orange;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
-        }
+      // cells
+      var td = tr.selectAll("td")
+        .data(function(d){
+          var recipient_count = recipientCount(d.to, d.cc, d.bcc);
+          var attach_count = splitAttachCount(d.attach)
+          return [d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject, d.num ];
+          //return [d.num + '::' + d.from + '::' + d.directory, d.datetime, d.from +'::' + d.fromcolor,d.to,d.cc,d.bcc,d.subject];
+        })
+        .enter().append("td")
+      //.text(function(d){return ['no'];})
+      //.html(function(d) {return ["<a href='"+d.directory+"'>"+d.directory+"</a>"]; })
+        .style("padding", "5px")
+        .style("font-size","10px")
+        .style("fill","blue")
+        .append('div')
+        .html(function(d,i) {
+          if( i == 1 ) {
+            return d.split('::')[0];
+          }
+          if (i == 2) {
+            var px = d > 100 ? 100 : d;
+            return "<div style='background-color: blue;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
+          }
+          if (i == 3) {
+            var px = (d / 1000.0) > 100 ? 100 : (d / 1000.0);
+            return "<div style='background-color: green;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
+          }
+          if (i == 4) {
+            var px = (d * 10) > 100 ? 100 : (d * 10);
+            return "<div style='background-color: orange;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
+          }
 
-        return d;
-      })
-      .style("color", function(d,i) {
-        if( i == 1) {
-          return colorByDomain(d.split('::')[0]);
-        } else {
-          return 'black';
-        }
-      })
-      .style("stroke","#FFFFFF");
+          if ( i == 6 ){
+            if (d in exported){
+              return "<div><span class='glyphicon glyphicon-star' ></span></div>";
+            } else {
+              return "<div></div>";
+            }
+          }
 
-    if (control_panel.isOpen()){
-      //resizes control panel
-      control_panel.open();
-    }
-    drawGraph(comp_data.graph);
+          return d;
+        })
+        .style("color", function(d,i) {
+          if( i == 1) {
+            return colorByDomain(d.split('::')[0]);
+          } else {
+            return 'black';
+          }
+        })
+        .style("stroke","#FFFFFF");
+
+      if (control_panel.isOpen()){
+        //resizes control panel
+        control_panel.open();
+      }
+      drawGraph(comp_data.graph);
+    });
+
   });
 }
 
