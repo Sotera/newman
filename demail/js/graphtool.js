@@ -396,6 +396,7 @@ function add_view_to_export(){
     dataType:"json"
   })
     .done(function(resp){
+      table_mark_exportable(true);
       console.log(resp);
     })
     .fail(function(resp){
@@ -458,6 +459,37 @@ function group_email_conversation(){
 
 }
 
+
+function table_mark_exportable(mark, ids_set){
+  var _ids = ids_set ? _.object(ids_set, _.range(ids_set.length)) : null;
+  d3.select("#result_table").select("tbody").selectAll("tr")
+    .filter(function(d, i){ 
+      /* this is a hack */
+      if (_ids != null){
+        if (d.num in _ids){
+          d.exported = mark;
+          return true;
+        }
+        return false;
+      }
+      //else process all
+      d.exported = mark;
+      return true;
+
+    })
+    .selectAll("td")
+    .filter(function(d, i){ 
+      return i==6;
+    })
+    .html(function(d,i){ 
+      if (mark){
+        return "<div><span class='glyphicon glyphicon-star' ></span></div>";
+      } else {
+        "<div></div>"
+      }      
+    });
+}
+
 // takes field + varargs ... now
 function do_search(fields, val) {
   var varargs = arguments;
@@ -516,6 +548,9 @@ function do_search(fields, val) {
       $('#search_status').empty();
       //d3.select("#search_status").text("");
       $('#document_count').text(comp_data.rows.length);
+      var data = _.map(comp_data.rows, function(o){
+        return _.extend(o, {'exported': (o.num in exported)})
+      });
 
       var lastSort = "";
       // create the table header
@@ -555,14 +590,14 @@ function do_search(fields, val) {
               return a.subject.localeCompare(b.subject) * direction;
             }
             if (i == 6){
-              return (+(a.num in exported) - +(b.num in exported)) * direction * -1; //put the marked items on top first
+              return (+(a.exported) - +(b.exported)) * direction * -1; //put the marked items on top first
             }
           });
         });
 
 
       // create rows
-      var tr = d3.select("#result_table").select("tbody").selectAll("tr").data(comp_data.rows).enter().append("tr");
+      var tr = d3.select("#result_table").select("tbody").selectAll("tr").data(data).enter().append("tr");
 
       tr.attr('class', 'clickable').on("click",function(d){
         console.log(d.directory);
@@ -597,7 +632,7 @@ function do_search(fields, val) {
         .data(function(d){
           var recipient_count = recipientCount(d.to, d.cc, d.bcc);
           var attach_count = splitAttachCount(d.attach)
-          return [d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject, d.num ];
+          return [d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject, d.exported ];
           //return [d.num + '::' + d.from + '::' + d.directory, d.datetime, d.from +'::' + d.fromcolor,d.to,d.cc,d.bcc,d.subject];
         })
         .enter().append("td")
@@ -625,7 +660,7 @@ function do_search(fields, val) {
           }
 
           if ( i == 6 ){
-            if (d in exported){
+            if (d){
               return "<div><span class='glyphicon glyphicon-star' ></span></div>";
             } else {
               return "<div></div>";
@@ -1467,6 +1502,7 @@ $(function () {
       })
 	.done(function(resp){
 	  console.log(resp);
+          table_mark_exportable(false);
 	  $('#exportModal').modal('hide');
 	})
 	.fail(function(resp){
@@ -1519,6 +1555,9 @@ $(function () {
 	})
 	  .done(function(resp){
             $("#submit_toggleExport").toggleClass('marked');
+            table_mark_exportable(
+              $("#submit_toggleExport").hasClass('marked'), 
+              [id]);
 	    console.log(resp);
 	  })
 	  .fail(function(resp){
