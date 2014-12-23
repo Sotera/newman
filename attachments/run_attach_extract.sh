@@ -15,7 +15,8 @@ TMP_DIR=tmp/elasticsearch_ingest
 printf "tika extract \n"
 printf "working dir $RUN_DIR\n"
 
-tail -n +2 $RUN_DIR/demail/emails/$EMAIL_TARGET/output.csv | ./attachments/tika.py $EMAIL_TARGET $TMP_DIR -
+#tail -n +2 $RUN_DIR/demail/emails/$EMAIL_TARGET/output.csv | ./attachments/tika.py $EMAIL_TARGET $TMP_DIR -
+tail -n +2 $RUN_DIR/demail/emails/$EMAIL_TARGET/output.csv | java -cp .:attachments/clj/lib/* clojure.main attachments/clj/tika.clj $EMAIL_TARGET $TMP_DIR -
 
 #delete index
 curl -XDELETE 'http://localhost:9200/newman'

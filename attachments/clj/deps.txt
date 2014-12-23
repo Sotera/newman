@@ -1,0 +1,33 @@
+Dependencies
+============
+
+http://clojure.org
+http://repo1.maven.org/maven2/org/clojure/clojure/1.6.0/clojure-1.6.0.zip
+
+https://github.com/clojure/data.json
+http://search.maven.org/remotecontent?filepath=org/clojure/data.json/0.2.5/data.json-0.2.5.jar
+
+http://tika.apache.org
+http://www.apache.org/dyn/closer.cgi/tika/tika-app-1.6.jar
+
+;;leiningen
+:dependencies [[org.clojure/clojure "1.6.0"]
+               [org.clojure/data.json "0.2.5"]
+               [org.apache.tika/tika-app "1.6"]]
+
+<!-- maven --> 
+<dependency>
+  <groupId>org.clojure</groupId>
+  <artifactId>clojure</artifactId>
+  <version>1.6.0</version>
+</dependency>
+<dependency>
+  <groupId>org.clojure</groupId>
+  <artifactId>data.json</artifactId>
+  <version>0.2.5</version>
+</dependency>
+<dependency>
+  <groupId>org.apache.tika</groupId>
+  <artifactId>tika-app</artifactId>
+  <version>1.6</version>
+</dependency>
