@@ -29,6 +29,11 @@
 (defn zero-pad [i]
   (format "%07d" i))
 
+;; print to STDERR
+(defn prn-err [s]
+  (binding [*out* *err*]
+    (println s)))
+
 ;; configured json writer
 (defn write-json [o]
   (json/write-str o :escape-slash false ))
@@ -59,19 +64,21 @@
   (let [files (clojure.string/split attach-str #";")
         id (fn [i] (str "attach_" email_id "_" i))
         attach_json (fn [f i]
-                      (let [fp
-                            (str "demail/emails/" email-target "/" dir "/" f)]
-                        { :id (id i)
+                      (let [fp (str "demail/emails/" email-target "/" dir "/" f)]
+                        (hash-map
+                         :id (id i)
                          :email_id email_id
                          :file_path fp
                          :contents (if (.exists (clojure.java.io/as-file fp))
                                      (extract-text fp)
-                                     "FILE NOT FOUND")}))]
+                                     (do
+                                       (prn-err (str "FILE NOT FOUND - " fp))
+                                       "")))))]
     (map attach_json files (iterate inc 1))))
 
 ;; process line to json
 (defn process-line [l]
-  (let [ items (clojure.string/split l #"\t")
+  (let [items (clojure.string/split l #"\t")
         attach (nth items 10)
         id (nth items 0)
         dir (nth items 1)
