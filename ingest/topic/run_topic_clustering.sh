@@ -19,7 +19,7 @@ if [ -e $TOPIC_DIR/Ingest/email_ingester.py ]; then
     rm -f $TOPIC_DIR/Ingest/email_ingester.py
 fi
 
-cp topic/email_ingester.py $TOPIC_DIR/Ingest/
+cp ingest/topic/email_ingester.py $TOPIC_DIR/Ingest/
 
 cd $TOPIC_DIR
 
@@ -57,6 +57,6 @@ if [ -e tmp/bulk_topic_score.dat ]; then
     rm -rf tmp/bulk_topic_score.dat
 fi
 
-./topic/ingest_topics_scores.py tmp/topic_cluster.idx tmp/topic_cluster.scores
+./ingest/topic/ingest_topics_scores.py tmp/topic_cluster.idx tmp/topic_cluster.scores
 
 
