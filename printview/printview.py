@@ -51,7 +51,7 @@ examples:
 
     def formatName(n):
         a = n.split() if n else []
-        return ' '.join(a[5:])
+        return ' '.join(a[:5])
 
     def formatScore(s):
         x = float(s) * 100
