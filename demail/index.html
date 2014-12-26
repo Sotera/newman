@@ -41,14 +41,14 @@
 	    <h4 class="modal-title" id="exportModal">Download</h4>
 	  </div>
 	  <div id="exportList" class="modal-body">
-	    ...
-	  </div>
-	  <div class="modal-footer">
-            <div id="export_download_link" style="float:left;display:none;">
+            <div id="export_link_spin">
+              <img src="imgs/loading-spin.svg" height="32" width="64" />
+            </div>
+            <div id="export_download_link" style="display:none;">
               <span class="glyphicon glyphicon-save" /> <a target="_blank">Download</a>
             </div>
-	    <button id="submit_downloadExportable" type="button" class="btn btn-primary">Create Export</button>
-	    <button id="submit_clearExportable" type="button" class="btn btn-secondary">Clear All</button>
+	  </div>
+	  <div class="modal-footer">
 	    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 	  </div>
 	</div>
@@ -216,9 +216,18 @@
                   <span> Documents: </span> <span id="document_count"></span>
                 </div>
                 <div style="float: right;padding-right: 9px;">
-                  <a class="clickable" id="email_view_export_all" title="Export All">
-                    <span>Add all to export  </span><span class="glyphicon glyphicon-plus-sign"> </span>
+                  <a class="clickable" id="email_view_marked">
+                    <span> View Exportable  </span>
                   </a>
+                  | 
+                  <a class="clickable" id="email_view_export_all" title="Mark All">
+                    <span class="glyphicon glyphicon-plus"> </span>
+                  </a>
+                  | 
+                  <a class="clickable" id="email_view_export_all_remove" title="Unmark All">
+                    <span class="glyphicon glyphicon-minus"> </span>
+                  </a>
+                  |
                   <!-- <a class="clickable" id="email_group_conversation" title="Conversations"> -->
                   <!--   <span class="glyphicon glyphicon-tasks"></span> -->
                   <!-- </a> -->

@@ -152,12 +152,13 @@ def setExportable(data):
 #POST /exportmany 
 def setExportMany(data):
     emails = data.get('emails', [])
+    exportable= 'true' if data.get('exportable', True) else 'false'
     stmt = (
-        " UPDATE email SET exportable=true WHERE id = %s "	
+        " UPDATE email SET exportable=%s WHERE id = %s "	
     )
     with newman_connector() as cnx:
         for email in emails: 
-            with execute_nonquery(cnx.conn(), stmt, email) as qry:
+            with execute_nonquery(cnx.conn(), stmt, exportable, email) as qry:
                 pass
     tangelo.content_type("application/json")
     return { 'exported' : emails }

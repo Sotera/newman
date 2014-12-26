@@ -87,7 +87,6 @@ var toggle_domains = (function(){
     }
   };
 
-
   btn.on('click', toggle);
 
   return {
@@ -391,12 +390,34 @@ function add_view_to_export(){
   $.ajax({
     url: 'email/exportmany',
     type: "POST",
-    data: JSON.stringify({'emails': emails}),
+    data: JSON.stringify({'emails': emails, 'exportable': true}),
     contentType:"application/json; charset=utf-8",
     dataType:"json"
   })
     .done(function(resp){
       table_mark_exportable(true);
+      console.log(resp);
+    })
+    .fail(function(resp){
+      alert('fail');
+      console.log("fail");
+    });  
+}
+
+function remove_view_from_export(){
+
+  var arr= d3.select("#result_table").select("tbody").selectAll("tr").data();
+  var emails = _.map(arr, function(o){  return o.num; });
+
+  $.ajax({
+    url: 'email/exportmany',
+    type: "POST",
+    data: JSON.stringify({'emails': emails, 'exportable': false}),
+    contentType:"application/json; charset=utf-8",
+    dataType:"json"
+  })
+    .done(function(resp){
+      table_mark_exportable(false);
       console.log(resp);
     })
     .fail(function(resp){
@@ -517,6 +538,9 @@ function do_search(fields, val) {
       'entity': function(args){
         var entity = _.first(_.rest(args));
         return "Searching on entity <br/><b>" + htmlEncode(entity) + "</b>";
+      },
+      'exportable': function(args){
+        return "Searching exportable emails";
       }
     };
     var field = _.first(varargs);
@@ -1405,7 +1429,7 @@ $(function () {
 
     $('#email_group_conversation').on('click', group_email_conversation);
     $('#email_view_export_all').on('click', add_view_to_export);    
-
+    $('#email_view_export_all_remove').on('click', remove_view_from_export);    
     //init
     do_search('all','');
 
@@ -1514,11 +1538,12 @@ $(function () {
 
     //on modal close event
     $('#exportModal').on('hidden.bs.modal', function () {
+      $('#export_link_spin').show();      
       $('#export_download_link').hide();
     });
 
     $("#submit_downloadExportable").click(function() {
-      console.log("download for for all exportable emails... ");
+      console.log("download for all exportable emails... ");
       $.ajax({
 	url: 'email/download',
 	type: "GET",
@@ -1528,6 +1553,7 @@ $(function () {
 	.done(function(resp){
 	  console.log(resp);
           $('#export_download_link a').attr('href', resp.file);
+          $('#export_link_spin').hide();      
           $('#export_download_link').show();
 	})
 	.fail(function(resp){
@@ -1535,6 +1561,10 @@ $(function () {
 	  console.log("fail");
 	  $('#exportModal').modal('hide');
 	});
+    });
+
+    $('#email_view_marked').click(function(){
+      do_search('exportable');
     });
 
     $("#submit_toggleExport").click(function() {
@@ -1571,38 +1601,55 @@ $(function () {
     });
 
     $("#view_exportList").click(function() {
-      $.get("email/exportable").then(
-        function(resp) {
-          console.log(resp);
+      $.ajax({
+	url: 'email/download',
+	type: "GET",
+	contentType:"application/json; charset=utf-8",
+	dataType:"json"
+      }).done(function(resp){
+	  console.log(resp);
+          $('#export_download_link a').attr('href', resp.file);
+          $('#export_link_spin').hide();      
+          $('#export_download_link').show();
+      }).fail(function(resp){
+	  alert('fail');
+	  console.log("fail");
+	  $('#exportModal').modal('hide');
+      });
 
-	  var template = "\
-{{#each emails}} \
-<p>  <a on-click='exportEmailView' href='view/{{0}}'>{{0}}</a> : {{1}} </p> \
-{{/each}} \
-";
-	  var ractive = new Ractive({
-	    el: "#exportList",
-	    template: template,
-	    data: { "emails": resp.emails }
-	  });
-	  ractive.on('exportEmailView', function(event) {
-	    event.original.preventDefault();
-	    $('#exportModal').modal('hide');
-	    $('#tab-list li:eq(2) a').tab('show')
-	    $(document).scrollTop(0);
-	    $("#email-body").empty();
-	    $("#email-body").append($('<span>').text('Loading... ')).append(waiting_bar);
-	    var id = event.context[0];
-	    $.get("email/email/" + encodeURIComponent(id)).then(
-	      function(resp) {
-		update_current(id);
-		if(resp.email.length > 0){
-		  $("#email-body").empty();
-		  $("#email-body").append(produceHTMLView(resp));
-		}
-	      });
-	  });
-        });
+      
+//       $.get("email/exportable").then(
+//         function(resp) {
+//           console.log(resp);
+
+// 	  var template = "\
+// {{#each emails}} \
+// <p>  <a on-click='exportEmailView' href='view/{{0}}'>{{0}}</a> : {{1}} </p> \
+// {{/each}} \
+// ";
+// 	  var ractive = new Ractive({
+// 	    el: "#exportList",
+// 	    template: template,
+// 	    data: { "emails": resp.emails }
+// 	  });
+// 	  ractive.on('exportEmailView', function(event) {
+// 	    event.original.preventDefault();
+// 	    $('#exportModal').modal('hide');
+// 	    $('#tab-list li:eq(2) a').tab('show')
+// 	    $(document).scrollTop(0);
+// 	    $("#email-body").empty();
+// 	    $("#email-body").append($('<span>').text('Loading... ')).append(waiting_bar);
+// 	    var id = event.context[0];
+// 	    $.get("email/email/" + encodeURIComponent(id)).then(
+// 	      function(resp) {
+// 		update_current(id);
+// 		if(resp.email.length > 0){
+// 		  $("#email-body").empty();
+// 		  $("#email-body").append(produceHTMLView(resp));
+// 		}
+// 	      });
+// 	  });
+//         });
     });
 
     $("#colorby2").click(function(){
