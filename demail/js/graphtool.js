@@ -1106,7 +1106,7 @@ function draw_attachments_table(email_addr){
 function draw_rank_chart() {
   $.get('email/rank').then(function(resp){
     $('#top-rank').empty();
-    var emails = _.map(resp.emails, function(email) {
+    var emails = _.map(_.take(resp.emails, 20), function(email) {
       return _.object(["email", "community", "communityId", "groupId", "rank", "totalReceived", "totalSent"], email);
     });
 
