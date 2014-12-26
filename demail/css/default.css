@@ -205,6 +205,10 @@ ul {
     background-color: #ffffae;
 }
 
+#result_table tbody >tr >td:nth-child(2) div {
+    white-space: nowrap;
+}
+
 
 .row-highlight {
     background-color: #ffffae;

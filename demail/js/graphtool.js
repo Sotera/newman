@@ -582,10 +582,10 @@ function do_search(fields, val) {
         .append("tr")
         .selectAll("tr")
       // .data(['Source','Date','From','To','Cc','Bcc','Subject'])
-        .data(['Date','From','Recipient Count','Body Size','Attachment Count', 'Subject', " "])
+        .data(['Id','Date','From','Recipient Count','Body Size','Attachment Count', 'Subject', " "])
         .enter().append("th")
         .html(function(d, i){
-          if (i == 6){ 
+          if (i == 7){ 
             return "<span class='glyphicon glyphicon-star' ></span>";
           }
           return d;
@@ -595,25 +595,28 @@ function do_search(fields, val) {
           var direction = (lastSort == k) ? -1 : 1;
           lastSort = (direction == -1) ? "" : k; //toggle
           d3.select("#result_table").select("tbody").selectAll("tr").sort(function(a, b) {
-            if (i == 0) {
-              return a.datetime.localeCompare(b.datetime) * direction;
+            if (i == 0){
+              return a.num.localeCompare(b.num) * direction;
             }
             if (i == 1) {
-              return a.from.localeCompare(b.from) * direction;
+              return a.datetime.localeCompare(b.datetime) * direction;
             }
             if (i == 2) {
+              return a.from.localeCompare(b.from) * direction;
+            }
+            if (i == 3) {
               return (recipientCount(a.to, a.cc, a.bcc) - recipientCount(b.to, b.cc, b.bcc)) * direction * -1; //desc first
             }
-            if (i == 3){
+            if (i == 4){
               return (a.bodysize - b.bodysize) * direction * -1; //desc first
             }
-            if (i == 4){
+            if (i == 5){
               return (splitAttachCount(a.attach) - splitAttachCount(b.attach)) * direction * -1; //desc first
             }
-            if (i == 5) {
+            if (i == 6) {
               return a.subject.localeCompare(b.subject) * direction;
             }
-            if (i == 6){
+            if (i == 7){
               return (+(a.exported) - +(b.exported)) * direction * -1; //put the marked items on top first
             }
           });
@@ -656,7 +659,7 @@ function do_search(fields, val) {
         .data(function(d){
           var recipient_count = recipientCount(d.to, d.cc, d.bcc);
           var attach_count = splitAttachCount(d.attach)
-          return [d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject, d.exported ];
+          return [d.num, d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject, d.exported ];
           //return [d.num + '::' + d.from + '::' + d.directory, d.datetime, d.from +'::' + d.fromcolor,d.to,d.cc,d.bcc,d.subject];
         })
         .enter().append("td")
@@ -667,23 +670,26 @@ function do_search(fields, val) {
         .style("fill","blue")
         .append('div')
         .html(function(d,i) {
-          if( i == 1 ) {
+          if (i == 0 ) { 
+            return $('<_>').append($('<span>', { 'title' : d }).html((d.length > 40) ? d.substring(0, 37) + "..." : d)).html();
+          }
+          if( i == 2 ) {
             return d.split('::')[0];
           }
-          if (i == 2) {
+          if (i == 3) {
             var px = d > 100 ? 100 : d;
             return "<div style='background-color: blue;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
           }
-          if (i == 3) {
+          if (i == 4) {
             var px = (d / 1000.0) > 100 ? 100 : (d / 1000.0);
             return "<div style='background-color: green;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
           }
-          if (i == 4) {
+          if (i == 5) {
             var px = (d * 10) > 100 ? 100 : (d * 10);
             return "<div style='background-color: orange;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
           }
 
-          if ( i == 6 ){
+          if ( i == 7 ){
             if (d){
               return "<div><span class='glyphicon glyphicon-star' ></span></div>";
             } else {
@@ -694,7 +700,7 @@ function do_search(fields, val) {
           return d;
         })
         .style("color", function(d,i) {
-          if( i == 1) {
+          if( i == 2) {
             return colorByDomain(d.split('::')[0]);
           } else {
             return 'black';
