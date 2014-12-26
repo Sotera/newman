@@ -500,7 +500,7 @@ function table_mark_exportable(mark, ids_set){
     })
     .selectAll("td")
     .filter(function(d, i){ 
-      return i==6;
+      return i==7;
     })
     .html(function(d,i){ 
       if (mark){
