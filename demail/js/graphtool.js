@@ -582,7 +582,7 @@ function do_search(fields, val) {
         .append("tr")
         .selectAll("tr")
       // .data(['Source','Date','From','To','Cc','Bcc','Subject'])
-        .data(['Id','Date','From','Recipient Count','Body Size','Attachment Count', 'Subject', " "])
+        .data(['ID','Date','From','Recipient Count','Body Size','Attachment Count', 'Subject', " "])
         .enter().append("th")
         .html(function(d, i){
           if (i == 7){ 
