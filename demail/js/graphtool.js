@@ -1124,7 +1124,7 @@ function draw_rank_chart() {
       .attr("width", width + margin.left + margin.right);
 
     x.domain([0, 100]);
-    chart.attr("height", barHeight * emails.length);
+    chart.attr("height", barHeight * (emails.length + 1));
 
     var bar = chart.selectAll("g")
       .data(emails).enter()
