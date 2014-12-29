@@ -48,9 +48,15 @@ def headerrow():
     row = "\t".join(['num','dir','category','datetime','importance','from','ip','to','cc','bcc','attachments','messageid','inreplyto','references','subject','body'])
     return row
 
-def createRow(uid, email_dir, email, attach, msg_body):
+def bccList(target, senders, tos, ccs, bccs):
+    if target.lower() in [s.lower() if s else "" for s in set(senders + tos + ccs + bccs)]:
+        return bccs
+    return bccs + [target]
 
-    addr_tostr = lambda arr : ";".join([addr for name, addr in getaddresses(arr)])
+def createRow(uid, email_dir, target_email, email, attach, msg_body):
+
+    addr_tostr = lambda arr : ";".join(arr)
+    addrs = lambda arr : [addr for name, addr in getaddresses(arr)]
     csv_sep = lambda arr : ",".join(arr) if arr else ''
     scolon_sep = lambda arr : ";".join(arr) if arr else '' 
     one = lambda arr : head(arr) if arr else '' 
@@ -61,11 +67,10 @@ def createRow(uid, email_dir, email, attach, msg_body):
     mail_date= email.get_all('date', None)
     subject = email.get_all('subject', [])
 
-    senders = email.get_all('from', [])
-    tos = email.get_all('to', [])
-    ccs = email.get_all('cc', [])
-    bccs = email.get_all('bcc', [])
-
+    senders = addrs(email.get_all('from', []))
+    tos = addrs(email.get_all('to', []))
+    ccs = addrs(email.get_all('cc', []))
+    bccs = bccList(target_email, senders, tos, ccs, addrs(email.get_all('bcc', [])))
     subject = quopri.decodestring(one(subject)).replace('\n', '[:newline:]').replace('\r', '').replace('\t', ' ')
     body = quopri.decodestring(msg_body).replace('\n', '[:newline:]').replace('\r', '').replace('\t', ' ')
     subject = re.sub(r'[^\x00-\x7F]',' ', subject)
@@ -74,7 +79,7 @@ def createRow(uid, email_dir, email, attach, msg_body):
     return "\t".join([uid, email_dir, '', dateToUTCstr(head(mail_date)) if mail_date else 'NODATE' , '', addr_tostr(senders), '', addr_tostr(tos), addr_tostr(ccs), addr_tostr(bccs), scolon_sep(attach), one(msgid), csv_sep(inreplyto), '', subject, body])
 
 
-def download(srv, outdir, limit, logfile):
+def download(srv, target_email, outdir, limit, logfile):
     srv.select("[Gmail]/All Mail", True)
     #resp, data = srv.uid('SEARCH', None, 'ALL')
     resp, data = srv.search(None, 'ALL')
@@ -133,6 +138,6 @@ def download(srv, outdir, limit, logfile):
 
         msg = re.sub(r'[^\x00-\x7F]',' ', msg)
         spit("{}/{}/{}.txt".format(outdir,fldr, uid), msg)
-        row = createRow(uid, fldr, mail, attach, msg)
+        row = createRow(uid, fldr, target_email, mail, attach, msg)
         spit("{}/output.csv".format(outdir), row + "\n")
 

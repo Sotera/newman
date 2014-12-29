@@ -53,7 +53,7 @@ def download(data):
 
                 mkdir(fldr + "/emails")
 
-                newman_email.download(session, fldr, int(limit), logfile)
+                newman_email.download(session, user, fldr, int(limit), logfile)
 
                 spit(logfile, "[Completed Download] {}\n".format(user))
             except Exception as ex:
