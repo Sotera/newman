@@ -305,8 +305,8 @@ def createResults(field, args_array):
     for i, o in enumerate(node_vals.iteritems()):
         k,v = o
         idx_lookup[k]=i
-        nodes.append({"name": k, "num": v.get("num"), "rank": v.get("rank"), "group": v.get("color"), "community": colors.get(v.get("comm"))})
-
+        #nodes.append({"name": k, "num": v.get("num"), "rank": v.get("rank"), "group": v.get("color"), "community": colors.get(v.get("comm"))})
+        nodes.append({"name": k, "num": v.get("num"), "rank": v.get("rank"), "group": v.get("color"), "community": v.get("comm_id")})
     edges = getEdges(idx_lookup, field, args_array)    
 
     results = { 'rows': emails, 'graph': { 'nodes': nodes, 'links': edges }}
