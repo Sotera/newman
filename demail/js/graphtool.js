@@ -59,9 +59,9 @@ var control_panel= (function(){
 }());
 
 
-var toggle_domains = (function(){
-  var btn = $('#toggle_domains');
-  var panel = $('#domains_list');
+var toggle_legends = (function(){
+  var btn = $('#toggle_legends');
+  var panel = $('#legend_list');
   var open_css = "glyphicon-chevron-down";
   var close_css = "glyphicon-chevron-up";
 
@@ -269,11 +269,13 @@ function dragended(d){
 
 function recolornodes(how) {
   if( how == 'comm') {
+    redraw_community_table()
     d3.selectAll("circle").style("fill", function(d) {
       return color(d.community);
     });
   }
   if( how == 'node') {
+    redraw_domains_table();
     d3.selectAll("circle").style("fill", function(d) {
       return colorByDomain(d.name);
       //return color(d.group);
@@ -876,7 +878,7 @@ function drawGraph(graph){
       return "translate(" + d.x + "," + d.y + ")";
     });
   });
-  redraw_domains_table();
+  redraw_legend();
 }
 
 function redraw() {
@@ -1208,17 +1210,17 @@ function draw_topic_tab(){
 
 function redraw_domains_table(){
   var lastSort = "";
-  $("#domain-table tbody").empty();
-  $("#domain-table thead").empty();
+  $("#legend-table tbody").empty();
+  $("#legend-table thead").empty();
 
-  var thead = d3.select("#domain-table").select("thead").append("tr").selectAll("tr").data(
+  var thead = d3.select("#legend-table").select("thead").append("tr").selectAll("tr").data(
     ['Color', 'Count', 'Domain']).enter().append("th")
     .text(function(d){ return d; })
     .attr('class', 'clickable')
     .on('click', function(k, i){
       var direction = (lastSort == k) ? -1 : 1;
       lastSort = (direction == -1) ? "" : k; //toggle
-      d3.select("#domain-table").select("tbody").selectAll("tr").sort(function(a,b){
+      d3.select("#legend-table").select("tbody").selectAll("tr").sort(function(a,b){
         if (i == 1){
           return (parseInt(a[i]) - parseInt(b[i])) * direction;
         }
@@ -1235,7 +1237,7 @@ function redraw_domains_table(){
     return [domain_set[v].color, domain_set[v].count, v];
   });
 
-  var tr = d3.select("#domain-table").select("tbody").selectAll("tr")
+  var tr = d3.select("#legend-table").select("tbody").selectAll("tr")
     .data(domains).enter().append("tr")
   //.attr('class', 'clickable')
     .on("click", function(d, i){
@@ -1277,6 +1279,78 @@ function redraw_domains_table(){
       return d;
     });
 }
+
+function redraw_community_table() {
+  var lastSort = "";
+  $("#legend-table tbody").empty();
+  $("#legend-table thead").empty();
+  
+  var thead = d3.select("#legend-table").select("thead").append("tr").selectAll("tr").data(
+    ['Count', 'Community']).enter().append("th")
+    .text(function(d){ return d; })
+    .attr('class', 'clickable')
+    .on('click', function(k, i){
+      var direction = (lastSort == k) ? -1 : 1;
+      lastSort = (direction == -1) ? "" : k; //toggle
+      d3.select("#legend-table").select("tbody").selectAll("tr").sort(function(a,b){
+        if (i == 0){
+          return (parseInt(a[i]) - parseInt(b[i])) * direction;
+        }
+        return a[i].localeCompare(b[i]) * direction;
+      });
+    });
+
+  var c = _.groupBy(d3.selectAll("circle").data(), function(d) { return d.community;});
+
+  var communities = _.map(c, function(v, k){
+    return [v.length, k];
+  });
+
+  var tr = d3.select("#legend-table").select("tbody").selectAll("tr")
+    .data(communities).enter().append("tr")
+    .on("mouseover", function(d, i){
+      var k = d[1];
+      d3.selectAll("circle").style("stroke","#ffff00");
+      d3.selectAll("circle").each(function(d, i){
+        if (k.localeCompare(d.community) == 0) {
+          d3.select(this).style("stroke-width",function(d) {
+            return 5;
+          });
+        }
+      });
+    })
+    .on("mouseout", function(d, i){
+      d3.selectAll("circle").style("stroke","#ff0000");
+      if (d3.select("#rankval").property("checked")) {
+        d3.selectAll("circle").each(function(d, i){
+          d3.select(this).style("opacity",function(d) { return 0.2 + (d.rank); });
+          d3.select(this).style("stroke-width",function(d) { return 5 * (d.rank); });
+        });
+      }
+      else {
+        d3.selectAll("circle").each(function(d, i){
+          d3.select(this).style("opacity","100");
+          d3.select(this).style("stroke-width","0");
+        });
+      }
+    })
+
+  tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td")
+    .html(function(d, i){
+      if (i == 1){
+        return $('<div>').append($('<div>').css({ 'min-height': '14px', 'width' : '100%', 'background-color' : color(+d)})).html();
+      }
+      return d;
+    });
+}
+
+function redraw_legend(){
+  if ($('input[name=optionRadios]:checked').val()=="comm"){
+    redraw_community_table();
+  } else {
+    redraw_domains_table();
+  }
+};
 
 function draw_entity_chart() {
 
