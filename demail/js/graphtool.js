@@ -325,20 +325,34 @@ function produceHTMLView(emailObj) {
       .append($('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'emails/' + TARGET_EMAIL.email + '/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.txt'}).text(d.num), $('<span>').text('    '),        
               $('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'emails/' + TARGET_EMAIL.email + '/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.html'}).append($('<span>').addClass('glyphicon glyphicon-print'))));
 
-  el.append(
-    $('<p>').append($('<span>').addClass('bold').text("From: "))
-      .append($('<a>', { 'class': 'clickable'}).on("click", function(){
+
+  var afrom = $('<a>', { 'class': 'clickable'}).on("click", function(){
         draw_attachments_table(d.from).done(function(){
           $('#tab-list li:eq(4) a').tab('show');
         });
         return false;
-      }).text(d.from)));
+      }).text(d.from);
+  var from_hover = node_highlight(d.from);
+  afrom.on('mouseover', from_hover.highlight);
+  afrom.on('mouseout', from_hover.unhighlight);
+
+  el.append(
+    $('<p>').append($('<span>').addClass('bold').text("From: "))
+      .append(afrom));
 
   var recipients = _.zip(['To', 'Cc', 'Bcc'], [d.to, d.cc, d.bcc]);
   _.each(recipients, function(item){
     var emails = _.uniq(item[1].split(';'));
     el.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
-              .append(emails.join('; ')));
+              .append(
+                _.map(emails, function(addr){
+                  var hover = node_highlight(addr);
+                  var span = $('<span>').text(addr + "; ");
+                  span.on('mouseover', hover.highlight);
+                  span.on('mouseout', hover.unhighlight);
+                  return span;
+                })
+              ));
   });
 
 
@@ -898,6 +912,35 @@ function toggle_labels() {
     labels = true;
   }
 }
+
+
+function node_highlight(email){
+  var n = _.first(d3.selectAll("circle").filter(function(d){ return d.name == email; }).data());
+  var groupId = _.getPath(n, "group");
+  var highlight = function(){
+    //graph
+    d3.select("#g_circle_" + groupId).style("stroke","#ffff00");
+    d3.select("#g_circle_" + groupId).style("stroke-width",function(d) { return 10; });
+  };
+
+  var unhighlight = function(){
+    //graph
+    d3.select("#g_circle_" + groupId).style("stroke","#ff0000");
+    if (d3.select("#rankval").property("checked")) {
+      d3.select("#g_circle_" + groupId).style("opacity",function(d) { return 0.2 + (d.rank); });
+      d3.select("#g_circle_" + groupId).style("stroke-width",function(d) { return 5 * (d.rank); });
+    }
+    else {
+      d3.select("#g_circle_" + groupId).style("opacity","100");
+      d3.select("#g_circle_" + groupId).style("stroke-width","0");
+    }
+  };
+
+  return {
+    highlight: highlight,
+    unhighlight: unhighlight
+  };
+};
 
 function draw_mini_topic_chart(email_id){
   $.when( $.ajax('topic/email/' + encodeURIComponent(email_id)), $.ajax('topic/category'))
