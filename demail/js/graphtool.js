@@ -3,8 +3,22 @@
 var width = 400,
 height = 500;
 
-var color = d3.scale.category20();
+
 var colorDomain = d3.scale.category20();
+
+var communityColor = (function(){
+  var color = d3.scale.category20();
+  var cache = {};
+  var itr = _.iterators.numbers();
+
+  var getColor = function(k){
+    var c = _.getPath(cache, ""+k);
+    if (c) return c;
+    cache[k] = color(itr());
+    return cache[k];
+  };
+  return getColor;
+}());
 
 var force = d3.layout.force()
   .linkDistance(10)
@@ -271,7 +285,7 @@ function recolornodes(how) {
   if( how == 'comm') {
     redraw_community_table()
     d3.selectAll("circle").style("fill", function(d) {
-      return color(d.community);
+      return communityColor(d.community);
     });
   }
   if( how == 'node') {
@@ -806,7 +820,7 @@ function drawGraph(graph){
         return colorByDomain(d.name);
         //return color(d.group);
       } else {
-        return color(d.community);
+        return communityColor(d.community);
       }})
     .style("stroke","red")
     .style("stroke-width", function(d) {
@@ -979,7 +993,7 @@ function draw_mini_topic_chart(email_id){
         .attr("y", function(d) { return margin.top + y(+d*100);})
         .attr("height", function(d) { return height - y(+d*100);})
         .attr("width", barWidth - 1)
-        .style("fill", function(d,i) { return color(i); })
+        .style("fill", function(d,i) { return communityColor(i); })
         .attr('class', 'clickable')
         .on("click", function(d, i){
           $('#tab-list li:eq(3) a').tab('show');
@@ -1188,7 +1202,7 @@ function draw_rank_chart() {
       })
       .attr("height", barHeight - 1)
       .style("fill", function(d) {
-        return color(+d.communityId);
+        return communityColor(+d.communityId);
       })
       .on("click", function(d){ })
       .append('title').text(function(d) { return d.email;});
@@ -1381,7 +1395,7 @@ function redraw_community_table() {
   tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td")
     .html(function(d, i){
       if (i == 1){
-        return $('<div>').append($('<div>').css({ 'min-height': '14px', 'width' : '100%', 'background-color' : color(+d)})).html();
+        return $('<div>').append($('<div>').css({ 'min-height': '14px', 'width' : '100%', 'background-color' : communityColor(+d)})).html();
       }
       return d;
     });
