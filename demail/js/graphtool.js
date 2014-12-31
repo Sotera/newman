@@ -571,6 +571,10 @@ function do_search(fields, val) {
       },
       'exportable': function(args){
         return "Searching exportable emails";
+      },
+      'community': function(args){
+        var community_id = _.first(args);
+        return "Searching community";
       }
     };
     var field = _.first(varargs);
