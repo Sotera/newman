@@ -50,6 +50,15 @@ stmt_node_vals_filter_export = (
    "  where eml.exportable = 'true' "
 )
 
+stmt_node_vals_filter_community = (
+    " select e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
+    " from email_addr e join xref_emailaddr_email xaddr on e.email_addr = xaddr.email_addr"
+    " join email eml on eml.id = xaddr.email_id "
+    " join xref_emailaddr_email xaddr2 on xaddr2.email_id = xaddr.email_id "
+    " join email_addr addr on addr.email_addr = xaddr2.email_addr "
+    " where addr.community_id = %s "
+)
+
 ## Email Rows
 stmt_find_emails = (
     " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
@@ -82,6 +91,13 @@ stmt_find_emails_filter_topic_score = (
 stmt_find_emails_filter_export = (
     " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
     " from email e where exportable = 'true' "
+)
+
+stmt_find_emails_filter_community = (
+    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
+    " from email e join xref_emailaddr_email addr on e.id = addr.email_id"
+    " join email_addr x on x.email_addr = addr.email_addr "
+    " where x.community_id = %s "
 )
 
 ## all edges
@@ -178,11 +194,36 @@ stmt_node_edges_filter_export = (
     "   group by source, target"
 )
 
+stmt_node_edges_filter_community = ( 
+    "  select source, target, sum(weight)"
+    " from ("
+    "    select x.`from` as source, x.recipient as target, count(1) as weight   "
+    "    from xref_recipients x join email e on x.email_id = e.id "
+    "    join xref_emailaddr_email xaddr on e.id = xaddr.email_id " 
+    "    join email_addr addr on addr.email_addr = xaddr.email_addr "
+    "    where addr.community_id = %s "
+    "   group by `from`, recipient "
+    "   union all"
+    "    select x.recipient as source, x.`from` as target, count(1) as weight   "
+    "    from xref_recipients x join email e on x.email_id = e.id "
+    "    join xref_emailaddr_email xaddr on e.id = xaddr.email_id " 
+    "    join email_addr addr on addr.email_addr = xaddr.email_addr "
+    "    where addr.community_id = %s "
+    "    group by x.`from`, x.recipient "
+    " ) as t "
+    "   group by source, target"
+)
+
 def nodeQueryObj(conn, field, args_array):
 
     #filter by exportable
     if field.lower() == "exportable": 
         return (conn, stmt_node_vals_filter_export)
+
+    #filter by community
+    if field.lower() == "community":
+        comm_id = head(args_array)
+        return (conn, stmt_node_vals_filter_community, comm_id)
 
     #filter by topic 
     if field.lower() == "topic": 
@@ -215,6 +256,11 @@ def edgeQueryObj(conn, field, args_array):
     if field.lower() == "exportable": 
         return (conn, stmt_node_edges_filter_export)
 
+    #filter by community
+    if field.lower() == "community":
+        comm_id = head(args_array)
+        return (conn, stmt_node_edges_filter_community, comm_id, comm_id)
+
     #filter by topic 
     if field.lower() == "topic": 
         category, idx, score = args_array[:3]
@@ -240,6 +286,12 @@ def emailQueryObj(conn, field, args_array):
     #filter by exportable
     if field.lower() == "exportable": 
         return (conn, stmt_find_emails_filter_export)
+
+    #filter by community
+    if field.lower() == "community":
+        comm_id = head(args_array)
+        return (conn, stmt_find_emails_filter_community, comm_id)
+
 
     #filter by topic 
     if field.lower() == "topic": 
