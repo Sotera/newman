@@ -79,7 +79,7 @@
 ;; process line to json
 (defn process-line [l]
   (let [items (clojure.string/split l #"\t")
-        attach (nth items 10)
+        attach (nth items 10 "")
         id (nth items 0)
         dir (nth items 1)
         m (hash-map :id id
@@ -88,8 +88,8 @@
                     :attachments (if (clojure.string/blank? attach)
                                    []
                                    (process-attachments id dir attach))
-                    :subject (nth items 14)
-                    :body (escape-body (nth items 15)))]
+                    :subject (nth items 14 "")
+                    :body (escape-body (nth items 15 "")))]
     (list (write-json { :index { :_id (:id m) }}) (write-json m))))
 
 ;; write lines to file 
