@@ -51,12 +51,10 @@ stmt_node_vals_filter_export = (
 )
 
 stmt_node_vals_filter_community = (
-    " select e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
+    " select distinct e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
     " from email_addr e join xref_emailaddr_email xaddr on e.email_addr = xaddr.email_addr"
-    " join email eml on eml.id = xaddr.email_id "
-    " join xref_emailaddr_email xaddr2 on xaddr2.email_id = xaddr.email_id "
-    " join email_addr addr on addr.email_addr = xaddr2.email_addr "
-    " where addr.community_id = %s "
+    " join xref_email_community xeml on xeml.email_id = xaddr.email_id "
+    " where xeml.community_id = %s "
 )
 
 ## Email Rows
@@ -94,9 +92,8 @@ stmt_find_emails_filter_export = (
 )
 
 stmt_find_emails_filter_community = (
-    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
-    " from email e join xref_emailaddr_email addr on e.id = addr.email_id"
-    " join email_addr x on x.email_addr = addr.email_addr "
+    " select distinct id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
+    " from email e join xref_email_community x on e.id = x.email_id "
     " where x.community_id = %s "
 )
 
@@ -198,17 +195,13 @@ stmt_node_edges_filter_community = (
     "  select source, target, sum(weight)"
     " from ("
     "    select x.`from` as source, x.recipient as target, count(1) as weight   "
-    "    from xref_recipients x join email e on x.email_id = e.id "
-    "    join xref_emailaddr_email xaddr on e.id = xaddr.email_id " 
-    "    join email_addr addr on addr.email_addr = xaddr.email_addr "
-    "    where addr.community_id = %s "
-    "   group by `from`, recipient "
+    "    from xref_recipients x join xref_email_community e on x.email_id = e.email_id "
+    "    where e.community_id = %s "
+    "    group by `from`, recipient "
     "   union all"
     "    select x.recipient as source, x.`from` as target, count(1) as weight   "
-    "    from xref_recipients x join email e on x.email_id = e.id "
-    "    join xref_emailaddr_email xaddr on e.id = xaddr.email_id " 
-    "    join email_addr addr on addr.email_addr = xaddr.email_addr "
-    "    where addr.community_id = %s "
+    "    from xref_recipients x join xref_email_community e on x.email_id = e.email_id "
+    "    where e.community_id = %s "
     "    group by x.`from`, x.recipient "
     " ) as t "
     "   group by source, target"
