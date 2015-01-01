@@ -263,3 +263,154 @@ div.bootstrap-growl >span.close {
 .marked:hover {
     color: #ffd700;
 }
+
+
+/* circular menu */
+/**
+ modified css voodoo 
+ http://stackoverflow.com/questions/13132864/creating-a-radial-menu-in-css
+**/
+
+#radial-wrap {
+    margin: 0;
+}
+
+#radial-wrap .email_addr {
+    font: 12px Verdana, sans-serif;
+    margin: 0 auto;
+    text-align: center;
+}
+
+#radial-wrap .email_addr a {
+    margin: 3px;
+    opacity: 1;
+}
+
+.ctrl {
+    position: absolute;
+    top: 50%; left: 50%;
+    font: 1.5em/1.13 Verdana, sans-serif;
+    transition: .3s;
+}
+
+/* generic link styles */
+a.ctrl, .ctrl a {
+    display: block;
+    opacity: .56;
+    background: #333;
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: 0 -1px dimgrey;
+}
+
+a.ctrl:hover, .ctrl a:hover, a.ctrl:focus, .ctrl a:focus { opacity: 1; }
+a.ctrl:focus, .ctrl a:focus { outline: none; }
+.button {
+    z-index: 2;
+    margin: -.625em;
+    width: 1.25em; height: 1.25em;
+    border-radius: 50%;
+    box-shadow: 0 0 3px 1px white;
+}
+
+.tip {
+    z-index: 1;
+    /**outline: dotted 1px white;/**/
+    margin: -5em;
+    width: 10em; height: 10em;
+    transform: scale(.001);
+    list-style: none;
+    opacity: 0;
+}
+
+/* the ends of the menu */
+/* .tip:before, .tip:after { */
+/*     position: absolute; */
+/*     top: 34.3%; */
+/*     width: .5em; height: 14%; */
+/*     opacity: .75; */
+/*     background: #333; */
+/*     content: ''; */
+/* } */
+/* .tip:before { */
+/*     left: 5.4%; */
+/*     border-radius: .25em 0 0 .25em; */
+/*     box-shadow: -1px 0 1px #333, inset 1px 0 1px #333, inset -1px 0 1px #333, */
+/*     inset 0 1px 1px #333, inset 0 -1px 1px #333; */
+/*     transform: rotate(-75deg); */
+/* } */
+/* .tip:after { */
+/*     right: 5.4%; */
+/*     border-radius: 0 .25em .25em 0; */
+/*     box-shadow: 1px 0 1px #333, inset -1px 0 1px #333, inset 1px 0 1px #333, */
+/*     inset 0 1px 1px #333, inset 0 -1px 1px #333; */
+/*     transform: rotate(75deg); */
+/* } */
+/* make the menu appear on click */
+.button:focus + .tip {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.slice {
+    overflow: hidden;
+    position: absolute;
+    /**outline: dotted 1px yellow;/**/
+    width: 50%; height: 50%;
+    transform-origin: 100% 100%;
+}
+
+/* .slice:first-child { transform: rotate(-45deg) skewY(60deg); } */
+/* .slice:nth-child(2) { transform: rotate(-15deg) skewY(60deg); } */
+/* .slice:nth-child(3) { transform: rotate(15deg) skewY(60deg); } */
+/* .slice:nth-child(4) { transform: rotate(45deg) skewY(60deg); } */
+/* .slice:last-child { transform: rotate(75deg) skewY(60deg); } */
+
+.slice:first-child { transform: rotate(-15deg) skewY(60deg); }
+.slice:nth-child(2) { transform: rotate(15deg) skewY(60deg); }
+.slice:nth-child(3) { transform: rotate(45deg) skewY(60deg); }
+
+
+
+/* covers for the inner part of the links so there's no hover trigger between
+   star button & menu links; give them a red background to see them */
+.slice:after {
+    position: absolute;
+    top: 32%; left: 32%;
+    width: 136%; height: 136%;
+    border-radius: 50%;
+    /* "unskew" = skew by minus the same angle by which parent was skewed */
+    transform: skewY(-60deg);
+    content: '';
+}
+/* menu links */
+.slice a {
+    width: 200%; height: 200%;
+    border-radius: 50%;
+    box-shadow: 0 0 3px dimgrey, inset 0 0 4px white;
+    /* "unskew" & rotate by -A°/2 */
+    transform: skewY(-60deg) rotate(-15deg);
+    background: /* lateral separators */
+    linear-gradient(75deg,
+                    transparent 50%, grey 50%, transparent 54%) no-repeat 36.5% 0,
+    linear-gradient(-75deg,
+                    transparent 50%, grey 50%, transparent 54%) no-repeat 63.5% 0,
+    /* make sure inner part is transparent */
+    radial-gradient(rgba(127,127,127,0) 49%,
+                    rgba(255,255,255,.7) 51%, #333 52%);
+    background-size: 15% 15%, 15% 15%, cover;
+    line-height: 1.4;
+}
+
+/* arrow for middle link */
+.slice:nth-child(2) a:after {
+    position: absolute;
+    top: 13%; left: 50%;
+    margin: -.25em;
+    width: .5em; height: .5em;
+    box-shadow: 2px 2px 2px white;
+    transform: rotate(45deg);
+    background: linear-gradient(-45deg, #333 50%, transparent 50%);
+    content: '';
+}

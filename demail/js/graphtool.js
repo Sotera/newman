@@ -850,12 +850,43 @@ function drawGraph(graph){
       var fn = function(){
         console.log(clicks);
         if (clicks > 1){
-          do_search('email', $('#txt_search').val());
+          //do_search('email', $('#txt_search').val());
         }
         clicks=0;
       };
       if (clicks == 1){
         $('#txt_search').val(n.name);
+        var t = Math.floor($('#radial-wrap').height() / 2);
+        var l = Math.floor($('#radial-wrap').width() / 2);
+        $('#radial-wrap')
+          .css('top', (30 + d3.event.clientY - t) + "px")
+          .css('left', (d3.event.clientX - l) + "px");
+
+        $('#radial-wrap').find(".email_addr a span").first().text(n.name);
+
+        $('#radial').find(".attach").first().unbind("click")
+        .on("click", function(){
+          draw_attachments_table(n.name).done(function(){
+            $('#tab-list li:eq(4) a').tab('show');
+          });
+        });
+
+        $('#radial').find(".email").first()
+          .unbind('click')
+          .on("click", function(){
+            do_search("email", n.name);
+          }).find("span").first()
+          .css("color", colorByDomain(n.name));
+
+        $('#radial').find(".community").first()
+          .unbind('click')
+          .on("click", function(){
+          do_search("community", n.community);
+        }).find("span").first()
+          .css("color", communityColor(n.community));
+
+        _.delay(function(){  $("#alink").focus(); }, 300);
+
         _.delay(fn, 300, n.name);
       }
     };
