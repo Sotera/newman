@@ -273,24 +273,28 @@ div.bootstrap-growl >span.close {
 
 #radial-wrap {
     margin: 0;
+    text-align: center;
 }
 
 #radial-wrap .email_addr {
     font: 12px Verdana, sans-serif;
     margin: 0 auto;
     text-align: center;
+    display: inline-block;
 }
 
 #radial-wrap .email_addr a {
     margin: 3px;
     opacity: 1;
+    border-radius: 12px;
+    padding: 2px 6px;
 }
 
 .ctrl {
     position: absolute;
     top: 50%; left: 50%;
     font: 1.5em/1.13 Verdana, sans-serif;
-    transition: .3s;
+    transition: .2s;
 }
 
 /* generic link styles */
