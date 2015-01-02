@@ -37,12 +37,19 @@ stmt_xref_entity_email = (
     " on x.entity_id = e.subject "
 )
 
+stmt_xref_email_community = (
+    " insert into xref_email_community (email_id, community_id) "
+    " select distinct e.id, a.community_id "
+    " from email e join xref_emailaddr_email x on e.id = x.email_id " 
+    " join email_addr a on x.email_addr = a.email_addr "
+)
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Post Process')
     args= parser.parse_args()
 
-    with newman_connector() as read_cnx, newman_connector() as write_cnx:
+    with newman_connector() as write_cnx:
         print "populate email_addr"
         with execute_nonquery(write_cnx.conn(), stmt_email_addr_insert) as qry:
             pass
@@ -57,3 +64,9 @@ if __name__ == "__main__":
         with execute_nonquery(write_cnx.conn(), stmt_xref_entity_email) as qry:
             pass
         write_cnx.commit()
+        
+        print "populate xref_email_community"
+        with execute_nonquery(write_cnx.conn(), stmt_xref_email_community) as qry:
+            pass
+        write_cnx.commit()
+

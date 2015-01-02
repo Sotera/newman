@@ -10,6 +10,31 @@
     <link href="css/default.css" rel="stylesheet">
   </head>
   <body>
+    <!-- hidden link //hack -->
+    <a id="alink" class='button ctrl'
+    style="height:0;width:0;position: absolute;top: -2000px;" href='#'
+    tabindex='1'></a>
+
+    <div id="radial-wrap" class="tip ctrl">
+      <div class="email_addr"><a><span></span></a></div>
+      <ul id="radial">
+        <li class='slice'>
+          <a class="clickable attach" title="Show Attachments">
+            <span class="glyphicon glyphicon-file"></span>
+          </a>
+        </li>
+        <li class='slice'>
+          <a class="clickable email" title="Search By Email">
+            <span class="glyphicon glyphicon-envelope"></span> 
+          </a>
+        </li>
+        <li class='slice'>
+          <a class="clickable community" title="Search By Community">
+            <span class="glyphicon glyphicon-search"></span> 
+          </a>
+        </li>
+      </ul>
+    </div>
 
     <!-- modal info panel -->
     <div id="info-panel" class="modal fade">

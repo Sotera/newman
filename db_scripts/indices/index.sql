@@ -93,6 +93,14 @@ create index idx_xref_email_topic_score_email on xref_email_topic_score(email_id
 create index idx_xref_email_topic_score_email_category on xref_email_topic_score(category_id, email_id);
 create index idx_xref_email_topic_score_category on xref_email_topic_score(category_id);
 
+call drop_index_if_exists('xref_email_community', 'idx_xref_email_community_email_community');
+call drop_index_if_exists('xref_email_community', 'idx_xref_email_community_email');
+call drop_index_if_exists('xref_email_community', 'idx_xref_email_community_community');
+
+create index idx_xref_email_community_email_community on xref_email_community(email_id, community_id);
+create index idx_xref_email_community_email on xref_email_community(email_id);
+create index idx_xref_email_community_community on xref_email_community(community_id);
+
 call drop_index_if_exists('search_results', 'idx_search_results_email_id');
 create index idx_search_results_email_id on search_results(email_id);
 
