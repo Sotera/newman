@@ -1,5 +1,9 @@
 /*globals tangelo, CryptoJS, $, d3, escape, FileReader, console */
 
+var doubleEncodeURIComponent= function(uri){
+  return encodeURIComponent(encodeURIComponent(uri));
+};
+
 var width = 400,
 height = 500;
 
@@ -315,7 +319,7 @@ function searchByEntity(entityid, type, value){
   console.log(entityid);
   console.log(type);
   console.log(value);
-  $.get("entity/rollup/" + encodeURIComponent(entityid)).then(
+  $.get("entity/rollup/" + doubleEncodeURIComponent(entityid)).then(
     function(resp) {
       do_search('entity', resp.rollupId, value);
     });
@@ -380,7 +384,7 @@ function produceHTMLView(emailObj) {
   var attachments = $('<p>').append($('<span>').addClass('bold').text("Attachments: "));
   _.each(d.attach.split(';'),
          function(attach){
-           attachments.append($('<a>', { 'class': 'clickable', "target": "_blank" ,"href" : 'emails/' + TARGET_EMAIL.email + '/' + d.directory + '/' + encodeURIComponent(attach) }).html(attach));
+           attachments.append($('<a>', { 'class': 'clickable', "target": "_blank" ,"href" : 'emails/' + TARGET_EMAIL.email + '/' + d.directory + '/' + doubleEncodeURIComponent(attach) }).html(attach));
            attachments.append($('<span>').html(';&nbsp'));
          });
 
@@ -594,7 +598,7 @@ function do_search(fields, val) {
   //d3.select("#search_status").text("Searching...");
   $('#search_status').empty();
   $('#search_status').append($('<span>',{ 'text': 'Searching... ' })).append(waiting_bar);
-  var args = _.map(_.rest(arguments), function(s){ return encodeURIComponent(s); })
+  var args = _.map(_.rest(arguments), function(s){ return doubleEncodeURIComponent(s); })
   var rest_url = args.join('/');
   console.log(rest_url);
 
@@ -669,7 +673,7 @@ function do_search(fields, val) {
         $("#email-body").empty();
         $("#email-body").append($('<span>').text('Loading... ')).append(waiting_bar);
 
-        $.get("email/email/" + encodeURIComponent(d.num)).then(
+        $.get("email/email/" + doubleEncodeURIComponent(d.num)).then(
           function(resp) {
             update_current(d.num);
             if(resp.email.length > 0){
@@ -992,7 +996,7 @@ function node_highlight(email){
 };
 
 function draw_mini_topic_chart(email_id){
-  $.when( $.ajax('topic/email/' + encodeURIComponent(email_id)), $.ajax('topic/category'))
+  $.when( $.ajax('topic/email/' + doubleEncodeURIComponent(email_id)), $.ajax('topic/category'))
     .done(function(resp_scores, resp_topics){
       var scores = _.first(resp_scores).scores;
       var topics = _.first(resp_topics).categories;
@@ -1153,7 +1157,7 @@ function draw_attachments_table(email_addr){
       .append("td")
       .on("click", function(d, i){
         if (i != 4) return;
-        $.get("email/email/" + encodeURIComponent(d)).then(
+        $.get("email/email/" + doubleEncodeURIComponent(d)).then(
           function(resp) {
             update_current(d);
             $('#tab-list li:eq(2) a').tab('show');
@@ -1165,7 +1169,7 @@ function draw_attachments_table(email_addr){
       })
       .html(function(d, i){
         if (i == 2){
-          var el = $('<div>').append($('<a>', { "target": "_blank" ,"href" : 'emails/' + TARGET_EMAIL.email + '/' + d[0] + '/' + encodeURIComponent(d[1]) }).html(d[1]));
+          var el = $('<div>').append($('<a>', { "target": "_blank" ,"href" : 'emails/' + TARGET_EMAIL.email + '/' + d[0] + '/' + doubleEncodeURIComponent(d[1]) }).html(d[1]));
           return el.html();
         }
         if (i == 3){
@@ -1178,7 +1182,7 @@ function draw_attachments_table(email_addr){
             var img = $('<img>').css('max-height', '50px').css('width','50px');
 
             switch (document_type(ext)){
-            case "image" : return img.attr('src', 'emails/' + TARGET_EMAIL.email + '/' + d[0] + '/' + encodeURIComponent(d[1]));
+            case "image" : return img.attr('src', 'emails/' + TARGET_EMAIL.email + '/' + d[0] + '/' + doubleEncodeURIComponent(d[1]));
             case "pdf" : return img.attr('src', 'imgs/document-icons/pdf-2.png');
             case "powerpoint" : return img.attr('src', 'imgs/document-icons/powerpoint-2.png');
             case "word" : return img.attr('src', 'imgs/document-icons/word-2.png');
@@ -1626,7 +1630,7 @@ $(function () {
       $.get("activesearch/like").then(
         function(resp){
           update_current(resp);
-          $.get("email/email/" + encodeURIComponent(resp)).then(
+          $.get("email/email/" + doubleEncodeURIComponent(resp)).then(
             function(resp) {
               if(resp.email.length > 0){
                 $("#email-body").empty();
@@ -1646,7 +1650,7 @@ $(function () {
       $.get("activesearch/dislike").then(
         function(resp){
           update_current(resp);
-          $.get("email/email/" + encodeURIComponent(resp)).then(
+          $.get("email/email/" + doubleEncodeURIComponent(resp)).then(
             function(resp) {
               if(resp.email.length > 0){
                 $("#email-body").empty();
@@ -1665,10 +1669,10 @@ $(function () {
       var id = current_email;
       $("#email-body").empty();
       $("#email-body").append(waiting_bar);
-      $.get("activesearch/seed/" + encodeURIComponent(id)).then(
+      $.get("activesearch/seed/" + doubleEncodeURIComponent(id)).then(
         function(resp) {
           update_current(resp);
-          $.get("email/email/" + encodeURIComponent(resp)).then(
+          $.get("email/email/" + doubleEncodeURIComponent(resp)).then(
             function(resp) {
               if(resp.email.length > 0){
                 $("#email-body").empty();
