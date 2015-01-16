@@ -146,6 +146,12 @@ create table xref_email_topic_score (
    score varchar(64) not null   
 ) ENGINE=MyISAM;
 
+drop table if exists xref_email_community;
+
+create table xref_email_community (
+   email_id varchar(250) not null,
+   community_id varchar(250) not null
+) ENGINE=MyISAM;
 
 drop table if exists search_results;
 

@@ -10,6 +10,31 @@
     <link href="css/default.css" rel="stylesheet">
   </head>
   <body>
+    <!-- hidden link //hack -->
+    <a id="alink" class='button ctrl'
+    style="height:0;width:0;position: absolute;top: -2000px;" href='#'
+    tabindex='1'></a>
+
+    <div id="radial-wrap" class="tip ctrl">
+      <div class="email_addr"><a><span></span></a></div>
+      <ul id="radial">
+        <li class='slice'>
+          <a class="clickable attach" title="Show Attachments">
+            <span class="glyphicon glyphicon-file"></span>
+          </a>
+        </li>
+        <li class='slice'>
+          <a class="clickable email" title="Search By Email">
+            <span class="glyphicon glyphicon-envelope"></span> 
+          </a>
+        </li>
+        <li class='slice'>
+          <a class="clickable community" title="Search By Community">
+            <span class="glyphicon glyphicon-search"></span> 
+          </a>
+        </li>
+      </ul>
+    </div>
 
     <!-- modal info panel -->
     <div id="info-panel" class="modal fade">
@@ -41,14 +66,14 @@
 	    <h4 class="modal-title" id="exportModal">Download</h4>
 	  </div>
 	  <div id="exportList" class="modal-body">
-	    ...
-	  </div>
-	  <div class="modal-footer">
-            <div id="export_download_link" style="float:left;display:none;">
+            <div id="export_link_spin">
+              <img src="imgs/loading-spin.svg" height="32" width="64" />
+            </div>
+            <div id="export_download_link" style="display:none;">
               <span class="glyphicon glyphicon-save" /> <a target="_blank">Download</a>
             </div>
-	    <button id="submit_downloadExportable" type="button" class="btn btn-primary">Create Export</button>
-	    <button id="submit_clearExportable" type="button" class="btn btn-secondary">Clear All</button>
+	  </div>
+	  <div class="modal-footer">
 	    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 	  </div>
 	</div>
@@ -70,11 +95,10 @@
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-          <a class="btn btn-default" href="ingest.html" role="button">Add New Email <span class="glyphicon glyphicon-plus-sign"/></a>
+          <a class="btn btn-default" href="ingest.html" role="button">Add New Email <span class="glyphicon glyphicon-plus-sign"></span></a>
         <li>
 	<li>
-	  <!-- <a id="view_exportList" class="btn btn-default">Email Export <span class="glyphicon glyphicon-list-alt"/> </a> -->
-	  <a id="view_exportList" type="button" class="btn btn-default" data-toggle="modal" data-target="#exportModal">Export <span class="glyphicon glyphicon-list-alt"/></a>
+	  <a id="view_exportList" type="button" class="btn btn-default" data-toggle="modal" data-target="#exportModal">Export <span class="glyphicon glyphicon-list-alt"></span></a>
 	</li>
       </ul>
       <!-- <ul class="nav navbar-nav"> -->
@@ -130,16 +154,17 @@
       </table>
 
       <div style="border-top: 1px solid #000;text-align:center;">
-        <div><span style="font-weight: bold">Domains Legend<span></div>
-        <div id="toggle_domains"><span class="glyphicon glyphicon-chevron-down"></span></div>
-        <div id="domains_list"style="height: 0px;max-height:400px;overflow-y: scroll;">
-          <table id="domain-table" class="table">
+        <div>
+          <span style="font-weight: bold">Legend</span>
+        </div>
+        <div id="toggle_legends"><span class="glyphicon glyphicon-chevron-down"></span></div>
+        <div id="legend_list" style="height: 0px;max-height:375px;overflow-y:scroll;">
+          <table id="legend-table" class="table">
             <thead />
             <tbody />
           </table>
         </div>
       </div>
-
     </div>
 
     <!-- body -->
@@ -212,10 +237,25 @@
                 <!--     <span class="glyphicon glyphicon-folder-open" /> -->
                 <!--   </a> -->
                 <!-- </div> -->
+                <div style="float: left;padding-right: 9px;">
+                  <span> Documents: </span> <span id="document_count"></span>
+                </div>
                 <div style="float: right;padding-right: 9px;">
-                  <a class="clickable" id="email_group_conversation" title="Conversations">
-                    <span class="glyphicon glyphicon-tasks" />
+                  <a class="clickable" id="email_view_marked">
+                    <span> View Exportable  </span>
                   </a>
+                  | 
+                  <a class="clickable" id="email_view_export_all" title="Mark All">
+                    <span class="glyphicon glyphicon-plus"> </span>
+                  </a>
+                  | 
+                  <a class="clickable" id="email_view_export_all_remove" title="Unmark All">
+                    <span class="glyphicon glyphicon-minus"> </span>
+                  </a>
+                  |
+                  <!-- <a class="clickable" id="email_group_conversation" title="Conversations"> -->
+                  <!--   <span class="glyphicon glyphicon-tasks"></span> -->
+                  <!-- </a> -->
                 </div>
               </div>
               <div style="overflow-y: scroll;height: 100%;max-height: 225px;">
@@ -233,7 +273,6 @@
     <script src="js/thirdparty/jquery-1.9.1.min.js"></script>
     <script src="js/thirdparty/jquery-ui.min.js"></script>
     <script src="js/thirdparty/d3.v3.min.js" charset="utf-8"></script>
-	<script src="js/thirdparty/ractive.min.js"></script>
     <script src="js/thirdparty/bootstrap.min.js"></script>
     <script src="js/thirdparty/underscore-min.js"></script>
     <script src="js/thirdparty/underscore-contrib.min.js"></script>

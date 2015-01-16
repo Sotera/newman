@@ -149,6 +149,19 @@ def setExportable(data):
     with newman_connector() as read_cnx:
         with execute_nonquery(read_cnx.conn(), stmt, exportable, email ) as qry:
             return { "email" : queryEmail(email) }
+#POST /exportmany 
+def setExportMany(data):
+    emails = data.get('emails', [])
+    exportable= 'true' if data.get('exportable', True) else 'false'
+    stmt = (
+        " UPDATE email SET exportable=%s WHERE id = %s "	
+    )
+    with newman_connector() as cnx:
+        for email in emails: 
+            with execute_nonquery(cnx.conn(), stmt, exportable, email) as qry:
+                pass
+    tangelo.content_type("application/json")
+    return { 'exported' : emails }
  
 #POST /download
 def buildExportable(*args):
@@ -200,7 +213,8 @@ get_actions = {
 }
 
 post_actions = {
-    "exportable" : setExportable
+    "exportable" : setExportable,
+    "exportmany" : setExportMany
 }
 
 def unknown(*args):
