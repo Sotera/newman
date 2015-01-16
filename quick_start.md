@@ -6,9 +6,9 @@ permalink: /quick-start/
 
 Install [Vagrant](http://www.vagrantup.com/)  
 Install [Virtual Box](https://www.virtualbox.org/wiki/Downloads)  
-Download [Newman-VM-1.0](http://goo.gl/tpSfcW) to your home directory
+Download [Newman-VM-1.1](http://goo.gl/38BhSV) to your home directory
 {% highlight bash %}
-$ vagrant init newman-vm-v1.0 ~/newman-vm-v1.0.box  
+$ vagrant init newman-vm-v1.1 ~/newman-vm-v1.1.box  
 $ vagrant up  
 $ vagrant ssh  
 $ tangelo restart  
