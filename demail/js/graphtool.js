@@ -34,6 +34,10 @@ var vis = svg.append('svg:g');
 var labels = false;
 var TARGET_EMAIL = null;
 
+var doubleEncodeURIComponent= function(uri){
+  return encodeURIComponent(encodeURIComponent(uri));
+};
+
 var control_panel= (function(){
   var container = $('#cp-toggle div:first-child');
   var btn = $('#cp-toggle div:first-child').find("div").first();
