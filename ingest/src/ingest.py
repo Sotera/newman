@@ -61,7 +61,7 @@ if __name__ == "__main__":
                 continue
 		
             if references != '' and references.split()[0] != '':
-                print references
+                #print references
 		threadid = references.split()[0]
 
             tosize = len(toemail.split(';'))
