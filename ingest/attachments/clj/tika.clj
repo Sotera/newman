@@ -70,7 +70,10 @@
                          :email_id email_id
                          :file_path fp
                          :contents (if (.exists (clojure.java.io/as-file fp))
-                                     (extract-text fp)
+                                     (try
+                                       (extract-text fp)
+                                       (catch Exception e
+                                         ""))
                                      (do
                                        (prn-err (str "FILE NOT FOUND - " fp))
                                        "")))))]
