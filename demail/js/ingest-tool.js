@@ -5,7 +5,7 @@ var validateEmail = function(email) {
 };
  
 var FORM = (function(){
-  var items = ['txt_email', 'txt_pass', 'btn-download', 'btn-ingest', 'ingest-options'];
+  var items = ['txt_email', 'txt_pass', 'btn-download', 'btn-ingest', 'ingest-options', 'txt_pstemail', 'pst-options', 'btn-pst-extract'];
   var enable = _.partial(_.each, items, function(item){ 
      $('#' + item).removeAttr('disabled');
   });
@@ -44,7 +44,21 @@ var refresh_ingest_options = function(){
       $('#ingest-options').append($('<option>').html(item));
     });
   });
-}
+};
+
+var refresh_pst_options = function(){
+  $.ajax({
+    'url' : 'pst/list', 
+    'type': 'GET',
+    'dataType' : 'json'
+  }).then(function(resp){
+    $('#ingest-options').empty();    
+    
+    _.each(resp.items, function(item){
+      $('#pst-options').append($('<option>').html(item));
+    });
+  });
+};
 
 var parseStatus = function(sz){
   var parts = sz.trim().split("\n");
@@ -78,6 +92,36 @@ var pollForStatus = function(url, statuses, callback){
   };
 };
 
+var pollForStatusExtract = function(logname, statuses, callback){
+  var url = 'ingest/ingeststate/' + logname;
+  var log_url = 'ingest/ingestlog/' + logname;
+  return function(){
+    (function poll(){
+      var success = function(resp){
+        var status = parseStatus(resp.log);        
+        console.log(status);
+        var b = _.some(statuses, function(s){
+          return s.toLowerCase() == status.toLowerCase();
+        });
+
+        if (b){
+          callback(status)
+        } else {
+          _.delay(poll, 15 * 1000);
+        }
+
+        $.ajax({ url : log_url , dataType: 'json'}).then(function(resp){
+          logMsgs("Extracting", status, _.last(resp.log.split("\n"), 15));
+          //refreshLogItems(_.last(resp.log.split("\n"), 15));
+        });
+      };
+
+      $.ajax({ url : url, dataType: 'json'}).then(success);
+    })();
+  };
+};
+
+
 var pollForStatusIngest = function(logname, statuses, callback){
   var url = 'ingest/ingeststate/' + logname;
   var log_url = 'ingest/ingestlog/' + logname;
@@ -106,6 +150,8 @@ var pollForStatusIngest = function(logname, statuses, callback){
     })();
   };
 };
+
+
 
 var ingestComplete = function(){
   $("#div-ingest-complete").show();
@@ -165,6 +211,38 @@ var run_ingest = function(str){
 
 };
 
+
+var extract_pst = function(email, pst_file) {
+
+  var extract = $.ajax({
+    'url' : 'pst/extract', 
+    'type': 'POST',
+    'dataType' : 'json',
+    'data': JSON.stringify({ 'email' : email, 'pst': pst_file }),
+    'contentType':"application/json; charset=utf-8"    
+  });
+
+  var fail = function(){
+    console.log(arguments);
+    alert('error');
+    FORM.enable();
+  };
+
+  FORM.disable();
+
+  extract.then(function(resp){
+    console.log(arguments);
+    var logname = resp.log;
+    var poll = pollForStatusExtract(logname, ['Complete', 'Error'], function(status){
+      FORM.enable();
+      refresh_ingest_options();
+      alert(status);
+    });
+    poll();
+  }, fail);
+
+};
+
 var click_handler_download = function(evt){
   evt.preventDefault();
   var user =  $('#txt_email').val();
@@ -215,11 +293,31 @@ var click_handler_ingest = function(evt){
   return false;
 };
 
+var click_handler_pst_extract = function(evt){
+  evt.preventDefault();
+
+  var email = $('#txt_pstemail').val().trim();
+
+  if (email.length == 0){
+    alert('please enter the email associated with this pst');
+    return;
+  }
+
+  if (!validateEmail(email)){
+    alert(email + " is not a valid email address. \nPlease enter a valid email \nexample: sample@gmail.com")
+    return;
+  };
+
+  extract_pst(email, $('#pst-options').val());
+};
+
+
 $('#btn-download').on('click', click_handler_download);
 $('#btn-ingest').on('click', click_handler_ingest);
-
+$('#btn-pst-extract').on('click', click_handler_pst_extract);
 
 
 //init
 
 refresh_ingest_options();
+refresh_pst_options();

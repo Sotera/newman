@@ -75,3 +75,8 @@ span.bold {
     font-family: "Lucida Console", Monaco, monospace;
     font-size: 12px;
 }
+
+label.upload input[type="file"] {
+    position: fixed;
+    top: -1000px;
+}

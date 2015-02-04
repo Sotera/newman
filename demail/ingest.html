@@ -74,6 +74,24 @@
               <button id="btn-download" class="btn btn-md  btn-primary">Download</button>     
             </p>
           </form>
+          <form class="form-ingest" role="form">
+            <p>
+              <span>Or Select a PST to ingest</span><br/>
+              <span>(copy a pst files to </span>
+              <span class="bold">/vagrant/pst</span><span> directory on the VM)</span>
+              </span>
+            </p>
+            <p>
+              <input id="txt_pstemail" 
+                     class="form-control" placeholder="PST Email Address" required >
+            </p>
+            <p>
+              <select class="form-control" id="pst-options"></select>
+            </p>
+            <p>
+              <button id="btn-pst-extract" class="btn btn-md  btn-primary">Extract</button>     
+            </p>
+          </form>
         </div>
 
         <div class="col-md-4">

@@ -17,8 +17,13 @@ fi
 
 mkdir "${DIR}"
 
+echo "readpst -e -o ${DIR}/ -b -D $2"
 readpst -e -o "${DIR}/" -b -D $2
 
 find "${DIR}" -type f > "${DIR}/emails.txt"
 
+if [[ -d "demail/emails/${1}" ]]; then
+    rm -rf "demail/emails/${1}"
+fi 
 
+cat "${DIR}/emails.txt" | ./pst/normalize.py "${1}" "demail/emails/${1}" --start 0 --limit 2000

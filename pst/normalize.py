@@ -52,11 +52,16 @@ examples:
     for i, line in enumerate(skip(args.infile, at_start=args.start)):
         if ((not args.limit == 0) and (i >= args.limit)):
             break;
-        fp = line.strip()
-        guid = email_extract.md5(fp)
-        category = email_extract.categoryList(fp)
-        buff = slurp(fp)
-        row = email_extract.extract(guid, buff, args.out_dir, category, args.target_email)
-        spit(outfile, row + "\n")
-        
-        prn("completed line: {}".format(i + args.start)) 
+        try:
+            fp = line.strip()
+            guid = email_extract.md5(fp)
+            category = email_extract.categoryList(fp)
+            buff = slurp(fp)
+
+            row = email_extract.extract(guid, buff, args.out_dir, category, args.target_email)
+            spit(outfile, row + "\n")
+        except Exception as e:
+            print "exception line: {} | {} ".format(i, e.message)
+
+        if i % 100 == 0:
+            prn("completed line: {}".format(i + args.start)) 
