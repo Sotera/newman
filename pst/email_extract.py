@@ -71,7 +71,7 @@ def createRow(email_id, _dir, target_email, mail, categories, attach, msg_body):
 
     msgid= mail.get_all('message-id', None)
     inreplyto = [clean_string(s, [ EXPR_OPTS['fix_utf8'], EXPR_OPTS['fix_tab'], EXPR_OPTS['fix_newline'] ]) for s in mail.get_all('in-reply-to', [])] 
-    references = mail.get_all('references', [])
+    references = [clean_string(s, [ EXPR_OPTS['fix_utf8'], EXPR_OPTS['fix_tab'], EXPR_OPTS['fix_newline'] ]) for s in mail.get_all('references', [])]
     mail_date= mail.get_all('date', None)
     subject = mail.get_all('subject', [])
     #importance ??
