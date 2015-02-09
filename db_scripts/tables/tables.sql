@@ -81,7 +81,7 @@ create table entity (
    idx int not null, 
    value varchar(1000) character set utf8 not null,
    email_id varchar(250) not null,
-   offset varchar(64) not null
+   offset varchar(250) not null
 ) ENGINE=MyISAM;
 
 drop table if exists entity_rollup;
