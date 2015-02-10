@@ -98,46 +98,50 @@ def download(srv, target_email, outdir, limit, logfile):
     c = counter()
     l = len(msgids)
     for msgid in msgids:
-        uid = getUIDForMessage(srv, msgid)
-        fldr ="emails/{}".format(uid) 
-        mkdir("{}/{}".format(outdir, fldr))
+        try:
+            uid = getUIDForMessage(srv, msgid)
+            fldr ="emails/{}".format(uid) 
+            mkdir("{}/{}".format(outdir, fldr))
 
-        i = c.next()
-        if i % 200 == 0:
-            spit(logfile, "[Downloading] Downloaded: {}/{}\n".format(i,l))
+            i = c.next()
+            if i % 200 == 0:
+                spit(logfile, "[Downloading] Downloaded: {}/{}\n".format(i,l))
 
-        resp, msgParts = srv.fetch(msgid, '(RFC822)')
-        if resp != 'OK':
-            err_msg = "Bad response: %s %s" % (resp, msgParts)
-            spit(logfile, "[Error] {}\n".format(err_msg))
-            raise Exception(err_msg)
+            resp, msgParts = srv.fetch(msgid, '(RFC822)')
+            if resp != 'OK':
+                err_msg = "Bad response: %s %s" % (resp, msgParts)
+                spit(logfile, "[Error] {}\n".format(err_msg))
+                raise Exception(err_msg)
 
-        emailBody = msgParts[0][1]
-        spit("{}/{}/{}.eml".format(outdir,fldr, uid), emailBody)
-        mail = email.message_from_string(emailBody)
-        attach = []
-        msg=""
-        for part in mail.walk():
-            if part.get_content_type() == 'text/plain':
-                msg = msg + "\n" + part.get_payload() 
-            if part.get_content_maintype() == 'multipart':
-                continue
-            if part.get('Content-Disposition') is None:
-                continue
+            emailBody = msgParts[0][1]
+            spit("{}/{}/{}.eml".format(outdir,fldr, uid), emailBody)
+            mail = email.message_from_string(emailBody)
+            attach = []
+            msg=""
+            for part in mail.walk():
+                if part.get_content_type() == 'text/plain':
+                    msg = msg + "\n" + part.get_payload() 
+                if part.get_content_maintype() == 'multipart':
+                    continue
+                if part.get('Content-Disposition') is None:
+                    continue
 
-            fileName = part.get_filename()
-            #escape file name
-            fileName = fileName if fileName else "Attach_{}".format(attach_count.next())
-            fileName = fileName.replace('/','_')
-            attach.append(fileName)
-            filePath = "{}/{}/{}".format(outdir, fldr, fileName)
+                fileName = part.get_filename()
+                #escape file name
+                fileName = fileName if fileName else "Attach_{}".format(attach_count.next())
+                fileName = fileName.replace('/','_')
+                attach.append(fileName)
+                filePath = "{}/{}/{}".format(outdir, fldr, fileName)
 
-            fp = open(filePath, 'wb')
-            fp.write(part.get_payload(decode=True))
-            fp.close()
+                fp = open(filePath, 'wb')
+                fp.write(part.get_payload(decode=True))
+                fp.close()
 
-        msg = re.sub(r'[^\x00-\x7F]',' ', msg)
-        spit("{}/{}/{}.txt".format(outdir,fldr, uid), msg)
-        row = createRow(uid, fldr, target_email, mail, attach, msg)
-        spit("{}/output.csv".format(outdir), row + "\n")
+            msg = re.sub(r'[^\x00-\x7F]',' ', msg)
+            spit("{}/{}/{}.txt".format(outdir,fldr, uid), msg)
+            row = createRow(uid, fldr, target_email, mail, attach, msg)
+            spit("{}/output.csv".format(outdir), row + "\n")
+        except Exception, e:
+            spit(logfile, "[Downloading] [Exception]: line {}, msgid {}, except {}\n".format(i,msgid, str(e)))            
+            continue
 
