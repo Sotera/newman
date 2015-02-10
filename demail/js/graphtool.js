@@ -1597,8 +1597,6 @@ $(function () {
     $('#email_group_conversation').on('click', group_email_conversation);
     $('#email_view_export_all').on('click', add_view_to_export);    
     $('#email_view_export_all_remove').on('click', remove_view_from_export);    
-    //init
-    do_search('all','');
 
     $('#top-entities').append(waiting_bar);
 
@@ -1771,5 +1769,37 @@ $(function () {
     });
 
   });
+
+
+  function parseHash(newHash, oldHash){
+    console.log('old: ' + oldHash + ', new: ' + newHash);
+    crossroads.parse(newHash);
+  }
+  
+  crossroads.addRoute("/search/{type}/:term:", function(type, term){
+    var searchTypes = ['all', 'email', 'topic', 'entity', 'exportable', 'community'];
+    term = term || "";
+    type = type.toLowerCase();
+    if (_.contains(searchTypes, type)){
+      do_search(type, term);
+    }    
+  });
+
+  crossroads.routed.add(function(req, data){
+    console.log('routed: ' + req);
+    console.log(data.route +' - '+ data.params +' - '+ data.isFirst);
+  });
+
+  crossroads.bypassed.add(function(req){
+    console.log('route not found: ' + req);
+    //alert('Error: route not found, go back');
+  });
+  
+  hasher.prependHash = '!';
+  hasher.initialized.add(parseHash);
+  hasher.changed.add(parseHash); 
+  hasher.init();
+
+  hasher.setHash('/search/all/');
 
 });
