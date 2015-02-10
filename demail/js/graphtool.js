@@ -1055,7 +1055,7 @@ function draw_mini_topic_chart(email_id){
         })
         .on("mouseover", function(d, i){
           //var str = "topic: " + i + "<br/>" + Math.floor(100 * d) + '%';
-          var str = "<ul><li>" + _.take(topics[i][1].split(' '), 5).join('</li><li>') + "</li></ul>";
+          var str = "<ul><li>" + _.take(topics[i][1].split(' '), 10).join('</li><li>') + "</li></ul>";
           topics_popover.show(str);
         })
         .on("mouseout", function(d, i){

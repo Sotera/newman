@@ -418,3 +418,7 @@ a.ctrl:focus, .ctrl a:focus { outline: none; }
     background: linear-gradient(-45deg, #333 50%, transparent 50%);
     content: '';
 }
+
+.popover {
+    z-index: 1099;
+}
