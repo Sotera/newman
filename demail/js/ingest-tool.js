@@ -52,7 +52,7 @@ var refresh_pst_options = function(){
     'type': 'GET',
     'dataType' : 'json'
   }).then(function(resp){
-    $('#ingest-options').empty();    
+    $('#pst-options').empty();    
     
     _.each(resp.items, function(item){
       $('#pst-options').append($('<option>').html(item));
