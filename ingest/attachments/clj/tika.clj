@@ -79,20 +79,29 @@
                                        "")))))]
     (map attach_json files (iterate inc 1))))
 
+(defn extract-phone-numbers [body]
+  (let [r (re-pattern "(\\d{3})\\D*(\\d{3})\\D*(\\d{4})\\D*(\\d*)$")
+        matches (re-seq r body)
+        ;; take match groups index 1,2,3 and concatenate them as string
+        normalize (fn [arr] (apply str (take 3 (rest arr))))]
+    (map normalize matches)))
+
 ;; process line to json
 (defn process-line [l]
   (let [items (clojure.string/split l #"\t")
         attach (nth items 10 "")
         id (nth items 0)
         dir (nth items 1)
+        body (escape-body (nth items 15 ""))
         m (hash-map :id id
                     :dir dir
                     :attach attach
                     :attachments (if (clojure.string/blank? attach)
                                    []
                                    (process-attachments id dir attach))
+                    :phone-numbers (extract-phone-numbers body)
                     :subject (nth items 14 "")
-                    :body (escape-body (nth items 15 "")))]
+                    :body body)]
     (list (write-json { :index { :_id (:id m) }}) (write-json m))))
 
 ;; write lines to file 
