@@ -93,9 +93,9 @@
         id (nth items 0)
         dir (nth items 1)
         froms (nth items 5 "")
-        tos (clojure.string/split (nth items 6 "") #";") 
-        ccs (clojure.string/split (nth items 7 "") #";")
-        bccs (clojure.string/split (nth items 8 "") #";")
+        tos (clojure.string/split (nth items 7 "") #";") 
+        ccs (clojure.string/split (nth items 8 "") #";")
+        bccs (clojure.string/split (nth items 9 "") #";")
         body (escape-body (nth items 15 ""))
         m (hash-map :id id
                     :dir dir
