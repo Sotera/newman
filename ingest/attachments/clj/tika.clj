@@ -92,6 +92,10 @@
         attach (nth items 10 "")
         id (nth items 0)
         dir (nth items 1)
+        froms (nth items 5 "")
+        tos (clojure.string/split (nth items 6 "") #";") 
+        ccs (clojure.string/split (nth items 7 "") #";")
+        bccs (clojure.string/split (nth items 8 "") #";")
         body (escape-body (nth items 15 ""))
         m (hash-map :id id
                     :dir dir
@@ -100,6 +104,10 @@
                                    []
                                    (process-attachments id dir attach))
                     :phone-numbers (extract-phone-numbers body)
+                    :from froms
+                    :to tos
+                    :cc ccs
+                    :bcc bccs
                     :subject (nth items 14 "")
                     :body body)]
     (list (write-json { :index { :_id (:id m) }}) (write-json m))))
