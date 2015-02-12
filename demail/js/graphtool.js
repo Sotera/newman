@@ -545,6 +545,23 @@ function table_mark_exportable(mark, ids_set){
     });
 }
 
+
+function show_email_view(email_id){
+  $('#tab-list li:eq(2) a').tab('show')
+  $(document).scrollTop(0);
+  $("#email-body").empty();
+  $("#email-body").append($('<span>').text('Loading... ')).append(waiting_bar);
+
+  $.get("email/email/" + encodeURIComponent(email_id)).then(
+    function(resp) {
+      update_current(email_id);
+      if(resp.email.length > 0){
+        $("#email-body").empty();
+        $("#email-body").append(produceHTMLView(resp));
+      }
+    });
+};
+
 // takes field + varargs ... now
 function do_search(fields, val) {
   var varargs = arguments;
@@ -665,23 +682,7 @@ function do_search(fields, val) {
       var tr = d3.select("#result_table").select("tbody").selectAll("tr").data(data).enter().append("tr");
 
       tr.attr('class', 'clickable').on("click",function(d){
-        console.log(d.directory);
-        // $("#webpage").load('emails/' + d.directory + '/' +
-        // d.directory.split('/')[1] + '.txt');
-        $('#tab-list li:eq(2) a').tab('show')
-        $(document).scrollTop(0);
-        $("#email-body").empty();
-        $("#email-body").append($('<span>').text('Loading... ')).append(waiting_bar);
-
-        $.get("email/email/" + encodeURIComponent(d.num)).then(
-          function(resp) {
-            update_current(d.num);
-            if(resp.email.length > 0){
-              $("#email-body").empty();
-              $("#email-body").append(produceHTMLView(resp));
-            }
-          });
-
+        show_email_view(d.num);
       }).on("mouseover", function(d) {
         tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(';');
         for (i = 0; i < tos.length; i++) {
@@ -1783,6 +1784,11 @@ $(function () {
     if (_.contains(searchTypes, type)){
       do_search(type, term);
     }    
+  });
+
+  crossroads.addRoute("/email/{id}", function(id){
+    do_search('all', id);
+    show_email_view(id);
   });
 
   crossroads.routed.add(function(req, data){
