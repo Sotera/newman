@@ -34,13 +34,14 @@ if __name__ == "__main__":
 
     desc = '''
 examples:
-    cat 2006.txt | ./pst/normalize.py  email@email.org demail/emails/email@email.org --start 0 --limit 1000
+    cat 2006.txt | ./pst/normalize.py  email@email.org demail/emails/email@email.org -a --start 0 --limit 1000
     '''
 
     parser = argparse.ArgumentParser(
         description=" ... ", 
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=desc)
+    parser.add_argument("-a","--header", action='store_true', help="add header to output")
     parser.add_argument("-s","--start", type=int, default=0, help="start at line #")
     parser.add_argument("-l", "--limit", type=int, default=0, help="end at line #")
     parser.add_argument("target_email", help="Target Email")
@@ -49,6 +50,9 @@ examples:
     args = parser.parse_args()
     outfile = "{}/output.csv".format(args.out_dir)
     mkdirp("{}/emails".format(args.out_dir))
+    if args.header:
+        spit(outfile, email_extract.headerrow() + "\n")
+
     for i, line in enumerate(skip(args.infile, at_start=args.start)):
         if ((not args.limit == 0) and (i >= args.limit)):
             break;
