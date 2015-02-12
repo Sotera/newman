@@ -1800,6 +1800,7 @@ $(function () {
   hasher.changed.add(parseHash); 
   hasher.init();
 
-  hasher.setHash('/search/all/');
-
+  if (hasher.getHash().length < 1){
+    hasher.setHash('/search/all/');
+  }
 });
