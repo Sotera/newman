@@ -68,7 +68,7 @@ if [ -e tmp/exploded.csv ]; then
 fi
 
 ./ingest/src/rank_ingest_results.py
-./ingest/src/email_detector2.py $EMAIL_TARGET > tmp/rankings
+./ingest/src/rank.py $EMAIL_TARGET > tmp/rankings
 ./ingest/src/rank_results.py
 
 ./ingest/src/post_process.py
