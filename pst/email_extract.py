@@ -64,7 +64,17 @@ def bccList(target, senders, tos, ccs, bccs):
 
 def createRow(email_id, _dir, target_email, mail, categories, attach, msg_body):
     addr_tostr = lambda arr : ";".join(arr)
-    addrs = lambda arr : [clean_string(addr.lower(), [(r'\'', '')]) for name, addr in getaddresses(arr)]
+    #addrs = lambda arr : [clean_string(addr.lower(), [(r'\'', '')]) for name, addr in getaddresses(arr)]
+    def addrs(arr):
+        items = []
+        arr = [clean_string(s.lower(), [(r',','')]) for s in arr]
+        for name, addr in getaddresses(arr):
+            if '@' in name:
+                items.append(name)
+            else:
+                items.append(addr)
+        return  [clean_string(s.lower(), [(r'\'', '')]) for s in items]
+
     csv_sep = lambda arr : ",".join(arr) if arr else ''
     scolon_sep = lambda arr : ";".join(arr) if arr else '' 
     one = lambda arr : head(arr) if arr else '' 
@@ -77,6 +87,8 @@ def createRow(email_id, _dir, target_email, mail, categories, attach, msg_body):
     #importance ??
     #ip ??
     senders = addrs(mail.get_all('from', []))
+    senders = [target_email if s == 'mailer-daemon' else s for s in senders]
+
     tos = addrs(mail.get_all('to', []))
     ccs = addrs(mail.get_all('cc', []))
     bccs = bccList(target_email, senders, tos, ccs, addrs(mail.get_all('bcc', [])))
