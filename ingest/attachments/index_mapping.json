@@ -51,7 +51,7 @@
       "id": {
         "type": "string"
       },
-      "phone-numbers": {
+      "phone_numbers": {
         "type": "string",
         "index": "not_analyzed"
       },
