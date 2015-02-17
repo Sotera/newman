@@ -89,14 +89,19 @@
 ;; process line to json
 (defn process-line [l]
   (let [items (clojure.string/split l #"\t")
+        clean_recepients (fn [sz]
+                           (if (clojure.string/blank? sz)
+                             []
+                             (map clojure.string/lower-case
+                                  (clojure.string/split sz #";"))))
         attach (nth items 10 "")
         id (nth items 0)
         dir (nth items 1)
         froms (clojure.string/lower-case (nth items 5 "")) 
         utc_date (nth items 3 "")
-        tos (map clojure.string/lower-case (clojure.string/split (nth items 7 "") #";")) 
-        ccs (map clojure.string/lower-case (clojure.string/split (nth items 8 "") #";"))
-        bccs (map clojure.string/lower-case (clojure.string/split (nth items 9 "") #";"))
+        tos (clean_recepients (nth items 7 ""))
+        ccs (clean_recepients (nth items 8 ""))
+        bccs (clean_recepients (nth items 9 ""))
         body (escape-body (nth items 15 ""))
         body_size (.length (nth items 15 ""))
         attachments (if (clojure.string/blank? attach)
@@ -108,7 +113,7 @@
                     :utc_date utc_date
                     :attachments attachments
                     :attachments_count (count attachments)
-                    :phone-numbers (extract-phone-numbers body)
+                    :phone_numbers (extract-phone-numbers body)
                     :from froms
                     :to tos
                     :cc ccs
