@@ -344,7 +344,7 @@ function produceHTMLView(emailObj) {
               $('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'emails/' + TARGET_EMAIL.email + '/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.html'}).append($('<span>').addClass('glyphicon glyphicon-print'))));
 
 
-  var afrom = $('<a>', { 'class': 'clickable'}).on("click", function(){
+  var afrom = $('<a>', { 'class': 'from clickable'}).on("click", function(){
         draw_attachments_table(d.from).done(function(){
           $('#tab-list li:eq(4) a').tab('show');
         });
@@ -1608,6 +1608,13 @@ $(function () {
     /* attach element event handlers */
     $("#submit_search").click(function(){
       do_search('all', $("#search_text").val());
+    });
+
+    $('#tab-list li:eq(4) a').on('click', function(){
+      var _from = $('#email-body-tab').find(".from").first().html();
+      if (_from){
+        draw_attachments_table(_from);
+      }
     });
 
     $("input[name='searchType']").change(function(e){
