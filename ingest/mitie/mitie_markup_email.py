@@ -48,18 +48,21 @@ def markup(email_id, body, tokens):
     body = re.sub(r'[^\x00-\x7F]',' ', body)
     reversed_tokens = sorted(tokens, key=itemgetter(1), reverse=True)
     for token in reversed_tokens:
-        splits = token[2].split(',')
-        last_word = token[3].split(' ')[-1]
-        last_word_len = len(last_word)
-        start_marker = splits[0]
-        end = splits[-1]
-        end_marker = int(end) + last_word_len
-        head, tail = string_split(body, end_marker)
-        body = "{0}</span>{1}".format(head, tail)        
-        head, tail = string_split(body, int(start_marker))
-        tail_1, tail_2 = string_split(tail, tail.find("</span>"))
-        tail = "{0}{1}".format(cgi.escape(tail_1), tail_2)
-        body = "{0}<span class=\"mitie mitie-{1}\" mitie-id=\"{2}\" mitie-type=\"{1}\" mitie-value=\"{3}\">{4}".format(head, token[4], token[5], cgi.escape(token[3]), tail)
+        try:
+            splits = token[2].split(',')
+            last_word = token[3].split(' ')[-1]
+            last_word_len = len(last_word)
+            start_marker = splits[0]
+            end = splits[-1]
+            end_marker = int(end) + last_word_len
+            head, tail = string_split(body, end_marker)
+            body = "{0}</span>{1}".format(head, tail)        
+            head, tail = string_split(body, int(start_marker))
+            tail_1, tail_2 = string_split(tail, tail.find("</span>"))
+            tail = "{0}{1}".format(cgi.escape(tail_1), tail_2)
+            body = "{0}<span class=\"mitie mitie-{1}\" mitie-id=\"{2}\" mitie-type=\"{1}\" mitie-value=\"{3}\">{4}".format(head, token[4], token[5], cgi.escape(token[3]), tail)
+        except:
+            continue
 
     body = body.replace('[:newline:]', '<br/>')
     return "{0}\t{1}".format(email_id, body)
