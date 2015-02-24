@@ -59,6 +59,21 @@ def counter(start=0):
         yield n
         n = inc(n)
 
+def lower(s):
+   return s.lower() if s else ''
+
+# passing 1 argument returns substring to the end 
+# passing 2 arguments returns the substring from arguments
+def substr(sz, *args):
+    if not sz:
+        return ''
+    if len(args) == 1:
+        return sz[nth(args, 0):]
+    return sz[nth(args, 0): nth(args, 1)]
+
+# insert a string at an index in another string
+def insert_at(sz, sz_insert, idx):
+    return "{}{}{}".format(substr(sz, 0, idx), sz_insert, substr(sz, idx))
 
 def jsonGet(arraypath, j, default=None):
     if not j:
