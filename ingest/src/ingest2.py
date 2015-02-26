@@ -7,11 +7,15 @@ import yaml
 import logging
 import logging.config
 
+
 #modify import for different parsers
 sys.path.append("./ingest/parsers")
 from default_parser import row_parser
 from tools import email_body_split
 from mitie_extractor import Extractor
+
+sys.path.append("./ingest/tika-socket-server/client")
+from tika_client import TikaClient
 
 sys.path.append("./demail")
 from newman.utils.file import slurpA, spit, RollingPartsFile
@@ -28,6 +32,8 @@ if __name__ == "__main__":
     lines = args.input_file.read().splitlines() if args.no_header else rest(args.input_file.read().splitlines())
     with RollingPartsFile(args.output_dir, 'es', 'json') as f, \
          Extractor('/srv/software/MITIE/MITIE-models/english/ner_model.dat') as mitie:
+        
+        tikaclient = TikaClient('localhost', 9999)
         for line in lines:
             count = c.next()
             try:
@@ -46,6 +52,17 @@ if __name__ == "__main__":
                 mitie_entities= mitie.extract_entities(row_object['email_body'])
                 row_object['mitie']['entities'] = mitie_entities
                 row_object['email_body_markup'] = mitie.markup(row_object['email_body'], mitie_entities)
+                #Attachments
+                row_object['tika']= {}
+                row_object['tika']['attach_text']= []
+                for attach in row_object['attach']:
+                    fp = os.path.abspath("./demail/emails/jeb@jeb.org/{}/{}".format(row_object['dir'], attach))
+                    rtn = tikaclient.extract_text(fp)
+                    if head(rtn):
+                        row_object['tika']['attach_text'].append({ 
+                            'file_path' : fp, 
+                            'file_name' : attach,
+                            'text' : nth(rtn, 1)})
 
                 idx = json.dumps({ "index": { "_id" : row_object['id'] }})
                 doc= json.dumps(row_object)

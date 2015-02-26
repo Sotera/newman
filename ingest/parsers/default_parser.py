@@ -27,7 +27,7 @@ def row_parser(line):
     o['to'] = lower(nth(row, 7, '')).split(';')
     o['cc'] = lower(nth(row, 8, '')).split(';')
     o['bcc'] = lower(nth(row, 9, '')).split(';')
-    o['attach'] = nth(row, 10).split(';')
+    o['attach'] = nth(row, 10).split(';') if nth(row, 10).strip() != '' else [] 
     o['messageid'] = nth(row, 11)
     o['inreplyto'] = nth(row, 12)
     o['references'] = nth(row, 13)
