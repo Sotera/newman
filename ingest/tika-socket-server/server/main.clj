@@ -104,7 +104,7 @@
                   (shutdown-server)
                   (response [true "stopped"])) 
       (do
-        (prn-err (str "UNKNOWN ROUTE : " (str (int r))))
+        (prn-err (str "ERROR UNKNOWN ROUTE : " (str (int r))))
         (response [false (str "UNKNOWN ROUTE : " (str (int r)))])))))
 
 ;; Start server
