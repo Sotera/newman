@@ -11,7 +11,7 @@ import logging.config
 #modify import for different parsers
 sys.path.append("./ingest/parsers")
 from default_parser import row_parser
-from tools import email_body_split
+from tools import email_body_split, document_entity_rollup
 from mitie_extractor import Extractor
 
 sys.path.append("./ingest/tika-socket-server/client")
@@ -19,7 +19,7 @@ from tika_client import TikaClient
 
 sys.path.append("./demail")
 from newman.utils.file import slurpA, spit, RollingPartsFile
-from newman.utils.functions import counter, rest, nth, head
+from newman.utils.functions import counter, rest, nth, head, lower
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Newman Ingest')
@@ -46,23 +46,47 @@ if __name__ == "__main__":
                 row_object['is_thread'] = head(body_split)
                 row_object['email_body'] = nth(body_split, 1, '')
                 row_object['email_thread'] = nth(body_split, 2, '')                   
-
+                
+                #Recepient list
+                for recp in filter(lambda x: x.strip() != '', set(
+                        row_object['to'] + 
+                        row_object['cc'] + 
+                        row_object['bcc'])):
+                    spit('tmp/recepient_list.tsv', "{}\t{}\n".format(row_object['from'], recp))
+    
                 #MITIE 
-                row_object['mitie'] = {}
-                mitie_entities= mitie.extract_entities(row_object['email_body'])
-                row_object['mitie']['entities'] = mitie_entities
-                row_object['email_body_markup'] = mitie.markup(row_object['email_body'], mitie_entities)
+                body_entities= mitie.extract_entities(row_object['email_body'])
+                row_object['email_body_entities'] = body_entities
+                row_object['email_body_markup'] = mitie.markup(row_object['email_body'], body_entities)
+
+                subject_entities= mitie.extract_entities(row_object['subject'])
+                row_object['email_subject_entities'] = subject_entities
+                row_object['email_subject_markup'] = mitie.markup(row_object['subject'], subject_entities)
+
                 #Attachments
-                row_object['tika']= {}
-                row_object['tika']['attach_text']= []
+                row_object['attachments']= []
                 for attach in row_object['attach']:
                     fp = os.path.abspath("./demail/emails/jeb@jeb.org/{}/{}".format(row_object['dir'], attach))
+                    file_name, file_ext = os.path.splitext(fp)
+                    if file_ext.startswith("."):
+                        file_ext = file_ext[:1]
                     rtn = tikaclient.extract_text(fp)
                     if head(rtn):
-                        row_object['tika']['attach_text'].append({ 
+                        
+                        row_object['attachments'].append({ 
                             'file_path' : fp, 
                             'file_name' : attach,
+                            'file_ext' : lower(file_ext),
+                            'entities' : mitie.extract_entities(nth(rtn, 1)),
                             'text' : nth(rtn, 1)})
+
+                #doc entity rollup 
+                row_object['all_entities'] = document_entity_rollup(
+                  row_object['email_subject_entities'] +
+                  row_object['email_body_entities'] +
+                    [ei
+                     for attach in row_object['attachments'] 
+                     for ei in attach['entities']])
 
                 idx = json.dumps({ "index": { "_id" : row_object['id'] }})
                 doc= json.dumps(row_object)

@@ -5,6 +5,9 @@ import sys, re
 
 sys.path.append("./demail")
 from newman.utils.functions import nth
+from operator import itemgetter
+import itertools
+
 
 def clean_string(sz, expr_list):
     return reduce(lambda x,r: re.sub(nth(r,0),nth(r,1,' '), x), expr_list, sz)
@@ -27,3 +30,19 @@ def email_body_split(body):
     reply= "\n".join(lines[body_split-1:])
     
     return (True, body, reply)
+
+
+def document_entity_rollup(entity_list):
+    flatten_entities = [{'tag': entity['tag'], 
+                         'value': entity['value']}
+                        for entity in entity_list]
+
+    sorted_entities = sorted(flatten_entities, key=itemgetter('tag', 'value'))
+    grouped_entities = itertools.groupby(sorted_entities, key=itemgetter('tag', 'value'))
+    #return list of objects with count
+    return [dict(zip(('tag', 'value', 'count'), 
+                     k+(len(list(v)),)))
+            for k,v in grouped_entities]
+
+    
+
