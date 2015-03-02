@@ -11,7 +11,7 @@ import logging.config
 #modify import for different parsers
 sys.path.append("./ingest/parsers")
 from default_parser import row_parser
-from tools import email_body_split, document_entity_rollup
+from tools import email_body_split, document_entity_rollup, build_attachment_meta
 from mitie_extractor import Extractor
 
 sys.path.append("./ingest/tika-socket-server/client")
@@ -24,7 +24,9 @@ from newman.utils.functions import counter, rest, nth, head, lower
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Newman Ingest')
     parser.add_argument("output_dir", help="directory to store output files")
+    parser.add_argument("input_dir", help="root directory where emails are stored, ex. demail/emails/{email addr}")
     parser.add_argument("--no_header", action="store_true", help="input has no header row")
+
     parser.add_argument("input_file", nargs='?', type=argparse.FileType('r'), default=sys.stdin, help="Input File")
 
     args= parser.parse_args()
@@ -66,19 +68,13 @@ if __name__ == "__main__":
                 #Attachments
                 row_object['attachments']= []
                 for attach in row_object['attach']:
-                    fp = os.path.abspath("./demail/emails/jeb@jeb.org/{}/{}".format(row_object['dir'], attach))
-                    file_name, file_ext = os.path.splitext(fp)
-                    if file_ext.startswith("."):
-                        file_ext = file_ext[:1]
+                    fp = os.path.abspath("{}/{}/{}".format(args.input_dir, row_object['dir'], attach))
+                    attach_obj = build_attachment_meta(fp)
                     rtn = tikaclient.extract_text(fp)
                     if head(rtn):
-                        
-                        row_object['attachments'].append({ 
-                            'file_path' : fp, 
-                            'file_name' : attach,
-                            'file_ext' : lower(file_ext),
-                            'entities' : mitie.extract_entities(nth(rtn, 1)),
-                            'text' : nth(rtn, 1)})
+                        attach_obj['entities'] = mitie.extract_entities(nth(rtn, 1))
+                        attach_obj['text'] = nth(rtn, 1)
+                    row_object['attachments'].append(attach_obj)
 
                 #doc entity rollup 
                 row_object['all_entities'] = document_entity_rollup(

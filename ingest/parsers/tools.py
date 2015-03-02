@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys, re
+import sys, os, re
 
 sys.path.append("./demail")
 from newman.utils.functions import nth
@@ -44,5 +44,17 @@ def document_entity_rollup(entity_list):
                      k+(len(list(v)),)))
             for k,v in grouped_entities]
 
-    
+def build_attachment_meta(file_path):
+    _, file_name = os.path.split(file_path)
+    _, file_ext = os.path.splitext(file_path)
+    file_size = os.path.getsize(file_path) if os.path.isfile(file_path) else -1L
+    if file_ext.startswith("."):
+        file_ext = file_ext[:1]
+
+    return { 'file_path': file_path, 
+             'file_name': file_name, 
+             'file_size': file_size, 
+             'file_ext': file_ext,
+             'entities': [],
+             'text' : '' }
 
