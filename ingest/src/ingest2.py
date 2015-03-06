@@ -11,7 +11,7 @@ import logging.config
 #modify import for different parsers
 sys.path.append("./ingest/parsers")
 from default_parser import row_parser
-from tools import email_body_split, document_entity_rollup, build_attachment_meta
+from tools import clean_string, email_body_split, document_entity_rollup, build_attachment_meta
 from mitie_extractor import Extractor
 
 sys.path.append("./ingest/tika-socket-server/client")
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     args= parser.parse_args()
     c = counter(0)
     lines = args.input_file.read().splitlines() if args.no_header else rest(args.input_file.read().splitlines())
-    with RollingPartsFile(args.output_dir, 'es', 'json') as f, \
+    with RollingPartsFile(args.output_dir, 'ingest', 'json') as f, \
          Extractor('/srv/software/MITIE/MITIE-models/english/ner_model.dat') as mitie:
         
         tikaclient = TikaClient('localhost', 9999)
@@ -48,7 +48,20 @@ if __name__ == "__main__":
                 row_object['is_thread'] = head(body_split)
                 row_object['email_body'] = nth(body_split, 1, '')
                 row_object['email_thread'] = nth(body_split, 2, '')                   
-                
+
+                #Topic Clustering Artifact
+                spit('tmp/topic_input.tsv', "{}\t{}\t{}\n".format(row_object['id'], 
+                                                                  clean_string(row_object['subject'], 
+                                                                               [(r'[^\x00-\x7F]', ' '),
+                                                                                (r'\t', ' '),
+                                                                                (r'\n', ' '),
+                                                                                (r'\r', ' ')]),
+                                                                  clean_string(row_object['email_body'], 
+                                                                               [(r'[^\x00-\x7F]', ' '),
+                                                                                (r'\t', ' '),
+                                                                                (r'\n', ' '),
+                                                                                (r'\r', ' ')])))
+
                 #Recepient list
                 for recp in filter(lambda x: x.strip() != '', set(
                         row_object['to'] + 
