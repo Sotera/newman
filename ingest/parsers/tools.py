@@ -8,10 +8,8 @@ from newman.utils.functions import nth
 from operator import itemgetter
 import itertools
 
-
 def clean_string(sz, expr_list):
     return reduce(lambda x,r: re.sub(nth(r,0),nth(r,1,' '), x), expr_list, sz)
-
 
 #return (was_split:Boolean, body, rest)
 def email_body_split(body):

@@ -11,6 +11,7 @@ if [[ $# -lt 2 ]]; then
 fi
 
 RUN_DIR=$(pwd)
+TMP_DIR=tmp/elasticsearch_ingest
 
 printf "working dir $RUN_DIR\n"
 
@@ -21,42 +22,36 @@ fi
 mkdir -p tmp/elasticsearch_ingest/index
 
 printf  "building elastic search ingest files\n"
+
+if [[ $'\x01ok' = $(printf "\x02\n" | nc localhost 9999) ]]; then
+    echo "Tika Server Running"
+else
+    ./bin/start-tika-socket-server.sh
+    sleep 3
+    if [[ $'\x01ok' != $(printf "\x02\n" | nc localhost 9999) ]]; then
+        echo "Tika Server Failed to Start"
+        exit 1
+    else
+        echo "Tika Server Started"        
+    fi
+fi
+
 #./ingest/src/ingest2.py tmp/elasticsearch_ingest/ demail/emails/jeb@jeb.org demail/emails/jeb@jeb.org/output.csv
-./ingest/src/ingest2.py tmp/elasticsearch_ingest/ $1 $2
+./ingest/src/ingest2.py tmp/elasticsearch_ingest/index $1 $2
 
-#topic clustering
-TOPIC_DIR=/srv/software/topic-clustering/topic
+#delete index
+curl -XDELETE 'http://localhost:9200/newman2'
 
-if [ -d tmp/elasticsearch_ingest/topic ]; then
-    rm -rf tmp/elasticsearch_ingest/topic
-fi
+# create index
+curl -s -XPOST 'http://localhost:9200/newman2' -d '{  "settings": { "index": { "mapping.allow_type_wrapper": true  }  }  }'
 
-mkdir -p tmp/elasticsearch_ingest/topic
-
-if [ -d tmp/topic ]; then
-    rm -rf tmp/topic
-fi
-mkdir -p tmp/topic/subject tmp/topic/body
-
-if [ -e ${TOPIC_DIR}/Ingest/body_ingester.py ]; then
-    rm -f ${TOPIC_DIR}/Ingest/body_ingester.py
-fi
-
-if [ -e ${TOPIC_DIR}/Ingest/subject_ingester.py ]; then
-    rm -f ${TOPIC_DIR}/Ingest/subject_ingester.py
-fi
-
-cp ingest/topic/subject_ingester.py ingest/topic/body_ingester.py ${TOPIC_DIR}/Ingest/
-
-cd ${TOPIC_DIR}
-
-python run_all.py -num_topics 20 -r subject_ingester ${RUN_DIR}/tmp/topic_input.tsv ${RUN_DIR}/tmp/topic/subject
-
-python run_all.py -num_topics 20 -r body_ingester ${RUN_DIR}/tmp/topic_input.tsv ${RUN_DIR}/tmp/topic/body
-
-cd ${RUN_DIR}
-
-# Topic Clustering ElasticSearch updates
+# ingest
+for f in $TMP_DIR/index/*; do 
+    curl -s -XPOST localhost:9200/newman2/emails/_bulk --data-binary @$f
+done;
 
 
 
+# Topic Clustering
+
+./ingest/topic/run_topic_clustering.sh

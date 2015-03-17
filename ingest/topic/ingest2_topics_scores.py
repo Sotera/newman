@@ -19,8 +19,16 @@ def create_summary_dict(input_index):
                     for i in summary_items]
     return summary_dict
 
+def spit_index_file(path, dict_idx, name):
+    idx = json.dumps({ "index": { "_id" : name }})
+    doc= json.dumps({ "doc" : dict_idx })
+    f="{}/index_{}.json".format(path, name)
+    spit(f, "{}\n{}\n".format(idx, doc))
+    print f
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Create ES files for bulk update')
+    parser.add_argument("label", help="label")
     parser.add_argument("output_dir", help="output directory")
     parser.add_argument("input_index", help="Input index file")
     parser.add_argument("input_scores", help="Input scores file")
@@ -31,9 +39,10 @@ if __name__ == "__main__":
     ## 2 ...
 
     summary_dict = create_summary_dict(args.input_index)
+    spit_index_file(args.output_dir, summary_dict, args.label)
     c = counter(0)
 
-    with RollingPartsFile(args.output_dir, 'topic_update', 'json') as f:
+    with RollingPartsFile(args.output_dir, "part_{}".format(args.label), 'json', .5) as f:
         for line in slurpA(args.input_scores):
             count = c.next()
             try:
@@ -43,7 +52,6 @@ if __name__ == "__main__":
                 for n, item in enumerate(items[2:]):
                     update_obj['topics'].append(
                         { 'summary_id' : "summary{}".format(n),
-                          'summary' : nth(summary_dict, n),
                           'score' : "{}".format(item) })
 
                 idx = json.dumps({ "update": { "_id" : _id }})
