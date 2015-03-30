@@ -31,7 +31,7 @@ Select a PST in the dropdown list and enter the email address associated with th
 Click the **Extract** button and the pst file will be staged for ingest 
 Once the **Extract** is complete the email address will show up in the Step 2. dropdown available to be ingested.
 
-![PST Ingest](../img/pst_ingest_page.png)
+<img src="../img/pst_ingest_page.png)" alt="pst ingest" style="height:300px;">
 
 # Video Demonstration  
 
