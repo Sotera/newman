@@ -14,10 +14,24 @@ $ vagrant ssh
 $ tangelo restart  
 {% endhighlight %}
 
+
+# Ingesting GMail
 In a browser goto [http://localhost:8787/ingest.html](http://localhost:8787/ingest.html)  
 Enter your gmail username and password and click download  
 Once download has completed, click ingest  
 Once ingest has completed, goto [http://localhost:8787/](http://localhost:8787/)  
+
+# Ingesting PST File
+First in order for a PST to be available to ingest. Create a folder at **pst/** at the root of the vagrant directory on your local machine (this is the directory with the VagrantFile) 
+This folder will show up inside the VM at **/vagrant/pst/**
+In a browser goto [http://localhost:8787/ingest.html](http://localhost:8787/ingest.html)  
+Under the Ingest GMail there is the option to ingest a PST. 
+The **pst** files located in the **pst/** folder will be available as options in the dropdown list
+Select a PST in the dropdown list and enter the email address associated with the PST in the textbox
+Click the **Extract** button and the pst file will be staged for ingest 
+Once the **Extract** is complete the email address will show up in the Step 2. dropdown available to be ingested.
+
+![PST Ingest](../img/pst_ingest_page.png)
 
 # Video Demonstration  
 
@@ -39,3 +53,5 @@ Goto [Google Security](https://security.google.com)
 Make sure "2-Step Verification" is **Disabled**.  
 Make sure "Access for less secure applications" is **Enabled**.  
 ![Google Security Pane](../img/google_security.png)
+
+
