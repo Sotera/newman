@@ -1,5 +1,21 @@
 /*globals tangelo, CryptoJS, $, d3, escape, FileReader, console */
 
+/**
+ *  instantiate user-ale-logger
+ */
+var ale = new userale({
+    loggingUrl: 'http://192.168.1.100', //The url of the User-ALE logging server.
+    toolName: 'newman', //The name of your tool
+    toolVersion: '1.1.2', //The semantic version of your tool
+    elementGroups: [ //A list of element groups used in your tool (see below)
+      'search_group'
+    ],
+    workerUrl: 'js/thirdparty/userale-worker.js', //The location of the User-ALE webworker file
+    debug: true, //Whether to log messages to console
+    sendLogs: false //Whether or not to send logs to the server (useful during testing)
+});
+ale.register();
+
 var width = 400,
 height = 500;
 
@@ -374,8 +390,8 @@ function produceHTMLView(emailObj) {
   });
 
 
-  var items = _.zip(['Subject','Date'],
-                    [d.subject, d.datetime]);
+  var items = _.zip(['Subject','Date'], [d.subject, d.datetime]);
+  
   _.each(items, function(item){
     el.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
               .append(item[1]) );
@@ -694,8 +710,8 @@ function do_search(fields, val) {
           }});
 
       // cells
-      var td = tr.selectAll("td")
-        .data(function(d){
+      var td = tr.selectAll("td").data(function(d){
+    	  
           var recipient_count = recipientCount(d.to, d.cc, d.bcc);
           var attach_count = splitAttachCount(d.attach)
           return [d.num, d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject, d.exported ];
@@ -1529,26 +1545,35 @@ $(function () {
     $('#target_email').html(TARGET_EMAIL.email);
 
     $('#txt_search').keyup(function (e){
-      if (e.keyCode === 13) {
-        var txt = $("#txt_search").val();
-        if (txt.length == 0){
-          setSearchType('all');
+        
+        console.log( '$(\'#txt_search\').keyup(function (e)' );
+        //user-ale logging
+        var msg = {
+            activity: 'perform',
+       	    action: 'enter',
+            elementId: this.getAttribute('id') || 'UNK',
+            elementType: 'textbox',
+            elementGroup: 'search_group',   
+            source: 'user',
+            tags: ['submit', 'search']
+        };
+        ale.log(msg);
+    	
+        if (e.keyCode === 13) {
+            var txt = $("#txt_search").val();
+            if (txt.length == 0){
+                setSearchType('all');
+            }
+            do_search($("input:radio[name ='searchType']:checked").val(), txt);     
         }
-        do_search($("input:radio[name ='searchType']:checked").val(), txt);
-      }
-      e.preventDefault();
+        e.preventDefault();
     });
 
     $("#search_form").submit(function(e){
       return false;
     });
 
-    // $('#target_email').on('click', function(){
-    //   setSearchType('email');
-    //   $("#txt_search").val(TARGET_EMAIL);
-    // });
-
-    $('#target_email_a').on('dblclick', function(){
+    $('#target_email').on('dblclick', function(){
       setSearchType('email');
       $("#txt_search").val(TARGET_EMAIL.email);
       do_search('email', TARGET_EMAIL.email);
@@ -1592,8 +1617,8 @@ $(function () {
       }
     }());
 
-    $('#target_email_a').on('mouseover', highlight_target.highlight);
-    $('#target_email_a').on('mouseout', highlight_target.unhighlight);
+    $('#target_email').on('mouseover', highlight_target.highlight);
+    $('#target_email').on('mouseout', highlight_target.unhighlight);
 
     $('#email_group_conversation').on('click', group_email_conversation);
     $('#email_view_export_all').on('click', add_view_to_export);    
@@ -1610,6 +1635,7 @@ $(function () {
       do_search('all', $("#search_text").val());
     });
 
+    
     $('#tab-list li:eq(4) a').on('click', function(){
       var _from = $('#email-body-tab').find(".from").first().html();
       if (_from){
