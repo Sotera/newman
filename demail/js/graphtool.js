@@ -4,15 +4,16 @@
  *  instantiate user-ale-logger
  */
 var ale = new userale({
-    loggingUrl: 'http://192.168.1.100', //The url of the User-ALE logging server.
+    loggingUrl: 'http://10.1.93.208', //The url of the User-ALE logging server.
     toolName: 'newman', //The name of your tool
     toolVersion: '1.1.2', //The semantic version of your tool
     elementGroups: [ //A list of element groups used in your tool (see below)
+      'view_group',
       'search_group'
     ],
     workerUrl: 'js/thirdparty/userale-worker.js', //The location of the User-ALE webworker file
     debug: true, //Whether to log messages to console
-    sendLogs: false //Whether or not to send logs to the server (useful during testing)
+    sendLogs: true //Whether or not to send logs to the server (useful during testing)
 });
 ale.register();
 
@@ -841,7 +842,7 @@ function drawGraph(graph){
     .attr("r", function(d) { return Math.log((d.num * 100 ));  })
     .attr("id", function(d) { return "g_circle_" + d.group; })
     .style("fill", function(d) {
-      if (d3.select("#colorby").property("checked")) {
+      if (d3.select("#colorByDomain").property("checked")) {
         return colorByDomain(d.name);
         //return color(d.group);
       } else {
@@ -1069,6 +1070,20 @@ function draw_mini_topic_chart(email_id){
               }
             });
           console.log((d*100) + "% \n" + topics[i]);
+
+
+            //user-ale logging
+            var msg = {
+              activity: 'perform',
+              action: 'click',
+              elementId: this.getAttribute('id') || 'UNK',
+              elementType: 'tab',
+              elementGroup: 'view_group',
+              source: 'user',
+              tags: ['select', 'view']
+            };
+            ale.log(msg);
+
         })
         .on("mouseover", function(d, i){
           //var str = "topic: " + i + "<br/>" + Math.floor(100 * d) + '%';
@@ -1183,6 +1198,19 @@ function draw_attachments_table(email_addr){
               $("#email-body").append(produceHTMLView(resp));
             }
           });
+
+          //user-ale logging
+          var msg = {
+            activity: 'perform',
+            action: 'click',
+            elementId: this.getAttribute('id') || 'UNK',
+            elementType: 'tab',
+            elementGroup: 'view_group',
+            source: 'user',
+            tags: ['select', 'view']
+          };
+          ale.log(msg);
+
       })
       .html(function(d, i){
         if (i == 2){
@@ -1574,6 +1602,7 @@ $(function () {
     });
 
     $('#target_email').on('dblclick', function(){
+
       setSearchType('email');
       $("#txt_search").val(TARGET_EMAIL.email);
       do_search('email', TARGET_EMAIL.email);
@@ -1641,6 +1670,19 @@ $(function () {
       if (_from){
         draw_attachments_table(_from);
       }
+
+      //user-ale logging
+      var msg = {
+        activity: 'perform',
+        action: 'click',
+        elementId: this.getAttribute('id') || 'UNK',
+        elementType: 'tab',
+        elementGroup: 'view_group',
+        source: 'user',
+        tags: ['select', 'view']
+      };
+      ale.log(msg);
+
     });
 
     $("input[name='searchType']").change(function(e){
@@ -1650,6 +1692,19 @@ $(function () {
         $('#txt_search').attr('placeholder', 'Search text...');
       }
       $('#txt_search').val('');
+
+      //user-ale logging
+      var msg = {
+        activity: 'perform',
+        action: 'click',
+        elementId: this.getAttribute('id') || 'UNK',
+        elementType: 'radiobutton',
+        elementGroup: 'search_group',
+        source: 'user',
+        tags: ['select', 'search']
+      };
+      ale.log(msg);
+
     });
 
     $("#submit_activesearch_like").click(function(){
@@ -1775,18 +1830,57 @@ $(function () {
       });
     });
 
-    $("#colorby2").click(function(){
-      console.log($("#colorby2").val());
+    $("#colorByCommunity").click(function(){
+      console.log($("#colorByCommunity").val());
       recolornodes('comm');
+
+      //user-ale logging
+      var msg = {
+        activity: 'perform',
+        action: 'click',
+        elementId: this.getAttribute('id') || 'UNK',
+        elementType: 'radiobutton',
+        elementGroup: 'view_group',
+        source: 'user',
+        tags: ['select', 'view']
+      };
+      ale.log(msg);
+
     });
 
-    $("#colorby").click(function(){
-      console.log($("#colorby").val());
+    $("#colorByDomain").click(function(){
+      console.log($("#colorByDomain").val());
       recolornodes('node');
+
+      //user-ale logging
+      var msg = {
+        activity: 'perform',
+        action: 'click',
+        elementId: this.getAttribute('id') || 'UNK',
+        elementType: 'radiobutton',
+        elementGroup: 'view_group',
+        source: 'user',
+        tags: ['select', 'view']
+      };
+      ale.log(msg);
+
     });
 
     $("#usetext").on("change", function(){
       toggle_labels();
+
+      //user-ale logging
+      var msg = {
+        activity: 'perform',
+        action: 'click',
+        elementId: this.getAttribute('id') || 'UNK',
+        elementType: 'checkbox',
+        elementGroup: 'view_group',
+        source: 'user',
+        tags: ['select', 'view']
+      };
+      ale.log(msg);
+
     });
 
     $("#rankval").click(function(){
@@ -1800,6 +1894,19 @@ $(function () {
         d3.selectAll("circle").style("stroke-width","0");
       }
       //recolornodes('rank');
+
+      //user-ale logging
+      var msg = {
+        activity: 'perform',
+        action: 'click',
+        elementId: this.getAttribute('id') || 'UNK',
+        elementType: 'checkbox',
+        elementGroup: 'view_group',
+        source: 'user',
+        tags: ['select', 'view']
+      };
+      ale.log(msg);
+
     });
 
   });
