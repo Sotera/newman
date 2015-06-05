@@ -4,10 +4,11 @@
  *  instantiate user-ale-logger
  */
 var ale = new userale({
-    loggingUrl: 'http://192.168.1.100', //The url of the User-ALE logging server.
+    loggingUrl: 'http://10.1.93.208', //The url of the User-ALE logging server.
     toolName: 'newman', //The name of your tool
     toolVersion: '1.1.2', //The semantic version of your tool
     elementGroups: [ //A list of element groups used in your tool (see below)
+      'view_group',
       'search_group'
     ],
     workerUrl: 'js/thirdparty/userale-worker.js', //The location of the User-ALE webworker file
@@ -15,6 +16,13 @@ var ale = new userale({
     sendLogs: false //Whether or not to send logs to the server (useful during testing)
 });
 ale.register();
+
+/**
+ * load profile-chart script
+ */
+$.getScript( "js/profile-chart.js", function() {
+  console.log( "profile-chart.js loaded!" );
+});
 
 var width = 400,
 height = 500;
@@ -41,7 +49,7 @@ var force = d3.layout.force()
   .linkStrength(2)
   .size([width, height]);
 
-var svg = d3.select("#node_graph").append("svg")
+var svg = d3.select("#data_visual").append("svg")
   .attr("width", "100%")
   .attr("height", height);
 
@@ -49,6 +57,9 @@ var vis = svg.append('svg:g');
 
 var labels = false;
 var TARGET_EMAIL = null;
+var datetime_range_max = 1000;
+var datetime_values_displayed = [];
+var datetime_values_all = [];
 
 var doubleEncodeURIComponent= function(uri){
   return encodeURIComponent(encodeURIComponent(uri));
@@ -252,7 +263,7 @@ var current_email = null;
 var current_export = null;
 
 function update_current(val){
-  console.log("showing current email: " + val);
+  console.log("update_current( " + val + " )");
   current_email = val;
 }
 
@@ -342,9 +353,10 @@ function searchByEntity(entityid, type, value){
 }
 
 function produceHTMLView(emailObj) {
-
+  console.log("produceHTMLView(" + emailObj + ")");
+	
   var d = _.object(['num', 'directory','datetime', 'exportable', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], emailObj.email);
-  console.log(d);
+  console.log( "\td = " + d);
   draw_mini_topic_chart(d.num);
   var el = $('<div>').addClass('body-view');
   //html += "<b>ID: </b>" + d.num + "<BR>";
@@ -578,11 +590,81 @@ function show_email_view(email_id){
     });
 };
 
+function stringStartsWith(string, prefix) {
+    return string.indexOf(prefix) === 0;
+}
+
+function stringEndsWith(string, suffix) {
+    return string.indexOf(suffix, string.length - suffix.length) !== -1;
+}
+
+function appendDateTimeRange( url ){
+	if ($( "#time_range_start" ).val() && $( "#time_range_end" ).val()) {
+		
+		var suffix = $( "#time_range_start" ).val().toString() + "/" + $( "#time_range_end" ).val().toString();
+		
+		if(url) {
+			if (stringEndsWith( url, '/')) {
+				return url + suffix;
+			}
+			return url + "/" + suffix;
+		}
+		return suffix;
+	}
+	return url;
+};
+
+function adjustDateTimeRange() {
+	console.log('adjustDateTimeRange()');
+	
+	if (datetime_values_all.length >= datetime_range_max) {
+		var increment = Math.floor( datetime_values_all.length / datetime_range_max );
+		
+		console.log('\tmaster.length' + datetime_values_all.length +
+				    ' display.length ' + datetime_range_max  +
+				    ' increment ' + increment );
+		
+		var sourceIndex = 0;
+		var length = datetime_range_max;
+		var value = "";
+		for (var i = 0; i < length; i++) {
+		    value = datetime_values_all[i];
+		    datetime_values_displayed.push( value );
+		    sourceIndex = sourceIndex + increment;
+		}
+	}
+	else {
+		datetime_values_displayed = datetime_values_all;
+	}
+	
+	//debug only
+	/*
+	for (var i = 0; i < datetime_values_displayed.length; i++ ) { 
+	    console.log( '\tmasterDateList[' + i + '] ' + datetime_values_all[i] );
+	}
+	*/
+
+	$( "#time_range_start" ).val( datetime_values_displayed[0] );
+	$( "#time_range_end" ).val( datetime_values_displayed[(datetime_values_displayed.length-1)] );
+}
+
 // takes field + varargs ... now
 function do_search(fields, val) {
+
+	console.log('do_search(' + fields + ', ' + val + ')' );
+	
   var varargs = arguments;
   /* Fails Lint -  Use '===' to compare with 'undefined' */
   if (fields == undefined) { fields = 'all'; }
+ 
+  
+  if (!val) {
+	  //var currentDate = new Date();
+	  //val = (currentDate.getMonth() + 1) + "-" + currentDate.getDate() + "-" + currentDate.getFullYear();
+	  val = "";
+  }
+  
+  console.log('\tval == ' + val );
 
   var search_msg = (function(varargs){
     var ops = {
@@ -631,12 +713,22 @@ function do_search(fields, val) {
   //d3.select("#search_status").text("Searching...");
   $('#search_status').empty();
   $('#search_status').append($('<span>',{ 'text': 'Searching... ' })).append(waiting_bar);
+  
   var args = _.map(_.rest(arguments), function(s){ return encodeURIComponent(s); })
+  console.log( "_.map(_.rest(arguments), function(s){ return encodeURIComponent(s); })" );
+  console.log( "\targs = " + args );
+  
   var rest_url = args.join('/');
-  console.log(rest_url);
+  console.log( "rest_url = " + rest_url );
+  
+  //rest_url = appendDateTimeRange( rest_url );
+  //console.log( "appendDateTimeRange, rest_rul = " + rest_url );
 
   $.get("email/exportable").then(function(resp_export){
-    $.getJSON("search/search/" + fields +'/' + rest_url , function (comp_data) {
+	  var full_url = "search/search/" + fields +'/' + rest_url;
+	  console.log( "\tfull_url = " + full_url );
+	  
+    $.getJSON( full_url, function (comp_data) {
       //var exported = _.indexBy(resp_export.emails, _.identity);
       var exported = _.object(resp_export.emails);
 
@@ -662,7 +754,8 @@ function do_search(fields, val) {
           return d;
         }).attr('class', 'clickable')
         .on("click", function(k, i){
-          console.log(arguments);
+          console.log( "on(\"click\", function(" + k + "," + i + ")" );
+          
           var direction = (lastSort == k) ? -1 : 1;
           lastSort = (direction == -1) ? "" : k; //toggle
           d3.select("#result_table").select("tbody").selectAll("tr").sort(function(a, b) {
@@ -699,7 +792,9 @@ function do_search(fields, val) {
 
       tr.attr('class', 'clickable').on("click",function(d){
         show_email_view(d.num);
+      
       }).on("mouseover", function(d) {
+    	  
         tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(';');
         for (i = 0; i < tos.length; i++) {
           d3.select("#" + d.from.replace(/\./g,'_').replace(/@/g,'_') + '_' + tos[i]).style("stroke", "red"); }})
@@ -714,6 +809,10 @@ function do_search(fields, val) {
     	  
           var recipient_count = recipientCount(d.to, d.cc, d.bcc);
           var attach_count = splitAttachCount(d.attach)
+          
+          datetime_values_all.push( d.datetime );
+          //console.log( "\tmasterDateTimeList[" + (datetime_values_all.length-1) + "] " + datetime_values_all[datetime_values_all.length-1] );
+          
           return [d.num, d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject, d.exported ];
           //return [d.num + '::' + d.from + '::' + d.directory, d.datetime, d.from +'::' + d.fromcolor,d.to,d.cc,d.bcc,d.subject];
         })
@@ -763,6 +862,9 @@ function do_search(fields, val) {
         })
         .style("stroke","#FFFFFF");
 
+      //adjust date-time-list
+      adjustDateTimeRange();
+      
       if (control_panel.isOpen()){
         //resizes control panel
         control_panel.open();
@@ -773,12 +875,11 @@ function do_search(fields, val) {
   });
 }
 
-
 // Draw a graph for a component
 function drawGraph(graph){
 
   svg.remove();
-  svg = d3.select("#node_graph").append("svg")
+  svg = d3.select("#data_visual").append("svg")
     .attr("height", "100%")
     .attr("width", "100%")
   //  .attr("viewBox", "0 0 " + width + " " + height )
@@ -840,13 +941,7 @@ function drawGraph(graph){
   node.append("svg:circle")
     .attr("r", function(d) { return Math.log((d.num * 100 ));  })
     .attr("id", function(d) { return "g_circle_" + d.group; })
-    .style("fill", function(d) {
-      if (d3.select("#colorby").property("checked")) {
-        return colorByDomain(d.name);
-        //return color(d.group);
-      } else {
-        return communityColor(d.community);
-      }})
+    .style("fill", function(d) { return colorByDomain(d.name); })
     .style("stroke","red")
     .style("stroke-width", function(d) {
       if (d3.select("#rankval").property("checked")) {
@@ -973,12 +1068,12 @@ function redraw() {
 
 function toggle_labels() {
   if (labels) {
-    d3.selectAll("#node_graph svg text").style("opacity","0");
+    d3.selectAll("#data_visual svg text").style("opacity","0");
     labels = false;
   }
 
   else {
-    d3.selectAll("#node_graph svg text").style("opacity","100");
+    d3.selectAll("#data_visual svg text").style("opacity","100");
     labels = true;
   }
 }
@@ -1069,6 +1164,20 @@ function draw_mini_topic_chart(email_id){
               }
             });
           console.log((d*100) + "% \n" + topics[i]);
+
+
+            //user-ale logging
+            var msg = {
+              activity: 'perform',
+              action: 'click',
+              elementId: this.getAttribute('id') || 'UNK',
+              elementType: 'tab',
+              elementGroup: 'view_group',
+              source: 'user',
+              tags: ['select', 'view']
+            };
+            ale.log(msg);
+
         })
         .on("mouseover", function(d, i){
           //var str = "topic: " + i + "<br/>" + Math.floor(100 * d) + '%';
@@ -1183,6 +1292,19 @@ function draw_attachments_table(email_addr){
               $("#email-body").append(produceHTMLView(resp));
             }
           });
+
+          //user-ale logging
+          var msg = {
+            activity: 'perform',
+            action: 'click',
+            elementId: this.getAttribute('id') || 'UNK',
+            elementType: 'tab',
+            elementGroup: 'view_group',
+            source: 'user',
+            tags: ['select', 'view']
+          };
+          ale.log(msg);
+
       })
       .html(function(d, i){
         if (i == 2){
@@ -1574,6 +1696,7 @@ $(function () {
     });
 
     $('#target_email').on('dblclick', function(){
+
       setSearchType('email');
       $("#txt_search").val(TARGET_EMAIL.email);
       do_search('email', TARGET_EMAIL.email);
@@ -1641,6 +1764,19 @@ $(function () {
       if (_from){
         draw_attachments_table(_from);
       }
+
+      //user-ale logging
+      var msg = {
+        activity: 'perform',
+        action: 'click',
+        elementId: this.getAttribute('id') || 'UNK',
+        elementType: 'tab',
+        elementGroup: 'view_group',
+        source: 'user',
+        tags: ['select', 'view']
+      };
+      ale.log(msg);
+
     });
 
     $("input[name='searchType']").change(function(e){
@@ -1650,6 +1786,19 @@ $(function () {
         $('#txt_search').attr('placeholder', 'Search text...');
       }
       $('#txt_search').val('');
+
+      //user-ale logging
+      var msg = {
+        activity: 'perform',
+        action: 'click',
+        elementId: this.getAttribute('id') || 'UNK',
+        elementType: 'radiobutton',
+        elementGroup: 'search_group',
+        source: 'user',
+        tags: ['select', 'search']
+      };
+      ale.log(msg);
+
     });
 
     $("#submit_activesearch_like").click(function(){
@@ -1775,18 +1924,104 @@ $(function () {
       });
     });
 
-    $("#colorby2").click(function(){
-      console.log($("#colorby2").val());
-      recolornodes('comm');
+    $("#profile_view").click(function(){
+      console.log( 'profile_view ' + $("#profile_view").val());
+
+      svg.remove();
+
+      loadSampleChartData();
+
+      //user-ale logging
+      var msg = {
+        activity: 'perform',
+        action: 'click',
+        elementId: this.getAttribute('id') || 'UNK',
+        elementType: 'radiobutton',
+        elementGroup: 'view_group',
+        source: 'user',
+        tags: ['select', 'view']
+      };
+      ale.log(msg);
+
     });
 
-    $("#colorby").click(function(){
-      console.log($("#colorby").val());
-      recolornodes('node');
+    $("#match_view").click(function(){
+      console.log( 'match_view ' + $("#match_view").val());
+      removeProfileChart();
+
+      svg.remove();
+
+      //user-ale logging
+      var msg = {
+        activity: 'perform',
+        action: 'click',
+        elementId: this.getAttribute('id') || 'UNK',
+        elementType: 'radiobutton',
+        elementGroup: 'view_group',
+        source: 'user',
+        tags: ['select', 'view']
+      };
+      ale.log(msg);
+
+    });
+
+    $("#graph_view").click(function(){
+      console.log($("#graph_view").val());
+      removeProfileChart();
+
+      do_search('all', '');
+
+      //recolornodes('node');
+
+      //user-ale logging
+      var msg = {
+        activity: 'perform',
+        action: 'click',
+        elementId: this.getAttribute('id') || 'UNK',
+        elementType: 'radiobutton',
+        elementGroup: 'view_group',
+        source: 'user',
+        tags: ['select', 'view']
+      };
+      ale.log(msg);
+
+    });
+
+    $("#colorByCommunity").click(function(){
+      console.log($("#colorByCommunity").val());
+
+      recolornodes('comm');
+
+      //user-ale logging
+      var msg = {
+        activity: 'perform',
+        action: 'click',
+        elementId: this.getAttribute('id') || 'UNK',
+        elementType: 'radiobutton',
+        elementGroup: 'view_group',
+        source: 'user',
+        tags: ['select', 'view']
+      };
+      ale.log(msg);
+
     });
 
     $("#usetext").on("change", function(){
+
       toggle_labels();
+
+      //user-ale logging
+      var msg = {
+        activity: 'perform',
+        action: 'click',
+        elementId: this.getAttribute('id') || 'UNK',
+        elementType: 'checkbox',
+        elementGroup: 'view_group',
+        source: 'user',
+        tags: ['select', 'view']
+      };
+      ale.log(msg);
+
     });
 
     $("#rankval").click(function(){
@@ -1800,13 +2035,54 @@ $(function () {
         d3.selectAll("circle").style("stroke-width","0");
       }
       //recolornodes('rank');
-    });
 
+      //user-ale logging
+      var msg = {
+        activity: 'perform',
+        action: 'click',
+        elementId: this.getAttribute('id') || 'UNK',
+        elementType: 'checkbox',
+        elementGroup: 'view_group',
+        source: 'user',
+        tags: ['select', 'view']
+      };
+      ale.log(msg);
+
+    });
+	$( "#time_range_slider" ).slider({
+		range: true,
+		min: 1,
+		max: datetime_range_max,
+		values: [ 1, datetime_range_max ],
+		slide: function( event, ui ) {
+			
+			var startValue = datetime_values_displayed[ (ui.values[0]-1) ];
+			$( "#time_range_start" ).val( startValue );
+			//console.log( "\trange-start " + startValue );
+			
+			var endValue = datetime_values_displayed[ (ui.values[1]-1) ];
+			$( "#time_range_end" ).val( endValue );
+			//console.log( "\trange-end " + endValue );
+			
+			
+			//$( "#time_range_start" ).val( ui.values[ 0 ] );
+			//$( "#time_range_end" ).val( ui.values[ 1 ] );
+			
+
+		},
+		stop: function( event, ui ) {
+			do_search('all', '');
+		}
+	});
+	
+	
+	//$( "#time_range_start" ).val( $( "#time_range_slider" ).slider( "values", 0 ));
+	//$( "#time_range_end" ).val( $( "#time_range_slider" ).slider( "values", 1 ));
   });
 
 
   function parseHash(newHash, oldHash){
-    console.log('old: ' + oldHash + ', new: ' + newHash);
+    console.log('parseHash( ' + newHash + ', ' + oldHash + ' )');
     crossroads.parse(newHash);
   }
   
@@ -1820,11 +2096,13 @@ $(function () {
   });
 
   crossroads.addRoute("/email/{id}", function(id){
+	console.log('crossroads.addRoute("/email/{id}", function(' + id + ' )');
     do_search('all', id);
     show_email_view(id);
   });
 
   crossroads.routed.add(function(req, data){
+	console.log( 'crossroads.routed.add(function( ' + req + ', ' + data + ' )' );
     console.log('routed: ' + req);
     console.log(data.route +' - '+ data.params +' - '+ data.isFirst);
   });
@@ -1839,7 +2117,12 @@ $(function () {
   hasher.changed.add(parseHash); 
   hasher.init();
 
-  if (hasher.getHash().length < 1){
+  if ($('#graph_view').val() == 'node' && hasher.getHash().length < 1){
     hasher.setHash('/search/all/');
   }
+  else if($('#profile_view').val() == 'profile') {
+    loadSampleChartData();
+  }
+
+  
 });

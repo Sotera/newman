@@ -8,6 +8,8 @@
     <link href="css/thirdparty/bootstrap.min.css" rel="stylesheet">
     <link href="css/thirdparty/bootstrap-glyphicons.css" rel="stylesheet">
     <link href="css/default.css" rel="stylesheet">
+    <link href="css/custom-bootstrap.css" rel="stylesheet">
+    <link href="css/profile-chart.css" rel="stylesheet">
   </head>
   <body>
     <!-- hidden link //hack -->
@@ -81,25 +83,27 @@
     </div>
 
     <!-- nav bar -->
-    <div class="navbar navbar-default navbar-fixed-top">
+    <div class="navbar navbar-default navbar-fixed-top" style="margin-bottom: 0px;">
       <div class="navbar-header">
-        <div class="navbar-brand">newman v1.1.2</div>
+        <div class="navbar-brand">newman v1.1.3</div>
       </div>
-      <ul class="nav navbar-nav">
-        <li>
-          <a style="cursor:pointer" id="target_email">
-            <span class="glyphicon glyphicon-envelope"></span>
-            <span id="target_email"></span>
+      <ul class="nav navbar-nav list-group" style="margin-bottom: 0px;" id="data-source-tab-list" role="tablist">
+        <li class="list-group-item" style="padding: 0px; border: 0px;" role="tab" data-toggle="tab">
+          <a type="button" class="btn btn-default" style="cursor:pointer;"
+             title="Analyze Twitter data" href="#" id="data_source_twitter">
+            <span class="glyphicon glyphicon-retweet"> Twitter</span>
           </a>
         </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
+        <!--
         <li>
           <a class="btn btn-default" href="ingest.html" role="button">Add New Email <span class="glyphicon glyphicon-plus-sign"></span></a>
         <li>
-	<li>
-	  <a id="view_exportList" type="button" class="btn btn-default" data-toggle="modal" data-target="#exportModal">Export <span class="glyphicon glyphicon-list-alt"></span></a>
-	</li>
+	    <li>
+	      <a id="view_exportList" type="button" class="btn btn-default" data-toggle="modal" data-target="#exportModal">Export <span class="glyphicon glyphicon-list-alt"></span></a>
+	    </li>
+	    -->
       </ul>
       <!-- <ul class="nav navbar-nav"> -->
       <!--   <li> -->
@@ -110,12 +114,14 @@
       <!-- </ul> -->
       <div style="padding-right: 20px;">
         <form id="search_form" class="navbar-form navbar-right" role="search" style="color: white;">
+          <!--
           <label class="radio-inline" >
-            <input type="radio" name="searchType" value="all" checked /> Free text
+            <input type="radio" name="searchType" value="all" checked /> All
           </label>
           <label class="radio-inline">
             <input type="radio" name="searchType" value="email" /> Email
           </label>
+          -->
           <div class="form-group" style="padding-left: 10px;">
             <input id="txt_search" type="text" class="form-control"
                    placeholder="Search text..."
@@ -125,63 +131,87 @@
         </form>
       </div>
     </div>
-    <div style="position: fixed;top: 50px;background-color: rgba(240,240,240,0.8);padding: 10px 10px;z-index: 999;font-size: 12px; border-bottom-right-radius: 10px;">
-      <table>
-        <tr>
-          <td>
-            <div style="padding-right: 10px;">Color:</div>
-          </td>
-          <td>
-            <label class="radio-inline" style="padding-right: 10px;"><input type="radio" name="optionRadios" id="colorby" value="node" style="margin: 2px 0 0 -20px;" checked /> Domain </label>
-          </td>
-          <td>
-            <label class="radio-inline"><input type="radio" name="optionRadios" id="colorby2"  value="comm" style="margin: 2px 0 0 -20px;"  /> Community </label>
-          </td>
-        </tr>
-        <tr>
-          <td><div style="padding-right: 10px;">Display:</div></td>
-          <td>
+    <div class="container-fluid" style="position: fixed;top: 50px;width: 50%;background-color: rgba(240,240,240,0.6);padding: 5px 5px;z-index: 999;font-size: 12px; border-bottom-right-radius: 10px;">
+
+        <div class="row">
+
+          <div class="col-xs-2" style="padding-left: 20px;padding-right: 0px;">
+            <label class="radio-inline"><input type="radio" name="optionRadios" id="profile_view"  value="profile" style="margin: 2px 0 0 -20px;" /> Profile</label>
+          </div>
+
+          <div class="col-xs-2" style="padding-left: 0px;padding-right: 0px;">
+            <label class="radio-inline"><input type="radio" name="optionRadios" id="match_view"  value="comm" style="margin: 2px 0 0 -20px;"  /> Match</label>
+          </div>
+
+          <div class="col-xs-2" style="padding-left: 0px;padding-right: 0px;">
+            <label class="radio-inline" style="padding-right: 10px;"><input type="radio" name="optionRadios" id="graph_view" value="node" style="margin: 2px 0 0 -20px;" checked /> Social</label>
+          </div>
+
+          <div class="col-xs-2" style="padding-left: 0px;padding-right: 0px;">
+            <!--<div style="padding-right: 10px;">Display</div>-->
+          </div>
+          <div class="col-xs-2" style="padding-left: 0px;padding-right: 0px;">
+
             <label class="checkbox" style="padding-right: 10px;margin: 0;">
-              <input type="checkbox" name="optionrank" id="rankval" value="rank" /> Rank
+              <input type="checkbox" name="optionrank" id="rankval" value="rank" /> Confidence
             </label>
-          </td>
-          <td>
+
+          </div>
+          <div class="col-xs-2">
             <label class="checkbox" style="padding-right: 10px;margin: 0;">
               <input type="checkbox" id="usetext" /> Labels
             </label>
-          </td>
-        </tr>
-      </table>
+          </div>
+        </div>
 
-      <div style="border-top: 1px solid #000;text-align:center;">
-        <div>
-          <span style="font-weight: bold">Legend</span>
+      <div class="row">
+        <div class="col-xs-2" style="padding-left: 12px;padding-right: 0px;">
+          <input type="text" id="time_range_start" readonly style="border:1px; background-color: rgba(240,240,240,0.6); color:#f6931f; font-weight:normal; font-size: 9px; width: 100%;">
         </div>
-        <div id="toggle_legends"><span class="glyphicon glyphicon-chevron-down"></span></div>
-        <div id="legend_list" style="height: 0px;max-height:375px;overflow-y:scroll;">
-          <table id="legend-table" class="table">
-            <thead />
-            <tbody />
-          </table>
+        <div class="col-xs-8" style="padding-left: 0px;padding-right: 0px;">
+          <div id="time_range_slider" style="font-size: 12px; background-color: rgba(240,240,240,0.6); width: 100%"></div>
         </div>
+        <div class="col-xs-2" style="padding-left: 0px;padding-right: 0px;">
+          <input type="text" id="time_range_end" readonly style="border:1px; background-color: rgba(240,240,240,0.6); color:#f6931f; font-weight:normal; font-size: 9px; width: 100%;">
+        </div>
+
       </div>
+             
+        <div class="row">
+
+          <div class="col-xs-12" style="padding-left: 0px;padding-right: 0px; border-top: 1px solid #000; text-align:center;">
+            <div style="height: 15px;">
+              <!--<span style="font-weight: normal">Legend</span>-->
+              <div id="toggle_legends">Legend <span class="glyphicon glyphicon-chevron-down"></span></div>
+            </div>
+
+            <div id="legend_list" style="padding-left: 12px; height: 0px;max-height:375px;overflow-y:scroll;">
+              <table id="legend-table" class="table">
+                <thead />
+                <tbody />
+              </table>
+            </div>
+          </div>
+        </div>
     </div>
 
     <!-- body -->
     <div class="container-fluid" style="margin-top: 5px;height: calc(100% - 52px);">
       <div class="row" style= "height: 100%;">
         <div class="col-sm-6"  style= "height: 100%;">
-          <div id="node_graph"  style= "height: 100%;"> </div>
+          <div id="data_visual"  style= "height: 100%;"> </div>
         </div>
         <div class="col-sm-6" style= "height: calc(100% - 52px);">
           <div style= "height: 100%;">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" style="width: 600px;" role="tablist" id="tab-list">
-              <li class="active"><a href="#top-rank" role="tab" data-toggle="tab">Rank</a></li>
-              <li><a href="#top-entities" role="tab" data-toggle="tab">Entities</a></li>
-              <li><a href="#email-body-tab" role="tab" data-toggle="tab">Email</a></li>
+              <li class="active"><a href="#top-rank" role="tab" data-toggle="tab">Confidence</a></li>
+              <!--<li><a href="#top-entities" role="tab" data-toggle="tab">Entities</a></li>-->
+              <li><a href="#email-body-tab" role="tab" data-toggle="tab">Content</a></li>
+              <!--
               <li><a href="#topics-tab" role="tab" data-toggle="tab">Topics</a></li>
               <li><a href="#attach-tab" role="tab" data-toggle="tab">Attachments</a></li>
+              -->
             </ul>
 
             <!-- Tab panes -->
@@ -272,7 +302,8 @@
 
     <script src="js/thirdparty/jquery-1.9.1.min.js"></script>
     <script src="js/thirdparty/jquery-ui.min.js"></script>
-    <script src="js/thirdparty/d3.v3.min.js" charset="utf-8"></script>
+    <!--<script src="js/thirdparty/d3.v3.min.js" charset="utf-8"></script>-->
+    <script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
     <script src="js/thirdparty/bootstrap.min.js"></script>
     <script src="js/thirdparty/underscore-min.js"></script>
     <script src="js/thirdparty/underscore-contrib.min.js"></script>
@@ -282,6 +313,7 @@
     <script src="js/thirdparty/hasher.js"></script>
     <script src="js/thirdparty/crossroads.js"></script>
     <script src="js/thirdparty/userale.js"></script>
+    <script src="js/profile-chart.js"></script>
     <script src="js/graphtool.js"></script>
 
   </body>

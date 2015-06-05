@@ -1,0 +1,314 @@
+[
+  {
+    "date": "2014-08-01",
+    "vol_min": 5350,
+    "vol_target": 6756,
+    "vol_like": 7819,
+    "vol_re": 9284,
+    "vol_total": 13835
+  },
+  {
+    "date": "2014-08-02",
+    "vol_min": 4439,
+    "vol_target": 5584,
+    "vol_like": 6554,
+    "vol_re": 8016,
+    "vol_total": 12765
+  },
+  {
+    "date": "2014-08-03",
+    "vol_min": 4247,
+    "vol_target": 5419,
+    "vol_like": 6332,
+    "vol_re": 7754,
+    "vol_total": 12236
+  },
+  {
+    "date": "2014-08-04",
+    "vol_min": 3293,
+    "vol_target": 4414,
+    "vol_like": 5191,
+    "vol_re": 6491,
+    "vol_total": 10325
+  },
+  {
+    "date": "2014-08-05",
+    "vol_min": 3942,
+    "vol_target": 5134,
+    "vol_like": 6069,
+    "vol_re": 7501,
+    "vol_total": 11685
+  },
+  {
+    "date": "2014-08-06",
+    "vol_min": 2744,
+    "vol_target": 5508,
+    "vol_like": 6879,
+    "vol_re": 9221,
+    "vol_total": 17239
+  },
+  {
+    "date": "2014-08-07",
+    "vol_min": 1807,
+    "vol_target": 3019,
+    "vol_like": 4119,
+    "vol_re": 5656,
+    "vol_total": 8851
+  },
+  {
+    "date": "2014-08-08",
+    "vol_min": 1855,
+    "vol_target": 3386,
+    "vol_like": 4473,
+    "vol_re": 5915,
+    "vol_total": 10580
+  },
+  {
+    "date": "2014-08-09",
+    "vol_min": 1830,
+    "vol_target": 3202,
+    "vol_like": 4233,
+    "vol_re": 5559,
+    "vol_total": 8930
+  },
+  {
+    "date": "2014-08-10",
+    "vol_min": 1828,
+    "vol_target": 3195,
+    "vol_like": 4304,
+    "vol_re": 5482,
+    "vol_total": 9189
+  },
+  {
+    "date": "2014-08-11",
+    "vol_min": 2246,
+    "vol_target": 3929,
+    "vol_like": 5326,
+    "vol_re": 7077,
+    "vol_total": 11648
+  },
+  {
+    "date": "2014-08-12",
+    "vol_min": 2051,
+    "vol_target": 3662,
+    "vol_like": 4849,
+    "vol_re": 6194,
+    "vol_total": 10078
+  },
+  {
+    "date": "2014-08-13",
+    "vol_min": 1700,
+    "vol_target": 3075,
+    "vol_like": 4068,
+    "vol_re": 5259,
+    "vol_total": 9789
+  },
+  {
+    "date": "2014-08-14",
+    "vol_min": 2161,
+    "vol_target": 3891,
+    "vol_like": 5262,
+    "vol_re": 6924,
+    "vol_total": 11612
+  },
+  {
+    "date": "2014-08-15",
+    "vol_min": 1765,
+    "vol_target": 3190,
+    "vol_like": 4388,
+    "vol_re": 5822,
+    "vol_total": 9433
+  },
+  {
+    "date": "2014-08-16",
+    "vol_min": 2036,
+    "vol_target": 3756,
+    "vol_like": 4775,
+    "vol_re": 6158,
+    "vol_total": 9999
+  },
+  {
+    "date": "2014-08-17",
+    "vol_min": 2079,
+    "vol_target": 3561,
+    "vol_like": 4753,
+    "vol_re": 6124,
+    "vol_total": 9807
+  },
+  {
+    "date": "2014-08-18",
+    "vol_min": 2108,
+    "vol_target": 3576,
+    "vol_like": 4818,
+    "vol_re": 6344,
+    "vol_total": 10235
+  },
+  {
+    "date": "2014-08-19",
+    "vol_min": 2143,
+    "vol_target": 3792,
+    "vol_like": 5073,
+    "vol_re": 6772,
+    "vol_total": 11338
+  },
+  {
+    "date": "2014-08-20",
+    "vol_min": 2086,
+    "vol_target": 3801,
+    "vol_like": 5073,
+    "vol_re": 6688,
+    "vol_total": 12394
+  },
+  {
+    "date": "2014-08-21",
+    "vol_min": 1767,
+    "vol_target": 3253,
+    "vol_like": 4282,
+    "vol_re": 5563,
+    "vol_total": 9167
+  },
+  {
+    "date": "2014-08-22",
+    "vol_min": 1756,
+    "vol_target": 3047,
+    "vol_like": 3950,
+    "vol_re": 5006,
+    "vol_total": 7948
+  },
+  {
+    "date": "2014-08-23",
+    "vol_min": 2123,
+    "vol_target": 3755,
+    "vol_like": 5173,
+    "vol_re": 7243,
+    "vol_total": 12338
+  },
+  {
+    "date": "2014-08-24",
+    "vol_min": 1967,
+    "vol_target": 3404,
+    "vol_like": 4529,
+    "vol_re": 5970,
+    "vol_total": 9897
+  },
+  {
+    "date": "2014-08-25",
+    "vol_min": 1537,
+    "vol_target": 2612,
+    "vol_like": 3394,
+    "vol_re": 4279,
+    "vol_total": 7104
+  },
+  {
+    "date": "2014-08-26",
+    "vol_min": 2182,
+    "vol_target": 3958,
+    "vol_like": 5505,
+    "vol_re": 7642,
+    "vol_total": 12707
+  },
+  {
+    "date": "2014-08-27",
+    "vol_min": 1932,
+    "vol_target": 3366,
+    "vol_like": 4526,
+    "vol_re": 6086,
+    "vol_total": 9930
+  },
+  {
+    "date": "2014-08-28",
+    "vol_min": 1268,
+    "vol_target": 2344,
+    "vol_like": 3256,
+    "vol_re": 4215,
+    "vol_total": 6673
+  },
+  {
+    "date": "2014-08-29",
+    "vol_min": 1225,
+    "vol_target": 2239,
+    "vol_like": 3033,
+    "vol_re": 4111,
+    "vol_total": 7601
+  },
+  {
+    "date": "2014-08-30",
+    "vol_min": 1393,
+    "vol_target": 2432,
+    "vol_like": 3417,
+    "vol_re": 4710,
+    "vol_total": 8798
+  },
+  {
+    "date": "2014-08-31",
+    "vol_min": 1175,
+    "vol_target": 2020,
+    "vol_like": 2768,
+    "vol_re": 3889,
+    "vol_total": 7744
+  },
+  {
+    "date": "2014-09-01",
+    "vol_min": 989,
+    "vol_target": 1655,
+    "vol_like": 2218,
+    "vol_re": 3167,
+    "vol_total": 6018
+  },
+  {
+    "date": "2014-09-02",
+    "vol_min": 1249,
+    "vol_target": 2069,
+    "vol_like": 2738,
+    "vol_re": 3938,
+    "vol_total": 7574
+  },
+  {
+    "date": "2014-09-03",
+    "vol_min": 936,
+    "vol_target": 1510,
+    "vol_like": 1968,
+    "vol_re": 2700,
+    "vol_total": 5215
+  },
+  {
+    "date": "2014-09-04",
+    "vol_min": 1264,
+    "vol_target": 2039,
+    "vol_like": 2657,
+    "vol_re": 3646,
+    "vol_total": 7042
+  },
+  {
+    "date": "2014-09-05",
+    "vol_min": 1305,
+    "vol_target": 2106,
+    "vol_like": 2745,
+    "vol_re": 3766,
+    "vol_total": 7273
+  },
+  {
+    "date": "2014-09-06",
+    "vol_min": 798,
+    "vol_target": 1288,
+    "vol_like": 1678,
+    "vol_re": 2303,
+    "vol_total": 4448
+  },
+  {
+    "date": "2014-09-07",
+    "vol_min": 1314,
+    "vol_target": 2120,
+    "vol_like": 2763,
+    "vol_re": 3791,
+    "vol_total": 7321
+  },
+  {
+    "date": "2014-09-08",
+    "vol_min": 1042,
+    "vol_target": 1681,
+    "vol_like": 2191,
+    "vol_re": 3007,
+    "vol_total": 5806
+  }
+]

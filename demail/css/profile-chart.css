@@ -1,0 +1,76 @@
+@import url(//fonts.googleapis.com/css?family=Open+Sans:400,700);
+
+svg {
+  font: 14px 'Open Sans';
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  fill: #000;
+}
+
+.axis .tick line {
+  stroke: rgba(0, 0, 0, 0.1);
+}
+
+.area {
+  stroke-width: 1;
+}
+
+.area.outer,
+.legend .outer {
+  fill: rgba(230, 230, 255, 0.8);
+  stroke: rgba(216, 216, 255, 0.8);
+}
+
+.area.inner,
+.legend .inner {
+  fill: rgba(127, 127, 255, 0.8);
+  stroke: rgba(96, 96, 255, 0.8);
+}
+
+.median-line,
+.legend .median-line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 3;
+}
+
+.legend .legend-bg {
+  fill: rgba(0, 0, 0, 0.5);
+  stroke: rgba(0, 0, 0, 0.5);
+}
+
+.marker.client .marker-bg,
+.marker.client path {
+  fill: rgba(255, 127, 0, 0.8);
+  stroke: rgba(255, 127, 0, 0.8);
+  stroke-width: 3;
+}
+
+.marker.server .marker-bg,
+.marker.server path {
+  fill: rgba(0, 153, 51, 0.8);
+  stroke: rgba(0, 153, 51, 0.8);
+  stroke-width: 3;
+}
+
+.marker path {
+  fill: none;
+}
+
+.legend text,
+.marker text {
+  fill: #fff;
+  font-weight: bold;
+}
+
+.marker text {
+  text-anchor: middle;
+}

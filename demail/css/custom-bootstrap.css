@@ -1,0 +1,22 @@
+/*
+.navbar-default .navbar-nav>li>a:hover {
+   border: 1px;
+	border-color: white;
+    border-radius: 8px;
+    font-size: 14px;
+}
+*/
+
+.navbar-default .navbar-nav>li>a:focus {
+    border: 1px;
+	border-color: white;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.navbar-default .navbar-nav>li>a {
+    border: 0px;
+    border-color: black;
+    border-radius: 0px;
+    font-size: 12px;
+}
