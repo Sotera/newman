@@ -3,6 +3,8 @@ $(function () {
         var text = $("#txt_search").val();
         var tbl_instagram = document.getElementById("ig");
         var tbl_twitter = document.getElementById("tw");
+        var linkInstagram = "#!/search/instagram/";
+        var linkTwitter = "#!/search/twitter/";
 
         var instagram = $.ajax({
             url: 'media/search/instagram/' + text,
@@ -40,13 +42,21 @@ $(function () {
             var cellI = rowI.insertCell();
             var rowT = tbl_twitter.insertRow();
             var cellT = rowT.insertCell();
+
             for (var i = 0; i < instagram[0].results.length; i++) {
-                cellI.innerHTML = instagram[0].results[i].name;
+                cellI.innerHTML = createIgHyperlink(instagram[0].results[i].name);
             };
 
             for (var i = 0; i < twitter[0].results.length; i++) {
-                cellT.innerHTML = twitter[0].results[i].name;
+                cellT.innerHTML = createTwHyperlink(twitter[0].results[i].name);
             };
+        }
+
+        function createIgHyperlink(username) {
+            return "<a href=" + linkInstagram + username + ">" + username + "</a>";
+        }
+        function createTwHyperlink(username) {
+            return "<a href=" + linkTwitter + username + ">" + username + "</a>";
         }
     });
 });
