@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<title>Newman v1.2.2 </title>
+<title>Newman</title>
 <head>
     <meta charset="utf-8">
     <title>newman</title>
@@ -63,25 +63,35 @@
 <h1 align="center">Newman Search Engine</h1>
 <ul class="input-list style-1 clearfix">
     <div align="center">
-        <li>
+        <li style="padding-top: 15px;">
+          <div>
             <input id="txt_search" type="text" class="form-control"
                    placeholder="Search username...">
+          </div>
+          <div style="padding: 15px">
             <button id="search-btn" class="btn btn-class">Search</button>
+          </div>
         </li>
     </div>
 </ul>
 <br><br><br>
 <!-- A place to show the output -->
-<div id=output>
+<div id="output">
     <table class="instagram" id="ig">
+      <thead>
         <tr>
-            <th>Instagram</th>
+            <th style="text-align: center">Instagram</th>
         </tr>
+        </thead>
+      <tbody />
     </table>
     <table class="twitter" id="tw">
+      <thead>
         <tr>
-            <th>Twitter</th>
+            <th style="text-align: center">Twitter</th>
         </tr>
+        </thead>
+      <tbody />
     </table>
 </div>
 </body>
