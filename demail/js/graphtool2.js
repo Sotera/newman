@@ -171,7 +171,7 @@ function dragended(d){
 }
 
 function show_content_view(postObj){
-  $('#tab-list li:eq(2) a').tab('show')
+  $('#tab-list li:eq(3) a').tab('show')
   $(document).scrollTop(0);
   $("#post-body").empty();
   //$("#post-body").append($('<span>').text('Loading...
@@ -203,7 +203,7 @@ function show_content_view(postObj){
              })))
     ]));
 
-  if (postObj['instagram']){
+  if (postObj['instagram']) {
     $("#post-body").append(
       $('<div>').append(
         $('<img>', {
@@ -223,7 +223,7 @@ function drawTable(posts){
   var thead = d3.select("#result_table").select("thead")
     .append("tr")
     .selectAll("tr")
-    .data(['ID','Date','Activity Count','Content Size','Post'])
+    .data(['ID','Date','Activity Count', 'Tags Count', 'Content Size','Post'])
     .enter().append("th")
     .html(function(d, i){
       return d;
@@ -242,10 +242,13 @@ function drawTable(posts){
         if (i == 2) {
           return (a.assoc_users.length - b.assoc_users.length) *  direction * -1;
         }
-        if (i == 3) {
+        if (i == 3){
+          return (a.tags.length - b.tags.length) * direction * -1;
+        }
+        if (i == 4) {
           return (a.content_size - b.content_size) * direction * -1; //desc first
         }
-        if (i == 4){
+        if (i == 5){
           return a.content.localeCompare(b.content) * direction;
         }
       });
@@ -264,7 +267,7 @@ function drawTable(posts){
   // cells
   var td = tr.selectAll("td")
     .data(function(d){
-      return [d.id, d.created, d.assoc_users.length, d.content_size, d.content];
+      return [d.id, d.created, d.assoc_users.length, d.tags.length, d.content_size, d.content];
     })
     .enter().append("td")
     .style("padding", "5px")
@@ -279,16 +282,17 @@ function drawTable(posts){
           .html();
       }
       if (i == 2) {
-        var px = d > 100 ? 100 : d;
+        var px = (d * 10) > 100 ? 100 : (d * 10);
         return "<div style='background-color: blue;height: 10px;width: " +px +"px;' title='" + +d + "'/>";}
-      
+
       if (i == 3) {
-        var px = (d / 2) > 100 ? 100 : (d / 2);
-        return "<div style='background-color: green;height: 10px;width: " +px +"px;' title='" + +d + "'/>";}
-      
-      if (i == 9) {
         var px = (d * 10) > 100 ? 100 : (d * 10);
         return "<div style='background-color: orange;height: 10px;width: " +px +"px;' title='" + +d + "'/>";}
+      
+      if (i == 4) {
+        var px = (d / 2) > 100 ? 100 : (d / 2);
+        return "<div style='background-color: green;height: 10px;width: " +px +"px;' title='" + +d + "'/>";}
+
       return d;
     })
     .style("color", function(d,i) {
@@ -536,6 +540,87 @@ function node_highlight(email){
   };
 };
 
+function drawTopTags(posts) {
+  $('#top-tags').empty();
+  var color = d3.scale.category20c();
+  if (posts.length < 1) {
+    $('#top-tags').append($('<p>').html("No results for tags."));
+  }
+
+  var g = _.sortBy(
+    _.groupBy(
+      _.mapcat(posts, function(post){
+        return _.map(post.tags, function(tag){ 
+          return [tag, post.id]
+        });
+      }), 
+      function(o){ 
+        return o[0];
+      }), 
+    function       (o){
+      return o.length * -1;
+    });
+
+  var top20tags =_.map(_.take(g, 20), function(l){
+    var k = _.first(_.first(l));
+    var v = _.map(l, function(o){ 
+      return _.nth(o, 1);
+    });
+    return [k,{"count": v.length, "ids" : v }];
+  })
+
+  var scores = top20tags;
+
+  var width = 400, barHeight = 20;
+  var margin = {top: 20, right: 10, bottom: 20, left: 150};
+  width = width - margin.left - margin.right;
+
+  var x = d3.scale.linear().range([0, width]);
+  var chart = d3.select("#top-tags").append('svg')
+    .attr('class', 'chart')
+    .attr("width", width + margin.left + margin.right);
+
+  x.domain([0, 100]);
+  chart.attr("height", barHeight * (scores.length+ 1));
+
+  var bar = chart.selectAll("g")
+    .data(scores).enter()
+    .append("g")
+    .attr("transform", function(d, i) { return "translate(" + margin.left + "," + (+(i * barHeight) + +margin.top) + ")";});
+
+  bar.append("rect")
+    .attr("width", function(d) {
+      return x((+d[1].count));
+    })
+    .attr("height", barHeight - 1)
+    .style("fill", function(d, i) {
+      return color(i);
+    })
+    .on("click", function(d){ })
+    .append('title').text(function(d) { return d[0];});
+
+  // bar.append("text")
+  //   .attr("x", function(d) { return x((+d.rank * 100)) - 3;})
+  //   .attr("y", barHeight / 2)
+  //   .attr("dy", ".35em")
+  //   .text(function(d) { return +d.rank;});
+
+  bar.append("text")
+    .attr("x", function(d) { return -margin.left;})
+    .attr("y", barHeight / 2)
+    .attr("class", "label clickable")
+    //.style("fill", function(d) {})
+    .text(function(d) { 
+      return d[0];
+      //return (d.user_id.length > 25) ? d.email.substr(0,25) + ".." : d.email; 
+    })
+    .on("click", function(d){
+    })
+    .on("mouseover", function(d){ })
+    .on("mouseout", function(d){ })
+    .append('title').text(function(d) { return d[0]; });
+}
+
 function drawTopAssoc(nodes) {
   $('#top-assoc').empty();
   var color = d3.scale.category20();
@@ -704,8 +789,11 @@ $(function () {
       drawTopAssoc(resp.graph.nodes);
       draw_confidence_chart(resp.similar);
       drawTable(resp.posts);
-      drawGraph(resp.graph);
-      //draw_rank_chart();      
+      drawTopTags(resp.posts);
+      
+      _.defer(drawGraph, resp.graph);
+      //drawGraph(resp.graph);
+
     }).fail(function(resp){
       alert("No data found for account - " + username + " on "+  type)
     });
