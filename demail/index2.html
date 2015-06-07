@@ -38,21 +38,29 @@
       </ul>
     </div>
 
-
     <!-- nav bar -->
     <div class="navbar navbar-default navbar-fixed-top" style="margin-bottom: 0px;">
       <div class="navbar-header">
         <div class="navbar-brand">newman-media</div>
       </div>
+      <ul class="nav navbar-nav">
+        <li>
+          <a style="cursor:pointer" id="current_user">
+            <span class="thetype" style="text-transform: uppercase;font-weight:bold;"></span>
+            <span class="username"></span>
+          </a>
+        </li>
+      </ul>
       <ul class="nav navbar-nav navbar-right">
       </ul>
       <div style="padding-right: 20px;">
         <form id="search_form" class="navbar-form navbar-right" role="search" style="color: white;">
           <div class="form-group" style="padding-left: 10px;">
+            <a href="search.html">Search</a>
             <input id="txt_search" type="text" class="form-control"
                    placeholder="Search text..."
                    autocomplete="off"
-                   style="border-radius: 15px;width: 300px;background-color: rgba(255,255,255,0.9);">
+                   style="display:none;border-radius: 15px;width: 300px;background-color: rgba(255,255,255,0.9);">
           </div>
         </form>
       </div>
@@ -73,21 +81,22 @@
                 data-toggle="tab">Confidence</a>
               </li>
               <li>
-                <a href="#content-body-tab" role="tab"
-                data-toggle="tab">Content</a>
+                <a href="#top-assoc" role="tab"
+                data-toggle="tab">Associated Users</a>
               </li>
               <li>
-                <a href="#top-entities" role="tab"
-                data-toggle="tab">Entities</a>
+                <a href="#content-body-tab" role="tab"
+                data-toggle="tab">Content</a>
               </li>
             </ul>
             <!-- Tab panes -->
             <div class="tab-content" style= "height: 100%;">
               <div class="tab-pane active" id="top-rank"> </div>
+              <div class="tab-pane" id="top-assoc"></div>
               <div class="tab-pane" id="content-body-tab" style="height: 100%;">
-                <div id="post-body"> Select a post to preview </div>
+                <div id="post-body" style="padding: 15px;"> Select a post to preview </div>
               </div>
-              <div class="tab-pane" id="top-entities"></div>
+
             </div>
           </div>
         </div>

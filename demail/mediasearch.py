@@ -44,7 +44,13 @@ def igpost(j):
     o['content']=jsonGet(["_source", "post", "caption","text"], j, "")
     o['content_size'] = len(o['content'])
     comments = jsonGet(["_source", "post", "comments", "data"], j, [])
-    o['assoc_users']= [ jsonGet(["from", "username"], c, "") for c in comments]
+    likes = jsonGet(["_source", "post", "likes", "data"], j, [])
+    o['tags'] = jsonGet(["_source", "post", "tags"], j, []) 
+    o['url']= jsonGet(["_source", "post", "link"], j, "")
+    o['location'] = jsonGet(["_source", "post", "location"], j, {"":"","":""})
+    o['assoc_users']= [ jsonGet(["from", "username"], c, "") for c in comments] + [jsonGet(['username'], like, '') for like in likes]
+    o['instagram'] = {}
+    o['instagram']['img'] = jsonGet(["_source", "post", "images", "low_resolution", "url"], j, "")
     return o
 
 def twtpost(j):
@@ -53,9 +59,12 @@ def twtpost(j):
     o['created']=parseTwitterStr(jsonGet(["_source", "post", "created_at"], j,""))
     o['content']=jsonGet(["_source", "post", "text"],j,"")
     o['content_size'] = len(o['content'])
+    o['tags'] = jsonGet(["_source", "post", "entities","hashtags"], j, []) 
+    o['url'] = "http://twitter.com/{}/status/{}".format(jsonGet(["_source", "username"], j, ""), o['id'])
     mentions = jsonGet(["_source", "post", "entities", "user_mentions"], j, [])
     mentions_users = [jsonGet(["screen_name"],m,"") for m in mentions]
     o['assoc_users']=list(set(mentions_users))
+    o['twitter'] = {}
     return o
 
 def extractInstagram(posts):
@@ -113,6 +122,8 @@ def search(which, user):
 def instagram_search(*args):
     instagram_id=urllib.unquote(nth(args, 0, ''))
     esresults = search('instagram', instagram_id)
+    if len(esresults) == 0:
+        return tangelo.HTTPStatusCode(404, "no data found for user")        
     o = extractInstagram(esresults)
     o['similar'] = similar('instagram', instagram_id)
     o['graph'] = buildGraph(o['posts'])
@@ -122,6 +133,8 @@ def instagram_search(*args):
 def twitter_search(*args):
     twitter_id=urllib.unquote(nth(args, 0, ''))
     esresults = search('twitter', twitter_id)
+    if len(esresults) == 0:
+        return tangelo.HTTPStatusCode(404, "no data found for user")        
     o = extractTwitter(esresults)
     o['similar'] = similar('twitter', twitter_id)
     o['graph'] = buildGraph(o['posts'])

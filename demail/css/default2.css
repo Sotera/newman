@@ -26,10 +26,10 @@ ul {
     padding-top: 10px;
 }
 
-.body-view > p {
+.post-view > p {
     margin: 0 0 5px;
 }
-.body-view .bold {
+.post-view .bold {
     font-weight: bold;
 }
 

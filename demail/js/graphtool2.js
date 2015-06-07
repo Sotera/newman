@@ -45,7 +45,31 @@ var svg = d3.select("#data_visual").append("svg")
 var vis = svg.append('svg:g');
 
 var labels = false;
-var CURRENT_USER = {}
+var CURRENT_USER = (function(){
+  var eltype = $("#current_user>span.thetype");
+  var eluser = $("#current_user>span.username");
+  var lookup = {"instagram" : "ig", 
+                "twitter": "tw" };
+  var _user = "";
+  var _type = "";
+  var setUser = function(type, username){
+    _user = username;
+    eluser.html(username);
+    _type = type;
+    eltype.html(lookup[type]);
+  };
+  var getUsername = function(){
+    return _user;
+  };
+  var getType = function(){
+    return _type;
+  };
+  return {
+    "getUsername": getUsername,
+    "getType": getType,
+    "setUser" : setUser
+  }
+}());
 
 var doubleEncodeURIComponent= function(uri){
   return encodeURIComponent(encodeURIComponent(uri));
@@ -146,34 +170,138 @@ function dragended(d){
   d3.select(this).classed("fixed", d.fixed = true);
 }
 
-function produceHTMLView(emailObj) {
-}
-
-function show_content_view(email_id){
+function show_content_view(postObj){
   $('#tab-list li:eq(2) a').tab('show')
   $(document).scrollTop(0);
-  $("#email-body").empty();
-  $("#email-body").append($('<span>').text('Loading... ')).append(waiting_bar);
-  
+  $("#post-body").empty();
+  //$("#post-body").append($('<span>').text('Loading...
+  //')).append(waiting_bar);
+  var assoc_users = _.uniq(postObj.assoc_users);
+  var tags = _.uniq(postObj.tags);
+  $("#post-body").append($('<div>').addClass("post-view").append(
+    [$('<p>').append($('<span>').addClass('bold').text("Post: ")),
+     $('<div>', { "style" : "font-size: 20px;"}
+      ).html(postObj.content),
+     $('<div>', { "style" : "padding-top: 10px;"})
+     .append($('<span>').addClass('bold').text("URL: "))
+     .append($('<a>', { "href": postObj.url, 
+                        "target" : "_blank" }).html(postObj.url)), 
+     $('<div>', { "style" : "padding-top: 10px;"})
+     .append($('<p>', { "style" : "overflow-wrap: break-word"})
+             .append($('<span>').addClass('bold').text("Associated Users: "))
+             .append(_.map(assoc_users, function(u){
+               return $('<a>', { "style" : "padding: 5px;"}).on("click", function(){
+                 var url = "/user/" + CURRENT_USER.getType() + "/" + u
+                 hasher.setHash(url);               
+               }).html(u);
+             }))),
+     $('<div>', { "style" : "padding-top: 10px;"})
+     .append($('<p>', { "style" : "overflow-wrap: break-word"})
+             .append($('<span>').addClass('bold').text("Tags: "))
+             .append(_.map(tags, function(u){
+               return $('<span>', { "style" : "padding: 5px;"}).html(u);
+             })))
+    ]));
+
+  if (postObj['instagram']){
+    $("#post-body").append(
+      $('<div>').append(
+        $('<img>', {
+          "src" : postObj.instagram.img
+        })))
+  }
+
 };
 
-// takes field + varargs ... now
-function do_search(fields, val) {
+function drawTable(posts){
+  $('#posts_count').text(posts.length);
+  $('#result_table>thead').empty();
+  $('#result_table>tbody').empty();
 
-  $.bootstrapGrowl(search_msg, {type : "success", offset: {from: 'bottom', amount: 10 }});
+  var lastSort = "";
+  // create the table header
+  var thead = d3.select("#result_table").select("thead")
+    .append("tr")
+    .selectAll("tr")
+    .data(['ID','Date','Activity Count','Content Size','Post'])
+    .enter().append("th")
+    .html(function(d, i){
+      return d;
+    })
+    .attr('class', 'clickable')
+    .on("click", function(k, i){
+      var direction = (lastSort == k) ? -1 : 1;
+      lastSort = (direction == -1) ? "" : k; //toggle
+      d3.select("#result_table").select("tbody").selectAll("tr").sort(function(a, b) {
+        if (i == 0){
+          return a.id.localeCompare(b.id) * direction;
+        }
+        if (i == 1) {
+          return a.created.localeCompare(b.created) * direction;
+        }
+        if (i == 2) {
+          return (a.assoc_users.length - b.assoc_users.length) *  direction * -1;
+        }
+        if (i == 3) {
+          return (a.content_size - b.content_size) * direction * -1; //desc first
+        }
+        if (i == 4){
+          return a.content.localeCompare(b.content) * direction;
+        }
+      });
+    });
 
-  d3.select("#result_table").select("tbody").selectAll("tr").remove();
-  d3.select("#result_table").select("thead").selectAll("tr").remove();
-  var text = val;
+  // create rows
+  var tr = d3.select("#result_table").select("tbody").selectAll("tr").data(posts).enter().append("tr");
 
-  //d3.select("#search_status").text("Searching...");
-  $('#search_status').empty();
-  $('#search_status').append($('<span>',{ 'text': 'Searching... ' })).append(waiting_bar);
-  
-  var args = _.map(_.rest(arguments), function(s){ return encodeURIComponent(s); })
-  var rest_url = args.join('/');
-  console.log( "rest_url = " + rest_url );
-}
+  tr.attr('class', 'clickable')
+    .on("click",function(d){
+      show_content_view(d);
+    })
+    .on("mouseover", function(d){})
+    .on("mouseout", function(d){});
+
+  // cells
+  var td = tr.selectAll("td")
+    .data(function(d){
+      return [d.id, d.created, d.assoc_users.length, d.content_size, d.content];
+    })
+    .enter().append("td")
+    .style("padding", "5px")
+    .style("font-size","10px")
+    .style("fill","blue")
+    .append('div')
+    .html(function(d,i) {
+      if (i == 0) { 
+        return $('<_>').append(
+          $('<span>', { 'title' : d})
+            .html((d.length > 40) ? d.substring(0, 37) + "..." : d))
+          .html();
+      }
+      if (i == 2) {
+        var px = d > 100 ? 100 : d;
+        return "<div style='background-color: blue;height: 10px;width: " +px +"px;' title='" + +d + "'/>";}
+      
+      if (i == 3) {
+        var px = (d / 2) > 100 ? 100 : (d / 2);
+        return "<div style='background-color: green;height: 10px;width: " +px +"px;' title='" + +d + "'/>";}
+      
+      if (i == 9) {
+        var px = (d * 10) > 100 ? 100 : (d * 10);
+        return "<div style='background-color: orange;height: 10px;width: " +px +"px;' title='" + +d + "'/>";}
+      return d;
+    })
+    .style("color", function(d,i) {
+      return 'black';
+    })
+    .style("stroke","#FFFFFF");
+
+  if (control_panel.isOpen()){
+    //resizes control panel
+    control_panel.open();
+  }
+};
+
 
 // Draw a graph for a component
 function drawGraph(graph){
@@ -280,13 +408,26 @@ function drawGraph(graph){
         $('#radial').find(".email").first()
           .unbind('click')
           .on("click", function(){
-            //do_search("email", n.name);
+            if (n.type == "post"){
+              //find the node in the table and load it in the content tab
+              var post = _.first(
+                d3.selectAll("#result_table>tbody>tr").filter(function(d){
+                  return d.id == n.name;
+                }).data());
+              show_content_view(post);
+            }
+            if (n.type == "user"){
+              var url = "/user/" + CURRENT_USER.getType() + "/" + n.name;
+              hasher.setHash(url);                    
+            }
+            console.log(n);
           }).find("span").first()
           .css("color", "white");
 
         $('#radial').find(".community").first()
           .unbind('click')
           .on("click", function(){
+            console.log(n);
           //do_search("community", n.community);
         }).find("span").first()
           .css("color", "red");
@@ -395,17 +536,98 @@ function node_highlight(email){
   };
 };
 
-function draw_confidence_chart(confidence_scores, which) {
+function drawTopAssoc(nodes) {
+  $('#top-assoc').empty();
+  var color = d3.scale.category20();
+  if (nodes.length < 1) {
+    $('#top-assoc').append($('<p>').html("No results for associated users."));
+  }
+  var users = _.filter(nodes, function(n){ return n.type == "user"; });
+  var top20 = _.take(_.sortBy(users, function(n){ return +n.value * -1;}), 20)
+  var step = 100.0 / _.reduce(top20, function(m, n){ return m + n.value; }, 0.000001);
+  var type = CURRENT_USER.getType();
+  var scores = _.map(top20, 
+                     function(o){
+                       var rank = (o.value * step ) / 25.0;
+                       rank = (rank > 1.0) ? .999 : rank;
+                       return { "type" : type,
+                                "user_id": o.name,
+                                "rank": rank };
+                     });
+
+  var width = 400, barHeight = 20;
+  var margin = {top: 20, right: 10, bottom: 20, left: 150};
+  width = width - margin.left - margin.right;
+
+  var x = d3.scale.linear().range([0, width]);
+  var chart = d3.select("#top-assoc").append('svg')
+    .attr('class', 'chart')
+    .attr("width", width + margin.left + margin.right);
+
+  x.domain([0, 100]);
+  chart.attr("height", barHeight * (scores.length+ 1));
+
+  var bar = chart.selectAll("g")
+    .data(scores).enter()
+    .append("g")
+    .attr("transform", function(d, i) { return "translate(" + margin.left + "," + (+(i * barHeight) + +margin.top) + ")";});
+
+  bar.append("rect")
+    .attr("width", function(d) {
+      return x((+d.rank * 100));
+    })
+    .attr("height", barHeight - 1)
+    .style("fill", function(d, i) {
+      return color(i);
+    })
+    .on("click", function(d){ })
+    .append('title').text(function(d) { return d.user_id;});
+
+  // bar.append("text")
+  //   .attr("x", function(d) { return x((+d.rank * 100)) - 3;})
+  //   .attr("y", barHeight / 2)
+  //   .attr("dy", ".35em")
+  //   .text(function(d) { return +d.rank;});
+
+  bar.append("text")
+    .attr("x", function(d) { return -margin.left;})
+    .attr("y", barHeight / 2)
+    .attr("class", "label clickable")
+    //.style("fill", function(d) {})
+    .text(function(d) { 
+      return d.user_id;
+      //return (d.user_id.length > 25) ? d.email.substr(0,25) + ".." : d.email; 
+    })
+    .on("click", function(d){
+      var url = "/user/" + d.type + "/" + d.user_id
+      hasher.setHash(url);      
+    })
+    .on("mouseover", function(d){ })
+    .on("mouseout", function(d){ })
+    .append('title').text(function(d) { return d.user_id; });
+}
+
+function draw_confidence_chart(confidence_scores) {
   $('#top-rank').empty();
   var color = d3.scale.category20();
   if (confidence_scores.length < 1) {
     $('#top-rank').append($('<p>').html("No results for rank."));
   }
-
+  var type = CURRENT_USER.getType();
+  var which_id_type = {"twitter": "instagram_id", 
+                      "instagram": "twitter_id"}[type];
+  var switched_type = { "twitter" : "instagram", 
+                      "instagram": "twitter"}[type];
   var scores = _.sortBy(
-    _.map(confidence_scores, function(o){
-      return { "type" : "twitter", "user_id": o['twitter_id'], "rank": parseFloat(o['score'])}
-    }), function(o){ return 1-o.rank});
+    _.map(confidence_scores, 
+          function(o){
+            return { "type" : switched_type, 
+                     "user_id": o[which_id_type], 
+                     "rank": parseFloat(o['score'])};
+          }), 
+    function(o){ 
+      return 1-o.rank;
+    });
 
   var width = 400, barHeight = 20;
   var margin = {top: 20, right: 10, bottom: 20, left: 150};
@@ -451,7 +673,8 @@ function draw_confidence_chart(confidence_scores, which) {
       //return (d.user_id.length > 25) ? d.email.substr(0,25) + ".." : d.email; 
     })
     .on("click", function(d){
-      alert(d);
+      var url = "/user/" + d.type + "/" + d.user_id
+      hasher.setHash(url);      
     })
     .on("mouseover", function(d){ })
     .on("mouseout", function(d){  })
@@ -477,11 +700,15 @@ $(function () {
       url: 'mediasearch/' + type + "/" + username,
       type: 'GET'
     }).done(function(resp){
-      drawGraph(resp.graph);
+      CURRENT_USER.setUser(type, username);
+      drawTopAssoc(resp.graph.nodes);
       draw_confidence_chart(resp.similar);
-      //drawTable(resp.posts);
+      drawTable(resp.posts);
+      drawGraph(resp.graph);
       //draw_rank_chart();      
-    })
+    }).fail(function(resp){
+      alert("No data found for account - " + username + " on "+  type)
+    });
   });
 
   crossroads.routed.add(function(req, data){
