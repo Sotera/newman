@@ -59,7 +59,7 @@ def twtpost(j):
     o['created']=parseTwitterStr(jsonGet(["_source", "post", "created_at"], j,""))
     o['content']=jsonGet(["_source", "post", "text"],j,"")
     o['content_size'] = len(o['content'])
-    o['tags'] = jsonGet(["_source", "post", "entities","hashtags"], j, []) 
+    o['tags'] = [jsonGet(["text"], t, "") for t in  jsonGet(["_source", "post", "entities","hashtags"], j, [])]
     o['url'] = "http://twitter.com/{}/status/{}".format(jsonGet(["_source", "username"], j, ""), o['id'])
     mentions = jsonGet(["_source", "post", "entities", "user_mentions"], j, [])
     mentions_users = [jsonGet(["screen_name"],m,"") for m in mentions]
