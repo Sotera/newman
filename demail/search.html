@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<title>Newman</title>
-<head>
+<html lang="en">
+  <head>
     <meta charset="utf-8">
     <title>newman</title>
     <link href="css/thirdparty/jquery-ui.css" rel="stylesheet">
@@ -8,12 +8,6 @@
     <link href="css/thirdparty/bootstrap.min.css" rel="stylesheet">
     <link href="css/thirdparty/bootstrap-glyphicons.css" rel="stylesheet">
     <link href="css/default.css" rel="stylesheet">
-
-    <!-- Boilerplate JavaScript -->
-    <script src="js/thirdparty/jquery-1.9.1.min.js"></script>
-
-    <!-- The app's JavaScript -->
-    <script src=js/searchtool.js></script>
     <style>
         input[type="text"] {
             display: block;
@@ -22,7 +16,9 @@
             font-family: sans-serif;
             font-size: 18px;
             box-shadow: none;
+            letter-spacing: .15em;
             background: #eeeeee;
+            border-radius: 10px;
         }
 
         .style-1 input[type="text"] {
@@ -50,48 +46,53 @@
             float: left;
         }
 
+        a.link {
+          font-size: 16px;
+          text-decoration: none;
+        }
+
     </style>
-</head>
-
-<body>
-<div class="navbar navbar-default navbar-fixed-top">
-    <div class="navbar-header">
-        <div class="navbar-brand">newman</div>
+  </head>
+  <body>
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="navbar-header">
+        <div class="navbar-brand">newman-media</div>
+      </div>
     </div>
-</div>
 
-<h1 align="center">Newman Search Engine</h1>
-<ul class="input-list style-1 clearfix">
-    <div align="center">
+    <h1 align="center">User Search</h1>
+    <ul class="input-list style-1 clearfix">
+      <div align="center">
         <li style="padding-top: 15px;">
           <div>
             <input id="txt_search" type="text" class="form-control"
                    placeholder="Search username...">
           </div>
-          <div style="padding: 15px">
-            <button id="search-btn" class="btn btn-class">Search</button>
-          </div>
         </li>
-    </div>
-</ul>
-<br><br><br>
-<!-- A place to show the output -->
-<div id="output">
-    <table class="instagram" id="ig">
-      <thead>
-        <tr>
+      </div>
+    </ul>
+
+    <div style="padding: 35px" />
+    <!-- A place to show the output -->
+    <div id="output">
+      <table class="instagram" id="ig">
+        <thead>
+          <tr>
             <th style="text-align: center">Instagram</th>
-        </tr>
+          </tr>
         </thead>
-      <tbody />
-    </table>
-    <table class="twitter" id="tw">
-      <thead>
-        <tr>
+        <tbody />
+      </table>
+      <table class="twitter" id="tw">
+        <thead>
+          <tr>
             <th style="text-align: center">Twitter</th>
-        </tr>
+          </tr>
         </thead>
-      <tbody />
-    </table>
-</div>
-</body>
+        <tbody />
+      </table>
+    </div>
+    <script src="js/thirdparty/jquery-1.9.1.min.js"></script>
+    <script src="js/searchtool.js"></script>
+  </body>
+</html>

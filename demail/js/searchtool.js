@@ -40,7 +40,7 @@ $(function () {
               $('<td>').append(
                 $('<a>', 
                   {"href" : createTwHyperlink(twt_name), 
-                   "text": twt_name}))))})
+                   "text": twt_name}).addClass('link'))))})
 
           $.each(igResponse[0], function(i, ig_name){
             tbl_instagram.append(
@@ -48,7 +48,7 @@ $(function () {
                 $('<td>').append(
                   $('<a>', 
                     {"href" : createIgHyperlink(ig_name), 
-                     "text": ig_name}))))});
+                     "text": ig_name}).addClass('link'))))});
       })
       .fail(function () {
         console.log("Fail");
@@ -67,6 +67,4 @@ $(function () {
       do_search();
       return false;  
     }});
-
-  $("#search-btn").click(function(){ do_search(); });
 });
