@@ -75,8 +75,13 @@
         <div class="col-sm-6" style= "height: calc(100% - 52px);">
           <div style= "height: 100%;">
             <!-- Nav tabs -->
-            <ul class="nav nav-tabs" style="width: 600px;" role="tablist" id="tab-list">
+            <ul class="nav nav-tabs" style="width: 600px;"
+                role="tablist" id="tab-list">
               <li class="active">
+                <a href="#top-tags" role="tab"
+                   data-toggle="tab">Tags</a>
+              </li>
+              <li>
                 <a href="#top-rank" role="tab"
                 data-toggle="tab">Confidence</a>
               </li>
@@ -85,19 +90,15 @@
                 data-toggle="tab">Associated Users</a>
               </li>
               <li>
-                <a href="#top-tags" role="tab"
-                   data-toggle="tab">Tags</a>
-              </li>
-              <li>
                 <a href="#content-body-tab" role="tab"
                 data-toggle="tab">Content</a>
               </li>
             </ul>
             <!-- Tab panes -->
             <div class="tab-content" style= "height: 100%;">
-              <div class="tab-pane active" id="top-rank"> </div>
+              <div class="tab-pane active" id="top-tags"></div>
+              <div class="tab-pane" id="top-rank"> </div>
               <div class="tab-pane" id="top-assoc"></div>
-              <div class="tab-pane" id="top-tags"></div>
               <div class="tab-pane" id="content-body-tab" style="height: 100%;">
                 <div id="post-body" style="padding: 15px;"> Select a post to preview </div>
               </div>
