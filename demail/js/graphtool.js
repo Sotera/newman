@@ -4,19 +4,17 @@
  *  instantiate user-ale-logger
  */
 var ale = new userale({
-    //loggingUrl: 'http://10.1.93.208', //The url of the User-ALE
-  //logging server.
-    loggingUrl: 'http://0.0.0.0', //The url of the User-ALE logging server.
-    toolName: 'newman', //The name of your tool
-    toolVersion: '1.1.2', //The semantic version of your tool
-    elementGroups: [ //A list of element groups used in your tool (see below)
-      'view_group',
-      'search_group'
-    ],
-    workerUrl: 'js/thirdparty/userale-worker.js', //The location of the User-ALE webworker file
-    debug: true, //Whether to log messages to console
-    sendLogs: false //Whether or not to send logs to the server (useful during testing)
-});
+      loggingUrl: 'http://10.1.93.208', //The url of the User-ALE logging server.
+      toolName: 'newman', //The name of your tool
+      toolVersion: 'media', //The semantic version of your tool
+      elementGroups: [ //A list of element groups used in your tool (see below)
+        'view_group',
+        'search_group'
+      ],
+      workerUrl: 'js/thirdparty/userale-worker.js', //The location of the User-ALE webworker file
+      debug: true, //Whether to log messages to console
+      sendLogs: true //Whether or not to send logs to the server (useful during testing)
+    });
 ale.register();
 
 
@@ -192,7 +190,20 @@ function show_content_view(postObj){
              .append(_.map(assoc_users, function(u){
                return $('<a>', { "style" : "padding: 5px;"}).on("click", function(){
                  var url = "/user/" + CURRENT_USER.getType() + "/" + u
-                 hasher.setHash(url);               
+                 hasher.setHash(url);
+
+                 //user-ale logging
+                 var msg = {
+                   activity: 'perform',
+                   action: 'click',
+                   elementId: this.getAttribute('id') || 'UNK',
+                   elementType: 'workspace',
+                   elementGroup: 'view_group',
+                   source: 'user',
+                   tags: ['select', 'view']
+                 };
+                 ale.log(msg);
+
                }).html(u);
              }))),
      $('<div>', { "style" : "padding-top: 10px;"})
@@ -232,6 +243,20 @@ function drawTable(posts){
     .on("click", function(k, i){
       var direction = (lastSort == k) ? -1 : 1;
       lastSort = (direction == -1) ? "" : k; //toggle
+
+        //user-ale logging
+        var msg = {
+          activity: 'perform',
+          action: 'click',
+          elementId: this.getAttribute('id') || 'UNK',
+          elementType: 'workspace',
+          elementGroup: 'view_group',
+          source: 'user',
+          tags: ['select', 'view']
+        };
+        ale.log(msg);
+
+
       d3.select("#result_table").select("tbody").selectAll("tr").sort(function(a, b) {
         if (i == 0){
           return a.id.localeCompare(b.id) * direction;
@@ -260,6 +285,19 @@ function drawTable(posts){
   tr.attr('class', 'clickable')
     .on("click",function(d){
       show_content_view(d);
+
+        //user-ale logging
+        var msg = {
+          activity: 'perform',
+          action: 'click',
+          elementId: this.getAttribute('id') || 'UNK',
+          elementType: 'workspace',
+          elementGroup: 'view_group',
+          source: 'user',
+          tags: ['select', 'view']
+        };
+        ale.log(msg);
+
     })
     .on("mouseover", function(d){})
     .on("mouseout", function(d){});
@@ -425,6 +463,20 @@ function drawGraph(graph){
               hasher.setHash(url);                    
             }
             console.log(n);
+
+
+              //user-ale logging
+            var msg = {
+              activity: 'perform',
+              action: 'click',
+              elementId: this.getAttribute('id') || 'UNK',
+              elementType: 'workspace',
+              elementGroup: 'view_group',
+              source: 'user',
+              tags: ['select', 'view']
+            };
+            ale.log(msg);
+
           }).find("span").first()
           .css("color", "white");
 
@@ -433,6 +485,18 @@ function drawGraph(graph){
           .on("click", function(){
             console.log(n);
           //do_search("community", n.community);
+
+            //user-ale logging
+            var msg = {
+              activity: 'perform',
+              action: 'click',
+              elementId: this.getAttribute('id') || 'UNK',
+              elementType: 'workspace',
+              elementGroup: 'view_group',
+              source: 'user',
+              tags: ['select', 'view']
+            };
+            ale.log(msg);
         }).find("span").first()
           .css("color", "red");
 
@@ -445,6 +509,19 @@ function drawGraph(graph){
 
   node.on("click", function(n){
     click_node(n);
+
+    //user-ale logging
+    var msg = {
+      activity: 'perform',
+      action: 'click',
+      elementId: this.getAttribute('id') || 'UNK',
+      elementType: 'workspace',
+      elementGroup: 'view_group',
+      source: 'user',
+      tags: ['select', 'view']
+    };
+    ale.log(msg);
+
   });
 
   node.on("mouseover", function() { 
@@ -596,7 +673,21 @@ function drawTopTags(posts) {
     .style("fill", function(d, i) {
       return color(i);
     })
-    .on("click", function(d){ })
+    .on("click", function(d){
+
+        //user-ale logging
+        var msg = {
+          activity: 'perform',
+          action: 'click',
+          elementId: this.getAttribute('id') || 'UNK',
+          elementType: 'tab',
+          elementGroup: 'view_group',
+          source: 'user',
+          tags: ['select', 'view']
+        };
+        ale.log(msg);
+
+    })
     .append('title').text(function(d) { return d[0];});
 
   // bar.append("text")
@@ -615,6 +706,18 @@ function drawTopTags(posts) {
       //return (d.user_id.length > 25) ? d.email.substr(0,25) + ".." : d.email; 
     })
     .on("click", function(d){
+
+        //user-ale logging
+        var msg = {
+          activity: 'perform',
+          action: 'click',
+          elementId: this.getAttribute('id') || 'UNK',
+          elementType: 'tab',
+          elementGroup: 'view_group',
+          source: 'user',
+          tags: ['select', 'view']
+        };
+        ale.log(msg);
     })
     .on("mouseover", function(d){ })
     .on("mouseout", function(d){ })
@@ -665,7 +768,21 @@ function drawTopAssoc(nodes) {
     .style("fill", function(d, i) {
       return color(i);
     })
-    .on("click", function(d){ })
+    .on("click", function(d){
+
+        //user-ale logging
+        var msg = {
+          activity: 'perform',
+          action: 'click',
+          elementId: this.getAttribute('id') || 'UNK',
+          elementType: 'tab',
+          elementGroup: 'view_group',
+          source: 'user',
+          tags: ['select', 'view']
+        };
+        ale.log(msg);
+
+    })
     .append('title').text(function(d) { return d.user_id;});
 
   // bar.append("text")
@@ -684,8 +801,22 @@ function drawTopAssoc(nodes) {
       //return (d.user_id.length > 25) ? d.email.substr(0,25) + ".." : d.email; 
     })
     .on("click", function(d){
-      var url = "/user/" + d.type + "/" + d.user_id
-      hasher.setHash(url);      
+
+        var url = "/user/" + d.type + "/" + d.user_id
+        hasher.setHash(url);
+
+        //user-ale logging
+        var msg = {
+          activity: 'perform',
+          action: 'click',
+          elementId: this.getAttribute('id') || 'UNK',
+          elementType: 'tab',
+          elementGroup: 'view_group',
+          source: 'user',
+          tags: ['select', 'view']
+        };
+        ale.log(msg);
+
     })
     .on("mouseover", function(d){ })
     .on("mouseout", function(d){ })
@@ -745,7 +876,21 @@ function draw_confidence_chart(confidence_scores) {
     .style("fill", function(d, i) {
       return color(i);
     })
-    .on("click", function(d){ })
+    .on("click", function(d){
+
+        //user-ale logging
+        var msg = {
+          activity: 'perform',
+          action: 'click',
+          elementId: this.getAttribute('id') || 'UNK',
+          elementType: 'tab',
+          elementGroup: 'view_group',
+          source: 'user',
+          tags: ['select', 'view']
+        };
+        ale.log(msg);
+
+    })
     .append('title').text(function(d) { return d.user_id;});
 
   // bar.append("text")
@@ -765,7 +910,20 @@ function draw_confidence_chart(confidence_scores) {
     })
     .on("click", function(d){
       var url = "/user/" + d.type + "/" + d.user_id
-      hasher.setHash(url);      
+      hasher.setHash(url);
+
+        //user-ale logging
+        var msg = {
+          activity: 'perform',
+          action: 'click',
+          elementId: this.getAttribute('id') || 'UNK',
+          elementType: 'tab',
+          elementGroup: 'view_group',
+          source: 'user',
+          tags: ['select', 'view']
+        };
+        ale.log(msg);
+
     })
     .on("mouseover", function(d){ })
     .on("mouseout", function(d){  })
