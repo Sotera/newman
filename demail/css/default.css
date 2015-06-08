@@ -26,10 +26,10 @@ ul {
     padding-top: 10px;
 }
 
-.body-view > p {
+.post-view > p {
     margin: 0 0 5px;
 }
-.body-view .bold {
+.post-view .bold {
     font-weight: bold;
 }
 
@@ -370,11 +370,12 @@ a.ctrl:focus, .ctrl a:focus { outline: none; }
 /* .slice:nth-child(3) { transform: rotate(15deg) skewY(60deg); } */
 /* .slice:nth-child(4) { transform: rotate(45deg) skewY(60deg); } */
 /* .slice:last-child { transform: rotate(75deg) skewY(60deg); } */
-
+.slice:first-child { transform: rotate(15deg) skewY(60deg); }
+/*
 .slice:first-child { transform: rotate(-15deg) skewY(60deg); }
 .slice:nth-child(2) { transform: rotate(15deg) skewY(60deg); }
 .slice:nth-child(3) { transform: rotate(45deg) skewY(60deg); }
-
+*/
 
 
 /* covers for the inner part of the links so there's no hover trigger between

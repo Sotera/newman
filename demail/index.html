@@ -14,185 +14,56 @@
   <body>
     <!-- hidden link //hack -->
     <a id="alink" class='button ctrl'
-    style="height:0;width:0;position: absolute;top: -2000px;" href='#'
-    tabindex='1'></a>
+       style="height:0;width:0;position: absolute;top: -2000px;" 
+       href='#' tabindex='1'></a>
 
     <div id="radial-wrap" class="tip ctrl">
       <div class="email_addr"><a><span></span></a></div>
       <ul id="radial">
-        <li class='slice'>
-          <a class="clickable attach" title="Show Attachments">
-            <span class="glyphicon glyphicon-file"></span>
-          </a>
-        </li>
+        <!-- <li class='slice'> -->
+        <!--   <a class="clickable attach" title="Show Attachments"> -->
+        <!--     <span class="glyphicon glyphicon-file"></span> -->
+        <!--   </a> -->
+        <!-- </li> -->
         <li class='slice'>
           <a class="clickable email" title="Search By Email">
-            <span class="glyphicon glyphicon-envelope"></span> 
-          </a>
-        </li>
-        <li class='slice'>
-          <a class="clickable community" title="Search By Community">
             <span class="glyphicon glyphicon-search"></span> 
           </a>
         </li>
+        <!-- <li class='slice'> -->
+        <!--   <a class="clickable community" title="Search By Community"> -->
+        <!--     <span class="glyphicon glyphicon-search"></span>  -->
+        <!--   </a> -->
+        <!-- </li> -->
       </ul>
-    </div>
-
-    <!-- modal info panel -->
-    <div id="info-panel" class="modal fade">
-      <div class="modal-dialog">
-        <div class="modal-content">
-
-          <div class="modal-header">
-            <h3>Information</h3>
-          </div>
-
-          <div class="modal-body">
-    	    Will fill this in later...
-          </div>
-
-          <div class="modal-footer">
-            <a class="btn btn-default" data-dismiss="modal">OK</a>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- modal email download/export -->
-    <div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-labelledby="exportModal" aria-hidden="true">
-      <div class="modal-dialog">
-	<div class="modal-content">
-	  <div class="modal-header">
-	    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-	    <h4 class="modal-title">Download</h4>
-	  </div>
-	  <div id="exportList" class="modal-body">
-            <div id="export_link_spin">
-              <img src="imgs/loading-spin.svg" height="32" width="64" />
-            </div>
-            <div id="export_download_link" style="display:none;">
-              <span class="glyphicon glyphicon-save" /> <a target="_blank">Download</a>
-            </div>
-	  </div>
-	  <div class="modal-footer">
-	    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-	  </div>
-	</div>
-      </div>
     </div>
 
     <!-- nav bar -->
     <div class="navbar navbar-default navbar-fixed-top" style="margin-bottom: 0px;">
       <div class="navbar-header">
-        <div class="navbar-brand">newman v1.1.3</div>
+        <div class="navbar-brand">newman-media</div>
       </div>
-      <ul class="nav navbar-nav list-group" style="margin-bottom: 0px;" id="data-source-tab-list" role="tablist">
-        <li class="list-group-item" style="padding: 0px; border: 0px;" role="tab" data-toggle="tab">
-          <a type="button" class="btn btn-default" style="cursor:pointer;"
-             title="Analyze Twitter data" href="#" id="data_source_twitter">
-            <span class="glyphicon glyphicon-retweet"> Twitter</span>
+      <ul class="nav navbar-nav">
+        <li>
+          <a style="cursor:pointer" id="current_user">
+            <span class="thetype" style="text-transform: uppercase;font-weight:bold;"></span>
+            <span class="username"></span>
           </a>
         </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <!--
-        <li>
-          <a class="btn btn-default" href="ingest.html" role="button">Add New Email <span class="glyphicon glyphicon-plus-sign"></span></a>
-        <li>
-	    <li>
-	      <a id="view_exportList" type="button" class="btn btn-default" data-toggle="modal" data-target="#exportModal">Export <span class="glyphicon glyphicon-list-alt"></span></a>
-	    </li>
-	    -->
       </ul>
-      <!-- <ul class="nav navbar-nav"> -->
-      <!--   <li> -->
-      <!--     <a style="cursor:pointer" data-toggle="modal" data-target="#info-panel"> -->
-      <!--       <span class="glyphicon glyphicon-info-sign"></span> Info -->
-      <!--     </a> -->
-      <!--   </li> -->
-      <!-- </ul> -->
       <div style="padding-right: 20px;">
         <form id="search_form" class="navbar-form navbar-right" role="search" style="color: white;">
-          <!--
-          <label class="radio-inline" >
-            <input type="radio" name="searchType" value="all" checked /> All
-          </label>
-          <label class="radio-inline">
-            <input type="radio" name="searchType" value="email" /> Email
-          </label>
-          -->
           <div class="form-group" style="padding-left: 10px;">
+            <a href="search.html">Search Users</a>
             <input id="txt_search" type="text" class="form-control"
                    placeholder="Search text..."
                    autocomplete="off"
-                   style="border-radius: 15px;width: 300px;background-color: rgba(255,255,255,0.9);">
+                   style="display:none;border-radius: 15px;width: 300px;background-color: rgba(255,255,255,0.9);">
           </div>
         </form>
       </div>
-    </div>
-    <div class="container-fluid" style="position: fixed;top: 50px;width: 50%;background-color: rgba(240,240,240,0.6);padding: 5px 5px;z-index: 999;font-size: 12px; border-bottom-right-radius: 10px;">
-
-        <div class="row">
-
-          <div class="col-xs-2" style="padding-left: 20px;padding-right: 0px;">
-            <label class="radio-inline"><input type="radio" name="optionRadios" id="profile_view"  value="profile" style="margin: 2px 0 0 -20px;" /> Profile</label>
-          </div>
-
-          <div class="col-xs-2" style="padding-left: 0px;padding-right: 0px;">
-            <label class="radio-inline"><input type="radio" name="optionRadios" id="match_view"  value="comm" style="margin: 2px 0 0 -20px;"  /> Match</label>
-          </div>
-
-          <div class="col-xs-2" style="padding-left: 0px;padding-right: 0px;">
-            <label class="radio-inline" style="padding-right: 10px;"><input type="radio" name="optionRadios" id="graph_view" value="node" style="margin: 2px 0 0 -20px;" checked /> Social</label>
-          </div>
-
-          <div class="col-xs-2" style="padding-left: 0px;padding-right: 0px;">
-            <!--<div style="padding-right: 10px;">Display</div>-->
-          </div>
-          <div class="col-xs-2" style="padding-left: 0px;padding-right: 0px;">
-
-            <label class="checkbox" style="padding-right: 10px;margin: 0;">
-              <input type="checkbox" name="optionrank" id="rankval" value="rank" /> Confidence
-            </label>
-
-          </div>
-          <div class="col-xs-2">
-            <label class="checkbox" style="padding-right: 10px;margin: 0;">
-              <input type="checkbox" id="usetext" /> Labels
-            </label>
-          </div>
-        </div>
-
-      <div class="row">
-        <div class="col-xs-2" style="padding-left: 12px;padding-right: 0px;">
-          <input type="text" id="time_range_start" readonly style="border:1px; background-color: rgba(240,240,240,0.6); color:#f6931f; font-weight:normal; font-size: 9px; width: 100%;">
-        </div>
-        <div class="col-xs-8" style="padding-left: 0px;padding-right: 0px;">
-          <div id="time_range_slider" style="font-size: 12px; background-color: rgba(240,240,240,0.6); width: 100%"></div>
-        </div>
-        <div class="col-xs-2" style="padding-left: 0px;padding-right: 0px;">
-          <input type="text" id="time_range_end" readonly style="border:1px; background-color: rgba(240,240,240,0.6); color:#f6931f; font-weight:normal; font-size: 9px; width: 100%;">
-        </div>
-
-      </div>
-             
-        <div class="row">
-
-          <div class="col-xs-12" style="padding-left: 0px;padding-right: 0px; border-top: 1px solid #000; text-align:center;">
-            <div style="height: 15px;">
-              <!--<span style="font-weight: normal">Legend</span>-->
-              <div id="toggle_legends">Legend <span class="glyphicon glyphicon-chevron-down"></span></div>
-            </div>
-
-            <div id="legend_list" style="padding-left: 12px; height: 0px;max-height:375px;overflow-y:scroll;">
-              <table id="legend-table" class="table">
-                <thead />
-                <tbody />
-              </table>
-            </div>
-          </div>
-        </div>
     </div>
 
     <!-- body -->
@@ -204,53 +75,35 @@
         <div class="col-sm-6" style= "height: calc(100% - 52px);">
           <div style= "height: 100%;">
             <!-- Nav tabs -->
-            <ul class="nav nav-tabs" style="width: 600px;" role="tablist" id="tab-list">
-              <li class="active"><a href="#top-rank" role="tab" data-toggle="tab">Confidence</a></li>
-              <!--<li><a href="#top-entities" role="tab" data-toggle="tab">Entities</a></li>-->
-              <li><a href="#email-body-tab" role="tab" data-toggle="tab">Content</a></li>
-              <!--
-              <li><a href="#topics-tab" role="tab" data-toggle="tab">Topics</a></li>
-              <li><a href="#attach-tab" role="tab" data-toggle="tab">Attachments</a></li>
-              -->
+            <ul class="nav nav-tabs" style="width: 600px;"
+                role="tablist" id="tab-list">
+              <li class="active">
+                <a href="#top-tags" role="tab"
+                   data-toggle="tab">Tags</a>
+              </li>
+              <li>
+                <a href="#top-rank" role="tab"
+                data-toggle="tab">Confidence</a>
+              </li>
+              <li>
+                <a href="#top-assoc" role="tab"
+                data-toggle="tab">Associated Users</a>
+              </li>
+              <li>
+                <a href="#content-body-tab" role="tab"
+                data-toggle="tab">Content</a>
+              </li>
             </ul>
-
             <!-- Tab panes -->
             <div class="tab-content" style= "height: 100%;">
-              <div class="tab-pane active" id="top-rank"> </div>
-              <div class="tab-pane" id="top-entities"></div>
-              <div class="tab-pane" id="email-body-tab" style="height: 100%;">
-                <div style="display: table;">
-                  <div style="display: inline-block;float:left;margin-top: 15px;">
-                    <a id="submit_activesearch" class="btn btn-default">Seed Active Search</a>
-                    <a id="submit_activesearch_like" class="btn btn-default" style="background-color: #00ff00"><span class="glyphicon glyphicon-thumbs-up" style="color: #000;"/></a>
-                    <a id="submit_activesearch_dislike" class="btn btn-default" style="background-color: #ff0000"><span class="glyphicon glyphicon-thumbs-down" style="color: #000"/></a>
-                  </div>
-                  <div style="background-color: #f0f0f0; padding: 5px; margin-left: 20px; float: left; display: inline-block;" id="topic_mini_chart"></div>
-		  <div style="display: inline-block;float:left;margin-top: 15px;margin-left: 20px;" class="active">
-		    <a id="submit_toggleExport" class="btn btn-default" style="background-color: #4888f3">
-                      <span class="glyphicon glyphicon-star" style="font-size:20px;" />
-                    </a>
-		  </div>
-                </div>
-                <div id="email-body"> Select an Email to preview </div>
+              <div class="tab-pane active" id="top-tags"></div>
+              <div class="tab-pane" id="top-rank"> </div>
+              <div class="tab-pane" id="top-assoc"></div>
+              <div class="tab-pane" id="content-body-tab" style="height: 100%;">
+                <div id="post-body" style="padding: 15px;"> Select a post to preview </div>
               </div>
-              <div class="tab-pane" id="topics-tab">
-                <table id="topics-table" class="info-table">
-                  <thead></thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-              <div class="tab-pane" id="attach-tab">
-                <div style="padding-bottom: 10px;">
-                  <span>Attachments for sender: </span><span id="attach-sender" style="font-weight: bold;"></span>
-                </div>
-                <div style="height: calc(100% - 30px);overflow-y: scroll;">
-                  <table id="attach-table" class="info-table"></table>
-                </div>
-              </div>
+
             </div>
-            <!-- Create an SVG element to represent the legend -->
-            <svg id="legend" style="position:fixed; top:100px; right:0px; pointer-events:none;"></svg>
           </div>
         </div>
       </div>
@@ -262,31 +115,14 @@
           <div class="col-sm-12" style="height: calc(100% - 25px);max-height: 250px;background-color:#d3d3d3;">
             <div style="height: 100%;max-height: 250px;">
               <div style="height: 25px;padding-top: 4px;">
+                <div style="float: left;padding-right: 9px;">
+                  <span> Posts: </span> <span id="posts_count"></span>
+                </div>
                 <!-- <div style="float: right;padding-right: 9px;"> -->
-                <!--   <a class="clickable"> -->
-                <!--     <span class="glyphicon glyphicon-folder-open" /> -->
+                <!--   <a class="clickable" id="email_view_marked"> -->
+                <!--     <span> View Exportable  </span> -->
                 <!--   </a> -->
                 <!-- </div> -->
-                <div style="float: left;padding-right: 9px;">
-                  <span> Documents: </span> <span id="document_count"></span>
-                </div>
-                <div style="float: right;padding-right: 9px;">
-                  <a class="clickable" id="email_view_marked">
-                    <span> View Exportable  </span>
-                  </a>
-                  | 
-                  <a class="clickable" id="email_view_export_all" title="Mark All">
-                    <span class="glyphicon glyphicon-plus"> </span>
-                  </a>
-                  | 
-                  <a class="clickable" id="email_view_export_all_remove" title="Unmark All">
-                    <span class="glyphicon glyphicon-minus"> </span>
-                  </a>
-                  |
-                  <!-- <a class="clickable" id="email_group_conversation" title="Conversations"> -->
-                  <!--   <span class="glyphicon glyphicon-tasks"></span> -->
-                  <!-- </a> -->
-                </div>
               </div>
               <div style="overflow-y: scroll;height: 100%;max-height: 225px;">
                 <table id="result_table" class="table" style="display:table;" >
