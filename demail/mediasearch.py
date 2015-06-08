@@ -72,8 +72,7 @@ def extractInstagram(posts):
     o['js'] = {}
     o['js']['post_count'] = len(posts)
     o['posts']= [ igpost(p) for p in posts]
-    o['js']['min_post'] = min(o['posts'], key=lambda x: x['created'])
-    o['js']['max_post'] = max(o['posts'], key=lambda x: x['created'])
+    o['js']['timeline'] = sorted([(p['created'], p['id'] ) for p in  o['posts']])
     return o
 
 def extractTwitter(posts):
@@ -81,8 +80,7 @@ def extractTwitter(posts):
     o['js'] = {}
     o['js']['result_count'] = len(posts)
     o['posts']= [ twtpost(p) for p in posts]
-    o['js']['min_post'] = min(o['posts'], key=lambda x: x['created'])
-    o['js']['max_post'] = max(o['posts'], key=lambda x: x['created'])
+    o['js']['timeline'] = sorted([(p['created'], p['id'] ) for p in  o['posts']])
     return o
 
 def similar(account_source, username):

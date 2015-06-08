@@ -608,7 +608,7 @@ function drawTopTags(posts) {
   bar.append("text")
     .attr("x", function(d) { return -margin.left;})
     .attr("y", barHeight / 2)
-    .attr("class", "label clickable")
+    .attr("class", "label")
     //.style("fill", function(d) {})
     .text(function(d) { 
       return d[0];
@@ -697,12 +697,18 @@ function draw_confidence_chart(confidence_scores) {
   var color = d3.scale.category20();
   if (confidence_scores.length < 1) {
     $('#top-rank').append($('<p>').html("No results for rank."));
+    return
   }
   var type = CURRENT_USER.getType();
   var which_id_type = {"twitter": "instagram_id", 
                       "instagram": "twitter_id"}[type];
   var switched_type = { "twitter" : "instagram", 
                       "instagram": "twitter"}[type];
+
+  $('#top-rank').append($('<div>').append(
+    $('<span>', { "style" : "font-weight: bold"})
+      .addClass('bold').html("Similar " + switched_type + " accounts")));
+
   var scores = _.sortBy(
     _.map(confidence_scores, 
           function(o){
@@ -796,6 +802,7 @@ $(function () {
 
     }).fail(function(resp){
       alert("No data found for account - " + username + " on "+  type)
+      window.history.back();
     });
   });
 
