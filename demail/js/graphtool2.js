@@ -742,11 +742,11 @@ function draw_confidence_chart(confidence_scores) {
     .on("click", function(d){ })
     .append('title').text(function(d) { return d.user_id;});
 
-  bar.append("text")
-    .attr("x", function(d) { return x((+d.rank * 100)) - 3;})
-    .attr("y", barHeight / 2)
-    .attr("dy", ".35em")
-    .text(function(d) { return +d.rank;});
+  // bar.append("text")
+  //   .attr("x", function(d) { return x((+d.rank * 100)) - 3;})
+  //   .attr("y", barHeight / 2)
+  //   .attr("dy", ".35em")
+  //   .text(function(d) { return +d.rank;});
 
   bar.append("text")
     .attr("x", function(d) { return -margin.left;})
