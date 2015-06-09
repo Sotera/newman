@@ -19,7 +19,9 @@ ale.register();
 $(function () {
 
   var do_search = function () {
-    var text = $("#txt_search").val();
+    var text = $("#txt_search").val().toLowerCase();
+    console.log( 'text_search: ' + text );
+
     var tbl_instagram = $("#ig>tbody");
     var tbl_twitter = $("#tw>tbody");
     var linkInstagram = "/#!/user/instagram/";
