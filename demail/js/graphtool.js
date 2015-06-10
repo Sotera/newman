@@ -321,11 +321,11 @@ function drawTable(posts){
       }
       if (i == 2) {
         var px = (d * 10) > 100 ? 100 : (d * 10);
-        return "<div style='background-color: blue;height: 10px;width: " +px +"px;' title='" + +d + "'/>";}
+        return "<div style='background-color: orange;height: 10px;width: " +px +"px;' title='" + +d + "'/>";}
 
       if (i == 3) {
         var px = (d * 10) > 100 ? 100 : (d * 10);
-        return "<div style='background-color: orange;height: 10px;width: " +px +"px;' title='" + +d + "'/>";}
+        return "<div style='background-color: purple;height: 10px;width: " +px +"px;' title='" + +d + "'/>";}
       
       if (i == 4) {
         var px = (d / 2) > 100 ? 100 : (d / 2);
