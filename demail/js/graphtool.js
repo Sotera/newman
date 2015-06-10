@@ -623,6 +623,9 @@ function drawTopTags(posts) {
   if (posts.length < 1) {
     $('#top-tags').append($('<p>').html("No results for tags."));
   }
+  else {
+      $('#top-tags').append($('<p>').html("The following are the top 20 hashtags and how often the tag appears."));
+  }
 
   var g = _.sortBy(
     _.groupBy(
@@ -688,7 +691,7 @@ function drawTopTags(posts) {
         ale.log(msg);
 
     })
-    .append('title').text(function(d) { return d[0];});
+    .append('title').text(function(d) { return d[1]['count']; });
 
   // bar.append("text")
   //   .attr("x", function(d) { return x((+d.rank * 100)) - 3;})
@@ -730,6 +733,10 @@ function drawTopAssoc(nodes) {
   if (nodes.length < 1) {
     $('#top-assoc').append($('<p>').html("No results for associated users."));
   }
+  else {
+    $('#top-assoc').append($('<p>').html("The following are the top 20 users and how often the user is associated with <b>" + CURRENT_USER.getUsername() + "</b>"));
+  }
+
   var users = _.filter(nodes, function(n){ return n.type == "user"; });
   var top20 = _.take(_.sortBy(users, function(n){ return +n.value * -1;}), 20)
   var step = 100.0 / _.reduce(top20, function(m, n){ return m + n.value; }, 0.000001);
@@ -783,7 +790,7 @@ function drawTopAssoc(nodes) {
         ale.log(msg);
 
     })
-    .append('title').text(function(d) { return d.user_id;});
+    .append('title').text(function(d) { return d.rank * 100 + "%"});
 
   // bar.append("text")
   //   .attr("x", function(d) { return x((+d.rank * 100)) - 3;})
@@ -830,6 +837,10 @@ function draw_confidence_chart(confidence_scores) {
     $('#top-rank').append($('<p>').html("No results for rank."));
     return
   }
+  else {
+    $('#top-rank').append($('<p>').html("The following are the possible aliases for <b>" + CURRENT_USER.getUsername() + "</b> and the confidence rating based on MIT scores."));
+  }
+
   var type = CURRENT_USER.getType();
   var which_id_type = {"twitter": "instagram_id", 
                       "instagram": "twitter_id"}[type];
