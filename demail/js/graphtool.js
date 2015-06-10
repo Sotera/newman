@@ -902,7 +902,7 @@ function draw_confidence_chart(confidence_scores) {
         ale.log(msg);
 
     })
-    .append('title').text(function(d) { return d.user_id;});
+    .append('title').text(function(d) { return "MIT score: " + d.rank; });
 
   // bar.append("text")
   //   .attr("x", function(d) { return x((+d.rank * 100)) - 3;})
