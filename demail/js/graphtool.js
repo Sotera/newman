@@ -46,8 +46,7 @@ var labels = false;
 var CURRENT_USER = (function(){
   var eltype = $("#current_user>span.thetype");
   var eluser = $("#current_user>span.username");
-  var lookup = {"instagram" : "ig", 
-                "twitter": "tw" };
+  var lookup = {"instagram" : "Instagram", "twitter": "Twitter" };
   var _user = "";
   var _type = "";
   var setUser = function(type, username){
@@ -569,7 +568,7 @@ function drawGraph(graph){
       return "translate(" + d.x + "," + d.y + ")";
     });
   });
-  //redraw_legend();
+
 }
 
 function redraw() {
