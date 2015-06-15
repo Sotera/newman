@@ -8,6 +8,7 @@
     <link href="css/thirdparty/bootstrap.min.css" rel="stylesheet">
     <link href="css/thirdparty/bootstrap-glyphicons.css" rel="stylesheet">
     <link href="css/default.css" rel="stylesheet">
+    <link href="css/thirdparty/font-awesome.min.css" rel="stylesheet">
     <style>
         input[type="text"] {
             display: block;
@@ -46,6 +47,13 @@
             float: left;
         }
 
+        table.results{
+            text-align: center;
+            border: solid 1px #FAFAFA;
+            width: 100%;
+            float: left;
+        }
+
         a.link {
           font-size: 16px;
           text-decoration: none;
@@ -74,23 +82,33 @@
 
     <div style="padding: 35px" />
     <!-- A place to show the output -->
+    <!--<div id="output">-->
+      <!--<table class="instagram" id="ig">-->
+        <!--<thead>-->
+          <!--<tr>-->
+            <!--<th style="text-align: center">Instagram</th>-->
+          <!--</tr>-->
+        <!--</thead>-->
+        <!--<tbody />-->
+      <!--</table>-->
+      <!--<table class="twitter" id="tw">-->
+        <!--<thead>-->
+          <!--<tr>-->
+            <!--<th style="text-align: center">Twitter</th>-->
+          <!--</tr>-->
+        <!--</thead>-->
+        <!--<tbody />-->
+      <!--</table>-->
+    <!--</div>-->
     <div id="output">
-      <table class="instagram" id="ig">
-        <thead>
-          <tr>
-            <th style="text-align: center">Instagram</th>
-          </tr>
-        </thead>
-        <tbody />
-      </table>
-      <table class="twitter" id="tw">
-        <thead>
-          <tr>
-            <th style="text-align: center">Twitter</th>
-          </tr>
-        </thead>
-        <tbody />
-      </table>
+        <table class="results" id="sr">
+            <thead>
+            <tr>
+                <th style="text-align: center">Search Results</th>
+            </tr>
+            </thead>
+            <tbody />
+        </table>
     </div>
     <script src="js/thirdparty/jquery-1.9.1.min.js"></script>
     <script src="js/thirdparty/userale.js"></script>

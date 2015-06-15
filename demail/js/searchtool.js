@@ -24,6 +24,7 @@ $(function () {
 
     var tbl_instagram = $("#ig>tbody");
     var tbl_twitter = $("#tw>tbody");
+    var tbl_results = $("#sr>tbody");
     var linkInstagram = "/#!/user/instagram/";
     var linkTwitter = "/#!/user/twitter/";
 
@@ -45,30 +46,34 @@ $(function () {
 
     $.when(instagram, twitter)
       .done(function (igResponse, tResponse) {
-        tbl_instagram.empty();
-        tbl_twitter.empty();
-        if (igResponse[0].length === 0){
-          tbl_instagram.append($('<tr>').append($('<td>').html('No Users Found')))
-        }
-        if (tResponse[0].length === 0) {
-          tbl_twitter.append($('<tr>').append($('<td>').html('No Users Found')))
-        }
-
+//        tbl_instagram.empty();
+//        tbl_twitter.empty();
+//        if (igResponse[0].length === 0){
+//          tbl_instagram.append($('<tr>').append($('<td>').html('No Users Found')))
+//        }
+//        if (tResponse[0].length === 0) {
+//          tbl_twitter.append($('<tr>').append($('<td>').html('No Users Found')))
+//        }
+          tbl_results.empty();
         $.each(tResponse[0], function(i, twt_name){
-          tbl_twitter.append(
+            tbl_results.append(
             $('<tr>').append(
               $('<td>').append(
-                $('<a>', 
-                  {"href" : createTwHyperlink(twt_name), 
-                   "text": twt_name}).addClass('link'))))})
+                $('<a>',
+                  {"href" : createTwHyperlink(twt_name),
+                   "text": twt_name + "  "}).addClass('link').append(
+                    $("<i>").addClass("fa fa-twitter")
+                ))))});
 
           $.each(igResponse[0], function(i, ig_name){
-            tbl_instagram.append(
+              tbl_results.append(
               $('<tr>').append(
                 $('<td>').append(
                   $('<a>', 
                     {"href" : createIgHyperlink(ig_name), 
-                     "text": ig_name}).addClass('link'))))});
+                     "text": ig_name + "  "}).addClass('link').append(
+                      $("<i>").addClass("fa fa-instagram")
+                  ))))});
       })
       .fail(function () {
         console.log("Fail");
