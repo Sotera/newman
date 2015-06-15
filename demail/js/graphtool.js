@@ -947,6 +947,21 @@ $(function () {
     return false;
   });
 
+  $('a[data-toggle=\"tab\"]').on('shown.bs.tab', function (e) {
+    var tab_name = console.log($(e.target).html());
+
+    var msg = {
+      activity: 'perform',
+      action: 'click',
+      elementId: this.getAttribute('id') || 'UNK',
+      elementType: 'tab',
+      elementGroup: 'view_group',
+      source: 'user',
+      tags: ['select', 'view']
+    };
+    //ale.log(msg);
+  });
+
   //$('#top-entities').append(waiting_bar);
 
   function parseHash(newHash, oldHash){
