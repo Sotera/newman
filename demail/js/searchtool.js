@@ -27,6 +27,8 @@ $(function () {
     var tbl_results = $("#sr>tbody");
     var linkInstagram = "/#!/user/instagram/";
     var linkTwitter = "/#!/user/twitter/";
+    var linkUserInstagram = "https://instagram.com/"
+    var linkUserTwitter = "https://twitter.com/"
 
     var instagram = $.ajax({
       url: 'mediasearch/user/instagram/' + text,
@@ -61,9 +63,12 @@ $(function () {
               $('<td>').append(
                 $('<a>',
                   {"href" : createTwHyperlink(twt_name),
-                   "text": twt_name + "  "}).addClass('link').append(
-                    $("<i>").addClass("fa fa-twitter")
-                ))))});
+                   "text": twt_name + " - "}).addClass('link').append(
+                    $("<i>").addClass("fa fa-twitter").append(
+                        $('<a>',
+                            {"href" : createTwUserHyperlink(twt_name),
+                                "text": " - User Website"}).addClass('link')
+                    )))))});
 
           $.each(igResponse[0], function(i, ig_name){
               tbl_results.append(
@@ -71,9 +76,12 @@ $(function () {
                 $('<td>').append(
                   $('<a>', 
                     {"href" : createIgHyperlink(ig_name), 
-                     "text": ig_name + "  "}).addClass('link').append(
-                      $("<i>").addClass("fa fa-instagram")
-                  ))))});
+                     "text": ig_name + " - "}).addClass('link').append(
+                      $("<i>").addClass("fa fa-instagram").append(
+                          $('<a>',
+                              {"href" : createIgUserHyperlink(ig_name),
+                                  "text": " - User Website"}).addClass('link')
+                      )))))});
       })
       .fail(function () {
         console.log("Fail");
@@ -84,6 +92,12 @@ $(function () {
     }
     function createTwHyperlink(username) {
       return linkTwitter + username;
+    }
+    function createIgUserHyperlink(username) {
+      return linkUserInstagram + username;
+    }
+    function createTwUserHyperlink(username) {
+      return linkUserTwitter + username;
     }
   }
 
