@@ -89,4 +89,40 @@
     color:#fff;
 }
 
+/***********************
+  THIN OUTLINE CLEAR BUTTONS
+************************/
+
+.btn.outline {
+    background: none;
+    padding: 2px 2px 2px 2px;
+    border-radius: 6px;
+    border: 0px solid #0080AB;
+    color: #0080AB;
+    font-weight:normal;
+    font-size: 12px;
+}
+.btn-small.outline {
+    position: relative;
+    width: auto;
+    height: auto;
+}
+.btn-small.outline:hover {
+    color: #006588;
+    border-radius: 6px;
+    border: 1px solid #006588;
+}
+.btn-small.outline:focus, .btn-small.outline:active, .btn-small.outline.active, .open > .dropdown-toggle.btn-small {
+    color: #0080AB;
+    border: none;
+    outline: none;
+}
+/*
+.btn-small.outline:focus, .btn-small.outline:active, .btn-small.outline.active, .open > .dropdown-toggle.btn-small {
+    color: #006588;
+    border-radius: 6px;
+    border: 1px solid #006588;
+    box-shadow: none;
+}
+*/
 

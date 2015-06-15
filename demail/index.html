@@ -7,10 +7,10 @@
     <link href="css/ner.css" rel="stylesheet">
     <link href="css/thirdparty/bootstrap.min.css" rel="stylesheet">
     <link href="css/thirdparty/bootstrap-glyphicons.css" rel="stylesheet">
+    <link href="css/thirdparty/font-awesome.min.css" rel="stylesheet">
     <link href="css/default.css" rel="stylesheet">
     <link href="css/custom-bootstrap.css" rel="stylesheet">
     <link href="css/profile-chart.css" rel="stylesheet">
-    <link href="css/thirdparty/font-awesome.min.css" rel="stylesheet">
   </head>
   <body>
     <!-- hidden link //hack -->
@@ -42,20 +42,27 @@
     <!-- nav bar -->
     <div class="navbar navbar-default navbar-fixed-top" style="margin-bottom: 0px;">
       <div class="navbar-header">
-        <div class="navbar-brand">newman-media</div>
+        <div class="navbar-brand">newman media</div>
       </div>
-      <ul class="nav navbar-nav">
+      <ul class="nav navbar-nav" style="width: 30%;">
         <li>
-          <a style="cursor:pointer" id="current_user">
-            <span class="thetype" style="text-transform: uppercase;font-weight:bold;"></span>
-            <span class="username"></span>
-          </a>
+          <div style="width: 200px; padding-top: 15px; text-align: left;">
+            <a style="width: 200px; color: white;" id="current_user">
+              <span id="data_source_icon" class="fa fa-instagram fa-inverse fa-lg"></span>
+              <!--<span class="thetype" style="text-transform: uppercase;font-weight:bold;"></span>-->
+              <span class="username" style="color: white;font-size: 15px;font-weight:normal;"></span>
+            </a>
+          </div>
+        </li>
+        <li>
+          <div style="width: 150px; padding-top: 15px; text-align: right; color: white;">
+            <span class="fa fa-search fa-inverse fa-lg"></span>
+            <a href="search.html" style="font-size: 15px; font-weight:bold; color: white;"> New User </a>
+          </div>
         </li>
       </ul>
       <ul class="nav nav-center nav navbar-right">
         <li>
-          <div style="padding-right: 20px; padding-top: 10%;">
-            <a href="search.html" style="color: white;font-size: 16px;font-weight:bold;">Search Users <span class="glyphicon glyphicon-search"></span></a>
             <!--
             <form id="search_form" class="navbar-form navbar-right" role="search" style="color: white;">
               <div class="form-group" style="padding-left: 10px;">
@@ -67,7 +74,6 @@
               </div>
             </form>
             -->
-          </div>
 	    </li>
 	  </ul>
     </div>
@@ -128,16 +134,24 @@
 
       </div>
              
-      <div class="row">
+      <div class="row" id="legend-toggle">
 
          <div class="col-xs-12">
-           <div class="row" style="padding-left: 20px;padding-right: 0px; border-top: 1px solid #000; text-align:left;">
-             <div style="height: 18px;">
-               <div id="toggle_legends" data-toggle="collapse" data-target="#legends">Legend <span class="glyphicon glyphicon-chevron-down" data-toggle="collapse" data-target="#legends"></span></div>
-             </div>
+
+           <div class="row" style="padding-left: 20px; height: 20px; padding-right: 1px; border-top: 0px solid #000; text-align:left;">
+               <!--
+               <button type="button" class="btn btn-small outline" id="toggle_legends" data-toggle="collapse" data-target="#graph-legends">Legend
+                 <span class="glyphicon glyphicon-chevron-up"></span>
+               </button> -->
+
+               <button type="button" class="btn btn-small outline" id="toggle_legends">Legend
+                 <span class="glyphicon glyphicon-chevron-up"></span>
+               </button>
+
            </div>
 
-            <div id="legends" class="collapse in" style="padding-left: 12px; height: 0px;max-height:375px;overflow-y:scroll;">
+            <!--<div id="graph-legends" class="collapse in" style="padding-left: 12px; padding-top: 4px; height: 0px; max-height:375px; overflow-y:scroll;">-->
+           <div id="graph-legends" class="container-fluid" style="padding-left: 12px; padding-top: 4px; height: 40px; display: block;">
               <div class="row" style="width:100%; height: 20px;">
                 <div class="col-xs-2">
                   <div class="progress-bar progress-bar-legend-user"
@@ -145,15 +159,15 @@
                        aria-valuenow="60"
                        aria-valuemin="0"
                        aria-valuemax="100"
-                       style="width:100%; height: 16px;" id="legend_color_bar_user"> user
+                       style="width:100%; height: 16px; border-radius: 4px;" id="legend_color_bar_user"> user
                   </div>
                 </div>
                 <div class="col-xs-1" style="text-align:left; padding-left: 0px;padding-right: 0px;">
                   <input type="text" id="legend_user_count" readonly
                          style="color: #000000;
-                         font-weight:normal;
+                         font-weight: normal;
                          font-size: 10px;
-                         border:0px;
+                         border: 0px;
                          background-color: rgba(240,240,240,0.0);
                          width: 100%;" >
                 </div>
@@ -168,13 +182,13 @@
                        aria-valuenow="60"
                        aria-valuemin="0"
                        aria-valuemax="100"
-                       style="width:100%; height: 16px;" id="legend_color_bar_post"> post
+                       style="width:100%; height: 16px; border-radius: 4px;" id="legend_color_bar_post"> post
                   </div>
                 </div>
                 <div class="col-xs-1" style="text-align:left; padding-left: 0px;padding-right: 0px;">
                   <input type="text" id="legend_post_count" readonly
                          style="color: #000000;
-                         font-weight:normal;
+                         font-weight: normal;
                          font-size: 10px;
                          border:0px;
                          background-color:
@@ -187,8 +201,8 @@
 
              </div>
 
-          </div>
-        </div>
+         </div> <!-- col-xs -->
+        </div> <!--row -->
     </div>
 
     <!-- body -->
@@ -236,6 +250,7 @@
                 control_panel.open();
             });
         </script>
+
       <div class="row" id="cp-toggle">
         <div class="col-sm-12">
           <div class="col-sm-2 col-sm-offset-5 toggle-button">

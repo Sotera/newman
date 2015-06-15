@@ -44,6 +44,10 @@ var vis = svg.append('svg:g');
 
 var labels = false;
 var CURRENT_USER = (function(){
+  var instagram_icon = "fa fa-instagram fa-inverse fa-lg";
+  var twitter_icon = "fa fa-twitter fa-inverse fa-lg";
+  var data_source_icon = $("#data_source_icon");
+
   var eltype = $("#current_user>span.thetype");
   var eluser = $("#current_user>span.username");
   var lookup = {"instagram" : "Instagram", "twitter": "Twitter" };
@@ -54,13 +58,36 @@ var CURRENT_USER = (function(){
     eluser.html(username);
     _type = type;
     eltype.html(lookup[type]);
+
+    console.log( '_type "' + type + '"' );
+    if (type === 'instagram') {
+      if(data_source_icon.hasClass( twitter_icon )) {
+        data_source_icon.removeClass( twitter_icon );
+      }
+      data_source_icon.addClass( instagram_icon );
+    }
+    else {
+      if(data_source_icon.hasClass( instagram_icon )) {
+        data_source_icon.removeClass( instagram_icon );
+      }
+      data_source_icon.addClass( twitter_icon );
+    }
+    data_source_icon.show();
+
   };
+
   var getUsername = function(){
     return _user;
   };
+
   var getType = function(){
     return _type;
   };
+
+  var getDataSourceIcon = function(){
+    return data_source_icon;
+  };
+
   return {
     "getUsername": getUsername,
     "getType": getType,
@@ -72,17 +99,78 @@ var doubleEncodeURIComponent= function(uri){
   return encodeURIComponent(encodeURIComponent(uri));
 };
 
+var legend_panel= (function(){
+  var container = $('#legend-toggle div:first-child');
+  var btn = $('#legend-toggle div:first-child').find("div").first();
+  var table_panel = $('#legend-toggle div:first-child div:nth-child(2)').first();
+  var close_icon = "glyphicon-chevron-up";
+  var open_icon = "glyphicon-chevron-down";
+
+  var open = function(){
+    if (!isOpen()) {
+      console.log('legend_panel.open()');
+      container.find("span").first().switchClass(open_icon, close_icon);
+
+      var legend_panel = $("#graph-legends");
+      if (legend_panel) {
+        legend_panel.show();
+      }
+
+    }
+  };
+
+  var close = function(){
+    if (isOpen()) {
+      console.log('legend_panel.close()');
+      container.find("span").first().switchClass(close_icon, open_icon);
+
+
+      var legend_panel = $("#graph-legends");
+      if(legend_panel) {
+        legend_panel.hide();
+      }
+
+    }
+  };
+
+  var isOpen = function(){
+    console.log( 'legend_panel.isOpen()' );
+    return _.contains(container.find("span").first().attr('class').split(/\s+/), close_icon);
+  };
+
+  var toggle = function(){
+    if (isOpen()){
+      close();
+    }
+    else {
+      open();
+    }
+  };
+
+  btn.on('click', toggle);
+
+  return {
+    open: open,
+    close: close,
+    toggle: toggle,
+    isOpen : isOpen
+  };
+
+}());
+
 var control_panel= (function(){
   var container = $('#cp-toggle div:first-child');
   var btn = $('#cp-toggle div:first-child').find("div").first();
   var table_panel = $('#cp-toggle div:first-child div:nth-child(2)').first();
   var open_css = "glyphicon-chevron-up";
   var close_css = "glyphicon-chevron-down";
+
   var open = function(){
     container.find("span").first().switchClass(open_css, close_css);
     var h = table_panel.height() + 25;
     container.css("top", "calc(100% - "+ h +"px)");
   };
+
   var close = function(){
     container.find("span").first().switchClass(close_css, open_css);
     container.css("top", "calc(100% - 25px)")
@@ -430,7 +518,7 @@ function drawGraph(graph){
     return function(n){
       clicks++;
       var fn = function(){
-        console.log(clicks);
+        console.log( 'clicks ' + clicks);
         if (clicks > 1){
           //do_search('email', $('#txt_search').val());
         }
@@ -438,6 +526,9 @@ function drawGraph(graph){
       };
       if (clicks == 1){
         $('#txt_search').val(n.name);
+
+        console.log( n );
+
         var t = Math.floor($('#radial-wrap').height() / 2);
         var l = Math.floor($('#radial-wrap').width() / 2);
         $('#radial-wrap')
@@ -455,12 +546,17 @@ function drawGraph(graph){
                 d3.selectAll("#result_table>tbody>tr").filter(function(d){
                   return d.id == n.name;
                 }).data());
+
+              console.log( post.content );
+
               show_content_view(post);
             }
             if (n.type == "user"){
               var url = "/user/" + CURRENT_USER.getType() + "/" + n.name;
               hasher.setHash(url);                    
             }
+
+            console.log( '$(#radial\').find(\".email").first()' );
             console.log(n);
 
 
@@ -482,6 +578,8 @@ function drawGraph(graph){
         $('#radial').find(".community").first()
           .unbind('click')
           .on("click", function(){
+
+            console.log( '$(#radial\').find(\".community").first()' );
             console.log(n);
           //do_search("community", n.community);
 
@@ -496,6 +594,8 @@ function drawGraph(graph){
               tags: ['select', 'view']
             };
             ale.log(msg);
+
+
         }).find("span").first()
           .css("color", "red");
 
@@ -507,6 +607,9 @@ function drawGraph(graph){
   }();
 
   node.on("click", function(n){
+
+    console.log( 'node.on("click", function(n)' );
+
     click_node(n);
 
     //user-ale logging
@@ -547,7 +650,11 @@ function drawGraph(graph){
   link.on("click", function(n) { console.log(n); });
 
   node.append("svg:text")
-    .text(function(d) {return d.name;})
+    .text(function(d) {
+
+
+      return d.name;
+    })
     .attr("fill","blue")
     .attr("stroke","blue")
     .attr("font-size","5pt")
@@ -826,7 +933,10 @@ function drawTopAssoc(nodes) {
     })
     .on("mouseover", function(d){ })
     .on("mouseout", function(d){ })
-    .append('title').text(function(d) { return d.user_id; });
+    .append('title').text(function(d) {
+
+      return d.user_id;
+    });
 }
 
 function draw_confidence_chart(confidence_scores) {
