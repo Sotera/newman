@@ -230,7 +230,7 @@ div.bootstrap-growl >span.close {
     color: #000;
 }
 
-#cp-toggle > div:first-child {
+#content-table-toggle > div:first-child {
     top: calc(100% - 25px);
     position: fixed;
     z-index: 25;
@@ -246,11 +246,11 @@ div.bootstrap-growl >span.close {
     cursor: pointer;
 }
 
-#cp-toggle a {
+#content-table-toggle a {
     color: #111;
 }
 
-#cp-toggle a:hover {
+#content-table-toggle a:hover {
     color: #777;
 }
 .tab-pane { height: 100%;}

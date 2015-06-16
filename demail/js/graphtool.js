@@ -108,7 +108,7 @@ var legend_panel= (function(){
 
   var open = function(){
     if (!isOpen()) {
-      console.log('legend_panel.open()');
+      //console.log('legend_panel.open()');
       container.find("span").first().switchClass(open_icon, close_icon);
 
       var legend_panel = $("#graph-legends");
@@ -121,7 +121,7 @@ var legend_panel= (function(){
 
   var close = function(){
     if (isOpen()) {
-      console.log('legend_panel.close()');
+      //console.log('legend_panel.close()');
       container.find("span").first().switchClass(close_icon, open_icon);
 
 
@@ -134,11 +134,26 @@ var legend_panel= (function(){
   };
 
   var isOpen = function(){
-    console.log( 'legend_panel.isOpen()' );
+    //console.log( 'legend_panel.isOpen()' );
     return _.contains(container.find("span").first().attr('class').split(/\s+/), close_icon);
   };
 
   var toggle = function(){
+
+    //user-ale logging
+    var element_ID = 'legend-toggle';
+    var msg = {
+      activity: 'perform',
+      action: 'click',
+      elementId: element_ID,
+      elementType: 'button',
+      elementGroup: 'view_group',
+      source: 'user',
+      tags: ['select', 'view']
+    };
+    console.log( 'clicked ' + element_ID );
+    ale.log(msg);
+
     if (isOpen()){
       close();
     }
@@ -158,10 +173,10 @@ var legend_panel= (function(){
 
 }());
 
-var control_panel= (function(){
-  var container = $('#cp-toggle div:first-child');
-  var btn = $('#cp-toggle div:first-child').find("div").first();
-  var table_panel = $('#cp-toggle div:first-child div:nth-child(2)').first();
+var content_table= (function(){
+  var container = $('#content-table-toggle div:first-child');
+  var btn = $('#content-table-toggle div:first-child').find("div").first();
+  var table_panel = $('#content-table-toggle div:first-child div:nth-child(2)').first();
   var open_css = "glyphicon-chevron-up";
   var close_css = "glyphicon-chevron-down";
 
@@ -181,6 +196,21 @@ var control_panel= (function(){
   };
 
   var toggle = function(){
+
+    //user-ale logging
+    var element_ID = 'content-table-toggle';
+    var msg = {
+      activity: 'perform',
+      action: 'click',
+      elementId: element_ID,
+      elementType: 'button',
+      elementGroup: 'view_group',
+      source: 'user',
+      tags: ['select', 'view']
+    };
+    console.log( 'clicked ' + element_ID );
+    ale.log(msg);
+
     if (isOpen()){
       close();
     } else {
@@ -280,15 +310,17 @@ function show_content_view(postObj){
                  hasher.setHash(url);
 
                  //user-ale logging
+                 var element_ID = 'content-link:' + url;
                  var msg = {
                    activity: 'perform',
                    action: 'click',
-                   elementId: this.getAttribute('id') || 'UNK',
-                   elementType: 'workspace',
+                   elementId: element_ID,
+                   elementType: 'link',
                    elementGroup: 'view_group',
                    source: 'user',
                    tags: ['select', 'view']
                  };
+                 console.log( 'clicked ' + element_ID );
                  ale.log(msg);
 
                }).html(u);
@@ -332,15 +364,17 @@ function drawTable(posts){
       lastSort = (direction == -1) ? "" : k; //toggle
 
         //user-ale logging
+        var element_ID = 'data-table-header';
         var msg = {
           activity: 'perform',
           action: 'click',
-          elementId: this.getAttribute('id') || 'UNK',
-          elementType: 'workspace',
+          elementId: element_ID,
+          elementType: 'datagrid',
           elementGroup: 'view_group',
           source: 'user',
           tags: ['select', 'view']
         };
+        console.log( 'clicked ' + element_ID );
         ale.log(msg);
 
 
@@ -374,15 +408,17 @@ function drawTable(posts){
       show_content_view(d);
 
         //user-ale logging
+        var element_ID = 'data-table-row:' + d.id;
         var msg = {
           activity: 'perform',
           action: 'click',
-          elementId: this.getAttribute('id') || 'UNK',
-          elementType: 'workspace',
+          elementId: element_ID,
+          elementType: 'datagrid',
           elementGroup: 'view_group',
           source: 'user',
           tags: ['select', 'view']
         };
+        console.log( 'clicked ' + element_ID );
         ale.log(msg);
 
     })
@@ -425,9 +461,9 @@ function drawTable(posts){
     })
     .style("stroke","#FFFFFF");
 
-  if (control_panel.isOpen()){
+  if (content_table.isOpen()){
     //resizes control panel
-    control_panel.open();
+    content_table.open();
   }
 };
 
@@ -540,6 +576,9 @@ function drawGraph(graph){
         $('#radial').find(".email").first()
           .unbind('click')
           .on("click", function(){
+
+            var element_ID = 'graph-node:';
+
             if (n.type == "post"){
               //find the node in the table and load it in the content tab
               var post = _.first(
@@ -550,26 +589,29 @@ function drawGraph(graph){
               console.log( post.content );
 
               show_content_view(post);
+              element_ID = element_ID + post.id;
             }
+
             if (n.type == "user"){
               var url = "/user/" + CURRENT_USER.getType() + "/" + n.name;
-              hasher.setHash(url);                    
+              hasher.setHash(url);
+              element_ID = element_ID + url;
             }
 
-            console.log( '$(#radial\').find(\".email").first()' );
+
             console.log(n);
 
-
               //user-ale logging
-            var msg = {
+              var msg = {
               activity: 'perform',
               action: 'click',
-              elementId: this.getAttribute('id') || 'UNK',
+              elementId: element_ID,
               elementType: 'workspace',
               elementGroup: 'view_group',
               source: 'user',
               tags: ['select', 'view']
             };
+            console.log( 'clicked ' + element_ID );
             ale.log(msg);
 
           }).find("span").first()
@@ -583,17 +625,19 @@ function drawGraph(graph){
             console.log(n);
           //do_search("community", n.community);
 
-            //user-ale logging
-            var msg = {
-              activity: 'perform',
-              action: 'click',
-              elementId: this.getAttribute('id') || 'UNK',
-              elementType: 'workspace',
-              elementGroup: 'view_group',
-              source: 'user',
-              tags: ['select', 'view']
-            };
-            ale.log(msg);
+              //user-ale logging
+              var element_ID = 'graph-node:community'
+              var msg = {
+                activity: 'perform',
+                action: 'click',
+                elementId: element_ID,
+                elementType: 'workspace',
+                elementGroup: 'view_group',
+                source: 'user',
+                tags: ['select', 'view']
+              };
+              console.log( 'clicked ' + element_ID );
+              ale.log(msg);
 
 
         }).find("span").first()
@@ -613,15 +657,17 @@ function drawGraph(graph){
     click_node(n);
 
     //user-ale logging
+    var element_ID = 'graph-node:' + node.name;
     var msg = {
       activity: 'perform',
       action: 'click',
-      elementId: this.getAttribute('id') || 'UNK',
+      elementId: element_ID,
       elementType: 'workspace',
       elementGroup: 'view_group',
       source: 'user',
       tags: ['select', 'view']
     };
+    console.log( 'clicked ' + element_ID );
     ale.log(msg);
 
   });
@@ -785,15 +831,17 @@ function drawTopTags(posts) {
     .on("click", function(d){
 
         //user-ale logging
+        var element_ID = 'top-hashtag-bar';
         var msg = {
           activity: 'perform',
           action: 'click',
-          elementId: this.getAttribute('id') || 'UNK',
-          elementType: 'tab',
+          elementId: element_ID,
+          elementType: 'progressbar',
           elementGroup: 'view_group',
           source: 'user',
           tags: ['select', 'view']
         };
+        console.log( 'clicked ' + element_ID );
         ale.log(msg);
 
     })
@@ -817,15 +865,17 @@ function drawTopTags(posts) {
     .on("click", function(d){
 
         //user-ale logging
+        var element_ID = 'top-hashtag-text';
         var msg = {
           activity: 'perform',
           action: 'click',
-          elementId: this.getAttribute('id') || 'UNK',
+          elementId: element_ID,
           elementType: 'tab',
           elementGroup: 'view_group',
           source: 'user',
           tags: ['select', 'view']
         };
+        console.log( 'clicked ' + element_ID );
         ale.log(msg);
     })
     .on("mouseover", function(d){ })
@@ -884,15 +934,17 @@ function drawTopAssoc(nodes) {
     .on("click", function(d){
 
         //user-ale logging
+        var element_ID = 'top-associate-bar';
         var msg = {
           activity: 'perform',
           action: 'click',
-          elementId: this.getAttribute('id') || 'UNK',
-          elementType: 'tab',
+          elementId: element_ID,
+          elementType: 'progressbar',
           elementGroup: 'view_group',
           source: 'user',
           tags: ['select', 'view']
         };
+        console.log( 'clicked ' + element_ID );
         ale.log(msg);
 
     })
@@ -919,15 +971,17 @@ function drawTopAssoc(nodes) {
         hasher.setHash(url);
 
         //user-ale logging
+        var element_ID = 'top-associate-link:' + url;
         var msg = {
           activity: 'perform',
           action: 'click',
-          elementId: this.getAttribute('id') || 'UNK',
-          elementType: 'tab',
+          elementId: element_ID,
+          elementType: 'link',
           elementGroup: 'view_group',
           source: 'user',
           tags: ['select', 'view']
         };
+        console.log( 'clicked ' + element_ID );
         ale.log(msg);
 
     })
@@ -999,15 +1053,17 @@ function draw_confidence_chart(confidence_scores) {
     .on("click", function(d){
 
         //user-ale logging
+        var element_ID = 'possible-alias-bar';
         var msg = {
           activity: 'perform',
           action: 'click',
-          elementId: this.getAttribute('id') || 'UNK',
+          elementId: element_ID,
           elementType: 'tab',
           elementGroup: 'view_group',
           source: 'user',
           tags: ['select', 'view']
         };
+        console.log( 'clicked ' + element_ID );
         ale.log(msg);
 
     })
@@ -1033,15 +1089,17 @@ function draw_confidence_chart(confidence_scores) {
       hasher.setHash(url);
 
         //user-ale logging
+        var element_ID = 'possible-alias-link:' + url;
         var msg = {
           activity: 'perform',
           action: 'click',
-          elementId: this.getAttribute('id') || 'UNK',
+          elementId: element_ID,
           elementType: 'tab',
           elementGroup: 'view_group',
           source: 'user',
           tags: ['select', 'view']
         };
+        console.log( 'clicked ' + element_ID );
         ale.log(msg);
 
     })
@@ -1058,18 +1116,20 @@ $(function () {
   });
 
   $('a[data-toggle=\"tab\"]').on('shown.bs.tab', function (e) {
-    var tab_name = console.log($(e.target).html());
+    var element_ID = 'tab:' + $(e.target).html();
 
     var msg = {
       activity: 'perform',
       action: 'click',
-      elementId: this.getAttribute('id') || 'UNK',
+      elementId: element_ID,
       elementType: 'tab',
       elementGroup: 'view_group',
       source: 'user',
       tags: ['select', 'view']
     };
-    //ale.log(msg);
+    console.log( 'clicked ' + element_ID );
+    ale.log(msg);
+
   });
 
   //$('#top-entities').append(waiting_bar);

@@ -1,20 +1,9 @@
 /**
- *  instantiate user-ale-logger
+ * load dependent script
  */
-var ale = new userale({
-  loggingUrl: 'http://10.1.93.208', //The url of the User-ALE logging server.
-  toolName: 'newman', //The name of your tool
-  toolVersion: 'media', //The semantic version of your tool
-  elementGroups: [ //A list of element groups used in your tool (see below)
-    'view_group',
-    'search_group'
-  ],
-  workerUrl: 'js/thirdparty/userale-worker.js', //The location of the User-ALE webworker file
-  debug: true, //Whether to log messages to console
-  sendLogs: true //Whether or not to send logs to the server (useful during testing)
+$.getScript( "js/graphtool.js", function() {
+  console.log( "graphtool.js loaded!" );
 });
-ale.register();
-
 
 $(function () {
 
@@ -106,15 +95,17 @@ $(function () {
       do_search();
 
       //user-ale logging
+      var element_ID = 'txt_search';
       var msg = {
         activity: 'perform',
         action: 'enter',
-        elementId: this.getAttribute('id') || 'UNK',
+        elementId: element_ID,
         elementType: 'textbox',
         elementGroup: 'search_group',
         source: 'user',
         tags: ['submit', 'search']
       };
+      console.log( 'pressed ' + element_ID );
       ale.log(msg);
 
       return false;  
