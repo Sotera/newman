@@ -554,7 +554,8 @@ function drawGraph(graph){
     return function(n){
       clicks++;
       var fn = function(){
-        console.log( 'clicks ' + clicks);
+        //console.log( 'clicks ' + clicks);
+
         if (clicks > 1){
           //do_search('email', $('#txt_search').val());
         }
@@ -601,8 +602,8 @@ function drawGraph(graph){
 
             console.log(n);
 
-              //user-ale logging
-              var msg = {
+            //user-ale logging
+            var msg = {
               activity: 'perform',
               action: 'click',
               elementId: element_ID,
@@ -657,7 +658,7 @@ function drawGraph(graph){
     click_node(n);
 
     //user-ale logging
-    var element_ID = 'graph-node:' + node.name;
+    var element_ID = 'graph-node:' + n.name;
     var msg = {
       activity: 'perform',
       action: 'click',
@@ -776,7 +777,7 @@ function drawTopTags(posts) {
     $('#top-tags').append($('<p>').html("No results for tags."));
   }
   else {
-      $('#top-tags').append($('<p>').html("The following are the top 20 hashtags and how often the tag appears."));
+      $('#top-tags').append($('<p>').html("Top 20 hashtags from all posts by <b>" + CURRENT_USER.getUsername() + "</b>."));
   }
 
   var g = _.sortBy(
@@ -890,7 +891,7 @@ function drawTopAssoc(nodes) {
     $('#top-assoc').append($('<p>').html("No results for associated users."));
   }
   else {
-    $('#top-assoc').append($('<p>').html("The following are the top 20 users and how often the user is associated with <b>" + CURRENT_USER.getUsername() + "</b>"));
+    $('#top-assoc').append($('<p>').html("Top 20 users associated with <b>" + CURRENT_USER.getUsername() + "</b>."));
   }
 
   var users = _.filter(nodes, function(n){ return n.type == "user"; });
@@ -1001,14 +1002,12 @@ function draw_confidence_chart(confidence_scores) {
     return
   }
   else {
-    $('#top-rank').append($('<p>').html("The following are the possible aliases for <b>" + CURRENT_USER.getUsername() + "</b> and the confidence rating based on MIT scores."));
+    $('#top-rank').append($('<p>').html("Top possible aliases for <b>" + CURRENT_USER.getUsername() + "</b> based on disambiguation algorithm by MIT."));
   }
 
   var type = CURRENT_USER.getType();
-  var which_id_type = {"twitter": "instagram_id", 
-                      "instagram": "twitter_id"}[type];
-  var switched_type = { "twitter" : "instagram", 
-                      "instagram": "twitter"}[type];
+  var which_id_type = {"twitter": "instagram_id", "instagram": "twitter_id"}[type];
+  var switched_type = { "twitter" : "instagram", "instagram": "twitter"}[type];
 
   $('#top-rank').append($('<div>').append(
     $('<span>', { "style" : "font-weight: bold"})
@@ -1067,7 +1066,7 @@ function draw_confidence_chart(confidence_scores) {
         ale.log(msg);
 
     })
-    .append('title').text(function(d) { return "MIT score: " + d.rank; });
+    .append('title').text(function(d) { return "MIT disambiguation score: " + d.rank; });
 
   // bar.append("text")
   //   .attr("x", function(d) { return x((+d.rank * 100)) - 3;})

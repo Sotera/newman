@@ -11,9 +11,9 @@ $(function () {
     var text = $("#txt_search").val().toLowerCase();
     console.log( 'text_search: ' + text );
 
-    var tbl_instagram = $("#ig>tbody");
-    var tbl_twitter = $("#tw>tbody");
-    var tbl_results = $("#sr>tbody");
+    var tbl_instagram = $("#instagram_table>tbody");
+    var tbl_twitter = $("#twitter_table>tbody");
+    var tbl_results = $("#search_result_table>tbody");
     var linkInstagram = "/#!/user/instagram/";
     var linkTwitter = "/#!/user/twitter/";
     var linkUserInstagram = "https://instagram.com/"
@@ -46,46 +46,52 @@ $(function () {
 //          tbl_twitter.append($('<tr>').append($('<td>').html('No Users Found')))
 //        }
           tbl_results.empty();
-        $.each(tResponse[0], function(i, twt_name){
+
+        $.each(igResponse[0], function(i, instagram_name){
+          tbl_results.append(
+            $('<tr>').append(
+              $('<td style="padding-left: 40%; text-align: left;">').append(
+                $('<a>',
+                  {"href" : createInstagramHyperlink(instagram_name),
+                    "text": instagram_name }).addClass('link').append(
+                    $('<a>',
+                      { "href" : createInstagramUserHyperlink(instagram_name),
+                        "text" : " - "
+                      }).addClass('link').append(
+                        $("<i>").addClass("fa fa-instagram")
+                    )
+                  ))))});
+
+        $.each(tResponse[0], function(i, twitter_name){
             tbl_results.append(
             $('<tr>').append(
-              $('<td>').append(
+              $('<td style="padding-left: 40%; text-align: left;">').append(
                 $('<a>',
-                  {"href" : createTwHyperlink(twt_name),
-                   "text": twt_name + " - "}).addClass('link').append(
-                    $("<i>").addClass("fa fa-twitter").append(
+                  {"href" : createTwitterHyperlink(twitter_name),
+                   "text": twitter_name }).addClass('link').append(
                         $('<a>',
-                            {"href" : createTwUserHyperlink(twt_name),
-                                "text": " - User Website"}).addClass('link')
+                            { "href" : createTwitterUserHyperlink(twitter_name),
+                              "text": " - "
+                            }).addClass('link').append(
+                              $("<i>").addClass("fa fa-twitter")
                     )))))});
 
-          $.each(igResponse[0], function(i, ig_name){
-              tbl_results.append(
-              $('<tr>').append(
-                $('<td>').append(
-                  $('<a>', 
-                    {"href" : createIgHyperlink(ig_name), 
-                     "text": ig_name + " - "}).addClass('link').append(
-                      $("<i>").addClass("fa fa-instagram").append(
-                          $('<a>',
-                              {"href" : createIgUserHyperlink(ig_name),
-                                  "text": " - User Website"}).addClass('link')
-                      )))))});
+
       })
       .fail(function () {
         console.log("Fail");
       });
 
-    function  createIgHyperlink(username) {
+    function  createInstagramHyperlink(username) {
       return linkInstagram + username;
     }
-    function createTwHyperlink(username) {
+    function createTwitterHyperlink(username) {
       return linkTwitter + username;
     }
-    function createIgUserHyperlink(username) {
+    function createInstagramUserHyperlink(username) {
       return linkUserInstagram + username;
     }
-    function createTwUserHyperlink(username) {
+    function createTwitterUserHyperlink(username) {
       return linkUserTwitter + username;
     }
   }
