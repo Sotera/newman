@@ -53,12 +53,12 @@ function timerMethod() {
     // If we don't have any logs to send to the server, just return 
     // back to the caller. There are no actions that need to be done
     // when it comes to logging.
-    else
-    {
-        // If we have debugging enabled, send a debug message saying there
-        // are no logs present to be sent to the logging server.
-        debug('No log sent, buffer empty.');
-    }
+    //else
+    //{
+    //    // If we have debugging enabled, send a debug message saying there
+    //    // are no logs present to be sent to the logging server.
+    //    debug('No log sent, buffer empty.');
+    //}
 }
 
 /**

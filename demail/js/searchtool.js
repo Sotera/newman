@@ -1,9 +1,21 @@
 /**
- * load dependent script
+ *  instantiate user-ale-logger
  */
-$.getScript( "js/graphtool.js", function() {
-  console.log( "graphtool.js loaded!" );
+var ale = new userale({
+  loggingUrl: 'http://10.1.93.208', //The url of the User-ALE logging server.
+  toolName: 'newman', //The name of your tool
+  toolVersion: 'media', //The semantic version of your tool
+  elementGroups: [ //A list of element groups used in your tool (see below)
+    'view_group',
+    'search_group'
+  ],
+  workerUrl: 'js/thirdparty/userale-worker.js', //The location of the User-ALE webworker file
+  debug: true, //Whether to log messages to console
+  sendLogs: true //Whether or not to send logs to the server (useful during testing)
 });
+ale.register();
+
+
 
 $(function () {
 

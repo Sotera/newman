@@ -1,22 +1,11 @@
-/*globals tangelo, CryptoJS, $, d3, escape, FileReader, console */
-
 /**
- *  instantiate user-ale-logger
+ * load dependent script
  */
-var ale = new userale({
-      loggingUrl: 'http://10.1.93.208', //The url of the User-ALE logging server.
-      toolName: 'newman', //The name of your tool
-      toolVersion: 'media', //The semantic version of your tool
-      elementGroups: [ //A list of element groups used in your tool (see below)
-        'view_group',
-        'search_group'
-      ],
-      workerUrl: 'js/thirdparty/userale-worker.js', //The location of the User-ALE webworker file
-      debug: true, //Whether to log messages to console
-      sendLogs: true //Whether or not to send logs to the server (useful during testing)
-    });
-ale.register();
+$.getScript( "js/searchtool.js", function() {
+  console.log( "searchtool.js loaded!" );
+});
 
+/*globals tangelo, CryptoJS, $, d3, escape, FileReader, console */
 
 var width = 400,
 height = 500;
@@ -30,6 +19,13 @@ var mediaColors = (function(){
   }
 }());
 
+var instagram_icon_small = (function() {
+  return "<i class=\"fa fa-instagram\">";
+}());
+
+var twitter_icon_small = (function() {
+  return "<i class=\"fa fa-twitter\">";
+}());
 
 var force = d3.layout.force()
   .linkDistance(10)
@@ -53,11 +49,16 @@ var CURRENT_USER = (function(){
   var lookup = {"instagram" : "Instagram", "twitter": "Twitter" };
   var _user = "";
   var _type = "";
-  var setUser = function(type, username){
+  var _associate_count = 0;
+  var _post_count = 0;
+
+  var setUser = function(type, username, associate_count, post_count ){
     _user = username;
     eluser.html(username);
     _type = type;
     eltype.html(lookup[type]);
+    _associate_count = associate_count;
+    _post_count = post_count;
 
     console.log( '_type "' + type + '"' );
     if (type === 'instagram') {
@@ -74,6 +75,12 @@ var CURRENT_USER = (function(){
     }
     data_source_icon.show();
 
+    $( '#legend_color_bar_user').text( 'Users ' + _associate_count );
+    $( '#legend_color_bar_post').text( 'Posts ' + _post_count );
+
+    //$( '#legend_user_count').val( _associate_count );
+    //$( '#legend_post_count').val( _post_count );
+
   };
 
   var getUsername = function(){
@@ -84,6 +91,14 @@ var CURRENT_USER = (function(){
     return _type;
   };
 
+  var getPostCount = function(){
+    return _post_count;
+  };
+
+  var getAssociateCount = function(){
+    return _associate_count;
+  };
+
   var getDataSourceIcon = function(){
     return data_source_icon;
   };
@@ -91,9 +106,20 @@ var CURRENT_USER = (function(){
   return {
     "getUsername": getUsername,
     "getType": getType,
+    "getAssociateCount": getAssociateCount,
+    "getPostCount": getPostCount,
+    "getDataSourceIcon": getDataSourceIcon,
     "setUser" : setUser
   }
 }());
+
+var parseAllUserNodes = function( nodes ) {
+  return _.filter(nodes, function( node ){ return node.type == "user"; });
+}
+
+var parseAllPostNodes = function( nodes ) {
+  return _.filter(nodes, function( node ){ return node.type == "post"; });
+}
 
 var doubleEncodeURIComponent= function(uri){
   return encodeURIComponent(encodeURIComponent(uri));
@@ -343,7 +369,7 @@ function show_content_view(postObj){
 
 };
 
-function drawTable(posts){
+function drawContentTable(posts){
   $('#posts_count').text(posts.length);
   $('#result_table>thead').empty();
   $('#result_table>tbody').empty();
@@ -531,9 +557,20 @@ function drawGraph(graph){
     .attr("class", "node");
 
   node.append("svg:circle")
-    .attr("r", function(d) { return Math.log((d.value * 1000 ));  })
-    .attr("id", function(d) { return "g_circle_" + d.group; })
+    .attr("r", function(d) {
+
+      return Math.log((d.value * 1000 ));
+
+    })
+    .attr("id", function(d) {
+
+      return "g_circle_" + d.group;
+
+    })
     .style("fill", function(d) { 
+      //console.log( "node.append(\"svg.circle\").style(\"fill\", function(d))" );
+      //console.log( '\td {' + d.type + ', ' + d.name + ', ' + d.value + '}' );
+
       return mediaColors[d.type];
     })
     //.style("stroke","red")
@@ -770,11 +807,13 @@ function node_highlight(email){
   };
 };
 
-function drawTopTags(posts) {
+function drawTopHashtags(posts) {
   $('#top-tags').empty();
-  var color = d3.scale.category20c();
+  //var color = d3.scale.category20c();
+  var color = d3.scale.category20b();
+
   if (posts.length < 1) {
-    $('#top-tags').append($('<p>').html("No results for tags."));
+    $('#top-tags').append($('<p>').html("No results for Hashtags."));
   }
   else {
       $('#top-tags').append($('<p>').html("Top 20 hashtags from all posts by <b>" + CURRENT_USER.getUsername() + "</b>."));
@@ -884,18 +923,21 @@ function drawTopTags(posts) {
     .append('title').text(function(d) { return d[0]; });
 }
 
-function drawTopAssoc(nodes) {
+function drawTopAssociateChart(nodes) {
   $('#top-assoc').empty();
-  var color = d3.scale.category20();
+  //var color = d3.scale.category20();
+  var color = d3.scale.category20b();
+
   if (nodes.length < 1) {
-    $('#top-assoc').append($('<p>').html("No results for associated users."));
+    $('#top-assoc').append($('<p>').html("No results for Associated Users."));
   }
   else {
-    $('#top-assoc').append($('<p>').html("Top 20 users associated with <b>" + CURRENT_USER.getUsername() + "</b>."));
+    $('#top-assoc').append($('<p>').html("Top 20 most active users associated with <b>" + CURRENT_USER.getUsername() + "</b>."));
   }
 
-  var users = _.filter(nodes, function(n){ return n.type == "user"; });
-  var top20 = _.take(_.sortBy(users, function(n){ return +n.value * -1;}), 20)
+  //var users = _.filter(nodes, function(n){ return n.type == "user"; });
+
+  var top20 = _.take(_.sortBy(nodes, function(n){ return +n.value * -1;}), 20)
   var step = 100.0 / _.reduce(top20, function(m, n){ return m + n.value; }, 0.000001);
   var type = CURRENT_USER.getType();
   var scores = _.map(top20, 
@@ -990,15 +1032,16 @@ function drawTopAssoc(nodes) {
     .on("mouseout", function(d){ })
     .append('title').text(function(d) {
 
-      return d.user_id;
+      return 'Click to view ' + d.user_id;
     });
 }
 
-function draw_confidence_chart(confidence_scores) {
+function drawConfidenceChart(confidence_scores) {
   $('#top-rank').empty();
-  var color = d3.scale.category20();
+  //var color = d3.scale.category20();
+  var color = d3.scale.category20b();
   if (confidence_scores.length < 1) {
-    $('#top-rank').append($('<p>').html("No results for rank."));
+    $('#top-rank').append($('<p>').html("No results for possible aliases"));
     return
   }
   else {
@@ -1007,20 +1050,19 @@ function draw_confidence_chart(confidence_scores) {
 
   var type = CURRENT_USER.getType();
   var which_id_type = {"twitter": "instagram_id", "instagram": "twitter_id"}[type];
-  var switched_type = { "twitter" : "instagram", "instagram": "twitter"}[type];
+  var switched_type = {"twitter" : "instagram", "instagram": "twitter"}[type];
+  var switched_data_source_icon = {"twitter" : instagram_icon_small, "instagram": twitter_icon_small}[type];
 
   $('#top-rank').append($('<div>').append(
     $('<span>', { "style" : "font-weight: bold"})
-      .addClass('bold').html("Similar " + switched_type + " accounts")));
+      .addClass('bold').html("Best available matches from " + switched_data_source_icon + " users")));
 
   var scores = _.sortBy(
-    _.map(confidence_scores, 
-          function(o){
-            return { "type" : switched_type, 
-                     "user_id": o[which_id_type], 
-                     "rank": parseFloat(o['score'])};
-          }), 
-    function(o){ 
+    _.map(confidence_scores,
+      function(o){
+        return { "type" : switched_type, "user_id": o[which_id_type], "rank": parseFloat(o['score'])};
+      }),
+    function(o){
       return 1-o.rank;
     });
 
@@ -1030,18 +1072,21 @@ function draw_confidence_chart(confidence_scores) {
 
   var x = d3.scale.linear().range([0, width]);
   var chart = d3.select("#top-rank").append('svg')
-    .attr('class', 'chart')
-    .attr("width", width + margin.left + margin.right);
+                .attr('class', 'chart')
+                .attr("width", width + margin.left + margin.right);
 
   x.domain([0, 100]);
   chart.attr("height", barHeight * (scores.length+ 1));
 
   var bar = chart.selectAll("g")
-    .data(scores).enter()
-    .append("g")
-    .attr("transform", function(d, i) { return "translate(" + margin.left + "," + (+(i * barHeight) + +margin.top) + ")";});
+                 .data(scores).enter()
+                 .append("g")
+                 .attr("transform", function(d, i) {
 
-  bar.append("rect")
+                   return "translate(" + margin.left + "," + (+(i * barHeight) + +margin.top) + ")";
+                 });
+
+  var bar_graph = bar.append("rect")
     .attr("width", function(d) {
       return x((+d.rank * 100));
     })
@@ -1051,19 +1096,19 @@ function draw_confidence_chart(confidence_scores) {
     })
     .on("click", function(d){
 
-        //user-ale logging
-        var element_ID = 'possible-alias-bar';
-        var msg = {
-          activity: 'perform',
-          action: 'click',
-          elementId: element_ID,
-          elementType: 'tab',
-          elementGroup: 'view_group',
-          source: 'user',
-          tags: ['select', 'view']
-        };
-        console.log( 'clicked ' + element_ID );
-        ale.log(msg);
+      //user-ale logging
+      var element_ID = 'possible-alias-bar';
+      var msg = {
+        activity: 'perform',
+        action: 'click',
+        elementId: element_ID,
+        elementType: 'tab',
+        elementGroup: 'view_group',
+        source: 'user',
+        tags: ['select', 'view']
+      };
+      console.log( 'clicked ' + element_ID );
+      ale.log(msg);
 
     })
     .append('title').text(function(d) { return "MIT disambiguation score: " + d.rank; });
@@ -1074,42 +1119,72 @@ function draw_confidence_chart(confidence_scores) {
   //   .attr("dy", ".35em")
   //   .text(function(d) { return +d.rank;});
 
-  bar.append("text")
+  var bar_text = bar.append("text")
     .attr("x", function(d) { return -margin.left;})
     .attr("y", barHeight / 2)
     .attr("class", "label clickable")
     //.style("fill", function(d) {})
-    .text(function(d) { 
+    .text(function(d) {
+
       return d.user_id;
       //return (d.user_id.length > 25) ? d.email.substr(0,25) + ".." : d.email; 
     })
     .on("click", function(d){
+      console.log( 'd {' + d.type + ',' + d.user_id + ',' + d.rank + '}' );
+
       var url = "/user/" + d.type + "/" + d.user_id
       hasher.setHash(url);
 
-        //user-ale logging
-        var element_ID = 'possible-alias-link:' + url;
-        var msg = {
-          activity: 'perform',
-          action: 'click',
-          elementId: element_ID,
-          elementType: 'tab',
-          elementGroup: 'view_group',
-          source: 'user',
-          tags: ['select', 'view']
-        };
-        console.log( 'clicked ' + element_ID );
-        ale.log(msg);
+      //user-ale logging
+      var element_ID = 'possible-alias-link:' + url;
+      var msg = {
+        activity: 'perform',
+        action: 'click',
+        elementId: element_ID,
+        elementType: 'tab',
+        elementGroup: 'view_group',
+        source: 'user',
+        tags: ['select', 'view']
+      };
+      console.log( 'clicked ' + element_ID );
+      ale.log(msg);
 
     })
-    .on("mouseover", function(d){ })
+    .on("mouseover", function(d){
+      redrawBarText(d);
+    })
     .on("mouseout", function(d){  })
-    .append('title').text(function(d) { return d.user_id; });
+    .append('title')
+    .text(function(d) {
+
+      return 'Click to view ' + d.user_id;
+    });
+
+  function redrawBarText(d) {
+    console.log( 'redrawBarText()' );
+    console.log( 'd {' + d.type + ',' + d.user_id + ',' + d.rank + '}' );
+
+    /*
+    bar_text
+      .transition().duration(500)
+      .attr("x", function(d) { return -margin.left;})
+      .attr("y", barHeight / 2)
+      .attr("class", "label clickable")
+      .attr({
+        height: 25,
+        width: 75
+      })
+      .style( 'font-size', '14px' );
+    */
+  }
 }
+
+
 
 /** document ready **/
 $(function () {
   "use strict";
+
   $("#search_form").submit(function(e){
     return false;
   });
@@ -1143,11 +1218,12 @@ $(function () {
       url: 'mediasearch/' + type + "/" + username,
       type: 'GET'
     }).done(function(resp){
-      CURRENT_USER.setUser(type, username);
-      drawTopAssoc(resp.graph.nodes);
-      draw_confidence_chart(resp.similar);
-      drawTable(resp.posts);
-      drawTopTags(resp.posts);
+      var user_nodes = parseAllUserNodes( resp.graph.nodes );
+      CURRENT_USER.setUser(type, username, user_nodes.length, resp.posts.length);
+      drawTopAssociateChart( user_nodes );
+      drawConfidenceChart(resp.similar);
+      drawContentTable(resp.posts);
+      drawTopHashtags(resp.posts);
       
       _.defer(drawGraph, resp.graph);
       //drawGraph(resp.graph);
