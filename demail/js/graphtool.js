@@ -369,8 +369,9 @@ function show_content_view(postObj){
 
 };
 
-function drawContentTable(posts){
-  $('#posts_count').text(posts.length);
+function drawContentTable(posts, user){
+  $('#posts_user').text( user.getUsername() );
+  $('#posts_count').text( posts.length );
   $('#result_table>thead').empty();
   $('#result_table>tbody').empty();
 
@@ -1219,11 +1220,11 @@ $(function () {
       type: 'GET'
     }).done(function(resp){
       var user_nodes = parseAllUserNodes( resp.graph.nodes );
-      CURRENT_USER.setUser(type, username, user_nodes.length, resp.posts.length);
+      CURRENT_USER.setUser( type, username, user_nodes.length, resp.posts.length );
       drawTopAssociateChart( user_nodes );
       drawConfidenceChart(resp.similar);
-      drawContentTable(resp.posts);
-      drawTopHashtags(resp.posts);
+      drawContentTable( resp.posts, CURRENT_USER );
+      drawTopHashtags( resp.posts );
       
       _.defer(drawGraph, resp.graph);
       //drawGraph(resp.graph);
