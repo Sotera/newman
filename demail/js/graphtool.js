@@ -19,13 +19,11 @@ var mediaColors = (function(){
   }
 }());
 
-var instagram_icon_small = (function() {
-  return "<i class=\"fa fa-instagram\">";
-}());
+var instagram_icon_inverse_class = "fa fa-instagram fa-inverse fa-lg";
+var twitter_icon_inverse_class = "fa fa-twitter fa-inverse fa-lg";
+var instagram_icon_small_class = "fa fa-instagram";
+var twitter_icon_small_class = "fa fa-twitter";
 
-var twitter_icon_small = (function() {
-  return "<i class=\"fa fa-twitter\">";
-}());
 
 var force = d3.layout.force()
   .linkDistance(10)
@@ -38,11 +36,13 @@ var svg = d3.select("#data_visual").append("svg")
 
 var vis = svg.append('svg:g');
 
-var labels = false;
+var all_user_label_on = $('#toggle_legend_label_user').prop('checked');
+var all_post_label_on = $('#toggle_legend_label_post').prop('checked');
 var CURRENT_USER = (function(){
-  var instagram_icon = "fa fa-instagram fa-inverse fa-lg";
-  var twitter_icon = "fa fa-twitter fa-inverse fa-lg";
-  var data_source_icon = $("#data_source_icon");
+
+  var navbar_data_source_icon = $('#data_source_icon');
+  var legend_data_icon_user =$('#legend_data_icon_user');
+  var legend_data_icon_post =$('#legend_data_icon_post');
 
   var eltype = $("#current_user>span.thetype");
   var eluser = $("#current_user>span.username");
@@ -62,21 +62,46 @@ var CURRENT_USER = (function(){
 
     console.log( '_type "' + type + '"' );
     if (type === 'instagram') {
-      if(data_source_icon.hasClass( twitter_icon )) {
-        data_source_icon.removeClass( twitter_icon );
+      if(navbar_data_source_icon.hasClass( twitter_icon_inverse_class )) {
+        navbar_data_source_icon.removeClass( twitter_icon_inverse_class );
       }
-      data_source_icon.addClass( instagram_icon );
+      navbar_data_source_icon.addClass( instagram_icon_inverse_class );
+
+      if(legend_data_icon_user.hasClass( twitter_icon_small_class )) {
+        legend_data_icon_user.removeClass( twitter_icon_small_class );
+      }
+      legend_data_icon_user.addClass( instagram_icon_small_class );
+
+      if(legend_data_icon_post.hasClass( twitter_icon_small_class )) {
+        legend_data_icon_post.removeClass( twitter_icon_small_class );
+      }
+      legend_data_icon_post.addClass( instagram_icon_small_class );
+
     }
     else {
-      if(data_source_icon.hasClass( instagram_icon )) {
-        data_source_icon.removeClass( instagram_icon );
+      if(navbar_data_source_icon.hasClass( instagram_icon_inverse_class )) {
+        navbar_data_source_icon.removeClass( instagram_icon_inverse_class );
       }
-      data_source_icon.addClass( twitter_icon );
-    }
-    data_source_icon.show();
+      navbar_data_source_icon.addClass( twitter_icon_inverse_class );
 
-    $( '#legend_color_bar_user').text( 'Users ' + _associate_count );
-    $( '#legend_color_bar_post').text( 'Posts ' + _post_count );
+      if(legend_data_icon_user.hasClass( instagram_icon_small_class )) {
+        legend_data_icon_user.removeClass( instagram_icon_small_class );
+      }
+      legend_data_icon_user.addClass( twitter_icon_small_class );
+
+      if(legend_data_icon_post.hasClass( instagram_icon_small_class )) {
+        legend_data_icon_post.removeClass( instagram_icon_small_class );
+      }
+      legend_data_icon_post.addClass( twitter_icon_small_class );
+
+    }
+    navbar_data_source_icon.show();
+    legend_data_icon_user.show();
+    legend_data_icon_post.show();
+
+
+    $( '#legend_color_bar_user').text( '  Users  ' + _associate_count );
+    $( '#legend_color_bar_post').text( '  Posts  ' + _post_count );
 
     //$( '#legend_user_count').val( _associate_count );
     //$( '#legend_post_count').val( _post_count );
@@ -100,7 +125,7 @@ var CURRENT_USER = (function(){
   };
 
   var getDataSourceIcon = function(){
-    return data_source_icon;
+    return navbar_data_source_icon;
   };
 
   return {
@@ -712,12 +737,13 @@ function drawGraph(graph){
   });
 
   node.on("mouseover", function() { 
-    d3.select(this).select("svg text").style("opacity","100"); 
+    //to-do
+    //d3.select(this).select("svg text").style("opacity","100");
   });
   node.on("mouseout", function() {
-    if (!labels){
-      d3.select(this).select("svg text").style("opacity","0");
-    }
+    //to-do
+    //d3.select(this).select("svg text").style("opacity","0");
+
   });
 
   link.append("svg:text")
@@ -744,9 +770,29 @@ function drawGraph(graph){
     .attr("stroke","blue")
     .attr("font-size","5pt")
     .attr("stroke-width","0.5px")
-    .style("opacity",function() {
-      if (labels) return 100;
-      else return 0;
+    .style("opacity",function(d) {
+
+      if (all_user_label_on) {
+        if (d.type === "user") {
+          return 100;
+        }
+
+        if (all_post_label_on) {
+          return 100;
+        }
+        return 0;
+      }
+      else {
+        if (d.type === "user") {
+          return 0;
+        }
+
+        if (all_post_label_on) {
+          return 100;
+        }
+        return 0;
+      }
+
     });
 
   force.on("tick", function() {
@@ -769,13 +815,43 @@ function redraw() {
            " scale(" + d3.event.scale + ")");
 }
 
-function toggle_labels() {
-  if (labels) {
-    d3.selectAll("#data_visual svg text").style("opacity","0");
-    labels = false;
-  } else {
+function toggleGraphLabel() {
+  console.log( 'toggleGraphLabel()' );
+
+  if (all_user_label_on && all_post_label_on) {
+    console.log( '\tuser ' + 'on, post ' + 'on'  );
+
     d3.selectAll("#data_visual svg text").style("opacity","100");
-    labels = true;
+
+  }
+  else if (!all_user_label_on && !all_post_label_on) {
+    console.log( '\tuser ' + 'off, post ' + 'off'  );
+
+    d3.selectAll("#data_visual svg text").style("opacity","0");
+  }
+  else if (all_user_label_on) {
+    console.log( '\tuser ' + 'on, post ' + 'off'  );
+
+    d3.selectAll("#data_visual svg text").style("opacity",function(d) {
+      if (d.type === "user") {
+        return "100";
+      }
+
+      return "0";
+    });
+
+  }
+  else {
+    console.log( '\tuser ' + 'off, post ' + 'on'  );
+
+    d3.selectAll("#data_visual svg text").style("opacity", function(d) {
+      if(d.type === "user" ) {
+        return "0";
+      }
+
+      return "100";
+    });
+
   }
 }
 
@@ -1052,7 +1128,8 @@ function drawConfidenceChart(confidence_scores) {
   var type = CURRENT_USER.getType();
   var which_id_type = {"twitter": "instagram_id", "instagram": "twitter_id"}[type];
   var switched_type = {"twitter" : "instagram", "instagram": "twitter"}[type];
-  var switched_data_source_icon = {"twitter" : instagram_icon_small, "instagram": twitter_icon_small}[type];
+  var switched_data_source_icon = {"twitter" : "<i class=\""+instagram_icon_small_class+"\">",
+                                   "instagram": "<i class=\""+twitter_icon_small_class+"\">"}[type];
 
   $('#top-rank').append($('<div>').append(
     $('<span>', { "style" : "font-weight: bold"})
@@ -1207,6 +1284,81 @@ $(function () {
 
   });
 
+  $("#toggle_legend_label_user").change( function(){
+
+    if ($(this).prop('checked')) {
+      console.log( 'toggle_legend_label_user ' + 'on'  );
+      all_user_label_on = true;
+    }
+    else {
+      console.log( 'toggle_legend_label_user ' + 'off'  );
+      all_user_label_on = false;
+    }
+
+    if ($('#toggle_legend_label_post').prop('checked')) {
+      console.log( 'toggle_legend_label_post ' + 'on'  );
+      all_post_label_on = true;
+    }
+    else {
+      console.log( 'toggle_legend_label_post ' + 'off'  );
+      all_post_label_on = false;
+    }
+
+
+    toggleGraphLabel();
+
+    //user-ale logging
+    var element_ID = 'toggle_legend_label_user'
+    var msg = {
+      activity: 'perform',
+      action: 'click',
+      elementId: element_ID,
+      elementType: 'checkbox',
+      elementGroup: 'view_group',
+      source: 'user',
+      tags: ['select', 'view']
+    };
+    ale.log(msg);
+
+  });
+
+  $("#toggle_legend_label_post").change( function(){
+
+    if ($(this).prop('checked')) {
+      console.log( 'toggle_legend_label_post ' + 'on'  );
+      all_post_label_on = true;
+    }
+    else {
+      console.log( 'toggle_legend_label_post ' + 'off'  );
+      all_post_label_on = false;
+    }
+
+    if ($('#toggle_legend_label_user').prop('checked')) {
+      console.log( 'toggle_legend_label_user ' + 'on'  );
+      all_user_label_on = true;
+    }
+    else {
+      console.log( 'toggle_legend_label_user ' + 'off'  );
+      all_user_label_on = false;
+    }
+
+    toggleGraphLabel();
+
+    //user-ale logging
+    var element_ID = 'toggle_legend_label_post'
+    var msg = {
+      activity: 'perform',
+      action: 'click',
+      elementId: element_ID,
+      elementType: 'checkbox',
+      elementGroup: 'view_group',
+      source: 'user',
+      tags: ['select', 'view']
+    };
+    ale.log(msg);
+
+  });
+
   //$('#top-entities').append(waiting_bar);
 
   function parseHash(newHash, oldHash){
@@ -1250,6 +1402,7 @@ $(function () {
   hasher.initialized.add(parseHash);
   hasher.changed.add(parseHash); 
   hasher.init();
+
 
 });
 

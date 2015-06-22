@@ -150,56 +150,65 @@
 
            </div>
 
+
             <!--<div id="graph-legends" class="collapse in" style="padding-left: 12px; padding-top: 4px; height: 0px; max-height:375px; overflow-y:scroll;">-->
            <div id="graph-legends" class="container-fluid" style="padding-left: 12px; padding-top: 4px; height: 40px; display: block;">
-              <div class="row" style="width:100%; height: 20px;">
-                <div class="col-xs-3">
-                  <div class="progress-bar progress-bar-legend-user"
+             <div class="row" style="width:100%; height: 20px;">
+
+               <div class="col-xs-3" style="padding-left: 12px; padding-right: 0px;">
+                 <div class="progress-bar progress-bar-legend-user"
                        role="progressbar"
                        aria-valuenow="60"
                        aria-valuemin="0"
                        aria-valuemax="100"
-                       style="width:100%; height: 18px; border-radius: 4px;" id="legend_color_bar_user">Users
-                  </div>
-                </div>
-                <div class="col-xs-1" style="text-align:left; padding-left: 0px;padding-right: 0px;">
-                  <input type="text" id="legend_user_count" readonly
-                         style="color: #000000;
-                         font-weight: normal;
-                         font-size: 10px;
-                         border: 0px;
-                         background-color: rgba(240,240,240,0.0);
-                         width: 100%;" >
-                </div>
-                <div class="col-xs-8">
-                </div>
-              </div>
+                       style="width: 100%; height: 18px; border-radius: 4px; text-align: left;">
+                   <input type="checkbox" id="toggle_legend_label_user" style="font-weight: normal; display: inline-flex;" checked/>
+                   <span id="legend_data_icon_user" style="display: inline-table; padding-left: 20px; padding-top: 0px;"/>
+                   <span id="legend_color_bar_user" style="text-align: right;"> Users </span>
+                 </div>
+               </div>
+
+               <div class="col-xs-1" style="padding-left: 0px; padding-right: 0px; height: 20px;">
+                 <!--
+                 <span id="legend_data_icon_user" style="display: inline-flex;"></span>
+                 -->
+               </div>
+
+               <div class="col-xs-8" style="padding-left: 0px; padding-right: 0px;">
+
+               </div>
+
+             </div>
 
               <div class="row" style="width:100%; height: 20px;">
-                <div class="col-xs-3">
-                  <div class="progress-bar progress-bar-legend-post"
+
+                <div class="col-xs-3" style="padding-left: 12px; padding-right: 0px; height: 20px;">
+                  <di class="progress-bar progress-bar-legend-post"
                        role="progressbar"
                        aria-valuenow="60"
                        aria-valuemin="0"
                        aria-valuemax="100"
-                       style="width:100%; height: 18px; border-radius: 4px;" id="legend_color_bar_post">Posts
-                  </div>
+                       style="width: 100%; height: 18px; border-radius: 4px; text-align: left;">
+                    <input type="checkbox" id="toggle_legend_label_post" style="font-weight: normal; display: inline-flex;" />
+                    <span id="legend_data_icon_post" style="display: inline-table; padding-left: 20px; padding-top: 0px;"/>
+                    <span id="legend_color_bar_post"> Posts </span>
+                  </di>
+
                 </div>
-                <div class="col-xs-1" style="text-align:left; padding-left: 0px;padding-right: 0px;">
-                  <input type="text" id="legend_post_count" readonly
-                         style="color: #000000;
-                         font-weight: normal;
-                         font-size: 10px;
-                         border:0px;
-                         background-color:
-                         rgba(240,240,240,0.0);
-                         width: 100%;">
+                <div class="col-xs-1" style="padding-left: 0px; padding-right: 0px;">
+                  <!--
+                  <span id="legend_data_icon_post" style="display: inline-flex;"></span>
+                  -->
                 </div>
-                <div class="col-xs-8">
+
+                <div class="col-xs-8" style="padding-left: 0px; padding-right: 0px;">
+
                 </div>
+
               </div>
 
              </div>
+
 
          </div> <!-- col-xs -->
         </div> <!--row -->
