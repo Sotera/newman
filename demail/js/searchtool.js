@@ -107,6 +107,24 @@ $(function () {
       return linkUserTwitter + username;
     }
   }
+    $("#search-btn").click(function () {
+        do_search();
+        //user-ale logging
+        var element_ID = 'txt_search';
+        var msg = {
+            activity: 'perform',
+            action: 'enter',
+            elementId: element_ID,
+            elementType: 'textbox',
+            elementGroup: 'search_group',
+            source: 'user',
+            tags: ['submit', 'search']
+        };
+        console.log( 'pressed ' + element_ID );
+        ale.log(msg);
+
+      return false;
+    });
 
   $('#txt_search').keypress(function (e) {
     if (e.which == 13) {
@@ -126,6 +144,7 @@ $(function () {
       console.log( 'pressed ' + element_ID );
       ale.log(msg);
 
-      return false;  
+      return false;
     }});
+
 });
