@@ -147,4 +147,11 @@ $(function () {
       return false;
     }});
 
+    $('#txt_search').keyup(function() {
+        clearTimeout(thread);
+        var thread = setTimeout(function() {
+            if ($("#txt_search").val().length > 1)
+                do_search();
+        }, 100);
+    });
 });
