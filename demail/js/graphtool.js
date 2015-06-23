@@ -336,63 +336,128 @@ function dragended(d){
   d3.select(this).classed("fixed", d.fixed = true);
 }
 
-function show_content_view(postObj){
-  $('#tab-list li:eq(3) a').tab('show')
-  $(document).scrollTop(0);
-  $("#post-body").empty();
-  //$("#post-body").append($('<span>').text('Loading...
-  //')).append(waiting_bar);
-  var assoc_users = _.uniq(postObj.assoc_users);
-  var tags = _.uniq(postObj.tags);
-  $("#post-body").append($('<div>').addClass("post-view").append(
-    [$('<p>').append($('<span>').addClass('bold').text("Post: ")),
-     $('<div>', { "style" : "font-size: 20px;"}
-      ).html(postObj.content),
-     $('<div>', { "style" : "padding-top: 10px;"})
-     .append($('<span>').addClass('bold').text("URL: "))
-     .append($('<a>', { "href": postObj.url, 
-                        "target" : "_blank" }).html(postObj.url)), 
-     $('<div>', { "style" : "padding-top: 10px;"})
-     .append($('<p>', { "style" : "overflow-wrap: break-word"})
-             .append($('<span>').addClass('bold').text("Associated Users: "))
-             .append(_.map(assoc_users, function(u){
-               return $('<a>', { "style" : "padding: 5px;"}).on("click", function(){
-                 var url = "/user/" + CURRENT_USER.getType() + "/" + u
-                 hasher.setHash(url);
+//function getIFrame() {
+//    var embedUrl =  "http://api.instagram.com/oembed?url=" + postObj.url;
+//    $.ajax({
+//        type: "GET",
+//        url: embedUrl,
+//        crossDomain: true,
+//        headers: { 'Access-Control-Allow-Methods': 'GET, POST, PUT' },
+//        async: true,
+//        dataType: "jsonp",
+//        success: function (data) {
+//            console.log("test" + data.html);
+//            return data.html
+//        },
+//        error: "FAILED"
+//    });
+//}
 
-                 //user-ale logging
-                 var element_ID = 'content-link:' + url;
-                 var msg = {
-                   activity: 'perform',
-                   action: 'click',
-                   elementId: element_ID,
-                   elementType: 'link',
-                   elementGroup: 'view_group',
-                   source: 'user',
-                   tags: ['select', 'view']
-                 };
-                 console.log( 'clicked ' + element_ID );
-                 ale.log(msg);
+function show_content_view(postObj) {
 
-               }).html(u);
-             }))),
-     $('<div>', { "style" : "padding-top: 10px;"})
-     .append($('<p>', { "style" : "overflow-wrap: break-word"})
-             .append($('<span>').addClass('bold').text("Tags: "))
-             .append(_.map(tags, function(u){
-               return $('<span>', { "style" : "padding: 5px;"}).html(u);
-             })))
-    ]));
+    $('#tab-list li:eq(3) a').tab('show');
+    $(document).scrollTop(0);
+    $("#post-body").empty();
+    $(document).ready(function () {
+        $(".fancybox").fancybox({
+            maxWidth: 800,
+            maxHeight: 600,
+            fitToView: false,
+            width: '70%',
+            height: '70%',
+            autoSize: false,
+            closeClick: false,
+            openEffect: 'none',
+            closeEffect: 'none'
+        });
+    });
+    //$("#post-body").append($('<span>').text('Loading...
+    //')).append(waiting_bar);
+    var assoc_users = _.uniq(postObj.assoc_users);
+    var tags = _.uniq(postObj.tags);
+    $("#post-body").append($('<div>').addClass("post-view").append(
+        [$('<p>').append($('<span>').addClass('bold').text("Post: ")),
+            $('<div>', { "style": "font-size: 20px;"}
+            ).html(postObj.content),
+            $('<div>', { "style": "padding-top: 10px;"})
+                .append($('<span>').addClass('bold').text("URL: "))
+                .append($('<a>', { "href": postObj.url,
+                    "target": "_blank" })
+//                        .addClass("fancybox fancybox.iframe")
+                    .html(postObj.url),
+                $('<div>', { "style": "padding-top: 10px;"})
+                    .append($('<p>', { "style": "overflow-wrap: break-word"})
+                        .append($('<span>').addClass('bold').text("Associated Users: "))
+                        .append(_.map(assoc_users, function (u) {
+                            return $('<a>', { "style": "padding: 5px;"}).on("click", function () {
+                                var url = "/user/" + CURRENT_USER.getType() + "/" + u
+                                hasher.setHash(url);
 
-  if (postObj['instagram']) {
-    $("#post-body").append(
-      $('<div>').append(
-        $('<img>', {
-          "src" : postObj.instagram.img
-        })))
-  }
+                                //user-ale logging
+                                var element_ID = 'content-link:' + url;
+                                var msg = {
+                                    activity: 'perform',
+                                    action: 'click',
+                                    elementId: element_ID,
+                                    elementType: 'link',
+                                    elementGroup: 'view_group',
+                                    source: 'user',
+                                    tags: ['select', 'view']
+                                };
+                                console.log('clicked ' + element_ID);
+                                ale.log(msg);
 
-};
+                            }).html(u);
+                        }))),
+                $('<div>', { "style": "padding-top: 10px;"})
+                    .append($('<p>', { "style": "overflow-wrap: break-word"})
+                        .append($('<span>').addClass('bold').text("Tags: "))
+                        .append(_.map(tags, function (u) {
+                            return $('<span>', { "style": "padding: 5px;"}).html(u);
+                        }))))
+        ]));
+
+    if (postObj['instagram']) {
+        var iFrameSizeIG = 400; // Must be AT LEAST 320
+        $.ajax({
+            type: "GET",
+            url: "http://api.instagram.com/oembed?url=" + postObj.url + "&maxwidth=" + iFrameSizeIG,
+            crossDomain: true,
+            headers: { 'Access-Control-Allow-Methods': 'GET, POST, PUT' },
+            async: true,
+            dataType: "jsonp",
+            success: function (data) {
+                $("#post-body").append($('<div>').addClass("post-view").append(
+                    $('<div>', { "style": "padding-top: 10px;"})
+                        .append($('<span>').addClass('bold').text("User Post: "))
+                        .append(data.html)))
+            },
+            error: function () {
+                alert("Error Occured");
+            }
+        });
+    }
+
+    if (postObj['twitter']) {
+        $.ajax({
+            type: "GET",
+            url: "https://api.twitter.com/1/statuses/oembed.json?url=" + postObj.url,
+            crossDomain: true,
+            headers: { 'Access-Control-Allow-Methods': 'GET, POST, PUT' },
+            async: true,
+            dataType: "jsonp",
+            success: function (data) {
+                $("#post-body").append($('<div>').addClass("post-view").append(
+                    $('<div>', { "style": "padding-top: 10px;"})
+                        .append($('<span>').addClass('bold').text("User Tweet: "))
+                        .append(data.html)))
+            },
+            error: function () {
+                alert("Error Occured");
+            }
+        });
+    }
+}
 
 function drawContentTable(posts, user){
   $('#posts_user').text( user.getUsername() );

@@ -2,6 +2,7 @@
 *.pyc
 *.zip
 .DS_Store
+*.idea
 work_dir
 
 demail/emails/
@@ -9,6 +10,5 @@ demail/emails/
 
 tmp/
 !tmp/.keep
-
 
 conf/*.cfg
