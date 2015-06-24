@@ -1002,6 +1002,18 @@ function drawTopHashtags(posts) {
     .append("g")
     .attr("transform", function(d, i) { return "translate(" + margin.left + "," + (+(i * barHeight) + +margin.top) + ")";});
 
+  var tip = d3.tip()
+    .attr('class', 'd3-tip')
+    .direction('e')
+    .offset(function() {
+        return [0, 10]
+    })
+    .html(function(d) {
+          return d[1]['count'];
+    });
+
+  bar.call(tip);
+
   bar.append("rect")
     .attr("width", function(d) {
       return x((+d[1].count));
@@ -1027,7 +1039,8 @@ function drawTopHashtags(posts) {
         ale.log(msg);
 
     })
-    .append('title').text(function(d) { return d[1]['count']; });
+    .on("mouseover", tip.show)
+    .on("mouseout", tip.hide);
 
   // bar.append("text")
   //   .attr("x", function(d) { return x((+d.rank * 100)) - 3;})
@@ -1108,6 +1121,18 @@ function drawTopAssociateChart(nodes) {
     .append("g")
     .attr("transform", function(d, i) { return "translate(" + margin.left + "," + (+(i * barHeight) + +margin.top) + ")";});
 
+  var tip = d3.tip()
+    .attr('class', 'd3-tip')
+    .direction('e')
+    .offset(function() {
+          return [0, 10]
+    })
+    .html(function(d) {
+          return d.rank * 100 + "<strong> %</strong></span>";
+    });
+
+  bar.call(tip);
+
   bar.append("rect")
     .attr("width", function(d) {
       return x((+d.rank * 100));
@@ -1133,7 +1158,8 @@ function drawTopAssociateChart(nodes) {
         ale.log(msg);
 
     })
-    .append('title').text(function(d) { return d.rank * 100 + "%"});
+    .on("mouseover", tip.show)
+    .on("mouseout", tip.hide);
 
   // bar.append("text")
   //   .attr("x", function(d) { return x((+d.rank * 100)) - 3;})
@@ -1170,10 +1196,15 @@ function drawTopAssociateChart(nodes) {
         ale.log(msg);
 
     })
-    .on("mouseover", function(d){ })
-    .on("mouseout", function(d){ })
+    .on("mouseover", function(d){
+          d3.select(this).style("text-decoration", "underline")
+              .style("stroke", "blue");
+    })
+    .on("mouseout", function(d) {
+          d3.select(this).style("text-decoration", null)
+              .style("stroke", null);
+    })
     .append('title').text(function(d) {
-
       return 'Click to view ' + d.user_id;
     });
 }
@@ -1229,6 +1260,18 @@ function drawConfidenceChart(confidence_scores) {
                    return "translate(" + margin.left + "," + (+(i * barHeight) + +margin.top) + ")";
                  });
 
+  var tip = d3.tip()
+      .attr('class', 'd3-tip')
+      .direction('e')
+      .offset(function() {
+          return [0, 10]
+      })
+      .html(function(d) {
+          return "<strong>MIT disambiguation score: </strong>" + d.rank;
+      });
+
+    bar.call(tip);
+
   var bar_graph = bar.append("rect")
     .attr("width", function(d) {
       return x((+d.rank * 100));
@@ -1254,7 +1297,8 @@ function drawConfidenceChart(confidence_scores) {
       ale.log(msg);
 
     })
-    .append('title').text(function(d) { return "MIT disambiguation score: " + d.rank; });
+    .on("mouseover", tip.show)
+    .on("mouseout", tip.hide)
 
   // bar.append("text")
   //   .attr("x", function(d) { return x((+d.rank * 100)) - 3;})
@@ -1294,13 +1338,16 @@ function drawConfidenceChart(confidence_scores) {
 
     })
     .on("mouseover", function(d){
-      redrawBarText(d);
+          redrawBarText(d);
+          d3.select(this).style("text-decoration", "underline")
+              .style("stroke", "blue");
     })
-    .on("mouseout", function(d){  })
-    .append('title')
-    .text(function(d) {
-
-      return 'Click to view ' + d.user_id;
+    .on("mouseout", function(d) {
+          d3.select(this).style("text-decoration", null)
+              .style("stroke", null);
+    })
+    .append('title').text(function(d) {
+          return 'Click to view ' + d.user_id;
     });
 
   function redrawBarText(d) {
