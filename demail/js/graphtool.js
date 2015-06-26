@@ -52,46 +52,164 @@ var vis = svg.append('svg:g');
 
 var all_user_label_on = $('#toggle_legend_label_user').prop('checked');
 var all_post_label_on = $('#toggle_legend_label_post').prop('checked');
-var CURRENT_USER = (function () {
 
-    var navbar_data_source_icon = $('#data_source_icon');
-    var legend_data_icon_user = $('#legend_data_icon_user');
-    var legend_data_icon_post = $('#legend_data_icon_post');
+var user_history = (function() {
+  var user_hist_max = 20;
+  var user_hist_list = [];
 
-    var eltype = $("#current_user>span.thetype");
-    var eluser = $("#current_user>span.username");
-    var lookup = {"instagram": "Instagram", "twitter": "Twitter" };
-    var _user = "";
-    var _type = "";
-    var _associate_count = 0;
-    var _post_count = 0;
+  var user = function( user_id, data_source ) {
+    return {
+      "user_id": user_id,
+      "data_source": data_source
+    };
+  };
 
-    var setUser = function (type, username, associate_count, post_count) {
-        _user = username;
-        eluser.html(username);
-        _type = type;
-        eltype.html(lookup[type]);
-        _associate_count = associate_count;
-        _post_count = post_count;
+  var push = function( user_id, data_source ) {
+    console.log( 'push( ' + user_id + ', ' + data_source + ' )');
 
-        console.log('_type "' + type + '"');
-        if (type === 'instagram') {
-            if (navbar_data_source_icon.hasClass(twitter_icon_inverse_class)) {
-                navbar_data_source_icon.removeClass(twitter_icon_inverse_class);
+    var new_user = user( user_id, data_source );
+
+    if (!contains( new_user )) {
+      if (user_hist_list.length == user_hist_max) {
+        user_hist_list.splice( user_hist_list.length - 1, 1 );
+      }
+      user_hist_list.unshift( new_user );
+
+      //console.log( '\tappended \'' + user + '\'' );
+    }
+
+  };
+
+  var pop = function() {
+    return user_hist_list.shift();
+  };
+
+  var contains = function( user ) {
+
+    var found = false;
+    _.each(user_hist_list, function( element ) {
+
+      if (element.user_id === user.user_id && element.data_source === user.data_source) {
+        found = true;
+      }
+
+    });
+
+    console.log( 'contains( ' + user.user_id + ' ) ' + found );
+
+    return found;
+  };
+
+  var getFirst = function() {
+    console.log( 'getFirst()');
+
+    return user_hist_list.pop();
+  };
+
+  var getAllUser= function() {
+    return user_hist_list;
+  };
+
+  var getUserByIndex = function( index ) {
+    return user_hist_list[ index ];
+  };
+
+  var getUserByName = function( user_name ) {
+
+    var user;
+    _.each(user_hist_list, function( element ) {
+
+      if (element.user_id === user_name) {
+        user = element;
+      }
+
+    });
+
+    return user;
+  };
+
+
+  var refreshUIDropdown = function( user_name ) {
+    setNavBarUserName( user_name );
+
+    console.log( 'user_hist[' + user_hist_list.length + ']' );
+
+    clearUIDropdown();
+
+    _.each(user_hist_list, function( element ) {
+      console.log( '\t' + element.user_id + ', ' + element.data_source );
+
+      var html_text = '<li><a style=\"padding: 0px 20px 0px 0px;\" >' + element.user_id + '</a></li>';
+
+      //console.log( '\t' + html_text );
+      $('#user_hist_list').append( html_text );
+
+    });
+
+  };
+
+  var clearUIDropdown = function() {
+    $('#user_hist_list li').each(function() {
+      $(this).remove();
+    });
+  }
+
+  return {
+    "push": push,
+    "pop": pop,
+    "getFirst": getFirst,
+    "getAllUser": getAllUser,
+    "getUserByIndex": getUserByIndex,
+    "getUserByName": getUserByName,
+    "refreshUIDropdown" : refreshUIDropdown
+  }
+
+}());
+
+var CURRENT_USER = (function(){
+
+  var navbar_data_source_icon = $('#data_source_icon');
+  var legend_data_icon_user =$('#legend_data_icon_user');
+  var legend_data_icon_post =$('#legend_data_icon_post');
+
+  var eltype = $("#current_user>span.thetype");
+  var eluser = $("#current_user>span.username");
+  var lookup = {"instagram" : "Instagram", "twitter": "Twitter" };
+  var _user = "";
+  var _type = "";
+  var _associate_count = 0;
+  var _post_count = 0;
+
+  var setUser = function(type, username, associate_count, post_count ){
+    _user = username;
+    eluser.html(username);
+    user_history.push( username, type );
+    user_history.refreshUIDropdown( username );
+
+    _type = type;
+    eltype.html(lookup[type]);
+
+    _associate_count = associate_count;
+    _post_count = post_count;
+
+    console.log( '_type "' + type + '"' );
+    if (type === 'instagram') {
+      if(navbar_data_source_icon.hasClass( twitter_icon_inverse_class )) {
+        navbar_data_source_icon.removeClass( twitter_icon_inverse_class );
+      }
+      navbar_data_source_icon.addClass( instagram_icon_inverse_class );
+
+      if(legend_data_icon_user.hasClass( twitter_icon_small_class )) {
+        legend_data_icon_user.removeClass( twitter_icon_small_class );
+      }
+      legend_data_icon_user.addClass( instagram_icon_small_class );
+
+      if(legend_data_icon_post.hasClass( twitter_icon_small_class )) {
+        legend_data_icon_post.removeClass( twitter_icon_small_class );
+      }
+      legend_data_icon_post.addClass( instagram_icon_small_class );
+
             }
-            navbar_data_source_icon.addClass(instagram_icon_inverse_class);
-
-            if (legend_data_icon_user.hasClass(twitter_icon_small_class)) {
-                legend_data_icon_user.removeClass(twitter_icon_small_class);
-            }
-            legend_data_icon_user.addClass(instagram_icon_small_class);
-
-            if (legend_data_icon_post.hasClass(twitter_icon_small_class)) {
-                legend_data_icon_post.removeClass(twitter_icon_small_class);
-            }
-            legend_data_icon_post.addClass(instagram_icon_small_class);
-
-        }
         else {
             if (navbar_data_source_icon.hasClass(instagram_icon_inverse_class)) {
                 navbar_data_source_icon.removeClass(instagram_icon_inverse_class);
@@ -1264,6 +1382,7 @@ function drawTopAssociateChart(nodes) {
                 .style("stroke", null);
         })
         .append('title').text(function (d) {
+
             return 'Click to view ' + d.user_id;
         });
 }
@@ -1430,152 +1549,187 @@ function drawConfidenceChart(confidence_scores) {
     }
 }
 
-
-/** document ready **/
-$(function () {
-    "use strict";
-
-    $("#search_form").submit(function (e) {
-        return false;
-    });
-
-    $('a[data-toggle=\"tab\"]').on('shown.bs.tab', function (e) {
-        var element_ID = 'tab:' + $(e.target).html();
-
-        var msg = {
-            activity: 'perform',
-            action: 'click',
-            elementId: element_ID,
-            elementType: 'tab',
-            elementGroup: 'view_group',
-            source: 'user',
-            tags: ['select', 'view']
-        };
-        console.log('clicked ' + element_ID);
-        ale.log(msg);
-
-    });
-
-    $("#toggle_legend_label_user").change(function () {
-
-        if ($(this).prop('checked')) {
-            console.log('toggle_legend_label_user ' + 'on');
-            all_user_label_on = true;
-        }
-        else {
-            console.log('toggle_legend_label_user ' + 'off');
-            all_user_label_on = false;
-        }
-
-        if ($('#toggle_legend_label_post').prop('checked')) {
-            console.log('toggle_legend_label_post ' + 'on');
-            all_post_label_on = true;
-        }
-        else {
-            console.log('toggle_legend_label_post ' + 'off');
-            all_post_label_on = false;
-        }
-
-
-        toggleGraphLabel();
-
-        //user-ale logging
-        var element_ID = 'toggle_legend_label_user'
-        var msg = {
-            activity: 'perform',
-            action: 'click',
-            elementId: element_ID,
-            elementType: 'checkbox',
-            elementGroup: 'view_group',
-            source: 'user',
-            tags: ['select', 'view']
-        };
-        ale.log(msg);
-
-    });
-
-    $("#toggle_legend_label_post").change(function () {
-
-        if ($(this).prop('checked')) {
-            console.log('toggle_legend_label_post ' + 'on');
-            all_post_label_on = true;
-        }
-        else {
-            console.log('toggle_legend_label_post ' + 'off');
-            all_post_label_on = false;
-        }
-
-        if ($('#toggle_legend_label_user').prop('checked')) {
-            console.log('toggle_legend_label_user ' + 'on');
-            all_user_label_on = true;
-        }
-        else {
-            console.log('toggle_legend_label_user ' + 'off');
-            all_user_label_on = false;
-        }
-
-        toggleGraphLabel();
-
-        //user-ale logging
-        var element_ID = 'toggle_legend_label_post'
-        var msg = {
-            activity: 'perform',
-            action: 'click',
-            elementId: element_ID,
-            elementType: 'checkbox',
-            elementGroup: 'view_group',
-            source: 'user',
-            tags: ['select', 'view']
-        };
-        ale.log(msg);
-
-    });
-
-    //$('#top-entities').append(waiting_bar);
-
-    function parseHash(newHash, oldHash) {
-        console.log('parseHash( ' + newHash + ', ' + oldHash + ' )');
-        crossroads.parse(newHash);
+    function setNavBarUserName(name) {
+        $('#current_user_select_dropdown').find('.dropdown-toggle').html(name + '<span class="caret"></span>');
     }
 
-    crossroads.addRoute("/user/{type}/{username}", function (type, username) {
-        $.ajax({
-            url: 'mediasearch/' + type + "/" + username,
-            type: 'GET'
-        }).done(function (resp) {
-            var user_nodes = parseAllUserNodes(resp.graph.nodes);
-            CURRENT_USER.setUser(type, username, user_nodes.length, resp.posts.length);
-            drawTopAssociateChart(user_nodes);
-            drawConfidenceChart(resp.similar);
-            drawContentTable(resp.posts, CURRENT_USER);
-            drawTopHashtags(resp.posts);
 
-            _.defer(drawGraph, resp.graph);
-            //drawGraph(resp.graph);
+    /** document ready **/
+    $(function () {
+        "use strict";
 
-        }).fail(function (resp) {
-            alert("No data found for account - " + username + " on " + type)
-            window.history.back();
+        $("#search_form").submit(function (e) {
+            return false;
         });
+
+        $('a[data-toggle=\"tab\"]').on('shown.bs.tab', function (e) {
+            var element_ID = 'tab:' + $(e.target).html();
+
+            var msg = {
+                activity: 'perform',
+                action: 'click',
+                elementId: element_ID,
+                elementType: 'tab',
+                elementGroup: 'view_group',
+                source: 'user',
+                tags: ['select', 'view']
+            };
+            console.log('clicked ' + element_ID);
+            ale.log(msg);
+
+        });
+
+        $("#toggle_legend_label_user").change(function () {
+
+            if ($(this).prop('checked')) {
+                console.log('toggle_legend_label_user ' + 'on');
+                all_user_label_on = true;
+            }
+            else {
+                console.log('toggle_legend_label_user ' + 'off');
+                all_user_label_on = false;
+            }
+
+            if ($('#toggle_legend_label_post').prop('checked')) {
+                console.log('toggle_legend_label_post ' + 'on');
+                all_post_label_on = true;
+            }
+            else {
+                console.log('toggle_legend_label_post ' + 'off');
+                all_post_label_on = false;
+            }
+
+
+            toggleGraphLabel();
+
+            //user-ale logging
+            var element_ID = 'toggle_legend_label_user'
+            var msg = {
+                activity: 'perform',
+                action: 'click',
+                elementId: element_ID,
+                elementType: 'checkbox',
+                elementGroup: 'view_group',
+                source: 'user',
+                tags: ['select', 'view']
+            };
+            ale.log(msg);
+
+        });
+
+        $("#toggle_legend_label_post").change(function () {
+
+            if ($(this).prop('checked')) {
+                console.log('toggle_legend_label_post ' + 'on');
+                all_post_label_on = true;
+            }
+            else {
+                console.log('toggle_legend_label_post ' + 'off');
+                all_post_label_on = false;
+            }
+
+            if ($('#toggle_legend_label_user').prop('checked')) {
+                console.log('toggle_legend_label_user ' + 'on');
+                all_user_label_on = true;
+            }
+            else {
+                console.log('toggle_legend_label_user ' + 'off');
+                all_user_label_on = false;
+            }
+
+            toggleGraphLabel();
+
+            //user-ale logging
+            var element_ID = 'toggle_legend_label_post'
+            var msg = {
+                activity: 'perform',
+                action: 'click',
+                elementId: element_ID,
+                elementType: 'checkbox',
+                elementGroup: 'view_group',
+                source: 'user',
+                tags: ['select', 'view']
+            };
+            ale.log(msg);
+
+        });
+
+
+        /**
+         * Note: this works if the list-item (li) elements are staticly defined at page-load time.
+         */
+        /*
+         $(".dropdown-menu li a").click(function(){
+         var dropdownSelected = $(this).text();
+         console.log( 'dropdownSelected ' + dropdownSelected );
+         $(this).parents('.dropdown').find('.dropdown-toggle').html(dropdownSelected+' <span class="caret"></span>');
+         });
+         */
+
+        /**
+         * Note:
+         * Since the list-item (li) elements are dynamically populated,
+         * elements that don't exist during page-load must have the event delegated
+         * to a static parent element that does exist at page-load time.
+         */
+        $('#current_user_select_dropdown').on('click', '.dropdown-menu li a', function () {
+            var dropdownSelected = $(this).text();
+            console.log('dropdown_selected ' + dropdownSelected);
+
+            var user = user_history.getUserByName(dropdownSelected);
+
+            if (user) {
+                console.log('\tswitching to ' + user.user_id);
+                var url = "/user/" + user.data_source + "/" + user.user_id
+                hasher.setHash(url);
+            }
+        });
+
+        //$('#top-entities').append(waiting_bar);
+
+        function parseHash(newHash, oldHash) {
+            console.log('parseHash( ' + newHash + ', ' + oldHash + ' )');
+            crossroads.parse(newHash);
+        }
+
+        crossroads.addRoute("/user/{type}/{username}", function (type, username) {
+            $.ajax({
+                url: 'mediasearch/' + type + "/" + username,
+                type: 'GET'
+            }).done(function (resp) {
+                var user_nodes = parseAllUserNodes(resp.graph.nodes);
+                CURRENT_USER.setUser(type, username, user_nodes.length, resp.posts.length);
+                drawTopAssociateChart(user_nodes);
+                drawConfidenceChart(resp.similar);
+                drawContentTable(resp.posts, CURRENT_USER);
+                drawTopHashtags(resp.posts);
+
+                _.defer(drawGraph, resp.graph);
+                //drawGraph(resp.graph);
+
+            }).fail(function (resp) {
+                alert("No data found for account - " + username + " on " + type)
+                window.history.back();
+            });
+        });
+
+        crossroads.routed.add(function (req, data) {
+            console.log('crossroads.routed.add(function( ' + req + ', ' + data + ' )');
+            console.log('routed: ' + req);
+            console.log(data.route + ' - ' + data.params + ' - ' + data.isFirst);
+        });
+
+        crossroads.bypassed.add(function (req) {
+            console.log('route not found: ' + req);
+            //alert('Error: route not found, go back');
+        });
+
+        hasher.prependHash = '!';
+        hasher.initialized.add(parseHash);
+        hasher.changed.add(parseHash);
+        hasher.init();
+
+
     });
-
-    crossroads.routed.add(function (req, data) {
-        console.log('crossroads.routed.add(function( ' + req + ', ' + data + ' )');
-        console.log('routed: ' + req);
-        console.log(data.route + ' - ' + data.params + ' - ' + data.isFirst);
-    });
-
-    crossroads.bypassed.add(function (req) {
-        console.log('route not found: ' + req);
-        //alert('Error: route not found, go back');
-    });
-
-    hasher.prependHash = '!';
-    hasher.initialized.add(parseHash);
-    hasher.changed.add(parseHash);
-    hasher.init();
-
-
-});
 
 
