@@ -38,6 +38,120 @@ var vis = svg.append('svg:g');
 
 var all_user_label_on = $('#toggle_legend_label_user').prop('checked');
 var all_post_label_on = $('#toggle_legend_label_post').prop('checked');
+
+var user_history = (function() {
+  var user_hist_max = 20;
+  var user_hist_list = [];
+
+  var user = function( user_id, data_source ) {
+    return {
+      "user_id": user_id,
+      "data_source": data_source
+    };
+  };
+
+  var push = function( user_id, data_source ) {
+    console.log( 'push( ' + user_id + ', ' + data_source + ' )');
+
+    var new_user = user( user_id, data_source );
+
+    if (!contains( new_user )) {
+      if (user_hist_list.length == user_hist_max) {
+        user_hist_list.splice( user_hist_list.length - 1, 1 );
+      }
+      user_hist_list.unshift( new_user );
+
+      //console.log( '\tappended \'' + user + '\'' );
+    }
+
+  };
+
+  var pop = function() {
+    return user_hist_list.shift();
+  };
+
+  var contains = function( user ) {
+
+    var found = false;
+    _.each(user_hist_list, function( element ) {
+
+      if (element.user_id === user.user_id && element.data_source === user.data_source) {
+        found = true;
+      }
+
+    });
+
+    console.log( 'contains( ' + user.user_id + ' ) ' + found );
+
+    return found;
+  };
+
+  var getFirst = function() {
+    console.log( 'getFirst()');
+
+    return user_hist_list.pop();
+  };
+
+  var getAllUser= function() {
+    return user_hist_list;
+  };
+
+  var getUserByIndex = function( index ) {
+    return user_hist_list[ index ];
+  };
+
+  var getUserByName = function( user_name ) {
+
+    var user;
+    _.each(user_hist_list, function( element ) {
+
+      if (element.user_id === user_name) {
+        user = element;
+      }
+
+    });
+
+    return user;
+  };
+
+
+  var refreshUIDropdown = function( user_name ) {
+    setNavBarUserName( user_name );
+
+    console.log( 'user_hist[' + user_hist_list.length + ']' );
+
+    clearUIDropdown();
+
+    _.each(user_hist_list, function( element ) {
+      console.log( '\t' + element.user_id + ', ' + element.data_source );
+
+      var html_text = '<li><a style=\"padding: 0px 20px 0px 0px;\" >' + element.user_id + '</a></li>';
+
+      //console.log( '\t' + html_text );
+      $('#user_hist_list').append( html_text );
+
+    });
+
+  };
+
+  var clearUIDropdown = function() {
+    $('#user_hist_list li').each(function() {
+      $(this).remove();
+    });
+  }
+
+  return {
+    "push": push,
+    "pop": pop,
+    "getFirst": getFirst,
+    "getAllUser": getAllUser,
+    "getUserByIndex": getUserByIndex,
+    "getUserByName": getUserByName,
+    "refreshUIDropdown" : refreshUIDropdown
+  }
+
+}());
+
 var CURRENT_USER = (function(){
 
   var navbar_data_source_icon = $('#data_source_icon');
@@ -55,8 +169,12 @@ var CURRENT_USER = (function(){
   var setUser = function(type, username, associate_count, post_count ){
     _user = username;
     eluser.html(username);
+    user_history.push( username, type );
+    user_history.refreshUIDropdown( username );
+
     _type = type;
     eltype.html(lookup[type]);
+
     _associate_count = associate_count;
     _post_count = post_count;
 
@@ -1205,6 +1323,7 @@ function drawTopAssociateChart(nodes) {
               .style("stroke", null);
     })
     .append('title').text(function(d) {
+
       return 'Click to view ' + d.user_id;
     });
 }
@@ -1369,6 +1488,9 @@ function drawConfidenceChart(confidence_scores) {
   }
 }
 
+function setNavBarUserName( name ) {
+  $('#current_user_select_dropdown').find('.dropdown-toggle').html( name + '<span class="caret"></span>');
+}
 
 
 /** document ready **/
@@ -1469,6 +1591,37 @@ $(function () {
     };
     ale.log(msg);
 
+  });
+
+
+  /**
+   * Note: this works if the list-item (li) elements are staticly defined at page-load time.
+   */
+  /*
+  $(".dropdown-menu li a").click(function(){
+    var dropdownSelected = $(this).text();
+    console.log( 'dropdownSelected ' + dropdownSelected );
+    $(this).parents('.dropdown').find('.dropdown-toggle').html(dropdownSelected+' <span class="caret"></span>');
+  });
+  */
+
+  /**
+   * Note:
+   * Since the list-item (li) elements are dynamically populated,
+   * elements that don't exist during page-load must have the event delegated
+   * to a static parent element that does exist at page-load time.
+   */
+  $('#current_user_select_dropdown').on('click', '.dropdown-menu li a', function() {
+    var dropdownSelected = $(this).text();
+    console.log('dropdown_selected ' + dropdownSelected);
+
+    var user = user_history.getUserByName(dropdownSelected);
+
+    if (user) {
+      console.log('\tswitching to ' + user.user_id);
+      var url = "/user/" + user.data_source + "/" + user.user_id
+      hasher.setHash(url);
+    }
   });
 
   //$('#top-entities').append(waiting_bar);

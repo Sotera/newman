@@ -4,13 +4,13 @@
     <meta charset="utf-8">
     <title>newman</title>
     <link href="css/thirdparty/jquery-ui.css" rel="stylesheet">
-    <link href="css/ner.css" rel="stylesheet">
     <link href="css/thirdparty/bootstrap.min.css" rel="stylesheet">
     <link href="css/thirdparty/bootstrap-glyphicons.css" rel="stylesheet">
     <link href="css/thirdparty/d3-tip.css" rel="stylesheet">
     <link href="css/thirdparty/font-awesome.min.css" rel="stylesheet">
     <link href="css/thirdparty/jquery.fancybox.css" rel="stylesheet">
     <link href="css/default.css" rel="stylesheet">
+    <link href="css/ner.css" rel="stylesheet">
     <link href="css/custom-bootstrap.css" rel="stylesheet">
     <link href="css/profile-chart.css" rel="stylesheet">
   </head>
@@ -42,42 +42,49 @@
     </div>
 
     <!-- nav bar -->
-    <div class="navbar navbar-default navbar-fixed-top" style="margin-bottom: 0px;">
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0px;">
       <div class="navbar-header">
         <div class="navbar-brand"><i>newman</i> media</div>
       </div>
-      <ul class="nav navbar-nav" style="width: 30%;">
-        <li>
-          <div style="width: 200px; padding-top: 15px; text-align: left;">
-            <a style="width: 200px; color: white;" id="current_user">
-              <span id="data_source_icon" class="fa fa-instagram fa-inverse fa-lg"></span>
-              <!--<span class="thetype" style="text-transform: uppercase;font-weight:bold;"></span>-->
-              <span class="username" style="color: white;font-size: 15px;font-weight:normal;"></span>
-            </a>
-          </div>
-        </li>
-        <li>
-          <div style="width: 150px; padding-top: 15px; text-align: right; color: white;">
-            <span class="fa fa-search fa-inverse fa-lg"></span>
-            <a href="search.html" style="font-size: 15px; font-weight:bold; color: white;"> Search User </a>
-          </div>
-        </li>
-      </ul>
-      <ul class="nav nav-center nav navbar-right">
-        <li>
-            <!--
-            <form id="search_form" class="navbar-form navbar-right" role="search" style="color: white;">
-              <div class="form-group" style="padding-left: 10px;">
-                <a href="search.html">Search Users</a>
-                <input id="txt_search" type="text" class="form-control"
-                       placeholder="Search text..."
-                       autocomplete="off"
-                       style="display:none;border-radius: 15px;width: 300px;background-color: rgba(255,255,255,0.9);">
-              </div>
-            </form>
-            -->
-	    </li>
-	  </ul>
+
+
+      <div class="collapse navbar-collapse">
+
+        <ul style="width: 100%;" >
+
+          <li style="position:relative; display: inline-block;">
+            <span id="data_source_icon" class="fa fa-instagram fa-lg"></span>
+          </li>
+
+          <li class="dropdown" style="position:relative; display: inline-block;" id="current_user_select_dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown"> User <b class="caret"></b></a>
+            <ul class="dropdown-menu" style="padding: 2px 0px 2px 0px; border-radius: 4px;" id="user_hist_list">
+
+              <!--
+              <li>
+                  <a id="current_user" style="padding: 0px 20px 0px 0px;">
+                    <span class="username" style="font-size: 15px;font-weight:normal;"></span>
+                  </a>
+              </li>
+              -->
+            </ul>
+          </li>
+
+          <li style="position:relative; display: inline-block;">
+            <div style="width: 150px; padding-top: 15px; text-align: right; color: white;">
+              <span class="fa fa-search fa-inverse fa-lg"></span>
+              <a href="search.html" style="font-size: 15px; font-weight:bold; color: white;"> Search User </a>
+            </div>
+          </li>
+
+          <li style="position:relative; display: inline-block;">
+
+          </li>
+
+        </ul>
+
+      </div>
+
     </div>
 
     <div class="container-fluid" style="position: fixed;top: 50px;width: 50%;background-color: rgba(240,240,240,0.6);padding: 5px 5px;z-index: 999;font-size: 12px; border-bottom-right-radius: 10px;">
@@ -284,8 +291,8 @@
 
     <script src="js/thirdparty/jquery-1.9.1.min.js"></script>
     <script src="js/thirdparty/jquery-ui.min.js"></script>
-    <!--<script src="js/thirdparty/d3.v3.min.js" charset="utf-8"></script>-->
-    <script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
+    <script src="js/thirdparty/d3.v3.min.js" charset="utf-8"></script>
+    <!--<script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>-->
     <script src="js/thirdparty/d3-tip.js"></script>
     <script src="js/thirdparty/bootstrap.min.js"></script>
     <script src="js/thirdparty/underscore-min.js"></script>
@@ -299,6 +306,7 @@
     <script src="js/thirdparty/userale.js"></script>
     <script src="js/profile-chart.js"></script>
     <script src="js/graphtool.js"></script>
+
     <script>
       window.addEventListener('load', function() {
         content_table.open();
