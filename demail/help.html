@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html t:type="graphene/layout" title="About ${appName}"
+      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
+      xmlns:p="tapestry:parameter">
+<head>
+    <meta charset="utf-8">
+    <title>newman</title>
+    <link href="css/thirdparty/bootstrap.min.css" rel="stylesheet">
+    <link href="css/thirdparty/bootstrap-glyphicons.css" rel="stylesheet">
+    <link href="css/thirdparty/font-awesome.min.css" rel="stylesheet">
+    <link href="css/thirdparty/jquery.fancybox.css" rel="stylesheet">
+    <link href="css/default.css" rel="stylesheet">
+    <link href="css/custom-bootstrap.css" rel="stylesheet">
+</head>
+<body>
+<div class="row-fluid">
+<div class="col-sm-12">
+<div class="row">
+<div class="col-sm-6">
+<div style="width: 700px">
+<h3 class="text-primary" style="margin: 20px, 0">Newman User Guide</h3>
+<!--<p>You are using ${appName} ${appVersion}</p>-->
+<!--<h1>Welcome to ${appName}!</h1>-->
+<!--<p>-->
+    <!--If you are new to ${appName}, we recommend that you watch the introductory video below to help get you started.-->
+    <!--If you have already watched the video and have more questions, please refer to the detailed documentation below the video.-->
+<!--</p>-->
+<!--<video width="1000" height="500" controls="true">-->
+    <!--<source src="media/GrapheneBSAGuide.mp4" type="video/mp4" />-->
+    <!--Your browser does not support HTML5 videos.  Please download the video using the link below instead.-->
+<!--</video>-->
+<!--<a href="media/GrapheneBSAGuide.mp4" download="GrapheneBSAGuide">Download the video</a>-->
+<h1>Welcome to Newman!</h1>
+<p>
+If you are new to Newman, we recommend that you watch the introductory video below to help get you started.
+If you have already watched the video and have more questions, please refer to the detailed documentation below the video.
+<iframe width="600" height="480" src="https://www.youtube.com/embed/E9zAR9Uoo3Q" frameborder="0" allowfullscreen></iframe>
+
+<table class="table eg-1">
+    <tbody>
+    <tr>
+        <td>
+            <h1>Introduction</h1>
+            <p>
+                Newman is a de-aliasing search tool to assist investigations of specific individuals.
+                Newman helps analysts find..
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <h1>Searching</h1>
+            <p>
+                Enter the Twitter/Instagram username of the person you are trying to find. The search will contain the characters
+                as a prefix of whatever you enter.
+            </p>
+        </td>
+        <td class="info">
+            Hint: The search will autosearch as you type but will only show up to 20 usernames on the screen at once.
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<h3 class="text-primary" style="margin: 20px, 0">Search Results</h3>
+<img src="" alt="Search Results Screen" style="width:600px;height:400px">
+<table class="table eg-1">
+    <tbody>
+    <tr>
+        <td>
+            <h1>Understanding Search Results</h1>
+            <p>
+                Newman returns your search results to a column showing up to 20 total users. The users will have an icon next to them which represents what
+                social media platform the user belongs to. Selecting the username will take you to our profile analysis page for that person.
+            </p>
+            <p>
+                <span class="fa-twitter fa-lg"></span> = Twitter
+                <span class="fa-instagram fa-lg"></span> = Instagram
+            </p>
+            <!--<p>-->
+                <!--The <i>Rank</i> column displays a numerical value that represents how relevant the result is to your search terms. By default, the table is-->
+                <!--sorted from rank 1 (most relevant) to the lowest rank (least relevant). Clicking on the small arrows below the header on the Rank column-->
+                <!--will toggle between sorting from lowest to highest rank or highest to lowest rank.-->
+            <!--</p>-->
+            <!--<p>-->
+                <!--The <i>Actions</i> column displays two buttons for each search result. The first displays the name and type of the report, and the second is-->
+                <!--called Graph. Clicking on the first button will open up the report itself in a new tab (see below for more details on the report viewer). The-->
+                <!--Graph button will create a shared attribute graph based on the report and its subjects (see below for more details on the shared-->
+                <!--attribute graph).  Clicking on the small arrows below the header on the <i>Actions</i> column will sort the table alphabetically by report name-->
+                <!--(click it again to toggle between sorting A to Z or Z to A). Note that sorting by <i>Actions</i> is a way to sort by report type, because the-->
+                <!--first part of each report name is the report type (the second part is the unique BSAID number).-->
+            <!--</p>-->
+            <!--<p>-->
+                <!--The <i>Information Icons</i> column displays icons that relate to the content of SAR narratives. Hovering your mouse over each icon will display a-->
+                <!--tooltip that explains what each icon means. Clicking on the small arrows below the header on the <i>Actions</i> column will sort the table by how-->
+                <!--many icons are associated with each report (either from most icons to least or from least to most).-->
+            <!--</p>-->
+            <!--<p>-->
+                <!--The <i>Date</i> column displays the date on which the financial activity being reported occurred. Clicking on the small arrows below the header on the-->
+                <!--<i>Date</i> column will toggle between sorting from earliest to latest date or vice versa.-->
+            <!--</p>-->
+            <!--<p>-->
+                <!--The <i>Amount</i> column displays the total amount involved in the transactions mentioned in the report. Clicking on the arrows below the header on the-->
+                <!--<i>Amount</i> column will toggle between sorting from highest to lowest amount or vice versa.-->
+            <!--</p>-->
+            <!--<p>-->
+                <!--The <i>Name List</i> column displays the names of all of the report&#39;s subjects, listed in the order in which they appear on the report. Clicking on the-->
+                <!--small arrows below the header on the <i>Name List</i> column will toggle between sorting from A to Z or Z to A on the name of the first subject listed in-->
+                <!--the report. This sorting happens based on the way the name is entered into the report. For example, a hypothetical subject named &quot;Abe Zebra&quot; could-->
+                <!--be written as &quot;ABE ZEBRA,&quot; which would be sorted as an &quot;A,&quot; or it could be written as &quot;ZEBRA/ABE,&quot; which would be sorted as a &quot;Z.&quot;-->
+            <!--</p>-->
+            <!--<p>-->
+                <!--The <i>Address List</i> column displays all of the addresses of the subjects listed in the report that had valid addresses to display.-->
+            <!--</p>-->
+            <!--<p>-->
+                <!--The <i>Communication Identifier List</i> displays all of the communications-related identifiers associated with the report subjects, e.g. phone numbers,-->
+                <!--email addresses, etc.-->
+            <!--</p>-->
+            <!--<p>-->
+                <!--The <i>Identifier List</i> displays all of the identifiers associated with the report subjects that could be used as IDs, e.g. Driver&#39;s License numbers,-->
+                <!--passport numbers, TINs, occupations, etc.-->
+            <!--</p>-->
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<h3 class="text-primary" style="margin: 20px, 0">User Newman Profile</h3>
+<img src="" alt="Report Viewer" style="width:1000px;height:500px">
+<table class="table eg-1">
+    <tbody>
+    <tr>
+        <td>
+            <h1>Viewing a Profile</h1>
+            <p>
+                At the top of the screen will display the user selected and social media icon associated to the username. Selecting the search user will allow you to go
+                back to the search page.
+            </p>
+            <p>
+                The left side panel shows the visual representation of the user's posts and associations with other users while the right side panel
+                shows information such as the associated users, possible aliases, hashtags, and the content of any selected post.
+            </p>
+            <p>
+                At the very bottom of the screen is a table list of all of the selected users posts. This can be collapsed and expanded to give more viewing room to
+                the graph/information panels.
+            </p>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<h3 class="text-primary" style="margin: 20px, 0">Shared Attribute Graph</h3>
+<img src="images/Shared_Attribute_Graph.PNG" alt="Shared Attribute Graph" style="width:1000px;height:500px">
+<table class="table eg-1">
+<tbody>
+<tr>
+    <td>
+        <h1>Graph Display</h1>
+        <p>
+            The graph displays all of the user's posts as nodes and the users associated to each post. These associations are made through
+            actions such as mentions, likes, retweets, comments, etc.
+        </p>
+    </td>
+</tr>
+<tr>
+    <td>
+        <h1>Graph Interaction</h1>
+        <p>
+            <b>Pan The Graph</b>
+        <ul>
+            <li>
+                <b>Left-click on an empty part of the graph space</b> and <i>hold down the mouse button</i>
+                Then, drag the mouse while holding down the mouse button to move the graph.
+            </li>
+        </ul>
+        </p>
+        <p>
+            <b>Selection</b>
+        <ul>
+            <li><b>Left-click</b> on a user node and select the <i>magnifying glass</i> to show that user's graph display.</li>
+            <li><b>Left-click</b> on a post node and select the <i>magnifying glass</i> to show the content of the post in the information panel.</li>
+        </ul>
+        </p>
+        <p>
+            <b>Zooming</b>
+        <ul>
+            <li>While your mouse is over the graph, <i>scroll <b>up</b></i> to <i>zoom <b>in</b></i></li>
+            <li>While your mouse is over the graph, <i>scroll <b>down</b></i> to <i>zoom <b>out</b></i></li>
+        </ul>
+        </p>
+    </td>
+    <td class="info">
+        The legend can be used to filter out the node labels. Just check/uncheck whatever you want to see.
+    </td>
+</tr>
+<tr>
+    <td>
+        <h1>Information Panel</h1>
+
+        <p>
+            The panel on the right of the screen has four panes: Associated Users, Possible Aliases, Hashtags, and Content.
+        </p>
+        <h4>Associated Users</h4>
+        <p>
+            The Associated Users pane shows the top 20 users associated with the current selected user. The bars represent how often that user
+            associates with the user. These associations are quantified through actions such as mentions, likes, retweets, comments, etc.
+        </p>
+        <h4>Possible Aliases</h4>
+        <p>
+            The Possible Aliases pane shows all of the possible aliases for the selected user based on the MIT rankings which uses a custom algorithm to
+            determine what aliases this user may be using. The bars represent the MIT score.
+        </p>
+        <h4>Hashtags</h4>
+        <p>
+            The Hashtags pane shows the top 20 hashtags the selected user uses in their posts. The bars represent the quantity
+            the user has used the hashtag in their posts.
+        </p>
+        <h4>Content</h4>
+        <p>
+            The Content panel displays information on the selected post:
+        <ul>
+            <li>
+                <b>Post</b> - The actual text of the post made by the user.
+            </li>
+            <li>
+                <b>URL</b> - The link to the actual post made by the user.
+            </li>
+            <li>
+                <b>Associated Users</b> - Lists the users that associated with this post.
+            </li>
+            <li>
+                <b>Tags</b> - List of hashtags that were used in this post.
+            </li>
+            <li>
+                <b>User Post</b> - The embedded version of the actual user post.
+            </li>
+        </ul>
+        </p>
+    <td class="info">
+        Hint: Putting your mouse over the.
+    </td>
+    </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="col-sm-6"></div>
+</div>
+
+</div>
+</div>
+    <script src="js/thirdparty/jquery-1.9.1.min.js"></script>
+    <script src="js/thirdparty/jquery-ui.min.js"></script>
+    <script src="js/thirdparty/bootstrap.min.js"></script>
+    <script src="js/thirdparty/underscore-min.js"></script>
+    <script src="js/thirdparty/underscore-contrib.min.js"></script>
+    <script src="js/thirdparty/jquery.bootstrap-growl.js"></script>
+    <script src="js/thirdparty/jquery.highlight-4.closure.js"></script>
+    <script src="js/thirdparty/jquery.fancybox.js"></script>
+    <script src="js/thirdparty/signals.js"></script>
+    <script src="js/thirdparty/hasher.js"></script>
+    <script src="js/thirdparty/crossroads.js"></script>
+    <script src="js/thirdparty/userale.js"></script>
+</body>
+
+</html>
