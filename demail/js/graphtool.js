@@ -1,20 +1,5 @@
 /*globals tangelo, CryptoJS, $, d3, escape, FileReader, console */
 
-/**
- *  instantiate user-ale-logger
- */
-var ale = new userale({
-    loggingUrl: 'http://192.168.1.100', //The url of the User-ALE logging server.
-    toolName: 'newman', //The name of your tool
-    toolVersion: '1.1.2', //The semantic version of your tool
-    elementGroups: [ //A list of element groups used in your tool (see below)
-      'search_group'
-    ],
-    workerUrl: 'js/thirdparty/userale-worker.js', //The location of the User-ALE webworker file
-    debug: true, //Whether to log messages to console
-    sendLogs: false //Whether or not to send logs to the server (useful during testing)
-});
-ale.register();
 
 var width = 400,
 height = 500;
@@ -1547,17 +1532,6 @@ $(function () {
     $('#txt_search').keyup(function (e){
         
         console.log( '$(\'#txt_search\').keyup(function (e)' );
-        //user-ale logging
-        var msg = {
-            activity: 'perform',
-       	    action: 'enter',
-            elementId: this.getAttribute('id') || 'UNK',
-            elementType: 'textbox',
-            elementGroup: 'search_group',   
-            source: 'user',
-            tags: ['submit', 'search']
-        };
-        ale.log(msg);
     	
         if (e.keyCode === 13) {
             var txt = $("#txt_search").val();
