@@ -2,18 +2,30 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>newman</title>
-    <link href="css/thirdparty/jquery-ui.css" rel="stylesheet">
-    <link href="css/ner.css" rel="stylesheet">
-    <link href="css/thirdparty/bootstrap.min.css" rel="stylesheet">
-    <link href="css/thirdparty/bootstrap-glyphicons.css" rel="stylesheet">
+    <title>Newman 1.3</title>
+    <link href="plugins/jquery-ui/jquery-ui.css" rel="stylesheet">
+
+    <link href="plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="plugins/d3-tip/d3-tip.css" rel="stylesheet">
+    <link href="plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
+    <link href="plugins/fullcalendar/fullcalendar.css" rel="stylesheet">
+    <link href="plugins/xcharts/xcharts.min.css" rel="stylesheet">
+    <link href="plugins/select2/select2.css" rel="stylesheet">
+    <link href="plugins/justified-gallery/justifiedGallery.css" rel="stylesheet">
+    <link href="plugins/chartist/chartist.min.css" rel="stylesheet">
+    <link href="css/newman-style-dark.css" rel="stylesheet">
+    <link href="css/newman-slider-theme.css" rel="stylesheet">
     <link href="css/default.css" rel="stylesheet">
+    <link href="css/ner.css" rel="stylesheet">
+    <link href="css/custom-bootstrap.css" rel="stylesheet">
+    <link href="css/profile-chart.css" rel="stylesheet">
   </head>
   <body>
-    <!-- hidden link //hack -->
-    <a id="alink" class='button ctrl'
-    style="height:0;width:0;position: absolute;top: -2000px;" href='#'
-    tabindex='1'></a>
+  <!-- hidden link //hack -->
+  <a id="alink" class='button ctrl'
+    style="height:0;width:0;position: absolute;top: -2000px;" href='#' tabindex='1'>
+  </a>
 
     <div id="radial-wrap" class="tip ctrl">
       <div class="email_addr"><a><span></span></a></div>
@@ -57,125 +69,429 @@
       </div>
     </div>
 
-    <!-- modal email download/export -->
-    <div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-labelledby="exportModal" aria-hidden="true">
-      <div class="modal-dialog">
-	<div class="modal-content">
-	  <div class="modal-header">
-	    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-	    <h4 class="modal-title">Download</h4>
-	  </div>
-	  <div id="exportList" class="modal-body">
-            <div id="export_link_spin">
-              <img src="imgs/loading-spin.svg" height="32" width="64" />
-            </div>
-            <div id="export_download_link" style="display:none;">
-              <span class="glyphicon glyphicon-save" /> <a target="_blank">Download</a>
-            </div>
-	  </div>
-	  <div class="modal-footer">
-	    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-	  </div>
-	</div>
-      </div>
-    </div>
-
-    <!-- nav bar -->
-    <div class="navbar navbar-default navbar-fixed-top">
-      <div class="navbar-header">
-        <div class="navbar-brand">newman v1.1.2</div>
-      </div>
-      <ul class="nav navbar-nav">
-        <li>
-          <a style="cursor:pointer" id="target_email">
-            <span class="glyphicon glyphicon-envelope"></span>
-            <span id="target_email"></span>
-          </a>
-        </li>
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
-        <li>
-          <a class="btn btn-default" href="ingest.html" role="button">Add New Email <span class="glyphicon glyphicon-plus-sign"></span></a>
-        <li>
-	<li>
-	  <a id="view_exportList" type="button" class="btn btn-default" data-toggle="modal" data-target="#exportModal">Export <span class="glyphicon glyphicon-list-alt"></span></a>
-	</li>
-      </ul>
-      <!-- <ul class="nav navbar-nav"> -->
-      <!--   <li> -->
-      <!--     <a style="cursor:pointer" data-toggle="modal" data-target="#info-panel"> -->
-      <!--       <span class="glyphicon glyphicon-info-sign"></span> Info -->
-      <!--     </a> -->
-      <!--   </li> -->
-      <!-- </ul> -->
-      <div style="padding-right: 20px;">
-        <form id="search_form" class="navbar-form navbar-right" role="search" style="color: white;">
-          <label class="radio-inline" >
-            <input type="radio" name="searchType" value="all" checked /> Free text
-          </label>
-          <label class="radio-inline">
-            <input type="radio" name="searchType" value="email" /> Email
-          </label>
-          <div class="form-group" style="padding-left: 10px;">
-            <input id="txt_search" type="text" class="form-control"
-                   placeholder="Search text..."
-                   autocomplete="off"
-                   style="border-radius: 15px;width: 300px;background-color: rgba(255,255,255,0.9);">
+  <!-- modal email download/export -->
+  <!--
+  <div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-labelledby="exportModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          <h4 class="modal-title">Download</h4>
+        </div>
+        <div id="exportList" class="modal-body">
+          <div id="export_link_spin">
+            <img src="imgs/loading-spin.svg" height="32" width="64" />
           </div>
-        </form>
+          <div id="export_download_link" style="display:none;">
+            <span class="glyphicon glyphicon-save" /> <a target="_blank">Download</a>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
       </div>
     </div>
-    <div style="position: fixed;top: 50px;background-color: rgba(240,240,240,0.8);padding: 10px 10px;z-index: 999;font-size: 12px; border-bottom-right-radius: 10px;">
-      <table>
-        <tr>
-          <td>
-            <div style="padding-right: 10px;">Color:</div>
-          </td>
-          <td>
-            <label class="radio-inline" style="padding-right: 10px;"><input type="radio" name="optionRadios" id="colorby" value="node" style="margin: 2px 0 0 -20px;" checked /> Domain </label>
-          </td>
-          <td>
-            <label class="radio-inline"><input type="radio" name="optionRadios" id="colorby2"  value="comm" style="margin: 2px 0 0 -20px;"  /> Community </label>
-          </td>
-        </tr>
-        <tr>
-          <td><div style="padding-right: 10px;">Display:</div></td>
-          <td>
-            <label class="checkbox" style="padding-right: 10px;margin: 0;">
-              <input type="checkbox" name="optionrank" id="rankval" value="rank" /> Rank
-            </label>
-          </td>
-          <td>
-            <label class="checkbox" style="padding-right: 10px;margin: 0;">
-              <input type="checkbox" id="usetext" /> Labels
-            </label>
-          </td>
-        </tr>
-      </table>
+  </div>
+  -->
 
-      <div style="border-top: 1px solid #000;text-align:center;">
-        <div>
-          <span style="font-weight: bold">Legend</span>
+  <!--Start Header-->
+  <header class="navbar">
+    <div class="container-fluid expanded-panel">
+      <div class="row">
+        <div id="logo" class="col-xs-12 col-sm-1">
+          <div class="row">
+            <div class="col-xs-5 col-sm-4">
+              <a class="sidebar-toggle show-sidebar"><i class="fa fa-outdent fa-inverse fa-lg"></i></a>
+            </div>
+            <div class="col-xs-7 col-sm-8" style="padding: 0px 0px 0px 2px;">
+              <a href="index.html">Newman <i class="fa fa-user-secret"></i></a>
+            </div>
+          </div>
         </div>
-        <div id="toggle_legends"><span class="glyphicon glyphicon-chevron-down"></span></div>
-        <div id="legend_list" style="height: 0px;max-height:375px;overflow-y:scroll;">
-          <table id="legend-table" class="table">
-            <thead />
-            <tbody />
+
+
+        <div id="top-panel" class="col-xs-12 col-sm-11">
+          <div class="row">
+
+            <!--
+            <div class="col-xs-4 col-sm-1" style="text-align: right; padding-right: 2px;">
+              <div class="btn-group" data-toggle="buttons" style="vertical-align: middle; padding-top: 5px;">
+                <button class="btn btn-default btn-xs">
+                  <span class="fa fa-text-width fa-inverse">
+                    <input type="radio" name="searchType" value="all">
+                  </span>
+                </button>
+                <button class="btn btn-default btn-xs">
+                  <span class="fa fa-envelope-o fa-inverse">
+                    <input type="radio" name="searchType" value="email">
+                  </span>
+                </button>
+                <button class="btn btn-default btn-xs focus active">
+                  <span class="fa fa-user-plus fa-inverse">
+                    <input type="radio" name="searchType" value="user" checked>
+                  </span>
+                </button>
+              </div>
+
+            </div>
+            -->
+
+            <div class="col-xs-12 col-sm-3" style="text-align: left;">
+
+              <div id="search">
+                <input id="txt_search" type="text" placeholder="search"/>
+                <i class="fa fa-search"></i>
+              </div>
+
+            </div>
+
+            <!-- start datetime-range -->
+            <div class="col-xs-12 col-sm-5" style="padding: 0px 0px 0px 0px;">
+              <div class="ui-rangeSliderZone">
+                <div id="date_range_slider"></div>
+              </div>
+            </div>
+            <!-- end datetime-range -->
+
+            <div class="col-xs-10 col-sm-3 top-panel-right">
+
+              <ul class="nav navbar-nav pull-right panel-menu">
+
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    <i class="fa fa-angle-down fa-inverse pull-right"></i>
+                    <span class="fa fa-cloud-upload fa-inverse fa-lg"></span>
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li class="hidden-xs">
+                      <a class="btn btn-inverse" href="ingest.html" role="button"
+                         style="font-size: 14px; font-weight:normal; color: #E1E1E1;">Add Email
+                        <span class="glyphicon glyphicon-plus-sign"></span>
+                      </a>
+                    </li>
+
+                    <li class="hidden-xs">
+                      <a id="view_exportList" type="button" class="btn btn-inverse" data-toggle="modal" data-target="#exportModal"
+                         style="font-size: 14px; font-weight:normal; color: #E1E1E1;">Export
+                        <span class="glyphicon glyphicon-list-alt"></span>
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+
+                <li class="hidden-xs">
+
+                  <a class="help" data-fancybox-type="iframe" href="help.html" style="font-size: 14px; font-weight:normal; color: #E1E1E1;">Help
+                    <span id="help-icon" class="fa fa-question-circle fa-inverse fa-lg"></span>
+                  </a>
+
+                </li>
+
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle account" data-toggle="dropdown">
+                    <div class="avatar">
+                      <img src="imgs/logo_darpa_160x120.png" class="img-circle" alt="avatar" />
+                    </div>
+                    <i class="fa fa-angle-down fa-inverse pull-right"></i>
+                    <div class="user-mini pull-right">
+                      <span class="welcome">DARPA</span>
+                      <span>Developer</span>
+                    </div>
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li>
+                      <a href="#">
+                        <i class="fa fa-user"></i>
+                        <span>Profile</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="ajax/page_messages.html" class="ajax-link">
+                        <i class="fa fa-envelope"></i>
+                        <span>Messages</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="ajax/gallery_simple.html" class="ajax-link">
+                        <i class="fa fa-picture-o"></i>
+                        <span>Albums</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="ajax/calendar.html" class="ajax-link">
+                        <i class="fa fa-tasks"></i>
+                        <span>Tasks</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#">
+                        <i class="fa fa-cog"></i>
+                        <span>Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#">
+                        <i class="fa fa-power-off"></i>
+                        <span>Logout</span>
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+
+            <div class="col-xs-2 col-sm-1" style="text-align: right;">
+              <a class="sidebar-toggle" href="index.html"><i class="fa fa-indent fa-inverse fa-lg"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!--End Header-->
+
+  <!--Start Main-Container-->
+    <div class="container-fluid" style="top: 52px; margin-top: 0px; height: 100%">
+      <!--Start Main-Container-Row-->
+      <div class="row" style="height: 100%;">
+
+        <!--Start Sidebar-Left-->
+        <!--<div id="sidebar-left" class="col-xs-2 col-sm-2">-->
+        <!--
+        <div style="position: fixed; width: 18%;" >
+          <ul class="nav main-menu">
+            <li>
+              <a href="ajax/dashboard.html" class="active ajax-link">
+                <i class="fa fa-dashboard"></i>
+                <span class="hidden-xs">Dashboard</span>
+              </a>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle">
+                <i class="fa fa-bar-chart-o"></i>
+                <span class="hidden-xs">Charts</span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="ajax-link" href="ajax/charts_xcharts.html">xCharts</a></li>
+                <li><a class="ajax-link" href="ajax/charts_flot.html">Flot Charts</a></li>
+                <li><a class="ajax-link" href="ajax/charts_google.html">Google Charts</a></li>
+                <li><a class="ajax-link" href="ajax/charts_morris.html">Morris Charts</a></li>
+                <li><a class="ajax-link" href="ajax/charts_amcharts.html">AmCharts</a></li>
+                <li><a class="ajax-link" href="ajax/charts_chartist.html">Chartist</a></li>
+                <li><a class="ajax-link" href="ajax/charts_coindesk.html">CoinDesk realtime</a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle">
+                <i class="fa fa-table"></i>
+                <span class="hidden-xs">Tables</span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="ajax-link" href="ajax/tables_simple.html">Simple Tables</a></li>
+                <li><a class="ajax-link" href="ajax/tables_datatables.html">Data Tables</a></li>
+                <li><a class="ajax-link" href="ajax/tables_beauty.html">Beauty Tables</a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle">
+                <i class="fa fa-pencil-square-o"></i>
+                <span class="hidden-xs">Forms</span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="ajax-link" href="ajax/forms_elements.html">Elements</a></li>
+                <li><a class="ajax-link" href="ajax/forms_layouts.html">Layouts</a></li>
+                <li><a class="ajax-link" href="ajax/forms_file_uploader.html">File Uploader</a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle">
+                <i class="fa fa-desktop"></i>
+                <span class="hidden-xs">UI Elements</span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="ajax-link" href="ajax/ui_grid.html">Grid</a></li>
+                <li><a class="ajax-link" href="ajax/ui_buttons.html">Buttons</a></li>
+                <li><a class="ajax-link" href="ajax/ui_progressbars.html">Progress Bars</a></li>
+                <li><a class="ajax-link" href="ajax/ui_jquery-ui.html">Jquery UI</a></li>
+                <li><a class="ajax-link" href="ajax/ui_icons.html">Icons</a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle">
+                <i class="fa fa-list"></i>
+                <span class="hidden-xs">Pages</span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="ajax/page_login.html">Login</a></li>
+                <li><a href="ajax/page_register.html">Register</a></li>
+                <li><a id="locked-screen" class="submenu" href="ajax/page_locked.html">Locked Screen</a></li>
+                <li><a class="ajax-link" href="ajax/page_contacts.html">Contacts</a></li>
+                <li><a class="ajax-link" href="ajax/page_feed.html">Feed</a></li>
+                <li><a class="ajax-link add-full" href="ajax/page_messages.html">Messages</a></li>
+                <li><a class="ajax-link" href="ajax/page_pricing.html">Pricing</a></li>
+                <li><a class="ajax-link" href="ajax/page_product.html">Product</a></li>
+                <li><a class="ajax-link" href="ajax/page_invoice.html">Invoice</a></li>
+                <li><a class="ajax-link" href="ajax/page_search.html">Search Results</a></li>
+                <li><a class="ajax-link" href="ajax/page_404.html">Error 404</a></li>
+                <li><a href="ajax/page_500.html">Error 500</a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle">
+                <i class="fa fa-map-marker"></i>
+                <span class="hidden-xs">Maps</span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="ajax-link" href="ajax/maps.html">OpenStreetMap</a></li>
+                <li><a class="ajax-link" href="ajax/map_fullscreen.html">Fullscreen map</a></li>
+                <li><a class="ajax-link" href="ajax/map_leaflet.html">Leaflet</a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle">
+                <i class="fa fa-picture-o"></i>
+                <span class="hidden-xs">Gallery</span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="ajax-link" href="ajax/gallery_simple.html">Simple Gallery</a></li>
+                <li><a class="ajax-link" href="ajax/gallery_flickr.html">Flickr Gallery</a></li>
+              </ul>
+            </li>
+            <li>
+              <a class="ajax-link" href="ajax/typography.html">
+                <i class="fa fa-font"></i>
+                <span class="hidden-xs">Typography</span>
+              </a>
+            </li>
+            <li>
+              <a class="ajax-link" href="ajax/calendar.html">
+                <i class="fa fa-calendar"></i>
+                <span class="hidden-xs">Calendar</span>
+              </a>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle">
+                <i class="fa fa-picture-o"></i>
+                <span class="hidden-xs">Multilevel menu</span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="#">First level menu</a></li>
+                <li><a href="#">First level menu</a></li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle">
+                    <i class="fa fa-plus-square"></i>
+                    <span class="hidden-xs">Second level menu group</span>
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a href="#">Second level menu</a></li>
+                    <li><a href="#">Second level menu</a></li>
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle">
+                        <i class="fa fa-plus-square"></i>
+                        <span class="hidden-xs">Three level menu group</span>
+                      </a>
+                      <ul class="dropdown-menu">
+                        <li><a href="#">Three level menu</a></li>
+                        <li><a href="#">Three level menu</a></li>
+                        <li class="dropdown">
+                          <a href="#" class="dropdown-toggle">
+                            <i class="fa fa-plus-square"></i>
+                            <span class="hidden-xs">Four level menu group</span>
+                          </a>
+                          <ul class="dropdown-menu">
+                            <li><a href="#">Four level menu</a></li>
+                            <li><a href="#">Four level menu</a></li>
+                            <li class="dropdown">
+                              <a href="#" class="dropdown-toggle">
+                                <i class="fa fa-plus-square"></i>
+                                <span class="hidden-xs">Five level menu group</span>
+                              </a>
+                              <ul class="dropdown-menu">
+                                <li><a href="#">Five level menu</a></li>
+                                <li><a href="#">Five level menu</a></li>
+                                <li class="dropdown">
+                                  <a href="#" class="dropdown-toggle">
+                                    <i class="fa fa-plus-square"></i>
+                                    <span class="hidden-xs">Six level menu group</span>
+                                  </a>
+                                  <ul class="dropdown-menu">
+                                    <li><a href="#">Six level menu</a></li>
+                                    <li><a href="#">Six level menu</a></li>
+                                  </ul>
+                                </li>
+                              </ul>
+                            </li>
+                          </ul>
+                        </li>
+                        <li><a href="#">Three level menu</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <!--End Sidebar-Left-->
+
+      <!--Start Content-->
+      <div class="col-xs-12 col-sm-12">
+
+        <!--Start Visual-Filter-->
+        <div style="position: fixed; left: 18%; background-color: rgba(210, 210, 210, 0.6); z-index: 999; font-size: 12px;
+             border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; width: 25%;">
+          <table>
+            <tr>
+              <td>
+                <div style="padding-right: 10px;">Color:</div>
+              </td>
+              <td>
+                <label class="radio-inline" style="padding-right: 10px;"><input type="radio" name="optionRadios" id="colorby" value="node" style="margin: 2px 0 0 -20px;" checked /> Domain </label>
+              </td>
+              <td>
+                <label class="radio-inline"><input type="radio" name="optionRadios" id="colorby2"  value="comm" style="margin: 2px 0 0 -20px;"  /> Community </label>
+              </td>
+            </tr>
+            <tr>
+              <td><div style="padding-right: 10px;">Display:</div></td>
+              <td>
+                <label class="checkbox" style="padding-right: 10px;margin: 0;">
+                  <input type="checkbox" name="optionrank" id="rankval" value="rank" /> Rank
+                </label>
+              </td>
+              <td>
+                <label class="checkbox" style="padding-right: 10px;margin: 0;">
+                  <input type="checkbox" id="usetext" /> Labels
+                </label>
+              </td>
+            </tr>
           </table>
-        </div>
-      </div>
-    </div>
 
-    <!-- body -->
-    <div class="container-fluid" style="margin-top: 5px;height: calc(100% - 52px);">
-      <div class="row" style= "height: 100%;">
-        <div class="col-sm-6"  style= "height: 100%;">
-          <div id="node_graph"  style= "height: 100%;"> </div>
+          <div style="border-top: 1px solid #000;text-align:center;">
+            <div>
+              <span style="font-weight: bold">Legend</span>
+            </div>
+            <div id="toggle_legends"><span class="glyphicon glyphicon-chevron-down"></span></div>
+            <div id="legend_list" style="height: 0px;max-height:375px;overflow-y:scroll;">
+              <table id="legend-table" class="table">
+                <thead />
+                <tbody />
+              </table>
+            </div>
+          </div>
         </div>
-        <div class="col-sm-6" style= "height: calc(100% - 52px);">
-          <div style= "height: 100%;">
-            <!-- Nav tabs -->
+        <!--End Visual-Filter-->
+
+        <!--Start Data-Visual-Left-->
+        <div class="col-sm-7"  style= "height: 100%; padding: 0px 0px 0px 0px;">
+          <div id="node_graph"  style= "height: 468px;"> </div>
+        </div>
+        <!--End Data-Visual-Left-->
+
+        <!--Start Data-Panel-Right-->
+        <div class="col-sm-5" style= "height: 100%;">
+          <div style= "height: 468px;">
+            <!--Start Data-Panel-Nav-Tabs-->
             <ul class="nav nav-tabs" style="width: 600px;" role="tablist" id="tab-list">
               <li class="active"><a href="#top-rank" role="tab" data-toggle="tab">Rank</a></li>
               <li><a href="#top-entities" role="tab" data-toggle="tab">Entities</a></li>
@@ -183,8 +499,9 @@
               <li><a href="#topics-tab" role="tab" data-toggle="tab">Topics</a></li>
               <li><a href="#attach-tab" role="tab" data-toggle="tab">Attachments</a></li>
             </ul>
+            <!--End Data-Panel-Nav-Tabs-->
 
-            <!-- Tab panes -->
+            <!--Start Data-Panel-Tab-Content-->
             <div class="tab-content" style= "height: 100%;">
               <div class="tab-pane active" id="top-rank"> </div>
               <div class="tab-pane" id="top-entities"></div>
@@ -219,12 +536,21 @@
                 </div>
               </div>
             </div>
+            <!--Start Data-Panel-Tab-Content-->
+
             <!-- Create an SVG element to represent the legend -->
             <svg id="legend" style="position:fixed; top:100px; right:0px; pointer-events:none;"></svg>
           </div>
         </div>
+        <!--End Data-Panel-Right-->
+
+        </div>
+        <!--End Content-->
       </div>
-      <div class="row" id="cp-toggle">
+      <!--End Main-container-Row-->
+
+      <!--Start Bottom-Panel-->
+      <div class="row" id="bottom-panel-toggle">
         <div class="col-sm-12">
           <div class="col-sm-2 col-sm-offset-5 toggle-button">
             <a><span class="glyphicon glyphicon-chevron-up"></span></a>
@@ -268,20 +594,34 @@
           </div>
         </div>
       </div>
-    </div>
+      <!--End Bottom-Panel-->
 
-    <script src="js/thirdparty/jquery-1.9.1.min.js"></script>
-    <script src="js/thirdparty/jquery-ui.min.js"></script>
-    <script src="js/thirdparty/d3.v3.min.js" charset="utf-8"></script>
-    <script src="js/thirdparty/bootstrap.min.js"></script>
-    <script src="js/thirdparty/underscore-min.js"></script>
-    <script src="js/thirdparty/underscore-contrib.min.js"></script>
-    <script src="js/thirdparty/jquery.bootstrap-growl.js"></script>
-    <script src="js/thirdparty/jquery.highlight-4.closure.js"></script>
-    <script src="js/thirdparty/signals.js"></script>
-    <script src="js/thirdparty/hasher.js"></script>
-    <script src="js/thirdparty/crossroads.js"></script>
-    <script src="js/thirdparty/userale.js"></script>
+    </div>
+    <!--End Main-Container-->
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="plugins/jquery/jquery.min.js"></script>
+    <script src="plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="plugins/d3/d3.min.js" charset="utf-8"></script>
+    <script src="plugins/jq-rangeslider/jQAllRangeSliders-min.js"></script>
+    <script src="plugins/jq-rangeslider/lib/jquery.mousewheel.min.js"></script>
+
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script src="plugins/underscore/underscore-min.js"></script>
+    <script src="plugins/underscore/underscore-contrib.min.js"></script>
+    <script src="plugins/bootstrap-growl/jquery.bootstrap-growl.js"></script>
+    <script src="plugins/jquery-highlight/jquery.highlight-4.closure.js"></script>
+    <script src="plugins/millermedeiros/signals.js"></script>
+    <script src="plugins/millermedeiros/hasher.js"></script>
+    <script src="plugins/millermedeiros/crossroads.js"></script>
+    <script src="plugins/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    <script src="plugins/tinymce/tinymce.min.js"></script>
+    <script src="plugins/tinymce/jquery.tinymce.min.js"></script>
+    <script src="plugins/user-ale/userale.js"></script>
+
+    <!-- All functions for this theme + document.ready processing -->
+
     <script src="js/graphtool.js"></script>
 
   </body>

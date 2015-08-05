@@ -39,10 +39,10 @@ var doubleEncodeURIComponent= function(uri){
   return encodeURIComponent(encodeURIComponent(uri));
 };
 
-var control_panel= (function(){
-  var container = $('#cp-toggle div:first-child');
-  var btn = $('#cp-toggle div:first-child').find("div").first();
-  var table_panel = $('#cp-toggle div:first-child div:nth-child(2)').first();
+var bottom_panel= (function(){
+  var container = $('#bottom-panel-toggle div:first-child');
+  var btn = $('#bottom-panel-toggle div:first-child').find("div").first();
+  var table_panel = $('#bottom-panel-toggle div:first-child div:nth-child(2)').first();
   var open_css = "glyphicon-chevron-up";
   var close_css = "glyphicon-chevron-down";
   var open = function(){
@@ -748,9 +748,9 @@ function do_search(fields, val) {
         })
         .style("stroke","#FFFFFF");
 
-      if (control_panel.isOpen()){
-        //resizes control panel
-        control_panel.open();
+      if (bottom_panel.isOpen()){
+        //resize bottom_panel
+        bottom_panel.open();
       }
       drawGraph(comp_data.graph);
     });
@@ -1298,7 +1298,7 @@ function draw_topic_tab(){
     var thead = d3.select("#topics-table").select("thead").append("tr").selectAll("tr").data(['Index', 'Topic', '% of Docs']).enter().append("th").text(function(d){ return d; });
     var tr = d3.select("#topics-table").select("tbody").selectAll("tr").data(categories).enter().append("tr").attr('class', 'clickable')
       .on("click", function(d, i){
-        control_panel.open();
+        bottom_panel.open();
         do_search('topic','all', d.idx, '0.5');
       });
     tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td").text(function(d){ return d; });
@@ -1512,6 +1512,8 @@ function draw_entity_chart() {
 /** document ready **/
 $(function () {
   "use strict";
+
+  $("#date_range_slider").dateRangeSlider();
 
   $.when($.get("email/target"), $.get("email/domains")).done(function(resp1, resp2){
     TARGET_EMAIL = _.object(
@@ -1816,4 +1818,5 @@ $(function () {
   if (hasher.getHash().length < 1){
     hasher.setHash('/search/all/');
   }
+
 });
