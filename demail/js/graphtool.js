@@ -1509,11 +1509,127 @@ function draw_entity_chart() {
 
 }
 
+var dashboard_content = (function () {
+
+  var dashboard_content_container = $('#content-dashboard-home');
+  var button = $('#toggle_dashboard_home');
+
+  var open = function () {
+    if (isHidden()) {
+
+      if(email_analytics_content.isVisible()) {
+        email_analytics_content.close();
+      }
+
+      dashboard_content_container.fadeToggle('fast');
+      //container.show();
+    }
+  };
+
+  var close = function () {
+    if (isVisible()) {
+
+      dashboard_content_container.fadeToggle('fast');
+      //container.hide();
+    }
+  };
+
+  var isVisible = function () {
+
+    return (dashboard_content_container && (dashboard_content_container.is(':visible') || (dashboard_content_container.css('display') != 'none')));
+  };
+
+  var isHidden = function () {
+
+    return (dashboard_content_container && ( dashboard_content_container.is(':hidden') || (dashboard_content_container.css('display') == 'none')));
+  };
+
+  var toggle = function () {
+
+    if (isVisible()) {
+      close();
+    }
+    else {
+      open();
+    }
+  };
+
+  button.on('click', toggle);
+
+  return {
+    open: open,
+    close: close,
+    toggle: toggle,
+    isVisible: isVisible,
+    isHidden: isHidden
+  };
+
+}());
+
+var email_analytics_content = (function () {
+
+  var email_container = $('#content-analytics-email');
+  var button = $('#toggle_analytics_email');
+
+  var open = function () {
+    if (isHidden()) {
+
+      if(dashboard_content.isVisible()) {
+        dashboard_content.close();
+      }
+      email_container.fadeToggle('fast');
+      //container.show();
+    }
+  };
+
+  var close = function () {
+    if (isVisible()) {
+
+      email_container.fadeToggle('fast');
+      //container.hide();
+    }
+  };
+
+  var isVisible = function () {
+
+    return (email_container && (email_container.is(':visible') || (email_container.css('display') != 'none')));
+  };
+
+  var isHidden = function () {
+
+    return (email_container && ( email_container.is(':hidden') || (email_container.css('display') == 'none')));
+  };
+
+  var toggle = function () {
+
+    if (isVisible()) {
+      close();
+    }
+    else {
+      open();
+    }
+  };
+
+  button.on('click', toggle);
+
+  return {
+    open: open,
+    close: close,
+    toggle: toggle,
+    isVisible: isVisible,
+    isHidden: isHidden
+  };
+
+}());
+
 /** document ready **/
 $(function () {
   "use strict";
 
   $("#date_range_slider").dateRangeSlider();
+
+  email_analytics_content.close();
+  drawDashboardCharts();
 
   $.when($.get("email/target"), $.get("email/domains")).done(function(resp1, resp2){
     TARGET_EMAIL = _.object(
@@ -1735,17 +1851,18 @@ $(function () {
 
     $("#view_exportList").click(function() {
       $.ajax({
-	url: 'email/download',
-	type: "GET",
-	contentType:"application/json; charset=utf-8",
-	dataType:"json"
+        url: 'email/download',
+        type: "GET",
+        contentType:"application/json; charset=utf-8",
+        dataType:"json"
       }).done(function(resp){
-	  console.log(resp);
-          $('#export_download_link a').attr('href', resp.file);
-          $('#export_link_spin').hide();      
-          $('#export_download_link').show();
+        console.log(resp);
+        $('#export_download_link a').attr('href', resp.file);
+        $('#export_link_spin').hide();
+        $('#export_download_link').show();
       }).fail(function(resp){
-	  alert('fail');
+        alert('fail');
+
 	  console.log("fail");
 	  $('#exportModal').modal('hide');
       });

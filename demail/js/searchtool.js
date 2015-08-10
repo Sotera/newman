@@ -26,8 +26,8 @@ var ale = new userale({
         'visual_legends',
         'tab_select'
     ],
-    workerUrl: 'js/thirdparty/userale-worker.js', //The location of the User-ALE webworker file
-    debug: true, //Whether to log messages to console
+    workerUrl: 'plugins/user-ale/userale-worker.js', //The location of the User-ALE webworker file
+    debug: false, //Whether to log messages to console
     sendLogs: false //Whether or not to send logs to the server (useful during testing)
 });
 ale.register();
@@ -69,6 +69,212 @@ $(".help").fancybox({
     closeEffect: 'none'
 });
 
+
+/**
+ * draw Morris Donut charts
+ */
+function drawDashboardCharts() {
+
+
+    Morris.Donut({
+        element: 'donut_chart_entities',
+        data: [
+            {value: 40, label: 'Jeb Bush', formatted: '40%' },
+            {value: 35, label: 'Florida', formatted: '35%' },
+            {value: 10, label: 'Bush', formatted: '10%' },
+            {value: 15, label: 'all other', formatted: '5%' }
+        ],
+        formatter: function (x, data) { return data.formatted; }
+    });
+
+    Morris.Bar({
+        element: 'horizontal_bar_chart_entities',
+        data: [
+            {x: 'Jeb Bush', y: 1183},
+            {x: 'Governor Bush', y: 1040},
+            {x: 'Florida', y: 502},
+            {x: 'Bush', y: 174},
+            {x: 'Miami', y: 161},
+            {x: 'Jeb', y: 145},
+            {x: 'FL', y: 144},
+            {x: 'U.S.', y: 133},
+            {x: 'Tallahassee', y: 124},
+            {x: 'Congress', y: 111},
+        ],
+        xkey: 'x',
+        ykeys: ['y'],
+        labels: ['Y'],
+        barColors: function (row, series, type) {
+            if (type === 'bar') {
+                var blue = Math.ceil(255 * row.y / this.ymax);
+                return 'rgb( 0, 0, ' + blue + ')';
+            }
+            else {
+                return '#000';
+            }
+        }
+    });
+
+
+    Morris.Donut({
+        element: 'donut_chart_topics',
+        data: [
+            {value: 10, label: 'school', formatted: '10.09%' },
+            {value: 9, label: 'development', formatted: '8.86%' },
+            {value: 7, label: 'funds', formatted: '6.43%' },
+            {value: 74, label: 'all other', formatted: '74%' }
+        ],
+        formatter: function (x, data) { return data.formatted; }
+    });
+
+    Morris.Donut({
+        element: 'donut_chart_domains',
+        data: [
+            {value: 40, label: 'Jeb Bush', formatted: '40%' },
+            {value: 35, label: 'Florida', formatted: '35%' },
+            {value: 10, label: 'Bush', formatted: '10%' },
+            {value: 15, label: 'all other', formatted: '5%' }
+        ],
+        formatter: function (x, data) { return data.formatted; }
+    });
+
+    Morris.Donut({
+        element: 'donut_chart_communities',
+        data: [
+            {value: 40, label: 'Jeb Bush', formatted: '40%' },
+            {value: 35, label: 'Florida', formatted: '35%' },
+            {value: 10, label: 'Bush', formatted: '10%' },
+            {value: 15, label: 'all other', formatted: '5%' }
+        ],
+        formatter: function (x, data) { return data.formatted; }
+    });
+
+
+}
+
+//
+//  Dynamically load Morris Charts plugin
+//  homepage: http://www.oesmith.co.uk/morris.js/ v0.4.3 License - MIT
+//  require Raphael http://raphael.js
+//
+function LoadMorrisScripts(callback){
+    function LoadMorrisScript(){
+        if(!$.fn.Morris){
+            $.getScript('plugins/morris/morris.min.js', callback);
+        }
+        else {
+            if (callback && typeof(callback) === "function") {
+                callback();
+            }
+        }
+    }
+    if (!$.fn.raphael){
+        $.getScript('plugins/raphael/raphael-min.js', LoadMorrisScript);
+    }
+    else {
+        LoadMorrisScript();
+    }
+}
+
+function drawHorizontalBarChart() {
+    var categories = ['', 'Jeb Bush', 'Florida', 'Bush', 'Miami', 'Jeb','FL','U.S.','Tallahassee', 'Congress'];
+
+    var values = [1183, 1140, 502, 174, 161, 145, 144, 133, 124, 111];
+
+    var colors = ['#0000b4', '#0082ca', '#0094ff', '#0d4bcf', '#0066AE', '#074285', '#00187B', '#285964', '#405F83', '#416545'];
+
+    var grid = d3.range(25).map(function(i){
+        return {'x1':0,'y1':0,'x2':0,'y2':480};
+    });
+
+    var tickVals = grid.map(function(d,i){
+        if(i>0){ return i*10; }
+        else if(i===0){ return "100";}
+    });
+
+    var xscale = d3.scale.linear()
+      .domain([10,250])
+      .range([0,722]);
+
+    var yscale = d3.scale.linear()
+      .domain([0,categories.length])
+      .range([0,480]);
+
+    var colorScale = d3.scale.quantize()
+      .domain([0,categories.length])
+      .range(colors);
+
+    var canvas = d3.select('#horizontal_bar_chart_entities')
+      .append('svg')
+      .attr({'width':400,'height':160});
+
+    var grids = canvas.append('g')
+      .attr('id','grid')
+      .attr('transform','translate(150,10)')
+      .selectAll('line')
+      .data(grid)
+      .enter()
+      .append('line')
+      .attr({'x1':function(d,i){ return i*30; },
+          'y1':function(d){ return d.y1; },
+          'x2':function(d,i){ return i*30; },
+          'y2':function(d){ return d.y2; },
+      })
+      .style({'stroke':'#adadad','stroke-width':'1px'});
+
+    var	xAxis = d3.svg.axis();
+    xAxis
+      .orient('bottom')
+      .scale(xscale)
+      .tickValues(tickVals);
+
+    var	yAxis = d3.svg.axis();
+    yAxis
+      .orient('left')
+      .scale(yscale)
+      .tickSize(2)
+      .tickFormat(function(d,i){ return categories[i]; })
+      .tickValues(d3.range(17));
+
+    var y_xis = canvas.append('g')
+      .attr("transform", "translate(150,0)")
+      .attr('id','yaxis')
+      .call(yAxis);
+
+    var x_xis = canvas.append('g')
+      .attr("transform", "translate(150,480)")
+      .attr('id','xaxis')
+      .call(xAxis);
+
+    var chart = canvas.append('g')
+      .attr("transform", "translate(150,0)")
+      .attr('id','bars')
+      .selectAll('rect')
+      .data(values)
+      .enter()
+      .append('rect')
+      .attr('height',19)
+      .attr({'x':0,'y':function(d,i){ return yscale(i)+19; }})
+      .style('fill',function(d,i){ return colorScale(i); })
+      .attr('width',function(d){ return 0; });
+
+
+    var transit = d3.select("svg").selectAll("rect")
+      .data(values)
+      .transition()
+      .duration(1000)
+      .attr("width", function(d) {return xscale(d); });
+
+    var transitext = d3.select('#bars')
+      .selectAll('text')
+      .data(values)
+      .enter()
+      .append('text')
+      .attr({'x':function(d) {return xscale(d)-200; },'y':function(d,i){ return yscale(i)+35; }})
+      .text(function(d){ return d+"$"; }).style({'fill':'#fff','font-size':'14px'});
+}
+
+/*
 $(function () {
 
     var do_search = function () {
@@ -108,14 +314,6 @@ $(function () {
 
         $.when(instagram, twitter)
             .done(function (igResponse, tResponse) {
-//        tbl_instagram.empty();
-//        tbl_twitter.empty();
-//        if (igResponse[0].length === 0){
-//          tbl_instagram.append($('<tr>').append($('<td>').html('No Users Found')))
-//        }
-//        if (tResponse[0].length === 0) {
-//          tbl_twitter.append($('<tr>').append($('<td>').html('No Users Found')))
-//        }
                 tbl_results.empty();
 
                 $.each(igResponse[0], function (i, instagram_name) {
@@ -169,6 +367,7 @@ $(function () {
             return linkUserTwitter + username;
         }
     }
+
     $("#search-btn").click(function () {
         do_search();
 
@@ -197,3 +396,4 @@ $(function () {
         }, 100);
     });
 });
+*/

@@ -18,8 +18,9 @@
     <link href="css/newman-slider-theme.css" rel="stylesheet">
     <link href="css/default.css" rel="stylesheet">
     <link href="css/ner.css" rel="stylesheet">
-    <link href="css/custom-bootstrap.css" rel="stylesheet">
-    <link href="css/profile-chart.css" rel="stylesheet">
+    <link href="css/newman-custom-bootstrap.css" rel="stylesheet">
+    <link href="css/newman-profile-chart.css" rel="stylesheet">
+    <link href="css/newman-help.css" rel="stylesheet">
   </head>
   <body>
   <!-- hidden link //hack -->
@@ -100,11 +101,11 @@
       <div class="row">
         <div id="logo" class="col-xs-12 col-sm-1">
           <div class="row">
-            <div class="col-xs-5 col-sm-4">
-              <a class="sidebar-toggle show-sidebar"><i class="fa fa-outdent fa-inverse fa-lg"></i></a>
+            <div class="col-xs-5 col-sm-4" style="padding: 0px 2px 0px 15px;">
+              <button class="button-sidebar"><i class="fa fa-outdent fa-inverse fa-lg"></i></button>
             </div>
-            <div class="col-xs-7 col-sm-8" style="padding: 0px 0px 0px 2px;">
-              <a href="index.html">Newman <i class="fa fa-user-secret"></i></a>
+            <div class="col-xs-7 col-sm-8" style="padding: 0px 0px 0px 2px; text-align: center">
+              <button class="button-logo" id="toggle_dashboard_home">Newman <i class="fa fa-user-secret"></i></button>
             </div>
           </div>
         </div>
@@ -240,8 +241,8 @@
               </ul>
             </div>
 
-            <div class="col-xs-2 col-sm-1" style="text-align: right;">
-              <a class="sidebar-toggle" href="index.html"><i class="fa fa-indent fa-inverse fa-lg"></i></a>
+            <div class="col-xs-2 col-sm-1" style="text-align: left;">
+              <button class="button-sidebar" id="toggle_analytics_email"><i class="fa fa-indent fa-inverse fa-lg"></i></button>
             </div>
           </div>
         </div>
@@ -437,164 +438,329 @@
       <!--Start Content-->
       <div class="col-xs-12 col-sm-12">
 
-        <!--Start Visual-Filter-->
-        <div style="position: fixed; left: 18%; background-color: rgba(210, 210, 210, 0.6); z-index: 999; font-size: 12px;
-             border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; width: 25%;">
-          <table>
-            <tr>
-              <td>
-                <div style="padding-right: 10px;">Color:</div>
-              </td>
-              <td>
-                <label class="radio-inline" style="padding-right: 10px;"><input type="radio" name="optionRadios" id="colorby" value="node" style="margin: 2px 0 0 -20px;" checked /> Domain </label>
-              </td>
-              <td>
-                <label class="radio-inline"><input type="radio" name="optionRadios" id="colorby2"  value="comm" style="margin: 2px 0 0 -20px;"  /> Community </label>
-              </td>
-            </tr>
-            <tr>
-              <td><div style="padding-right: 10px;">Display:</div></td>
-              <td>
-                <label class="checkbox" style="padding-right: 10px;margin: 0;">
-                  <input type="checkbox" name="optionrank" id="rankval" value="rank" /> Rank
-                </label>
-              </td>
-              <td>
-                <label class="checkbox" style="padding-right: 10px;margin: 0;">
-                  <input type="checkbox" id="usetext" /> Labels
-                </label>
-              </td>
-            </tr>
-          </table>
+        <!--Start Home-Dashboard-Content-->
+        <div id="content-dashboard-home" class="container-fluid analytics-content">
 
-          <div style="border-top: 1px solid #000;text-align:center;">
-            <div>
-              <span style="font-weight: bold">Legend</span>
+          <!--Start Search-Result-Dashboard-Left-->
+          <div class="col-sm-5"  style= "height: 100%; padding: 0px 0px 0px 0px;">
+
+            <!--Start Search-Result-Category-Left-->
+            <div class="col-xs-2">
+              <ul class="nav nav-search">
+                <li class="active"><a href="#">Web</a></li>
+                <li><a href="#">Images</a></li>
+                <li><a href="#">Video</a></li>
+                <li><a href="#">Maps</a></li>
+                <li><a href="#">News</a></li>
+              </ul>
             </div>
-            <div id="toggle_legends"><span class="glyphicon glyphicon-chevron-down"></span></div>
-            <div id="legend_list" style="height: 0px;max-height:375px;overflow-y:scroll;">
-              <table id="legend-table" class="table">
-                <thead />
-                <tbody />
-              </table>
+            <!--End Search-Result-Category-Left-->
+
+            <!--Start Search-Result-Link-Center-->
+            <div class="col-xs-10">
+              <p class="small">About 3,870,000,000 results (0.28 seconds)</p>
+              <div class="one-result">
+                <a href="#" class="large">Metasearch Search Engine - Search.com</a>
+                <p class="txt-primary">www.search.com</p>
+                <p><b>Search</b> the Web by <b>searching</b> the best engines from one place.</p>
+              </div>
+              <div class="one-result">
+                <a href="#" class="large">Wolfram|Alpha: Computational Knowledge Engine</a>
+                <p class="txt-primary">www.wolframalpha.com</p>
+                <p>Wolfram|Alpha is more than a <b>search</b> engine. It gives you access to the world's facts and data and calculates answers across a range of topics, including science ...</p>
+              </div>
+              <div class="one-result">
+                <a href="#" class="large">Yahoo Search - Web Search</a>
+                <p class="txt-primary">search.yahoo.com</p>
+                <p>The <b>search</b> engine that helps you find exactly what you're looking for. Find the most relevant information, video, images, and answers from all across the Web.</p>
+              </div>
+              <div class="one-result">
+                <a href="#" class="large">Bing</a>
+                <p class="txt-primary">www.bing.com</p>
+                <p>Bing is a <b>search</b> engine that brings together the best of <b>search</b> and people in your social networks to help you spend less time <b>searching</b> and more time doing.</p>
+              </div>
+              <div class="one-result">
+                <a href="#" class="large">Google</a>
+                <p class="txt-primary">www.google.com</p>
+                <p><b>Search</b> the world's information, including webpages, images, videos and more. Google has many special features to help you find exactly what you're looking ...</p>
+              </div>
+              <div class="one-result">
+                <a href="#" class="large">AOL.com - News, Sports, Weather, Entertainment, Local & Lifestyle</a>
+                <p class="txt-primary">www.aol.com</p>
+                <p>AOL offers today's news, sports, stock quotes, weather, movie reviews, TV trends and more. Get free email, AIM access, online radio, videos and horoscopes ...</p>
+              </div>
+              <div class="one-result">
+                <a href="#" class="large">Search DuckDuckGo</a>
+                <p class="txt-primary">https://duckduckgo.com/‎</p>
+                <p><b>Search</b> anonymously. Find instantly. DuckDuckGo is a search engine that does not track you and, has more instant answers and less spam/clutter.</p>
+              </div>
+              <ul class="pagination"><li class="prev disabled"><a href="#">← Previous</a></li><li class="active"><a href="#">1</a></li><li><a href="#">2</a></li><li><a href="#">3</a></li><li><a href="#">4</a></li><li><a href="#">5</a></li><li class="next"><a href="#">Next → </a></li></ul>
+            </div>
+            <!--End Search-Result-Link-Center-->
+
+          </div>
+          <!--End Search-Research-Dashboard-Left-->
+
+          <!--Start Dashboard-Right-->
+          <div class="col-sm-7" style= "height: 100%;">
+            <div style= "height: 100%;">
+
+
+              <!--Start Dashboard-Panel-Nav-Tabs-->
+              <!--
+              <ul class="nav nav-tabs" style="width: 600px;" role="tablist" id="dashboard-tab-list">
+                <li class="active"><a href="#top-entities" role="tab" data-toggle="tab">Entities</a></li>
+                <li><a href="#topics-tab" role="tab" data-toggle="tab">Topics</a></li>
+              </ul>
+              -->
+              <!--End Dashboard-Panel-Nav-Tabs-->
+
+              <!--Start Dashboard-Panel-Tab-Content-->
+              <!--
+              <div class="tab-content" style= "height: 100%;">
+                <div class="tab-pane active" id="dashboard-top-entities"></div>
+                <div class="tab-pane" id="dashboard-top-topics">
+                  <table id="dashboard-top-topics-table" class="info-table">
+                    <thead></thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+
+              </div>
+              -->
+              <!--End Dashboard-Panel-Tab-Content-->
+
+              <div class="row box" >
+                <!--<div class="box ui-draggable ui-droppable">-->
+                  <div class="box-header">
+                    <div class="box-name">
+                      <i class="fa fa-hand-o-right"></i>
+                      <span>Entities</span>
+                    </div>
+                    <div class="box-icons">
+                      <a class="collapse-link"><i class="fa fa-compress"></i></a>
+                      <a class="expand-link"><i class="fa fa-expand"></i></a>
+                      <!--<a class="close-link"><i class="fa fa-times"></i></a>-->
+                    </div>
+                  </div>
+                  <div class="box-content" style="height: 164px;">
+                    <div class="col-xs-3">
+                      <div id="donut_chart_entities" style="width: 160px; height: 160px; position: relative"></div>
+                    </div>
+                    <div class="col-xs-9">
+                      <div id="horizontal_bar_chart_entities" style="width: 400px; height: 160px; position: relative"></div>
+                    </div>
+                  </div>
+                <!--</div>-->
+              </div>
+
+              <div class="row">
+                <div class="col-xs-6">
+                  <div id="donut_chart_topics" style="width: 160px; height: 160px;"></div>
+                </div>
+                <div class="col-xs-6">
+
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-xs-6">
+                  <div id="donut_chart_domains" style="width: 160px; height: 160px;"></div>
+                </div>
+                <div class="col-xs-6">
+
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-xs-6">
+                  <div id="donut_chart_communities" style="width: 160px; height: 160px;"></div>
+                </div>
+                <div class="col-xs-6">
+
+                </div>
+              </div>
+
+
+
             </div>
           </div>
+          <!--End Dashboard-Right-->
+
         </div>
-        <!--End Visual-Filter-->
 
-        <!--Start Data-Visual-Left-->
-        <div class="col-sm-7"  style= "height: 100%; padding: 0px 0px 0px 0px;">
-          <div id="node_graph"  style= "height: 468px;"> </div>
-        </div>
-        <!--End Data-Visual-Left-->
+        <!--Start Email-Analytics-Content-->
+        <div id="content-analytics-email" class="container-fluid analytics-content" >
 
-        <!--Start Data-Panel-Right-->
-        <div class="col-sm-5" style= "height: 100%;">
-          <div style= "height: 468px;">
-            <!--Start Data-Panel-Nav-Tabs-->
-            <ul class="nav nav-tabs" style="width: 600px;" role="tablist" id="tab-list">
-              <li class="active"><a href="#top-rank" role="tab" data-toggle="tab">Rank</a></li>
-              <li><a href="#top-entities" role="tab" data-toggle="tab">Entities</a></li>
-              <li><a href="#email-body-tab" role="tab" data-toggle="tab">Email</a></li>
-              <li><a href="#topics-tab" role="tab" data-toggle="tab">Topics</a></li>
-              <li><a href="#attach-tab" role="tab" data-toggle="tab">Attachments</a></li>
-            </ul>
-            <!--End Data-Panel-Nav-Tabs-->
+          <!--Start Visual-Filter-->
+          <div style="position: fixed; left: 18%; background-color: rgba(210, 210, 210, 0.6); z-index: 999; font-size: 12px;
+             border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; width: 25%;">
+            <table>
+              <tr>
+                <td>
+                  <div style="padding-right: 10px;">Color:</div>
+                </td>
+                <td>
+                  <label class="radio-inline" style="padding-right: 10px;"><input type="radio" name="optionRadios" id="colorby" value="node" style="margin: 2px 0 0 -20px;" checked /> Domain </label>
+                </td>
+                <td>
+                  <label class="radio-inline"><input type="radio" name="optionRadios" id="colorby2"  value="comm" style="margin: 2px 0 0 -20px;"  /> Community </label>
+                </td>
+              </tr>
+              <tr>
+                <td><div style="padding-right: 10px;">Display:</div></td>
+                <td>
+                  <label class="checkbox" style="padding-right: 10px;margin: 0;">
+                    <input type="checkbox" name="optionrank" id="rankval" value="rank" /> Rank
+                  </label>
+                </td>
+                <td>
+                  <label class="checkbox" style="padding-right: 10px;margin: 0;">
+                    <input type="checkbox" id="usetext" /> Labels
+                  </label>
+                </td>
+              </tr>
+            </table>
 
-            <!--Start Data-Panel-Tab-Content-->
-            <div class="tab-content" style= "height: 100%;">
-              <div class="tab-pane active" id="top-rank"> </div>
-              <div class="tab-pane" id="top-entities"></div>
-              <div class="tab-pane" id="email-body-tab" style="height: 100%;">
-                <div style="display: table;">
-                  <div style="display: inline-block;float:left;margin-top: 15px;">
-                    <a id="submit_activesearch" class="btn btn-default">Seed Active Search</a>
-                    <a id="submit_activesearch_like" class="btn btn-default" style="background-color: #00ff00"><span class="glyphicon glyphicon-thumbs-up" style="color: #000;"/></a>
-                    <a id="submit_activesearch_dislike" class="btn btn-default" style="background-color: #ff0000"><span class="glyphicon glyphicon-thumbs-down" style="color: #000"/></a>
-                  </div>
-                  <div style="background-color: #f0f0f0; padding: 5px; margin-left: 20px; float: left; display: inline-block;" id="topic_mini_chart"></div>
-		  <div style="display: inline-block;float:left;margin-top: 15px;margin-left: 20px;" class="active">
-		    <a id="submit_toggleExport" class="btn btn-default" style="background-color: #4888f3">
-                      <span class="glyphicon glyphicon-star" style="font-size:20px;" />
-                    </a>
-		  </div>
-                </div>
-                <div id="email-body"> Select an Email to preview </div>
+            <div style="border-top: 1px solid #000;text-align:center;">
+              <div>
+                <span style="font-weight: bold">Legend</span>
               </div>
-              <div class="tab-pane" id="topics-tab">
-                <table id="topics-table" class="info-table">
-                  <thead></thead>
-                  <tbody></tbody>
+              <div id="toggle_legends"><span class="glyphicon glyphicon-chevron-down"></span></div>
+              <div id="legend_list" style="height: 0px;max-height:375px;overflow-y:scroll;">
+                <table id="legend-table" class="table">
+                  <thead />
+                  <tbody />
                 </table>
               </div>
-              <div class="tab-pane" id="attach-tab">
-                <div style="padding-bottom: 10px;">
-                  <span>Attachments for sender: </span><span id="attach-sender" style="font-weight: bold;"></span>
+            </div>
+          </div>
+          <!--End Visual-Filter-->
+
+          <!--Start Data-Visual-Left-->
+          <div class="col-sm-7"  style= "height: 100%; padding: 0px 0px 0px 0px;">
+            <div id="node_graph"  style= "height: 488px;"> </div>
+          </div>
+          <!--End Data-Visual-Left-->
+
+          <!--Start Data-Panel-Right-->
+          <div class="col-sm-5" style= "height: 100%;">
+            <div style= "height: 478px;">
+              <!--Start Data-Panel-Nav-Tabs-->
+              <ul class="nav nav-tabs" style="width: 600px;" role="tablist" id="tab-list">
+                <li class="active"><a href="#top-rank" role="tab" data-toggle="tab">Rank</a></li>
+                <li><a href="#top-entities" role="tab" data-toggle="tab">Entities</a></li>
+                <li><a href="#email-body-tab" role="tab" data-toggle="tab">Email</a></li>
+                <li><a href="#topics-tab" role="tab" data-toggle="tab">Topics</a></li>
+                <li><a href="#attach-tab" role="tab" data-toggle="tab">Attachments</a></li>
+              </ul>
+              <!--End Data-Panel-Nav-Tabs-->
+
+              <!--Start Data-Panel-Tab-Content-->
+              <div class="tab-content" style= "height: 100%;">
+                <div class="tab-pane active" id="top-rank"> </div>
+                <div class="tab-pane" id="top-entities"></div>
+                <div class="tab-pane" id="email-body-tab" style="height: 100%;">
+                  <div style="display: table;">
+                    <div style="display: inline-block;float:left;margin-top: 15px;">
+                      <a id="submit_activesearch" class="btn btn-default">Seed Active Search</a>
+                      <a id="submit_activesearch_like" class="btn btn-default" style="background-color: #00ff00"><span class="glyphicon glyphicon-thumbs-up" style="color: #000;"/></a>
+                      <a id="submit_activesearch_dislike" class="btn btn-default" style="background-color: #ff0000"><span class="glyphicon glyphicon-thumbs-down" style="color: #000"/></a>
+                    </div>
+                    <div style="background-color: #f0f0f0; padding: 5px; margin-left: 20px; float: left; display: inline-block;" id="topic_mini_chart"></div>
+                    <div style="display: inline-block;float:left;margin-top: 15px;margin-left: 20px;" class="active">
+                      <a id="submit_toggleExport" class="btn btn-default" style="background-color: #4888f3">
+                        <span class="glyphicon glyphicon-star" style="font-size:20px;" />
+                      </a>
+                    </div>
+                  </div>
+                  <div id="email-body"> Select an Email to preview </div>
                 </div>
-                <div style="height: calc(100% - 30px);overflow-y: scroll;">
-                  <table id="attach-table" class="info-table"></table>
+                <div class="tab-pane" id="topics-tab">
+                  <table id="topics-table" class="info-table">
+                    <thead></thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+                <div class="tab-pane" id="attach-tab">
+                  <div style="padding-bottom: 10px;">
+                    <span>Attachments for sender: </span><span id="attach-sender" style="font-weight: bold;"></span>
+                  </div>
+                  <div style="height: calc(100% - 30px);overflow-y: scroll;">
+                    <table id="attach-table" class="info-table"></table>
+                  </div>
+                </div>
+              </div>
+              <!--Start Data-Panel-Tab-Content-->
+
+              <!-- Create an SVG element to represent the legend -->
+              <svg id="legend" style="position:fixed; top:100px; right:0px; pointer-events:none;"></svg>
+            </div>
+          </div>
+          <!--End Data-Panel-Right-->
+
+          <!--Start Bottom-Panel-->
+          <div class="row" id="bottom-panel-toggle">
+            <div class="col-sm-12">
+              <div class="col-sm-2 col-sm-offset-5 toggle-button">
+                <a><span class="glyphicon glyphicon-chevron-up"></span></a>
+              </div>
+              <div class="col-sm-12" style="height: calc(100% - 25px);max-height: 250px;background-color:#d3d3d3;">
+                <div style="height: 100%;max-height: 250px;">
+                  <div style="height: 25px;padding-top: 4px;">
+                    <!-- <div style="float: right;padding-right: 9px;"> -->
+                    <!--   <a class="clickable"> -->
+                    <!--     <span class="glyphicon glyphicon-folder-open" /> -->
+                    <!--   </a> -->
+                    <!-- </div> -->
+                    <div style="float: left;padding-right: 9px;">
+                      <span> Documents: </span> <span id="document_count"></span>
+                    </div>
+                    <div style="float: right;padding-right: 9px;">
+                      <a class="clickable" id="email_view_marked">
+                        <span> View Exportable  </span>
+                      </a>
+                      |
+                      <a class="clickable" id="email_view_export_all" title="Mark All">
+                        <span class="glyphicon glyphicon-plus"> </span>
+                      </a>
+                      |
+                      <a class="clickable" id="email_view_export_all_remove" title="Unmark All">
+                        <span class="glyphicon glyphicon-minus"> </span>
+                      </a>
+                      |
+                      <!-- <a class="clickable" id="email_group_conversation" title="Conversations"> -->
+                      <!--   <span class="glyphicon glyphicon-tasks"></span> -->
+                      <!-- </a> -->
+                    </div>
+                  </div>
+                  <div style="overflow-y: scroll;height: 100%;max-height: 225px;">
+                    <table id="result_table" class="table" style="display:table;" >
+                      <thead class="result_thead"></thead>
+                      <tbody class="result_tbody"></tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
-            <!--Start Data-Panel-Tab-Content-->
-
-            <!-- Create an SVG element to represent the legend -->
-            <svg id="legend" style="position:fixed; top:100px; right:0px; pointer-events:none;"></svg>
           </div>
+          <!--End Bottom-Panel-->
+
         </div>
-        <!--End Data-Panel-Right-->
+        <!--End Email-Analytics-Content-->
 
         </div>
         <!--End Content-->
       </div>
       <!--End Main-container-Row-->
 
-      <!--Start Bottom-Panel-->
-      <div class="row" id="bottom-panel-toggle">
+      <!--Start Main-Container-Bottom-Panel-->
+      <div class="row">
         <div class="col-sm-12">
-          <div class="col-sm-2 col-sm-offset-5 toggle-button">
-            <a><span class="glyphicon glyphicon-chevron-up"></span></a>
-          </div>
-          <div class="col-sm-12" style="height: calc(100% - 25px);max-height: 250px;background-color:#d3d3d3;">
-            <div style="height: 100%;max-height: 250px;">
-              <div style="height: 25px;padding-top: 4px;">
-                <!-- <div style="float: right;padding-right: 9px;"> -->
-                <!--   <a class="clickable"> -->
-                <!--     <span class="glyphicon glyphicon-folder-open" /> -->
-                <!--   </a> -->
-                <!-- </div> -->
-                <div style="float: left;padding-right: 9px;">
-                  <span> Documents: </span> <span id="document_count"></span>
-                </div>
-                <div style="float: right;padding-right: 9px;">
-                  <a class="clickable" id="email_view_marked">
-                    <span> View Exportable  </span>
-                  </a>
-                  | 
-                  <a class="clickable" id="email_view_export_all" title="Mark All">
-                    <span class="glyphicon glyphicon-plus"> </span>
-                  </a>
-                  | 
-                  <a class="clickable" id="email_view_export_all_remove" title="Unmark All">
-                    <span class="glyphicon glyphicon-minus"> </span>
-                  </a>
-                  |
-                  <!-- <a class="clickable" id="email_group_conversation" title="Conversations"> -->
-                  <!--   <span class="glyphicon glyphicon-tasks"></span> -->
-                  <!-- </a> -->
-                </div>
-              </div>
-              <div style="overflow-y: scroll;height: 100%;max-height: 225px;">
-                <table id="result_table" class="table" style="display:table;" >
-                  <thead class="result_thead"></thead>
-                  <tbody class="result_tbody"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
-      <!--End Bottom-Panel-->
+      <!--End Main-Container-Bottom-Panel-->
 
     </div>
     <!--End Main-Container-->
@@ -618,10 +784,14 @@
     <script src="plugins/justified-gallery/jquery.justifiedGallery.min.js"></script>
     <script src="plugins/tinymce/tinymce.min.js"></script>
     <script src="plugins/tinymce/jquery.tinymce.min.js"></script>
+    <script src="plugins/morris/morris.min.js"></script>
+    <script src="plugins/raphael/raphael-min.js"></script>
+
     <script src="plugins/user-ale/userale.js"></script>
 
     <!-- All functions for this theme + document.ready processing -->
 
+    <script src="js/searchtool.js"></script>
     <script src="js/graphtool.js"></script>
 
   </body>
