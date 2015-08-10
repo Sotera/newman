@@ -99,19 +99,19 @@
   <header class="navbar">
     <div class="container-fluid expanded-panel">
       <div class="row">
-        <div id="logo" class="col-xs-12 col-sm-1">
+        <div id="logo" class="col-xs-12 col-sm-2" style="padding: 0px 0px 0px 15px;">
           <div class="row">
-            <div class="col-xs-5 col-sm-4" style="padding: 0px 2px 0px 15px;">
+            <div class="col-xs-5 col-sm-4" style="padding: 0px 5px 0px 15px;">
               <button class="button-sidebar"><i class="fa fa-outdent fa-inverse fa-lg"></i></button>
             </div>
-            <div class="col-xs-7 col-sm-8" style="padding: 0px 0px 0px 2px; text-align: center">
+            <div class="col-xs-7 col-sm-8" style="padding: 0px; text-align: left">
               <button class="button-logo" id="toggle_dashboard_home">Newman <i class="fa fa-user-secret"></i></button>
             </div>
           </div>
         </div>
 
 
-        <div id="top-panel" class="col-xs-12 col-sm-11">
+        <div id="top-panel" class="col-xs-12 col-sm-10">
           <div class="row">
 
             <!--
@@ -137,7 +137,7 @@
             </div>
             -->
 
-            <div class="col-xs-12 col-sm-3" style="text-align: left;">
+            <div class="col-xs-12 col-sm-3" style="padding: 0px 5px 0px 15px; text-align: left;">
 
               <div id="search">
                 <input id="txt_search" type="text" placeholder="search"/>
@@ -147,14 +147,14 @@
             </div>
 
             <!-- start datetime-range -->
-            <div class="col-xs-12 col-sm-5" style="padding: 0px 0px 0px 0px;">
+            <div class="col-xs-12 col-sm-5" style="padding: 0px;">
               <div class="ui-rangeSliderZone">
                 <div id="date_range_slider"></div>
               </div>
             </div>
             <!-- end datetime-range -->
 
-            <div class="col-xs-10 col-sm-3 top-panel-right">
+            <div class="col-xs-10 col-sm-3 top-panel-right" style="padding: 0px;">
 
               <ul class="nav navbar-nav pull-right panel-menu">
 
@@ -241,7 +241,7 @@
               </ul>
             </div>
 
-            <div class="col-xs-2 col-sm-1" style="text-align: left;">
+            <div class="col-xs-2 col-sm-1" style="padding: 0px 15px 0px 0px; text-align: center;">
               <button class="button-sidebar" id="toggle_analytics_email"><i class="fa fa-indent fa-inverse fa-lg"></i></button>
             </div>
           </div>
@@ -442,7 +442,7 @@
         <div id="content-dashboard-home" class="container-fluid analytics-content">
 
           <!--Start Search-Result-Dashboard-Left-->
-          <div class="col-sm-5"  style= "height: 100%; padding: 0px 0px 0px 0px;">
+          <div class="col-sm-5"  style= "height: 100%; padding: 0px;">
 
             <!--Start Search-Result-Category-Left-->
             <div class="col-xs-2">
@@ -540,7 +540,6 @@
                     <div class="box-icons">
                       <a class="collapse-link"><i class="fa fa-compress"></i></a>
                       <a class="expand-link"><i class="fa fa-expand"></i></a>
-                      <!--<a class="close-link"><i class="fa fa-times"></i></a>-->
                     </div>
                   </div>
                   <div class="box-content" style="height: 164px;">
@@ -554,30 +553,66 @@
                 <!--</div>-->
               </div>
 
-              <div class="row">
-                <div class="col-xs-6">
-                  <div id="donut_chart_topics" style="width: 160px; height: 160px;"></div>
+              <div class="row box">
+                <div class="box-header">
+                  <div class="box-name">
+                    <i class="fa fa-hand-o-right"></i>
+                    <span>Topics</span>
+                  </div>
+                  <div class="box-icons">
+                    <a class="collapse-link"><i class="fa fa-compress"></i></a>
+                    <a class="expand-link"><i class="fa fa-expand"></i></a>
+                  </div>
                 </div>
-                <div class="col-xs-6">
-
+                <div class="box-content" style="padding: 0px; height: 164px;">
+                  <div class="col-xs-3">
+                    <div id="donut_chart_topics" style="width: 160px; height: 160px;"></div>
+                  </div>
+                  <div class="col-xs-9" style="padding: 0px;">
+                    <div id="horizontal_bar_chart_topics" style="width: 400px; height: 160px; position: relative"></div>
+                  </div>
                 </div>
               </div>
 
-              <div class="row">
-                <div class="col-xs-6">
-                  <div id="donut_chart_domains" style="width: 160px; height: 160px;"></div>
+              <div class="row box">
+                <div class="box-header">
+                  <div class="box-name">
+                    <i class="fa fa-hand-o-right"></i>
+                    <span>Domains</span>
+                  </div>
+                  <div class="box-icons">
+                    <a class="collapse-link"><i class="fa fa-compress"></i></a>
+                    <a class="expand-link"><i class="fa fa-expand"></i></a>
+                  </div>
                 </div>
-                <div class="col-xs-6">
-
+                <div class="box-content" style="height: 164px;">
+                  <div class="col-xs-3" style="padding: 0px;">
+                    <div id="donut_chart_domains" style="width: 160px; height: 160px;"></div>
+                  </div>
+                  <div class="col-xs-9" style="padding: 0px;">
+                    <div id="horizontal_bar_chart_domains" style="width: 400px; height: 160px; position: relative"></div>
+                  </div>
                 </div>
               </div>
 
-              <div class="row">
-                <div class="col-xs-6">
-                  <div id="donut_chart_communities" style="width: 160px; height: 160px;"></div>
+              <div class="row box">
+                <div class="box-header">
+                  <div class="box-name">
+                    <i class="fa fa-hand-o-right"></i>
+                    <span>Communities</span>
+                  </div>
+                  <div class="box-icons">
+                    <a class="collapse-link"><i class="fa fa-compress"></i></a>
+                    <a class="expand-link"><i class="fa fa-expand"></i></a>
+                  </div>
                 </div>
-                <div class="col-xs-6">
-
+                <div class="box-content" style="height: 164px;">
+                  <div class="col-xs-3" style="padding: 0px;">
+                    <div id="donut_chart_communities" style="width: 160px; height: 160px;"></div>
+                  </div>
+                  <div class="col-xs-9" style="padding: 0px">
+                    <div id="horizontal_bar_chart_communities" style="width: 400px; height: 160px; position: relative"></div>
+                  </div>
                 </div>
               </div>
 
@@ -638,7 +673,7 @@
           <!--End Visual-Filter-->
 
           <!--Start Data-Visual-Left-->
-          <div class="col-sm-7"  style= "height: 100%; padding: 0px 0px 0px 0px;">
+          <div class="col-sm-7"  style= "height: 100%; padding: 0px;">
             <div id="node_graph"  style= "height: 488px;"> </div>
           </div>
           <!--End Data-Visual-Left-->

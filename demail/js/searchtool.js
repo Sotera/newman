@@ -80,9 +80,9 @@ function drawDashboardCharts() {
         element: 'donut_chart_entities',
         data: [
             {value: 40, label: 'Jeb Bush', formatted: '40%' },
-            {value: 35, label: 'Florida', formatted: '35%' },
-            {value: 10, label: 'Bush', formatted: '10%' },
-            {value: 15, label: 'all other', formatted: '5%' }
+            {value: 38, label: 'Florida', formatted: '38%' },
+            {value: 17, label: 'Bush', formatted: '16.7%' },
+            {value: 5, label: 'Miami', formatted: '5.8%' }
         ],
         formatter: function (x, data) { return data.formatted; }
     });
@@ -119,21 +119,49 @@ function drawDashboardCharts() {
     Morris.Donut({
         element: 'donut_chart_topics',
         data: [
-            {value: 10, label: 'school', formatted: '10.09%' },
-            {value: 9, label: 'development', formatted: '8.86%' },
-            {value: 7, label: 'funds', formatted: '6.43%' },
-            {value: 74, label: 'all other', formatted: '74%' }
+            {value: 30, label: 'school', formatted: '10.09%' },
+            {value: 27, label: 'development', formatted: '8.86%' },
+            {value: 22, label: 'funds', formatted: '6.87%' },
+            {value: 21, label: 'mother', formatted: '6.43%' }
         ],
         formatter: function (x, data) { return data.formatted; }
+    });
+
+    Morris.Bar({
+        element: 'horizontal_bar_chart_topics',
+        data: [
+            {x: 'school', y: 10},
+            {x: 'development', y: 9},
+            {x: 'funds', y: 7},
+            {x: 'mother', y: 7},
+            {x: 'ethanol', y: 6},
+            {x: 'confidential', y: 5},
+            {x: 'license', y: 5},
+            {x: 'teacher', y: 5},
+            {x: 'board', y: 5},
+            {x: 'hospital', y: 5},
+        ],
+        xkey: 'x',
+        ykeys: ['y'],
+        labels: ['Y'],
+        barColors: function (row, series, type) {
+            if (type === 'bar') {
+                var blue = Math.ceil(255 * row.y / this.ymax);
+                return 'rgb( 0, 0, ' + blue + ')';
+            }
+            else {
+                return '#000';
+            }
+        }
     });
 
     Morris.Donut({
         element: 'donut_chart_domains',
         data: [
             {value: 40, label: 'Jeb Bush', formatted: '40%' },
-            {value: 35, label: 'Florida', formatted: '35%' },
-            {value: 10, label: 'Bush', formatted: '10%' },
-            {value: 15, label: 'all other', formatted: '5%' }
+            {value: 38, label: 'Florida', formatted: '38%' },
+            {value: 17, label: 'Bush', formatted: '16.7%' },
+            {value: 5, label: 'Miami', formatted: '5.8%' }
         ],
         formatter: function (x, data) { return data.formatted; }
     });
@@ -142,9 +170,9 @@ function drawDashboardCharts() {
         element: 'donut_chart_communities',
         data: [
             {value: 40, label: 'Jeb Bush', formatted: '40%' },
-            {value: 35, label: 'Florida', formatted: '35%' },
-            {value: 10, label: 'Bush', formatted: '10%' },
-            {value: 15, label: 'all other', formatted: '5%' }
+            {value: 38, label: 'Florida', formatted: '38%' },
+            {value: 17, label: 'Bush', formatted: '16.7%' },
+            {value: 5, label: 'Miami', formatted: '5.8%' }
         ],
         formatter: function (x, data) { return data.formatted; }
     });

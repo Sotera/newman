@@ -45,6 +45,7 @@ h1, .h1, h2, .h2, h3, .h3 {
 .button-logo {
   position:relative;
   height: 50px;
+  padding: 0px 0px 0px 0px;
   color: whitesmoke;
   font-family: "Righteous",cursive;
   font-size: 14px;
@@ -370,7 +371,7 @@ a.show-sidebar:hover {
   position: relative;
   border: 1px solid #ccc;
   background: transparent;
-  margin-bottom: 20px;
+  margin: 0px 0px 5px 0px;
 }
 .full-content .box {
   border: 0;
@@ -422,7 +423,7 @@ a.show-sidebar:hover {
 }
 .box-content {
   position: relative;
-  padding: 15px;
+  padding: 0px 0px 0px 0px;
   background: #FBFBF0;
 }
 .box-content.dropbox, .box-content.sortablebox {
