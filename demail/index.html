@@ -119,17 +119,12 @@
               <div class="btn-group" data-toggle="buttons" style="vertical-align: middle; padding-top: 5px;">
                 <button class="btn btn-default btn-xs">
                   <span class="fa fa-text-width fa-inverse">
-                    <input type="radio" name="searchType" value="all">
+                    <input type="radio" name="searchType" value="all" checked>
                   </span>
                 </button>
                 <button class="btn btn-default btn-xs">
                   <span class="fa fa-envelope-o fa-inverse">
                     <input type="radio" name="searchType" value="email">
-                  </span>
-                </button>
-                <button class="btn btn-default btn-xs focus active">
-                  <span class="fa fa-user-plus fa-inverse">
-                    <input type="radio" name="searchType" value="user" checked>
                   </span>
                 </button>
               </div>
@@ -442,33 +437,28 @@
         <div id="content-dashboard-home" class="container-fluid analytics-content">
 
           <!--Start Search-Result-Dashboard-Left-->
-          <div class="col-sm-5"  style= "height: 100%; padding: 0px;">
+          <div class="col-sm-4"  style= "height: 100%; padding: 0px;">
 
             <!--Start Search-Result-Category-Left-->
-            <div class="col-xs-2">
+            <div class="col-xs-3" style="padding: 0px;">
               <ul class="nav nav-search">
-                <li class="active"><a href="#">Web</a></li>
-                <li><a href="#">Images</a></li>
-                <li><a href="#">Video</a></li>
-                <li><a href="#">Maps</a></li>
-                <li><a href="#">News</a></li>
+                <li class="active"><a href="#">All</a></li>
+                <li><a href="#">Email</a></li>
+                <li><a href="#">Topic</a></li>
+                <li><a href="#">Community</a></li>
+                <li><a href="#">Entity</a></li>
               </ul>
             </div>
             <!--End Search-Result-Category-Left-->
 
             <!--Start Search-Result-Link-Center-->
-            <div class="col-xs-10">
+            <div class="col-xs-9" style="padding: 0px 0px 0px 5px;">
+
+              <div id="search_result_container">
+
+              <!--
               <p class="small">About 3,870,000,000 results (0.28 seconds)</p>
-              <div class="one-result">
-                <a href="#" class="large">Metasearch Search Engine - Search.com</a>
-                <p class="txt-primary">www.search.com</p>
-                <p><b>Search</b> the Web by <b>searching</b> the best engines from one place.</p>
-              </div>
-              <div class="one-result">
-                <a href="#" class="large">Wolfram|Alpha: Computational Knowledge Engine</a>
-                <p class="txt-primary">www.wolframalpha.com</p>
-                <p>Wolfram|Alpha is more than a <b>search</b> engine. It gives you access to the world's facts and data and calculates answers across a range of topics, including science ...</p>
-              </div>
+
               <div class="one-result">
                 <a href="#" class="large">Yahoo Search - Web Search</a>
                 <p class="txt-primary">search.yahoo.com</p>
@@ -484,17 +474,12 @@
                 <p class="txt-primary">www.google.com</p>
                 <p><b>Search</b> the world's information, including webpages, images, videos and more. Google has many special features to help you find exactly what you're looking ...</p>
               </div>
-              <div class="one-result">
-                <a href="#" class="large">AOL.com - News, Sports, Weather, Entertainment, Local & Lifestyle</a>
-                <p class="txt-primary">www.aol.com</p>
-                <p>AOL offers today's news, sports, stock quotes, weather, movie reviews, TV trends and more. Get free email, AIM access, online radio, videos and horoscopes ...</p>
+              -->
+
               </div>
-              <div class="one-result">
-                <a href="#" class="large">Search DuckDuckGo</a>
-                <p class="txt-primary">https://duckduckgo.com/‎</p>
-                <p><b>Search</b> anonymously. Find instantly. DuckDuckGo is a search engine that does not track you and, has more instant answers and less spam/clutter.</p>
-              </div>
+
               <ul class="pagination"><li class="prev disabled"><a href="#">← Previous</a></li><li class="active"><a href="#">1</a></li><li><a href="#">2</a></li><li><a href="#">3</a></li><li><a href="#">4</a></li><li><a href="#">5</a></li><li class="next"><a href="#">Next → </a></li></ul>
+
             </div>
             <!--End Search-Result-Link-Center-->
 
@@ -502,7 +487,7 @@
           <!--End Search-Research-Dashboard-Left-->
 
           <!--Start Dashboard-Right-->
-          <div class="col-sm-7" style= "height: 100%;">
+          <div class="col-sm-8" style= "height: 100%;">
             <div style= "height: 100%;">
 
 
@@ -531,26 +516,27 @@
               <!--End Dashboard-Panel-Tab-Content-->
 
               <div class="row box" >
-                <!--<div class="box ui-draggable ui-droppable">-->
-                  <div class="box-header">
-                    <div class="box-name">
-                      <i class="fa fa-hand-o-right"></i>
-                      <span>Entities</span>
-                    </div>
-                    <div class="box-icons">
-                      <a class="collapse-link"><i class="fa fa-compress"></i></a>
-                      <a class="expand-link"><i class="fa fa-expand"></i></a>
-                    </div>
+                <div class="box-header">
+                  <div class="box-name">
+                    <i class="fa fa-hand-o-right"></i>
+                    <span>Entities</span>
                   </div>
-                  <div class="box-content" style="height: 164px;">
-                    <div class="col-xs-3">
-                      <div id="donut_chart_entities" style="width: 160px; height: 160px; position: relative"></div>
-                    </div>
-                    <div class="col-xs-9">
-                      <div id="horizontal_bar_chart_entities" style="width: 400px; height: 160px; position: relative"></div>
-                    </div>
+                  <div class="box-icons">
+                    <a class="collapse-link"><i class="fa fa-compress"></i></a>
+                    <a class="expand-link"><i class="fa fa-expand"></i></a>
                   </div>
-                <!--</div>-->
+                </div>
+                <div class="box-content" style="height: 164px;">
+                  <div class="col-xs-3" style="padding: 0px;">
+                    <div id="chart_donut_entities" style="width: 160px; height: 160px; position: relative;"></div>
+                  </div>
+                  <div class="col-xs-7" style="padding: 0px;">
+                    <div id="chart_horizontal_bar_entities" style="width: 100%; height: 100%; position: relative;"></div>
+                  </div>
+                  <div class="col-xs-2" style="padding: 0px;">
+                    <div id="chart_legend_entities" style="width: 100%; height: 100%; position: relative;"></div>
+                  </div>
+                </div>
               </div>
 
               <div class="row box">
@@ -566,10 +552,10 @@
                 </div>
                 <div class="box-content" style="padding: 0px; height: 164px;">
                   <div class="col-xs-3">
-                    <div id="donut_chart_topics" style="width: 160px; height: 160px;"></div>
+                    <div id="chart_donut_topics" style="width: 160px; height: 160px;"></div>
                   </div>
                   <div class="col-xs-9" style="padding: 0px;">
-                    <div id="horizontal_bar_chart_topics" style="width: 400px; height: 160px; position: relative"></div>
+                    <div id="chart_horizontal_bar_topics" style="width: 100%; height: 100%; position: relative"></div>
                   </div>
                 </div>
               </div>
@@ -587,10 +573,10 @@
                 </div>
                 <div class="box-content" style="height: 164px;">
                   <div class="col-xs-3" style="padding: 0px;">
-                    <div id="donut_chart_domains" style="width: 160px; height: 160px;"></div>
+                    <div id="chart_donut_domains" style="width: 160px; height: 160px;"></div>
                   </div>
                   <div class="col-xs-9" style="padding: 0px;">
-                    <div id="horizontal_bar_chart_domains" style="width: 400px; height: 160px; position: relative"></div>
+                    <div id="chart_horizontal_bar_domains" style="width: 100%; height: 100%; position: relative"></div>
                   </div>
                 </div>
               </div>
@@ -608,10 +594,10 @@
                 </div>
                 <div class="box-content" style="height: 164px;">
                   <div class="col-xs-3" style="padding: 0px;">
-                    <div id="donut_chart_communities" style="width: 160px; height: 160px;"></div>
+                    <div id="chart_donut_communities" style="width: 160px; height: 160px;"></div>
                   </div>
                   <div class="col-xs-9" style="padding: 0px">
-                    <div id="horizontal_bar_chart_communities" style="width: 400px; height: 160px; position: relative"></div>
+                    <div id="chart_horizontal_bar_communities" style="width: 100%; height: 100%; position: relative"></div>
                   </div>
                 </div>
               </div>

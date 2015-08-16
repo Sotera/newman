@@ -563,45 +563,60 @@ function show_email_view(email_id){
     });
 };
 
-// takes field + varargs ... now
-function do_search(fields, val) {
-  var varargs = arguments;
-  /* Fails Lint -  Use '===' to compare with 'undefined' */
-  if (fields == undefined) { fields = 'all'; }
+function toString( map ) {
+  if (map) {
+    var mapAsText = "";
+    _.each(map, function (element) {
+      mapAsText = mapAsText + element.toString() + " ";
+    });
+    return mapAsText.trim();
+  }
 
-  var search_msg = (function(varargs){
+  return "";
+}
+
+/**
+ * displays search status popup
+ * @param search_arg_list
+ */
+function showSearchPopup( search_field, search_text ) {
+  console.log('show_search_popup(' + search_field + ', ' + search_text + ')');
+
+  var search_msg = (function(field, args){
+    console.log('\tsearch_msg = (function(' + field + ', ' + args + ')');
+
     var ops = {
-      'all': function(args){
-        var text = _.first(args);
-        if (text.trim() === ""){
-          return "Searching all";
+      'all': function(field, args){
+        console.log('\t\t\'all\': function(' + field + ', ' + args + ')');
+
+        if (args) {
+          return "Searching <b>" + field + "</b><br/> for " + args;
         }
-        return "Searching text for <br/><b>" + text +"</b>";
+        return "Searching <b>" + field +"</b><br/> for all";
+
       },
-      'email': function(args){
-        var email = _.first(args);
-        return "Searching on email <br/><b>" + email +"</b>";
+
+      'email': function(field, args){
+        return "Searching <b>" + field +"</b><br/> for " + args;
       },
-      'topic': function(args){
-        var topic = _.first(_.rest(args));
-        var score = _.first(_.rest(args, 2));
-        return "Searching on topic index <b>" + topic +"</b><br/> with score greater than " + Math.floor(100.0 * score) + "%";
+      'topic': function(field, args){
+        var score = _.first(_.rest(args, 1));
+        return "Searching <b>" + field +"</b><br/> with score greater than " + Math.floor(100.0 * score) + "%";
       },
-      'entity': function(args){
-        var entity = _.first(_.rest(args));
-        return "Searching on entity <br/><b>" + htmlEncode(entity) + "</b>";
+      'entity': function(field, args){
+        return "Searching <b>" + htmlEncode(field) + "</b><br/> for " + args;
       },
-      'exportable': function(args){
-        return "Searching exportable emails";
+      'exportable': function(field, args){
+        return "Searching <b>" + field + "</b><br/> for " + args;
       },
       'community': function(args){
-        var community_id = _.first(args);
-        return "Searching community";
+        return "Searching <b>" + field + "</b><br/> for " + args;
       }
     };
-    var field = _.first(varargs);
-    return ops[field](_.rest(varargs));
-  }(varargs));
+
+    return ops[field](args);
+
+  }(search_field, search_text));
 
   $.bootstrapGrowl(search_msg, {type : "success", offset: {from: 'bottom', amount: 10 }});
 
@@ -611,24 +626,61 @@ function do_search(fields, val) {
 
   d3.select("#result_table").select("tbody").selectAll("tr").remove();
   d3.select("#result_table").select("thead").selectAll("tr").remove();
-  var text = val;
+
+  var text = search_text;
 
   //d3.select("#search_status").text("Searching...");
   $('#search_status').empty();
   $('#search_status').append($('<span>',{ 'text': 'Searching... ' })).append(waiting_bar);
+
+}
+
+/**
+ * performs search based on field and argument value
+ * @param field
+ * @param val
+ */
+function do_search(field, val) {
+  var varargs = arguments;
+
+  if (field === undefined) { field = 'all'; }
+
+  console.log('do_search(' + toString(varargs) + ')');
+
   var args = _.map(_.rest(arguments), function(s){ return encodeURIComponent(s); })
-  var rest_url = args.join('/');
-  console.log(rest_url);
+  var search_arg = args.join('/');
+  console.log('\tsearch_arg \'' + search_arg + '\'');
+
+  var url_path = "search/search/" + field +'/' + search_arg;
+
 
   $.get("email/exportable").then(function(resp_export){
-    $.getJSON("search/search/" + fields +'/' + rest_url , function (comp_data) {
+
+    $.getJSON( url_path , function (search_response) {
+
+
+      console.log( '.getJSON(' + url_path + ')' );
+
+      search_result.push( search_arg,
+                          search_arg,
+                          field,
+                          "",
+                          url_path,
+                          'default_data_set',
+                          'email',
+                          search_response.rows.length,
+                          search_response.graph.nodes.length );
+      /*
+
       //var exported = _.indexBy(resp_export.emails, _.identity);
       var exported = _.object(resp_export.emails);
 
+
       $('#search_status').empty();
       //d3.select("#search_status").text("");
-      $('#document_count').text(comp_data.rows.length);
-      var data = _.map(comp_data.rows, function(o){
+
+      $('#document_count').text(search_response.rows.length);
+      var data = _.map(search_response.rows, function(o){
         return _.extend(o, {'exported': (o.num in exported)})
       });
 
@@ -752,12 +804,169 @@ function do_search(fields, val) {
         //resize bottom_panel
         bottom_panel.open();
       }
-      drawGraph(comp_data.graph);
+      drawGraph(search_response.graph);
+
+      */
+
     });
 
   });
+
 }
 
+/**
+ * load and parse search result referenced by URL
+ */
+function loadSearchResult( url_path ) {
+
+  $.get("email/exportable").then(function(resp_export){
+
+    $.getJSON( url_path , function (search_response) {
+
+
+      console.log( '.getJSON(' + url_path + ')' );
+
+
+      //var exported = _.indexBy(resp_export.emails, _.identity);
+      var exported = _.object(resp_export.emails);
+
+
+      $('#search_status').empty();
+      //d3.select("#search_status").text("");
+
+      $('#document_count').text(search_response.rows.length);
+      var data = _.map(search_response.rows, function(o){
+        return _.extend(o, {'exported': (o.num in exported)})
+      });
+
+      var lastSort = "";
+      // create the table header
+      var thead = d3.select("#result_table").select("thead")
+        .append("tr")
+        .selectAll("tr")
+        // .data(['Source','Date','From','To','Cc','Bcc','Subject'])
+        .data(['ID','Date','From','Recipient Count','Body Size','Attachment Count', 'Subject', " "])
+        .enter().append("th")
+        .html(function(d, i){
+          if (i == 7){
+            return "<span class='glyphicon glyphicon-star' ></span>";
+          }
+          return d;
+        }).attr('class', 'clickable')
+        .on("click", function(k, i){
+          console.log(arguments);
+          var direction = (lastSort == k) ? -1 : 1;
+          lastSort = (direction == -1) ? "" : k; //toggle
+          d3.select("#result_table").select("tbody").selectAll("tr").sort(function(a, b) {
+            if (i == 0){
+              return a.num.localeCompare(b.num) * direction;
+            }
+            if (i == 1) {
+              return a.datetime.localeCompare(b.datetime) * direction;
+            }
+            if (i == 2) {
+              return a.from.localeCompare(b.from) * direction;
+            }
+            if (i == 3) {
+              return (recipientCount(a.to, a.cc, a.bcc) - recipientCount(b.to, b.cc, b.bcc)) * direction * -1; //desc first
+            }
+            if (i == 4){
+              return (a.bodysize - b.bodysize) * direction * -1; //desc first
+            }
+            if (i == 5){
+              return (splitAttachCount(a.attach) - splitAttachCount(b.attach)) * direction * -1; //desc first
+            }
+            if (i == 6) {
+              return a.subject.localeCompare(b.subject) * direction;
+            }
+            if (i == 7){
+              return (+(a.exported) - +(b.exported)) * direction * -1; //put the marked items on top first
+            }
+          });
+        });
+
+
+      // create rows
+      var tr = d3.select("#result_table").select("tbody").selectAll("tr").data(data).enter().append("tr");
+
+      tr.attr('class', 'clickable').on("click",function(d){
+        show_email_view(d.num);
+      }).on("mouseover", function(d) {
+        tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(';');
+        for (i = 0; i < tos.length; i++) {
+          d3.select("#" + d.from.replace(/\./g,'_').replace(/@/g,'_') + '_' + tos[i]).style("stroke", "red"); }})
+        .on("mouseout", function(d){
+          tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(';');
+          for (i = 0; i < tos.length; i++) {
+            d3.select("#" + d.from.replace(/\./g,'_').replace(/@/g,'_') + '_' + tos[i]).style("stroke", "#bbb");
+          }});
+
+      // cells
+      var td = tr.selectAll("td").data(function(d){
+
+        var recipient_count = recipientCount(d.to, d.cc, d.bcc);
+        var attach_count = splitAttachCount(d.attach)
+        return [d.num, d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject, d.exported ];
+        //return [d.num + '::' + d.from + '::' + d.directory, d.datetime, d.from +'::' + d.fromcolor,d.to,d.cc,d.bcc,d.subject];
+      })
+        .enter().append("td")
+        //.text(function(d){return ['no'];})
+        //.html(function(d) {return ["<a href='"+d.directory+"'>"+d.directory+"</a>"]; })
+        .style("padding", "5px")
+        .style("font-size","10px")
+        .style("fill","blue")
+        .append('div')
+        .html(function(d,i) {
+          if (i == 0 ) {
+            return $('<_>').append($('<span>', { 'title' : d }).html((d.length > 40) ? d.substring(0, 37) + "..." : d)).html();
+          }
+          if( i == 2 ) {
+            return d.split('::')[0];
+          }
+          if (i == 3) {
+            var px = d > 100 ? 100 : d;
+            return "<div style='background-color: blue;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
+          }
+          if (i == 4) {
+            var px = (d / 1000.0) > 100 ? 100 : (d / 1000.0);
+            return "<div style='background-color: green;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
+          }
+          if (i == 5) {
+            var px = (d * 10) > 100 ? 100 : (d * 10);
+            return "<div style='background-color: orange;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
+          }
+
+          if ( i == 7 ){
+            if (d){
+              return "<div><span class='glyphicon glyphicon-star' ></span></div>";
+            } else {
+              return "<div></div>";
+            }
+          }
+
+          return d;
+        })
+        .style("color", function(d,i) {
+          if( i == 2) {
+            return colorByDomain(d.split('::')[0]);
+          } else {
+            return 'black';
+          }
+        })
+        .style("stroke","#FFFFFF");
+
+      if (bottom_panel.isOpen()){
+        //resize bottom_panel
+        bottom_panel.open();
+      }
+      drawGraph(search_response.graph);
+    });
+
+  });
+
+  hasher.setHash( url_path );
+  email_analytics_content.open();
+}
 
 // Draw a graph for a component
 function drawGraph(graph){
@@ -1452,7 +1661,8 @@ function redraw_legend(){
 
 function draw_entity_chart() {
 
-  $.get('entity/top/20').then(function(resp){
+  $.get('entity/top/20').then(function(response){
+
     $('#top-entities').empty();
     var legend_items = ["Person", "Location", "Organization", "Misc"];
 
@@ -1463,10 +1673,10 @@ function draw_entity_chart() {
         .append($('<br/>'));
     });
 
-    var entities = resp.entities;
+    var entities = response.entities;
 
-    var width = 400, barHeight = 20;
-    var margin = {top: 20, right: 10, bottom: 20, left: 150};
+    var width = 400, barHeight = 20, margin_top = 20, margin_bottom = 20;
+    var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
     width = width - margin.left - margin.right;
 
     var x = d3.scale.linear().range([0, width]);
@@ -1509,12 +1719,21 @@ function draw_entity_chart() {
 
 }
 
+function refresh_dashboard() {
+  console.log( 'refresh_dashboard()' );
+  search_result.refreshUI();
+
+}
+
 var dashboard_content = (function () {
 
   var dashboard_content_container = $('#content-dashboard-home');
   var button = $('#toggle_dashboard_home');
 
   var open = function () {
+
+    search_result.refreshUI();
+
     if (isHidden()) {
 
       if(email_analytics_content.isVisible()) {
@@ -1524,6 +1743,7 @@ var dashboard_content = (function () {
       dashboard_content_container.fadeToggle('fast');
       //container.show();
     }
+
   };
 
   var close = function () {
@@ -1622,14 +1842,25 @@ var email_analytics_content = (function () {
 
 }());
 
-/** document ready **/
+
+/**
+ * document ready
+ */
 $(function () {
   "use strict";
 
+  // initialize date-range slider
   $("#date_range_slider").dateRangeSlider();
 
+  // close existing analytics displays if applicable
   email_analytics_content.close();
+
+  // initialize search-result UI
+  search_result.setUI( $('#search_result_container') );
+
+  // initialize dashboard
   drawDashboardCharts();
+
 
   $.when($.get("email/target"), $.get("email/domains")).done(function(resp1, resp2){
     TARGET_EMAIL = _.object(
@@ -1647,18 +1878,33 @@ $(function () {
 
     $('#target_email').html(TARGET_EMAIL.email);
 
-    $('#txt_search').keyup(function (e){
+    // initialize search keyboard event
+    $('#txt_search').keyup(function (event){
         
-        console.log( '$(\'#txt_search\').keyup(function (e)' );
+        console.log( '$(\'#txt_search\').keyup(function (event)' );
     	
-        if (e.keyCode === 13) {
-            var txt = $("#txt_search").val();
-            if (txt.length == 0){
-                setSearchType('all');
+        if (event.keyCode === 13) {
+          search_result.clearAll();
+
+          var text_input = $("#txt_search").val();
+          if (text_input.length == 0){
+            setSearchType('all');
+            //do_search($("input:radio[name ='searchType']:checked").val(), text_input);
+            do_search( 'all', text_input);
+          }
+          else {
+
+            var word_list = text_input.split(" ");
+            if (word_list.length > 1) {
+              _.each(word_list, function (word) {
+                do_search('all', word);
+              });
             }
-            do_search($("input:radio[name ='searchType']:checked").val(), txt);     
+            do_search('all', text_input);
+          }
+
         }
-        e.preventDefault();
+        event.preventDefault();
     });
 
     $("#search_form").submit(function(e){
@@ -1899,7 +2145,7 @@ $(function () {
 
 
   function parseHash(newHash, oldHash){
-    console.log('old: ' + oldHash + ', new: ' + newHash);
+    console.log('parseHash( ' + newHash + ', ' + oldHash + ' )');
     crossroads.parse(newHash);
   }
   
@@ -1917,13 +2163,13 @@ $(function () {
     show_email_view(id);
   });
 
-  crossroads.routed.add(function(req, data){
-    console.log('routed: ' + req);
+  crossroads.routed.add(function(request, data){
+    console.log('routed: ' + request);
     console.log(data.route +' - '+ data.params +' - '+ data.isFirst);
   });
 
-  crossroads.bypassed.add(function(req){
-    console.log('route not found: ' + req);
+  crossroads.bypassed.add(function(request){
+    console.log('route not found: ' + request);
     //alert('Error: route not found, go back');
   });
   
@@ -1931,6 +2177,7 @@ $(function () {
   hasher.initialized.add(parseHash);
   hasher.changed.add(parseHash); 
   hasher.init();
+
 
   if (hasher.getHash().length < 1){
     hasher.setHash('/search/all/');

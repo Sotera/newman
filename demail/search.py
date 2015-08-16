@@ -327,12 +327,13 @@ def ingestESTextResults(hits):
         cnx.commit()
 
 def createResults(field, args_array):
+    cherrypy.log("createResults( %s, %s)" % (field, args_array) )
 
-    ## is text search 
+    ## is text search
     if not field.lower() in ["email", "entity"]:
         text = head(args_array)    
         if text:
-            tangelo.log("text search : %s" % text)        
+            tangelo.log("\ttext search : %s" % text)
             es = Elasticsearch()
             res = es.search(index="newman", doc_type="emails", size=1000, q=text, body= {"fields": ["_id"], "query": {"match_all": {}}})
             

@@ -101,12 +101,14 @@
 
 .btn.outline {
     background: none;
-    padding: 2px 2px 2px 2px;
+    padding: 5px 5px 5px 5px;
     border-radius: 6px;
     border: 0px solid #0080AB;
     color: #0080AB;
     font-weight:normal;
     font-size: 12px;
+    line-height: inherit;
+    margin: 0px;
 }
 .btn-small.outline {
     position: relative;
