@@ -577,7 +577,6 @@ function toString( map ) {
 
 /**
  * displays search status popup
- * @param search_arg_list
  */
 function showSearchPopup( search_field, search_text ) {
   console.log('show_search_popup(' + search_field + ', ' + search_text + ')');
@@ -609,12 +608,12 @@ function showSearchPopup( search_field, search_text ) {
       'exportable': function(field, args){
         return "Searching <b>" + field + "</b><br/> for " + args;
       },
-      'community': function(args){
+      'community': function(field, args){
         return "Searching <b>" + field + "</b><br/> for " + args;
       }
     };
 
-    return ops[field](args);
+    return ops[field](field, args);
 
   }(search_field, search_text));
 

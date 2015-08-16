@@ -115,7 +115,7 @@ var search_result = (function () {
                         data_source_category,
                         document_count,
                         node_count ) {
-    console.log('push( ' + label + ', ' + url + ' )');
+    console.log('push( ' + label + ', ' + search_text + ', ' + search_field + ', ' + url + ' )');
 
     var new_result = result( decodeURI(label),
                              decodeURI(search_text),
@@ -598,10 +598,12 @@ function drawChartDomain( count ) {
         domains = domains.splice(0, count);
       }
 
+      /*
       _.each(domains, function (item) {
         console.log( 'domain : ' + item.domain + ' count : ' + item.count  );
 
       });
+      */
 
 
       var color = d3.scale.category20b();
