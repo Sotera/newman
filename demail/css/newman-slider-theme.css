@@ -13,7 +13,9 @@
 
 .ui-rangeSlider{
   height: 20px;
+  line-height: 20px;
   padding-top: 25px;
+  font-size: smaller;
 }
 
 .ui-rangeSlider,

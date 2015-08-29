@@ -1,7 +1,7 @@
 
 from newman.db.newman_db import newman_connector
 from newman.db.mysql import execute_query
-from newman.utils.functions import nth, rest, head, jsonGet
+from newman.utils.functions import nth, rest, subList, last, head, jsonGet
 
 from elasticsearch import Elasticsearch
 
@@ -58,6 +58,11 @@ stmt_node_vals_filter_community = (
 )
 
 ## Email Rows
+stmt_all_email_dates = (
+    " select id, datetime, from_addr, tos, ccs, subject "
+    " from email "
+)
+
 stmt_find_emails = (
     " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
     " from email "
@@ -207,6 +212,20 @@ stmt_node_edges_filter_community = (
     "   group by source, target"
 )
 
+def queryAllDates():
+    cherrypy.log("queryAllDates()")
+    cols = ('doc_id', 'datetime', 'from', 'to', 'cc', 'subject')
+    rows = []
+    with newman_connector() as read_cnx:    
+        tangelo.log("\tstart query")
+        with execute_query(*(read_cnx.conn(), stmt_all_email_dates)) as qry:
+            tangelo.log("\t%s" % qry.stmt)
+            for item in qry.cursor():
+                row = dict(zip(cols, item))
+                rows.append(row)
+    sorted_rows = sorted(rows, key=lambda x: str(x.get('datetime')))
+    return sorted_rows
+
 def nodeQueryObj(conn, field, args_array):
 
     #filter by exportable
@@ -276,6 +295,8 @@ def getEdges(node_idx, field, args_array):
                     for from_, to_, weight in qry.cursor()]
 
 def emailQueryObj(conn, field, args_array):
+    cherrypy.log("emailQueryObj( %s, %s)" % (field, args_array))
+    
     #filter by exportable
     if field.lower() == "exportable": 
         return (conn, stmt_find_emails_filter_export)
@@ -301,13 +322,15 @@ def emailQueryObj(conn, field, args_array):
     # all
     return  (conn, stmt_find_emails)
 
+
 def getEmails(colors, field, args_array):
+    cherrypy.log("getEmails( %s, %s)" % (field, args_array))
     cols = ('num', 'directory', 'datetime', 'from', 'to', 'cc', 'bcc', 'subject', 'attach', 'bodysize')
     rows = []
     with newman_connector() as read_cnx:    
-        tangelo.log("start email query")
+        tangelo.log("\tstart email query")
         with execute_query(*emailQueryObj(read_cnx.conn(), field, args_array)) as qry:
-            tangelo.log("emails : %s" % qry.stmt)
+            tangelo.log("\temails : %s" % qry.stmt)
             for item in qry.cursor():
                 row = dict(zip(cols, item))
                 row["fromcolor"] = colors.get(row.get('from'))
@@ -359,17 +382,86 @@ def createResults(field, args_array):
 
     return results
 
-#GET /search/<fields>/<arg>/<arg>/...
+def querySearchResult(field, start_date, end_date, args_array):
+    cherrypy.log("querySearchResult( %s, %s, %s, %s)" % (field, start_date, end_date, args_array) )
+
+
+    ## is text search
+    if not field.lower() in ["email", "entity"]:
+        text = head(args_array)  
+        if text:
+            tangelo.log("\ttext search : %s" % text)
+            es = Elasticsearch()
+            res = es.search(index="newman", doc_type="emails", size=1000, q=text, body= {"fields": ["_id"], "query": {"match_all": {}}})
+            
+            ingestESTextResults(jsonGet(['hits','hits'], res, []))
+    
+    node_vals = getNodeVals(field, args_array)
+    colors = {k:v.get("group_id") for k,v in node_vals.iteritems()}
+
+    for k,v in node_vals.iteritems():
+        node_vals[k]["color"] = colors.get(k)
+    emails = sorted(getEmails(colors, field, args_array), key=lambda x: str(x.get('datetime')))
+    idx_lookup = {}
+    nodes = []
+
+    for i, o in enumerate(node_vals.iteritems()):
+        k,v = o
+        idx_lookup[k]=i
+        nodes.append({"name": k, "num": v.get("num"), "rank": v.get("rank"), "group": v.get("color"), "community": v.get("comm_id")})
+    edges = getEdges(idx_lookup, field, args_array)    
+
+    results = { 'rows': emails, 'graph': { 'nodes': nodes, 'links': edges }}
+
+    return results
+
+#GET /dates
+def getDates(*args):    
+    tangelo.content_type("application/json")    
+    results = { 'doc_dates': queryAllDates() }
+    return results
+
+#GET /search/<fields>/<arg>/<arg>/.../<date-range>
 def search(*args):
-    cherrypy.log("args: %s" % str(args))
-    cherrypy.log("args-len: %s" % len(args))
-    fields=nth(args, 0, 'all')
+    cherrypy.log("search(args[%s] %s)" % (len(args), str(args)))
+
+    field=nth(args, 0, 'all')
     args_array=rest(args)
-    cherrypy.log("search fields: %s, args: %s" % (fields, args_array))
-    return createResults(fields, args_array)
+    start_date_string, end_date_string = parseDateRange(args_array)
+    cherrypy.log("\targs_array[%s] %s)" % (len(args), str(args)))
+    
+    if start_date_string=='default_min' or end_date_string=='default_max':
+        sorted_rows = queryAllDates()
+        start_date_string = sorted_rows[0]['datetime'].split('T', 1)[0]
+        end_date_string = sorted_rows[-1]['datetime'].split('T', 1)[0]
+    else:    
+        args_array = args_array[ :-1]
+    
+    #return createResults(field, args_array)
+    return querySearchResult(field, start_date_string, end_date_string, args_array)
+
+def parseDateRange( args ):
+    cherrypy.log("parseDateRange(args[%s] %s)" % (len(args), str(args)))
+    
+    start_date_string = 'default_min'
+    end_date_string = 'default_max'
+    
+    #last_item = last(args)
+    last_item = args[-1]
+    
+    if last_item:
+        #cherrypy.log("\trange '%s'" % last_item)
+        tokens = last_item.split(',')
+        if len(tokens) == 2:
+            start_date_string = tokens[0]
+            end_date_string = tokens[1]
+
+    cherrypy.log("\tstart_date '%s', end_date '%s'" % (start_date_string, end_date_string))
+    return start_date_string, end_date_string    
 
 actions = {
-    "search": search
+    "search": search,
+    "dates" : getDates
 }
 
 def unknown(*args):

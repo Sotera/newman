@@ -16,6 +16,13 @@ def empty(arr):
 def rest(arr):
     return arr[1:]
 
+def subList(array, start_index, end_index):
+    if array:
+        return array[start_index:end_index]
+    else:
+        return None
+    
+    
 def last(arr):
     l = arr[-1:]
     if l:

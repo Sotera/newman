@@ -58,7 +58,43 @@ function logUIEvent( ui_activity,
 }
 */
 
+/**
+ * date-time range container
+ */
+var date_range = (function () {
 
+  var date_range_min_text = 'default_min';
+  var date_range_max_text = 'default_max';
+
+  var setDateMinText = function (new_min_text) {
+    date_range_min_text = new_min_text;
+  };
+
+  var setDateMaxText = function (new_max_text) {
+    date_range_max_text = new_max_text;
+  };
+
+  var getDateMinText = function () {
+    return date_range_min_text;
+  };
+
+  var getDateMaxText = function () {
+    return date_range_max_text;
+  };
+
+  var getDateRange = function () {
+    return getDateMinText() + ',' + getDateMaxText();
+  };
+
+  return {
+    "setDateMinText" : setDateMinText,
+    "setDateMaxText" : setDateMaxText,
+    "getDateMinText" : getDateMinText,
+    "getDateMaxText" : getDateMaxText,
+    "getDateRange" : getDateRange
+  }
+
+}());
 
 /**
  * search result container
@@ -755,11 +791,12 @@ function draw_chart_community( count ) {
         domains = domains.splice(0, count);
       }
 
+      /*
       _.each(domains, function (item) {
         console.log( 'domain : ' + item.domain + ' count : ' + item.count  );
 
       });
-
+      */
 
       var color = d3.scale.category20b();
       var width = 600, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
@@ -866,10 +903,78 @@ function draw_chart_community( count ) {
 }
 
 /**
+ * request and update date-time-range selector
+ */
+function initDateTimeRange() {
+
+  var ui_id = '#date_range_slider';
+
+  if (ui_id) {
+
+
+    $.get('search/dates').then(function (response) {
+      console.log( 'initDateTimeRange()' );
+
+      var doc_dates = response.doc_dates;
+      var start_datetime = doc_dates[0].datetime;
+      var start_date_array = start_datetime.split('T')[0].split('-');
+      console.log( '\tstart_date_array[] ' + parseInt(start_date_array[0]) + ', ' + parseInt(start_date_array[1]) + ', ' + parseInt(start_date_array[2]) );
+
+      var start_date = new Date(parseInt(start_date_array[0]), parseInt(start_date_array[1])-1, parseInt(start_date_array[2]));
+
+      var end_datetime = doc_dates[doc_dates.length-1].datetime;
+      var end_date_array = end_datetime.split('T')[0].split('-');
+      var end_date = new Date(parseInt(end_date_array[0]), parseInt(end_date_array[1])-1, parseInt(end_date_array[2]));
+
+      var default_interval_months = 3;
+      var default_start_year = end_date.getFullYear();
+      var default_start_month = end_date.getMonth() - default_interval_months;
+      if (default_start_month <= 0) {
+        default_start_month = default_start_month + 12;
+        default_start_year = default_start_year - 1;
+      }
+      var default_start_day = end_date.getDate();
+      if (default_start_day > 28) {
+        default_start_day = 28;
+      }
+
+      var default_start_date = new Date(default_start_year, default_start_month, default_start_day);
+
+      console.log( '\tstart_date : ' + start_datetime + ' end_date : ' + end_datetime );
+
+      var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+      //var months = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+
+      $(ui_id).dateRangeSlider({
+        bounds: {min: start_date, max: end_date},
+        defaultValues: {min: default_start_date, max: end_date},
+        scales: [{
+          first: function(value){ return value; },
+          end: function(value) {return value; },
+          next: function(value){
+            var next = new Date(value);
+            return new Date(next.setMonth(value.getMonth() + 3));
+          },
+          label: function(value){
+            return months[value.getMonth()] + ', ' + value.getFullYear();
+          }
+        }]
+      });
+
+      date_range.setDateMinText(default_start_date.toISOString().substring(0, 10));
+      date_range.setDateMaxText(end_date.toISOString().substring(0, 10));
+
+    });
+
+  }
+}
+
+/**
  * draw Morris Donut charts
  */
 function drawDashboardCharts() {
 
+  initDateTimeRange();
 
   drawChartEntity(10);
   drawChartTopic(10);

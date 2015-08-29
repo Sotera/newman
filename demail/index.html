@@ -441,12 +441,12 @@
 
             <!--Start Search-Result-Category-Left-->
             <div class="col-xs-3" style="padding: 0px;">
-              <ul class="nav nav-search">
-                <li class="active"><a href="#">All</a></li>
-                <li><a href="#">Email</a></li>
-                <li><a href="#">Topic</a></li>
-                <li><a href="#">Community</a></li>
-                <li><a href="#">Entity</a></li>
+              <ul class="nav nav-search" id="search_field_list">
+                <li class="btn btn-small outline active" id="search_field_all">All</li>
+                <li class="btn btn-small outline" id="search_field_email">Email</li>
+                <li class="btn btn-small outline" id="search_field_topic">Topic</li>
+                <li class="btn btn-small outline" id="search_field_community">Community</li>
+                <li class="btn btn-small outline" id="search_field_entity">Entity</li>
               </ul>
             </div>
             <!--End Search-Result-Category-Left-->
@@ -791,6 +791,7 @@
     <script src="plugins/jquery-ui/jquery-ui.min.js"></script>
     <script src="plugins/d3/d3.min.js" charset="utf-8"></script>
     <script src="plugins/jq-rangeslider/jQAllRangeSliders-min.js"></script>
+    <script src="plugins/jq-rangeslider/jQAllRangeSliders-withRuler-min.js"></script>
     <script src="plugins/jq-rangeslider/lib/jquery.mousewheel.min.js"></script>
 
     <!-- Include all compiled plugins (below), or include individual files as needed -->

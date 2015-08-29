@@ -122,9 +122,9 @@
     border: 1px solid #BBBBBB;
 }
 .btn-small.outline:focus, .btn-small.outline:active, .btn-small.outline.active, .open > .dropdown-toggle.btn-small {
-    color: #0080AB;
-    border: none;
-    outline: none;
+    color: #006588;
+    border-radius: 6px;
+    border: 1px solid #BBBBBB;
 }
 /*
 .btn-small.outline:focus, .btn-small.outline:active, .btn-small.outline.active, .open > .dropdown-toggle.btn-small {
