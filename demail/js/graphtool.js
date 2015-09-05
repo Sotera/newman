@@ -1,9 +1,9 @@
 /*globals tangelo, CryptoJS, $, d3, escape, FileReader, console */
 
+//is_load_on_response - flag to whether or not to load result immediately
+var is_load_on_response = false;
 
-var width = 400,
-height = 500;
-
+var width = 400, height = 500;
 
 var colorDomain = d3.scale.category20();
 
@@ -248,6 +248,7 @@ function emailsDomain(email){
 }
 
 function colorByDomain(email){
+  //console.log('colorByDomain(' + email + ')');
   var domain = emailsDomain(email);
   return domain_set[domain].color;
 }
@@ -317,11 +318,11 @@ function recipientCount(to, cc, bcc){
 }
 
 function searchByEntity(entityid, type, value){
-  console.log(entityid);
-  console.log(type);
-  console.log(value);
+  console.log('searchByEntity(' + entityid + ', ' + type + ', ' + value + ')');
+
   $.get("entity/rollup/" + encodeURIComponent(entityid)).then(
     function(resp) {
+      is_load_on_response = true;
       do_search('entity', resp.rollupId, value);
     });
 }
@@ -692,6 +693,183 @@ function searchByField( field ) {
 }
 
 /**
+ * validate datetime as text
+ * @param datetime_text typically in the format of yyyy-MM-ddThh:mm:ss
+ * @returns true if the text is valid datetime representation, false otherwise
+ */
+function validateDateTime(datetime_text) {
+  if (datetime_text) {
+    if (isNaN(Date.parse(datetime_text))) {
+      return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+/**
+ * validate email address
+ * @param email_address
+ * @returns true if the argument email address is valid, false otherwise
+ */
+function validateEmailAddress(email_address) {
+
+    var regex = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+    return regex.test( email_address );
+
+}
+
+/**
+ * remove all empty space from text
+ * @param text
+ * @returns text string without any empty space
+ */
+function removeAllWhitespace(text) {
+  if(text) {
+    return text.replace(/\s+/g, "").trim();
+  }
+  return text;
+}
+
+/**
+ * validate domain-service response
+ * @param response data received from service
+ * @returns filtered response
+ */
+function validateDomainResponse(response) {
+  if (response) {
+    console.log('validateDomainResponse(...)');
+
+    if (response[0].domains) {
+      console.log( '\tdomains[' + response[0].domains.length + ']' );
+
+      var new_domains = [];
+      var invalid_item_count = 0;
+      _.each(response[0].domains, function (item) {
+
+        var domain_text = decodeURIComponent( item[0] );
+        var domain_count = item[1];
+        if (domain_text) {
+          domain_text = removeAllWhitespace( domain_text );
+          //console.log('\tdomain : \'' + domain_text + '\'');
+
+          new_domains.push([domain_text, domain_count]);
+        }
+        else {
+          console.log('\tundefined domain : ' + domain_text);
+          invalid_item_count++;
+        }
+      });
+
+      response[0].domains = new_domains;
+      console.log( '\tnew domains[' + response[0].domains.length + '], invalid domains ' + invalid_item_count );
+    }
+
+    return response;
+  }
+
+  console.log( 'response undefined' );
+  return response;
+}
+
+/**
+ * validate search-service response
+ * @param response data received from service
+ * @returns filtered response
+ */
+function validateSearchResponse(response) {
+  if (response) {
+    console.log( 'validateSearchResponse(...)' );
+
+    // validate graph nodes and links
+    if (response.graph) {
+      console.log( '\tnodes[' + response.graph.nodes.length + '] links[' + response.graph.links.length + ']' );
+
+      // validate graph-nodes
+      var new_nodes = [];
+      var invalid_node_count = 0;
+      _.each(response.graph.nodes, function (item) {
+
+        if (validateEmailAddress( item.name )) {
+
+          new_nodes.push( item );
+        }
+        else {
+          console.log('\tinvalid node(email) { name: ' + item.name + ', community: ' + item.community + ' group: ' + item.group + ' }');
+          invalid_node_count++;
+        }
+      });
+
+      // validate graph-links
+      var new_links = [];
+      var invalid_link_count = 0;
+      _.each(response.graph.links, function (item) {
+
+        if (new_nodes[item.source] && new_nodes[item.target]) {
+
+          new_links.push( item );
+        }
+        else {
+          console.log('\tundefined link { source: ' + item.source + ', target: ' + item.target + ", value: " + item.value + ' }');
+          invalid_link_count++;
+        }
+      });
+
+      response.graph.nodes = new_nodes;
+      response.graph.links = new_links;
+      console.log( '\tnew nodes[' + response.graph.nodes.length + '], invalid nodes ' + invalid_node_count +
+                   ', new links[' + response.graph.links.length + '], invalid links ' + invalid_link_count );
+    }
+
+    // validate rows
+    if (response.rows) {
+      console.log( '\trows[' + response.rows.length + ']' );
+
+      var new_rows = [];
+      var invalid_row_count = 0;
+      _.each(response.rows, function (item) {
+
+        if (validateDateTime(item.datetime)) {
+
+          if (item.from) {
+            var address = decodeURIComponent( item.from );
+
+            // check for whitespace in email address
+            if (validateEmailAddress( address )) {
+              item.from = address;
+              //console.log('\tfrom \'' + address + '\'');
+
+              new_rows.push(item);
+            }
+            else {
+              console.log('\tinvalid from : ' + item.from);
+              invalid_row_count++;
+            }
+          }
+          else {
+            console.log('\tundefined from : ' + item.from);
+            invalid_row_count++;
+          }
+        }
+        else {
+          console.log('\tinvalid datetime : ' + item.datetime);
+          invalid_row_count++;
+        }
+
+      });
+
+      response.rows = new_rows;
+      console.log( '\tnew rows[' + response.rows.length + '], invalid row ' + invalid_row_count );
+    }
+
+    return response;
+  }
+
+  console.log( 'response undefined' );
+  return response;
+}
+
+/**
  * performs search based on field and argument value
  * @param field
  * @param value
@@ -701,7 +879,7 @@ function do_search(field, value) {
 
   if (field === undefined) { field = 'all'; }
 
-  console.log('do_search(' + toString(varargs) + ')');
+  console.log('do_search(' + toString(varargs) + ',' + is_load_on_response + ')');
 
   var args = _.map(_.rest(arguments), function(s){ return encodeURIComponent(s); })
   //var search_arg = args.join('/');
@@ -725,26 +903,39 @@ function do_search(field, value) {
 
       console.log( '.getJSON(' + url_path + ')' );
 
-      var doc_count = 0;
-      if (search_response.rows) {
-        doc_count = search_response.rows.length;
+      //validate search-response
+      search_response = validateSearchResponse( search_response );
+
+      if (is_load_on_response) {
+
+        showSearchPopup( field, decodeURIComponent(search_arg) );
+        loadSearchResult( url_path );
+
+        is_load_on_response = false;
       }
+      else {
 
-      var node_count = 0;
-      if (search_response.graph && search_response.graph.nodes) {
-        node_count = search_response.graph.nodes.length;
+        var doc_count = 0;
+        if (search_response.rows) {
+          doc_count = search_response.rows.length;
+        }
+
+        var node_count = 0;
+        if (search_response.graph && search_response.graph.nodes) {
+          node_count = search_response.graph.nodes.length;
+        }
+
+        search_result.push(search_arg,
+                           search_arg,
+                           field,
+                           "",
+                           url_path,
+                           'default_data_set',
+                           'email',
+                           doc_count,
+                           node_count);
+
       }
-
-      search_result.push( search_arg,
-                          search_arg,
-                          field,
-                          "",
-                          url_path,
-                          'default_data_set',
-                          'email',
-                          doc_count,
-                          node_count );
-
     });
 
   });
@@ -925,9 +1116,9 @@ function drawGraph(graph){
 
   graph.links.forEach(function(link) {
     var s = nodes[link.source];
-    t = nodes[link.target];
-    w = link.value;
-    i = {}; // intermediate node
+    var t = nodes[link.target];
+    var w = link.value;
+    var i = {}; // intermediate node
     nodes.push(i);
     links.push({source: s, target: i}, {source: i, target: t});
     bilinks.push([s, i, t, w]);
@@ -1026,6 +1217,8 @@ function drawGraph(graph){
         $('#radial').find(".email").first()
           .unbind('click')
           .on("click", function(){
+            console.log( 'node-clicked search-by-email' );
+            is_load_on_response = true;
             do_search("email", n.name);
           }).find("span").first()
           .css("color", colorByDomain(n.name));
@@ -1033,7 +1226,9 @@ function drawGraph(graph){
         $('#radial').find(".community").first()
           .unbind('click')
           .on("click", function(){
-          do_search("community", n.community);
+            console.log( 'node-clicked search-by-community' );
+            is_load_on_response = true;
+            do_search("community", n.community);
         }).find("span").first()
           .css("color", communityColor(n.community));
 
@@ -1411,7 +1606,8 @@ function draw_rank_chart() {
       .text(function(d) { return (d.email.length > 25) ? d.email.substr(0,25) + ".." : d.email; })
       .on("click", function(d){
         setSearchType('email');
-        $("#txt_search").val(d.email)
+        $("#txt_search").val(d.email);
+        is_load_on_response = true;
         do_search('email', $("#txt_search").val());
       })
       .on("mouseover", function(d){
@@ -1445,6 +1641,7 @@ function draw_topic_tab(){
     var tr = d3.select("#topics-table").select("tbody").selectAll("tr").data(categories).enter().append("tr").attr('class', 'clickable')
       .on("click", function(d, i){
         bottom_panel.open();
+        is_load_on_response = true;
         do_search('topic','all', d.idx, '0.5');
       });
     tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td").text(function(d){ return d; });
@@ -1646,6 +1843,7 @@ function draw_entity_chart() {
       .attr("y", barHeight / 2)
       .attr("class", "label clickable")
       .on("click", function(d){
+        is_load_on_response = true;
         do_search('entity', d[0], d[2]);
       })
       .text(function(d) { return (d[2].length > 25) ? d[2].substr(0,25) + ".." : d[2]; })
@@ -1803,7 +2001,53 @@ $(function () {
     //console.log("date-range {" +  date_range.getDateRange() + "}");
   });
 
+  $('a[data-toggle=\"tab\"]').on('shown.bs.tab', function (e) {
+    //var element_ID = $(e.target).html();
+    var element_ID = $(e.target).attr("href");
+    console.log( 'tab_select ' + element_ID);
+
+    if (element_ID.endsWith( 'dashboard_tab_content_outbound_activities' )) {
+      if(dashboard_time_chart_outbound_activities) {
+        console.log( '\tredraw() called');
+        dashboard_time_chart_outbound_activities.redraw();
+      }
+    }
+    else if (element_ID.endsWith( 'dashboard_tab_content_inbound_activities' )) {
+      if(dashboard_time_chart_inbound_activities) {
+        console.log( '\tredraw() called');
+        dashboard_time_chart_inbound_activities.redraw();
+      }
+    }
+    else if (element_ID.endsWith( 'dashboard_tab_content_entities' )) {
+      if(dashboard_donut_chart_entities) {
+        dashboard_donut_chart_entities.redraw();
+      }
+    }
+    else if (element_ID.endsWith( 'dashboard_tab_content_topics' )) {
+      if(dashboard_donut_chart_topic) {
+        dashboard_donut_chart_topic.redraw();
+      }
+    }
+    else if (element_ID.endsWith( 'dashboard_tab_content_domains' )) {
+      if(dashboard_donut_chart_domain) {
+        dashboard_donut_chart_domain.redraw();
+      }
+    }
+    else if (element_ID.endsWith( 'dashboard_tab_content_communities' )) {
+      if(dashboard_donut_chart_communities) {
+        dashboard_donut_chart_communities.redraw();
+      }
+    }
+
+
+  });
+
+
   $.when($.get("email/target"), $.get("email/domains")).done(function(resp1, resp2){
+
+    //validate service response
+    resp2 = validateDomainResponse( resp2 );
+
     TARGET_EMAIL = _.object(
       ['email', 'community', 'community_id', 'group', 'total_received', 'total_sent', 'rank'],
       _.first(resp1[0].email)
