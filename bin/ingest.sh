@@ -86,8 +86,7 @@ printf "printable views\n"
 
 ./ingest/printview/printview.py $EMAIL_TARGET ingest/printview/report.tmpl.html
 
-printf "active search ingest\n"
-
-./ingest/activesearch/ingest.sh $1
+#printf "active search ingest\n"
+#./ingest/activesearch/ingest.sh $1
 
 
