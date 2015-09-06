@@ -250,6 +250,16 @@ function emailsDomain(email){
 function colorByDomain(email){
   //console.log('colorByDomain(' + email + ')');
   var domain = emailsDomain(email);
+
+  /*
+  var domain_count = 0;
+  _.each(domain_set, function (item) {
+    console.log('\t\tdomain { ' + item.domain + ', color: ' +item.color + ', count: ' + item.count + ' }');
+    domain_count++;
+  });
+  console.log('\tdomain_set[' + domain_count + ']');
+  */
+
   return domain_set[domain].color;
 }
 
@@ -693,6 +703,50 @@ function searchByField( field ) {
 }
 
 /**
+ * validate date-range-service response
+ * @param response data received from service
+ * @returns filtered response
+ */
+function validateDateRangeResponse(response) {
+  if (response) {
+    console.log('validateDateRangeResponse(...)');
+
+    if (response.doc_dates) {
+      console.log( '\tdomains[' + response.doc_dates.length + ']' );
+
+      var new_doc_dates = [];
+      var invalid_item_count = 0;
+      _.each(response.doc_dates, function (item) {
+
+        if (validateDateTime( item.datetime )) {
+          if (validateEmailAddress(item.from)) {
+
+            new_doc_dates.push(item);
+          }
+          else {
+            console.log('\tinvalid doc_date { from: ' + item.from + ', date: ' + item.datetime + ' }');
+            invalid_item_count++;
+          }
+        }
+        else {
+          console.log('\tinvalid doc_date { from: ' + item.from + ', date: ' + item.datetime + ' }');
+          invalid_item_count++;
+        }
+
+      });
+
+      response.doc_dates = new_doc_dates;
+      console.log( '\tnew domains[' + response.doc_dates.length + '], invalid domains ' + invalid_item_count );
+    }
+
+    return response;
+  }
+
+  console.log( 'response undefined' );
+  return response;
+}
+
+/**
  * validate datetime as text
  * @param datetime_text typically in the format of yyyy-MM-ddThh:mm:ss
  * @returns true if the text is valid datetime representation, false otherwise
@@ -740,12 +794,12 @@ function validateDomainResponse(response) {
   if (response) {
     console.log('validateDomainResponse(...)');
 
-    if (response[0].domains) {
-      console.log( '\tdomains[' + response[0].domains.length + ']' );
+    if (response.domains) {
+      console.log( '\tdomains[' + response.domains.length + ']' );
 
       var new_domains = [];
       var invalid_item_count = 0;
-      _.each(response[0].domains, function (item) {
+      _.each(response.domains, function (item) {
 
         var domain_text = decodeURIComponent( item[0] );
         var domain_count = item[1];
@@ -761,8 +815,8 @@ function validateDomainResponse(response) {
         }
       });
 
-      response[0].domains = new_domains;
-      console.log( '\tnew domains[' + response[0].domains.length + '], invalid domains ' + invalid_item_count );
+      response.domains = new_domains;
+      console.log( '\tnew domains[' + response.domains.length + '], invalid domains ' + invalid_item_count );
     }
 
     return response;
@@ -908,12 +962,27 @@ function do_search(field, value) {
 
       if (is_load_on_response) {
 
+        email_analytics_content.open();
+
+        var label = ' all';
+        if(search_arg) {
+          label = ' ' + decodeURIComponent(search_arg);
+        }
+        var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',','_');;
+
+        history_nav.push(id,
+                         label,
+                         'fa fa-connectdevelop',
+                         url_path);
+
         showSearchPopup( field, decodeURIComponent(search_arg) );
         loadSearchResult( url_path );
 
         is_load_on_response = false;
       }
       else {
+
+        dashboard_content.open();
 
         var doc_count = 0;
         if (search_response.rows) {
@@ -935,6 +1004,7 @@ function do_search(field, value) {
                            doc_count,
                            node_count);
 
+
       }
     });
 
@@ -951,6 +1021,8 @@ function loadSearchResult( url_path ) {
 
     $.getJSON( url_path , function (search_response) {
 
+      //validate search-response
+      search_response = validateSearchResponse( search_response );
 
       console.log( '.getJSON(' + url_path + ')' );
 
@@ -1094,6 +1166,7 @@ function loadSearchResult( url_path ) {
 
   hasher.setHash( url_path );
   email_analytics_content.open();
+  history_nav.refreshUI();
 }
 
 // Draw a graph for a component
@@ -1909,7 +1982,13 @@ var dashboard_content = (function () {
     }
   };
 
-  button.on('click', toggle);
+
+  button.on('click', function(){
+    console.log('button-clicked \'' + $(this).attr('id') + '\'');
+
+    open();
+  });
+
 
   return {
     open: open,
@@ -1989,6 +2068,8 @@ $(function () {
 
   // initialize search-result UI
   search_result.setUI( $('#search_result_container') );
+
+  history_nav.initialize();
 
   // initialize dashboard
   drawDashboardCharts();

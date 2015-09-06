@@ -15,6 +15,11 @@ stmt_node_vals = (
      " from email_addr e "
 )
 
+stmt_node_vals_in_datetime_range = (
+    " select e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
+     " from email_addr e "
+)
+
 stmt_node_vals_filter_email_addr = (
     " select distinct e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
     " from email_addr e join xref_emailaddr_email xaddr on e.email_addr = xaddr.email_addr "
@@ -253,7 +258,8 @@ def nodeQueryObj(conn, field, args_array):
 
 def getNodeVals(field, args_array):
     """
-    nodes should be the all of the emails an email addr is a part of and then all of then all of the email addr associated with that set of emails 
+    nodes should be all of the emails that an email addr is a part of,
+    and all of the email addresses associated with that set of emails 
     """
     with newman_connector() as read_cnx:
         tangelo.log("start node query")
@@ -428,12 +434,22 @@ def search(*args):
     field=nth(args, 0, 'all')
     args_array=rest(args)
     start_date_string, end_date_string = parseDateRange(args_array)
-    cherrypy.log("\targs_array[%s] %s)" % (len(args), str(args)))
+    #cherrypy.log("\targs_array[%s] %s)" % (len(args), str(args)))
     
     if start_date_string=='default_min' or end_date_string=='default_max':
         sorted_rows = queryAllDates()
-        start_date_string = sorted_rows[0]['datetime'].split('T', 1)[0]
-        end_date_string = sorted_rows[-1]['datetime'].split('T', 1)[0]
+        #start_date_string = sorted_rows[0]['datetime'].split('T', 1)[0]
+        #end_date_string = sorted_rows[-1]['datetime'].split('T', 1)[0]
+        start_date_string = sorted_rows[0]['datetime']
+        
+        #hack to filter email without datetime
+        end_date_string = sorted_rows[-1]['datetime']
+        while (end_date_string == 'NODATE'):
+            end_index = len(sorted_rows) - 1
+            sorted_rows = sorted_rows[:end_index]
+            end_date_string = sorted_rows[-1]['datetime']
+            
+            
     else:    
         args_array = args_array[ :-1]
     
@@ -453,8 +469,8 @@ def parseDateRange( args ):
         #cherrypy.log("\trange '%s'" % last_item)
         tokens = last_item.split(',')
         if len(tokens) == 2:
-            start_date_string = tokens[0]
-            end_date_string = tokens[1]
+            start_date_string = tokens[0] + 'T00:00:00'
+            end_date_string = tokens[1] + 'T00:00:00'
 
     cherrypy.log("\tstart_date '%s', end_date '%s'" % (start_date_string, end_date_string))
     return start_date_string, end_date_string    

@@ -58,6 +58,124 @@ function logUIEvent( ui_activity,
 }
 */
 
+var dashboard_time_chart_outbound_activities;
+var dashboard_time_chart_inbound_activities;
+var dashboard_donut_chart_entities;
+var dashboard_donut_chart_topic;
+var dashboard_donut_chart_domain;
+var dashboard_donut_chart_communities;
+
+/**
+ * monthly account activity container
+ */
+/*
+var account_activity = (function () {
+
+  var account = '';
+  var outbound_count = 0;
+  var inbound_count = 0;
+
+  var setAccount = function (new_account) {
+    if (new_account > 0) {
+      account = new_account;
+    }
+  };
+
+  var getAccount = function () {
+      return account;
+  };
+
+  var newOutbound = function (count) {
+    if (count > 0) {
+      outbound_count = outbound_count + count;
+    }
+  };
+
+  var getOutbound = function () {
+    return outbound_count;
+  };
+
+  var newInbound = function (count) {
+    if (count > 0) {
+      inbound_count = inbound_count + count;
+    }
+  };
+
+  var getInbound = function () {
+    return inbound_count;
+  };
+
+  return {
+    "setAccount" : setAccount,
+    "getAccount" : getAccount,
+    "newOutbound" : newOutbound,
+    "getOutbound" : getOutbound,
+    "newInbound" : newInbound,
+    "getInbound" : getInbound
+  }
+
+}());
+*/
+
+/**
+ * monthly activity container
+ */
+/*
+var activity_monthly = (function () {
+
+  var date_start = 'default_min';
+  var date_end = 'default_max';
+  var outbound_monthly = [];
+  var inbound_monthly = [];
+
+  var account_activity = function (account, activity_count) {
+    var _account = new_account;
+    var _activity_count = new_activity( count );
+
+    var new_activity = function( count ) {
+      if (count > 0) {
+        _activity_count = _activity_count + count;
+      }
+    }
+
+    return {
+
+    }
+  };
+
+  var newActivity = function (sender, receiver, activity_date, doc_id) {
+
+  };
+
+  var setDateStart = function (new_start) {
+    date_start = new_start;
+  };
+
+  var getDateStart = function () {
+    return date_start;
+  };
+
+  var setDateEnd = function (new_end) {
+    date_end = new_end;
+  };
+
+  var getDateEnd = function () {
+    return date_end;
+  };
+
+
+
+  return {
+    "setDateMinText" : setDateMinText,
+    "setDateMaxText" : setDateMaxText,
+    "getDateMinText" : getDateMinText,
+    "getDateMaxText" : getDateMaxText,
+    "getDateRange" : getDateRange
+  }
+
+}());
+*/
+
 /**
  * date-time range container
  */
@@ -153,8 +271,8 @@ var search_result = (function () {
                         node_count ) {
     console.log('push( ' + label + ', ' + search_text + ', ' + search_field + ', ' + url + ' )');
 
-    var new_result = result( decodeURI(label),
-                             decodeURI(search_text),
+    var new_result = result( decodeURIComponent(label),
+                             decodeURIComponent(search_text),
                              search_field,
                              description,
                              url,
@@ -269,7 +387,18 @@ var search_result = (function () {
           id: element.key,
           on: {
             click: function () {
-              console.log(this.id);
+              console.log( 'search-item-selected : ' + this.id);
+
+              var label = ' all';
+              if(element.search_text) {
+                label = ' ' + decodeURIComponent(element.search_text);
+              }
+              var id = decodeURIComponent( element.url ).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',','_');
+
+              history_nav.push(id,
+                               label,
+                               'fa fa-connectdevelop',
+                               element.url);
 
               showSearchPopup( element.search_field, element.search_text );
               loadSearchResult( element.url );
@@ -436,13 +565,28 @@ function drawChartEntity( count ) {
 
       var top_donut_chart_data = [];
       var top_donut_chart_total = 1;
+      var top_donut_chart_colors = [];
 
 
       for( var i = 0; i < top_count; i++ ){
         top_donut_chart_total = top_donut_chart_total + entities[i][3];
+        var entity_type = entities[i][1];
+        var entity_color = '#c0c0c0';
+        if (entity_type === 'person') {
+          entity_color = '#00ccff';
+        }
+        else if (entity_type === 'location') {
+          entity_color = '#00ff00';
+        }
+        else if (entity_type === 'organization') {
+          entity_color = '#ffcc33';
+        }
+        top_donut_chart_colors.push( entity_color );
       };
 
       for( var i = 0; i < top_count; i++ ){
+
+
         var value = Math.round((entities[i][3] / top_donut_chart_total) * 100);
         var entry = {
           value: value,
@@ -453,11 +597,14 @@ function drawChartEntity( count ) {
       };
 
 
-      Morris.Donut({
+      dashboard_donut_chart_entities = Morris.Donut({
         element: 'chart_donut_entities',
         data: top_donut_chart_data,
+        colors: top_donut_chart_colors,
         formatter: function (x, data) { return data.formatted; }
       });
+
+      dashboard_donut_chart_entities.select(0);
 
     });
 
@@ -499,7 +646,7 @@ function drawChartTopic( count ) {
       });
       */
 
-      var color = d3.scale.category20b();
+      var colors = d3.scale.category20b();
       var width = 600, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 7;
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
       width = width - margin.left - margin.right;
@@ -530,7 +677,7 @@ function drawChartTopic( count ) {
 
         })
         .style("fill", function (d, i) {
-          return color(i);
+          return colors(i);
         })
         .append('title').text(function (d) {
           return d.score;
@@ -592,11 +739,14 @@ function drawChartTopic( count ) {
       };
 
 
-      Morris.Donut({
+      dashboard_donut_chart_topic = Morris.Donut({
         element: 'chart_donut_topics',
+        colors: colors.range(),
         data: top_donut_chart_data,
         formatter: function (x, data) { return data.formatted; }
       });
+
+      dashboard_donut_chart_topic.select(0);
 
     });
 
@@ -623,6 +773,9 @@ function drawChartDomain( count ) {
 
     $.get('email/domains').then(function (response) {
 
+      //validate search-response
+      response = validateDomainResponse( response );
+
       var domains = _.map(response.domains, function( element ){
         var domain =  _.object(["domain", "count"], element);
         domain.count = parseInt(domain.count);
@@ -642,7 +795,7 @@ function drawChartDomain( count ) {
       */
 
 
-      var color = d3.scale.category20b();
+      var colors = d3.scale.category20b();
       var width = 600, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
       width = width - margin.left - margin.right;
@@ -673,7 +826,7 @@ function drawChartDomain( count ) {
 
         })
         .style("fill", function (d, i) {
-          return color(i);
+          return colors(i);
         })
         .append('title').text(function (d) {
           return d.count;
@@ -735,11 +888,14 @@ function drawChartDomain( count ) {
       };
 
 
-      Morris.Donut({
+      dashboard_donut_chart_domain = Morris.Donut({
         element: 'chart_donut_domains',
+        colors: colors.range(),
         data: top_donut_chart_data,
         formatter: function (x, data) { return data.formatted; }
       });
+
+      dashboard_donut_chart_domain.select(0);
 
     });
 
@@ -761,15 +917,15 @@ function predicatBy(prop){
 }
 
 /**
- * request and display top community-related charts
+ * request and display activity-related charts
  * @param count
  */
-function draw_chart_community( count ) {
+function draw_chart_account_activities( count ) {
 
-  var chart_ui_id = '#chart_horizontal_bar_communities';
-  var legend_ui_id = '#chart_legend_communities';
+  var chart_ui_id_text = 'chart_line_account_activities';
+  var chart_ui_id_element = $('#' + chart_ui_id_text);
 
-  if (count > 0 && chart_ui_id) {
+  if (count > 0 && chart_ui_id_element) {
 
     var top_count = count;
     /*
@@ -778,127 +934,79 @@ function draw_chart_community( count ) {
      }
      */
 
-    $.get('email/domains').then(function (response) {
+    $.get('search/dates').then(function (response) {
+      console.log('draw_chart_account_activities()');
 
-      var domains = _.map(response.domains, function( element ){
-        var domain =  _.object(["domain", "count"], element);
+      var doc_dates = response.doc_dates;
+
+      var domains = _.map(doc_dates, function (element) {
+        var domain = _.object(["domain", "count"], element);
         domain.count = parseInt(domain.count);
         return domain;
       });
 
-      domains = domains.sort( predicatBy("count"));
+      domains = domains.sort(predicatBy("count"));
       if (domains.length > count) {
         domains = domains.splice(0, count);
       }
 
       /*
-      _.each(domains, function (item) {
-        console.log( 'domain : ' + item.domain + ' count : ' + item.count  );
+       _.each(domains, function (item) {
+       console.log( 'domain : ' + item.domain + ' count : ' + item.count  );
 
+       });
+       */
+
+
+      dashboard_time_chart_outbound_activities = Morris.Line({
+        element: 'chart_line_outbound_activities',
+        data: [
+          {period: '2010 Jan', user_0: 2666, user_1: null, user_2: 2647},
+          {period: '2010 Apr', user_0: 2778, user_1: 2294, user_2: 2441},
+          {period: '2010 Jul', user_0: 4912, user_1: 1969, user_2: 2501},
+          {period: '2010 Sep', user_0: 3767, user_1: 3597, user_2: 5689},
+          {period: '2011 Jan', user_0: 6810, user_1: 1914, user_2: 2293},
+          {period: '2011 Apr', user_0: 5670, user_1: 4293, user_2: 1881},
+          {period: '2011 Jul', user_0: 4820, user_1: 3795, user_2: 1588},
+          {period: '2011 Sep', user_0: 15073, user_1: 5967, user_2: 5175},
+          {period: '2012 Jan', user_0: 10687, user_1: 4460, user_2: 2028},
+          {period: '2012 Apr', user_0: 8432, user_1: 5713, user_2: 1791}
+        ],
+        xkey: 'period',
+        ykeys: ['user_0', 'user_1', 'user_2'],
+        labels: ['Alic', 'Bob', 'Charles'],
+        pointSize: 2,
+        parseTime: false,
+        hideHover: 'auto',
+        resize: true,
+        redraw: true
       });
-      */
 
-      var color = d3.scale.category20b();
-      var width = 600, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
-      var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
-      width = width - margin.left - margin.right;
-
-      var x = d3.scale.linear().range([0, width]);
-      var chart = d3.select(chart_ui_id).append('svg')
-        .attr('class', 'chart')
-        .attr("width", width + margin.left + margin.right);
-
-      x.domain([0, 100]);
-      chart.attr("height", height_bar * domains.length + margin_top + margin_bottom);
-
-      var bar = chart.selectAll("g")
-        .data(domains).enter()
-        .append("g")
-        .attr("transform", function (d, i) {
-          return "translate(" + margin.left + "," + (+(i * height_bar) + +margin.top) + ")";
-        });
-
-      bar.append("rect")
-        .attr("width", function (d) {
-          return x(+d.count * width_bar_factor);
-        })
-        .attr("height", height_bar - 1)
-        .attr("class", "label highlight clickable")
-        .on("click", function (d) {
-          console.log( 'clicked on \'' + d.domain + '\'');
-
-        })
-        .style("fill", function (d, i) {
-          return color(i);
-        })
-        .append('title').text(function (d) {
-          return d.count;
-        });
-
-
-      bar.append("text")
-        .attr("x", function (d) {
-          return x(+d.count * width_bar_factor) - 3;
-        })
-        .attr("y", height_bar / 2)
-        .attr("dy", ".35em")
-        .text(function (d) {
-          return +d.count;
-        });
-
-
-      bar.append("text")
-        .attr("x", function (d) {
-          return -margin.left;
-        })
-        .attr("y", height_bar / 2)
-        .attr("class", "label clickable")
-        .on("click", function (d) {
-          console.log( 'clicked on \'' + d.domain + '\'');
-
-        })
-        .text(function (d) {
-          var max_length = 30;
-          if (d.domain.length > max_length) {
-            var text = d.domain.substr(0, max_length);
-            text = text.substr( 0, text.lastIndexOf(' '));
-            return text + " ...";
-          }
-
-          return d.domain;
-        })
-        .append('title').text(function (d) {
-          return d.domain;
-        });
-
-
-      var top_donut_chart_data = [];
-      var top_donut_chart_total = 1;
-
-
-      for( var i = 0; i < top_count; i++ ){
-        top_donut_chart_total = top_donut_chart_total + domains[i].count;
-      };
-
-      for( var i = 0; i < top_count; i++ ){
-        var value = Math.round((domains[i].count / top_donut_chart_total) * 100);
-        var entry = {
-          value: value,
-          label: (_.take((domains[i].domain).split(' '), 3).join(' ')),
-          formatted: value + '%'
-        };
-        top_donut_chart_data.push(entry);
-      };
-
-
-      Morris.Donut({
-        element: 'chart_donut_communities',
-        data: top_donut_chart_data,
-        formatter: function (x, data) { return data.formatted; }
+      dashboard_time_chart_inbound_activities = Morris.Line({
+        element: 'chart_line_inbound_activities',
+        data: [
+          {period: '2010 Jan', user_0: 2666, user_1: null, user_2: 2647},
+          {period: '2010 Apr', user_0: 2778, user_1: 2294, user_2: 2441},
+          {period: '2010 Jul', user_0: 4912, user_1: 1969, user_2: 2501},
+          {period: '2010 Sep', user_0: 3767, user_1: 3597, user_2: 5689},
+          {period: '2011 Jan', user_0: 6810, user_1: 1914, user_2: 2293},
+          {period: '2011 Apr', user_0: 5670, user_1: 4293, user_2: 1881},
+          {period: '2011 Jul', user_0: 4820, user_1: 3795, user_2: 1588},
+          {period: '2011 Sep', user_0: 15073, user_1: 5967, user_2: 5175},
+          {period: '2012 Jan', user_0: 10687, user_1: 4460, user_2: 2028},
+          {period: '2012 Apr', user_0: 8432, user_1: 5713, user_2: 1791}
+        ],
+        xkey: 'period',
+        ykeys: ['user_0', 'user_1', 'user_2'],
+        labels: ['Alic', 'Bob', 'Charles'],
+        pointSize: 2,
+        parseTime: false,
+        hideHover: 'auto',
+        resize: true,
+        redraw: true
       });
 
     });
-
   }
 }
 
@@ -915,16 +1023,19 @@ function initDateTimeRange() {
     $.get('search/dates').then(function (response) {
       console.log( 'initDateTimeRange()' );
 
+      //validate service-response
+      response = validateDateRangeResponse( response );
+
       var doc_dates = response.doc_dates;
       var start_datetime = doc_dates[0].datetime;
       var start_date_array = start_datetime.split('T')[0].split('-');
-      console.log( '\tstart_date_array[] ' + parseInt(start_date_array[0]) + ', ' + parseInt(start_date_array[1]) + ', ' + parseInt(start_date_array[2]) );
-
       var start_date = new Date(parseInt(start_date_array[0]), parseInt(start_date_array[1])-1, parseInt(start_date_array[2]));
 
       var end_datetime = doc_dates[doc_dates.length-1].datetime;
       var end_date_array = end_datetime.split('T')[0].split('-');
       var end_date = new Date(parseInt(end_date_array[0]), parseInt(end_date_array[1])-1, parseInt(end_date_array[2]));
+
+      console.log( '\tstart_date : ' + start_datetime + ' end_date : ' + end_datetime );
 
       var default_interval_months = 3;
       var default_start_year = end_date.getFullYear();
@@ -940,7 +1051,7 @@ function initDateTimeRange() {
 
       var default_start_date = new Date(default_start_year, default_start_month, default_start_day);
 
-      console.log( '\tstart_date : ' + start_datetime + ' end_date : ' + end_datetime );
+
 
       var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
       //var months = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
@@ -979,7 +1090,7 @@ function drawDashboardCharts() {
   drawChartEntity(10);
   drawChartTopic(10);
   drawChartDomain(10);
-  draw_chart_community(10);
+  draw_chart_account_activities(5);
 
 }
 

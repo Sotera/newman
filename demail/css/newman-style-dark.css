@@ -648,24 +648,46 @@ ul.DTTT_dropdown.dropdown-menu > li:hover > a {
   box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
 }
 #breadcrumb {
+  height: 18px;
+  line-height: 18px;
   padding: 0;
-  line-height: 40px;
-  background: #353535;
-  margin-bottom: 30px;
+  background: linear-gradient(#0479b9, #011d4b);
+  margin: 0px;
+  font-size: 10px;
 }
 .breadcrumb {
-  padding: 0 15px;
-  background: none;
+  height: 18px;
+  line-height: 18px;
+  padding: 0px;
+  background: linear-gradient(#0479b9, #011d4b);
+  margin: 0px;
+  font-size: 10px;
   -webkit-border-radius: 0;
   -moz-border-radius: 0;
   border-radius: 0;
-  margin: 0;
 }
 .breadcrumb > li > a {
   color:#d8d8d8;
 }
 .breadcrumb > li > a:hover, .breadcrumb > li:last-child > a {
   color:#f8f8f8;
+}
+.breadcrumb-button {
+  background: linear-gradient(#0479b9, #011d4b);
+  position: relative;
+  width: inherit;
+  height: 16px;
+  line-height: 16px;
+  color: #BBBBBB;
+  border-radius: 6px;
+  border: 0px solid #BBBBBB;
+  vertical-align: middle;
+}
+.breadcrumb-button:hover {
+  /*color: #006588;*/
+  color: #BBBBBB;
+  border-radius: 6px;
+  border: 1px solid #BBBBBB;
 }
 .bs-callout {
   padding: 15px;

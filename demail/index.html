@@ -246,10 +246,24 @@
   </header>
   <!--End Header-->
 
+  <div class="container-fluid" style="position: fixed; margin-top: 0px; height: 18px; width: 100%;">
+    <!-- Start Breadcrumb-Container-Row -->
+    <div class="row">
+      <div id="container_breadcrumb" class="col-xs-12 breadcrumb" style="padding-left: 15px;">
+        <ol class="breadcrumb pull-left" id="hist_list">
+          <li><button id="hist_dashboard_home" class="breadcrumb-button" ><i class="fa fa fa-tachometer"></i> Dashboard</button></li>
+        </ol>
+      </div>
+    </div>
+    <!-- End Breadcrumb-Container-Row -->
+  </div>
+
   <!--Start Main-Container-->
-    <div class="container-fluid" style="top: 52px; margin-top: 0px; height: 100%">
+    <div class="container-fluid" style="margin-top: 18px; height: 100%">
+
+
       <!--Start Main-Container-Row-->
-      <div class="row" style="height: 100%;">
+      <div class="row" style="height: 100%; margin-top: 4px;">
 
         <!--Start Sidebar-Left-->
         <!--<div id="sidebar-left" class="col-xs-2 col-sm-2">-->
@@ -490,59 +504,134 @@
           <div class="col-sm-8" style= "height: 100%;">
             <div style= "height: 100%;">
 
-
-              <!--Start Dashboard-Panel-Nav-Tabs-->
-              <!--
-              <ul class="nav nav-tabs" style="width: 600px;" role="tablist" id="dashboard-tab-list">
-                <li class="active"><a href="#top-entities" role="tab" data-toggle="tab">Entities</a></li>
-                <li><a href="#topics-tab" role="tab" data-toggle="tab">Topics</a></li>
-              </ul>
-              -->
-              <!--End Dashboard-Panel-Nav-Tabs-->
-
-              <!--Start Dashboard-Panel-Tab-Content-->
-              <!--
-              <div class="tab-content" style= "height: 100%;">
-                <div class="tab-pane active" id="dashboard-top-entities"></div>
-                <div class="tab-pane" id="dashboard-top-topics">
-                  <table id="dashboard-top-topics-table" class="info-table">
-                    <thead></thead>
-                    <tbody></tbody>
-                  </table>
-                </div>
-
-              </div>
-              -->
-              <!--End Dashboard-Panel-Tab-Content-->
-
-              <div class="row box" >
-                <div class="box-header">
-                  <div class="box-name">
-                    <i class="fa fa-hand-o-right"></i>
-                    <span>Entities</span>
-                  </div>
-                  <div class="box-icons">
-                    <a class="collapse-link"><i class="fa fa-compress"></i></a>
-                    <a class="expand-link"><i class="fa fa-expand"></i></a>
-                  </div>
-                </div>
-                <div class="box-content" style="height: 164px;">
-                  <div class="col-xs-3" style="padding: 0px;">
-                    <div id="chart_donut_entities" style="width: 160px; height: 160px; position: relative;"></div>
-                  </div>
-                  <div class="col-xs-7" style="padding: 0px;">
-                    <div id="chart_horizontal_bar_entities" style="width: 100%; height: 100%; position: relative;"></div>
-                  </div>
-                  <div class="col-xs-2" style="padding: 0px;">
-                    <div id="chart_legend_entities" style="width: 100%; height: 100%; position: relative;"></div>
-                  </div>
-                </div>
-              </div>
-
+              <!-- Start Dashboard-Right-Row-1 -->
               <div class="row box">
+                <!--Start Dashboard-Right-Row-1-Panel-Nav-Tabs-->
+                <ul class="nav nav-tabs box-name" style="height: 30px;" role="tablist" id="dashboard_row1_tab_list">
+                  <li class="active" style="height: inherit;">
+                    <a href="#dashboard_tab_content_outbound_activities" style="height: inherit;" role="tab" data-toggle="tab">Outbound Activities</a>
+                  </li>
+                  <li style="height: inherit;">
+                    <a href="#dashboard_tab_content_inbound_activities" style="height: inherit;" role="tab" data-toggle="tab">Inbound Activities</a>
+                  </li>
+                </ul>
+                <!--End Dashboard-Right-Row-1-Panel-Nav-Tabs-->
+
+                <!--Start Dashboard-Right-Row-1-Panel-Tab-Content-->
+                <div class="tab-content" style= "height: 100%;">
+                  <div class="tab-pane active" id="dashboard_tab_content_outbound_activities">
+                    <div class="box-content" style="padding: 0px; width: 812px; height: 164px;">
+
+                          <div id="chart_line_outbound_activities" style="width: 100%; height: 100%;"></div>
+
+                    </div>
+                  </div>
+                  <div class="tab-pane" id="dashboard_tab_content_inbound_activities">
+                    <div class="box-content" style="padding: 0px; width: 812px; height: 164px;">
+
+                          <div id="chart_line_inbound_activities" style="width: 100%; height: 100%;"></div>
+
+                    </div>
+                  </div>
+                </div>
+                <!-- End Dashboard-Right-Row-1-Panel-Tab-Content -->
+              </div>
+              <!-- End Dashboard-Right-Row-1 -->
+
+              <!-- Start Dashboard-Right-Row-2 -->
+              <div class="row box" >
+                <!--Start Dashboard-Right-Row-2-Panel-Nav-Tabs-->
+                <ul class="nav nav-tabs box-name" style="height: 30px;" role="tablist" id="dashboard_row2_tab_list">
+                  <li class="active" style="height: inherit;">
+                    <a href="#dashboard_tab_content_entities" style="height: inherit;" role="tab" data-toggle="tab">Entities</a>
+                  </li>
+                  <li style="height: inherit;">
+                    <a href="#dashboard_tab_content_topics" style="height: inherit;" role="tab" data-toggle="tab">Topics</a>
+                  </li>
+                </ul>
+                <!--End Dashboard-Right-Row-2-Panel-Nav-Tabs-->
+
+                <!--Start Dashboard-Right-Row-2-Panel-Tab-Content-->
+                <div class="tab-content" style= "height: 100%;">
+                  <div class="tab-pane active" id="dashboard_tab_content_entities">
+                    <div class="box-content" style="padding: 0px; height: 164px;">
+                      <div class="row">
+                        <div class="col-xs-3" style="padding: 0px;">
+                          <div id="chart_donut_entities" style="width: 160px; height: 160px; position: relative;"></div>
+                        </div>
+                        <div class="col-xs-7" style="padding: 0px;">
+                          <div id="chart_horizontal_bar_entities" style="width: 100%; height: 100%; position: relative;"></div>
+                        </div>
+                        <div class="col-xs-2" style="padding: 0px;">
+                          <div id="chart_legend_entities" style="width: 100%; height: 100%; position: relative;"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tab-pane" id="dashboard_tab_content_topics">
+                    <div class="box-content" style="height: 164px;">
+                      <div class="row box">
+                        <div class="col-xs-3">
+                          <div id="chart_donut_topics" style="width: 160px; height: 160px;"></div>
+                        </div>
+                        <div class="col-xs-9" style="padding: 0px;">
+                          <div id="chart_horizontal_bar_topics" style="width: 100%; height: 100%; position: relative"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Start Dashboard-Right-Row-2-Panel-Tab-Content -->
+              </div>
+              <!-- End Dashboard-Right-Row-2 -->
+
+              <!--Start Dashboard-Right-Row-3 -->
+              <div class="row box">
+                <!--Start Dashboard-Right-Row-3-Panel-Nav-Tabs-->
+                <ul class="nav nav-tabs box-name" style="height: 30px;" role="tablist" id="dashboard_row3_tab_list">
+                  <li class="active" style="height: inherit;">
+                    <a href="#dashboard_tab_content_domains" style="height: inherit;" role="tab" data-toggle="tab">Domains</a>
+                  </li>
+                  <li style="height: inherit;">
+                    <a href="#dashboard_tab_content_topics" style="height: inherit;" role="tab" data-toggle="tab">Communities</a>
+                  </li>
+                </ul>
+                <!--End Dashboard-Right-Row-3-Panel-Nav-Tabs-->
+
+                <!--Start Dashboard-Right-Row-3-Panel-Tab-Content-->
+                <div class="tab-content" style= "height: 100%;">
+                  <div class="tab-pane active" id="dashboard_tab_content_domains">
+                    <div class="row box">
+                      <div class="box-content" style="height: 164px;">
+                        <div class="col-xs-3" style="padding: 0px;">
+                          <div id="chart_donut_domains" style="width: 160px; height: 160px;"></div>
+                        </div>
+                        <div class="col-xs-9" style="padding: 0px;">
+                          <div id="chart_horizontal_bar_domains" style="width: 100%; height: 100%; position: relative"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tab-pane" id="dashboard_tab_content_communities">
+                    <div class="box-content" style="padding: 0px; height: 164px;">
+                      <div class="row">
+                        <div class="col-xs-3">
+                          <div id="chart_donut_communities" style="width: 160px; height: 160px;"></div>
+                        </div>
+                        <div class="col-xs-9" style="padding: 0px;">
+                          <div id="chart_horizontal_bar_communities" style="width: 100%; height: 100%; position: relative"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Start Dashboard-Right-Row-3-Panel-Tab-Content -->
+              </div>
+              <!-- End Dashboard-Right-Row-3 -->
+<!--
                 <div class="box-header">
                   <div class="box-name">
-                    <i class="fa fa-hand-o-right"></i>
+                    <i class="fa fa-tachometer"></i>
                     <span>Topics</span>
                   </div>
                   <div class="box-icons">
@@ -563,7 +652,7 @@
               <div class="row box">
                 <div class="box-header">
                   <div class="box-name">
-                    <i class="fa fa-hand-o-right"></i>
+                    <i class="fa fa-tachometer"></i>
                     <span>Domains</span>
                   </div>
                   <div class="box-icons">
@@ -580,30 +669,7 @@
                   </div>
                 </div>
               </div>
-
-              <div class="row box">
-                <div class="box-header">
-                  <div class="box-name">
-                    <i class="fa fa-hand-o-right"></i>
-                    <span>Communities</span>
-                  </div>
-                  <div class="box-icons">
-                    <a class="collapse-link"><i class="fa fa-compress"></i></a>
-                    <a class="expand-link"><i class="fa fa-expand"></i></a>
-                  </div>
-                </div>
-                <div class="box-content" style="height: 164px;">
-                  <div class="col-xs-3" style="padding: 0px;">
-                    <div id="chart_donut_communities" style="width: 160px; height: 160px;"></div>
-                  </div>
-                  <div class="col-xs-9" style="padding: 0px">
-                    <div id="chart_horizontal_bar_communities" style="width: 100%; height: 100%; position: relative"></div>
-                  </div>
-                </div>
-              </div>
-
-
-
+-->
             </div>
           </div>
           <!--End Dashboard-Right-->
@@ -814,6 +880,7 @@
     <!-- All functions for this theme + document.ready processing -->
 
     <script src="js/searchtool.js"></script>
+    <script src="js/history-nav.js"></script>
     <script src="js/graphtool.js"></script>
 
   </body>
