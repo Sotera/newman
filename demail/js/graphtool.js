@@ -40,23 +40,28 @@ var doubleEncodeURIComponent= function(uri){
 };
 
 var bottom_panel= (function(){
-  var container = $('#bottom-panel-toggle div:first-child');
-  var btn = $('#bottom-panel-toggle div:first-child').find("div").first();
-  var table_panel = $('#bottom-panel-toggle div:first-child div:nth-child(2)').first();
-  var open_css = "glyphicon-chevron-up";
-  var close_css = "glyphicon-chevron-down";
+
+  var container = $('#container-data-table');
+  var toggle_button = $('#button-toggle-data-table');
+
+  //var table_panel = $('#bottom-panel-toggle div:first-child div:nth-child(2)').first();
+
+  var icon_class_open = "glyphicon-chevron-up";
+  var icon_class_close = "glyphicon-chevron-down";
+
   var open = function(){
-    container.find("span").first().switchClass(open_css, close_css);
-    var h = table_panel.height() + 25;
-    container.css("top", "calc(100% - "+ h +"px)");
+
+    toggle_button.find("span").first().switchClass(icon_class_open, icon_class_close);
+    container.css("bottom", "0px");
   };
   var close = function(){
-    container.find("span").first().switchClass(close_css, open_css);
-    container.css("top", "calc(100% - 25px)")
+
+    toggle_button.find("span").first().switchClass(icon_class_close, icon_class_open);
+    container.css("bottom", "-300px");
   };
 
   var isOpen = function(){
-    return _.contains(container.find("span").first().attr('class').split(/\s+/), close_css);
+    return _.contains(container.find("span").first().attr('class').split(/\s+/), icon_class_close);
   };
 
   var toggle = function(){
@@ -67,7 +72,7 @@ var bottom_panel= (function(){
     }
   };
 
-  btn.on('click', toggle);
+  toggle_button.on('click', toggle);
 
   return {
     open: open,
@@ -2066,9 +2071,13 @@ $(function () {
   // close existing analytics displays if applicable
   email_analytics_content.close();
 
+  // close existing data-table displays if applicable
+  bottom_panel.close();
+
   // initialize search-result UI
   search_result.setUI( $('#search_result_container') );
 
+  // initialize navigation-history
   history_nav.initialize();
 
   // initialize dashboard

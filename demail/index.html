@@ -246,6 +246,7 @@
   </header>
   <!--End Header-->
 
+  <!-- Start Breadcrumb-Container -->
   <div class="container-fluid" style="position: fixed; margin-top: 0px; height: 18px; width: 100%;">
     <!-- Start Breadcrumb-Container-Row -->
     <div class="row">
@@ -257,6 +258,7 @@
     </div>
     <!-- End Breadcrumb-Container-Row -->
   </div>
+  <!-- End Breadcrumb-Container -->
 
   <!--Start Main-Container-->
     <div class="container-fluid" style="margin-top: 18px; height: 100%">
@@ -628,48 +630,7 @@
                 <!-- Start Dashboard-Right-Row-3-Panel-Tab-Content -->
               </div>
               <!-- End Dashboard-Right-Row-3 -->
-<!--
-                <div class="box-header">
-                  <div class="box-name">
-                    <i class="fa fa-tachometer"></i>
-                    <span>Topics</span>
-                  </div>
-                  <div class="box-icons">
-                    <a class="collapse-link"><i class="fa fa-compress"></i></a>
-                    <a class="expand-link"><i class="fa fa-expand"></i></a>
-                  </div>
-                </div>
-                <div class="box-content" style="padding: 0px; height: 164px;">
-                  <div class="col-xs-3">
-                    <div id="chart_donut_topics" style="width: 160px; height: 160px;"></div>
-                  </div>
-                  <div class="col-xs-9" style="padding: 0px;">
-                    <div id="chart_horizontal_bar_topics" style="width: 100%; height: 100%; position: relative"></div>
-                  </div>
-                </div>
-              </div>
 
-              <div class="row box">
-                <div class="box-header">
-                  <div class="box-name">
-                    <i class="fa fa-tachometer"></i>
-                    <span>Domains</span>
-                  </div>
-                  <div class="box-icons">
-                    <a class="collapse-link"><i class="fa fa-compress"></i></a>
-                    <a class="expand-link"><i class="fa fa-expand"></i></a>
-                  </div>
-                </div>
-                <div class="box-content" style="height: 164px;">
-                  <div class="col-xs-3" style="padding: 0px;">
-                    <div id="chart_donut_domains" style="width: 160px; height: 160px;"></div>
-                  </div>
-                  <div class="col-xs-9" style="padding: 0px;">
-                    <div id="chart_horizontal_bar_domains" style="width: 100%; height: 100%; position: relative"></div>
-                  </div>
-                </div>
-              </div>
--->
             </div>
           </div>
           <!--End Dashboard-Right-->
@@ -786,53 +747,6 @@
           </div>
           <!--End Data-Panel-Right-->
 
-          <!--Start Bottom-Panel-->
-          <div class="row" id="bottom-panel-toggle">
-            <div class="col-sm-12">
-              <div class="col-sm-2 col-sm-offset-5 toggle-button">
-                <a><span class="glyphicon glyphicon-chevron-up"></span></a>
-              </div>
-              <div class="col-sm-12" style="height: calc(100% - 25px);max-height: 250px;background-color:#d3d3d3;">
-                <div style="height: 100%;max-height: 250px;">
-                  <div style="height: 25px;padding-top: 4px;">
-                    <!-- <div style="float: right;padding-right: 9px;"> -->
-                    <!--   <a class="clickable"> -->
-                    <!--     <span class="glyphicon glyphicon-folder-open" /> -->
-                    <!--   </a> -->
-                    <!-- </div> -->
-                    <div style="float: left;padding-right: 9px;">
-                      <span> Documents: </span> <span id="document_count"></span>
-                    </div>
-                    <div style="float: right;padding-right: 9px;">
-                      <a class="clickable" id="email_view_marked">
-                        <span> View Exportable  </span>
-                      </a>
-                      |
-                      <a class="clickable" id="email_view_export_all" title="Mark All">
-                        <span class="glyphicon glyphicon-plus"> </span>
-                      </a>
-                      |
-                      <a class="clickable" id="email_view_export_all_remove" title="Unmark All">
-                        <span class="glyphicon glyphicon-minus"> </span>
-                      </a>
-                      |
-                      <!-- <a class="clickable" id="email_group_conversation" title="Conversations"> -->
-                      <!--   <span class="glyphicon glyphicon-tasks"></span> -->
-                      <!-- </a> -->
-                    </div>
-                  </div>
-                  <div style="overflow-y: scroll;height: 100%;max-height: 225px;">
-                    <table id="result_table" class="table" style="display:table;" >
-                      <thead class="result_thead"></thead>
-                      <tbody class="result_tbody"></tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!--End Bottom-Panel-->
-
         </div>
         <!--End Email-Analytics-Content-->
 
@@ -851,6 +765,61 @@
 
     </div>
     <!--End Main-Container-->
+
+  <!-- Start Data-Table-Container -->
+  <div class="container-fluid" id="container-data-table" style="position: fixed; bottom: 0px;">
+    <div class="row" id="bottom-panel-toggle">
+      <div class="col-sm-12">
+        <!-- Start Data-Table-Toggle -->
+        <div class="col-sm-2 col-sm-offset-5 toggle-button" id="button-toggle-data-table">
+          <a><i class="fa fa-files-o"></i> <span class="glyphicon glyphicon-chevron-up"></span></a>
+        </div>
+        <!-- End Data-Table-Toggle -->
+
+        <div class="col-sm-12" style="height: calc(100% - 20px); max-height: 300px; background-color:#d3d3d3;">
+          <div style="height: 100%; max-height: 300px;">
+            <div style="height: 20px; padding-top: 4px;">
+              <!-- <div style="float: right;padding-right: 9px;"> -->
+              <!--   <a class="clickable"> -->
+              <!--     <span class="glyphicon glyphicon-folder-open" /> -->
+              <!--   </a> -->
+              <!-- </div> -->
+              <div style="float: left;padding-right: 9px;">
+                <span><i class="fa fa-files-o"></i> Documents: </span> <span id="document_count"></span>
+              </div>
+              <div style="float: right;padding-right: 9px;">
+                <a class="clickable" id="email_view_marked">
+                  <span> View Exportable  </span>
+                </a>
+                |
+                <a class="clickable" id="email_view_export_all" title="Mark All">
+                  <span class="glyphicon glyphicon-plus"> </span>
+                </a>
+                |
+                <a class="clickable" id="email_view_export_all_remove" title="Unmark All">
+                  <span class="glyphicon glyphicon-minus"> </span>
+                </a>
+                |
+                <!-- <a class="clickable" id="email_group_conversation" title="Conversations"> -->
+                <!--   <span class="glyphicon glyphicon-tasks"></span> -->
+                <!-- </a> -->
+              </div>
+            </div>
+            <!-- Start Data-Table-Documents -->
+            <div style="overflow-y: scroll; width: 100%; height: 100%; max-height: 280px;">
+              <table id="result_table" class="table" style="display:table;" >
+                <thead class="result_thead"></thead>
+                <tbody class="result_tbody"></tbody>
+              </table>
+            </div>
+            <!-- Start Data-Table-Documents -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- End Data-Table-Container -->
+
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="plugins/jquery/jquery.min.js"></script>

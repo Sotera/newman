@@ -231,13 +231,13 @@ div.bootstrap-growl >span.close {
 }
 
 #cp-toggle > div:first-child {
-    top: calc(100% - 25px);
+    top: calc(100% - 20px);
     position: fixed;
     z-index: 25;
 }
 
 .toggle-button {
-    height: 25px;
+    height: 20px;
     padding-top: 3px;
     background-color: #d3d3d3;
     border-top-right-radius: 7px;

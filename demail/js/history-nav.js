@@ -115,8 +115,6 @@ var history_nav = (function () {
     console.log( 'user_hist[' + hist_list.length + ']' );
 
     clearUI();
-    //var view_home = '<li><button id=\"breadcrumb_dashboard_home\" class=\"breadcrumb-button\" ><i class=\"fa fa fa-tachometer\"></i> Dashboard</button></li>';
-    //$('#hist_list').append( view_home );
 
     _.each(hist_list, function( element ) {
       console.log( '\t' + element.label + ', ' + element.uid + ', ' + element.icon_class + ', ' + element.data_url );
@@ -131,6 +129,9 @@ var history_nav = (function () {
           click: function () {
             console.log( 'hist-item-selected : ' + this.id + ', data-url: ' + element.data_url );
 
+            // close data-table-view
+            bottom_panel.close();
+
             if (this.id == 'hist_dashboard_home') {
               dashboard_content.open();
             }
@@ -143,8 +144,6 @@ var history_nav = (function () {
 
       var hist_item = $( '<li/>' )
       hist_item.append( button );
-
-      //var hist_item = '<li><button class=\"breadcrumb-button\" id=\"' + element.uid + '\" ><i class=\"' + element.icon_class + '\"/></i>' + element.label + '</button></li>';
 
       //console.log( '\t' + html_text );
       $('#hist_list').append( hist_item );
