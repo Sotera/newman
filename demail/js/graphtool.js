@@ -1151,24 +1151,46 @@ function toggle_labels() {
 
 
 function node_highlight(email){
-  var n = _.first(d3.selectAll("circle").filter(function(d){ return d.name == email; }).data());
-  var groupId = _.getPath(n, "group");
-  var highlight = function(){
-    //graph
-    d3.select("#g_circle_" + groupId).style("stroke","#ffff00");
-    d3.select("#g_circle_" + groupId).style("stroke-width",function(d) { return 10; });
+  var group_ID;
+  if (email) {
+    console.log('node_highlight(' + email + ')');
+    var node_list = d3.selectAll("circle").filter(function (d) {
+      return d.name == email;
+    }).data();
+    console.log('\tnode_list : ' + JSON.stringify(node_list, null, 2));
+
+    if(node_list) {
+      var node = _.first(node_list);
+      group_ID = _.getPath(node, "group");
+    }
+  }
+
+  var highlight = function () {
+    if(group_ID) {
+      //graph
+      d3.select("#g_circle_" + group_ID).style("stroke", "#ffff00");
+      d3.select("#g_circle_" + group_ID).style("stroke-width", function (d) {
+        return 10;
+      });
+    }
   };
 
-  var unhighlight = function(){
-    //graph
-    d3.select("#g_circle_" + groupId).style("stroke","#ff0000");
-    if (d3.select("#rankval").property("checked")) {
-      d3.select("#g_circle_" + groupId).style("opacity",function(d) { return 0.2 + (d.rank); });
-      d3.select("#g_circle_" + groupId).style("stroke-width",function(d) { return 5 * (d.rank); });
-    }
-    else {
-      d3.select("#g_circle_" + groupId).style("opacity","100");
-      d3.select("#g_circle_" + groupId).style("stroke-width","0");
+  var unhighlight = function () {
+    if(group_ID) {
+      //graph
+      d3.select("#g_circle_" + group_ID).style("stroke", "#ff0000");
+      if (d3.select("#rankval").property("checked")) {
+        d3.select("#g_circle_" + group_ID).style("opacity", function (d) {
+          return 0.2 + (d.rank);
+        });
+        d3.select("#g_circle_" + group_ID).style("stroke-width", function (d) {
+          return 5 * (d.rank);
+        });
+      }
+      else {
+        d3.select("#g_circle_" + group_ID).style("opacity", "100");
+        d3.select("#g_circle_" + group_ID).style("stroke-width", "0");
+      }
     }
   };
 
