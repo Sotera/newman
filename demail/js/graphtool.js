@@ -1155,7 +1155,7 @@ function node_highlight(email){
   if (email) {
     console.log('node_highlight(' + email + ')');
     var node_list = d3.selectAll("circle").filter(function (d) {
-      return d.name == email;
+      return (d && d.name == email);
     }).data();
     console.log('\tnode_list : ' + JSON.stringify(node_list, null, 2));
 
