@@ -243,13 +243,13 @@ function update_current(val){
 
 var domain_set = {};
 
-function emailsDomain(email){
+function getEmailDomain(email){
   return email.replace(/.*@/, "");
 }
 
-function colorByDomain(email){
-  //console.log('colorByDomain(' + email + ')');
-  var domain = emailsDomain(email);
+function getDomainColor(email){
+  //console.log('getDomainColor(' + email + ')');
+  var domain = getEmailDomain(email);
   return domain_set[domain].color;
 }
 
@@ -297,7 +297,7 @@ function recolornodes(how) {
   if( how == 'node') {
     redraw_domains_table();
     d3.selectAll("circle").style("fill", function(d) {
-      return colorByDomain(d.name);
+      return getDomainColor(d.name);
       //return color(d.group);
     });
   }
@@ -922,7 +922,7 @@ function do_search(fields, val) {
         })
         .style("color", function(d,i) {
           if( i == 2) {
-            return colorByDomain(d.split('::')[0]);
+            return getDomainColor(d.split('::')[0]);
           } else {
             return 'black';
           }
@@ -1008,7 +1008,7 @@ function drawGraph(graph){
     .attr("id", function(d) { return "g_circle_" + d.group; })
     .style("fill", function(d) {
       if (d3.select("#colorby").property("checked")) {
-        return colorByDomain(d.name);
+        return getDomainColor(d.name);
         //return color(d.group);
       } else {
         return communityColor(d.community);
@@ -1063,7 +1063,7 @@ function drawGraph(graph){
           .on("click", function(){
             do_search("email", n.name);
           }).find("span").first()
-          .css("color", colorByDomain(n.name));
+          .css("color", getDomainColor(n.name));
 
         $('#radial').find(".community").first()
           .unbind('click')
@@ -1157,7 +1157,7 @@ function node_highlight(email){
     var node_list = d3.selectAll("circle").filter(function (d) {
       return (d && d.name == email);
     }).data();
-    console.log('\tnode_list : ' + JSON.stringify(node_list, null, 2));
+    //console.log('\tnode_list : ' + JSON.stringify(node_list, null, 2));
 
     if(node_list) {
       var node = _.first(node_list);
@@ -1462,7 +1462,7 @@ function draw_rank_chart() {
       .attr("y", barHeight / 2)
       .attr("class", "label clickable")
       .style("fill", function(d) {
-        return colorByDomain(d.email);
+        return getDomainColor(d.email);
         //return color(+d.groupId);
       })
       .text(function(d) { return (d.email.length > 25) ? d.email.substr(0,25) + ".." : d.email; })
@@ -1529,17 +1529,25 @@ function redraw_domains_table(){
       });
     });
 
-  var d = _.uniq(_.map(d3.selectAll("circle").data(),
-                       function(d){
-                         return emailsDomain(d.name);
-                       }));
+  var domain_set = _.groupBy(d3.selectAll("circle").data(),
+    function(node) {
+      if (node && node.name) {
+        var domain = getEmailDomain(node.name);
+        return domain;
+      }
+    });
+  //console.log('\tdomain_set: ' + JSON.stringify(domain_set, null, 2));
 
-  var domains = _.map(d, function(v){
-    return [domain_set[v].color, domain_set[v].count, v];
-  });
+  var color_n_count_by_domain = _.map(domain_set,
+    function(value, key){
+      if(value && key) {
+        return [getDomainColor(key), value.length, key];
+      }
+    });
+  //console.log('\tcolor_n_count_by_domain: ' + JSON.stringify(color_n_count_by_domain, null, 2));
 
   var tr = d3.select("#legend-table").select("tbody").selectAll("tr")
-    .data(domains).enter().append("tr")
+    .data(color_n_count_by_domain).enter().append("tr")
   //.attr('class', 'clickable')
     .on("click", function(d, i){
       console.log(d);
@@ -1548,7 +1556,7 @@ function redraw_domains_table(){
       var hoverDomain = d[2];
       d3.selectAll("circle").style("stroke","#ffff00");
       d3.selectAll("circle").each(function(d, i){
-        if (hoverDomain.localeCompare(emailsDomain(d.name)) == 0) {
+        if (hoverDomain.localeCompare(getEmailDomain(d.name)) == 0) {
           d3.select(this).style("stroke-width",function(d) {
             return 5;
           });
@@ -1601,14 +1609,24 @@ function redraw_community_table() {
       });
     });
 
-  var c = _.groupBy(d3.selectAll("circle").data(), function(d) { return d.community;});
+  var community_set = _.groupBy(d3.selectAll("circle").data(),
+    function(node) {
+      if (node && node.community) {
+        return node.community;
+      }
+    });
+  //console.log('\tcommunity_set: ' + JSON.stringify(community_set, null, 2));
 
-  var communities = _.map(c, function(v, k){
-    return [v.length, k];
-  });
+  var node_count_by_community = _.map(community_set,
+    function(value, key){
+      if(value && key) {
+        return [value.length, key];
+      }
+    });
+  //console.log('\tnode_count_by_community: ' + JSON.stringify(node_count_by_community, null, 2));
 
   var tr = d3.select("#legend-table").select("tbody").selectAll("tr")
-    .data(communities).enter().append("tr")
+    .data(node_count_by_community).enter().append("tr")
     .on("mouseover", function(d, i){
       var k = d[1];
       d3.selectAll("circle").style("stroke","#ffff00");
