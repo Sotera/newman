@@ -69,10 +69,10 @@ def createRow(email_id, _dir, target_email, mail, categories, attach, msg_body):
         items = []
         arr = [clean_string(s.lower(), [(r',','')]) for s in arr]
         for name, addr in getaddresses(arr):
-            if '@' in name:
-                items.append(name)
-            else:
+            if '@' in addr:
                 items.append(addr)
+            elif '@' in name:
+                items.append(name)        
         return  [clean_string(s.lower(), [(r'\'', '')]) for s in items]
 
     csv_sep = lambda arr : ",".join(arr) if arr else ''
