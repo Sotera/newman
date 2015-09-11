@@ -5,9 +5,9 @@ var is_load_on_response = false;
 
 var width = 400, height = 500;
 
-var colorDomain = d3.scale.category20();
+var color_set_domain = d3.scale.category20();
 
-var communityColor = (function(){
+var color_set_community = (function(){
   var color = d3.scale.category20();
   var cache = {};
   var itr = _.iterators.numbers();
@@ -248,24 +248,30 @@ function update_current(val){
 
 var domain_set = {};
 
-function emailsDomain(email){
+function getEmailDomain(email){
   return email.replace(/.*@/, "");
 }
 
-function colorByDomain(email){
-  //console.log('colorByDomain(' + email + ')');
-  var domain = emailsDomain(email);
+function getDomainColor(email){
+  if(email) {
+    //console.log('getDomainColor(' + email + ')');
+    var domain = getEmailDomain(email);
+    if (domain) {
 
-  /*
-  var domain_count = 0;
-  _.each(domain_set, function (item) {
-    console.log('\t\tdomain { ' + item.domain + ', color: ' +item.color + ', count: ' + item.count + ' }');
-    domain_count++;
-  });
-  console.log('\tdomain_set[' + domain_count + ']');
-  */
+      //console.log('\tdomain_set: ' + JSON.stringify(domain_set, null, 2));
 
-  return domain_set[domain].color;
+      if (domain_set[domain]) {
+        var color = domain_set[domain].color
+        if (color) {
+          return color;
+        }
+        console.log('\tdomain_set[' + domain + '].color undefined');
+      }
+      console.log('\tdomain_set[' + domain + '] undefined');
+    }
+    console.log('\tdomain undefined');
+  }
+  return 'rgb(255,255,255,0)';
 }
 
 
@@ -302,18 +308,21 @@ function dragended(d){
   d3.select(this).classed("fixed", d.fixed = true);
 }
 
-function recolornodes(how) {
-  if( how == 'comm') {
+function recolornodes(category) {
+  if( category == 'comm') {
     redraw_community_table()
     d3.selectAll("circle").style("fill", function(d) {
-      return communityColor(d.community);
+      return color_set_community(d.community);
     });
   }
-  if( how == 'node') {
+  if( category == 'node') {
     redraw_domains_table();
     d3.selectAll("circle").style("fill", function(d) {
-      return colorByDomain(d.name);
-      //return color(d.group);
+      if(d && d.name) {
+        //console.log('node' + JSON.stringify(d, null, 2));
+        return getDomainColor(d.name);
+        //return color(d.group);
+      }
     });
   }
 }
@@ -729,12 +738,12 @@ function validateDateRangeResponse(response) {
             new_doc_dates.push(item);
           }
           else {
-            console.log('\tinvalid doc_date { from: ' + item.from + ', date: ' + item.datetime + ' }');
+            console.log('\tinvalid email-address { from: ' + item.from + ', date: ' + item.datetime + ' }');
             invalid_item_count++;
           }
         }
         else {
-          console.log('\tinvalid doc_date { from: ' + item.from + ', date: ' + item.datetime + ' }');
+          console.log('\tinvalid datetime { from: ' + item.from + ', date: ' + item.datetime + ' }');
           invalid_item_count++;
         }
 
@@ -769,13 +778,72 @@ function validateDateTime(datetime_text) {
 /**
  * validate email address
  * @param email_address
- * @returns true if the argument email address is valid, false otherwise
+ * @returns true if the argument is valid, false otherwise
  */
 function validateEmailAddress(email_address) {
-
+  if(email_address) {
+    /*
     var regex = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
-    return regex.test( email_address );
+    return regex.test(email_address);
+    */
+    var name = email_address.split('@')[0];
+    if(validateEmailUser(name)) {
+      var domain = email_address.split('@')[1];
+      if(validateEmailDomain(domain)) {
+        return true;
+      }
+      console.log( '\tinvalid email-domain: ' + name );
+      return false;
+    }
+    console.log( '\tinvalid email-user: ' + name );
+    return false;
+  }
+  return false;
+}
 
+/**
+ * validate email user
+ * @param email_user
+ * @returns true if the argument is valid, false otherwise
+ */
+function validateEmailUser(email_user) {
+  if(email_user) {
+    if(!containsWhitespace(email_user)) {
+      var regex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*/i;
+      return regex.test(email_user);
+    }
+    return false;
+  }
+  return false;
+}
+
+/**
+ * validate email main
+ * @param email_domain
+ * @returns true if the argument is valid, false otherwise
+ */
+function validateEmailDomain(email_domain) {
+  if(email_domain) {
+    if(!containsWhitespace(email_domain)) {
+      var regex = /^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/i;
+      return regex.test(email_domain);
+    }
+    return false;
+  }
+  return false;
+}
+
+/**
+ * check for whitespace
+ * @param text
+ * @returns true if the argument contains any whitespace, false otherwise
+ */
+function containsWhitespace(text) {
+  if(text) {
+    var regex = /\s/g;
+    return regex.test(text);
+  }
+  return false;
 }
 
 /**
@@ -785,9 +853,45 @@ function validateEmailAddress(email_address) {
  */
 function removeAllWhitespace(text) {
   if(text) {
-    return text.replace(/\s+/g, "").trim();
+    text = text.replace(/\s/g, "").trim();
   }
   return text;
+}
+
+/**
+ * sort predicate based on property
+ */
+function descendingPredicatByProperty(property){
+  return function (a, b) {
+
+    if (a[property] > b[property]) {
+      return -1;
+    }
+
+    if (a[property] < b[property]) {
+      return 1;
+    }
+
+    return 0;
+  }
+}
+
+/**
+ * sort predicate based on index
+ */
+function descendingPredicatByIndex(index){
+  return function(a, b) {
+
+    if( a[index] > b[index]){
+      return -1;
+    }
+
+    if( a[index] < b[index] ){
+      return 1;
+    }
+
+    return 0;
+  }
 }
 
 /**
@@ -796,6 +900,8 @@ function removeAllWhitespace(text) {
  * @returns filtered response
  */
 function validateDomainResponse(response) {
+
+
   if (response) {
     console.log('validateDomainResponse(...)');
 
@@ -804,27 +910,30 @@ function validateDomainResponse(response) {
 
       var new_domains = [];
       var invalid_item_count = 0;
-      _.each(response.domains, function (item) {
+      _.each(response.domains, function (domain) {
 
-        var domain_text = decodeURIComponent( item[0] );
-        var domain_count = item[1];
-        if (domain_text) {
-          domain_text = removeAllWhitespace( domain_text );
+        var domain_text = decodeURIComponent( domain[0] );
+        var domain_count = parseInt(domain[1]);
+
+        if (domain_text && validateEmailDomain(domain_text)) {
           //console.log('\tdomain : \'' + domain_text + '\'');
-
           new_domains.push([domain_text, domain_count]);
         }
         else {
-          console.log('\tundefined domain : ' + domain_text);
+          //console.log('\tinvalid domain : ' + domain_text);
           invalid_item_count++;
         }
       });
 
-      response.domains = new_domains;
-      console.log( '\tnew domains[' + response.domains.length + '], invalid domains ' + invalid_item_count );
-    }
+      new_domains = new_domains.sort( descendingPredicatByIndex(1) );
+      var new_response = { "domains": new_domains };
+      //console.log( 'validated-response:\n' + JSON.stringify(new_response, null, 2) );
 
-    return response;
+      console.log( '\tnew domains[' + new_response.domains.length + ']' );
+      return new_response;
+
+    }
+    console.log( 'response.domains undefined' );
   }
 
   console.log( 'response undefined' );
@@ -869,7 +978,7 @@ function validateSearchResponse(response) {
           new_links.push( item );
         }
         else {
-          console.log('\tundefined link { source: ' + item.source + ', target: ' + item.target + ", value: " + item.value + ' }');
+          //console.log('\tundefined link { source: ' + item.source + ', target: ' + item.target + ", value: " + item.value + ' }');
           invalid_link_count++;
         }
       });
@@ -893,7 +1002,7 @@ function validateSearchResponse(response) {
           if (item.from) {
             var address = decodeURIComponent( item.from );
 
-            // check for whitespace in email address
+            // check for email address
             if (validateEmailAddress( address )) {
               item.from = address;
               //console.log('\tfrom \'' + address + '\'');
@@ -901,12 +1010,12 @@ function validateSearchResponse(response) {
               new_rows.push(item);
             }
             else {
-              console.log('\tinvalid from : ' + item.from);
+              console.log('\tinvalid email : ' + item.from);
               invalid_row_count++;
             }
           }
           else {
-            console.log('\tundefined from : ' + item.from);
+            console.log('\tundefined email : ' + item.from);
             invalid_row_count++;
           }
         }
@@ -963,7 +1072,7 @@ function do_search(field, value) {
       console.log( '.getJSON(' + url_path + ')' );
 
       //validate search-response
-      search_response = validateSearchResponse( search_response );
+      var filtered_response = validateSearchResponse( search_response );
 
       if (is_load_on_response) {
 
@@ -990,13 +1099,13 @@ function do_search(field, value) {
         dashboard_content.open();
 
         var doc_count = 0;
-        if (search_response.rows) {
-          doc_count = search_response.rows.length;
+        if (filtered_response.rows) {
+          doc_count = filtered_response.rows.length;
         }
 
         var node_count = 0;
-        if (search_response.graph && search_response.graph.nodes) {
-          node_count = search_response.graph.nodes.length;
+        if (filtered_response.graph && filtered_response.graph.nodes) {
+          node_count = filtered_response.graph.nodes.length;
         }
 
         search_result.push(search_arg,
@@ -1027,7 +1136,7 @@ function loadSearchResult( url_path ) {
     $.getJSON( url_path , function (search_response) {
 
       //validate search-response
-      search_response = validateSearchResponse( search_response );
+      var filtered_response = validateSearchResponse( search_response );
 
       console.log( '.getJSON(' + url_path + ')' );
 
@@ -1039,8 +1148,8 @@ function loadSearchResult( url_path ) {
       $('#search_status').empty();
       //d3.select("#search_status").text("");
 
-      $('#document_count').text(search_response.rows.length);
-      var data = _.map(search_response.rows, function(o){
+      $('#document_count').text(filtered_response.rows.length);
+      var data = _.map(filtered_response.rows, function(o){
         return _.extend(o, {'exported': (o.num in exported)})
       });
 
@@ -1153,7 +1262,7 @@ function loadSearchResult( url_path ) {
         })
         .style("color", function(d,i) {
           if( i == 2) {
-            return colorByDomain(d.split('::')[0]);
+            return getDomainColor(d.split('::')[0]);
           } else {
             return 'black';
           }
@@ -1164,7 +1273,7 @@ function loadSearchResult( url_path ) {
         //resize bottom_panel
         bottom_panel.open();
       }
-      drawGraph(search_response.graph);
+      drawGraph(filtered_response.graph);
     });
 
   });
@@ -1242,10 +1351,14 @@ function drawGraph(graph){
     .attr("id", function(d) { return "g_circle_" + d.group; })
     .style("fill", function(d) {
       if (d3.select("#colorby").property("checked")) {
-        return colorByDomain(d.name);
-        //return color(d.group);
+        if(d && d.name) {
+          return getDomainColor(d.name);
+          //return color(d.group);
+        }
       } else {
-        return communityColor(d.community);
+        if(d && d.community) {
+          return color_set_community(d.community);
+        }
       }})
     .style("stroke","red")
     .style("stroke-width", function(d) {
@@ -1299,7 +1412,7 @@ function drawGraph(graph){
             is_load_on_response = true;
             do_search("email", n.name);
           }).find("span").first()
-          .css("color", colorByDomain(n.name));
+          .css("color", getDomainColor(n.name));
 
         $('#radial').find(".community").first()
           .unbind('click')
@@ -1308,7 +1421,7 @@ function drawGraph(graph){
             is_load_on_response = true;
             do_search("community", n.community);
         }).find("span").first()
-          .css("color", communityColor(n.community));
+          .css("color", color_set_community(n.community));
 
         _.delay(function(){  $("#alink").focus(); }, 300);
 
@@ -1476,7 +1589,7 @@ function draw_mini_topic_chart(email_id){
         .attr("y", function(d) { return margin.top + y(+d*100);})
         .attr("height", function(d) { return height - y(+d*100);})
         .attr("width", barWidth - 1)
-        .style("fill", function(d,i) { return communityColor(i); })
+        .style("fill", function(d,i) { return color_set_community(i); })
         .attr('class', 'clickable')
         .on("click", function(d, i){
           $('#tab-list li:eq(3) a').tab('show');
@@ -1685,7 +1798,7 @@ function draw_rank_chart() {
       })
       .attr("height", barHeight - 1)
       .style("fill", function(d) {
-        return communityColor(+d.communityId);
+        return color_set_community(+d.communityId);
       })
       .on("click", function(d){ })
       .append('title').text(function(d) { return d.email;});
@@ -1701,8 +1814,10 @@ function draw_rank_chart() {
       .attr("y", barHeight / 2)
       .attr("class", "label clickable")
       .style("fill", function(d) {
-        return colorByDomain(d.email);
-        //return color(+d.groupId);
+        if(d && d.name) {
+          return getDomainColor(d.email);
+          //return color(+d.groupId);
+        }
       })
       .text(function(d) { return (d.email.length > 25) ? d.email.substr(0,25) + ".." : d.email; })
       .on("click", function(d){
@@ -1751,6 +1866,7 @@ function draw_topic_tab(){
 
 
 function redraw_domains_table(){
+
   var lastSort = "";
   $("#legend-table tbody").empty();
   $("#legend-table thead").empty();
@@ -1770,17 +1886,24 @@ function redraw_domains_table(){
       });
     });
 
-  var d = _.uniq(_.map(d3.selectAll("circle").data(),
-                       function(d){
-                         return emailsDomain(d.name);
-                       }));
-
-  var domains = _.map(d, function(v){
-    return [domain_set[v].color, domain_set[v].count, v];
+  var domain_list = _.groupBy(d3.selectAll("circle").data(), function(node) {
+    if (node && node.name) {
+      var domain = getEmailDomain(node.name);
+      return domain;
+    }
   });
+  console.log('\tdomain_list: ' + JSON.stringify(domain_list, null, 2));
+
+  var color_n_count_by_domain = _.map(domain_list, function(value, key){
+    if(value && key) {
+      return [getDomainColor(key), value.length, key];
+    }
+  });
+  color_n_count_by_domain = color_n_count_by_domain.sort(descendingPredicatByIndex(1));
+  //console.log('\tcolor_n_count_by_domain: ' + JSON.stringify(color_n_count_by_domain, null, 2));
 
   var tr = d3.select("#legend-table").select("tbody").selectAll("tr")
-    .data(domains).enter().append("tr")
+    .data(color_n_count_by_domain).enter().append("tr")
   //.attr('class', 'clickable')
     .on("click", function(d, i){
       console.log(d);
@@ -1789,10 +1912,13 @@ function redraw_domains_table(){
       var hoverDomain = d[2];
       d3.selectAll("circle").style("stroke","#ffff00");
       d3.selectAll("circle").each(function(d, i){
-        if (hoverDomain.localeCompare(emailsDomain(d.name)) == 0) {
-          d3.select(this).style("stroke-width",function(d) {
-            return 5;
-          });
+        if(d) {
+          //console.log('node' + JSON.stringify(d, null, 2));
+          if (hoverDomain.localeCompare(getEmailDomain(d.name)) == 0) {
+            d3.select(this).style("stroke-width", function (d) {
+              return 5;
+            });
+          }
         }
       });
     })
@@ -1842,14 +1968,26 @@ function redraw_community_table() {
       });
     });
 
-  var c = _.groupBy(d3.selectAll("circle").data(), function(d) { return d.community;});
+  var community_set = _.groupBy(d3.selectAll("circle").data(),
+    function(node) {
+      if(node && node.community) {
+        return node.community;
+      }
+    }
+  );
 
-  var communities = _.map(c, function(v, k){
-    return [v.length, k];
-  });
+  var node_count_by_community = _.map(community_set,
+    function(value, key){
+      if(value && key) {
+        return [value.length, key];
+      }
+    }
+  );
+  node_count_by_community = node_count_by_community.sort(descendingPredicatByIndex(0));
+  //console.log('\tnode_count_by_community: ' + JSON.stringify(node_count_by_community, null, 2));
 
   var tr = d3.select("#legend-table").select("tbody").selectAll("tr")
-    .data(communities).enter().append("tr")
+    .data(node_count_by_community).enter().append("tr")
     .on("mouseover", function(d, i){
       var k = d[1];
       d3.selectAll("circle").style("stroke","#ffff00");
@@ -1880,7 +2018,7 @@ function redraw_community_table() {
   tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td")
     .html(function(d, i){
       if (i == 1){
-        return $('<div>').append($('<div>').css({ 'min-height': '14px', 'width' : '100%', 'background-color' : communityColor(+d)})).html();
+        return $('<div>').append($('<div>').css({ 'min-height': '14px', 'width' : '100%', 'background-color' : color_set_community(+d)})).html();
       }
       return d;
     });
@@ -2158,21 +2296,27 @@ $(function () {
 
   $.when($.get("email/target"), $.get("email/domains")).done(function(resp1, resp2){
 
-    //validate service response
-    resp2 = validateDomainResponse( resp2 );
+    if(!service_response_email_domains) {
+      console.log('graphtool: request service_response_email_domains');
+      //validate service response
+      service_response_email_domains = validateDomainResponse(resp2);
+    }
+    var filtered_response = service_response_email_domains;
+    //console.log('\tfiltered_response: ' + JSON.stringify(filtered_response, null, 2));
 
     TARGET_EMAIL = _.object(
       ['email', 'community', 'community_id', 'group', 'total_received', 'total_sent', 'rank'],
       _.first(resp1[0].email)
     );
 
-    _.each(resp2[0].domains, function(o, i){
+    _.each(filtered_response.domains, function(o, i){
       domain_set[o[0]] = {
         count: o[1],
-        color: colorDomain(i),
+        color: color_set_domain(i),
         domain: o[0]
       }
     });
+    //console.log('\tdomain_set: ' + JSON.stringify(domain_set, null, 2));
 
     $('#target_email').html(TARGET_EMAIL.email);
 

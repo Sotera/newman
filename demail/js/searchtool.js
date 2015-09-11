@@ -65,6 +65,8 @@ var dashboard_donut_chart_topic;
 var dashboard_donut_chart_domain;
 var dashboard_donut_chart_communities;
 
+var service_response_email_domains;
+
 /**
  * monthly account activity container
  */
@@ -773,16 +775,23 @@ function drawChartDomain( count ) {
 
     $.get('email/domains').then(function (response) {
 
-      //validate search-response
-      response = validateDomainResponse( response );
 
-      var domains = _.map(response.domains, function( element ){
+      if(!service_response_email_domains) {
+        console.log('searchtool: request service_response_email_domains');
+        //validate service response
+        service_response_email_domains = validateDomainResponse(response);
+      }
+      var filtered_response = service_response_email_domains;
+      //console.log('\tfiltered_response: ' + JSON.stringify(filtered_response, null, 2));
+
+      var domains = _.map(filtered_response.domains, function( element ){
         var domain =  _.object(["domain", "count"], element);
-        domain.count = parseInt(domain.count);
         return domain;
       });
 
-      domains = domains.sort( predicatBy("count"));
+      domains = domains.sort( descendingPredicatByProperty("count"));
+      //console.log('domains: ' + JSON.stringify(domains, null, 2));
+
       if (domains.length > count) {
         domains = domains.splice(0, count);
       }
@@ -898,21 +907,6 @@ function drawChartDomain( count ) {
       dashboard_donut_chart_domain.select(0);
 
     });
-
-  }
-}
-
-/**
- * sort predicate based on property
- */
-function predicatBy(prop){
-  return function(a,b){
-    if( a[prop] > b[prop]){
-      return -1;
-    }else if( a[prop] < b[prop] ){
-      return 1;
-    }
-    return 0;
   }
 }
 
@@ -945,7 +939,7 @@ function draw_chart_account_activities( count ) {
         return domain;
       });
 
-      domains = domains.sort(predicatBy("count"));
+      domains = domains.sort(descendingPredicatByProperty("count"));
       if (domains.length > count) {
         domains = domains.splice(0, count);
       }
