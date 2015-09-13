@@ -1086,8 +1086,9 @@ function do_search(field, value) {
 
         history_nav.push(id,
                          label,
-                         'fa fa-connectdevelop',
-                         url_path);
+                         '',
+                         url_path,
+                         field);
 
         showSearchPopup( field, decodeURIComponent(search_arg) );
         loadSearchResult( url_path );

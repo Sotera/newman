@@ -6,21 +6,38 @@ var history_nav = (function () {
   var hist_max = 20;
   var hist_list = [];
 
-  var data_view = function( uid, label, icon_class, data_url ) {
+  var data_view = function( uid, label, icon_class, data_url, data_field ) {
 
     return {
       "uid" : uid,
       "label": label,
       "icon_class": icon_class,
-      "data_url": data_url
+      "data_url": data_url,
+      "data_field": data_field
     };
   };
 
 
-  var push = function ( uid, label, icon_class, data_url) {
+  var push = function ( uid, label, icon_class, data_url, data_field) {
     console.log('push( ' + uid + ', ' + label + ', ' + data_url + ' )');
 
-    var new_data_view = data_view(uid, label, icon_class, data_url);
+    if(!icon_class) {
+      icon_class = 'fa fa-asterisk';
+      if (data_field === 'email') {
+        icon_class = 'fa fa-files-o';
+      }
+      else if (data_field === 'topic') {
+        icon_class = 'fa fa-list-ol';
+      }
+      else if (data_field === 'community') {
+        icon_class = 'fa fa-link';
+      }
+      else if (data_field === 'entity') {
+        icon_class = 'fa fa-th';
+      }
+    }
+
+    var new_data_view = data_view(uid, label, icon_class, data_url, data_field);
 
     if (!contains(new_data_view)) {
       if (hist_list.length == hist_max) {
@@ -103,7 +120,8 @@ var history_nav = (function () {
     push('hist_dashboard_home',
          ' Dashboard',
          'fa fa-tachometer',
-         '/');
+         '/',
+         '');
 
     refreshUI();
 

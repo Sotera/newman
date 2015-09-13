@@ -399,8 +399,9 @@ var search_result = (function () {
 
               history_nav.push(id,
                                label,
-                               'fa fa-connectdevelop',
-                               element.url);
+                               '',
+                               element.url,
+                               element.search_field);
 
               showSearchPopup( element.search_field, element.search_text );
               loadSearchResult( element.url );
