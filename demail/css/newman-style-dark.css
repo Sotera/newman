@@ -1845,7 +1845,9 @@ ul.DTTT_dropdown.dropdown-menu > li:hover > a {
 }
 .btn + .dropdown-menu {
   margin-top: -10px;
-  background: rgba(0, 0, 0, 0.7) !important; padding: 0; border: 0; 
+  background: rgba(255, 255, 255, 1.0);
+  padding: 0;
+  border: 1px;
   right: 0; 
   left: auto; 
   min-width: 100%;
