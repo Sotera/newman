@@ -354,20 +354,29 @@ def ingestESTextResults(hits):
                 pass
 
         cnx.commit()
-
 def createResults(field, args_array):
     cherrypy.log("createResults( %s, %s)" % (field, args_array) )
 
     ## is text search
     if not field.lower() in ["email", "entity"]:
-        text = head(args_array)    
+        text = head(args_array)
         if text:
-            tangelo.log("\ttext search : %s" % text)
+            tangelo.log("text search : %s" % text)
             es = Elasticsearch()
-            res = es.search(index="newman", doc_type="emails", size=1000, q=text, body= {"fields": ["_id"], "query": {"match_all": {}}})
-            
+            if len(args_array) == 3:
+                # start = time.strptime(args_array[1], "%Y-%m-%dT%H:%M:%S")
+                # end = time.strptime(args_array[2], "%Y-%m-%dT%H:%M:%S")
+                start = args_array[1]
+                end = args_array[2]
+                body= {"fields": ["_id"], "filter":{"range" : {"utc_date" : { "gte": start, "lte": end }}}}
+            else:
+                body= {"fields": ["_id"], "query": {"match_all": {}}}
+
+
+            res = es.search(index="newman", doc_type="emails", size=1000, q=text, body=body)
+
             ingestESTextResults(jsonGet(['hits','hits'], res, []))
-    
+
     node_vals = getNodeVals(field, args_array)
     colors = {k:v.get("group_id") for k,v in node_vals.iteritems()}
 
@@ -382,7 +391,7 @@ def createResults(field, args_array):
         idx_lookup[k]=i
         #nodes.append({"name": k, "num": v.get("num"), "rank": v.get("rank"), "group": v.get("color"), "community": colors.get(v.get("comm"))})
         nodes.append({"name": k, "num": v.get("num"), "rank": v.get("rank"), "group": v.get("color"), "community": v.get("comm_id")})
-    edges = getEdges(idx_lookup, field, args_array)    
+    edges = getEdges(idx_lookup, field, args_array)
 
     results = { 'rows': emails, 'graph': { 'nodes': nodes, 'links': edges }}
 
@@ -427,7 +436,7 @@ def getDates(*args):
     results = { 'doc_dates': queryAllDates() }
     return results
 
-#GET /search/<fields>/<arg>/<arg>/.../<date-range>
+#GET /search/<fields>/<arg>/<arg>/<date-start>/<date-end>
 def search(*args):
     cherrypy.log("search(args[%s] %s)" % (len(args), str(args)))
 
