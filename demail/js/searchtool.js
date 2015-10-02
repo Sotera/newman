@@ -58,14 +58,15 @@ function logUIEvent( ui_activity,
 }
 */
 
-var dashboard_time_chart_outbound_activities;
-var dashboard_time_chart_inbound_activities;
-var dashboard_donut_chart_entities;
+var dashboard_time_chart_outbound_activity;
+var dashboard_time_chart_inbound_activity;
+
+var dashboard_donut_chart_entity;
 var dashboard_donut_chart_topic;
 var dashboard_donut_chart_domain;
-var dashboard_donut_chart_communities;
+var dashboard_donut_chart_community;
+var dashboard_donut_chart_rank;
 
-var service_response_email_domains;
 
 /**
  * monthly account activity container
@@ -179,6 +180,241 @@ var activity_monthly = (function () {
 */
 
 /**
+ * all domain colors
+ */
+var color_set_domain = d3.scale.category20();
+
+/**
+ * all community colors
+ */
+var color_set_community = (function(){
+  var colors = d3.scale.category20();
+  var cache = {};
+  var iterator = _.iterators.numbers();
+
+  var getColor = function(k) {
+    //console.log('color_set_community.getColor( ' + k + ' )');
+
+    var _color = _.getPath(cache, ""+k);
+    if (_color) {
+      return _color;
+    }
+    cache[k] = colors(iterator());
+    return cache[k];
+  };
+  return getColor;
+}());
+
+/**
+ * all communities container
+ */
+var all_community_map = (function () {
+
+  var _community_map = {};
+
+  var _community = function( key, community, count, color ) {
+
+    return {
+      "key" : key,
+      "community" : community,
+      "count" : count,
+      "color" : color
+    }
+  }
+
+  var put = function ( key, community, count, color ) {
+    //console.log('put( ' + key + ', ' + community + ', ' + count + ', ' + color + ' )');
+
+    var new_community = _community( key, community, count, color );
+
+    if (contains(new_community)) {
+      new_community = _community_map[ key ];
+      new_community.count = new_community.count + count;
+    }
+    //console.log('\tcommunity\'' + key + '\' count ' + new_community.count + ' color ' + new_community.color );
+
+    _community_map[ key ] = new_community;
+
+
+
+    return new_community;
+  };
+
+  var contains = function (new_domain) {
+
+    var found = false;
+    _.each(_community_map, function (element) {
+      if (element.key === new_domain.key && element.community === new_domain.community) {
+        found = true;
+      }
+    });
+
+    return found;
+  };
+
+  var getAll = function () {
+    //console.log('getAll()');
+    console.log('\tcommunity_map.size ' + _.size(_community_map));
+    //console.log('\tcommunity_map : ' + JSON.stringify(domain_map, null, 2));
+
+    //create a deep-copy
+    return clone( _community_map )
+  };
+
+  var getAllCount = function () {
+    return _.size(_community_map);
+  };
+
+  var get = function ( key ) {
+    //console.log('get( ' + key + ' )');
+
+
+    var domain = _community_map[ key ];
+
+    return domain;
+  };
+
+  var getColor = function ( key ) {
+    //console.log('getColor( ' + key + ' )');
+
+    var domain = _community_map[ key ];
+    if(domain) {
+      return domain.color;
+    }
+    //console.log('\tNo community found \'' + key + '\'');
+
+    var new_color = color_set_community( key );
+    put(key, key, 1, new_color);
+
+    return new_color;
+  };
+
+  var getCount = function ( key ) {
+    //console.log('getCount( ' + key + ' )');
+
+    var domain = _community_map[ key ];
+    if(domain) {
+      return domain.count;
+    }
+    console.log('\tNo community found \'' + key + '\'');
+
+    return domain;
+  };
+
+  return {
+    "put" : put,
+    "contains" : contains,
+    "getAll" : getAll,
+    "getAllCount" : getAllCount,
+    "get" : get,
+    "getColor" : getColor,
+    "getCount" : getCount
+  }
+}());
+
+/**
+ * all domains container
+ */
+var all_domain_map = (function () {
+
+  var _domain_map = {};
+
+  var _domain = function( key, domain, count, color ) {
+    return {
+      "key" : key,
+      "domain" : domain,
+      "count" : count,
+      "color" : color
+    }
+  }
+
+  var put = function ( key, domain, count, color ) {
+    //console.log('put( ' + key + ', ' + domain + ', ' + count + ', ' + color + ' )');
+
+    var new_domain = _domain( key, domain, count, color );
+
+    if (contains(new_domain)) {
+      console.log('\t domain \'' + key + '\' already exists!');
+
+    }
+    else {
+      _domain_map[ key ] = new_domain;
+
+    }
+
+    return new_domain;
+  };
+
+  var contains = function (new_domain) {
+
+    var found = false;
+    _.each(_domain_map, function (element) {
+      if (element.key === new_domain.key && element.domain === new_domain.domain) {
+        found = true;
+      }
+    });
+
+    return found;
+  };
+
+  var getAll = function () {
+    console.log('getAll()');
+    console.log('\tdomain_map.size ' + _.size(_domain_map));
+    //console.log('\tdomain_map : ' + JSON.stringify(domain_map, null, 2));
+
+    //create a deep-copy
+    return clone( _domain_map );
+  };
+
+  var getAllCount = function () {
+    return _.size(_domain_map);
+  };
+
+  var get = function ( key ) {
+    console.log('get( ' + key + ' )');
+
+
+    var domain = _domain_map[ key ];
+
+    return domain;
+  };
+
+  var getColor = function ( key ) {
+    console.log('getColor( ' + key + ' )');
+
+    var domain = _domain_map[ key ];
+    if(domain) {
+      return domain.color;
+    }
+    console.log('\tNo domain found \'' + key + '\'');
+
+    return domain;
+  };
+
+  var getCount = function ( key ) {
+    console.log('getCount( ' + key + ' )');
+
+    var domain = _domain_map[ key ];
+    if(domain) {
+      return domain.count;
+    }
+    console.log('\tNo domain found \'' + key + '\'');
+
+    return domain;
+  };
+
+  return {
+    "put" : put,
+    "contains" : contains,
+    "getAll" : getAll,
+    "getAllCount" : getAllCount,
+    "get" : get,
+    "getColor" : getColor,
+    "getCount" : getCount
+  }
+}());
+
+/**
  * date-time range container
  */
 var date_range = (function () {
@@ -222,6 +458,7 @@ var date_range = (function () {
 var search_result = (function () {
   var result_set_max = 20;
   var result_set = [];
+  var result_root;
   var ui_appendable;
 
   var result = function( label,
@@ -232,7 +469,10 @@ var search_result = (function () {
                          data_source_id,
                          data_source_category,
                          document_count,
-                         node_count ) {
+                         document_sent,
+                         document_received,
+                         node_count,
+                         rank ) {
     if (!label) {
       if (search_text) {
         label = search_text;
@@ -246,10 +486,65 @@ var search_result = (function () {
       description = data_source_id + ", " + search_field;
     }
 
+    if (document_count) {
+      document_count = parseInt( document_count );
+      if (document_count < 0 ) {
+        document_count = 0;
+      }
+    }
+    else {
+      document_count = 0;
+    }
+
+    if (document_sent) {
+      document_sent = parseInt( document_sent );
+      if (document_sent < 0 ) {
+        document_sent = 0;
+      }
+    }
+    else {
+      document_sent = 0;
+    }
+
+    if (document_received) {
+      document_received = parseInt( document_received );
+      if (document_received < 0 ) {
+        document_received = 0;
+      }
+    }
+    else {
+      document_received = 0;
+    }
+
+    if (node_count) {
+      node_count = parseInt( node_count );
+      if (node_count < 0 ) {
+        node_count = 0;
+      }
+    }
+    else {
+      node_count = 0;
+    }
+
+    if (rank) {
+      rank = parseFloat( rank );
+      if (rank < 0.0 || rank > 1.0) {
+        rank = 0.0;
+      }
+    }
+    else {
+      rank = 0.0;
+    }
+
     var key = label.replace(' ', '_');
+    var parent_index = 1;
+    if (url.endsWith( url_search_all )) {
+      parent_index = 0;
+    }
 
     return {
       "key" : key,
+      "parent_index" : parent_index,
       "label" : label,
       "search_text" : search_text,
       "search_field" : search_field,
@@ -258,7 +553,10 @@ var search_result = (function () {
       "data_source_id" : data_source_id,
       "data_source_category" : data_source_category,
       "document_count" : document_count,
+      "document_sent" : document_sent,
+      "document_received" : document_received,
       "node_count" : node_count,
+      "rank" : rank,
     }
   }
 
@@ -270,7 +568,10 @@ var search_result = (function () {
                         data_source_id,
                         data_source_category,
                         document_count,
-                        node_count ) {
+                        document_sent,
+                        document_received,
+                        node_count,
+                        rank ) {
     console.log('push( ' + label + ', ' + search_text + ', ' + search_field + ', ' + url + ' )');
 
     var new_result = result( decodeURIComponent(label),
@@ -281,7 +582,10 @@ var search_result = (function () {
                              data_source_id,
                              data_source_category,
                              document_count,
-                             node_count );
+                             document_sent,
+                             document_received,
+                             node_count,
+                             rank );
 
     if (!contains(new_result)) {
       if (result_set.length == result_set_max) {
@@ -297,9 +601,40 @@ var search_result = (function () {
     return new_result;
   };
 
+  var setRoot = function ( label,
+                           search_text,
+                           search_field,
+                           description,
+                           url,
+                           data_source_id,
+                           data_source_category,
+                           document_count,
+                           node_count ) {
+    console.log('setRoot( ' + label + ', ' + search_text + ', ' + search_field + ', ' + url + ' )');
+
+    result_root = result( decodeURIComponent(label),
+                          decodeURIComponent(search_text),
+                          search_field,
+                          description,
+                          url,
+                          data_source_id,
+                          data_source_category,
+                          document_count,
+                          0,
+                          0,
+                          node_count,
+                          0.0 );
+
+
+    return clone(result_root);
+  };
+
+  var getRoot = function() {
+    return clone(result_root);
+  }
+
   var clearAll = function () {
-    console.log('clearAll()');
-    clearUI();
+    //console.log('clearAll()');
     result_set = [];
   }
 
@@ -315,7 +650,6 @@ var search_result = (function () {
       if (element.url === result.url) {
         found = true;
       }
-
     });
 
     console.log('contains( ' + result.label + ' ) ' + found);
@@ -329,16 +663,16 @@ var search_result = (function () {
     return result_set.pop();
   };
 
-  var getAllResult = function () {
-    return result_set;
+  var getAll = function () {
+    return clone(result_set);
   };
 
-  var getResultByIndex = function (index) {
+  var getByIndex = function (index) {
     return result_set[ index ];
   };
 
-  var getResultByLabel = function ( label ) {
-    //console.log( 'getResultByLabel(' + label + ')' );
+  var getByLabel = function ( label ) {
+    //console.log( 'getByLabel(' + label + ')' );
 
     var result;
     _.each(result_set, function (element) {
@@ -352,8 +686,23 @@ var search_result = (function () {
     return result;
   };
 
-  var getResultByURL = function ( url ) {
-    //console.log( 'getResultByURL(' + url + ')' );
+  var getByKey = function ( key ) {
+    //console.log( 'getByKey(' + key + ')' );
+
+    var result;
+    _.each(result_set, function (element) {
+
+      if (element.key === key) {
+        result = element;
+      }
+
+    });
+
+    return result;
+  };
+
+  var getByURL = function ( url ) {
+    //console.log( 'getByURL(' + url + ')' );
 
     var result;
     _.each(result_set, function (element) {
@@ -371,12 +720,169 @@ var search_result = (function () {
     ui_appendable = new_ui_appendable;
   }
 
+
+  var onTreeTableRowEvent = function( element ) {
+
+    var label = ' all';
+    if (element.search_text) {
+      label = ' ' + decodeURIComponent(element.search_text);
+    }
+    var id = decodeURIComponent(element.url).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
+
+    history_nav.push(
+      id,
+      label,
+      '',
+      element.url,
+      element.search_field
+    );
+
+    showSearchPopup(element.search_field, element.search_text);
+    loadSearchResult(element.url);
+
+  }
+
+  var populateTreeTableRow = function( ui_appendable, data_list ) {
+
+    if (ui_appendable) {
+      ui_appendable.empty();
+
+      if(data_list.length > 0) {
+
+        //sort by ranking
+        data_list.sort(descendingPredicatByProperty('rank'));
+        //console.log( 'data_list: ' + JSON.stringify(data_list, null, 2) );
+
+        var data_set_selected = all_data_source.getSelected();
+
+        var root_result = getRoot();
+        if (!root_result) {
+
+          root_result = setRoot(
+            'all (' + data_set_selected.label + ')',
+            '',
+            'text',
+            '',
+            url_search_all,
+            data_set_selected.label,
+            'pst',
+            0,
+            0
+          );
+        }
+
+        /**
+         * Insert root to the top of the list for the purpose of populating the treegrid.
+         * The list contains only subsets under the root data-set,
+         * and does not track state.
+         */
+        data_list.unshift(root_result);
+
+        var row_index = 1;
+
+        _.each(data_list, function (element) {
+          //console.log('\t' + element.label + ', ' + element.url );
+
+          var button_html = "<button type=\"button\" class=\"btn btn-small outline\" id=\"" + element.key + "\">" + element.label + "</button>";
+          var checkbox_html = "<input type=\"checkbox\" id=\"checkbox_" + element.key + "\"/>";
+
+          ui_appendable.on('click', 'td button:button', function (event) {
+
+            // Ignore this event if preventDefault has been called.
+            if (event.defaultPrevented) return;
+
+            var column_index = parseInt($(this).index());
+            var row_index = parseInt($(this).parent().index());
+            console.log('search-result-selected [' + row_index + ',' + column_index + ']');
+
+            var attr_id = $(this).attr('id');
+            if (attr_id) {
+              console.log('\tid : ' + attr_id);
+
+              var element = getByKey(attr_id);
+              //console.log('\element : ' + JSON.stringify(element, null, 2));
+
+              //onTreeTableRowEvent(element);
+
+
+              var label = ' all';
+              if (element.search_text) {
+                label = ' ' + decodeURIComponent(element.search_text);
+              }
+              var id = decodeURIComponent(element.url).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
+
+              history_nav.push(
+                id,
+                label,
+                '',
+                element.url,
+                element.search_field
+              );
+
+              //showSearchPopup(element.search_field, element.search_text);
+              loadSearchResult(element.url);
+
+
+            }
+
+
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+          });
+
+          var parent_index = element.parent_index;
+          var table_row;
+          if (parent_index > 0) {
+            table_row = $('<tr class=\"treegrid-' + row_index + ' treegrid-parent-' + parent_index + '\"/>').append(
+              "<td>" + button_html + "</td>" +
+              "<td>" + checkbox_html + "</td>" +
+              "<td>" + element.document_sent + "</td>" +
+              "<td>" + element.document_received + "</td>" +
+              "<td>" + element.document_count + "</td>" +
+              "<td>" + element.node_count + "</td>"
+            );
+
+          }
+          else {
+            table_row = $('<tr class=\"treegrid-' + row_index + '\"/>').append(
+              "<td>" + button_html + "</td>" +
+              "<td>" + checkbox_html + "</td>" +
+              "<td>" + element.document_sent + "</td>" +
+              "<td>" + element.document_received + "</td>" +
+              "<td>" + element.document_count + "</td>" +
+              "<td>" + element.node_count + "</td>"
+            );
+          }
+
+          ui_appendable.append(table_row);
+
+          row_index++;
+        });
+
+        /**
+         * Remove root from the top of the list.
+         * The list contains only subsets under the root data-set,
+         * and does not track state
+         */
+        data_list.shift();
+      }
+    }
+
+  }
+
   var refreshUI = function() {
 
+    newUI( result_set );
+
+    /*
     if (ui_appendable) {
       console.log('result_set[' + result_set.length + ']');
 
       clearUI();
+
+      //sort by ranking
+      result_set.sort( descendingPredicatByProperty( 'rank' ) );
 
       _.each(result_set, function (element) {
         //console.log('\t' + element.label + ', ' + element.url );
@@ -412,18 +918,51 @@ var search_result = (function () {
         var div = $( '<div class=\"one-result\" />' )
           .append( button )
           .append(
+          "<a href=\"" + element.url + "\" class=\"txt-primary\">" +
           "<p class=\"txt-primary\">" + "    " +
-          "<i class=\"fa fa-files-o fa-lg\"></i>" + "  document  " + element.document_count + "  " +
-          "<i class=\"fa fa-user fa-lg\"></i>" + "  account  " + element.node_count + "  " +
+          "<i class=\"fa fa-envelope-o \"></i>" + "  document  " + element.document_count + "  " +
+          "<i class=\"fa fa-expand \"></i>" + "  sent  " + element.document_sent + "  " +
+          "<i class=\"fa fa-compress \"></i>" + "  received  " + element.document_received + "  " +
+          "<i class=\"fa fa-user \"></i>" + "  account  " + element.node_count + "  " +
           "</p>" +
-          "<a href=\"" + element.url + "\" class=\"txt-primary\">" + "    " + element.description + " ... </a>"
+          "</a>"
           );
 
         ui_appendable.append( div );
 
-      });
+      }); // end of _.each
+
     }
+    */
+
+
   };
+
+  var newUI = function(data_list) {
+
+    if (data_list.length > 0) {
+
+      var ui_container_treetable = $('#search_result_treetable');
+      var ui_container_treetable_body = $('#search_result_treetable_body');
+
+      if (ui_container_treetable && ui_container_treetable_body) {
+        ui_container_treetable_body.empty();
+
+        populateTreeTableRow(ui_container_treetable_body, data_list);
+
+        ui_container_treetable.treegrid({
+          initialState: 'expanded',
+          expanderExpandedClass: 'fa fa-minus-square-o',
+          expanderCollapsedClass: 'fa fa-plus-square-o'
+        });
+
+      }
+
+      console.log( 'data_list[' + data_list.length +']' );
+      //console.log( 'data_list : ' + JSON.stringify(data_list, null, 2) );
+    }
+
+  }
 
   var clearUI = function () {
 
@@ -445,14 +984,17 @@ var search_result = (function () {
       "pop": pop,
       "contains": contains,
       "getFirst": getFirst,
-      "getAllResult": getAllResult,
-      "getResultByIndex": getResultByIndex,
-      "getResultByLabel" : getResultByLabel,
-      "getResultByURL" : getResultByURL,
+      "getAll": getAll,
+      "getByKey" : getByKey,
+      "getByIndex": getByIndex,
+      "getByLabel" : getByLabel,
+      "getByURL" : getByURL,
       "clearAll" : clearAll,
       "refreshUI" : refreshUI,
       "setUI" : setUI,
-      "clearUI" : clearUI
+      "clearUI" : clearUI,
+      "setRoot" : setRoot,
+      "getRoot" : getRoot
     }
 }());
 
@@ -571,7 +1113,7 @@ function drawChartEntity( count ) {
       var top_donut_chart_colors = [];
 
 
-      for( var i = 0; i < top_count; i++ ){
+      for( var i = 0; i < entities.length; i++ ){
         top_donut_chart_total = top_donut_chart_total + entities[i][3];
         var entity_type = entities[i][1];
         var entity_color = '#c0c0c0';
@@ -587,7 +1129,7 @@ function drawChartEntity( count ) {
         top_donut_chart_colors.push( entity_color );
       };
 
-      for( var i = 0; i < top_count; i++ ){
+      for( var i = 0; i < entities.length; i++ ){
 
 
         var value = Math.round((entities[i][3] / top_donut_chart_total) * 100);
@@ -600,14 +1142,14 @@ function drawChartEntity( count ) {
       };
 
 
-      dashboard_donut_chart_entities = Morris.Donut({
+      dashboard_donut_chart_entity = Morris.Donut({
         element: 'chart_donut_entities',
         data: top_donut_chart_data,
         colors: top_donut_chart_colors,
         formatter: function (x, data) { return data.formatted; }
       });
 
-      dashboard_donut_chart_entities.select(0);
+      dashboard_donut_chart_entity.select(0);
 
     });
 
@@ -727,11 +1269,11 @@ function drawChartTopic( count ) {
       var top_donut_chart_total = 1;
 
 
-      for( var i = 0; i < top_count; i++ ){
+      for( var i = 0; i < categories.length; i++ ){
         top_donut_chart_total = top_donut_chart_total + categories[i].score;
       };
 
-      for( var i = 0; i < top_count; i++ ){
+      for( var i = 0; i < categories.length; i++ ){
         var value = Math.round((categories[i].score / top_donut_chart_total) * 100);
         var entry = {
           value: value,
@@ -777,12 +1319,12 @@ function drawChartDomain( count ) {
     $.get('email/domains').then(function (response) {
 
 
-      if(!service_response_email_domains) {
+      if(!service_response_email_domain) {
         console.log('searchtool: request service_response_email_domains');
         //validate service response
-        service_response_email_domains = validateDomainResponse(response);
+        service_response_email_domain = validateResponseDomain(response);
       }
-      var filtered_response = service_response_email_domains;
+      var filtered_response = service_response_email_domain;
       //console.log('\tfiltered_response: ' + JSON.stringify(filtered_response, null, 2));
 
       var domains = _.map(filtered_response.domains, function( element ){
@@ -791,19 +1333,17 @@ function drawChartDomain( count ) {
       });
 
       domains = domains.sort( descendingPredicatByProperty("count"));
-      //console.log('domains: ' + JSON.stringify(domains, null, 2));
 
       if (domains.length > count) {
         domains = domains.splice(0, count);
       }
+      //console.log('domains: ' + JSON.stringify(domains, null, 2));
 
       /*
       _.each(domains, function (item) {
         console.log( 'domain : ' + item.domain + ' count : ' + item.count  );
-
       });
       */
-
 
       var colors = d3.scale.category20b();
       var width = 600, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
@@ -883,11 +1423,11 @@ function drawChartDomain( count ) {
       var top_donut_chart_total = 1;
 
 
-      for( var i = 0; i < top_count; i++ ){
+      for( var i = 0; i < domains.length; i++ ){
         top_donut_chart_total = top_donut_chart_total + domains[i].count;
       };
 
-      for( var i = 0; i < top_count; i++ ){
+      for( var i = 0; i < domains.length; i++ ){
         var value = Math.round((domains[i].count / top_donut_chart_total) * 100);
         var entry = {
           value: value,
@@ -904,8 +1444,351 @@ function drawChartDomain( count ) {
         data: top_donut_chart_data,
         formatter: function (x, data) { return data.formatted; }
       });
-
       dashboard_donut_chart_domain.select(0);
+
+    });
+  }
+}
+
+/**
+ * request and display top community-related charts
+ * @param count
+ */
+function drawChartCommunity( count ) {
+
+  var chart_ui_id = '#chart_horizontal_bar_communities';
+  var legend_ui_id = '#chart_legend_communities';
+
+  if (count > 0 && chart_ui_id) {
+
+    var top_count = count;
+    /*
+     if (top_count > 5) {
+       top_count = 5;
+     }
+     */
+
+
+    /*
+    var service_url = 'search/search/all/';
+
+    $.get(service_url).then(function (response) {
+
+      console.log('.getJSON(' + service_url + ')');
+
+      //validate search-response
+      service_response_email_all = validateResponseSearch(response);
+
+      var community_map = all_community_map.getAll();
+      //console.log('\tcommunity_map: ' + JSON.stringify(community_map, null, 2));
+
+      var communities = _.values( community_map );
+
+      communities = communities.sort(descendingPredicatByProperty("count"));
+
+      if (communities.length > count) {
+        communities = communities.splice(0, count);
+      }
+      console.log('communities: ' + JSON.stringify(communities, null, 2));
+
+
+      var colors = d3.scale.category20b();
+      var width = 600, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
+      var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
+      width = width - margin.left - margin.right;
+
+      var x = d3.scale.linear().range([0, width]);
+      var chart = d3.select(chart_ui_id).append('svg')
+        .attr('class', 'chart')
+        .attr("width", width + margin.left + margin.right);
+
+      x.domain([0, 100]);
+      chart.attr("height", height_bar * communities.length + margin_top + margin_bottom);
+
+      var bar = chart.selectAll("g")
+        .data(communities).enter()
+        .append("g")
+        .attr("transform", function (d, i) {
+          return "translate(" + margin.left + "," + (+(i * height_bar) + +margin.top) + ")";
+        });
+
+      bar.append("rect")
+        .attr("width", function (d) {
+          return x(+d.count * width_bar_factor);
+        })
+        .attr("height", height_bar - 1)
+        .attr("class", "label highlight clickable")
+        .on("click", function (d) {
+          console.log( 'clicked on \'' + d.key + '\'');
+
+        })
+        .style("fill", function (d, i) {
+          return colors(i);
+        })
+        .append('title').text(function (d) {
+          return d.count;
+        });
+
+
+      bar.append("text")
+        .attr("x", function (d) {
+          return x(+d.count * width_bar_factor) - 3;
+        })
+        .attr("y", height_bar / 2)
+        .attr("dy", ".35em")
+        .text(function (d) {
+          return +d.count;
+        });
+
+
+      bar.append("text")
+        .attr("x", function (d) {
+          return -margin.left;
+        })
+        .attr("y", height_bar / 2)
+        .attr("class", "label clickable")
+        .on("click", function (d) {
+          console.log( 'clicked on \'' + d.key + '\'');
+
+        })
+        .text(function (d) {
+          return d.key;
+        })
+        .append('title').text(function (d) {
+          return d.key;
+        });
+
+
+      var top_donut_chart_data = [];
+      var top_donut_chart_total = 1;
+
+
+      for( var i = 0; i < communities.length; i++ ){
+        top_donut_chart_total = top_donut_chart_total + communities[i].count;
+      };
+
+      for( var i = 0; i < communities.length; i++ ){
+        var value = Math.round((communities[i].count / top_donut_chart_total) * 100);
+        var entry = {
+          value: value,
+          label: communities[i].key,
+          formatted: value + '%'
+        };
+        top_donut_chart_data.push(entry);
+      };
+
+
+      dashboard_donut_chart_community = Morris.Donut({
+        element: 'chart_donut_communities',
+        colors: colors.range(),
+        data: top_donut_chart_data,
+        formatter: function (x, data) { return data.formatted; }
+      });
+      dashboard_donut_chart_community.select(0);
+
+    });
+    */
+  }
+}
+
+/**
+ * request and display top rank-related charts
+ * @param count
+ */
+function drawChartRank( count ) {
+
+  var chart_ui_id = '#chart_horizontal_bar_rank';
+  var legend_ui_id = '#chart_legend_rank';
+
+  if (count > 0 && chart_ui_id) {
+
+    var top_count = count;
+    /*
+     if (top_count > 5) {
+     top_count = 5;
+     }
+     */
+
+
+
+    $.get('email/rank').then(function (response) {
+
+      var ranks = service_response_email_rank.getResponseMapValues();
+
+      if (ranks) {
+        console.log('service_response_email_rank.response[' + ranks.length + ']');
+      }
+      else {
+        console.log('searchtool received: service_response_email_rank');
+        service_response_email_rank.setResponse(response);
+        ranks = service_response_email_rank.getResponseMapValues();
+      }
+
+      /*
+       var filtered_response = service_response_email_rank;
+       //console.log('\tfiltered_response: ' + JSON.stringify(filtered_response, null, 2));
+
+       var emails = _.map(_.take(filtered_response.emails, 20), function(email) {
+       return _.object(["email", "community", "communityId", "groupId", "rank", "totalReceived", "totalSent"], email);
+       });
+       */
+
+      if (ranks.length < 1) {
+        $('#chart_horizontal_bar_rank').append($('<p>').html("No results for ranking"));
+      }
+      else {
+
+        if (ranks.length > count) {
+          ranks = ranks.splice(0, count);
+        }
+        //console.log('ranks: ' + JSON.stringify(ranks, null, 2));
+
+
+        var width = 600, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 100;
+        var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
+        width = width - margin.left - margin.right;
+
+        var x = d3.scale.linear().range([0, width]);
+        var chart = d3.select(chart_ui_id).append('svg')
+          .attr('class', 'chart')
+          .attr("width", width + margin.left + margin.right);
+
+        x.domain([0, 100]);
+        chart.attr("height", height_bar * ranks.length + margin_top + margin_bottom);
+
+        var bar = chart.selectAll("g")
+          .data(ranks).enter()
+          .append("g")
+          .attr("transform", function (d, i) {
+            return "translate(" + margin.left + "," + (+(i * height_bar) + +margin.top) + ")";
+          });
+
+        bar.append("rect")
+          .attr("width", function (d) {
+            return x(+d.rank * width_bar_factor);
+          })
+          .attr("height", height_bar - 1)
+          .style("fill", function (d, i) {
+            return color_set_community(+d.communityId);
+          })
+          .on("click", function (d) {
+            console.log('clicked on \'' + d.email + '\'');
+
+          })
+          .append('title').text(function (d) {
+            return d.email;
+          })
+          .attr("class", "label highlight clickable");
+
+
+        bar.append("text")
+          .attr("x", function (d) {
+            return x(+d.rank * width_bar_factor) - 3;
+          })
+          .attr("y", height_bar / 2)
+          .attr("dy", ".35em")
+          .text(function (d) {
+            return +d.rank;
+          });
+
+
+        bar.append("text")
+          .attr("x", function (d) {
+            return -margin.left;
+          })
+          .attr("y", height_bar / 2)
+          .attr("class", "label clickable")
+          .style("fill", function (d) {
+            if (d && d.email) {
+              return getDomainColor(d.email);
+            }
+          })
+          .text(function (d) {
+            var max_length = 30;
+            if (d.email.length > max_length) {
+              var text = d.email.substr(0, max_length);
+              return text + " ...";
+            }
+
+            return d.email;
+          })
+          .on("click", function (d) {
+            console.log('clicked on \'' + d.rank + '\'');
+
+            setSearchType('email');
+            $("#txt_search").val(d.email);
+            is_load_on_response = true;
+            do_search('email', $("#txt_search").val());
+
+          })
+          .on("mouseover", function (d) {
+            d3.select("#g_circle_" + d.groupId).style("stroke", "#ffff00");
+            d3.select("#g_circle_" + d.groupId).style("stroke-width", function (d) {
+              return 10 * (d.rank);
+            });
+          })
+          .on("mouseout", function (d) {
+            d3.select("#g_circle_" + d.groupId).style("stroke", "#ff0000");
+            if (d3.select("#rankval").property("checked")) {
+              d3.select("#g_circle_" + d.groupId).style("opacity", function (d) {
+                return 0.2 + (d.rank);
+              });
+              d3.select("#g_circle_" + d.groupId).style("stroke-width", function (d) {
+                return 5 * (d.rank);
+              });
+            }
+            else {
+              d3.select("#g_circle_" + d.groupId).style("opacity", "100");
+              d3.select("#g_circle_" + d.groupId).style("stroke-width", "0");
+            }
+          })
+          .append('title').text(function (d) {
+            return d.email;
+          });
+
+
+        var top_donut_chart_data = [];
+        var top_donut_chart_total = 1;
+        var top_donut_chart_colors = [];
+
+
+        for (var i = 0; i < ranks.length; i++) {
+          top_donut_chart_total = top_donut_chart_total + ranks[i].rank;
+
+          var entity_color = color_set_community(ranks[i].communityId)
+
+          top_donut_chart_colors.push(entity_color);
+        }
+        ;
+
+        for (var i = 0; i < ranks.length; i++) {
+          top_donut_chart_total = top_donut_chart_total + ranks[i].rank;
+        }
+        ;
+
+        for (var i = 0; i < ranks.length; i++) {
+          var value = Math.round((ranks[i].rank / top_donut_chart_total) * 100);
+          var entry = {
+            value: value,
+            label: ranks[i].email,
+            formatted: value + '%'
+          };
+          top_donut_chart_data.push(entry);
+        }
+        ;
+
+
+        dashboard_donut_chart_rank = Morris.Donut({
+          element: 'chart_donut_rank',
+          colors: top_donut_chart_colors,
+          data: top_donut_chart_data,
+          formatter: function (x, data) {
+            return data.formatted;
+          }
+        });
+        dashboard_donut_chart_rank.select(0);
+
+      }
 
     });
   }
@@ -915,7 +1798,7 @@ function drawChartDomain( count ) {
  * request and display activity-related charts
  * @param count
  */
-function draw_chart_account_activities( count ) {
+function drawChartAccountActivity( count ) {
 
   var chart_ui_id_text = 'chart_line_account_activities';
   var chart_ui_id_element = $('#' + chart_ui_id_text);
@@ -952,7 +1835,113 @@ function draw_chart_account_activities( count ) {
        });
        */
 
+      var chart_outbound = c3.generate({
+        bindto: '#chart_line_outbound_activities',
+        data: {
+          x: 'x',
+          columns: [
+            ['x',
+              '2012-01-01', '2012-02-01', '2012-03-01', '2012-04-01', '2012-05-01', '2012-06-01', '2012-07-01', '2012-08-01', '2012-09-01', '2012-10-01', '2012-11-01', '2012-12-01',
+              '2013-01-01', '2013-02-01', '2013-03-01', '2013-04-01', '2013-05-01', '2013-06-01', '2013-07-01', '2013-08-01', '2013-09-01', '2013-10-01', '2013-11-01', '2013-12-01'
+            ],
+            ['acct-1', 30, 200, 200, 400, 150, 250, 30, 200, 200, 400, 150, 250, 30, 200, 200, 400, 150, 250, 150, 250, 30, 200, 200, 400],
+            ['acct-2', 130, 100, 100, 200, 150, 50, 130, 100, 100, 200, 150, 50, 130, 100, 100, 200, 150, 50, 150, 50, 130, 100, 100, 200],
+            ['acct-3', 230, 200, 200, 300, 250, 250, 230, 200, 200, 300, 250, 250, 230, 200, 200, 300, 250, 250, 300, 250, 250, 230, 200, 200]
+          ],
+          type: 'bar',
 
+          groups: [
+            ['acct-1', 'acct-2', 'acct-3']
+          ]
+        },
+        colors: {
+          'acct-1': '#ff0000',
+          'acct-2': '#00ff00',
+          'acct-3': '#0000ff'
+        },
+        axis : {
+          x : {
+            type : 'timeseries',
+            tick: {
+              //format: function (x) { return x.getFullYear(); }
+              format: '%Y-%m-%d' // format string is also available for timeseries data
+            }
+          }
+        },
+        grid: {
+          y: {
+            lines: [{value:0}]
+          }
+        }
+      });
+
+      var chart_inbound = c3.generate({
+        bindto: '#chart_line_inbound_activities',
+        data: {
+          x: 'x',
+          columns: [
+            ['x',
+              '2012-01-01', '2012-02-01', '2012-03-01', '2012-04-01', '2012-05-01', '2012-06-01', '2012-07-01', '2012-08-01', '2012-09-01', '2012-10-01', '2012-11-01', '2012-12-01',
+              '2013-01-01', '2013-02-01', '2013-03-01', '2013-04-01', '2013-05-01', '2013-06-01', '2013-07-01', '2013-08-01', '2013-09-01', '2013-10-01', '2013-11-01', '2013-12-01'
+            ],
+            ['acct-1', 30, 200, 200, 400, 150, 250, 30, 200, 200, 400, 150, 250, 30, 200, 200, 400, 150, 250, 150, 250, 30, 200, 200, 400],
+            ['acct-2', 130, 100, 100, 200, 150, 50, 130, 100, 100, 200, 150, 50, 130, 100, 100, 200, 150, 50, 150, 50, 130, 100, 100, 200],
+            ['acct-3', 230, 200, 200, 300, 250, 250, 230, 200, 200, 300, 250, 250, 230, 200, 200, 300, 250, 250, 300, 250, 250, 230, 200, 200]
+          ],
+          type: 'bar',
+
+          groups: [
+            ['acct-1', 'acct-2', 'acct-3']
+          ]
+        },
+        colors: {
+          'acct-1': color_set_domain(0),
+          'acct-2': color_set_domain(1),
+          'acct-3': color_set_domain(2)
+        },
+        axis : {
+          x : {
+            type : 'timeseries',
+            tick: {
+              //format: function (x) { return x.getFullYear(); }
+              format: '%Y-%m-%d' // format string is also available for timeseries data
+            }
+          }
+        },
+        grid: {
+          y: {
+            lines: [{value:0}]
+          }
+        }
+      });
+
+      /*
+      setTimeout(function () {
+        chart.groups([['acct-1', 'acct-2', 'acct-3']])
+      }, 1000);
+      */
+
+      setTimeout(function () {
+        chart_outbound.load({
+          columns: [['acct-4', 0, 0, 0, 0, 0, 0, 100, 25, 50, 200, 300, 100, 100, 50, 150, 200, 300, 100, 100, 50, 150, 200, 300, 100]],
+          colors: {
+            'acct-4': color_set_domain(3)
+          }
+        });
+      }, 1500);
+
+      setTimeout(function () {
+        chart_outbound.groups([['acct-1', 'acct-2', 'acct-3', 'acct-4']])
+      }, 2000);
+
+      setTimeout(function () {
+        chart_inbound.groups([['acct-1', 'acct-2', 'acct-3']])
+      }, 2000);
+
+      dashboard_time_chart_outbound_activity = chart_outbound;
+      dashboard_time_chart_inbound_activity = chart_inbound;
+
+      /*
       dashboard_time_chart_outbound_activities = Morris.Line({
         element: 'chart_line_outbound_activities',
         data: [
@@ -1001,6 +1990,8 @@ function draw_chart_account_activities( count ) {
         redraw: true
       });
 
+      */
+
     });
   }
 }
@@ -1019,7 +2010,7 @@ function initDateTimeRange() {
       console.log( 'initDateTimeRange()' );
 
       //validate service-response
-      response = validateDateRangeResponse( response );
+      response = validateResponseDateRange( response );
 
       var doc_dates = response.doc_dates;
       var start_datetime = doc_dates[0].datetime;
@@ -1082,10 +2073,13 @@ function drawDashboardCharts() {
 
   initDateTimeRange();
 
+  drawChartAccountActivity(5);
   drawChartEntity(10);
   drawChartTopic(10);
   drawChartDomain(10);
-  draw_chart_account_activities(5);
+  drawChartCommunity(10);
+  drawChartRank(10);
+
 
 }
 

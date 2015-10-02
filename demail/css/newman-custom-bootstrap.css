@@ -148,6 +148,7 @@
 .btn.outline-inverse:hover {
     border-radius: 6px;
     border: 1px solid #FFFFFF;
+    color: whitesmoke;
 }
 
 text.label.highlight {

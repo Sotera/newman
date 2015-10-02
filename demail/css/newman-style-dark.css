@@ -45,7 +45,7 @@ h1, .h1, h2, .h2, h3, .h3 {
 .button-logo {
   position:relative;
   height: 50px;
-  padding: 0px 0px 0px 0px;
+  padding: 0px 10px 0px 10px;
   color: whitesmoke;
   font-family: "Righteous",cursive;
   font-size: 14px;
@@ -110,6 +110,44 @@ a.show-sidebar:hover {
 .button-sidebar:hover {
   border: solid 1px;
   border-radius: 4px;
+}
+
+.button-dropdown-menu {
+  background: none;
+  padding: 2px 2px 2px 2px;
+  border-radius: 6px;
+  border: 0px solid #FFFFFF;
+  font-weight:normal;
+  font-size: 12px;
+  position: relative;
+  color: whitesmoke;
+}
+
+.button-dropdown-menu:hover {
+  border-radius: 6px;
+  border: 1px solid #FFFFFF;
+  color: whitesmoke;
+}
+
+.button-dropdown-menu-item {
+  background: none;
+  padding: 2px 2px 2px 2px;
+  margin: 0;
+  border-radius: 6px;
+  border: 0px solid #FFFFFF;
+  font-weight:normal;
+  font-size: 12px;
+  position: relative;
+  color: #011d4b;
+  /*color: #FFFFFF;*/
+  line-height: 20px;
+  text-align: center;
+}
+
+.button-dropdown-menu-item:hover {
+  border-radius: 6px;
+  /*border: 1px solid #FFFFFF;*/
+  background: #5e9ff5;
 }
 
 #sidebar-left {
@@ -807,7 +845,7 @@ ul.DTTT_dropdown.dropdown-menu > li:hover > a {
   cursor: pointer;
   font-family: "Lucida Grande","Lucida Sans","Lucida Sans Unicode","Segoe UI",Verdana,sans-serif;
   display: inline-block;
-  vertical-align: top;
+  vertical-align: middle;
   position: relative;
   font-size: 12px;
   font-weight: bold;
@@ -1062,6 +1100,7 @@ ul.DTTT_dropdown.dropdown-menu > li:hover > a {
 .s {
   color: #d44950;
 }
+/*
 .radio, .checkbox, .radio-inline, .checkbox-inline {
   position: relative; padding-left: 20px;
 }
@@ -1102,6 +1141,7 @@ ul.DTTT_dropdown.dropdown-menu > li:hover > a {
 .radio input[type=radio]:checked + i:before, .radio-inline input[type=radio]:checked + i:before {
   content:"\f192";
 }
+*/
 .toggle-switch {
   position: relative;
   width: 60px;
@@ -1379,6 +1419,7 @@ ul.DTTT_dropdown.dropdown-menu > li:hover > a {
   height: 26px;
   line-height: 26px;
 }
+/*
 .form-horizontal .radio, .form-horizontal .checkbox, .form-horizontal .radio-inline, .form-horizontal .checkbox-inline {
   min-height: inherit;
   padding-top: 0;
@@ -1395,6 +1436,7 @@ ul.DTTT_dropdown.dropdown-menu > li:hover > a {
 .input-group .form-control {
   margin:0;
 }
+*/
 #ui-datepicker-div {
   background: rgba(0, 0, 0, 0.7) !important;
   border:0;
@@ -1845,7 +1887,7 @@ ul.DTTT_dropdown.dropdown-menu > li:hover > a {
 }
 .btn + .dropdown-menu {
   margin-top: -10px;
-  background: rgba(255, 255, 255, 1.0);
+  background: rgba(255, 255, 255, 0.9);
   padding: 0;
   border: 1px;
   right: 0; 
@@ -1853,7 +1895,7 @@ ul.DTTT_dropdown.dropdown-menu > li:hover > a {
   min-width: 100%;
 }
 .btn + .dropdown-menu > li > a {
-  padding: 5px 10px !important;
+  padding: 2px 2px 2px 2px !important;
   color: #f0f0f0;
 }
 .v-txt {

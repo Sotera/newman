@@ -5,22 +5,6 @@ var is_load_on_response = false;
 
 var width = 400, height = 500;
 
-var color_set_domain = d3.scale.category20();
-
-var color_set_community = (function(){
-  var color = d3.scale.category20();
-  var cache = {};
-  var itr = _.iterators.numbers();
-
-  var getColor = function(k){
-    var c = _.getPath(cache, ""+k);
-    if (c) return c;
-    cache[k] = color(itr());
-    return cache[k];
-  };
-  return getColor;
-}());
-
 var force = d3.layout.force()
   .linkDistance(10)
   .linkStrength(2)
@@ -33,7 +17,7 @@ var svg = d3.select("#node_graph").append("svg")
 var vis = svg.append('svg:g');
 
 var labels = false;
-var TARGET_EMAIL = null;
+var data_source_selected = null;
 
 var doubleEncodeURIComponent= function(uri){
   return encodeURIComponent(encodeURIComponent(uri));
@@ -51,13 +35,23 @@ var bottom_panel= (function(){
 
   var open = function(){
 
+    unhide();
+
     toggle_button.find("span").first().switchClass(icon_class_open, icon_class_close);
     container.css("bottom", "0px");
   };
   var close = function(){
 
     toggle_button.find("span").first().switchClass(icon_class_close, icon_class_open);
-    container.css("bottom", "-300px");
+    container.css("bottom", "-272px");
+  };
+  var hide = function(){
+
+    container.css("display", "none");
+  };
+  var unhide = function(){
+
+    container.css("display", "block");
   };
 
   var isOpen = function(){
@@ -78,7 +72,9 @@ var bottom_panel= (function(){
     open: open,
     close: close,
     toggle: toggle,
-    isOpen : isOpen
+    isOpen: isOpen,
+    hide: hide,
+    unhide: unhide
   };
 }());
 
@@ -241,9 +237,9 @@ var waiting_spin = $('<img>', {
 var current_email = null;
 var current_export = null;
 
-function update_current(val){
-  console.log("showing current email: " + val);
-  current_email = val;
+function updateCurrentEmail(email){
+  console.log("updateCurrentEmail(" + email + ")");
+  current_email = email;
 }
 
 var domain_set = {};
@@ -312,7 +308,8 @@ function recolornodes(category) {
   if( category == 'comm') {
     redraw_community_table()
     d3.selectAll("circle").style("fill", function(d) {
-      return color_set_community(d.community);
+      //return color_set_community(d.community);
+      return all_community_map.getColor( d.community );
     });
   }
   if( category == 'node') {
@@ -327,19 +324,17 @@ function recolornodes(category) {
   }
 }
 
-function splitItemCount(str){
-  if (str.trim().length == 0) return 0
-  return str.split(';').length;
+function getDocInboundCount( key ) {
+  "use strict";
+
 }
 
-function splitAttachCount(str){
-  if (str.trim().length == 0) return 0
-  return str.split(';').length;
+function getDocOutboundCount( key ) {
+  "use strict";
+
 }
 
-function recipientCount(to, cc, bcc){
-  return _.reduce(_.map([to, cc, bcc], splitItemCount), function(a,b){ return a+b;}, 0);
-}
+
 
 function searchByEntity(entityid, type, value){
   console.log('searchByEntity(' + entityid + ', ' + type + ', ' + value + ')');
@@ -366,8 +361,8 @@ function produceHTMLView(emailObj) {
   el.append(
     $('<p>').append(
       $('<span>').addClass('bold').text("ID: "))
-      .append($('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'emails/' + TARGET_EMAIL.email + '/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.txt'}).text(d.num), $('<span>').text('    '),        
-              $('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'emails/' + TARGET_EMAIL.email + '/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.html'}).append($('<span>').addClass('glyphicon glyphicon-print'))));
+      .append($('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'emails/' + data_source_selected.email + '/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.txt'}).text(d.num), $('<span>').text('    '),
+              $('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'emails/' + data_source_selected.email + '/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.html'}).append($('<span>').addClass('glyphicon glyphicon-print'))));
 
 
   var afrom = $('<a>', { 'class': 'from clickable'}).on("click", function(){
@@ -410,7 +405,7 @@ function produceHTMLView(emailObj) {
   var attachments = $('<p>').append($('<span>').addClass('bold').text("Attachments: "));
   _.each(d.attach.split(';'),
          function(attach){
-           attachments.append($('<a>', { 'class': 'clickable', "target": "_blank" ,"href" : 'emails/' + TARGET_EMAIL.email + '/' + d.directory + '/' + encodeURIComponent(attach) }).html(attach));
+           attachments.append($('<a>', { 'class': 'clickable', "target": "_blank" ,"href" : 'emails/' + data_source_selected.email + '/' + d.directory + '/' + encodeURIComponent(attach) }).html(attach));
            attachments.append($('<span>').html(';&nbsp'));
          });
 
@@ -559,8 +554,10 @@ function table_mark_exportable(mark, ids_set){
 
     })
     .selectAll("td")
-    .filter(function(d, i){ 
-      return i==7;
+    .filter(function(d, i){
+      //no need to display doc-UID
+      //return i==7;
+      return i==6;
     })
     .html(function(d,i){ 
       if (mark){
@@ -572,7 +569,7 @@ function table_mark_exportable(mark, ids_set){
 }
 
 
-function show_email_view(email_id){
+function showEmailView(email_id){
   $('#tab-list li:eq(2) a').tab('show')
   $(document).scrollTop(0);
   $("#email-body").empty();
@@ -580,7 +577,7 @@ function show_email_view(email_id){
 
   $.get("email/email/" + encodeURIComponent(email_id)).then(
     function(resp) {
-      update_current(email_id);
+      updateCurrentEmail(email_id);
       if(resp.email.length > 0){
         $("#email-body").empty();
         $("#email-body").append(produceHTMLView(resp));
@@ -701,17 +698,20 @@ function searchByField( field ) {
   var text_input = $("#txt_search").val();
   if (text_input.length == 0){
 
-    do_search( field, text_input);
+    requestSearch( field, text_input, false);
   }
   else {
 
     var word_list = text_input.split(" ");
     if (word_list.length > 1) {
       _.each(word_list, function (word) {
-        do_search( field, word);
+        requestSearch( field, word, false);
       });
     }
-    do_search( field, text_input);
+    else {
+      requestSearch( field, word_list[0], false);
+    }
+    //requestSearch( field, text_input, false);
   }
 
 }
@@ -721,9 +721,9 @@ function searchByField( field ) {
  * @param response data received from service
  * @returns filtered response
  */
-function validateDateRangeResponse(response) {
+function validateResponseDateRange(response) {
   if (response) {
-    console.log('validateDateRangeResponse(...)');
+    console.log('validateResponseDateRange(...)');
 
     if (response.doc_dates) {
       console.log( '\tdomains[' + response.doc_dates.length + ']' );
@@ -895,15 +895,43 @@ function descendingPredicatByIndex(index){
 }
 
 /**
+ * sort predicate based on descending value
+ */
+function descendingPredicatByValue(){
+  return function(a, b) {
+    return b - a;
+  }
+}
+
+/**
+ * sort predicate based on ascending value
+ */
+function ascendingPredicatByValue(){
+  return function(a, b) {
+    return a - b;
+  }
+}
+
+/**
+ *
+ * @param from, floor int value
+ * @param to, ceiling int value
+ * @returns {number}
+ */
+function generateRandomInt( from, to ) {
+  return Math.floor(Math.random() * (to - from + 1) + from);
+}
+
+/**
  * validate domain-service response
  * @param response data received from service
  * @returns filtered response
  */
-function validateDomainResponse(response) {
+function validateResponseDomain(response) {
 
 
   if (response) {
-    console.log('validateDomainResponse(...)');
+    console.log('validateResponseDomain(...)');
 
     if (response.domains) {
       console.log( '\tdomains[' + response.domains.length + ']' );
@@ -930,6 +958,12 @@ function validateDomainResponse(response) {
       //console.log( 'validated-response:\n' + JSON.stringify(new_response, null, 2) );
 
       console.log( '\tnew domains[' + new_response.domains.length + ']' );
+
+      // initialize domain-map
+      _.each(new_domains, function(object, index) {
+        all_domain_map.put(object[0], object[0], object[1], color_set_domain(index));
+      });
+
       return new_response;
 
     }
@@ -945,9 +979,9 @@ function validateDomainResponse(response) {
  * @param response data received from service
  * @returns filtered response
  */
-function validateSearchResponse(response) {
+function validateResponseSearch(response) {
   if (response) {
-    console.log( 'validateSearchResponse(...)' );
+    console.log( 'validateResponseSearch(...)' );
 
     // validate graph nodes and links
     if (response.graph) {
@@ -987,6 +1021,13 @@ function validateSearchResponse(response) {
       response.graph.links = new_links;
       console.log( '\tnew nodes[' + response.graph.nodes.length + '], invalid nodes ' + invalid_node_count +
                    ', new links[' + response.graph.links.length + '], invalid links ' + invalid_link_count );
+
+      // initialize community-map
+      _.each(new_nodes, function(object, index) {
+        all_community_map.put(object.community, parseInt(object.community), 1, color_set_community(object.community));
+      });
+      console.log( '\tcommunity_map[' + all_community_map.getAllCount() + ']' );
+      //console.log( 'all_community_map: ' + JSON.stringify(all_community_map.getAll(), null, 2) );
     }
 
     // validate rows
@@ -1038,23 +1079,83 @@ function validateSearchResponse(response) {
 }
 
 /**
+ * validate email-topic-score response
+ * @param response data received from service
+ * @returns filtered response
+ */
+function validateResponseEmailTopicScore(response) {
+
+
+  if (response) {
+    console.log('validateResponseEmailTopicScore(...)');
+    //console.log( '\tresponse\n' + JSON.stringify(response, null, 2) );
+
+    if (response[0].scores) {
+      //console.log( '\tscores[' + response[0].scores.length + ']' );
+
+      var new_scores = [];
+      var invalid_item_count = 0;
+      _.each(response[0].scores, function (score) {
+
+        var score_value = parseFloat(score);
+
+        if (score_value) {
+          new_scores.push(score_value);
+        }
+        else {
+          //console.log('\tinvalid score : ' + score);
+          invalid_item_count++;
+        }
+      });
+
+      response[0].scores = new_scores;
+      //console.log( 'validated-response:\n' + JSON.stringify(new_response, null, 2) );
+
+      console.log( '\tnew scores[' + response[0].scores.length + ']' );
+      return response;
+    }
+    else {
+      console.log('response[0].scores undefined');
+    }
+  }
+  else {
+    console.log('response undefined');
+  }
+
+  return response;
+}
+
+
+/**
  * performs search based on field and argument value
  * @param field
  * @param value
  */
 function do_search(field, value) {
-  var varargs = arguments;
 
-  if (field === undefined) { field = 'all'; }
+  if (!field) { field = 'all'; }
+  console.log('do_search(' + toString(arguments) + ')');
 
-  console.log('do_search(' + toString(varargs) + ',' + is_load_on_response + ')');
+  var search_text = _.map(_.rest(arguments), function(s){ return encodeURIComponent(s); })
+  //search_text = search_text.join('/');
 
-  var args = _.map(_.rest(arguments), function(s){ return encodeURIComponent(s); })
-  //var search_arg = args.join('/');
-  var search_arg = args;
-  console.log('\tsearch_arg \'' + search_arg + '\'');
+  requestSearch(field, search_text, false );
 
-  var url_path = "search/search/" + field +'/' + search_arg;
+}
+
+/**
+ * @param field
+ * @param search_text
+ * @param load_on_response
+ */
+function requestSearch(field, search_text, load_on_response) {
+
+  if (!field) { field = 'all'; }
+  //console.log('requestSearch(' + toString(arguments)  + ')');
+
+  console.log('\tsearch_text \'' + search_text + '\'');
+
+  var url_path = "search/search/" + field +'/' + search_text;
 
   var range_min = date_range.getDateMinText();
   var range_max = date_range.getDateMaxText();
@@ -1072,15 +1173,15 @@ function do_search(field, value) {
       console.log( '.getJSON(' + url_path + ')' );
 
       //validate search-response
-      var filtered_response = validateSearchResponse( search_response );
+      var filtered_response = validateResponseSearch( search_response );
 
       if (is_load_on_response) {
 
         email_analytics_content.open();
 
         var label = ' all';
-        if(search_arg) {
-          label = ' ' + decodeURIComponent(search_arg);
+        if(search_text) {
+          label = ' ' + decodeURIComponent(search_text);
         }
         var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',','_');;
 
@@ -1090,7 +1191,7 @@ function do_search(field, value) {
                          url_path,
                          field);
 
-        showSearchPopup( field, decodeURIComponent(search_arg) );
+        showSearchPopup( field, decodeURIComponent(search_text) );
         loadSearchResult( url_path );
 
         is_load_on_response = false;
@@ -1098,28 +1199,74 @@ function do_search(field, value) {
       else {
 
         dashboard_content.open();
+        var data_set_selected = all_data_source.getSelected();
 
-        var doc_count = 0;
-        if (filtered_response.rows) {
-          doc_count = filtered_response.rows.length;
+        if (url_path.endsWith( url_search_all )) {
+
+          var ranks = service_response_email_rank.getResponseMapValues();
+          //console.log( 'ranks: ' + JSON.stringify(ranks, null, 2) );
+          if (ranks.length > 1) {
+            ranks = ranks.splice(0, 10);
+            _.each(ranks, function (element) {
+              requestSearch( 'all', element.email, false );
+            });
+          }
+
+          var doc_count = 0;
+          if (filtered_response.rows) {
+            doc_count = filtered_response.rows.length;
+          }
+
+          var node_count = 0;
+          if (filtered_response.graph && filtered_response.graph.nodes) {
+            node_count = filtered_response.graph.nodes.length;
+          }
+
+          var root_result = search_result.setRoot(
+            'all (' + data_set_selected.label + ')',
+            '',
+            'text',
+            '',
+            url_path,
+            data_set_selected.label,
+            'pst',
+            doc_count,
+            node_count
+          );
+
         }
+        else {
 
-        var node_count = 0;
-        if (filtered_response.graph && filtered_response.graph.nodes) {
-          node_count = filtered_response.graph.nodes.length;
+          var doc_count = 0;
+          if (filtered_response.rows) {
+            doc_count = filtered_response.rows.length;
+          }
+
+          var node_count = 0;
+          if (filtered_response.graph && filtered_response.graph.nodes) {
+            node_count = filtered_response.graph.nodes.length;
+          }
+
+          var doc_sent = service_response_email_rank.getDocSent( search_text );
+          var doc_received = service_response_email_rank.getDocReceived( search_text );
+          var rank = service_response_email_rank.getRank( search_text );
+
+          search_result.push(
+            search_text,
+            search_text,
+            field,
+            "",
+            url_path,
+            data_set_selected.label,
+            'pst',
+            doc_count,
+            doc_sent,
+            doc_received,
+            node_count,
+            rank
+          );
+
         }
-
-        search_result.push(search_arg,
-                           search_arg,
-                           field,
-                           "",
-                           url_path,
-                           'default_data_set',
-                           'email',
-                           doc_count,
-                           node_count);
-
-
       }
     });
 
@@ -1131,13 +1278,14 @@ function do_search(field, value) {
  * load and parse search result referenced by URL
  */
 function loadSearchResult( url_path ) {
+  bottom_panel.unhide();
 
   $.get("email/exportable").then(function(resp_export){
 
     $.getJSON( url_path , function (search_response) {
 
       //validate search-response
-      var filtered_response = validateSearchResponse( search_response );
+      var filtered_response = validateResponseSearch( search_response );
 
       console.log( '.getJSON(' + url_path + ')' );
 
@@ -1154,16 +1302,27 @@ function loadSearchResult( url_path ) {
         return _.extend(o, {'exported': (o.num in exported)})
       });
 
+      $('#doc_count_inbound').text( ' Inbound ' + generateRandomInt(0, 500) );
+      $('#doc_count_outbound').text( ' Outbound ' + generateRandomInt(0, 500) );
+
+      /*
       var lastSort = "";
+
       // create the table header
       var thead = d3.select("#result_table").select("thead")
         .append("tr")
         .selectAll("tr")
-        // .data(['Source','Date','From','To','Cc','Bcc','Subject'])
-        .data(['ID','Date','From','Recipient Count','Body Size','Attachment Count', 'Subject', " "])
+        //no need to display doc-UID
+        //.data(['ID','Date','From','Recipient Count','Body Size','Attachment Count', 'Subject', " "])
+        .data(['Date','From','Recipient Count','Body Size','Attachment Count', 'Subject', " "])
         .enter().append("th")
         .html(function(d, i){
-          if (i == 7){
+          //no need to display doc-UID
+          //if (i == 7){
+          //  return "<span class='glyphicon glyphicon-star' ></span>";
+          //}
+
+          if (i == 6){
             return "<span class='glyphicon glyphicon-star' ></span>";
           }
           return d;
@@ -1173,30 +1332,54 @@ function loadSearchResult( url_path ) {
           var direction = (lastSort == k) ? -1 : 1;
           lastSort = (direction == -1) ? "" : k; //toggle
           d3.select("#result_table").select("tbody").selectAll("tr").sort(function(a, b) {
-            if (i == 0){
-              return a.num.localeCompare(b.num) * direction;
-            }
-            if (i == 1) {
+            //no need to display doc-UID
+            //if (i == 0){
+            //  return a.num.localeCompare(b.num) * direction;
+            //}
+            //if (i == 1) {
+            //  return a.datetime.localeCompare(b.datetime) * direction;
+            //}
+            //if (i == 2) {
+            //  return a.from.localeCompare(b.from) * direction;
+            //}
+            //if (i == 3) {
+            //  return (recipientCount(a.to, a.cc, a.bcc) - recipientCount(b.to, b.cc, b.bcc)) * direction * -1; //desc first
+            //}
+            //if (i == 4){
+            //  return (a.bodysize - b.bodysize) * direction * -1; //desc first
+            //}
+            //if (i == 5){
+            //  return (splitAttachCount(a.attach) - splitAttachCount(b.attach)) * direction * -1; //desc first
+            //}
+            //if (i == 6) {
+            //  return a.subject.localeCompare(b.subject) * direction;
+            //}
+            //if (i == 7){
+            //  return (+(a.exported) - +(b.exported)) * direction * -1; //put the marked items on top first
+            //}
+
+            if (i == 0) {
               return a.datetime.localeCompare(b.datetime) * direction;
             }
-            if (i == 2) {
+            if (i == 1) {
               return a.from.localeCompare(b.from) * direction;
             }
-            if (i == 3) {
+            if (i == 2) {
               return (recipientCount(a.to, a.cc, a.bcc) - recipientCount(b.to, b.cc, b.bcc)) * direction * -1; //desc first
             }
-            if (i == 4){
+            if (i == 3){
               return (a.bodysize - b.bodysize) * direction * -1; //desc first
             }
-            if (i == 5){
+            if (i == 4){
               return (splitAttachCount(a.attach) - splitAttachCount(b.attach)) * direction * -1; //desc first
             }
-            if (i == 6) {
+            if (i == 5) {
               return a.subject.localeCompare(b.subject) * direction;
             }
-            if (i == 7){
+            if (i == 6){
               return (+(a.exported) - +(b.exported)) * direction * -1; //put the marked items on top first
             }
+
           });
         });
 
@@ -1204,25 +1387,35 @@ function loadSearchResult( url_path ) {
       // create rows
       var tr = d3.select("#result_table").select("tbody").selectAll("tr").data(data).enter().append("tr");
 
-      tr.attr('class', 'clickable').on("click",function(d){
-        show_email_view(d.num);
-      }).on("mouseover", function(d) {
-        tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(';');
-        for (i = 0; i < tos.length; i++) {
-          d3.select("#" + d.from.replace(/\./g,'_').replace(/@/g,'_') + '_' + tos[i]).style("stroke", "red"); }})
-        .on("mouseout", function(d){
+      tr.attr('class', 'clickable')
+        .on("click", function(d) {
+
+          show_email_view( d.num );
+
+        })
+        .on("mouseover", function(d) {
+
+          tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(';');
+          for (i = 0; i < tos.length; i++) {
+            d3.select("#" + d.from.replace(/\./g,'_').replace(/@/g,'_') + '_' + tos[i]).style("stroke", "red");
+          }
+        })
+        .on("mouseout", function(d) {
           tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(';');
           for (i = 0; i < tos.length; i++) {
             d3.select("#" + d.from.replace(/\./g,'_').replace(/@/g,'_') + '_' + tos[i]).style("stroke", "#bbb");
-          }});
+          }
+        });
 
       // cells
       var td = tr.selectAll("td").data(function(d){
 
         var recipient_count = recipientCount(d.to, d.cc, d.bcc);
         var attach_count = splitAttachCount(d.attach)
-        return [d.num, d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject, d.exported ];
-        //return [d.num + '::' + d.from + '::' + d.directory, d.datetime, d.from +'::' + d.fromcolor,d.to,d.cc,d.bcc,d.subject];
+
+        //no need to display doc-UID
+        //return [d.num, d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject, d.exported ];
+        return [d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject, d.exported ];
       })
         .enter().append("td")
         //.text(function(d){return ['no'];})
@@ -1232,26 +1425,50 @@ function loadSearchResult( url_path ) {
         .style("fill","blue")
         .append('div')
         .html(function(d,i) {
-          if (i == 0 ) {
-            return $('<_>').append($('<span>', { 'title' : d }).html((d.length > 40) ? d.substring(0, 37) + "..." : d)).html();
-          }
-          if( i == 2 ) {
+
+          //no need to display doc-UID
+          //if (i == 0 ) {
+          //  return $('<div>').append($('<span>', { 'title' : d }).html((d.length > 40) ? d.substring(0, 37) + "..." : d)).html();
+          //}
+          //if( i == 2 ) {
+          //  return d.split('::')[0];
+          //}
+          //if (i == 3) {
+          //  var px = d > 100 ? 100 : d;
+          //  return "<div style='background-color: blue;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
+          //}
+          //if (i == 4) {
+          //  var px = (d / 1000.0) > 100 ? 100 : (d / 1000.0);
+          //  return "<div style='background-color: green;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
+          //}
+          //if (i == 5) {
+          //  var px = (d * 10) > 100 ? 100 : (d * 10);
+          //  return "<div style='background-color: orange;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
+          //}
+          //if ( i == 7 ){
+          //  if (d){
+          //    return "<div><span class='glyphicon glyphicon-star' ></span></div>";
+          //  } else {
+          //    return "<div></div>";
+          //  }
+          //}
+
+          if( i == 1 ) {
             return d.split('::')[0];
           }
-          if (i == 3) {
+          if (i == 2) {
             var px = d > 100 ? 100 : d;
             return "<div style='background-color: blue;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
           }
-          if (i == 4) {
+          if (i == 3) {
             var px = (d / 1000.0) > 100 ? 100 : (d / 1000.0);
             return "<div style='background-color: green;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
           }
-          if (i == 5) {
+          if (i == 4) {
             var px = (d * 10) > 100 ? 100 : (d * 10);
             return "<div style='background-color: orange;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
           }
-
-          if ( i == 7 ){
+          if ( i == 6 ){
             if (d){
               return "<div><span class='glyphicon glyphicon-star' ></span></div>";
             } else {
@@ -1262,19 +1479,32 @@ function loadSearchResult( url_path ) {
           return d;
         })
         .style("color", function(d,i) {
-          if( i == 2) {
+          //no need to display doc-UID
+          //if(i == 2) {
+          //  return getDomainColor(d.split('::')[0]);
+          //}
+
+          if(i == 1) {
             return getDomainColor(d.split('::')[0]);
-          } else {
+          }
+          else {
             return 'black';
           }
         })
         .style("stroke","#FFFFFF");
 
+      */
+
+      // populate data-table
+      populateDataTable( filtered_response.rows )
+
       if (bottom_panel.isOpen()){
         //resize bottom_panel
         bottom_panel.open();
       }
-      drawGraph(filtered_response.graph);
+
+      // render graph display
+      drawGraph( filtered_response.graph );
     });
 
   });
@@ -1300,7 +1530,7 @@ function drawGraph(graph){
 
   var nodes = graph.nodes.slice();
   var links = [];
-  var bilinks = [];
+  var bi_links = [];
 
   graph.links.forEach(function(link) {
     var s = nodes[link.source];
@@ -1309,7 +1539,7 @@ function drawGraph(graph){
     var i = {}; // intermediate node
     nodes.push(i);
     links.push({source: s, target: i}, {source: i, target: t});
-    bilinks.push([s, i, t, w]);
+    bi_links.push([s, i, t, w]);
   });
 
   force.nodes(nodes).links(links).start();
@@ -1329,7 +1559,7 @@ function drawGraph(graph){
     .attr("d", "M0,-5L10,0L0,5");
 
   var link = vis.selectAll(".link")
-    .data(bilinks)
+    .data(bi_links)
     .enter().append("path")
     .attr("class", "link").attr("marker-end", "url(#end)")
     .style("stroke", "black")
@@ -1358,7 +1588,8 @@ function drawGraph(graph){
         }
       } else {
         if(d && d.community) {
-          return color_set_community(d.community);
+          //return color_set_community(d.community);
+          return all_community_map.getColor( d.community );
         }
       }})
     .style("stroke","red")
@@ -1385,11 +1616,14 @@ function drawGraph(graph){
       var fn = function(){
         console.log(clicks);
         if (clicks > 1){
-          //do_search('email', $('#txt_search').val());
+          //requestSearch('email', $('#txt_search').val(), true);
         }
         clicks=0;
       };
-      if (clicks == 1){
+      if (clicks == 1) {
+        $('#doc_count_inbound').text( ' Inbound ' + generateRandomInt(0, 500) );
+        $('#doc_count_outbound').text( ' Outbound ' + generateRandomInt(0, 500) );
+
         $('#txt_search').val(n.name);
         var t = Math.floor($('#radial-wrap').height() / 2);
         var l = Math.floor($('#radial-wrap').width() / 2);
@@ -1411,7 +1645,7 @@ function drawGraph(graph){
           .on("click", function(){
             console.log( 'node-clicked search-by-email' );
             is_load_on_response = true;
-            do_search("email", n.name);
+            requestSearch("email", n.name, true);
           }).find("span").first()
           .css("color", getDomainColor(n.name));
 
@@ -1420,10 +1654,10 @@ function drawGraph(graph){
           .on("click", function(){
             console.log( 'node-clicked search-by-community' );
             is_load_on_response = true;
-            do_search("community", n.community);
+            requestSearch("community", n.community, true);
         }).find("span").first()
-          .css("color", color_set_community(n.community));
-
+         // .css("color", color_set_community(n.community));
+          .css("color", all_community_map.getColor( n.community ));
         _.delay(function(){  $("#alink").focus(); }, 300);
 
         _.delay(fn, 300, n.name);
@@ -1556,7 +1790,11 @@ function node_highlight(email){
 function draw_mini_topic_chart(email_id){
   $.when( $.ajax('topic/email/' + encodeURIComponent(email_id)), $.ajax('topic/category'))
     .done(function(resp_scores, resp_topics){
-      var scores = _.first(resp_scores).scores;
+
+      var filtered_response = validateResponseEmailTopicScore( resp_scores );
+      var scores = _.first(filtered_response).scores;
+      //console.log( '\'topic/email/'+ email_id +'\' scores\n' + JSON.stringify(scores, null, 2) );
+
       var topics = _.first(resp_topics).categories;
       $('#topic_mini_chart').empty();
 
@@ -1590,7 +1828,10 @@ function draw_mini_topic_chart(email_id){
         .attr("y", function(d) { return margin.top + y(+d*100);})
         .attr("height", function(d) { return height - y(+d*100);})
         .attr("width", barWidth - 1)
-        .style("fill", function(d,i) { return color_set_community(i); })
+        //.style("fill", function(d,i) { return color_set_community(i); })
+        .style("fill", function(d,i) {
+          return all_community_map.getColor( i );
+        })
         .attr('class', 'clickable')
         .on("click", function(d, i){
           $('#tab-list li:eq(3) a').tab('show');
@@ -1717,7 +1958,7 @@ function draw_attachments_table(email_addr){
         if (i != 4) return;
         $.get("email/email/" + encodeURIComponent(d)).then(
           function(resp) {
-            update_current(d);
+            updateCurrentEmail(d);
             $('#tab-list li:eq(2) a').tab('show');
             if(resp.email.length > 0){
               $("#email-body").empty();
@@ -1727,7 +1968,7 @@ function draw_attachments_table(email_addr){
       })
       .html(function(d, i){
         if (i == 2){
-          var el = $('<div>').append($('<a>', { "target": "_blank" ,"href" : 'emails/' + TARGET_EMAIL.email + '/' + d[0] + '/' + encodeURIComponent(d[1]) }).html(d[1]));
+          var el = $('<div>').append($('<a>', { "target": "_blank" ,"href" : 'emails/' + data_source_selected.email + '/' + d[0] + '/' + encodeURIComponent(d[1]) }).html(d[1]));
           return el.html();
         }
         if (i == 3){
@@ -1740,7 +1981,7 @@ function draw_attachments_table(email_addr){
             var img = $('<img>').css('max-height', '50px').css('width','50px');
 
             switch (document_type(ext)){
-            case "image" : return img.attr('src', 'emails/' + TARGET_EMAIL.email + '/' + d[0] + '/' + encodeURIComponent(d[1]));
+            case "image" : return img.attr('src', 'emails/' + data_source_selected.email + '/' + d[0] + '/' + encodeURIComponent(d[1]));
             case "pdf" : return img.attr('src', 'imgs/document-icons/pdf-2.png');
             case "powerpoint" : return img.attr('src', 'imgs/document-icons/powerpoint-2.png');
             case "word" : return img.attr('src', 'imgs/document-icons/word-2.png');
@@ -1799,7 +2040,8 @@ function draw_rank_chart() {
       })
       .attr("height", barHeight - 1)
       .style("fill", function(d) {
-        return color_set_community(+d.communityId);
+        //return color_set_community(+d.communityId);
+        return all_community_map.getColor( +d.communityId );
       })
       .on("click", function(d){ })
       .append('title').text(function(d) { return d.email;});
@@ -1825,7 +2067,7 @@ function draw_rank_chart() {
         setSearchType('email');
         $("#txt_search").val(d.email);
         is_load_on_response = true;
-        do_search('email', $("#txt_search").val());
+        requestSearch('email', $("#txt_search").val(), true);
       })
       .on("mouseover", function(d){
         d3.select("#g_circle_" + d.groupId).style("stroke","#ffff00");
@@ -1893,7 +2135,7 @@ function redraw_domains_table(){
       return domain;
     }
   });
-  console.log('\tdomain_list: ' + JSON.stringify(domain_list, null, 2));
+  //console.log('\tdomain_list: ' + JSON.stringify(domain_list, null, 2));
 
   var color_n_count_by_domain = _.map(domain_list, function(value, key){
     if(value && key) {
@@ -2019,7 +2261,8 @@ function redraw_community_table() {
   tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td")
     .html(function(d, i){
       if (i == 1){
-        return $('<div>').append($('<div>').css({ 'min-height': '14px', 'width' : '100%', 'background-color' : color_set_community(+d)})).html();
+        //return $('<div>').append($('<div>').css({ 'min-height': '14px', 'width' : '100%', 'background-color' : color_set_community(+d)})).html();
+        return $('<div>').append($('<div>').css({ 'min-height': '14px', 'width' : '100%', 'background-color' : all_community_map.getColor( +d )})).html();
       }
       return d;
     });
@@ -2115,6 +2358,8 @@ var dashboard_content = (function () {
         email_analytics_content.close();
       }
 
+      bottom_panel.hide();
+
       dashboard_content_container.fadeToggle('fast');
       //container.show();
     }
@@ -2178,6 +2423,9 @@ var email_analytics_content = (function () {
       if(dashboard_content.isVisible()) {
         dashboard_content.close();
       }
+
+      bottom_panel.unhide();
+
       email_container.fadeToggle('fast');
       //container.show();
     }
@@ -2230,6 +2478,8 @@ var email_analytics_content = (function () {
 $(function () {
   "use strict";
 
+  service_response_email_rank.requestService();
+
   // close existing analytics displays if applicable
   email_analytics_content.close();
 
@@ -2253,26 +2503,33 @@ $(function () {
     //console.log("date-range {" +  date_range.getDateRange() + "}");
   });
 
+
   $('a[data-toggle=\"tab\"]').on('shown.bs.tab', function (e) {
     //var element_ID = $(e.target).html();
     var element_ID = $(e.target).attr("href");
     console.log( 'tab_select ' + element_ID);
 
     if (element_ID.endsWith( 'dashboard_tab_content_outbound_activities' )) {
-      if(dashboard_time_chart_outbound_activities) {
-        console.log( '\tredraw() called');
-        dashboard_time_chart_outbound_activities.redraw();
+      if(dashboard_time_chart_outbound_activity) {
+        console.log('\tredraw() called');
+
+        setTimeout(function () {
+          dashboard_time_chart_outbound_activity.groups([['acct-1', 'acct-2', 'acct-3', 'acct-4']])
+        }, 0);
       }
     }
     else if (element_ID.endsWith( 'dashboard_tab_content_inbound_activities' )) {
-      if(dashboard_time_chart_inbound_activities) {
-        console.log( '\tredraw() called');
-        dashboard_time_chart_inbound_activities.redraw();
+      if(dashboard_time_chart_inbound_activity) {
+        console.log('\tredraw() called');
+
+        setTimeout(function () {
+          dashboard_time_chart_inbound_activity.groups([['acct-1', 'acct-2', 'acct-3']])
+        }, 0);
       }
     }
     else if (element_ID.endsWith( 'dashboard_tab_content_entities' )) {
-      if(dashboard_donut_chart_entities) {
-        dashboard_donut_chart_entities.redraw();
+      if(dashboard_donut_chart_entity) {
+        dashboard_donut_chart_entity.redraw();
       }
     }
     else if (element_ID.endsWith( 'dashboard_tab_content_topics' )) {
@@ -2286,8 +2543,13 @@ $(function () {
       }
     }
     else if (element_ID.endsWith( 'dashboard_tab_content_communities' )) {
-      if(dashboard_donut_chart_communities) {
-        dashboard_donut_chart_communities.redraw();
+      if(dashboard_donut_chart_community) {
+        dashboard_donut_chart_community.redraw();
+      }
+    }
+    else if (element_ID.endsWith( 'dashboard_tab_content_rank' )) {
+      if(dashboard_donut_chart_rank) {
+        dashboard_donut_chart_rank.redraw();
       }
     }
 
@@ -2297,20 +2559,21 @@ $(function () {
 
   $.when($.get("email/target"), $.get("email/domains")).done(function(resp1, resp2){
 
-    if(!service_response_email_domains) {
+    if(!service_response_email_domain) {
       console.log('graphtool: request service_response_email_domains');
       //validate service response
-      service_response_email_domains = validateDomainResponse(resp2);
+      service_response_email_domain = validateResponseDomain(resp2);
     }
-    var filtered_response = service_response_email_domains;
+    var filtered_response = service_response_email_domain;
     //console.log('\tfiltered_response: ' + JSON.stringify(filtered_response, null, 2));
 
-    TARGET_EMAIL = _.object(
+    data_source_selected = _.object(
       ['email', 'community', 'community_id', 'group', 'total_received', 'total_sent', 'rank'],
       _.first(resp1[0].email)
     );
 
     _.each(filtered_response.domains, function(o, i){
+
       domain_set[o[0]] = {
         count: o[1],
         color: color_set_domain(i),
@@ -2319,7 +2582,8 @@ $(function () {
     });
     //console.log('\tdomain_set: ' + JSON.stringify(domain_set, null, 2));
 
-    $('#target_email').html(TARGET_EMAIL.email);
+    all_data_source.initialize( data_source_selected.email, data_source_selected.email, '' );
+    $('#target_email').html(data_source_selected.email);
 
     // initialize search keyboard event
     $('#txt_search').keyup(function (event){
@@ -2359,20 +2623,20 @@ $(function () {
 
     $('#target_email').on('dblclick', function(){
       setSearchType('email');
-      $("#txt_search").val(TARGET_EMAIL.email);
-      do_search('email', TARGET_EMAIL.email);
+      $("#txt_search").val(data_source_selected.email);
+      requestSearch('email', data_source_selected.email, true);
     });
 
     var highlight_target = (function(){
-      var groupId = TARGET_EMAIL.group;
-      var rank = TARGET_EMAIL.rank;
+      var groupId = data_source_selected.group;
+      var rank = data_source_selected.rank;
       var highlight = function(){
         //graph
         d3.select("#g_circle_" + groupId).style("stroke","#ffff00");
         d3.select("#g_circle_" + groupId).style("stroke-width",function(d) { return 10; });
         //email-table
         $('#result_table tbody tr td:nth-child(2)').each(function(i, el){
-          if (TARGET_EMAIL.email.localeCompare(el.innerText.trim()) == 0) {
+          if (data_source_selected.email.localeCompare(el.innerText.trim()) == 0) {
             $(el).addClass('highlight-td');
           }
         });
@@ -2416,7 +2680,7 @@ $(function () {
 
     /* attach element event handlers */
     $("#submit_search").click(function(){
-      do_search('all', $("#search_text").val());
+      requestSearch('all', $("#search_text").val(), false);
     });
 
     
@@ -2445,7 +2709,7 @@ $(function () {
       $("#email-body").append(waiting_bar);
       $.get("activesearch/like").then(
         function(resp){
-          update_current(resp);
+          updateCurrentEmail(resp);
           $.get("email/email/" + encodeURIComponent(resp)).then(
             function(resp) {
               if(resp.email.length > 0){
@@ -2465,7 +2729,7 @@ $(function () {
       $("#email-body").append(waiting_bar);
       $.get("activesearch/dislike").then(
         function(resp){
-          update_current(resp);
+          updateCurrentEmail(resp);
           $.get("email/email/" + encodeURIComponent(resp)).then(
             function(resp) {
               if(resp.email.length > 0){
@@ -2487,7 +2751,7 @@ $(function () {
       $("#email-body").append(waiting_bar);
       $.get("activesearch/seed/" + encodeURIComponent(id)).then(
         function(resp) {
-          update_current(resp);
+          updateCurrentEmail(resp);
           $.get("email/email/" + encodeURIComponent(resp)).then(
             function(resp) {
               if(resp.email.length > 0){
@@ -2511,30 +2775,30 @@ $(function () {
     $("#submit_toggleExport").click(function() {
       console.log("toggle export flag for email_id... ");
       if (current_email == null) {
-	//alert("please select an email first");
-	return;
+        //alert("please select an email first");
+        return;
       }
       var id = current_email;
 
       var ajaxToggle = function(id, exportable){
-	$.ajax({
-	  url: 'email/exportable',
-	  type: "POST",
-	  data: JSON.stringify({"email": id, "exportable": !exportable}),
-	  contentType:"application/json; charset=utf-8",
-	  dataType:"json"
-	})
-	  .done(function(resp){
+        $.ajax({
+          url: 'email/exportable',
+          type: "POST",
+          data: JSON.stringify({"email": id, "exportable": !exportable}),
+          contentType:"application/json; charset=utf-8",
+          dataType:"json"
+        })
+          .done(function(resp){
             $("#submit_toggleExport").toggleClass('marked');
             table_mark_exportable(
-              $("#submit_toggleExport").hasClass('marked'), 
+              $("#submit_toggleExport").hasClass('marked'),
               [id]);
-	    console.log(resp);
-	  })
-	  .fail(function(resp){
-	    alert('fail');
-	    console.log("fail");
-	  });
+            console.log(resp);
+          })
+          .fail(function(resp){
+            alert('fail');
+            console.log("fail");
+          });
       };
 
       ajaxToggle(id, $("#submit_toggleExport").hasClass('marked'));
@@ -2605,8 +2869,8 @@ $(function () {
   });
 
   crossroads.addRoute("/email/{id}", function(id){
-    do_search('all', id);
-    show_email_view(id);
+    requestSearch('all', id, true);
+    showEmailView(id);
   });
 
   crossroads.routed.add(function(request, data){
@@ -2626,7 +2890,7 @@ $(function () {
 
 
   if (hasher.getHash().length < 1){
-    hasher.setHash('/search/all/');
+    hasher.setHash( url_search_all );
   }
 
 });

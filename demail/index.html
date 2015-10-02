@@ -3,24 +3,30 @@
   <head>
     <meta charset="utf-8">
     <title>Newman 1.3</title>
-    <link href="plugins/jquery-ui/jquery-ui.css" rel="stylesheet">
-
-    <link href="plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="plugins/d3-tip/d3-tip.css" rel="stylesheet">
-    <link href="plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet">
-    <link href="plugins/fancybox/jquery.fancybox.css" rel="stylesheet">
-    <link href="plugins/fullcalendar/fullcalendar.css" rel="stylesheet">
-    <link href="plugins/xcharts/xcharts.min.css" rel="stylesheet">
-    <link href="plugins/select2/select2.css" rel="stylesheet">
-    <link href="plugins/justified-gallery/justifiedGallery.css" rel="stylesheet">
-    <link href="plugins/chartist/chartist.min.css" rel="stylesheet">
-    <link href="css/newman-style-dark.css" rel="stylesheet">
-    <link href="css/newman-slider-theme.css" rel="stylesheet">
-    <link href="css/default.css" rel="stylesheet">
+    <link href="plugins/jquery-ui/jquery-ui.css" rel="stylesheet" type="text/css">
+    <!--<link href="plugins/jquery-treetable/css/jquery.treetable.css" rel="stylesheet" type="text/css">-->
+    <!--<link href="plugins/jquery-treetable/css/jquery.treetable.theme.default.css" rel="stylesheet" type="text/css">-->
+    <link href="plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="plugins/jquery-treegrid/css/jquery.treegrid.css" rel="stylesheet" type="text/css">
+    <link href="plugins/datatables/css/dataTables.bootstrap.min.css" rel="stylesheet" type="text/css">
+    <!--<link href="plugins/datatables-fixedheader/css/fixedHeader.dataTables.min.css" rel="stylesheet" type="text/css">
+    <link href="plugins/datatables-fixedcolumns/css/fixedColumns.bootstrap.min.css" rel="stylesheet" type="text/css">-->
+    <link href="plugins/d3-tip/d3-tip.css" rel="stylesheet" type="text/css">
+    <link href="plugins/c3/c3.css" rel="stylesheet" type="text/css">
+    <link href="plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="plugins/fancybox/jquery.fancybox.css" rel="stylesheet" type="text/css">
+    <link href="plugins/fullcalendar/fullcalendar.css" rel="stylesheet" type="text/css">
+    <link href="plugins/xcharts/xcharts.min.css" rel="stylesheet" type="text/css">
+    <link href="plugins/select2/select2.css" rel="stylesheet" type="text/css">
+    <link href="plugins/justified-gallery/justifiedGallery.css" rel="stylesheet" type="text/css">
+    <link href="plugins/chartist/chartist.min.css" rel="stylesheet" type="text/css">
+    <link href="css/newman-style-dark.css" rel="stylesheet" type="text/css">
+    <link href="css/newman-slider-theme.css" rel="stylesheet" type="text/css">
+    <link href="css/default.css" rel="stylesheet" type="text/css">
     <link href="css/ner.css" rel="stylesheet">
-    <link href="css/newman-custom-bootstrap.css" rel="stylesheet">
-    <link href="css/newman-profile-chart.css" rel="stylesheet">
-    <link href="css/newman-help.css" rel="stylesheet">
+    <link href="css/newman-custom-bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="css/newman-profile-chart.css" rel="stylesheet" type="text/css">
+    <link href="css/newman-help.css" rel="stylesheet" type="text/css">
   </head>
   <body>
   <!-- hidden link //hack -->
@@ -99,19 +105,22 @@
   <header class="navbar">
     <div class="container-fluid expanded-panel">
       <div class="row">
-        <div id="logo" class="col-xs-12 col-sm-2" style="padding: 0px 0px 0px 15px;">
+        <div id="logo" class="col-xs-12 col-sm-1" style="padding: 0px 0px 0px 15px;">
           <div class="row">
+            <!--
             <div class="col-xs-5 col-sm-4" style="padding: 0px 5px 0px 15px;">
               <button class="button-sidebar"><i class="fa fa-outdent fa-inverse fa-lg"></i></button>
             </div>
             <div class="col-xs-7 col-sm-8" style="padding: 0px; text-align: left">
               <button class="button-logo" id="toggle_dashboard_home">Newman <i class="fa fa-user-secret"></i></button>
             </div>
+            -->
+            <button class="button-logo" id="toggle_dashboard_home">Newman <i class="fa fa-user-secret"></i></button>
           </div>
         </div>
 
 
-        <div id="top-panel" class="col-xs-12 col-sm-10">
+        <div id="top-panel" class="col-xs-12 col-sm-11">
           <div class="row">
 
             <!--
@@ -149,10 +158,24 @@
             </div>
             <!-- end datetime-range -->
 
-            <div class="col-xs-10 col-sm-3 top-panel-right" style="padding: 0px;">
+            <!-- start data-set -->
+            <div class="col-xs-12 col-sm-2" style="padding: 0px 10px 0px 10px;">
+
+              <div class="dropdown" style="width: 100%; height: 100%; position:relative; display: inline-block; text-align: right;" id="data_source_selected">
+                <span class="dropdown-toggle btn navbar-btn button-dropdown-menu" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px"> Default_PST <span class="fa fa-database"></span></span>
+                <ul class="dropdown-menu" style="width: 100%; padding: 2px 0px 2px 0px; border-radius: 4px;" id="data_source_list">
+
+                </ul>
+              </div>
+
+            </div>
+            <!-- end data-set -->
+
+            <div class="col-xs-10 col-sm-2 top-panel-right" style="padding: 0px 10px 0px 10px;">
 
               <ul class="nav navbar-nav pull-right panel-menu">
 
+                <!--
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                     <i class="fa fa-angle-down fa-inverse pull-right"></i>
@@ -174,6 +197,16 @@
                     </li>
                   </ul>
                 </li>
+                -->
+
+                <li class="hidden-xs">
+
+                  <a id="view_exportList" type="button" class="btn btn-inverse" data-toggle="modal" data-target="#exportModal"
+                     style="font-size: 14px; font-weight:normal; color: #E1E1E1;">Export
+                    <span class="glyphicon glyphicon-list-alt"></span>
+                  </a>
+
+                </li>
 
                 <li class="hidden-xs">
 
@@ -183,6 +216,7 @@
 
                 </li>
 
+                <!--
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle account" data-toggle="dropdown">
                     <div class="avatar">
@@ -233,12 +267,16 @@
                     </li>
                   </ul>
                 </li>
+                -->
+
               </ul>
             </div>
 
+            <!--
             <div class="col-xs-2 col-sm-1" style="padding: 0px 15px 0px 0px; text-align: center;">
               <button class="button-sidebar" id="toggle_analytics_email"><i class="fa fa-indent fa-inverse fa-lg"></i></button>
             </div>
+            -->
           </div>
         </div>
       </div>
@@ -453,9 +491,10 @@
         <div id="content-dashboard-home" class="container-fluid analytics-content">
 
           <!--Start Search-Result-Dashboard-Left-->
-          <div class="col-sm-4"  style= "height: 100%; padding: 0px;">
+          <div class="col-sm-5"  style= "height: 100%; padding: 0px;">
 
             <!--Start Search-Result-Category-Left-->
+            <!--
             <div class="col-xs-3" style="padding: 0px;">
               <ul class="nav nav-search" id="search_field_list">
                 <li class="btn btn-small outline active" id="search_field_all">All</li>
@@ -465,36 +504,56 @@
                 <li class="btn btn-small outline" id="search_field_entity">Entity</li>
               </ul>
             </div>
+            -->
             <!--End Search-Result-Category-Left-->
 
             <!--Start Search-Result-Link-Center-->
-            <div class="col-xs-9" style="padding: 0px 0px 0px 5px;">
+            <div class="col-xs-12" style="padding: 0px 0px 0px 5px;">
 
-              <div id="search_result_container">
+              <div id="search_result_container"></div>
+
+
+              <table id="search_result_treetable" class="table tree-2 table-bordered table-striped table-condensed">
+                <thead>
+                <tr style="font-size: small;">
+                  <th><i class="fa fa-user-plus"></i> Account</th>
+                  <th><i class="fa fa-check-square-o"></i></th>
+                  <th>Sent</th>
+                  <th>Received</th>
+                  <th><i class="fa fa-envelope-o"></i></th>
+                  <th><i class="fa fa-users"></i></th>
+                </tr>
+                </thead>
+                <tbody style="font-size: 11px;" id="search_result_treetable_body">
+                </tbody>
+                <!--
+                <tbody>
+                <tr class="treegrid-1">
+                  <td>Root node</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
+                </tr>
+                <tr class="treegrid-2 treegrid-parent-1">
+                  <td>Node 1-1 no-child</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
+                </tr>
+                <tr class="treegrid-3 treegrid-parent-1">
+                  <td>Node 1-2</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
+                </tr>
+                <tr class="treegrid-4 treegrid-parent-3">
+                  <td>Node 1-2-1</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
+                </tr>
+                <tr class="treegrid-5 treegrid-parent-3">
+                  <td>Node 1-2-2</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
+                </tr>
+                <tr class="treegrid-6 treegrid-parent-5">
+                  <td>Node 1-5-1</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
+                </tr>
+                </tbody>
+                -->
+              </table>
+
 
               <!--
-              <p class="small">About 3,870,000,000 results (0.28 seconds)</p>
-
-              <div class="one-result">
-                <a href="#" class="large">Yahoo Search - Web Search</a>
-                <p class="txt-primary">search.yahoo.com</p>
-                <p>The <b>search</b> engine that helps you find exactly what you're looking for. Find the most relevant information, video, images, and answers from all across the Web.</p>
-              </div>
-              <div class="one-result">
-                <a href="#" class="large">Bing</a>
-                <p class="txt-primary">www.bing.com</p>
-                <p>Bing is a <b>search</b> engine that brings together the best of <b>search</b> and people in your social networks to help you spend less time <b>searching</b> and more time doing.</p>
-              </div>
-              <div class="one-result">
-                <a href="#" class="large">Google</a>
-                <p class="txt-primary">www.google.com</p>
-                <p><b>Search</b> the world's information, including webpages, images, videos and more. Google has many special features to help you find exactly what you're looking ...</p>
-              </div>
-              -->
-
-              </div>
-
               <ul class="pagination"><li class="prev disabled"><a href="#">← Previous</a></li><li class="active"><a href="#">1</a></li><li><a href="#">2</a></li><li><a href="#">3</a></li><li><a href="#">4</a></li><li><a href="#">5</a></li><li class="next"><a href="#">Next → </a></li></ul>
+              -->
 
             </div>
             <!--End Search-Result-Link-Center-->
@@ -503,7 +562,7 @@
           <!--End Search-Research-Dashboard-Left-->
 
           <!--Start Dashboard-Right-->
-          <div class="col-sm-8" style= "height: 100%;">
+          <div class="col-sm-7" style= "height: 100%;">
             <div style= "height: 100%;">
 
               <!-- Start Dashboard-Right-Row-1 -->
@@ -595,7 +654,10 @@
                     <a href="#dashboard_tab_content_domains" style="height: inherit;" role="tab" data-toggle="tab">Domains</a>
                   </li>
                   <li style="height: inherit;">
-                    <a href="#dashboard_tab_content_topics" style="height: inherit;" role="tab" data-toggle="tab">Communities</a>
+                    <a href="#dashboard_tab_content_communities" style="height: inherit;" role="tab" data-toggle="tab">Communities</a>
+                  </li>
+                  <li style="height: inherit;">
+                    <a href="#dashboard_tab_content_rank" style="height: inherit;" role="tab" data-toggle="tab">Rank</a>
                   </li>
                 </ul>
                 <!--End Dashboard-Right-Row-3-Panel-Nav-Tabs-->
@@ -626,6 +688,18 @@
                       </div>
                     </div>
                   </div>
+                  <div class="tab-pane" id="dashboard_tab_content_rank">
+                    <div class="box-content" style="padding: 0px; height: 164px;">
+                      <div class="row">
+                        <div class="col-xs-3">
+                          <div id="chart_donut_rank" style="width: 160px; height: 160px;"></div>
+                        </div>
+                        <div class="col-xs-9" style="padding: 0px;">
+                          <div id="chart_horizontal_bar_rank" style="width: 100%; height: 100%; position: relative"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <!-- Start Dashboard-Right-Row-3-Panel-Tab-Content -->
               </div>
@@ -641,45 +715,99 @@
         <div id="content-analytics-email" class="container-fluid analytics-content" >
 
           <!--Start Visual-Filter-->
-          <div style="position: fixed; left: 18%; background-color: rgba(210, 210, 210, 0.6); z-index: 999; font-size: 12px;
-             border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; width: 25%;">
-            <table>
-              <tr>
-                <td>
-                  <div style="padding-right: 10px;">Color:</div>
-                </td>
-                <td>
-                  <label class="radio-inline" style="padding-right: 10px;"><input type="radio" name="optionRadios" id="colorby" value="node" style="margin: 2px 0 0 -20px;" checked /> Domain </label>
-                </td>
-                <td>
-                  <label class="radio-inline"><input type="radio" name="optionRadios" id="colorby2"  value="comm" style="margin: 2px 0 0 -20px;"  /> Community </label>
-                </td>
-              </tr>
-              <tr>
-                <td><div style="padding-right: 10px;">Display:</div></td>
-                <td>
-                  <label class="checkbox" style="padding-right: 10px;margin: 0;">
-                    <input type="checkbox" name="optionrank" id="rankval" value="rank" /> Rank
-                  </label>
-                </td>
-                <td>
-                  <label class="checkbox" style="padding-right: 10px;margin: 0;">
-                    <input type="checkbox" id="usetext" /> Labels
-                  </label>
-                </td>
-              </tr>
-            </table>
+          <div style="position: fixed; left: 20%; background-color: rgba(210, 210, 210, 0.6); z-index: 999; font-size: 11px;
+             border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; width: 30%;">
 
-            <div style="border-top: 1px solid #000;text-align:center;">
+            <div class="row" style="margin: 0;">
+              <div class="col-sm-2">
+                <div style="padding: 0;">Color</div>
+              </div>
+              <div class="col-sm-3" style="padding: 0;" >
+                <label class="radio-inline" >
+                  <input type="radio" name="optionRadios" id="colorby" value="node" style="margin: 2px 0 0 -15px;" checked="checked"/> Domain
+                </label>
+              </div>
+              <div class="col-sm-3" style="padding: 0; border-right: 1px solid rgba(255, 255, 255, 0.6);">
+                <label class="radio-inline" >
+                  <input type="radio" name="optionRadios" id="colorby2" value="comm" style="margin: 2px 0 0 -15px;" /> Community
+                </label>
+              </div>
+              <div class="col-sm-4" style="padding: 0 0 0 2px;">
+                <span class="fa fa-envelope-o" id="doc_count_inbound" style="padding: 0;"> Inbound </span>
+              </div>
+            </div>
+            <div class="row" style="margin: 0;">
+              <div class="col-sm-2">
+                <div style="padding: 0;">Display</div>
+              </div>
+              <div class="col-sm-3" style="padding: 0;">
+                <label class="checkbox-inline" >
+                  <input type="checkbox" name="optionrank" id="rankval" value="rank" style="margin: 2px 0 0 -15px;" /> Rank
+                </label>
+              </div>
+              <div class="col-sm-3" style="padding: 0; border-right: 1px solid rgba(255, 255, 255, 0.6);">
+                <label class="checkbox-inline" >
+                  <input type="checkbox" id="usetext" style="margin: 2px 0 0 -15px;" /> Labels
+                </label>
+              </div>
+              <div class="col-sm-4" style="padding: 0 0 0 2px;">
+                <span class="fa fa-envelope-o" id="doc_count_outbound" style="padding: 0;"> Outbound </span>
+              </div>
+            </div>
+
+
+            <!--
+            <div class="row" style="margin: 0;">
+              <table>
+                <tr>
+                  <td>
+                    <div style="padding: 0px 15px 0px 15px;">Color:</div>
+                  </td>
+                  <td>
+                    <label class="radio-inline" style="padding: 0px 10px 0px 10px;">
+                      <input type="radio" name="optionRadios" id="colorby" value="node" style="margin: 2px 0 0 -15px;" checked /> Domain
+                    </label>
+                  </td>
+                  <td>
+                    <label class="radio-inline" style="padding: 0px 10px 0px 10px;">
+                      <input type="radio" name="optionRadios" id="colorby2"  value="comm" style="margin: 2px 0 0 -15px;"  /> Community
+                    </label>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div style="padding: 0px 15px 0px 15px;">Display:</div>
+                  </td>
+                  <td>
+                    <label class="checkbox" style="padding: 0px 10px 0px 10px;">
+                      <input type="checkbox" name="optionrank" id="rankval" value="rank" style="margin: 2px 0 0 -15px;" /> Rank
+                    </label>
+                  </td>
+                  <td>
+                    <label class="checkbox" style="padding: 0px 10px 0px 10px;">
+                      <input type="checkbox" id="usetext" style="margin: 2px 0 0 -15px;" /> Labels
+                    </label>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            -->
+
+
+            <div class="row" style="border-top: 1px solid rgba(255, 255, 255, 0.6); text-align: center; margin: 0;">
+              <!--
               <div>
                 <span style="font-weight: bold">Legend</span>
               </div>
-              <div id="toggle_legends"><span class="glyphicon glyphicon-chevron-down"></span></div>
-              <div id="legend_list" style="height: 0px;max-height:375px;overflow-y:scroll;">
-                <table id="legend-table" class="table" style="table-layout: fixed;">
-                  <thead />
-                  <tbody />
-                </table>
+              -->
+              <div class="col-sm-12">
+                <div id="toggle_legends"><span class="glyphicon glyphicon-chevron-down">Legend</span></div>
+                <div id="legend_list" style="height: 0px; max-height:375px; overflow-y:scroll;">
+                  <table id="legend-table" class="table" style="display: table; table-layout: fixed;">
+                    <thead />
+                    <tbody />
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -696,19 +824,19 @@
             <div style= "height: 580px;">
               <!--Start Data-Panel-Nav-Tabs-->
               <ul class="nav nav-tabs" style="width: 600px;" role="tablist" id="tab-list">
-                <li class="active"><a href="#top-rank" role="tab" data-toggle="tab">Rank</a></li>
-                <li><a href="#top-entities" role="tab" data-toggle="tab">Entities</a></li>
-                <li><a href="#email-body-tab" role="tab" data-toggle="tab">Email</a></li>
-                <li><a href="#topics-tab" role="tab" data-toggle="tab">Topics</a></li>
+                <!--<li><a href="#top-rank" role="tab" data-toggle="tab">Rank</a></li>-->
+                <!--<li><a href="#top-entities" role="tab" data-toggle="tab">Entities</a></li>-->
+                <li class="active"><a href="#email-body-tab" role="tab" data-toggle="tab">Email</a></li>
+                <!--<li><a href="#topics-tab" role="tab" data-toggle="tab">Topics</a></li>-->
                 <li><a href="#attach-tab" role="tab" data-toggle="tab">Attachments</a></li>
               </ul>
               <!--End Data-Panel-Nav-Tabs-->
 
               <!--Start Data-Panel-Tab-Content-->
               <div class="tab-content" style= "height: 100%;">
-                <div class="tab-pane active" id="top-rank"> </div>
-                <div class="tab-pane" id="top-entities"></div>
-                <div class="tab-pane" id="email-body-tab" style="height: 100%;">
+                <!--<div class="tab-pane" id="top-rank"></div>-->
+                <!--<div class="tab-pane" id="top-entities"></div>-->
+                <div class="tab-pane active" id="email-body-tab" style="height: 100%;">
                   <div class="row" style="display: table;">
                     <!--
                     <div style="display: inline-block; float:left; margin-top: 15px;">
@@ -752,6 +880,29 @@
                       </div>
                     </div>
 
+                    <div style="display: inline-block; float:left; margin: 5px 0px 5px 15px;">
+                      <div class="btn-group" style="margin: 0px;">
+                        <a class="btn btn-xs btn-default" href="#mark_as_read" data-toggle="dropdown" style="color: #afadb9">
+                          <i class="fa fa-tag fa-lg"></i> Mark As Read
+                        </a>
+                        <a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#mark_as_read">
+                          <span class="fa fa-caret-down"></span>
+                        </a>
+                        <ul class="dropdown-menu" role="menu" >
+                          <li>
+                            <a href="#mark_as_read" role="menuitem" data-toggle="dropdown" style="color: #afadb9">
+                              <i class="fa fa-tag fa-lg"></i> Mark As Read
+                            </a>
+                          </li>
+                          <li>
+                            <a href="#mark_as_unread" role="menuitem" data-toggle="dropdown" style="color: #ffb237">
+                              <i class="fa fa-tag fa-lg"></i> Mark As Unread
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
                     <div style="display: inline-block; float: left; margin-top: 5px; margin-left: 10px;" class="active">
                       <a id="submit_toggleExport" class="btn btn-xs btn-default" style="color: #4888f3">
                         <span><i class="fa fa-star fa-lg"></i></span>
@@ -763,18 +914,20 @@
                   </div>
                   <div class="row" id="email-body"> Select an Email to preview </div>
                 </div>
+                <!--
                 <div class="tab-pane" id="topics-tab">
-                  <table id="topics-table" class="info-table">
+                  <table id="topics-table" class="info-table" style="display: table; table-layout: fixed;">
                     <thead></thead>
                     <tbody></tbody>
                   </table>
                 </div>
+                -->
                 <div class="tab-pane" id="attach-tab">
                   <div style="padding-bottom: 10px;">
                     <span>Attachments for sender: </span><span id="attach-sender" style="font-weight: bold;"></span>
                   </div>
                   <div style="height: calc(100% - 30px);overflow-y: scroll;">
-                    <table id="attach-table" class="info-table"></table>
+                    <table id="attach-table" class="info-table" style="display: table; table-layout: fixed;"></table>
                   </div>
                 </div>
               </div>
@@ -824,7 +977,7 @@
               <!--   </a> -->
               <!-- </div> -->
               <div style="float: left;padding-right: 9px;">
-                <span><i class="fa fa-files-o"></i> Documents: </span> <span id="document_count"></span>
+                <span><i class="fa fa-envelope-o"></i> Documents: </span> <span id="document_count"></span>
               </div>
               <div style="float: right;padding-right: 9px;">
                 <a class="clickable" id="email_view_marked">
@@ -845,10 +998,14 @@
               </div>
             </div>
             <!-- Start Data-Table-Documents -->
-            <div style="overflow-y: scroll; width: 100%; height: 100%; max-height: 280px;">
-              <table id="result_table" class="table" style="display: table; table-layout: fixed;" >
+            <div style="width: 100%; height: 100%; max-height: 280px; overflow-y: scroll;">
+              <!--
+              <table id="result_table" class="table" style="display: table; table-layout: fixed; overflow-y: scroll;" >
                 <thead class="result_thead"></thead>
                 <tbody class="result_tbody"></tbody>
+              </table>
+              -->
+              <table id="result_table" class="display" width="100%" cellspacing="0" style="display: table; table-layout: fixed; font-size: 11px;" >
               </table>
             </div>
             <!-- Start Data-Table-Documents -->
@@ -863,7 +1020,11 @@
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="plugins/jquery/jquery.min.js"></script>
     <script src="plugins/jquery-ui/jquery-ui.min.js"></script>
-    <script src="plugins/d3/d3.min.js" charset="utf-8"></script>
+    <!--<script src="plugins/jquery-treetable/jquery.treetable.js"></script>-->
+    <script src="plugins/jquery-treegrid/js/jquery.treegrid.min.js"></script>
+    <script src="plugins/jquery-treegrid/js/jquery.treegrid.bootstrap3.js"></script>
+    <script src="plugins/d3/d3.min.js"></script>
+    <script src="plugins/c3/c3.min.js"></script>
     <script src="plugins/jq-rangeslider/jQAllRangeSliders-min.js"></script>
     <script src="plugins/jq-rangeslider/jQAllRangeSliders-withRuler-min.js"></script>
     <script src="plugins/jq-rangeslider/lib/jquery.mousewheel.min.js"></script>
@@ -874,6 +1035,10 @@
     <script src="plugins/underscore/underscore-contrib.min.js"></script>
     <script src="plugins/bootstrap-growl/jquery.bootstrap-growl.js"></script>
     <script src="plugins/jquery-highlight/jquery.highlight-4.closure.js"></script>
+    <script src="plugins/datatables/js/jquery.dataTables.min.js"></script>
+    <script src="plugins/datatables/js/dataTables.bootstrap.min.js"></script>
+    <!--<script src="plugins/datatables-fixedheader/js/dataTables.fixedHeader.min.js"></script>
+    <script src="plugins/datatables-fixedcolumns/js/dataTables.fixedColumns.min.js"></script>-->
     <script src="plugins/millermedeiros/signals.js"></script>
     <script src="plugins/millermedeiros/hasher.js"></script>
     <script src="plugins/millermedeiros/crossroads.js"></script>
@@ -887,8 +1052,11 @@
 
     <!-- All functions for this theme + document.ready processing -->
 
-    <script src="js/searchtool.js"></script>
     <script src="js/history-nav.js"></script>
+    <script src="js/newman-data-source.js"></script>
+    <script src="js/newman-service.js"></script>
+    <script src="js/newman-data-table.js"></script>
+    <script src="js/searchtool.js"></script>
     <script src="js/graphtool.js"></script>
 
   </body>

@@ -24,13 +24,13 @@ var history_nav = (function () {
     if(!icon_class) {
       icon_class = 'fa fa-asterisk';
       if (data_field === 'email') {
-        icon_class = 'fa fa-files-o';
+        icon_class = 'fa fa-envelope-o';
+      }
+      else if (data_field === 'community') {
+        icon_class = 'fa fa-connectdevelop';
       }
       else if (data_field === 'topic') {
         icon_class = 'fa fa-list-ol';
-      }
-      else if (data_field === 'community') {
-        icon_class = 'fa fa-link';
       }
       else if (data_field === 'entity') {
         icon_class = 'fa fa-th';
@@ -151,9 +151,11 @@ var history_nav = (function () {
             bottom_panel.close();
 
             if (this.id == 'hist_dashboard_home') {
+
               dashboard_content.open();
             }
             else {
+
               loadSearchResult( element.data_url );
             }
           }
