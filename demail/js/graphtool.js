@@ -234,13 +234,7 @@ var waiting_spin = $('<img>', {
   'width' : 256,
   'height' : 32});
 
-var current_email = null;
-var current_export = null;
 
-function updateCurrentEmail(email){
-  console.log("updateCurrentEmail(" + email + ")");
-  current_email = email;
-}
 
 var domain_set = {};
 
@@ -437,49 +431,7 @@ function produceHTMLView(emailObj) {
   return el;
 }
 
-function add_view_to_export(){
 
-  var arr= d3.select("#result_table").select("tbody").selectAll("tr").data();
-  var emails = _.map(arr, function(o){  return o.num; });
-
-  $.ajax({
-    url: 'email/exportmany',
-    type: "POST",
-    data: JSON.stringify({'emails': emails, 'exportable': true}),
-    contentType:"application/json; charset=utf-8",
-    dataType:"json"
-  })
-    .done(function(resp){
-      table_mark_exportable(true);
-      console.log(resp);
-    })
-    .fail(function(resp){
-      alert('fail');
-      console.log("fail");
-    });  
-}
-
-function remove_view_from_export(){
-
-  var arr= d3.select("#result_table").select("tbody").selectAll("tr").data();
-  var emails = _.map(arr, function(o){  return o.num; });
-
-  $.ajax({
-    url: 'email/exportmany',
-    type: "POST",
-    data: JSON.stringify({'emails': emails, 'exportable': false}),
-    contentType:"application/json; charset=utf-8",
-    dataType:"json"
-  })
-    .done(function(resp){
-      table_mark_exportable(false);
-      console.log(resp);
-    })
-    .fail(function(resp){
-      alert('fail');
-      console.log("fail");
-    });  
-}
 
 function group_email_conversation(){
 
@@ -536,54 +488,6 @@ function group_email_conversation(){
 }
 
 
-function table_mark_exportable(mark, ids_set){
-  var _ids = ids_set ? _.object(ids_set, _.range(ids_set.length)) : null;
-  d3.select("#result_table").select("tbody").selectAll("tr")
-    .filter(function(d, i){ 
-      /* this is a hack */
-      if (_ids != null){
-        if (d.num in _ids){
-          d.exported = mark;
-          return true;
-        }
-        return false;
-      }
-      //else process all
-      d.exported = mark;
-      return true;
-
-    })
-    .selectAll("td")
-    .filter(function(d, i){
-      //no need to display doc-UID
-      //return i==7;
-      return i==6;
-    })
-    .html(function(d,i){ 
-      if (mark){
-        return "<div><span class='glyphicon glyphicon-star' ></span></div>";
-      } else {
-        "<div></div>"
-      }      
-    });
-}
-
-
-function showEmailView(email_id){
-  $('#tab-list li:eq(2) a').tab('show')
-  $(document).scrollTop(0);
-  $("#email-body").empty();
-  $("#email-body").append($('<span>').text('Loading... ')).append(waiting_bar);
-
-  $.get("email/email/" + encodeURIComponent(email_id)).then(
-    function(resp) {
-      updateCurrentEmail(email_id);
-      if(resp.email.length > 0){
-        $("#email-body").empty();
-        $("#email-body").append(produceHTMLView(resp));
-      }
-    });
-};
 
 function toString( map ) {
   if (map) {
@@ -1163,115 +1067,108 @@ function requestSearch(field, search_text, load_on_response) {
     url_path = url_path + '/' + date_range.getDateRange();
   }
 
+  $.getJSON( url_path , function (search_response) {
 
 
-  $.get("email/exportable").then(function(resp_export){
+    console.log( '.getJSON(' + url_path + ')' );
 
-    $.getJSON( url_path , function (search_response) {
+    //validate search-response
+    var filtered_response = validateResponseSearch( search_response );
 
+    if (is_load_on_response) {
 
-      console.log( '.getJSON(' + url_path + ')' );
+      email_analytics_content.open();
 
-      //validate search-response
-      var filtered_response = validateResponseSearch( search_response );
+      var label = ' all';
+      if(search_text) {
+        label = ' ' + decodeURIComponent(search_text);
+      }
+      var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',','_');;
 
-      if (is_load_on_response) {
+      history_nav.push(id,
+        label,
+        '',
+        url_path,
+        field);
 
-        email_analytics_content.open();
+      showSearchPopup( field, decodeURIComponent(search_text) );
+      loadSearchResult( url_path );
 
-        var label = ' all';
-        if(search_text) {
-          label = ' ' + decodeURIComponent(search_text);
+      is_load_on_response = false;
+    }
+    else {
+
+      dashboard_content.open();
+      var data_set_selected = all_data_source.getSelected();
+
+      if (url_path.endsWith( url_search_all )) {
+
+        var ranks = service_response_email_rank.getResponseMapValues();
+        //console.log( 'ranks: ' + JSON.stringify(ranks, null, 2) );
+        if (ranks.length > 1) {
+          ranks = ranks.splice(0, 10);
+          _.each(ranks, function (element) {
+            requestSearch( 'all', element.email, false );
+          });
         }
-        var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',','_');;
 
-        history_nav.push(id,
-                         label,
-                         '',
-                         url_path,
-                         field);
+        var doc_count = 0;
+        if (filtered_response.rows) {
+          doc_count = filtered_response.rows.length;
+        }
 
-        showSearchPopup( field, decodeURIComponent(search_text) );
-        loadSearchResult( url_path );
+        var node_count = 0;
+        if (filtered_response.graph && filtered_response.graph.nodes) {
+          node_count = filtered_response.graph.nodes.length;
+        }
 
-        is_load_on_response = false;
+        var root_result = search_result.setRoot(
+          '* (' + data_set_selected.label + ')',
+          '',
+          'text',
+          '',
+          url_path,
+          data_set_selected.label,
+          'pst',
+          doc_count,
+          node_count
+        );
+
       }
       else {
 
-        dashboard_content.open();
-        var data_set_selected = all_data_source.getSelected();
-
-        if (url_path.endsWith( url_search_all )) {
-
-          var ranks = service_response_email_rank.getResponseMapValues();
-          //console.log( 'ranks: ' + JSON.stringify(ranks, null, 2) );
-          if (ranks.length > 1) {
-            ranks = ranks.splice(0, 10);
-            _.each(ranks, function (element) {
-              requestSearch( 'all', element.email, false );
-            });
-          }
-
-          var doc_count = 0;
-          if (filtered_response.rows) {
-            doc_count = filtered_response.rows.length;
-          }
-
-          var node_count = 0;
-          if (filtered_response.graph && filtered_response.graph.nodes) {
-            node_count = filtered_response.graph.nodes.length;
-          }
-
-          var root_result = search_result.setRoot(
-            'all (' + data_set_selected.label + ')',
-            '',
-            'text',
-            '',
-            url_path,
-            data_set_selected.label,
-            'pst',
-            doc_count,
-            node_count
-          );
-
+        var doc_count = 0;
+        if (filtered_response.rows) {
+          doc_count = filtered_response.rows.length;
         }
-        else {
 
-          var doc_count = 0;
-          if (filtered_response.rows) {
-            doc_count = filtered_response.rows.length;
-          }
-
-          var node_count = 0;
-          if (filtered_response.graph && filtered_response.graph.nodes) {
-            node_count = filtered_response.graph.nodes.length;
-          }
-
-          var doc_sent = service_response_email_rank.getDocSent( search_text );
-          var doc_received = service_response_email_rank.getDocReceived( search_text );
-          var rank = service_response_email_rank.getRank( search_text );
-
-          search_result.push(
-            search_text,
-            search_text,
-            field,
-            "",
-            url_path,
-            data_set_selected.label,
-            'pst',
-            doc_count,
-            doc_sent,
-            doc_received,
-            node_count,
-            rank
-          );
-
+        var node_count = 0;
+        if (filtered_response.graph && filtered_response.graph.nodes) {
+          node_count = filtered_response.graph.nodes.length;
         }
+
+        var doc_sent = service_response_email_rank.getDocSent( search_text );
+        var doc_received = service_response_email_rank.getDocReceived( search_text );
+        var rank = service_response_email_rank.getRank( search_text );
+
+        search_result.push(
+          search_text,
+          search_text,
+          field,
+          "",
+          url_path,
+          data_set_selected.label,
+          'pst',
+          doc_count,
+          doc_sent,
+          doc_received,
+          node_count,
+          rank
+        );
+
       }
-    });
-
+    }
   });
-
 }
 
 /**
@@ -1280,7 +1177,8 @@ function requestSearch(field, search_text, load_on_response) {
 function loadSearchResult( url_path ) {
   bottom_panel.unhide();
 
-  $.get("email/exportable").then(function(resp_export){
+  $.get("email/exportable").then(function(response_exportable) {
+    service_response_email_exportable.setResponse(response_exportable);
 
     $.getJSON( url_path , function (search_response) {
 
@@ -1290,17 +1188,20 @@ function loadSearchResult( url_path ) {
       console.log( '.getJSON(' + url_path + ')' );
 
 
-      //var exported = _.indexBy(resp_export.emails, _.identity);
-      var exported = _.object(resp_export.emails);
+      //var exported = _.indexBy(response_exportable.emails, _.identity);
+      var exported = _.object(response_exportable.emails);
 
 
       $('#search_status').empty();
       //d3.select("#search_status").text("");
 
       $('#document_count').text(filtered_response.rows.length);
+
+      /*
       var data = _.map(filtered_response.rows, function(o){
         return _.extend(o, {'exported': (o.num in exported)})
       });
+      */
 
       $('#doc_count_inbound').text( ' Inbound ' + generateRandomInt(0, 500) );
       $('#doc_count_outbound').text( ' Outbound ' + generateRandomInt(0, 500) );
@@ -1958,7 +1859,7 @@ function draw_attachments_table(email_addr){
         if (i != 4) return;
         $.get("email/email/" + encodeURIComponent(d)).then(
           function(resp) {
-            updateCurrentEmail(d);
+            setEmailVisible(d);
             $('#tab-list li:eq(2) a').tab('show');
             if(resp.email.length > 0){
               $("#email-body").empty();
@@ -2479,6 +2380,7 @@ $(function () {
   "use strict";
 
   service_response_email_rank.requestService();
+  service_response_email_exportable.requestService();
 
   // close existing analytics displays if applicable
   email_analytics_content.close();
@@ -2709,7 +2611,7 @@ $(function () {
       $("#email-body").append(waiting_bar);
       $.get("activesearch/like").then(
         function(resp){
-          updateCurrentEmail(resp);
+          setEmailVisible(resp);
           $.get("email/email/" + encodeURIComponent(resp)).then(
             function(resp) {
               if(resp.email.length > 0){
@@ -2729,7 +2631,7 @@ $(function () {
       $("#email-body").append(waiting_bar);
       $.get("activesearch/dislike").then(
         function(resp){
-          updateCurrentEmail(resp);
+          setEmailVisible(resp);
           $.get("email/email/" + encodeURIComponent(resp)).then(
             function(resp) {
               if(resp.email.length > 0){
@@ -2751,7 +2653,7 @@ $(function () {
       $("#email-body").append(waiting_bar);
       $.get("activesearch/seed/" + encodeURIComponent(id)).then(
         function(resp) {
-          updateCurrentEmail(resp);
+          setEmailVisible(resp);
           $.get("email/email/" + encodeURIComponent(resp)).then(
             function(resp) {
               if(resp.email.length > 0){
@@ -2774,7 +2676,7 @@ $(function () {
 
     $("#submit_toggleExport").click(function() {
       console.log("toggle export flag for email_id... ");
-      if (current_email == null) {
+      if (!current_email) {
         //alert("please select an email first");
         return;
       }
@@ -2788,12 +2690,13 @@ $(function () {
           contentType:"application/json; charset=utf-8",
           dataType:"json"
         })
-          .done(function(resp){
+          .done(function(response){
+            console.log('email_id_marked: ' + id);
             $("#submit_toggleExport").toggleClass('marked');
-            table_mark_exportable(
-              $("#submit_toggleExport").hasClass('marked'),
-              [id]);
-            console.log(resp);
+            var is_marked = $("#submit_toggleExport").hasClass('marked');
+            var id_set = [id];
+            table_mark_exportable( is_marked, id_set );
+            //console.log('email/exportable response:' + JSON.stringify(response, null, 2));
           })
           .fail(function(resp){
             alert('fail');

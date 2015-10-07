@@ -478,7 +478,7 @@ var search_result = (function () {
         label = search_text;
       }
       else {
-        label = 'all';
+        label = '*';
       }
     }
 
@@ -759,7 +759,7 @@ var search_result = (function () {
         if (!root_result) {
 
           root_result = setRoot(
-            'all (' + data_set_selected.label + ')',
+            '* (' + data_set_selected.label + ')',
             '',
             'text',
             '',
@@ -799,28 +799,31 @@ var search_result = (function () {
             if (attr_id) {
               console.log('\tid : ' + attr_id);
 
-              var element = getByKey(attr_id);
-              //console.log('\element : ' + JSON.stringify(element, null, 2));
-
-              //onTreeTableRowEvent(element);
-
-
-              var label = ' all';
-              if (element.search_text) {
-                label = ' ' + decodeURIComponent(element.search_text);
+              var item = getByKey(attr_id);
+              if(!item) {
+                item = element;
               }
-              var id = decodeURIComponent(element.url).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
+              //console.log('\element : ' + JSON.stringify(item, null, 2));
+
+              //onTreeTableRowEvent(item);
+
+
+              var label = ' ' + attr_id.replace('_', ' ');
+              if (item.label) {
+                label = ' ' + item.label;
+              }
+              var id = decodeURIComponent(item.url).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
 
               history_nav.push(
                 id,
-                label,
+                item.label,
                 '',
-                element.url,
-                element.search_field
+                item.url,
+                item.search_field
               );
 
               //showSearchPopup(element.search_field, element.search_text);
-              loadSearchResult(element.url);
+              loadSearchResult(item.url);
 
 
             }
@@ -834,6 +837,7 @@ var search_result = (function () {
           var parent_index = element.parent_index;
           var table_row;
           if (parent_index > 0) {
+            // populate leaf-node
             table_row = $('<tr class=\"treegrid-' + row_index + ' treegrid-parent-' + parent_index + '\"/>').append(
               "<td>" + button_html + "</td>" +
               "<td>" + checkbox_html + "</td>" +
@@ -845,11 +849,12 @@ var search_result = (function () {
 
           }
           else {
+            // populate parent-node
             table_row = $('<tr class=\"treegrid-' + row_index + '\"/>').append(
               "<td>" + button_html + "</td>" +
               "<td>" + checkbox_html + "</td>" +
-              "<td>" + element.document_sent + "</td>" +
-              "<td>" + element.document_received + "</td>" +
+              "<td></td>" +
+              "<td></td>" +
               "<td>" + element.document_count + "</td>" +
               "<td>" + element.node_count + "</td>"
             );
@@ -1041,7 +1046,7 @@ function drawChartEntity( count ) {
 
       var entities = response.entities;
 
-      var width = 450, height_bar = 15, margin_top = 8, margin_bottom = 2;
+      var width = 380, height_bar = 15, margin_top = 8, margin_bottom = 2;
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 100};
       width = width - margin.left - margin.right;
 
@@ -1192,7 +1197,7 @@ function drawChartTopic( count ) {
       */
 
       var colors = d3.scale.category20b();
-      var width = 600, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 7;
+      var width = 530, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 7;
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
       width = width - margin.left - margin.right;
 
@@ -1346,7 +1351,7 @@ function drawChartDomain( count ) {
       */
 
       var colors = d3.scale.category20b();
-      var width = 600, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
+      var width = 530, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
       width = width - margin.left - margin.right;
 
@@ -1493,7 +1498,7 @@ function drawChartCommunity( count ) {
 
 
       var colors = d3.scale.category20b();
-      var width = 600, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
+      var width = 530, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
       width = width - margin.left - margin.right;
 
@@ -1616,10 +1621,9 @@ function drawChartRank( count ) {
       var ranks = service_response_email_rank.getResponseMapValues();
 
       if (ranks) {
-        console.log('service_response_email_rank.response[' + ranks.length + ']');
+        console.log('loaded service_response_email_rank[' + ranks.length + ']');
       }
       else {
-        console.log('searchtool received: service_response_email_rank');
         service_response_email_rank.setResponse(response);
         ranks = service_response_email_rank.getResponseMapValues();
       }
@@ -1644,7 +1648,7 @@ function drawChartRank( count ) {
         //console.log('ranks: ' + JSON.stringify(ranks, null, 2));
 
 
-        var width = 600, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 100;
+        var width = 530, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 100;
         var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
         width = width - margin.left - margin.right;
 

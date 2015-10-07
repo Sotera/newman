@@ -203,7 +203,7 @@
 
                   <a id="view_exportList" type="button" class="btn btn-inverse" data-toggle="modal" data-target="#exportModal"
                      style="font-size: 14px; font-weight:normal; color: #E1E1E1;">Export
-                    <span class="glyphicon glyphicon-list-alt"></span>
+                    <span class="fa fa-download fa-inverse fa-lg"></span>
                   </a>
 
                 </li>
@@ -581,14 +581,14 @@
                 <!--Start Dashboard-Right-Row-1-Panel-Tab-Content-->
                 <div class="tab-content" style= "height: 100%;">
                   <div class="tab-pane active" id="dashboard_tab_content_outbound_activities">
-                    <div class="box-content" style="padding: 0px; width: 812px; height: 164px;">
+                    <div class="box-content" style="padding: 0px; width: 100%; height: 164px;">
 
                           <div id="chart_line_outbound_activities" style="width: 100%; height: 100%;"></div>
 
                     </div>
                   </div>
                   <div class="tab-pane" id="dashboard_tab_content_inbound_activities">
-                    <div class="box-content" style="padding: 0px; width: 812px; height: 164px;">
+                    <div class="box-content" style="padding: 0px; width: 100%; height: 164px;">
 
                           <div id="chart_line_inbound_activities" style="width: 100%; height: 100%;"></div>
 
@@ -651,20 +651,32 @@
                 <!--Start Dashboard-Right-Row-3-Panel-Nav-Tabs-->
                 <ul class="nav nav-tabs box-name" style="height: 30px;" role="tablist" id="dashboard_row3_tab_list">
                   <li class="active" style="height: inherit;">
+                    <a href="#dashboard_tab_content_rank" style="height: inherit;" role="tab" data-toggle="tab">Rank</a>
+                  </li>
+                  <li style="height: inherit;">
                     <a href="#dashboard_tab_content_domains" style="height: inherit;" role="tab" data-toggle="tab">Domains</a>
                   </li>
                   <li style="height: inherit;">
                     <a href="#dashboard_tab_content_communities" style="height: inherit;" role="tab" data-toggle="tab">Communities</a>
-                  </li>
-                  <li style="height: inherit;">
-                    <a href="#dashboard_tab_content_rank" style="height: inherit;" role="tab" data-toggle="tab">Rank</a>
                   </li>
                 </ul>
                 <!--End Dashboard-Right-Row-3-Panel-Nav-Tabs-->
 
                 <!--Start Dashboard-Right-Row-3-Panel-Tab-Content-->
                 <div class="tab-content" style= "height: 100%;">
-                  <div class="tab-pane active" id="dashboard_tab_content_domains">
+                  <div class="tab-pane active" id="dashboard_tab_content_rank">
+                    <div class="box-content" style="padding: 0px; height: 164px;">
+                      <div class="row">
+                        <div class="col-xs-3">
+                          <div id="chart_donut_rank" style="width: 160px; height: 160px;"></div>
+                        </div>
+                        <div class="col-xs-9" style="padding: 0px;">
+                          <div id="chart_horizontal_bar_rank" style="width: 100%; height: 100%; position: relative"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tab-pane" id="dashboard_tab_content_domains">
                     <div class="row box">
                       <div class="box-content" style="height: 164px;">
                         <div class="col-xs-3" style="padding: 0px;">
@@ -684,18 +696,6 @@
                         </div>
                         <div class="col-xs-9" style="padding: 0px;">
                           <div id="chart_horizontal_bar_communities" style="width: 100%; height: 100%; position: relative"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="tab-pane" id="dashboard_tab_content_rank">
-                    <div class="box-content" style="padding: 0px; height: 164px;">
-                      <div class="row">
-                        <div class="col-xs-3">
-                          <div id="chart_donut_rank" style="width: 160px; height: 160px;"></div>
-                        </div>
-                        <div class="col-xs-9" style="padding: 0px;">
-                          <div id="chart_horizontal_bar_rank" style="width: 100%; height: 100%; position: relative"></div>
                         </div>
                       </div>
                     </div>
