@@ -67,12 +67,6 @@ function validateResponseSearch(response) {
       console.log( '\tnew nodes[' + response.graph.nodes.length + '], invalid nodes ' + invalid_node_count +
         ', new links[' + response.graph.links.length + '], invalid links ' + invalid_link_count );
 
-      // initialize community-map
-      _.each(new_nodes, function(object, index) {
-        all_community_map.put(object.community, parseInt(object.community), 1, color_set_community(object.community));
-      });
-      console.log( '\tcommunity_map[' + all_community_map.getAllCount() + ']' );
-      //console.log( 'all_community_map: ' + JSON.stringify(all_community_map.getAll(), null, 2) );
     }
 
     // validate rows
@@ -530,4 +524,23 @@ function ascendingPredicatByValue(){
  */
 function generateRandomInt( from, to ) {
   return Math.floor(Math.random() * (to - from + 1) + from);
+}
+
+/**
+ * return a deep-copy of the argument
+ * @param source to be cloned
+ * @returns deep-copy
+ */
+function clone( source ) {
+  if (source) {
+    var copy;
+    if (jQuery.isArray(source)) {
+      copy = jQuery.extend(true, [], source);
+    }
+    else {
+      copy = jQuery.extend(true, {}, source);
+    }
+    return copy;
+  }
+  return source;
 }
