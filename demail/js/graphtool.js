@@ -564,182 +564,6 @@ function show_email_view(email_id){
     });
 };
 
-/**
- * validate datetime as text
- * @param datetime_text typically in the format of yyyy-MM-ddThh:mm:ss
- * @returns true if the text is valid datetime representation, false otherwise
- */
-function validateDateTime(datetime_text) {
-  if (datetime_text) {
-    if (isNaN(Date.parse(datetime_text))) {
-      return false;
-    }
-    return true;
-  }
-  return false;
-}
-
-/**
- * validate email address
- * @param email_address
- * @returns true if the argument email address is valid, false otherwise
- */
-function validateEmailAddress(email_address) {
-
-    var regex = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
-    return regex.test( email_address );
-
-}
-
-/**
- * remove all empty space from text
- * @param text
- * @returns text string without any empty space
- */
-function removeAllWhitespace(text) {
-  if(text) {
-    return text.replace(/\s+/g, "").trim();
-  }
-  return text;
-}
-
-/**
- * validate domain-service response
- * @param response data received from service
- * @returns filtered response
- */
-function validateDomainResponse(response) {
-  if (response) {
-    console.log('validateDomainResponse(...)');
-
-    if (response[0].domains) {
-      console.log( '\tdomains[' + response[0].domains.length + ']' );
-
-      var new_domains = [];
-      var invalid_item_count = 0;
-      _.each(response[0].domains, function (item) {
-
-        var domain_text = decodeURIComponent( item[0] );
-        var domain_count = item[1];
-        if (domain_text) {
-          domain_text = removeAllWhitespace( domain_text );
-          //console.log('\tdomain : \'' + domain_text + '\'');
-
-          new_domains.push([domain_text, domain_count]);
-        }
-        else {
-          console.log('\tundefined domain : ' + domain_text);
-          invalid_item_count++;
-        }
-      });
-
-      response[0].domains = new_domains;
-      console.log( '\tnew domains[' + response[0].domains.length + '], invalid domains ' + invalid_item_count );
-    }
-
-    return response;
-  }
-
-  console.log( 'response undefined' );
-  return response;
-}
-
-/**
- * validate search-service response
- * @param response data received from service
- * @returns filtered response
- */
-function validateSearchResponse(response) {
-  if (response) {
-    console.log( 'validateSearchResponse(...)' );
-
-    // validate graph nodes and links
-    if (response.graph) {
-      console.log( '\tnodes[' + response.graph.nodes.length + '] links[' + response.graph.links.length + ']' );
-
-      // validate graph-nodes
-      var new_nodes = [];
-      var invalid_node_count = 0;
-      _.each(response.graph.nodes, function (item) {
-
-        if (validateEmailAddress( item.name )) {
-
-          new_nodes.push( item );
-        }
-        else {
-          console.log('\tinvalid node(email) { name: ' + item.name + ', community: ' + item.community + ' group: ' + item.group + ' }');
-          invalid_node_count++;
-        }
-      });
-
-      // validate graph-links
-      var new_links = [];
-      var invalid_link_count = 0;
-      _.each(response.graph.links, function (item) {
-
-        if (new_nodes[item.source] && new_nodes[item.target]) {
-
-          new_links.push( item );
-        }
-        else {
-          console.log('\tundefined link { source: ' + item.source + ', target: ' + item.target + ", value: " + item.value + ' }');
-          invalid_link_count++;
-        }
-      });
-
-      response.graph.nodes = new_nodes;
-      response.graph.links = new_links;
-      console.log( '\tnew nodes[' + response.graph.nodes.length + '], invalid nodes ' + invalid_node_count +
-                   ', new links[' + response.graph.links.length + '], invalid links ' + invalid_link_count );
-    }
-
-    // validate rows
-    if (response.rows) {
-      console.log( '\trows[' + response.rows.length + ']' );
-
-      var new_rows = [];
-      var invalid_row_count = 0;
-      _.each(response.rows, function (item) {
-
-        if (validateDateTime(item.datetime)) {
-
-          if (item.from) {
-            var address = decodeURIComponent( item.from );
-
-            // check for whitespace in email address
-            if (validateEmailAddress( address )) {
-              item.from = address;
-              //console.log('\tfrom \'' + address + '\'');
-
-              new_rows.push(item);
-            }
-            else {
-              console.log('\tinvalid from : ' + item.from);
-              invalid_row_count++;
-            }
-          }
-          else {
-            console.log('\tundefined from : ' + item.from);
-            invalid_row_count++;
-          }
-        }
-        else {
-          console.log('\tinvalid datetime : ' + item.datetime);
-          invalid_row_count++;
-        }
-
-      });
-
-      response.rows = new_rows;
-      console.log( '\tnew rows[' + response.rows.length + '], invalid row ' + invalid_row_count );
-    }
-
-    return response;
-  }
-
-  console.log( 'response undefined' );
-  return response;
-}
 
 // takes field + varargs ... now
 function do_search(fields, val) {
@@ -806,7 +630,7 @@ function do_search(fields, val) {
       $('#search_status').empty();
       //d3.select("#search_status").text("");
 
-      comp_data = validateSearchResponse( comp_data );
+      comp_data = validateResponseSearch( comp_data );
 
       $('#document_count').text(comp_data.rows.length);
       var data = _.map(comp_data.rows, function(o){
@@ -1737,7 +1561,7 @@ $(function () {
   $.when($.get("email/target"), $.get("email/domains")).done(function(resp1, resp2){
 
     //validate service response
-    resp2 = validateDomainResponse( resp2 );
+    resp2 = validateResponseDomain( resp2 );
 
     TARGET_EMAIL = _.object(
       ['email', 'community', 'community_id', 'group', 'total_received', 'total_sent', 'rank'],
