@@ -651,10 +651,10 @@ function requestSearch(field, search_text, load_on_response) {
 
   var url_path = "search/search/" + field +'/' + search_text;
 
-  var range_min = date_range.getDateMinText();
-  var range_max = date_range.getDateMaxText();
-  if (search_text && range_min != 'default_min' && range_max != 'default_max') {
-    url_path = url_path + '/' + date_range.getDateRange();
+  var range_min = datetime_range.getDateMinText();
+  var range_max = datetime_range.getDateMaxText();
+  if (search_text && range_min && range_max) {
+    url_path = url_path + '/' + datetime_range.getDateRange();
   }
 
   $.getJSON( url_path , function (search_response) {
@@ -676,7 +676,7 @@ function requestSearch(field, search_text, load_on_response) {
       if(search_text) {
         label = ' ' + decodeURIComponent(search_text);
       }
-      var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',','_');;
+      var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',','_');
 
       history_nav.push(id,
         label,
@@ -1992,8 +1992,8 @@ $(function () {
 
   // initialize date-range slider binding
   $("#date_range_slider").bind("userValuesChanged", function(e, data){
-    date_range.setDateMinText(data.values.min.toISOString().substring(0, 10));
-    date_range.setDateMaxText(data.values.max.toISOString().substring(0, 10));
+    datetime_range.setDateMinText(data.values.min.toISOString().substring(0, 10));
+    datetime_range.setDateMaxText(data.values.max.toISOString().substring(0, 10));
 
     //console.log("date-range {" +  date_range.getDateRange() + "}");
   });

@@ -354,52 +354,9 @@ def ingestESTextResults(hits):
                 pass
 
         cnx.commit()
+
 def createResults(field, args_array):
     cherrypy.log("createResults( %s, %s)" % (field, args_array) )
-
-    ## is text search
-    if not field.lower() in ["email", "entity"]:
-        text = head(args_array)
-        if text:
-            tangelo.log("text search : %s" % text)
-            es = Elasticsearch()
-            if len(args_array) == 3:
-                # start = time.strptime(args_array[1], "%Y-%m-%dT%H:%M:%S")
-                # end = time.strptime(args_array[2], "%Y-%m-%dT%H:%M:%S")
-                start = args_array[1]
-                end = args_array[2]
-                body= {"fields": ["_id"], "filter":{"range" : {"utc_date" : { "gte": start, "lte": end }}}}
-            else:
-                body= {"fields": ["_id"], "query": {"match_all": {}}}
-
-
-            res = es.search(index="newman", doc_type="emails", size=1000, q=text, body=body)
-
-            ingestESTextResults(jsonGet(['hits','hits'], res, []))
-
-    node_vals = getNodeVals(field, args_array)
-    colors = {k:v.get("group_id") for k,v in node_vals.iteritems()}
-
-    for k,v in node_vals.iteritems():
-        node_vals[k]["color"] = colors.get(k)
-    emails = sorted(getEmails(colors, field, args_array), key=lambda x: str(x.get('datetime')))
-    idx_lookup = {}
-    nodes = []
-
-    for i, o in enumerate(node_vals.iteritems()):
-        k,v = o
-        idx_lookup[k]=i
-        #nodes.append({"name": k, "num": v.get("num"), "rank": v.get("rank"), "group": v.get("color"), "community": colors.get(v.get("comm"))})
-        nodes.append({"name": k, "num": v.get("num"), "rank": v.get("rank"), "group": v.get("color"), "community": v.get("comm_id")})
-    edges = getEdges(idx_lookup, field, args_array)
-
-    results = { 'rows': emails, 'graph': { 'nodes': nodes, 'links': edges }}
-
-    return results
-
-def querySearchResult(field, start_date, end_date, args_array):
-    cherrypy.log("querySearchResult( %s, %s, %s, %s)" % (field, start_date, end_date, args_array) )
-
 
     ## is text search
     if not field.lower() in ["email", "entity"]:
@@ -430,6 +387,46 @@ def querySearchResult(field, start_date, end_date, args_array):
 
     return results
 
+
+def querySearchResult(field, start_date, end_date, args_array):
+    cherrypy.log("querySearchResult( %s, %s, %s, %s)" % (field, start_date, end_date, args_array) )
+
+    ## is text search
+    if not field.lower() in ["email", "entity"]:
+        text = head(args_array)
+        if text:
+            tangelo.log("text search : %s" % text)
+            es = Elasticsearch()
+            if start_date and end_date:
+                body= {"fields": ["_id"], "filter":{"range" : {"utc_date" : { "gte": start_date, "lte": end_date }}}}
+            else:
+                body= {"fields": ["_id"], "query": {"match_all": {}}}
+
+
+            res = es.search(index="newman", doc_type="emails", size=1000, q=text, body=body)
+
+            ingestESTextResults(jsonGet(['hits','hits'], res, []))
+
+    node_vals = getNodeVals(field, args_array)
+    colors = {k:v.get("group_id") for k,v in node_vals.iteritems()}
+
+    for k,v in node_vals.iteritems():
+        node_vals[k]["color"] = colors.get(k)
+    emails = sorted(getEmails(colors, field, args_array), key=lambda x: str(x.get('datetime')))
+    idx_lookup = {}
+    nodes = []
+
+    for i, o in enumerate(node_vals.iteritems()):
+        k,v = o
+        idx_lookup[k]=i
+        #nodes.append({"name": k, "num": v.get("num"), "rank": v.get("rank"), "group": v.get("color"), "community": colors.get(v.get("comm"))})
+        nodes.append({"name": k, "num": v.get("num"), "rank": v.get("rank"), "group": v.get("color"), "community": v.get("comm_id")})
+    edges = getEdges(idx_lookup, field, args_array)
+
+    results = { 'rows': emails, 'graph': { 'nodes': nodes, 'links': edges }}
+
+    return results
+
 #GET /dates
 def getDates(*args):    
     tangelo.content_type("application/json")    
@@ -445,7 +442,7 @@ def search(*args):
     start_date_string, end_date_string = parseDateRange(args_array)
     #cherrypy.log("\targs_array[%s] %s)" % (len(args), str(args)))
     
-    if start_date_string=='default_min' or end_date_string=='default_max':
+    if start_date_string=='unknown_min' or end_date_string=='unknown_max':
         sorted_rows = queryAllDates()
         #start_date_string = sorted_rows[0]['datetime'].split('T', 1)[0]
         #end_date_string = sorted_rows[-1]['datetime'].split('T', 1)[0]
@@ -460,7 +457,7 @@ def search(*args):
             
             
     else:    
-        args_array = args_array[ :-1]
+        args_array = args_array[ :-2]
     
     #return createResults(field, args_array)
     return querySearchResult(field, start_date_string, end_date_string, args_array)
@@ -468,18 +465,23 @@ def search(*args):
 def parseDateRange( args ):
     cherrypy.log("parseDateRange(args[%s] %s)" % (len(args), str(args)))
     
-    start_date_string = 'default_min'
-    end_date_string = 'default_max'
+    start_date_string = 'unknown_min'
+    end_date_string = 'unknown_max'
     
     #last_item = last(args)
     last_item = args[-1]
-    
     if last_item:
         #cherrypy.log("\trange '%s'" % last_item)
-        tokens = last_item.split(',')
-        if len(tokens) == 2:
-            start_date_string = tokens[0] + 'T00:00:00'
-            end_date_string = tokens[1] + 'T00:00:00'
+        #end_date_string = time.strptime(last_item, "%Y-%m-%dT%H:%M:%S")
+        end_date_string = last_item + 'T00:00:00'
+    
+        second_last_item = args[-2]
+        if second_last_item:
+            #cherrypy.log("\trange '%s'" % second_last_item)
+            #start_date_string = time.strptime(second_last_item, "%Y-%m-%dT%H:%M:%S")
+            start_date_string = second_last_item + 'T00:00:00'
+    
+
 
     cherrypy.log("\tstart_date '%s', end_date '%s'" % (start_date_string, end_date_string))
     return start_date_string, end_date_string    

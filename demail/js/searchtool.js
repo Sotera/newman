@@ -417,10 +417,10 @@ var all_domain_map = (function () {
 /**
  * date-time range container
  */
-var date_range = (function () {
+var datetime_range = (function () {
 
-  var date_range_min_text = 'default_min';
-  var date_range_max_text = 'default_max';
+  var date_range_min_text = '';
+  var date_range_max_text = '';
 
   var setDateMinText = function (new_min_text) {
     date_range_min_text = new_min_text;
@@ -439,7 +439,7 @@ var date_range = (function () {
   };
 
   var getDateRange = function () {
-    return getDateMinText() + ',' + getDateMaxText();
+    return getDateMinText() + '/' + getDateMaxText();
   };
 
   return {
@@ -2062,8 +2062,8 @@ function initDateTimeRange() {
         }]
       });
 
-      date_range.setDateMinText(default_start_date.toISOString().substring(0, 10));
-      date_range.setDateMaxText(end_date.toISOString().substring(0, 10));
+      datetime_range.setDateMinText(default_start_date.toISOString().substring(0, 10));
+      datetime_range.setDateMaxText(end_date.toISOString().substring(0, 10));
 
     });
 
