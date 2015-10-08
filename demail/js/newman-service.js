@@ -8,78 +8,116 @@ var service_response_email_domain;
 var url_search_all = '/search/all/';
 
 /**
- * return a deep-copy of the argument
- * @param source to be cloned
- * @returns deep-copy
+ * email-rank response container
+ * @type {{requestService, getResponse}}
  */
-function clone( source ) {
-  if (source) {
-    var copy;
-    if (jQuery.isArray(source)) {
-      copy = jQuery.extend(true, [], source);
-    }
-    else {
-      copy = jQuery.extend(true, {}, source);
-    }
-    return copy;
+var service_response_email_search_all = (function () {
+
+  var _response = {};
+  var _graph_node_map = {};
+  var _graph_link_map = {};
+  var _email_map = {};
+
+  function requestService() {
+    console.log('service_response_email_search_all.requestService()');
+
+    $.get( url_search_all ).then(function (response) {
+      setResponse( response );
+    });
   }
-  return source;
-}
 
-/**
- * validate email-rank response
- * @param response data received from service
- * @returns filtered response
- */
-function validateResponseEmailRank(response) {
+  function setResponse( response ) {
+    if (response) {
+      _response = validateResponseSearch(response);
+      console.log('received service_response_email_search_all.graph.nodes[' + response.graph.nodes.length + ']');
+      console.log('received service_response_email_search_all.graph.links[' + response.graph.links.length + ']');
+      console.log('received service_response_email_search_all.rows[' + response.rows.length + ']');
+      //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
 
-
-  if (response) {
-    console.log('validateResponseEmailRank(...)');
-    //console.log( '\tresponse\n' + JSON.stringify(response, null, 2) );
-
-    if (response.emails) {
-      //console.log( '\temails[' + response.emails.length + ']' );
-
-      var new_emails = [];
-      var invalid_item_count = 0;
-      _.each(response.emails, function (email) {
-
-        var new_email = [
-          email[0],
-          email[1],
-          parseInt(email[2]),
-          parseInt(email[3]),
-          parseFloat(email[4]),
-          parseInt(email[5]),
-          parseInt(email[6])
-        ];
-
-        if (new_email) {
-          new_emails.push(new_email);
-        }
-        else {
-          //console.log('\tinvalid score : ' + score);
-          invalid_item_count++;
-        }
+      // hack to initialize community-map
+      _.each(response.graph.nodes, function(object, index) {
+        all_community_map.put(object.community, parseInt(object.community), 1, color_set_community(object.community));
       });
+      console.log( '\tcommunity_map[' + all_community_map.getAllCount() + ']' );
+      //console.log( 'all_community_map: ' + JSON.stringify(all_community_map.getAll(), null, 2) );
 
-      response.emails = new_emails;
-      //console.log( 'validated-response:\n' + JSON.stringify(response, null, 2) );
+      mapResponseEmailDocs(_response.rows);
+    }
+  }
 
-      console.log( '\tnew emails[' + response.emails.length + ']' );
-      return response;
+  function setResponseEmailDocs( email_docs ) {
+    if (email_docs) {
+      email_docs = validateResponseEmailDocs( email_docs );
+      mapResponseEmailDocs( email_docs.email_docs );
+      _response["rows"] = email_docs.email_docs;
+    }
+  }
+
+  function mapResponseEmailDocs( email_docs ) {
+    if (email_docs) {
+
+      var object_array = _.map(email_docs, function (element) {
+        return _.object(["from", "to", "cc", "bcc", "attach", "bodysize", "datetime", "subject", "num", "directory", "fromcolor" ], element);
+      });
+      //console.log('object_array: ' + JSON.stringify(object_array, null, 2));
+
+      _email_map = _.object(_.map( object_array, function (element) {
+        return [element.num, element]
+      }));
+      //console.log('_response_map: ' + JSON.stringify(_response_map, null, 2));
     }
     else {
-      console.log('response.emails undefined');
+      _email_map = {};
     }
   }
-  else {
-    console.log('response undefined');
+
+  function getResponse() {
+    if (_response) {
+      //create a deep-copy, return the copy
+      return clone( _response )
+    }
+    return _response;
   }
 
-  return response;
-}
+  function getEmailDocMap() {
+    if (_.isEmpty(_email_map)) {
+      //create a deep-copy, return the copy
+      return clone( _email_map )
+    }
+    return _email_map;
+  }
+
+  function isEmailDocMapEmpty() {
+    return _.isEmpty(_email_map);
+  }
+
+  function getAllEmailDoc() {
+    var values = _.values( _email_map );
+    if (values) {
+      //create a deep-copy, return the copy
+      return clone( values )
+    }
+    return values;
+  }
+
+  function getEmailDoc( key ) {
+    var value = _email_map[key];
+    return value;
+  }
+
+  return {
+    'requestService' : requestService,
+    'getResponse' : getResponse,
+    'setResponse' : setResponse,
+    'setResponseEmailDocs' : setResponseEmailDocs,
+    'getEmailDocMap' : getEmailDocMap,
+    'isEmailDocMapEmpty' : isEmailDocMapEmpty,
+    'getAllEmailDoc' : getAllEmailDoc,
+    'getEmailDoc' : getEmailDoc,
+  }
+
+}());
+
 
 /**
  * email-rank response container
@@ -91,7 +129,7 @@ var service_response_email_rank = (function () {
   var _response_map = {};
 
   function requestService() {
-    console.log('requestService()');
+    console.log('service_response_email_rank.requestService()');
 
     $.get('email/rank').then(function (response) {
 
@@ -112,11 +150,6 @@ var service_response_email_rank = (function () {
 
   function mapResponse( response ) {
     if (response) {
-      /*
-       _response_map = _.map(_.take(response.emails, 20), function (email) {
-        return _.object(["email", "community", "communityId", "groupId", "rank", "totalReceived", "totalSent"], email);
-      });
-      */
 
       var object_array = _.map(_.take(response.emails, 20), function (element) {
         return _.object(["email", "community", "communityId", "groupId", "rank", "totalReceived", "totalSent"], element);
@@ -213,7 +246,7 @@ var service_response_email_exportable = (function () {
   var _not_exportable_html = '';
 
   function requestService() {
-    console.log('requestService()');
+    console.log('service_response_email_exportable.requestService()');
 
     $.get('email/exportable').then(function (response) {
       setResponse( response );
@@ -314,50 +347,3 @@ var service_response_email_exportable = (function () {
   }
 
 }());
-
-/**
- * validate email-exportable response
- * @param response data received from service
- * @returns filtered response
- */
-function validateResponseEmailExportable(response) {
-
-
-  if (response) {
-    console.log('validateResponseEmailExportable(...)');
-    //console.log( '\tresponse\n' + JSON.stringify(response, null, 2) );
-
-    if (response.emails) {
-      //console.log( '\temails[' + response.emails.length + ']' );
-
-      var new_emails = [];
-      var invalid_item_count = 0;
-      _.each(response.emails, function (email) {
-
-        var new_email = [ email[0], email[1] ];
-
-        if (new_email) {
-          new_emails.push(new_email);
-        }
-        else {
-          //console.log('\tinvalid score : ' + score);
-          invalid_item_count++;
-        }
-      });
-
-      response.emails = new_emails;
-      //console.log( 'validated-response:\n' + JSON.stringify(response, null, 2) );
-
-      console.log( '\tnew emails[' + response.emails.length + ']' );
-      return response;
-    }
-    else {
-      console.log('response.emails undefined');
-    }
-  }
-  else {
-    console.log('response undefined');
-  }
-
-  return response;
-}

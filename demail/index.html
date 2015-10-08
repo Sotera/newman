@@ -510,14 +510,40 @@
             <!--Start Search-Result-Link-Center-->
             <div class="col-xs-12" style="padding: 0px 0px 0px 5px;">
 
-              <div id="search_result_container"></div>
+              <!--Start Search-Aggregate-Filter -->
+              <div class="row" style="margin: 0; border-bottom: 1px solid rgba(255, 255, 255, 1.0);">
+                <div class="col-sm-1" style="padding: 0; border-left: 1px solid rgba(255, 255, 255, 1.0);">
+                  <span class="checkbox-inline" >
+                    <input type="checkbox" id="search_filter_data_set" value="rank" style="margin: 2px 0 0 -15px;" checked />
+                    <i class="fa fa-database"></i>
+                  </span>
+                </div>
+                <div class="col-sm-3" style="padding: 0; border-left: 1px solid rgba(255, 255, 255, 1.0);">
+                  <span class="checkbox-inline" >
+                    <input type="checkbox" id="search_filter_user_account" style="margin: 2px 0 0 -15px;" checked />
+                    <i class="fa fa-user-plus"></i> Account
+                  </span>
+                </div>
+                <div class="col-sm-2" style="padding: 0; border-left: 1px solid rgba(255, 255, 255, 1.0);">
+                  <span class="checkbox-inline" >
+                    <input type="checkbox" id="search_filter_free_text" style="margin: 2px 0 0 -15px;" />
+                    <i class="fa fa-search"></i> Text
+                  </span>
+                  <!--<span class="fa fa-envelope-o" style="padding: 0;"> Outbound </span>-->
+                </div>
+                <div class="col-sm-6" style="padding: 0 0 0 2px;">
 
+                </div>
+              </div>
+              <!--End Search-Aggregate-Filter -->
+
+              <div id="search_result_container"></div>
 
               <table id="search_result_treetable" class="table tree-2 table-bordered table-striped table-condensed">
                 <thead>
                 <tr style="font-size: small;">
-                  <th><i class="fa fa-user-plus"></i> Account</th>
-                  <th><i class="fa fa-check-square-o"></i></th>
+                  <th width="60%"></th>
+                  <th><i class="fa fa-filter"></i></th>
                   <th>Sent</th>
                   <th>Received</th>
                   <th><i class="fa fa-envelope-o"></i></th>
@@ -754,45 +780,6 @@
                 <span class="fa fa-envelope-o" id="doc_count_outbound" style="padding: 0;"> Outbound </span>
               </div>
             </div>
-
-
-            <!--
-            <div class="row" style="margin: 0;">
-              <table>
-                <tr>
-                  <td>
-                    <div style="padding: 0px 15px 0px 15px;">Color:</div>
-                  </td>
-                  <td>
-                    <label class="radio-inline" style="padding: 0px 10px 0px 10px;">
-                      <input type="radio" name="optionRadios" id="colorby" value="node" style="margin: 2px 0 0 -15px;" checked /> Domain
-                    </label>
-                  </td>
-                  <td>
-                    <label class="radio-inline" style="padding: 0px 10px 0px 10px;">
-                      <input type="radio" name="optionRadios" id="colorby2"  value="comm" style="margin: 2px 0 0 -15px;"  /> Community
-                    </label>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div style="padding: 0px 15px 0px 15px;">Display:</div>
-                  </td>
-                  <td>
-                    <label class="checkbox" style="padding: 0px 10px 0px 10px;">
-                      <input type="checkbox" name="optionrank" id="rankval" value="rank" style="margin: 2px 0 0 -15px;" /> Rank
-                    </label>
-                  </td>
-                  <td>
-                    <label class="checkbox" style="padding: 0px 10px 0px 10px;">
-                      <input type="checkbox" id="usetext" style="margin: 2px 0 0 -15px;" /> Labels
-                    </label>
-                  </td>
-                </tr>
-              </table>
-            </div>
-            -->
-
 
             <div class="row" style="border-top: 1px solid rgba(255, 255, 255, 0.6); text-align: center; margin: 0;">
               <!--
@@ -1053,6 +1040,7 @@
     <!-- All functions for this theme + document.ready processing -->
 
     <script src="js/history-nav.js"></script>
+    <script src="js/newman-data-validator.js"></script>
     <script src="js/newman-data-source.js"></script>
     <script src="js/newman-service.js"></script>
     <script src="js/newman-data-table.js"></script>

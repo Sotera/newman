@@ -3,6 +3,63 @@
  */
 
 /**
+ * validate search-service email-document response
+ * @param response data received from service
+ * @returns filtered response
+ */
+function validateResponseEmailDocs(response) {
+  if (response) {
+    console.log( 'validateResponseEmailDocs(...)' );
+
+    // validate email_docs
+    if (response.email_docs) {
+      console.log( '\temail_docs[' + response.email_docs.length + ']' );
+
+      var new_email_docs = [];
+      var invalid_doc_count = 0;
+      _.each(response.email_docs, function (item) {
+
+        if (validateDateTime(item.datetime)) {
+
+          if (item.from) {
+            var address = decodeURIComponent( item.from );
+
+            // check for email address
+            if (validateEmailAddress( address )) {
+              item.from = address;
+              //console.log('\tfrom \'' + address + '\'');
+
+              new_email_docs.push(item);
+            }
+            else {
+              console.log('\tinvalid email : ' + item.from);
+              invalid_doc_count++;
+            }
+          }
+          else {
+            console.log('\tundefined email : ' + item.from);
+            invalid_doc_count++;
+          }
+        }
+        else {
+          console.log('\tinvalid datetime : ' + item.datetime);
+          invalid_doc_count++;
+        }
+
+      });
+
+      response.email_docs = new_email_docs;
+      console.log( '\tnew email_docs[' + response.email_docs.length + '], invalid row ' + invalid_doc_count );
+    }
+
+    return response;
+  }
+
+  console.log( 'response undefined' );
+  return response;
+}
+
+/**
  * validate search-service response
  * @param response data received from service
  * @returns filtered response
