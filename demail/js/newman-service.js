@@ -242,7 +242,7 @@ var service_response_email_exportable = (function () {
 
   var _response = {};
   var _response_map = {};
-  var _exportable_html = '<i class="fa fa-star" style="font-size: smaller;"></i>';
+  var _exportable_html = '<i class="fa fa-star" style="font-size: smaller; color: #4888f3"></i>';
   var _not_exportable_html = '';
 
   function requestService() {

@@ -115,7 +115,7 @@
               <button class="button-logo" id="toggle_dashboard_home">Newman <i class="fa fa-user-secret"></i></button>
             </div>
             -->
-            <button class="button-logo" id="toggle_dashboard_home">Newman <i class="fa fa-user-secret"></i></button>
+            <button class="button-logo" id="toggle_dashboard_home"><i class="fa fa-user-secret"></i> Newman +</button>
           </div>
         </div>
 
@@ -299,11 +299,11 @@
   <!-- End Breadcrumb-Container -->
 
   <!--Start Main-Container-->
-    <div class="container-fluid" style="margin-top: 18px; height: 100%">
+    <div class="container-fluid" style="position: fixed; top: 70px; height: 100%; overflow: scroll;">
 
 
       <!--Start Main-Container-Row-->
-      <div class="row" style="height: 100%; margin-top: 4px;">
+      <div class="row" style="height: 100%;">
 
         <!--Start Sidebar-Left-->
         <!--<div id="sidebar-left" class="col-xs-2 col-sm-2">-->
@@ -485,7 +485,7 @@
         <!--End Sidebar-Left-->
 
       <!--Start Content-->
-      <div class="col-xs-12 col-sm-12">
+      <div class="col-xs-12 col-sm-12 container-body">
 
         <!--Start Home-Dashboard-Content-->
         <div id="content-dashboard-home" class="container-fluid analytics-content">
@@ -742,7 +742,7 @@
         <div id="content-analytics-email" class="container-fluid analytics-content" >
 
           <!--Start Visual-Filter-->
-          <div style="position: fixed; left: 20%; background-color: rgba(210, 210, 210, 0.6); z-index: 999; font-size: 11px;
+          <div style="position: fixed; left: 10%; background-color: rgba(210, 210, 210, 0.6); z-index: 999; font-size: 11px;
              border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; width: 30%;">
 
             <div class="row" style="margin: 0;">
@@ -802,120 +802,105 @@
           <!--End Visual-Filter-->
 
           <!--Start Data-Visual-Left-->
-          <div class="col-sm-6"  style= "height: 100%; padding: 0px;">
+          <div class="col-sm-5"  style= "height: 100%; padding: 0px;">
             <div id="node_graph"  style= "height: 580px;"> </div>
           </div>
           <!--End Data-Visual-Left-->
 
           <!--Start Data-Panel-Right-->
-          <div class="col-sm-6" style= "height: 100%;">
-            <div style= "height: 580px;">
+          <div class="col-sm-7" style= "height: 100%;">
+            <div class="row">
               <!--Start Data-Panel-Nav-Tabs-->
-              <ul class="nav nav-tabs" style="width: 600px;" role="tablist" id="tab-list">
-                <!--<li><a href="#top-rank" role="tab" data-toggle="tab">Rank</a></li>-->
-                <!--<li><a href="#top-entities" role="tab" data-toggle="tab">Entities</a></li>-->
-                <li class="active"><a href="#email-body-tab" role="tab" data-toggle="tab">Email</a></li>
-                <!--<li><a href="#topics-tab" role="tab" data-toggle="tab">Topics</a></li>-->
-                <li><a href="#attach-tab" role="tab" data-toggle="tab">Attachments</a></li>
-              </ul>
+              <div class="row">
+                <ul class="col-sm-12 nav nav-tabs" role="tablist" id="tab-list" style= "height: 30px; padding: 0px; font-size: 13px;">
+                  <li class="active" style= "height: 30px;"><a style= "height: 30px;" href="#email-body-tab" role="tab" data-toggle="tab"><i class="fa fa-envelope-o"></i> Email</a></li>
+                  <li style= "height: 30px;"><a style= "height: 30px;" href="#attach-tab" role="tab" data-toggle="tab"><i class="fa fa-paperclip"></i> Attachments</a></li>
+                </ul>
+              </div>
               <!--End Data-Panel-Nav-Tabs-->
 
               <!--Start Data-Panel-Tab-Content-->
-              <div class="tab-content" style= "height: 100%;">
-                <!--<div class="tab-pane" id="top-rank"></div>-->
-                <!--<div class="tab-pane" id="top-entities"></div>-->
-                <div class="tab-pane active" id="email-body-tab" style="height: 100%;">
-                  <div class="row" style="display: table;">
-                    <!--
-                    <div style="display: inline-block; float:left; margin-top: 15px;">
-                      <a id="submit_activesearch" class="btn btn-sm btn-default">Seed Active Search</a>
-                      <a id="submit_activesearch_like" class="btn btn-sm btn-default" style="background-color: #00ff00"><span class="glyphicon glyphicon-thumbs-up" style="color: #000;"/></a>
-                      <a id="submit_activesearch_dislike" class="btn btn-sm btn-default" style="background-color: #ff0000"><span class="glyphicon glyphicon-thumbs-down" style="color: #000"/></a>
-                    </div>
-                    -->
+              <div class="row">
+                <div class="col-sm-12 tab-content" style= "height: 100%; overflow: scroll;">
+                  <div class="tab-pane active" id="email-body-tab" style="height: 100%;">
+                    <div class="row" style="display: table;">
 
-                    <div style="display: inline-block; float:left; margin: 5px 0px 5px 15px;">
-                      <div class="btn-group" style="margin: 0px;">
-                        <a class="btn btn-xs btn-default" href="#level_pertinence_not" data-toggle="dropdown" style="color: #555555">
-                          <i class="fa fa-flag fa-lg"></i> Not Pertinent
-                        </a>
-                        <a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#level_pertinence_not">
-                          <span class="fa fa-caret-down"></span>
-                        </a>
-                        <ul class="dropdown-menu" role="menu" >
-                          <li>
-                            <a href="#level_pertinence_very" role="menuitem" data-toggle="dropdown" style="color: #ff3200">
-                              <i class="fa fa-flag fa-lg"></i> Very Pertinent
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#level_pertinence_pertinent" role="menuitem" data-toggle="dropdown" style="color: #00ff64">
-                              <i class="fa fa-flag fa-lg"></i> Pertinent
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#level_pertinence_not" role="menuitem" data-toggle="dropdown" style="color: #555555">
-                              <i class="fa fa-flag fa-lg"></i> Not Pertinent
-                            </a>
-                          </li>
-                          <li class="divider"></li>
-                          <li>
-                            <a href="#level_pertinence_irrelevant" role="menuitem" data-toggle="dropdown" style="color: #c8c8c8">
-                              <i class="fa fa-thumbs-down"></i> Irrelevant
-                            </a>
-                          </li>
-                        </ul>
+                      <div style="display: inline-block; float:left; margin: 5px 0px 5px 15px;">
+                        <div class="btn-group" style="margin: 0px; font-size: 12px; font-weight: normal;">
+                          <a class="btn btn-xs btn-default" href="#level_pertinence_not" data-toggle="dropdown" style="color: #555555">
+                            <i class="fa fa-flag fa-lg"></i> Not Pertinent
+                          </a>
+                          <a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#level_pertinence_not">
+                            <span class="fa fa-caret-down"></span>
+                          </a>
+                          <ul class="dropdown-menu" role="menu" >
+                            <li>
+                              <a href="#level_pertinence_very" role="menuitem" data-toggle="dropdown" style="color: #ff3200">
+                                <i class="fa fa-flag fa-lg"></i> Very Pertinent
+                              </a>
+                            </li>
+                            <li>
+                              <a href="#level_pertinence_pertinent" role="menuitem" data-toggle="dropdown" style="color: #00ff64">
+                                <i class="fa fa-flag fa-lg"></i> Pertinent
+                              </a>
+                            </li>
+                            <li>
+                              <a href="#level_pertinence_not" role="menuitem" data-toggle="dropdown" style="color: #555555">
+                                <i class="fa fa-flag fa-lg"></i> Not Pertinent
+                              </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                              <a href="#level_pertinence_irrelevant" role="menuitem" data-toggle="dropdown" style="color: #c8c8c8">
+                                <i class="fa fa-thumbs-down"></i> Irrelevant
+                              </a>
+                            </li>
+                          </ul>
+                        </div>
                       </div>
-                    </div>
 
-                    <div style="display: inline-block; float:left; margin: 5px 0px 5px 15px;">
-                      <div class="btn-group" style="margin: 0px;">
-                        <a class="btn btn-xs btn-default" href="#mark_as_read" data-toggle="dropdown" style="color: #afadb9">
-                          <i class="fa fa-tag fa-lg"></i> Mark As Read
-                        </a>
-                        <a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#mark_as_read">
-                          <span class="fa fa-caret-down"></span>
-                        </a>
-                        <ul class="dropdown-menu" role="menu" >
-                          <li>
-                            <a href="#mark_as_read" role="menuitem" data-toggle="dropdown" style="color: #afadb9">
-                              <i class="fa fa-tag fa-lg"></i> Mark As Read
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#mark_as_unread" role="menuitem" data-toggle="dropdown" style="color: #ffb237">
-                              <i class="fa fa-tag fa-lg"></i> Mark As Unread
-                            </a>
-                          </li>
-                        </ul>
+                      <div style="display: inline-block; float:left; margin: 5px 0px 5px 15px;">
+                        <div class="btn-group" style="margin: 0px;">
+                          <a class="btn btn-xs btn-default" href="#mark_as_read" data-toggle="dropdown" style="color: #afadb9">
+                            <i class="fa fa-tag fa-lg"></i> Mark As Read
+                          </a>
+                          <a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#mark_as_read">
+                            <span class="fa fa-caret-down"></span>
+                          </a>
+                          <ul class="dropdown-menu" role="menu" >
+                            <li>
+                              <a href="#mark_as_read" role="menuitem" data-toggle="dropdown" style="color: #afadb9">
+                                <i class="fa fa-tag fa-lg"></i> Mark As Read
+                              </a>
+                            </li>
+                            <li>
+                              <a href="#mark_as_unread" role="menuitem" data-toggle="dropdown" style="color: #ffb237">
+                                <i class="fa fa-tag fa-lg"></i> Mark As Unread
+                              </a>
+                            </li>
+                          </ul>
+                        </div>
                       </div>
+
+                      <div style="display: inline-block; float: left; margin-top: 5px; margin-left: 10px;" class="active">
+                        <a id="submit_toggleExport" class="btn btn-xs btn-default">
+                          <span><i class="fa fa-star fa-lg" style="color: #4888f3"></i></span>
+                        </a>
+                      </div>
+
+                      <div style="background-color: #f0f0f0; padding: 5px; margin-left: 20px; float: left; display: inline-block;" id="topic_mini_chart"></div>
+
                     </div>
+                    <div class="row" style= "padding: 0px 0px 0px 15px; font-size: 13px;" id="email-body"> Select an Email to preview </div>
+                  </div>
 
-                    <div style="display: inline-block; float: left; margin-top: 5px; margin-left: 10px;" class="active">
-                      <a id="submit_toggleExport" class="btn btn-xs btn-default" style="color: #4888f3">
-                        <span><i class="fa fa-star fa-lg"></i></span>
-                      </a>
+                  <div class="tab-pane" id="attach-tab">
+                    <div style="padding-bottom: 10px;">
+                      <span>Attachments for sender: </span><span id="attach-sender" style="font-weight: bold;"></span>
                     </div>
-
-                    <div style="background-color: #f0f0f0; padding: 5px; margin-left: 20px; float: left; display: inline-block;" id="topic_mini_chart"></div>
-
-                  </div>
-                  <div class="row" id="email-body"> Select an Email to preview </div>
-                </div>
-                <!--
-                <div class="tab-pane" id="topics-tab">
-                  <table id="topics-table" class="info-table" style="display: table; table-layout: fixed;">
-                    <thead></thead>
-                    <tbody></tbody>
-                  </table>
-                </div>
-                -->
-                <div class="tab-pane" id="attach-tab">
-                  <div style="padding-bottom: 10px;">
-                    <span>Attachments for sender: </span><span id="attach-sender" style="font-weight: bold;"></span>
-                  </div>
-                  <div style="height: calc(100% - 30px);overflow-y: scroll;">
-                    <table id="attach-table" class="info-table" style="display: table; table-layout: fixed;"></table>
+                    <div style="height: calc(100% - 30px); overflow-y: scroll;">
+                      <table id="attach-table" class="info-table" style="display: table; table-layout: fixed;"></table>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -175,6 +175,15 @@ a.show-sidebar:hover {
   transition: 0.1s;
 }
 
+.container-body {
+  max-height: 700px;
+  max-width: 1310px;
+  height: 700px;
+  width: 1310px;
+  margin: 0;
+  padding: 0;
+}
+
 .analytics-content {
   height: 100%;
   width: 100%;
@@ -410,7 +419,7 @@ a.show-sidebar:hover {
   position: relative;
   border: 1px solid #ccc;
   background: transparent;
-  margin: 0px 0px 5px 0px;
+  margin: 0px 0px 2px 0px;
 }
 .full-content .box {
   border: 0;
