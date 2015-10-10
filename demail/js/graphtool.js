@@ -423,9 +423,9 @@ function produceHTMLView(emailObj) {
 
   // exportable text (when email is initially loaded)
   if (d.exportable === 'true') {
-    $("#submit_toggleExport").addClass('marked')
+    $("#toggle_mark_for_export").addClass('marked')
   } else {
-    $("#submit_toggleExport").removeClass('marked')
+    $("#toggle_mark_for_export").removeClass('marked')
   }
 
   return el;
@@ -2267,56 +2267,25 @@ $(function () {
       do_search('exportable');
     });
 
-    $("#submit_toggleExport").click(function() {
-      console.log("toggle export flag for email_id... ");
-      if (!current_email) {
-        //alert("please select an email first");
-        return;
-      }
-      var id = current_email;
+    // initialize data-table events
+    initDataTableEvents();
 
-      var ajaxToggle = function(id, exportable){
-        $.ajax({
-          url: 'email/exportable',
-          type: "POST",
-          data: JSON.stringify({"email": id, "exportable": !exportable}),
-          contentType:"application/json; charset=utf-8",
-          dataType:"json"
-        })
-          .done(function(response){
-            console.log('email_id_marked: ' + id);
-            $("#submit_toggleExport").toggleClass('marked');
-            var is_marked = $("#submit_toggleExport").hasClass('marked');
-            var id_set = [id];
-            table_mark_exportable( is_marked, id_set );
-            //console.log('email/exportable response:' + JSON.stringify(response, null, 2));
-          })
-          .fail(function(resp){
-            alert('fail');
-            console.log("fail");
-          });
-      };
-
-      ajaxToggle(id, $("#submit_toggleExport").hasClass('marked'));
-
-    });
-
-    $("#view_exportList").click(function() {
+    $("#view_export_list").click(function() {
       $.ajax({
         url: 'email/download',
         type: "GET",
         contentType:"application/json; charset=utf-8",
         dataType:"json"
-      }).done(function(resp){
-        console.log(resp);
-        $('#export_download_link a').attr('href', resp.file);
+      }).done(function(response){
+        console.log(response);
+        $('#export_download_link a').attr('href', response.file);
         $('#export_link_spin').hide();
         $('#export_download_link').show();
       }).fail(function(resp){
         alert('fail');
 
-	  console.log("fail");
-	  $('#exportModal').modal('hide');
+        console.log("fail");
+        $('#exportModal').modal('hide');
       });
     });
 

@@ -175,6 +175,12 @@ a.show-sidebar:hover {
   transition: 0.1s;
 }
 
+.data-table-row-read {
+  font-weight: normal;
+  background: rgba(253, 253, 253, 0.5);
+  color: rgb(214, 214, 214);
+}
+
 .container-body {
   max-height: 700px;
   max-width: 1310px;

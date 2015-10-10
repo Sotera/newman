@@ -190,7 +190,7 @@
                     </li>
 
                     <li class="hidden-xs">
-                      <a id="view_exportList" type="button" class="btn btn-inverse" data-toggle="modal" data-target="#exportModal"
+                      <a id="view_export_list" type="button" class="btn btn-inverse" data-toggle="modal" data-target="#exportModal"
                          style="font-size: 14px; font-weight:normal; color: #E1E1E1;">Export
                         <span class="glyphicon glyphicon-list-alt"></span>
                       </a>
@@ -201,7 +201,7 @@
 
                 <li class="hidden-xs">
 
-                  <a id="view_exportList" type="button" class="btn btn-inverse" data-toggle="modal" data-target="#exportModal"
+                  <a id="view_export_list" type="button" class="btn btn-inverse" data-toggle="modal" data-target="#exportModal"
                      style="font-size: 14px; font-weight:normal; color: #E1E1E1;">Export
                     <span class="fa fa-download fa-inverse fa-lg"></span>
                   </a>
@@ -508,7 +508,7 @@
             <!--End Search-Result-Category-Left-->
 
             <!--Start Search-Result-Link-Center-->
-            <div class="col-xs-12" style="padding: 0px 0px 0px 5px;">
+            <div class="col-xs-12" style="padding: 0px 0px 0px 5px; max-height: 700px; overflow-y: scroll;">
 
               <!--Start Search-Aggregate-Filter -->
               <div class="row" style="margin: 0; border-bottom: 1px solid rgba(255, 255, 255, 1.0);">
@@ -821,13 +821,32 @@
 
               <!--Start Data-Panel-Tab-Content-->
               <div class="row">
-                <div class="col-sm-12 tab-content" style= "height: 100%; overflow: scroll;">
+                <div class="col-sm-12 tab-content" style= "height: 100%; overflow-y: scroll;">
+
+                  <!--Start Data-Panel-Tab-Content-Email-->
                   <div class="tab-pane active" id="email-body-tab" style="height: 100%;">
                     <div class="row" style="display: table;">
 
+                      <!--Start Data-Panel-Tab-Content-Email-Star(Like)-Button -->
+                      <div style="display: inline-block; float: left; margin-top: 5px; margin-left: 10px;" class="active">
+                        <a id="toggle_mark_for_export" class="btn btn-xs btn-default">
+                          <span><i class="fa fa-star fa-lg" style="color: #4888f3"></i></span>
+                        </a>
+                      </div>
+                      <!--End Data-Panel-Tab-Content-Email-Star(Like)-Button -->
+
+                      <!--Start Data-Panel-Tab-Content-Email-Mark-Read-Toggle -->
+                      <div style="display: inline-block; float: left; margin-top: 5px; margin-left: 10px;">
+                        <button id="toggle_mark_as_read" class="btn btn-xs btn-default">
+                          <span><i class="fa fa-check-square-o fa-lg"></i> Mark As Read</span>
+                        </button>
+                      </div>
+                      <!--End Data-Panel-Tab-Content-Email-Mark-Read-Toggle -->
+
+                      <!--Start Data-Panel-Tab-Content-Email-Pertinence-Select -->
                       <div style="display: inline-block; float:left; margin: 5px 0px 5px 15px;">
                         <div class="btn-group" style="margin: 0px; font-size: 12px; font-weight: normal;">
-                          <a class="btn btn-xs btn-default" href="#level_pertinence_not" data-toggle="dropdown" style="color: #555555">
+                          <a class="btn btn-xs btn-default" href="#level_pertinence_not" data-toggle="dropdown" style="color: #bbbbbb">
                             <i class="fa fa-flag fa-lg"></i> Not Pertinent
                           </a>
                           <a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#level_pertinence_not">
@@ -845,54 +864,27 @@
                               </a>
                             </li>
                             <li>
-                              <a href="#level_pertinence_not" role="menuitem" data-toggle="dropdown" style="color: #555555">
+                              <a href="#level_pertinence_not" role="menuitem" data-toggle="dropdown" style="color: #bbbbbb">
                                 <i class="fa fa-flag fa-lg"></i> Not Pertinent
                               </a>
                             </li>
                             <li class="divider"></li>
                             <li>
-                              <a href="#level_pertinence_irrelevant" role="menuitem" data-toggle="dropdown" style="color: #c8c8c8">
-                                <i class="fa fa-thumbs-down"></i> Irrelevant
+                              <a href="#level_pertinence_irrelevant" role="menuitem" data-toggle="dropdown" style="color: rgb(175, 173, 185)">
+                                <i class="fa fa-square-o fa-lg"></i> Clear Flag
                               </a>
                             </li>
                           </ul>
                         </div>
                       </div>
-
-                      <div style="display: inline-block; float:left; margin: 5px 0px 5px 15px;">
-                        <div class="btn-group" style="margin: 0px;">
-                          <a class="btn btn-xs btn-default" href="#mark_as_read" data-toggle="dropdown" style="color: #afadb9">
-                            <i class="fa fa-tag fa-lg"></i> Mark As Read
-                          </a>
-                          <a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#mark_as_read">
-                            <span class="fa fa-caret-down"></span>
-                          </a>
-                          <ul class="dropdown-menu" role="menu" >
-                            <li>
-                              <a href="#mark_as_read" role="menuitem" data-toggle="dropdown" style="color: #afadb9">
-                                <i class="fa fa-tag fa-lg"></i> Mark As Read
-                              </a>
-                            </li>
-                            <li>
-                              <a href="#mark_as_unread" role="menuitem" data-toggle="dropdown" style="color: #ffb237">
-                                <i class="fa fa-tag fa-lg"></i> Mark As Unread
-                              </a>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      <div style="display: inline-block; float: left; margin-top: 5px; margin-left: 10px;" class="active">
-                        <a id="submit_toggleExport" class="btn btn-xs btn-default">
-                          <span><i class="fa fa-star fa-lg" style="color: #4888f3"></i></span>
-                        </a>
-                      </div>
+                      <!--End Data-Panel-Tab-Content-Email-Pertinence-Select -->
 
                       <div style="background-color: #f0f0f0; padding: 5px; margin-left: 20px; float: left; display: inline-block;" id="topic_mini_chart"></div>
 
                     </div>
                     <div class="row" style= "padding: 0px 0px 0px 15px; font-size: 13px;" id="email-body"> Select an Email to preview </div>
                   </div>
+                  <!--End Data-Panel-Tab-Content-Email-->
 
                   <div class="tab-pane" id="attach-tab">
                     <div style="padding-bottom: 10px;">

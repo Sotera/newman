@@ -347,3 +347,118 @@ var service_response_email_exportable = (function () {
   }
 
 }());
+
+
+/**
+ * email-pertinence response container
+ * @type {{requestService, getResponse}}
+ */
+var service_response_email_pertinence = (function () {
+
+  var _response = {};
+  var _response_map = {};
+  var _very_pertinent_html = '<i class="fa fa-flag" style="font-size: smaller; color: #ff3200"></i>';
+  var _pertinent_html = '<i class="fa fa-flag" style="font-size: smaller; color: #00ff64"></i>';
+  var _not_pertinent_html = '<i class="fa fa-flag" style="font-size: smaller; color: #bbbbbb"></i>';
+  var _unknown_pertinence_html = '';
+
+  function requestService() {
+    console.log('service_response_email_pertinence.requestService()');
+
+    $.get('email/pertinence').then(function (response) {
+      setResponse( response );
+    });
+  }
+
+  function setResponse( response ) {
+    if (response) {
+      /*
+      _response = validateResponseEmailPertinence(response);
+      console.log('received service_response_email_pertinence[' + response.emails.length + ']');
+      //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
+
+      mapResponse(_response);
+      */
+    }
+  }
+
+  function mapResponse( response ) {
+    if (response) {
+
+      //to-do
+
+    }
+  }
+
+  function getResponse() {
+    if (_response) {
+      //create a deep-copy, return the copy
+      return clone( _response )
+    }
+    return _response;
+  }
+
+  function getResponseMap() {
+    if (_response_map) {
+      //create a deep-copy, return the copy
+      return clone( _response_map )
+    }
+    return _response_map;
+  }
+
+  function getResponseMapKeys() {
+    if (_response_map) {
+      var key = _.keys( _response_map );
+      //create a deep-copy, return the copy
+      return clone( key )
+    }
+    return _response_map;
+  }
+
+  function getResponseMapValues() {
+    if (_response_map) {
+      var values = _.values( _response_map );
+      //create a deep-copy, return the copy
+      return clone( values )
+    }
+    return _response_map;
+  }
+
+  function isPertinent( key ) {
+    if (_response_map) {
+      var value = _response_map[key];
+      if (value) {
+        // to-do
+        return false;
+      }
+      return false;
+    }
+    return false;
+  }
+
+  function getVeryPertinentHTML() {
+    return _very_pertinent_html;
+  }
+  function getPertinentHTML() {
+    return _pertinent_html;
+  }
+  function getNotPertinentHTML() {
+    return _not_pertinent_html;
+  }
+  function getUnknownPertinentHTML() {
+    return _unknown_pertinence_html;
+  }
+
+  return {
+    'requestService' : requestService,
+    'getResponse' : getResponse,
+    'setResponse' : setResponse,
+    'getResponseMap' : getResponseMap,
+    'isPertinent' : isPertinent,
+    'getVeryPertinentHTML' : getVeryPertinentHTML,
+    'getPertinentHTML' : getPertinentHTML,
+    'getNotPertinentHTML' : getNotPertinentHTML,
+    'getUnknownPertinentHTML' : getUnknownPertinentHTML
+  }
+
+}());
