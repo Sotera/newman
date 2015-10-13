@@ -1,12 +1,17 @@
 
 from elasticsearch import Elasticsearch
+import tangelo
 import json
 
-row_fields = ["id","tos","senders","ccs","bccs","datetime","subject"]
-graph_fields = ["community", "community_id", "addr", "received_count", "sent_count", "recepient.email_id", "sender.email_id"]
+_row_fields = ["id","tos","senders","ccs","bccs","datetime","subject"]
+_graph_fields = ["community", "community_id", "addr", "received_count", "sent_count", "recepient.email_id", "sender.email_id"]
+# Sort which will add sent + rcvd and sort most to top
+_sort_email_addrs_by_total={ "_script": { "script_file": "email_addr-sent-rcvd-sum", "lang": "groovy", "type": "number","order": "desc" }}
+_query_all = {"bool":{"must":[{"match_all":{}}]}}
 
 def count(start="2000-01-01", end="now"):
     es = Elasticsearch()
+    # TODO apply filter to query not to body
     filter = {"range" : {"datetime" : { "gte": start, "lte": end }}}
     all_query = {"bool":{"must":[{"match_all":{}}]}}
     count = es.count(index="sample", doc_type="emails", body={"query" : all_query})
@@ -16,19 +21,42 @@ def count(start="2000-01-01", end="now"):
 
 def map_rows(doc):
     fields = doc["fields"]
-    rows = {}
-    rows["num"] =  fields["id"][0]
+    row = {}
+    row["num"] =  fields["id"][0]
 
-    rows["from"] = dictDefault(fields,"senders", [""])[0]
-    rows["to"] = reduceAddress(dictDefault(fields, "tos"))
-    rows["cc"] = reduceAddress(dictDefault(fields,"ccs"))
-    rows["bcc"] = reduceAddress(dictDefault(fields,"bccs"))
-    rows["datetime"] = dictDefault(fields,"datetime",[""])[0]
-    rows["subject"] =  dictDefault(fields,"subject",[""])[0]
-    rows["fromcolor"] =  1950
-    rows["attach"] =  ""
-    rows["bodysize"] =  0
-    return rows
+    row["from"] = dict_default(fields,"senders", [""])[0]
+    row["to"] = reduce_address(dict_default(fields, "tos"))
+    row["cc"] = reduce_address(dict_default(fields,"ccs"))
+    row["bcc"] = reduce_address(dict_default(fields,"bccs"))
+    row["datetime"] = dict_default(fields,"datetime",[""])[0]
+    row["subject"] =  dict_default(fields,"subject",[""])[0]
+    row["fromcolor"] =  1950
+    row["attach"] =  ""
+    row["bodysize"] =  0
+    return row
+
+# def create_community_graph(email_addr):
+#     emailIndex= {}
+#     nodes = []
+#     edges = []
+#     total_docs = count()
+#     senderIndex = {}
+#     rcvrIndex = {}
+#     index = 0
+#     for emailAddr in email_addresses:
+#         fields = emailAddr["fields"]
+#         node = {}
+#         name = fields["addr"][0]
+#         node["commumity"] =  fields["community"][0]
+#         node["group"] =  fields["community_id"][0]
+#         node["name"] = name
+#         node["num"] =  fields["sent_count"][0] + fields["received_count"][0]
+#         node["rank"] = (fields["sent_count"][0] + fields["received_count"][0]) / float(total_docs)
+#         node["rcvr"] = []
+#         node["sender"] = []
+#         emailIndex[name] = index
+#         index=index+1
+
 
 def create_graph(email_addresses):
     emailIndex= {}
@@ -46,7 +74,7 @@ def create_graph(email_addresses):
         node["group"] =  fields["community_id"][0]
         node["name"] = name
         node["num"] =  fields["sent_count"][0] + fields["received_count"][0]
-        node["rank"] = (fields["sent_count"][0] + fields["received_count"][0]) / total_docs
+        node["rank"] = (fields["sent_count"][0] + fields["received_count"][0]) / float(total_docs)
         node["rcvr"] = []
         node["sender"] = []
         emailIndex[name] = index
@@ -100,32 +128,48 @@ def create_graph(email_addresses):
             edges.append({"source" : emailIndex[side_a],"target": emailIndex[side_b] ,"value": num})
     return {"nodes" : nodes, "links" : edges}
 
-def dictDefault(dict, key, default=""):
+def dict_default(dict, key, default=""):
     return dict[key] if key in dict else default
 
-def reduceAddress(addresses, tokenizer=";"):
-    if len(addresses) == 1:
-        return addresses[0]
-    return reduce(lambda str1, str2: str2 if not str1 else (str1+tokenizer+str2), addresses, "")
+def reduce_address(addresses, tokenizer=";"):
+    str(tokenizer).join(str(item) for item in addresses)
+
+# Get search all
+def search_ranked_email_addrs(start="2000-01-01", end="now",size=20,*args):
+    tangelo.content_type("application/json")
+    es = Elasticsearch()
+    graph_body= {"fields": _graph_fields, "sort" : _sort_email_addrs_by_total, "query" : _query_all}
+    return es.search(index="sample", doc_type="email_address", size=size, body=graph_body)
 
 #Build a graph ranked based on sent + rcvd
-def build_ranked_graph(start="2000-01-01", end="now"):
-    es = Elasticsearch()
-
-    # Sort which will add sent + rcvd and sort most to top
-    sort={ "_script": { "script_file": "email_addr-sent-rcvd-sum", "lang": "groovy", "type": "number","order": "desc" }}
-    query = {"bool":{"must":[{"match_all":{}}]}}
-    graph_body= {"fields": graph_fields, "sort" : sort, "query" : query}
-    graph_results = es.search(index="sample", doc_type="email_address", size=100, body=graph_body)
-    graph_results = graph_results.get('hits').get('hits')
-    graph_results = create_graph(graph_results)
+def build_ranked_graph(start="2000-01-01", end="now",*args):
+    graph_results = search_ranked_email_addrs(start, end, 100, args)
+    graph_results = create_graph(graph_results.get('hits').get('hits'))
     return {"graph":graph_results, "rows":[]}
 
+
 # build a graph for a specific email address.  This will use a high performance mget operation
+# Rewrote this query to build through the community
+def get_graph_for_email_address2(email_addr):
+    es = Elasticsearch()
+
+    parent_obj = es.get(index="sample", doc_type="email_address", id=email_addr)
+    community = parent_obj["_source"]["community"]
+
+    local = es.search(index="sample", doc_type="email_address", size=2000, body={"query":{"bool":{"must":[{"term": {"community":community}}]}}})
+    # for addrs in local["hits"]["hits"]:
+
+
+    #TODO rank community
+
+    print local
+
+
+# build a graph for a specific email address.  This will use a high performance mget operation
+# THis was a first attempt and was not querying through the community
 def get_graph_for_email_address(email_addr):
     es = Elasticsearch()
 
-    # Sort which will add sent + rcvd and sort most to top
     graph_results = es.get(index="sample", doc_type="email_address", id=email_addr)
     # TODO
     # graph_results = createGraph(graph_results)
@@ -148,7 +192,7 @@ def get_graph_for_email_address(email_addr):
     # links will be refs
     #Generate the graph
     email_addrs = {"ids" : list(refs)[:1000]}
-    email_addrs = es.mget(index="sample", doc_type="email_address", fields=graph_fields, body=email_addrs)["docs"]
+    email_addrs = es.mget(index="sample", doc_type="email_address", fields=_graph_fields, body=email_addrs)["docs"]
     graph_results = create_graph(email_addrs)
 
     # convert rows to UI json format
@@ -164,7 +208,7 @@ def get_rows(ids=[]):
 
     print len(ids)
     row_body= {"ids" : list(ids)[:1000]}
-    row_results = es.mget(index="sample", doc_type="emails", fields=row_fields, body=row_body)
+    row_results = es.mget(index="sample", doc_type="emails", fields=_row_fields, body=row_body)
     row_results = row_results["docs"]
 
     return row_results
@@ -174,9 +218,6 @@ def populate_rows(email_addr):
     start="2000-01-01"
     end="now"
     es = Elasticsearch()
-    # res = es.search(index="sample", doc_type="email_address", size=100, body={"query": {"match_all": {}}})
-    # print("Got %d Hits:" % res['hits']['total'])
-
 
     filter =  {"range" : {"datetime" : { "gte": start, "lte": end }}}
 
@@ -195,7 +236,7 @@ def populate_rows(email_addr):
 
 if __name__ == "__main__":
     # res = buildGraph()
-    res = get_graph_for_email_address("denver.stutler@myflorida.com")
+    res = get_graph_for_email_address("tom.barry@myflorida.com")
     text_file = open("/home/elliot/graph.json", "w")
     text_file.write(json.dumps(res))
     text_file.close()
