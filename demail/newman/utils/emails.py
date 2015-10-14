@@ -1,12 +1,12 @@
-__author__ = 'elliot'
-
 import cherrypy
 import tangelo
 import base64
 import json
+import urllib
 from elasticsearch import Elasticsearch
 from searches import search_ranked_email_addrs, count
 from cherrypy.lib.static import serve_fileobj
+from functions import nth
 
 
 #map the email_address for the email/rank ReST service
@@ -74,25 +74,24 @@ def header(h, t=None):
 
 
 def get_attachment(email_id, attachment_name):
-    es = Elasticsearch()
     tangelo.log("Searchinng for attachment: ", email_id)
     tangelo.log("ATTACHMENT", attachment_name)
 
     tangelo.content_type("application/x-download")
     header("Content-Disposition", 'attachment; filename="{}"'.format(attachment_name))
 
-    images_resp = es.search(index="sample", doc_type="attachments", size=10, body={"query":{"bool":{"must":[
+    es = Elasticsearch()
+    attachments_resp = es.search(index="sample", doc_type="attachments", size=10, body={"query":{"bool":{"must":[
         {"term": {"id":email_id}},
         {"term": {"filename":attachment_name}}
     ]}}})
-    image_json = images_resp["hits"]["hits"][0]
+    attachments_json = attachments_resp["hits"]["hits"][0]
     # TODO ensure len should be 1
 
-    content = image_json["_source"]["contents64"]
+    filename = attachments_json["_source"]["filename"]
+    ext = attachments_json["_source"]["extension"]
 
-    filename = image_json["_source"]["filename"]
-    ext = image_json["_source"]["extension"]
-
+    content = attachments_json["_source"]["contents64"]
     bytes = base64.b64decode(content)
     # dump(bytes, filename)
 
@@ -102,6 +101,38 @@ def get_attachment(email_id, attachment_name):
     # resp =  serve_fileobj(bytes, "application/x-download", "attachment", filename)
     return as_str
 
+
+def get_attachments_sender(*args):
+    sender=urllib.unquote(nth(args, 0, ''))
+    if not sender:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing id")
+    tangelo.content_type("application/json")
+    # fields= ["id", "dir", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"]
+    fields= ["id", "datetime", "senders", "tos", "ccs", "bccs", "subject", "attachments.filename"]
+    body={"filter":{"exists":{"field":"attachments"}}, "query":{"match":{"senders":sender}}, "fields":fields}
+
+    es = Elasticsearch()
+    attachments_resp = es.search(index="sample", doc_type="emails", size=10, body=body)
+
+    email_attachments = []
+    for attachment_item in attachments_resp["hits"]["hits"]:
+        fields = attachment_item["fields"]
+        attachment_fields = [fields["id"][0],
+                "deprecated",
+                 fields["datetime"][0],
+                 fields.get("senders","")[0],
+                 ';'.join(fields.get("tos","")),
+                 ';'.join(fields.get("ccs","")),
+                 ';'.join(fields.get("bccs","")),
+                 ';'.join(fields.get("subject",""))]
+        for attachment_name in fields["attachments.filename"]:
+            l = list(attachment_fields)
+            l.append(attachment_name)
+            l.append(0)
+            email_attachments.append(l)
+    return {"sender":sender, "email_attachments":email_attachments}
+
+
 def dump(bytes, name):
     text_file = open("/tmp/"+name, "wb")
     text_file.write(bytes)
@@ -109,9 +140,12 @@ def dump(bytes, name):
 
 
 if __name__ == "__main__":
+    email="arlene.dibenigno@myflorida.com"
+    for x in get_attachments_sender(email)["email_attachments"]:
+        print x
     # res = buildGraph()
     # res = get_ranked_email_address("2000-01-01", "now", 20)
-    res=get_email("d6d86d10-6879-11e5-bb05-08002705cb99")
-    text_file = open("/home/elliot/email.json", "w")
-    text_file.write(json.dumps(res))
-    text_file.close()
+    # res=get_email("d6d86d10-6879-11e5-bb05-08002705cb99")
+    # text_file = open("/home/elliot/email.json", "w")
+    # text_file.write(json.dumps(res))
+    # text_file.close()
