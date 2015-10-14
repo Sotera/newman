@@ -135,30 +135,34 @@ def reduce_address(addresses, tokenizer=";"):
     str(tokenizer).join(str(item) for item in addresses)
 
 # Get search all
-def search_ranked_email_addrs(start="2000-01-01", end="now",size=20,*args):
+def search_ranked_email_addrs(index, start="2000-01-01", end="now",size=20):
     tangelo.content_type("application/json")
     es = Elasticsearch()
     graph_body= {"fields": _graph_fields, "sort" : _sort_email_addrs_by_total, "query" : _query_all}
     return es.search(index="sample", doc_type="email_address", size=size, body=graph_body)
 
 #Build a graph ranked based on sent + rcvd
-def build_ranked_graph(start="2000-01-01", end="now",*args):
-    graph_results = search_ranked_email_addrs(start, end, 100, args)
+def build_ranked_graph(index, *args, **kwargs):
+    start = kwargs["start"]
+    end = kwargs["end"]
+    graph_results = search_ranked_email_addrs(index, start, end, 20)
     graph_results = create_graph(graph_results.get('hits').get('hits'))
     return {"graph":graph_results, "rows":[]}
 
 
 # build a graph for a specific email address.  This will use a high performance mget operation
 # Rewrote this query to build through the community
-def get_graph_for_email_address2(email_addr):
+def get_graph_for_email_address(index, email_addr):
     es = Elasticsearch()
 
-    parent_obj = es.get(index="sample", doc_type="email_address", id=email_addr)
-    community = parent_obj["_source"]["community"]
+    query_email_addr = { "query" : { "filtered" : { "filter" : { "term" : { "addr":email_addr}}}}}
+
+    parent_obj = es.search(index=index, doc_type="email_address", size=100, body=query_email_addr)
+
+    community = parent_obj["hits"]["hits"][0]["_source"]["community"]
 
     local = es.search(index="sample", doc_type="email_address", size=2000, body={"query":{"bool":{"must":[{"term": {"community":community}}]}}})
     # for addrs in local["hits"]["hits"]:
-
 
     #TODO rank community
 
@@ -167,16 +171,17 @@ def get_graph_for_email_address2(email_addr):
 
 # build a graph for a specific email address.  This will use a high performance mget operation
 # THis was a first attempt and was not querying through the community
-def get_graph_for_email_address(email_addr):
+def get_graph_for_email_address_old(index, email_addr):
     es = Elasticsearch()
 
-    graph_results = es.get(index="sample", doc_type="email_address", id=email_addr)
+    query_email_addr = { "query" : { "filtered" : { "filter" : { "term" : { "addr":email_addr}}}}}
+    graph_results = es.search(index=index, doc_type="email_address", body=query_email_addr)
     # TODO
     # graph_results = createGraph(graph_results)
 
     email_ids = set([])
     # TODO data time filtering on email_address sent / rcvd results
-    for item in graph_results["_source"]["sender"] + graph_results["_source"]["recepient"]:
+    for item in graph_results["hits"]["hits"][0]["_source"]["sender"] + graph_results["hits"]["hits"][0]["_source"]["recepient"]:
         email_ids.add(item["email_id"])
 
     rows = get_rows(email_ids)
@@ -192,7 +197,7 @@ def get_graph_for_email_address(email_addr):
     # links will be refs
     #Generate the graph
     email_addrs = {"ids" : list(refs)[:1000]}
-    email_addrs = es.mget(index="sample", doc_type="email_address", fields=_graph_fields, body=email_addrs)["docs"]
+    email_addrs = es.mget(index=index, doc_type="email_address", fields=_graph_fields, body=email_addrs)["docs"]
     graph_results = create_graph(email_addrs)
 
     # convert rows to UI json format
@@ -236,7 +241,7 @@ def populate_rows(email_addr):
 
 if __name__ == "__main__":
     # res = buildGraph()
-    res = get_graph_for_email_address("tom.barry@myflorida.com")
+    res = get_graph_for_email_address2("sample","tom.barry@myflorida.com")
     text_file = open("/home/elliot/graph.json", "w")
     text_file.write(json.dumps(res))
     text_file.close()

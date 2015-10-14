@@ -73,22 +73,33 @@ def header(h, t=None):
     return r
 
 
-def get_attachment(email_id, attachment_name):
-    tangelo.log("Searchinng for attachment: ", email_id)
-    tangelo.log("ATTACHMENT", attachment_name)
+def get_attachment(index, email_id, attachment_name):
+    cherrypy.log("email.get_attachments_sender(index=%s, sender=%s, attachment_name=%s)" % (index, email_id, attachment_name))
+    if not index:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing index")
+    if not email_id:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing email_id")
+    if not attachment_name:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing attachment_name")
 
     tangelo.content_type("application/x-download")
-    header("Content-Disposition", 'attachment; filename="{}"'.format(attachment_name))
 
     es = Elasticsearch()
-    attachments_resp = es.search(index="sample", doc_type="attachments", size=10, body={"query":{"bool":{"must":[
+    attachments_resp = es.search(index=index, doc_type="attachments", size=10, body={"query":{"bool":{"must":[
         {"term": {"id":email_id}},
         {"term": {"filename":attachment_name}}
     ]}}})
-    attachments_json = attachments_resp["hits"]["hits"][0]
-    # TODO ensure len should be 1
+
+    attachments_json = attachments_resp["hits"]["hits"]
+    if not attachments_json:
+        return tangelo.HTTPStatusCode(400, "no attachments found for (index=%s, sender=%s, attachment_name=%s)" % (index, email_id, attachment_name))
+
+    attachments_json = attachments_json[0]
+    # TODO ensure len should be only 1 attachment
 
     filename = attachments_json["_source"]["filename"]
+    header("Content-Disposition", 'attachment; filename="{}"'.format(filename))
+
     ext = attachments_json["_source"]["extension"]
 
     content = attachments_json["_source"]["contents64"]
@@ -102,17 +113,21 @@ def get_attachment(email_id, attachment_name):
     return as_str
 
 
-def get_attachments_sender(*args):
-    sender=urllib.unquote(nth(args, 0, ''))
+def get_attachments_sender(index, sender, *args, **kwargs):
+
+    cherrypy.log("email.get_attachments_sender(index=%s, sender=%s)" % (index, sender))
+    if not index:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing index")
     if not sender:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing id")
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing sender")
+
     tangelo.content_type("application/json")
     # fields= ["id", "dir", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"]
     fields= ["id", "datetime", "senders", "tos", "ccs", "bccs", "subject", "attachments.filename"]
     body={"filter":{"exists":{"field":"attachments"}}, "query":{"match":{"senders":sender}}, "fields":fields}
 
     es = Elasticsearch()
-    attachments_resp = es.search(index="sample", doc_type="emails", size=10, body=body)
+    attachments_resp = es.search(index=index, doc_type="emails", size=10, body=body)
 
     email_attachments = []
     for attachment_item in attachments_resp["hits"]["hits"]:
@@ -141,7 +156,7 @@ def dump(bytes, name):
 
 if __name__ == "__main__":
     email="arlene.dibenigno@myflorida.com"
-    for x in get_attachments_sender(email)["email_attachments"]:
+    for x in get_attachments_sender("sample",email)["email_attachments"]:
         print x
     # res = buildGraph()
     # res = get_ranked_email_address("2000-01-01", "now", 20)
