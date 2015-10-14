@@ -4,6 +4,9 @@ from newman.utils.functions import nth
 from newman.settings import getOpt 
 from newman.utils.file import rmrf, mkdir, mv 
 from newman.utils.date_utils import fmtNow
+from newman.utils.emails import get_ranked_email_address, get_attachment, get_attachments_sender
+from cherrypy.lib.httputil import parse_query_string
+from urlparse import urlparse
 
 import tangelo
 import cherrypy
@@ -202,14 +205,17 @@ def buildExportable(*args):
     return { "file" : "downloads/{}.tar.gz".format(tar_gz) }
 	
 get_actions = {
-    "target" : getTarget, 
+    "target" : getTarget,
     "email": getEmail,
     "domains" : getDomains,
     "entities" : getEntities,
-    "rank" : getRankedEmails,
-    "attachments" : getAttachmentsSender,
+    "rank" : get_ranked_email_address,
+    "rank_old" : getRankedEmails,
     "exportable" : getExportable,
-    "download" : buildExportable
+    "download" : buildExportable,
+    "attachment" : get_attachment,
+    "attachments" : get_attachments_sender
+
 }
 
 post_actions = {
@@ -222,7 +228,9 @@ def unknown(*args):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-    return get_actions.get(action, unknown)(*args)
+    cherrypy.log("email(args[%s] %s)" % (len(args), str(args)))
+    cherrypy.log("email(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    return get_actions.get(action, unknown)(*args, **kwargs)
 
 @tangelo.restful
 def post(*pargs, **kwargs):
