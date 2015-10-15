@@ -9,12 +9,12 @@ _graph_fields = ["community", "community_id", "addr", "received_count", "sent_co
 _sort_email_addrs_by_total={ "_script": { "script_file": "email_addr-sent-rcvd-sum", "lang": "groovy", "type": "number","order": "desc" }}
 _query_all = {"bool":{"must":[{"match_all":{}}]}}
 
-def count(start="2000-01-01", end="now"):
+def count(index, start="2000-01-01", end="now"):
     es = Elasticsearch()
     # TODO apply filter to query not to body
     filter = {"range" : {"datetime" : { "gte": start, "lte": end }}}
     all_query = {"bool":{"must":[{"match_all":{}}]}}
-    count = es.count(index="sample", doc_type="emails", body={"query" : all_query})
+    count = es.count(index=index, doc_type="emails", body={"query" : all_query})
 
     return count["count"]
 
@@ -35,34 +35,15 @@ def map_rows(doc):
     row["bodysize"] =  0
     return row
 
-# def create_community_graph(email_addr):
-#     emailIndex= {}
-#     nodes = []
-#     edges = []
-#     total_docs = count()
-#     senderIndex = {}
-#     rcvrIndex = {}
-#     index = 0
-#     for emailAddr in email_addresses:
-#         fields = emailAddr["fields"]
-#         node = {}
-#         name = fields["addr"][0]
-#         node["commumity"] =  fields["community"][0]
-#         node["group"] =  fields["community_id"][0]
-#         node["name"] = name
-#         node["num"] =  fields["sent_count"][0] + fields["received_count"][0]
-#         node["rank"] = (fields["sent_count"][0] + fields["received_count"][0]) / float(total_docs)
-#         node["rcvr"] = []
-#         node["sender"] = []
-#         emailIndex[name] = index
-#         index=index+1
+# def create_graph_from_email(index, email_addresses):
+#     query =  {"filtered" : { "filter" : {"bool" { "term" : { "productID" : email_addresses}}}}}
 
 
-def create_graph(email_addresses):
+def create_graph(index, email_addresses):
     emailIndex= {}
     nodes = []
     edges = []
-    total_docs = count()
+    total_docs = count(index)
     senderIndex = {}
     rcvrIndex = {}
     index = 0
@@ -132,40 +113,44 @@ def dict_default(dict, key, default=""):
     return dict[key] if key in dict else default
 
 def reduce_address(addresses, tokenizer=";"):
-    str(tokenizer).join(str(item) for item in addresses)
+    return str(tokenizer).join(str(item) for item in addresses)
 
 # Get search all
-def search_ranked_email_addrs(index, start, end, size):
+def _search_ranked_email_addrs(index, start, end, size):
     tangelo.content_type("application/json")
     es = Elasticsearch()
     graph_body= {"fields": _graph_fields, "sort" : _sort_email_addrs_by_total, "query" : _query_all}
     return es.search(index=index, doc_type="email_address", size=size, body=graph_body)
 
+# GET /search/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
 #Build a graph ranked based on sent + rcvd
-def build_ranked_graph(index, *args, **kwargs):
+def build_ranked_graph(*args, **kwargs):
     start = kwargs["start"]
     end = kwargs["end"]
-    graph_results = search_ranked_email_addrs(index, start, end, 20)
+    index = kwargs["index"]
+    graph_results = _search_ranked_email_addrs(index, start, end, 20)
     graph_results = create_graph(graph_results.get('hits').get('hits'))
     return {"graph":graph_results, "rows":[]}
 
-
+# GET /search/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
 # build a graph for a specific email address.  This will use a high performance mget operation
 # Rewrote this query to build through the community
-def get_graph_for_email_address(index, email_addr):
+def get_graph_for_email_address(*args, **kwargs):
+    start = kwargs["start"]
+    end = kwargs["end"]
+    index = kwargs["index"]
+    email_addr = kwargs["email_addr"]
+
     es = Elasticsearch()
 
-    query_email_addr = { "query" : { "filtered" : { "filter" : { "term" : { "addr":email_addr}}}}}
+    query_email_addr = { "query" : { "filtered" : { "filter" : { "term" : { "addr" : email_addr}}}}}
 
     parent_obj = es.search(index=index, doc_type="email_address", size=100, body=query_email_addr)
 
     community = parent_obj["hits"]["hits"][0]["_source"]["community"]
 
-    local = es.search(index="sample", doc_type="email_address", size=2000, body={"query":{"bool":{"must":[{"term": {"community":community}}]}}})
+    local = es.search(index=index, doc_type="email_address", size=2000, body={"query":{"bool":{"must":[{"term": {"community":community}}]}}})
     # for addrs in local["hits"]["hits"]:
-
-    #TODO rank community
-
     print local
 
 

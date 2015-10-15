@@ -488,9 +488,7 @@ def unknown(*args):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-    return actions.get(action, unknown)(*args, **kwargs)
     # TODO remove hack
-    index = "sample"
     if args:
         index = args[0]
     # TODO remove hack
@@ -500,6 +498,7 @@ def get(action, *args, **kwargs):
     if "end" not in kwargs:
         kwargs["end"] = "now"
     # TODO remove hack
-    index = "sample"
-    
+    if "index" not in kwargs:
+        kwargs["index"] = "sample"
+
     return actions.get(action, unknown)(*args, **kwargs)

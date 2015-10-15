@@ -4,7 +4,7 @@ import base64
 import json
 import urllib
 from elasticsearch import Elasticsearch
-from searches import search_ranked_email_addrs, count
+from searches import _search_ranked_email_addrs, count
 from cherrypy.lib.static import serve_fileobj
 from functions import nth
 
@@ -24,13 +24,14 @@ def map_email_addr(email_addr_resp, total_emails):
     return email_addr
 
 # Get rank
-def get_ranked_email_address(index, *args, **kwargs):
+def get_ranked_email_address(*args, **kwargs):
     start = kwargs["start"]
     end = kwargs["end"]
+    index = kwargs["index"]
     size = kwargs.get("size", 20)
     tangelo.content_type("application/json")
-    email_addrs = search_ranked_email_addrs(index, start, end, size)
-    total_docs = count()
+    email_addrs = _search_ranked_email_addrs(index, start, end, size)
+    total_docs = count(index)
     ret = [map_email_addr(email_addr, total_docs) for email_addr in email_addrs.get('hits').get('hits')]
     return {"emails": ret }
 

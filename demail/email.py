@@ -231,20 +231,19 @@ def unknown(*args):
 @tangelo.restful
 def get(action, *args, **kwargs):
     # TODO remove hack
-    index = "sample"
-    if args:
-        index = args[0]
-    # TODO remove hack
     if "start" not in kwargs:
         kwargs["start"] = "1970"
     # TODO remove hack
     if "end" not in kwargs:
         kwargs["end"] = "now"
+    # TODO remove hack
+    if "index" not in kwargs:
+        kwargs["index"] = "sample"
 
     cherrypy.log("email(args[%s] %s)" % (len(args), str(args)))
     cherrypy.log("email(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
 
-    return get_actions.get(action, unknown)(index, *args, **kwargs)
+    return get_actions.get(action, unknown)( *args, **kwargs)
 
 @tangelo.restful
 def post(*pargs, **kwargs):
