@@ -388,8 +388,8 @@ def createResults(field, args_array):
     return results
 
 
-def querySearchResult(field, start_date, end_date, args_array):
-    cherrypy.log("querySearchResult( %s, %s, %s, %s)" % (field, start_date, end_date, args_array) )
+def querySearchResult(data_set_id, field, start_date, end_date, args_array):
+    cherrypy.log("querySearchResult(%s, %s, %s, %s, %s)" % (data_set_id, field, start_date, end_date, args_array) )
 
     ## is text search
     if not field.lower() in ["email", "entity"]:
@@ -428,63 +428,52 @@ def querySearchResult(field, start_date, end_date, args_array):
     return results
 
 #GET /dates
-def getDates(*args):    
+def getDates(*args, **kwargs):    
     tangelo.content_type("application/json")    
     results = { 'doc_dates': queryAllDates() }
     return results
 
-#GET /search/<fields>/<arg>/<arg>/<date-start>/<date-end>
-def search(*args):
-    cherrypy.log("search(args[%s] %s)" % (len(args), str(args)))
+#GET /search/<data_set>/<fields>/<arg>/<arg>/?start_datetime=<datetime>&end_datetime=<datetime>
+def search(*path_args, **param_args):
+    tangelo.log("search(path_args[%s] %s)" % (len(path_args), str(path_args)))
 
-    field=nth(args, 0, 'all')
-    args_array=rest(args)
-    start_date_string, end_date_string = parseDateRange(args_array)
-    #cherrypy.log("\targs_array[%s] %s)" % (len(args), str(args)))
+
+    field = nth(path_args, 0, 'all')
+    args_array = rest(path_args)
+    tangelo.log("\tfield : %s, args_array : %s" %(field, str(args_array)))
     
-    if start_date_string=='unknown_min' or end_date_string=='unknown_max':
+    if len(args_array) == 0 :
+        args_array = ['']
+    #tangelo.log("\targs_array : %s" %str(args_array))
+
+    data_set_id, start_datetime, end_datetime = parseFormParameters(**param_args)
+
+    
+    if start_datetime=='unknown_min' or end_datetime=='unknown_max':
         sorted_rows = queryAllDates()
-        #start_date_string = sorted_rows[0]['datetime'].split('T', 1)[0]
-        #end_date_string = sorted_rows[-1]['datetime'].split('T', 1)[0]
-        start_date_string = sorted_rows[0]['datetime']
+        #start_datetime = sorted_rows[0]['datetime'].split('T', 1)[0]
+        #end_datetime = sorted_rows[-1]['datetime'].split('T', 1)[0]
+        start_datetime = sorted_rows[0]['datetime']
         
         #hack to filter email without datetime
-        end_date_string = sorted_rows[-1]['datetime']
-        while (end_date_string == 'NODATE'):
+        end_datetime = sorted_rows[-1]['datetime']
+        while (end_datetime == 'NODATE'):
             end_index = len(sorted_rows) - 1
             sorted_rows = sorted_rows[:end_index]
-            end_date_string = sorted_rows[-1]['datetime']
+            end_datetime = sorted_rows[-1]['datetime']
             
-            
-    else:    
-        args_array = args_array[ :-2]
     
     #return createResults(field, args_array)
-    return querySearchResult(field, start_date_string, end_date_string, args_array)
+    return querySearchResult(data_set_id, field, start_datetime, end_datetime, args_array)
 
-def parseDateRange( args ):
-    cherrypy.log("parseDateRange(args[%s] %s)" % (len(args), str(args)))
-    
-    start_date_string = 'unknown_min'
-    end_date_string = 'unknown_max'
-    
-    #last_item = last(args)
-    last_item = args[-1]
-    if last_item:
-        #cherrypy.log("\trange '%s'" % last_item)
-        #end_date_string = time.strptime(last_item, "%Y-%m-%dT%H:%M:%S")
-        end_date_string = last_item + 'T00:00:00'
-    
-        second_last_item = args[-2]
-        if second_last_item:
-            #cherrypy.log("\trange '%s'" % second_last_item)
-            #start_date_string = time.strptime(second_last_item, "%Y-%m-%dT%H:%M:%S")
-            start_date_string = second_last_item + 'T00:00:00'
-    
+def parseFormParameters( **kwargs ):
+    cherrypy.log("parseKeywordParameter(args[%s] %s)" % (len(kwargs), str(kwargs)))
+    data_set_id = kwargs.get('data_set_id','default_data_set')
+    start_datetime = kwargs.get('start_datetime','unknown_min')
+    end_datetime = kwargs.get('end_datetime','unknown_max')
 
-
-    cherrypy.log("\tstart_date '%s', end_date '%s'" % (start_date_string, end_date_string))
-    return start_date_string, end_date_string    
+    cherrypy.log("\tdata_set '%s', start_date '%s', end_date '%s'" % (data_set_id, start_datetime, end_datetime))
+    return data_set_id, start_datetime, end_datetime    
 
 actions = {
     "search": search,
@@ -496,4 +485,4 @@ def unknown(*args):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-    return actions.get(action, unknown)(*args)
+    return actions.get(action, unknown)(*args, **kwargs)

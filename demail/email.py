@@ -58,6 +58,7 @@ def getEntities(*args):
     tangelo.content_type("application/json")    
     return queryEntity(email)
 
+
 #GET /rank
 def getRankedEmails(*args):
     tangelo.content_type("application/json")    
@@ -73,6 +74,7 @@ def getRankedEmails(*args):
             return { "emails" : rtn }
 
 #GET /target
+#deprecated; use new service url http://<host>:<port>/datasource/all/
 def getTarget(*args):
     # returns the users who's email is being analyzed
     #todo: read from file or config 

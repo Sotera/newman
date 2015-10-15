@@ -2,7 +2,7 @@
  * Created by jlee on 9/17/15.
  */
 
-var all_data_source = (function () {
+var newman_data_source = (function () {
   var data_source_max = 20;
   var data_source_list = [];
   var data_source_selected;
@@ -183,6 +183,26 @@ var all_data_source = (function () {
     return clone(data_source_selected);
   }
 
+  function appendDataSource( url_path ) {
+
+    if (url_path) {
+      if (url_path.endsWith('/')) {
+        url_path = url_path.substring(0, url_path.length - 1);
+      }
+
+      var data_source = getSelected();
+      if (data_source && data_source.uid) {
+        url_path = url_path + '?data_set_id=' + data_source.uid;
+      }
+      else {
+        url_path = url_path + '?data_set_id=default_data_set';
+      }
+    }
+
+    return url_path;
+
+  }
+
   return {
     "push": push,
     "pop": pop,
@@ -194,7 +214,8 @@ var all_data_source = (function () {
     "refreshUI": refreshUI,
     "initialize": initialize,
     "setSelected": setSelected,
-    "getSelected": getSelected
+    "getSelected": getSelected,
+    "appendDataSource": appendDataSource
   }
 
 }());

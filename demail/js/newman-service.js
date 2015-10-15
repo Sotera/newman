@@ -5,7 +5,8 @@
 var service_response_email_all;
 var service_response_email_domain;
 
-var url_search_all = '/search/all/';
+var url_search_all = 'search/all/';
+var url_search_exportable = 'search/exportable/';
 
 /**
  * email-rank response container
@@ -459,6 +460,104 @@ var service_response_email_pertinence = (function () {
     'getPertinentHTML' : getPertinentHTML,
     'getNotPertinentHTML' : getNotPertinentHTML,
     'getUnknownPertinentHTML' : getUnknownPertinentHTML
+  }
+
+}());
+
+/**
+ * email-pertinence response container
+ * @type {{requestService, getResponse}}
+ */
+var service_response_data_source = (function () {
+
+  var _response = {};
+  var _response_map = {};
+  var _data_set_id_selected;
+
+  function requestService() {
+    console.log('service_response_email_pertinence.requestService()');
+
+    $.get('datasource/all').then(function (response) {
+      setResponse( response );
+    });
+  }
+
+  function setResponse( response ) {
+    if (response) {
+       _response = response;
+       console.log('received service_response_data_source[' + response.data_sets.length + ']');
+       console.log(JSON.stringify(_response, null, 2));
+
+       mapResponse(_response);
+
+    }
+  }
+
+  function mapResponse( response ) {
+    if (response) {
+      _response_map = _.object(_.map( response.data_sets, function (element) {
+
+        newman_data_source.initialize(element['data_set_id'], element['data_set_label'], element['data_set_id']);
+
+        return [element['data_set_id'], element]
+      }));
+      //console.log('_response_map: ' + JSON.stringify(_response_map, null, 2));
+
+    }
+  }
+
+  function getResponse() {
+    if (_response) {
+      //create a deep-copy, return the copy
+      return clone( _response )
+    }
+    return _response;
+  }
+
+  function getResponseMap() {
+    if (_response_map) {
+      //create a deep-copy, return the copy
+      return clone( _response_map )
+    }
+    return _response_map;
+  }
+
+  function getResponseMapKeys() {
+    if (_response_map) {
+      var key = _.keys( _response_map );
+      //create a deep-copy, return the copy
+      return clone( key )
+    }
+    return _response_map;
+  }
+
+  function getResponseMapValues() {
+    if (_response_map) {
+      var values = _.values( _response_map );
+      //create a deep-copy, return the copy
+      return clone( values )
+    }
+    return _response_map;
+  }
+
+  function getDataSet(key) {
+    if (_response_map) {
+      var data_set = _response_map[key];
+      if(data_set) {
+        return clone(data_set)
+      }
+      return data_set;
+    }
+    return _response_map;
+  }
+
+  return {
+    'requestService' : requestService,
+    'getResponse' : getResponse,
+    'setResponse' : setResponse,
+    'getResponseMapKeys' : getResponseMapKeys,
+    'getResponseMapValues' : getResponseMapValues,
+    'getDataSet' : getDataSet
   }
 
 }());

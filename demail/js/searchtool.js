@@ -753,7 +753,7 @@ var search_result = (function () {
         data_list.sort(descendingPredicatByProperty('rank'));
         //console.log( 'data_list: ' + JSON.stringify(data_list, null, 2) );
 
-        var data_set_selected = all_data_source.getSelected();
+        var data_set_selected = newman_data_source.getSelected();
 
         var root_result = getRoot();
         if (!root_result) {

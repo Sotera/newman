@@ -649,12 +649,23 @@ function requestSearch(field, search_text, load_on_response) {
 
   console.log('\tsearch_text \'' + search_text + '\'');
 
-  var url_path = "search/search/" + field +'/' + search_text;
+  var url_path = "search/search/" + field;
+  //console.log( '\turl :' + url_path );
 
-  var range_min = datetime_range.getDateMinText();
-  var range_max = datetime_range.getDateMaxText();
-  if (search_text && range_min && range_max) {
-    url_path = url_path + '/' + datetime_range.getDateRange();
+  if (search_text) {
+    url_path = url_path +'/' + search_text;
+  }
+
+  url_path = newman_data_source.appendDataSource( url_path );
+  console.log( '\turl :' + url_path );
+
+  if (search_text && !url_path.indexOf( url_search_exportable ) >= 0) {
+
+    var range_min = datetime_range.getDateMinText();
+    var range_max = datetime_range.getDateMaxText();
+    if (range_min && range_max) {
+      url_path += '&start_datetime=' + range_min + '&end_datetime=' + range_max;
+    }
   }
 
   $.getJSON( url_path , function (search_response) {
@@ -664,11 +675,14 @@ function requestSearch(field, search_text, load_on_response) {
 
     var filtered_response = validateResponseSearch( search_response );
 
-    if (url_path.endsWith(url_search_all)) {
+    if (url_path.indexOf(url_search_all) >= 0) {
       service_response_email_search_all.setResponse( search_response );
     }
 
-    if (is_load_on_response) {
+    if (url_path.indexOf( url_search_exportable ) >= 0) {
+      loadSearchResult( url_path );
+    }
+    else if (is_load_on_response) {
 
       email_analytics_content.open();
 
@@ -692,9 +706,9 @@ function requestSearch(field, search_text, load_on_response) {
     else {
 
       dashboard_content.open();
-      var data_set_selected = all_data_source.getSelected();
+      var data_set_selected = newman_data_source.getSelected();
 
-      if (url_path.endsWith( url_search_all )) {
+      if (url_path.indexOf( url_search_all ) >= 0) {
 
         var ranks = service_response_email_rank.getResponseMapValues();
         //console.log( 'ranks: ' + JSON.stringify(ranks, null, 2) );
@@ -1403,8 +1417,8 @@ function document_type(ext){
 
 function draw_attachments_table(email_addr){
   var deferred = $.Deferred();
-  $.ajax('email/attachments/' + email_addr).done(function(resp){
-    var emails = _.mapcat(resp.email_attachments, function(r){
+  $.ajax('email/attachments/' + email_addr).done(function(response){
+    var emails = _.mapcat(response.email_attachments, function(r){
       var o = _.object(["id", "dir", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"], r);
       var copy = _.omit(o, "attach");
       var attachments = _.map(o.attach.split(';'), function(attach){
@@ -1413,8 +1427,9 @@ function draw_attachments_table(email_addr){
       return attachments;
     });
 
+    //console.log( 'attachment: ' + JSON.stringify(emails, null, 2) );
 
-    $('#attach-sender').html(resp.sender);
+    $('#attach-sender').html(response.sender);
     $('#attach-table').empty();
     $('#attach-table').append($('<thead>')).append($('<tbody>'));
 
@@ -1972,6 +1987,7 @@ var email_analytics_content = (function () {
 $(function () {
   "use strict";
 
+  service_response_data_source.requestService();
   service_response_email_rank.requestService();
   service_response_email_exportable.requestService();
 
@@ -2077,7 +2093,9 @@ $(function () {
     });
     //console.log('\tdomain_set: ' + JSON.stringify(domain_set, null, 2));
 
-    all_data_source.initialize( data_source_selected.email, data_source_selected.email, '' );
+    //all_data_source.push( data_source_selected.email, data_source_selected.email, '' );
+    //all_data_source.refreshUI();
+
     $('#target_email').html(data_source_selected.email);
 
     // initialize search keyboard event
@@ -2179,7 +2197,7 @@ $(function () {
     });
 
     
-    $('#tab-list li:eq(4) a').on('click', function(){
+    $('#tab-list li:eq(1) a').on('click', function(){
       var _from = $('#email-body-tab').find(".from").first().html();
       if (_from){
         draw_attachments_table(_from);
