@@ -1,13 +1,15 @@
 
+import tangelo
+import cherrypy
+
 from newman.db.newman_db import newman_connector
 from newman.db.mysql import execute_query
 from newman.utils.functions import nth, rest, subList, last, head, jsonGet
 
 from elasticsearch import Elasticsearch
 
-import tangelo
-import cherrypy
-import json
+from cherrypy.lib.httputil import parse_query_string
+from newman.utils.searches import build_ranked_graph
 
 ## node vals
 stmt_node_vals = (
@@ -428,7 +430,7 @@ def querySearchResult(data_set_id, field, start_date, end_date, args_array):
     return results
 
 #GET /dates
-def getDates(*args, **kwargs):    
+def getDates(*args, **kwargs):
     tangelo.content_type("application/json")    
     results = { 'doc_dates': queryAllDates() }
     return results
@@ -476,6 +478,7 @@ def parseFormParameters( **kwargs ):
     return data_set_id, start_datetime, end_datetime    
 
 actions = {
+    "build_ranked_graph": build_ranked_graph,
     "search": search,
     "dates" : getDates
 }
@@ -485,4 +488,18 @@ def unknown(*args):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
+    return actions.get(action, unknown)(*args, **kwargs)
+    # TODO remove hack
+    index = "sample"
+    if args:
+        index = args[0]
+    # TODO remove hack
+    if "start" not in kwargs:
+        kwargs["start"] = "1970"
+    # TODO remove hack
+    if "end" not in kwargs:
+        kwargs["end"] = "now"
+    # TODO remove hack
+    index = "sample"
+    
     return actions.get(action, unknown)(*args, **kwargs)

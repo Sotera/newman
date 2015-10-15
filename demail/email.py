@@ -4,6 +4,9 @@ from newman.utils.functions import nth
 from newman.settings import getOpt 
 from newman.utils.file import rmrf, mkdir, mv 
 from newman.utils.date_utils import fmtNow
+from newman.utils.emails import get_ranked_email_address, get_attachment, get_attachments_sender
+from cherrypy.lib.httputil import parse_query_string
+from urlparse import urlparse
 
 import tangelo
 import cherrypy
@@ -75,7 +78,7 @@ def getRankedEmails(*args):
 
 #GET /target
 #deprecated; use new service url http://<host>:<port>/datasource/all/
-def getTarget(*args):
+def getTarget(*args, **kwargs):
     # returns the users who's email is being analyzed
     #todo: read from file or config 
     target = getOpt('target')
@@ -91,7 +94,7 @@ def getTarget(*args):
             return { "email" : rtn }
 
 #GET /domains
-def getDomains(*args):
+def getDomains(*args, **kwargs):
     stmt = (
         "SELECT SUBSTRING_INDEX(email_addr, '@', -1) as eml, count(1) from email_addr group by eml"
     )
@@ -119,7 +122,7 @@ def getAttachmentsSender(*args):
             return { "sender": sender, "email_attachments" : rtn }
 
 #GET /exportable			
-def getExportable(*args):
+def getExportable(*args, **kwargs):
     stmt = (
         " SELECT id, subject FROM email WHERE exportable='true' "
     )
@@ -204,14 +207,17 @@ def buildExportable(*args):
     return { "file" : "downloads/{}.tar.gz".format(tar_gz) }
 	
 get_actions = {
-    "target" : getTarget, 
+    "target" : getTarget,
     "email": getEmail,
     "domains" : getDomains,
     "entities" : getEntities,
-    "rank" : getRankedEmails,
-    "attachments" : getAttachmentsSender,
+    "rank" : get_ranked_email_address,
+    "rank_old" : getRankedEmails,
     "exportable" : getExportable,
-    "download" : buildExportable
+    "download" : buildExportable,
+    "attachment" : get_attachment,
+    "attachments" : get_attachments_sender
+
 }
 
 post_actions = {
@@ -224,7 +230,21 @@ def unknown(*args):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-    return get_actions.get(action, unknown)(*args)
+    # TODO remove hack
+    index = "sample"
+    if args:
+        index = args[0]
+    # TODO remove hack
+    if "start" not in kwargs:
+        kwargs["start"] = "1970"
+    # TODO remove hack
+    if "end" not in kwargs:
+        kwargs["end"] = "now"
+
+    cherrypy.log("email(args[%s] %s)" % (len(args), str(args)))
+    cherrypy.log("email(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+
+    return get_actions.get(action, unknown)(index, *args, **kwargs)
 
 @tangelo.restful
 def post(*pargs, **kwargs):
