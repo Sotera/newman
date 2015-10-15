@@ -135,11 +135,11 @@ def reduce_address(addresses, tokenizer=";"):
     str(tokenizer).join(str(item) for item in addresses)
 
 # Get search all
-def search_ranked_email_addrs(index, start="2000-01-01", end="now",size=20):
+def search_ranked_email_addrs(index, start, end, size):
     tangelo.content_type("application/json")
     es = Elasticsearch()
     graph_body= {"fields": _graph_fields, "sort" : _sort_email_addrs_by_total, "query" : _query_all}
-    return es.search(index="sample", doc_type="email_address", size=size, body=graph_body)
+    return es.search(index=index, doc_type="email_address", size=size, body=graph_body)
 
 #Build a graph ranked based on sent + rcvd
 def build_ranked_graph(index, *args, **kwargs):
@@ -241,7 +241,7 @@ def populate_rows(email_addr):
 
 if __name__ == "__main__":
     # res = buildGraph()
-    res = get_graph_for_email_address2("sample","tom.barry@myflorida.com")
+    res = get_graph_for_email_address("sample","tom.barry@myflorida.com")
     text_file = open("/home/elliot/graph.json", "w")
     text_file.write(json.dumps(res))
     text_file.close()
