@@ -232,13 +232,13 @@ def unknown(*args):
 def get(action, *args, **kwargs):
     # TODO remove hack
     if "start" not in kwargs:
-        kwargs["start"] = "1970"
+        kwargs["start_datetime"] = "1970"
     # TODO remove hack
     if "end" not in kwargs:
-        kwargs["end"] = "now"
+        kwargs["end_datetime"] = "now"
     # TODO remove hack
     if "index" not in kwargs:
-        kwargs["index"] = "sample"
+        kwargs["data_set_id"] = "sample"
 
     cherrypy.log("email(args[%s] %s)" % (len(args), str(args)))
     cherrypy.log("email(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
