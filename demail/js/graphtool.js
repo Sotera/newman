@@ -657,16 +657,15 @@ function requestSearch(field, search_text, load_on_response) {
   }
 
   url_path = newman_data_source.appendDataSource( url_path );
-  console.log( '\turl :' + url_path );
 
-  if (search_text && !url_path.indexOf( url_search_exportable ) >= 0) {
-
-    var range_min = datetime_range.getDateMinText();
-    var range_max = datetime_range.getDateMaxText();
-    if (range_min && range_max) {
-      url_path += '&start_datetime=' + range_min + '&end_datetime=' + range_max;
-    }
+  if (url_path.indexOf( url_search_exportable ) < 0) {
+    url_path = newman_datetime_range.appendDatetimeRange( url_path );
   }
+
+  var current_data_set_url = service_response_email_search_all.getServiceURL();
+
+  console.log( '\turl : \'' + url_path + '\'' );
+  //console.log( '\tservice_response_email_search_all.getServiceURL(): \'' + current_data_set_url +'\'' );
 
   $.getJSON( url_path , function (search_response) {
 
@@ -675,7 +674,8 @@ function requestSearch(field, search_text, load_on_response) {
 
     var filtered_response = validateResponseSearch( search_response );
 
-    if (url_path.indexOf(url_search_all) >= 0) {
+    if (url_path.endsWith( current_data_set_url )) {
+      //console.log( 'url_path.endsWith(service_response_email_search_all.getServiceURL())' );
       service_response_email_search_all.setResponse( search_response );
     }
 
@@ -708,7 +708,7 @@ function requestSearch(field, search_text, load_on_response) {
       dashboard_content.open();
       var data_set_selected = newman_data_source.getSelected();
 
-      if (url_path.indexOf( url_search_all ) >= 0) {
+      if (url_path.endsWith(current_data_set_url)) {
 
         var ranks = service_response_email_rank.getResponseMapValues();
         //console.log( 'ranks: ' + JSON.stringify(ranks, null, 2) );
@@ -729,13 +729,19 @@ function requestSearch(field, search_text, load_on_response) {
           node_count = filtered_response.graph.nodes.length;
         }
 
+        var data_set_id = newman_data_source.parseDataSource( url_path );
+        if (!data_set_id) {
+          data_set_id = newman_data_source.getDefaultDataSourceID();
+        }
+        console.log('data_set_id: ' + data_set_id);
+
         var root_result = search_result.setRoot(
           '* (' + data_set_selected.label + ')',
           '',
           'text',
           '',
           url_path,
-          data_set_selected.label,
+          data_set_id,
           'pst',
           doc_count,
           node_count
@@ -758,13 +764,17 @@ function requestSearch(field, search_text, load_on_response) {
         var doc_received = service_response_email_rank.getDocReceived( search_text );
         var rank = service_response_email_rank.getRank( search_text );
 
+        var data_set_id = newman_data_source.parseDataSource( url_path );
+        if (!data_set_id) {
+          data_set_id = newman_data_source.getDefaultDataSourceID();
+        }
         search_result.push(
           search_text,
           search_text,
           field,
           "",
           url_path,
-          data_set_selected.label,
+          data_set_id,
           'pst',
           doc_count,
           doc_sent,
@@ -2006,13 +2016,8 @@ $(function () {
   // initialize dashboard
   drawDashboardCharts();
 
-  // initialize date-range slider binding
-  $("#date_range_slider").bind("userValuesChanged", function(e, data){
-    datetime_range.setDateMinText(data.values.min.toISOString().substring(0, 10));
-    datetime_range.setDateMaxText(data.values.max.toISOString().substring(0, 10));
-
-    //console.log("date-range {" +  date_range.getDateRange() + "}");
-  });
+  // initialize datetime-range slider binding
+  newman_datetime_range.initialize();
 
 
   $('a[data-toggle=\"tab\"]').on('shown.bs.tab', function (e) {
@@ -2373,7 +2378,7 @@ $(function () {
 
 
   if (hasher.getHash().length < 1){
-    hasher.setHash( url_search_all );
+    hasher.setHash( service_response_email_search_all.getServiceURLBase() );
   }
 
 });

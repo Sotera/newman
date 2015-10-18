@@ -2,11 +2,9 @@
  * Created by jlee on 9/25/15.
  */
 
-var service_response_email_all;
 var service_response_email_domain;
-
-var url_search_all = 'search/all/';
 var url_search_exportable = 'search/exportable/';
+
 
 /**
  * email-rank response container
@@ -14,22 +12,52 @@ var url_search_exportable = 'search/exportable/';
  */
 var service_response_email_search_all = (function () {
 
+  var _service_url = 'search/all/';
+  var _service_url_init;
+  var _is_init = true;
   var _response = {};
   var _graph_node_map = {};
   var _graph_link_map = {};
   var _email_map = {};
 
+  function getServiceURLBase() {
+    return _service_url;
+  }
+
+  function getServiceURLInit() {
+    return _service_url_init;
+  }
+
+  function getServiceURL() {
+
+    var service_url = newman_data_source.appendDataSource( _service_url );
+    service_url = newman_datetime_range.appendDatetimeRange( service_url );
+
+    if (_is_init) {
+      //keep track of the very first initial on-load url
+      _service_url_init = service_url;
+      _is_init = false;
+    }
+
+    return service_url;
+  }
+
   function requestService() {
     console.log('service_response_email_search_all.requestService()');
 
-    $.get( url_search_all ).then(function (response) {
+    $.get( getServiceURL() ).then(function (response) {
       setResponse( response );
     });
   }
 
-  function setResponse( response ) {
+  function setResponse( response, validate_enabled ) {
     if (response) {
-      _response = validateResponseSearch(response);
+      if (validate_enabled) {
+        _response = validateResponseSearch(response);
+      }
+      else {
+        _response = response;
+      }
       console.log('received service_response_email_search_all.graph.nodes[' + response.graph.nodes.length + ']');
       console.log('received service_response_email_search_all.graph.links[' + response.graph.links.length + ']');
       console.log('received service_response_email_search_all.rows[' + response.rows.length + ']');
@@ -107,6 +135,9 @@ var service_response_email_search_all = (function () {
   }
 
   return {
+    'getServiceURLBase' : getServiceURLBase,
+    'getServiceURLInit' : getServiceURLInit,
+    'getServiceURL' : getServiceURL,
     'requestService' : requestService,
     'getResponse' : getResponse,
     'setResponse' : setResponse,
@@ -126,13 +157,34 @@ var service_response_email_search_all = (function () {
  */
 var service_response_email_rank = (function () {
 
+  var _service_url = 'email/rank';
   var _response = {};
   var _response_map = {};
+  var _size = 20;
+
+  function getServiceURL() {
+
+    var service_url = newman_data_source.appendDataSource( _service_url );
+    service_url = newman_datetime_range.appendDatetimeRange( service_url );
+    service_url += '&size=' + _size;
+
+    return service_url;
+  }
+
+  function getSize() {
+    return _size
+  }
+
+  function setSize(new_size) {
+    if(new_size > 0) {
+      _size = new_size;
+    }
+  }
 
   function requestService() {
     console.log('service_response_email_rank.requestService()');
 
-    $.get('email/rank').then(function (response) {
+    $.get(getServiceURL()).then(function (response) {
 
       setResponse( response );
 
@@ -223,6 +275,7 @@ var service_response_email_rank = (function () {
   }
 
   return {
+    'getServiceURL' : getServiceURL,
     'requestService' : requestService,
     'getResponse' : getResponse,
     'setResponse' : setResponse,

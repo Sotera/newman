@@ -3,6 +3,7 @@
  */
 
 var newman_data_source = (function () {
+  var _default_data_set_id = 'default_data_set';
   var data_source_max = 20;
   var data_source_list = [];
   var data_source_selected;
@@ -190,17 +191,30 @@ var newman_data_source = (function () {
         url_path = url_path.substring(0, url_path.length - 1);
       }
 
+      var data_set_id = _default_data_set_id;
       var data_source = getSelected();
       if (data_source && data_source.uid) {
-        url_path = url_path + '?data_set_id=' + data_source.uid;
+        data_set_id = data_source.uid;
+      }
+
+      if (url_path.indexOf('?') > 0) {
+        url_path = url_path + '&data_set_id=' + data_set_id;
       }
       else {
-        url_path = url_path + '?data_set_id=default_data_set';
+        url_path = url_path + '?data_set_id=' + data_set_id;
       }
     }
 
     return url_path;
+  }
 
+  function parseDataSource( url ) {
+    var data_set_id = getURLParameter( url, 'data_set_id' );
+    return data_set_id;
+  }
+
+  function getDefaultDataSourceID() {
+    return _default_data_set_id;
   }
 
   return {
@@ -215,7 +229,9 @@ var newman_data_source = (function () {
     "initialize": initialize,
     "setSelected": setSelected,
     "getSelected": getSelected,
-    "appendDataSource": appendDataSource
+    "appendDataSource": appendDataSource,
+    "parseDataSource": parseDataSource,
+    "getDefaultDataSourceID": getDefaultDataSourceID
   }
 
 }());
