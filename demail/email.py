@@ -7,6 +7,7 @@ from newman.utils.date_utils import fmtNow
 from newman.utils.emails import get_ranked_email_address, get_attachment, get_attachments_sender
 from cherrypy.lib.httputil import parse_query_string
 from urlparse import urlparse
+from datasource import getDefaultDataSetID
 
 import tangelo
 import cherrypy
@@ -63,7 +64,19 @@ def getEntities(*args):
 
 
 #GET /rank
-def getRankedEmails(*args):
+def getRankedEmails(*args, **kwargs):
+    tangelo.log("getRankedEmails(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    
+    data_set_id = kwargs.get('data_set_id','default_data_set')
+    
+    if data_set_id == 'default_data_set':
+        data_set_id = getDefaultDataSetID()
+    
+    #re-direct based on data_set_id
+    if data_set_id != 'newman':
+        return get_ranked_email_address(*args, **kwargs)
+    
+    
     tangelo.content_type("application/json")    
     stmt = (
         " select email_addr, community, community_id, group_id, rank, total_received, total_sent "
@@ -105,7 +118,16 @@ def getDomains(*args, **kwargs):
             return { "domains" : rtn }
 
 #GET /attachments/<sender>
-def getAttachmentsSender(*args):
+def getAttachmentsSender(*args, **kwargs):
+    data_set_id = kwargs.get('data_set_id','default_data_set')
+    
+    if data_set_id == 'default_data_set':
+        data_set_id = getDefaultDataSetID()
+    
+    #re-direct based on data_set_id
+    if data_set_id != 'newman':
+        return get_attachments_sender(*args, **kwargs)
+    
     sender=urllib.unquote(nth(args, 0, ''))
     if not sender:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing id")
@@ -211,12 +233,11 @@ get_actions = {
     "email": getEmail,
     "domains" : getDomains,
     "entities" : getEntities,
-    "rank" : get_ranked_email_address,
-    "rank_old" : getRankedEmails,
+    "rank" : getRankedEmails,
     "exportable" : getExportable,
     "download" : buildExportable,
     "attachment" : get_attachment,
-    "attachments" : get_attachments_sender
+    "attachments" : getAttachmentsSender
 
 }
 
@@ -230,15 +251,6 @@ def unknown(*args):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-    # TODO remove hack
-    if "start" not in kwargs:
-        kwargs["start_datetime"] = "1970"
-    # TODO remove hack
-    if "end" not in kwargs:
-        kwargs["end_datetime"] = "now"
-    # TODO remove hack
-    if "index" not in kwargs:
-        kwargs["data_set_id"] = "sample"
 
     cherrypy.log("email(args[%s] %s)" % (len(args), str(args)))
     cherrypy.log("email(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))

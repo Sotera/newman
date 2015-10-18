@@ -10,6 +10,7 @@ from elasticsearch import Elasticsearch
 
 from cherrypy.lib.httputil import parse_query_string
 from newman.utils.searches import build_ranked_graph
+from datasource import getDefaultDataSetID
 
 ## node vals
 stmt_node_vals = (
@@ -357,6 +358,7 @@ def ingestESTextResults(hits):
 
         cnx.commit()
 
+#deprecated
 def createResults(field, args_array):
     cherrypy.log("createResults( %s, %s)" % (field, args_array) )
 
@@ -405,7 +407,7 @@ def querySearchResult(data_set_id, field, start_date, end_date, args_array):
                 body= {"fields": ["_id"], "query": {"match_all": {}}}
 
 
-            res = es.search(index="newman", doc_type="emails", size=1000, q=text, body=body)
+            res = es.search(index=data_set_id, doc_type="emails", size=1000, q=text, body=body)
 
             ingestESTextResults(jsonGet(['hits','hits'], res, []))
 
@@ -435,21 +437,15 @@ def getDates(*args, **kwargs):
     results = { 'doc_dates': queryAllDates() }
     return results
 
-#GET /search/<data_set>/<fields>/<arg>/<arg>/?start_datetime=<datetime>&end_datetime=<datetime>
+#GET /search/<data_set>/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
 def search(*path_args, **param_args):
     tangelo.log("search(path_args[%s] %s)" % (len(path_args), str(path_args)))
 
-
-    field = nth(path_args, 0, 'all')
-    args_array = rest(path_args)
-    tangelo.log("\tfield : %s, args_array : %s" %(field, str(args_array)))
-    
-    if len(args_array) == 0 :
-        args_array = ['']
-    #tangelo.log("\targs_array : %s" %str(args_array))
-
     data_set_id, start_datetime, end_datetime = parseFormParameters(**param_args)
-
+    
+    #re-direct based on data_set_id
+    if data_set_id != 'newman':
+        return build_ranked_graph(*path_args, **param_args);
     
     if start_datetime=='unknown_min' or end_datetime=='unknown_max':
         sorted_rows = queryAllDates()
@@ -463,6 +459,16 @@ def search(*path_args, **param_args):
             end_index = len(sorted_rows) - 1
             sorted_rows = sorted_rows[:end_index]
             end_datetime = sorted_rows[-1]['datetime']
+
+
+    field = nth(path_args, 0, 'all')
+    args_array = rest(path_args)
+    tangelo.log("\tfield : %s, args_array : %s" %(field, str(args_array)))
+    
+    if len(args_array) == 0 :
+        args_array = ['']
+    #tangelo.log("\targs_array : %s" %str(args_array))
+
             
     
     #return createResults(field, args_array)
@@ -474,6 +480,9 @@ def parseFormParameters( **kwargs ):
     start_datetime = kwargs.get('start_datetime','unknown_min')
     end_datetime = kwargs.get('end_datetime','unknown_max')
 
+    if data_set_id == 'default_data_set':
+        data_set_id = getDefaultDataSetID()
+        
     cherrypy.log("\tdata_set '%s', start_date '%s', end_date '%s'" % (data_set_id, start_datetime, end_datetime))
     return data_set_id, start_datetime, end_datetime    
 
@@ -488,15 +497,4 @@ def unknown(*args):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-
-    # TODO remove hack
-    if "start" not in kwargs:
-        kwargs["start_datetime"] = "1970"
-    # TODO remove hack
-    if "end" not in kwargs:
-        kwargs["end_datetime"] = "now"
-    # TODO remove hack
-    if "index" not in kwargs:
-        kwargs["data_set_id"] = "sample"
-
     return actions.get(action, unknown)(*args, **kwargs)

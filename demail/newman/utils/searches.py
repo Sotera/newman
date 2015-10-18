@@ -122,24 +122,24 @@ def _search_ranked_email_addrs(index, start, end, size):
     graph_body= {"fields": _graph_fields, "sort" : _sort_email_addrs_by_total, "query" : _query_all}
     return es.search(index=index, doc_type="email_address", size=size, body=graph_body)
 
-# GET /search/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
+# GET /search/<query string>?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
 #Build a graph ranked based on sent + rcvd
 def build_ranked_graph(*args, **kwargs):
-    start = kwargs["start"]
-    end = kwargs["end"]
-    index = kwargs["index"]
+    start = kwargs["start_datetime"]
+    end = kwargs["end_datetime"]
+    index = kwargs["data_set_id"]
     graph_results = _search_ranked_email_addrs(index, start, end, 20)
     graph_results = create_graph(graph_results.get('hits').get('hits'))
     return {"graph":graph_results, "rows":[]}
 
-# GET /search/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
+# GET /search/field/email_address/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
 # build a graph for a specific email address.  This will use a high performance mget operation
 # Rewrote this query to build through the community
 def get_graph_for_email_address(*args, **kwargs):
-    start = kwargs["start"]
-    end = kwargs["end"]
-    index = kwargs["index"]
-    email_addr = kwargs["email_addr"]
+    start = kwargs["start_datetime"]
+    end = kwargs["end_datetime"]
+    index = kwargs["data_set_id"]
+    email_addr = args[-1]
 
     es = Elasticsearch()
 
