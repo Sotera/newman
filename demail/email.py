@@ -237,7 +237,7 @@ get_actions = {
     "exportable" : getExportable,
     "download" : buildExportable,
     "attachment" : get_attachment,
-    "attachments" : getAttachmentsSender
+    "attachments" : get_attachments_sender
 
 }
 

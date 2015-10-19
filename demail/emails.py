@@ -110,7 +110,8 @@ def get_attachment(index, email_id, attachment_name):
     # resp =  serve_fileobj(bytes, "application/x-download", "attachment", filename)
     return as_str
 
-
+# /GET
+# find all attachments for a specific email address
 def get_attachments_sender(index, sender, *args, **kwargs):
 
     cherrypy.log("email.get_attachments_sender(index=%s, sender=%s)" % (index, sender))
