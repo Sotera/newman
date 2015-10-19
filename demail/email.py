@@ -1,21 +1,19 @@
+import json
+import urllib
+import shutil
+import os
+
+import tangelo
+import cherrypy
+
 from newman.db.newman_db import newman_connector
 from newman.db.mysql import execute_query, execute_nonquery
 from newman.utils.functions import nth
 from newman.settings import getOpt
 from newman.utils.file import rmrf, mkdir, mv
 from newman.utils.date_utils import fmtNow
-from newman.utils.emails import get_ranked_email_address, get_attachment, get_attachments_sender
-from cherrypy.lib.httputil import parse_query_string
-from urlparse import urlparse
+from emails import get_ranked_email_address, get_attachment, get_attachments_sender, get_email
 from datasource import getDefaultDataSetID
-
-import tangelo
-import cherrypy
-import json
-import urllib
-
-import shutil
-import os
 
 stmt_email_by_id = (
     " select e.id, e.dir, e.datetime, e.exportable, e.from_addr, e.tos, e.ccs, e.bccs, e.subject, html.body_html, e.attach "
@@ -169,7 +167,7 @@ def setExportable(data):
         with newman_connector() as read_cnx:
             with execute_nonquery(read_cnx.conn(), stmt) as qry:
                 return { "success" : "true" }
-        #return tangelo.HTTPStatusCode(400, "invalid service call - missing id")
+                #return tangelo.HTTPStatusCode(400, "invalid service call - missing id")
 
     tangelo.content_type("application/json")
     stmt = (
@@ -256,6 +254,9 @@ def get(action, *args, **kwargs):
 
     cherrypy.log("email(args[%s] %s)" % (len(args), str(args)))
     cherrypy.log("email(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+
+    if "data_set_id" not in kwargs or (kwargs["data_set_id"] == "default_data_set"):
+        kwargs["data_set_id"] = getDefaultDataSetID()
 
     return get_actions.get(action, unknown)( *args, **kwargs)
 

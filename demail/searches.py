@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 from elasticsearch.client import IndicesClient
+from newman.utils.functions import nth
 import tangelo
-import json
 
 # contains a cache of all email_address.addr, email_address
 _email_addr_cache = None
@@ -85,6 +85,7 @@ def _map_node(email_addr, total_docs):
     node["rank"] = (email_addr["sent_count"][0] + email_addr["received_count"][0]) / float(total_docs)
     return node
 
+# Deprecated slated for removal
 def create_graph(index, email_addresses):
     emailIndex= {}
     nodes = []
@@ -160,15 +161,25 @@ def _search_ranked_email_addrs(index, start, end, size):
 
 # GET /search/<query string>?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
 #Build a graph ranked based on sent + rcvd
+# TODO
+# THis builds a graph for all top ranked email_addresses.  THis will require using the logic
+# def _create_graph_from_email(index, email_address, start, end, terms=[], size=2000) but to pass in a collection of
+# emails addesses to the initial graph email search
 def build_ranked_graph(*args, **kwargs):
     start = kwargs["start_datetime"]
     end = kwargs["end_datetime"]
     index = kwargs["data_set_id"]
+
     graph_results = _search_ranked_email_addrs(index, start, end, 20)
-    graph_results = create_graph(graph_results.get('hits').get('hits'))
-    return {"graph":graph_results, "rows":[]}
+    graph_results = create_graph(index, graph_results.get('hits').get('hits'))
+    return {"graph":{"nodes":[], "links":[]}, "rows":[]}
 
 def _load_email_addr_cache(index):
+    global _email_addr_cache
+
+    if _email_addr_cache:
+        return _email_addr_cache
+
     es = Elasticsearch()
 
     body={"query" : {"match_all" : {}}}
@@ -181,8 +192,12 @@ def _load_email_addr_cache(index):
     return _email_addr_cache
 
 # This will generate the graph structure for a specific email address.  Will aply date filter and term query.
-def _create_graph_from_email(index, email_address, start, end, terms=[], size=2000):
-    term_query = {"match_all" : {}} if not terms else {"match" : {"_all" : " ".join(terms)}}
+def _create_graph_from_email(index, email_address, search_terms,start, end, size=2000):
+    tangelo.log("BFEORE")
+    _load_email_addr_cache(index)
+    tangelo.log("AFTER")
+
+    term_query = {"match_all" : {}} if not search_terms else {"match" : {"_all" : " ".join(search_terms)}}
 
     query_email_addr =  {"query":{"filtered" : {
         "query" : term_query,
@@ -193,6 +208,7 @@ def _create_graph_from_email(index, email_address, start, end, terms=[], size=20
                 {"term" : { "ccs" : email_address}},
                 {"term" : { "bccs" : email_address}}
             ],
+            # TODO must not contain owner
             "must":[{"range" : {"datetime" : { "gte": start, "lte": end }}}]
         }}}}}
 
@@ -227,7 +243,13 @@ def _create_graph_from_email(index, email_address, start, end, terms=[], size=20
 # build a graph for a specific email address.
 # args should be a list of terms to search for in any document field
 def get_graph_for_email_address(*args, **kwargs):
-    return _create_graph_from_email(kwargs["data_set_id"], args[-1], kwargs["start_datetime"], kwargs["end_datetime"], kwargs["size"])
+    search_terms=[]
+    email_address=nth(args, 1, '')
+
+    if not email_address:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing email address")
+
+    return _create_graph_from_email(kwargs["data_set_id"], email_address, search_terms, kwargs["start_datetime"], kwargs["end_datetime"],  kwargs.get("size",2000))
 
 
 def _mget_rows(ids=[]):

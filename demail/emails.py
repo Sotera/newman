@@ -1,12 +1,10 @@
+import base64
+
 import cherrypy
 import tangelo
-import base64
-import json
-import urllib
 from elasticsearch import Elasticsearch
+from datasource import parseFormParameters
 from searches import _search_ranked_email_addrs, count
-from cherrypy.lib.static import serve_fileobj
-from functions import nth
 
 
 #map the email_address for the email/rank ReST service
@@ -25,7 +23,6 @@ def map_email_addr(email_addr_resp, total_emails):
 
 #GET /rank?data_set_id=<dateset>&start_datetime=<start_datetime>&end_datetime=<end_datetime>&size=<size>
 def get_ranked_email_address(*args, **kwargs):
-    
     index = kwargs.get('data_set_id','sample')
     start= kwargs.get('start_datetime','1970')
     end = kwargs.get('end_datetime','now')
@@ -37,14 +34,11 @@ def get_ranked_email_address(*args, **kwargs):
     ret = [map_email_addr(email_addr, total_docs) for email_addr in email_addrs.get('hits').get('hits')]
     return {"emails": ret }
 
-#GET /email/<id>
-def get_email(id):
-    if not id:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing id")
+def _get_email(index, email_id):
 
     es = Elasticsearch()
     fields=["id","datetime","senders_line","tos_line","ccs_line","bccs_line","subject","body","attachments.filename","entities.entity_organization","entities.entity_location","entities.entity_person","entities.entity_misc"]
-    email = es.get(index="sample", doc_type="emails", id=id, fields=fields)
+    email = es.get(index="sample", doc_type="emails", id=email_id, fields=fields)
 
     default=[""]
     fields = email["fields"]
@@ -76,7 +70,6 @@ def header(h, t=None):
         cherrypy.response.headers[h] = t
 
     return r
-
 
 def get_attachment(index, email_id, attachment_name):
     cherrypy.log("email.get_attachments_sender(index=%s, sender=%s, attachment_name=%s)" % (index, email_id, attachment_name))
@@ -157,6 +150,14 @@ def dump(bytes, name):
     text_file = open("/tmp/"+name, "wb")
     text_file.write(bytes)
     text_file.close()
+
+#GET /email/<id>
+def get_email(*path_args, **param_args):
+    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**param_args)
+    email_id = path_args[-1]
+    if not email_id:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing email_id")
+    return _get_email(data_set_id, email_id)
 
 
 if __name__ == "__main__":

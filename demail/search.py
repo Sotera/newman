@@ -1,16 +1,13 @@
-
 import tangelo
 import cherrypy
+from elasticsearch import Elasticsearch
 
 from newman.db.newman_db import newman_connector
 from newman.db.mysql import execute_query
-from newman.utils.functions import nth, rest, subList, last, head, jsonGet
+from newman.utils.functions import nth, rest, head, jsonGet
+from searches import build_ranked_graph, get_graph_for_email_address
+from datasource import getDefaultDataSetID, parseFormParameters
 
-from elasticsearch import Elasticsearch
-
-from cherrypy.lib.httputil import parse_query_string
-from newman.utils.searches import build_ranked_graph
-from datasource import getDefaultDataSetID
 
 ## node vals
 stmt_node_vals = (
@@ -441,18 +438,23 @@ def getDates(*args, **kwargs):
 def search(*path_args, **param_args):
     tangelo.log("search(path_args[%s] %s)" % (len(path_args), str(path_args)))
 
-    data_set_id, start_datetime, end_datetime = parseFormParameters(**param_args)
-    
+    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**param_args)
+
     #re-direct based on data_set_id
     if data_set_id != 'newman':
-        return build_ranked_graph(*path_args, **param_args);
-    
+        if path_args[0] == "all" and len(path_args) == 1:
+            return build_ranked_graph(*path_args, **param_args);
+        elif path_args[0] == "all" and len(path_args) == 2:
+            return get_graph_for_email_address(*path_args, **param_args)
+
+    tangelo.log("search ERROR default to old code")
+
     if start_datetime=='unknown_min' or end_datetime=='unknown_max':
         sorted_rows = queryAllDates()
         #start_datetime = sorted_rows[0]['datetime'].split('T', 1)[0]
         #end_datetime = sorted_rows[-1]['datetime'].split('T', 1)[0]
         start_datetime = sorted_rows[0]['datetime']
-        
+
         #hack to filter email without datetime
         end_datetime = sorted_rows[-1]['datetime']
         while (end_datetime == 'NODATE'):
@@ -464,30 +466,18 @@ def search(*path_args, **param_args):
     field = nth(path_args, 0, 'all')
     args_array = rest(path_args)
     tangelo.log("\tfield : %s, args_array : %s" %(field, str(args_array)))
-    
+
     if len(args_array) == 0 :
         args_array = ['']
     #tangelo.log("\targs_array : %s" %str(args_array))
 
-            
-    
+
+
     #return createResults(field, args_array)
     return querySearchResult(data_set_id, field, start_datetime, end_datetime, args_array)
 
-def parseFormParameters( **kwargs ):
-    cherrypy.log("parseKeywordParameter(args[%s] %s)" % (len(kwargs), str(kwargs)))
-    data_set_id = kwargs.get('data_set_id','default_data_set')
-    start_datetime = kwargs.get('start_datetime','unknown_min')
-    end_datetime = kwargs.get('end_datetime','unknown_max')
-
-    if data_set_id == 'default_data_set':
-        data_set_id = getDefaultDataSetID()
-        
-    cherrypy.log("\tdata_set '%s', start_date '%s', end_date '%s'" % (data_set_id, start_datetime, end_datetime))
-    return data_set_id, start_datetime, end_datetime    
-
 actions = {
-    "build_ranked_graph": build_ranked_graph,
+    # "search": get_graph_for_email_address,
     "search": search,
     "dates" : getDates
 }
@@ -497,4 +487,10 @@ def unknown(*args):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
+    cherrypy.log("search.%s(args[%s] %s)" % (action,len(args), str(args)))
+    cherrypy.log("search.%s(kwargs[%s] %s)" % (action,len(kwargs), str(kwargs)))
+
+    # if "data_set_id" not in kwargs or (kwargs["data_set_id"] == "default_data_set"):
+    kwargs["data_set_id"] = getDefaultDataSetID()
+
     return actions.get(action, unknown)(*args, **kwargs)
