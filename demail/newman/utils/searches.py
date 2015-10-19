@@ -1,4 +1,5 @@
 from elasticsearch import Elasticsearch
+from elasticsearch.client import IndicesClient
 import tangelo
 import json
 
@@ -23,6 +24,18 @@ def count(index, type="emails", start="2000-01-01", end="now"):
 
     return count["count"]
 
+def stats():
+    es = Elasticsearch()
+    ic = IndicesClient()
+    stats = ic.stats(index="_all")
+    indexes = [(index, count(index)) for index in stats["indices"]]
+    aggregation = {
+        "aggregations" : {
+            "min_date" : { "min" : { "field" : "datetime" } }
+        }
+    }
+    es.search(index="sample", doc_type="emails", body={})
+    print indexes
 
 def _map_rows(doc):
     fields = doc["fields"]
@@ -229,9 +242,10 @@ def _mget_rows(ids=[]):
     return row_results
 
 if __name__ == "__main__":
+    stats()
     # res = buildGraph()
-    _email_addr_cache = _load_email_addr_cache("sample")
-    res = _create_graph_from_email("sample","tom.barry@myflorida.com","2001","now", terms=["swamped"])
-    text_file = open("/home/elliot/graph.json", "w")
-    text_file.write(json.dumps(res))
-    text_file.close()
+    # _email_addr_cache = _load_email_addr_cache("sample")
+    # res = _create_graph_from_email("sample","tom.barry@myflorida.com","2001","now", terms=["swamped"])
+    # text_file = open("/home/elliot/graph.json", "w")
+    # text_file.write(json.dumps(res))
+    # text_file.close()
