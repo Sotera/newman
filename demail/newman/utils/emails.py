@@ -25,10 +25,13 @@ def map_email_addr(email_addr_resp, total_emails):
 
 # Get rank
 def get_ranked_email_address(*args, **kwargs):
-    start = kwargs["start_datetime"]
-    end = kwargs["end_datetime"]
-    index = kwargs["data_set_id"]
+    
+    index = kwargs.get('data_set_id','sample')
+    start= kwargs.get('start_datetime','1970')
+    end = kwargs.get('end_datetime','now')
     size = kwargs.get("size", 20)
+    
+    
     tangelo.content_type("application/json")
     email_addrs = _search_ranked_email_addrs(index, start, end, size)
     total_docs = count(index)

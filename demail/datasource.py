@@ -7,10 +7,12 @@ import cherrypy
 import json
 import urllib
 
+def getDefaultDataSetID():
+    return 'sample'
 
 def listAllDataSet():
     cherrypy.log("listAllDataSet()")
-    rows = [getDataSet('sample')]
+    rows = [getDataSet(getDefaultDataSetID())]
 
     return rows
 
@@ -26,7 +28,7 @@ def getDataSet(*args):
     if not data_set_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing data_set_id")
 
-    result = {'data_set_id':'sample',
+    result = {'data_set_id':getDefaultDataSetID(),
               'data_set_label':'sample_data_set_0',
               'data_set_document_count' : 5000,
               'data_set_node_count' : 2500,

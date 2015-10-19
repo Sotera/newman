@@ -65,12 +65,16 @@ function validateResponseEmailDocs(response) {
  * @returns filtered response
  */
 function validateResponseSearch(response) {
+  var debug_enabled = false;
   if (response) {
-    console.log( 'validateResponseSearch(...)' );
+    console.log('validateResponseSearch(...)');
+
 
     // validate graph nodes and links
     if (response.graph) {
-      console.log( '\tnodes[' + response.graph.nodes.length + '] links[' + response.graph.links.length + ']' );
+      if (debug_enabled) {
+        console.log('\tnodes[' + response.graph.nodes.length + '] links[' + response.graph.links.length + ']');
+      }
 
       var new_nodes = [];
       var new_links = [];
@@ -88,7 +92,10 @@ function validateResponseSearch(response) {
           new_nodes.push( item );
         }
         else {
-          console.log('\tinvalid node(email) { name: ' + item.name + ', community: ' + item.community + ' index: ' + index + ' }');
+          if (debug_enabled) {
+            console.log('\tinvalid node(email) { name: ' + item.name + ', community: ' + item.community + ' index: ' + index + ' }');
+          }
+
           invalid_node_count++;
 
           _.each(response.graph.links, function (item) {
@@ -97,7 +104,10 @@ function validateResponseSearch(response) {
 
               clone_links.splice(index, 1);
 
-              console.log('\t\tinvalidated link { source: ' + item.source + ', target: ' + item.target + ", value: " + item.value + ' }');
+              if (debug_enabled) {
+                console.log('\t\tinvalidated link { source: ' + item.source + ', target: ' + item.target + ", value: " + item.value + ' }');
+              }
+
               invalid_link_count++;
             }
 
@@ -114,21 +124,29 @@ function validateResponseSearch(response) {
           new_links.push( item );
         }
         else {
-          console.log('\tundefined link { source: ' + item.source + ', target: ' + item.target + ", value: " + item.value + ' }');
+          if (debug_enabled) {
+            console.log('\tundefined link { source: ' + item.source + ', target: ' + item.target + ", value: " + item.value + ' }');
+          }
+
           invalid_link_count++;
         }
       });
 
       response.graph.nodes = new_nodes;
       response.graph.links = new_links;
-      console.log( '\tnew nodes[' + response.graph.nodes.length + '], invalid nodes ' + invalid_node_count +
-        ', new links[' + response.graph.links.length + '], invalid links ' + invalid_link_count );
+
+      if (debug_enabled) {
+        console.log('\tnew nodes[' + response.graph.nodes.length + '], invalid nodes ' + invalid_node_count +
+                    ', new links[' + response.graph.links.length + '], invalid links ' + invalid_link_count);
+      }
 
     }
 
     // validate rows
     if (response.rows) {
-      console.log( '\trows[' + response.rows.length + ']' );
+      if (debug_enabled) {
+        console.log('\trows[' + response.rows.length + ']');
+      }
 
       var new_rows = [];
       var invalid_row_count = 0;
@@ -147,30 +165,40 @@ function validateResponseSearch(response) {
               new_rows.push(item);
             }
             else {
-              console.log('\tinvalid email : ' + item.from);
+              if (debug_enabled) {
+                console.log('\tinvalid email : ' + item.from);
+              }
               invalid_row_count++;
             }
           }
           else {
-            console.log('\tundefined email : ' + item.from);
+            if (debug_enabled) {
+              console.log('\tundefined email : ' + item.from);
+            }
             invalid_row_count++;
           }
         }
         else {
-          console.log('\tinvalid datetime : ' + item.datetime);
+          if (debug_enabled) {
+            console.log('\tinvalid datetime : ' + item.datetime);
+          }
           invalid_row_count++;
         }
 
       });
 
       response.rows = new_rows;
-      console.log( '\tnew rows[' + response.rows.length + '], invalid row ' + invalid_row_count );
+      if (debug_enabled) {
+        console.log('\tnew rows[' + response.rows.length + '], invalid row ' + invalid_row_count);
+      }
     }
 
     return response;
   }
 
-  console.log( 'response undefined' );
+  if (debug_enabled) {
+    console.log('response undefined');
+  }
   return response;
 }
 
@@ -198,7 +226,7 @@ function validateResponseEmailRank(response) {
           email[1],
           parseInt(email[2]),
           parseInt(email[3]),
-          parseFloat(email[4]),
+          parseFloat(email[4]).toFixed(3),
           parseInt(email[5]),
           parseInt(email[6])
         ];
@@ -343,6 +371,7 @@ function validateDateTime(datetime_text) {
  * @returns true if the argument is valid, false otherwise
  */
 function validateEmailAddress(email_address) {
+  var debug_enabled = false;
   if(email_address) {
     /*
      var regex = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
@@ -354,10 +383,14 @@ function validateEmailAddress(email_address) {
       if(validateEmailDomain(domain)) {
         return true;
       }
-      console.log( '\tinvalid email-domain: ' + name );
+      if(debug_enabled) {
+        console.log('\tinvalid email-domain: ' + name);
+      }
       return false;
     }
-    console.log( '\tinvalid email-user: ' + name );
+    if(debug_enabled) {
+      console.log('\tinvalid email-user: ' + name);
+    }
     return false;
   }
   return false;
@@ -600,4 +633,28 @@ function clone( source ) {
     return copy;
   }
   return source;
+}
+
+/**
+ * return a parameter-value from a valid url
+ * @param a valid url
+ * @param a parameter key
+ * @returns parameter value
+ */
+function getURLParameter( url, parameter_key ) {
+  //console.log('getURLParameter(' + url + ', ' + parameter_key + ')');
+  var parameter_value;
+  if (url && parameter_key) {
+    var url_parameter_list = url.split('&');
+    for (var i = 0; i < url_parameter_list.length; i++) {
+      var parameter_name = url_parameter_list[i].split('=');
+      var key = parameter_name[0];
+      var value = parameter_name[1];
+      //console.log('\tkey: ' + key + ' value: ' + value );
+      if (key.endsWith( parameter_key )) {
+        parameter_value = value;
+      }
+    }
+  }
+  return parameter_value;
 }

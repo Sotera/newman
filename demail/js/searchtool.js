@@ -414,52 +414,17 @@ var all_domain_map = (function () {
   }
 }());
 
-/**
- * date-time range container
- */
-var datetime_range = (function () {
 
-  var date_range_min_text = '';
-  var date_range_max_text = '';
-
-  var setDateMinText = function (new_min_text) {
-    date_range_min_text = new_min_text;
-  };
-
-  var setDateMaxText = function (new_max_text) {
-    date_range_max_text = new_max_text;
-  };
-
-  var getDateMinText = function () {
-    return date_range_min_text;
-  };
-
-  var getDateMaxText = function () {
-    return date_range_max_text;
-  };
-
-  var getDateRange = function () {
-    return getDateMinText() + '/' + getDateMaxText();
-  };
-
-  return {
-    "setDateMinText" : setDateMinText,
-    "setDateMaxText" : setDateMaxText,
-    "getDateMinText" : getDateMinText,
-    "getDateMaxText" : getDateMaxText,
-    "getDateRange" : getDateRange
-  }
-
-}());
 
 /**
  * search result container
  */
 var search_result = (function () {
-  var result_set_max = 20;
-  var result_set = [];
-  var result_root;
-  var ui_appendable;
+  var _search_result_map = {};
+  var _current_list_max = 20;
+  var _current_list = [];
+  var _current_list_root;
+  var _ui_appendable;
 
   var result = function( label,
                          search_text,
@@ -538,9 +503,12 @@ var search_result = (function () {
 
     var key = label.replace(' ', '_');
     var parent_index = 1;
-    if (url.endsWith( url_search_all )) {
+
+    if (url.endsWith(service_response_email_search_all.getServiceURL()) ||
+        url.endsWith(service_response_email_search_all.getServiceURLInit())) {
       parent_index = 0;
     }
+    //console.log('result( ' + key + ', ' + data_source_id + ', ' + parent_index + ', ' + url + ' )');
 
     return {
       "key" : key,
@@ -572,7 +540,7 @@ var search_result = (function () {
                         document_received,
                         node_count,
                         rank ) {
-    console.log('push( ' + label + ', ' + search_text + ', ' + search_field + ', ' + url + ' )');
+    //console.log('push( ' + label + ', ' + search_text + ', ' + search_field + ', ' + url + ' )');
 
     var new_result = result( decodeURIComponent(label),
                              decodeURIComponent(search_text),
@@ -588,10 +556,10 @@ var search_result = (function () {
                              rank );
 
     if (!contains(new_result)) {
-      if (result_set.length == result_set_max) {
-        result_set.splice(result_set.length - 1, 1);
+      if (_current_list.length == _current_list_max) {
+        _current_list.splice(_current_list.length - 1, 1);
       }
-      result_set.unshift(new_result);
+      _current_list.unshift(new_result);
 
       //console.log( '\tappended \'' + label + '\'' );
 
@@ -610,9 +578,9 @@ var search_result = (function () {
                            data_source_category,
                            document_count,
                            node_count ) {
-    console.log('setRoot( ' + label + ', ' + search_text + ', ' + search_field + ', ' + url + ' )');
+    console.log('setRoot( ' + label + ', ' + data_source_id + ', ' + search_field + ', ' + url + ' )');
 
-    result_root = result( decodeURIComponent(label),
+    _current_list_root = result( decodeURIComponent(label),
                           decodeURIComponent(search_text),
                           search_field,
                           description,
@@ -626,26 +594,26 @@ var search_result = (function () {
                           0.0 );
 
 
-    return clone(result_root);
+    return clone(_current_list_root);
   };
 
   var getRoot = function() {
-    return clone(result_root);
+    return clone(_current_list_root);
   }
 
   var clearAll = function () {
     //console.log('clearAll()');
-    result_set = [];
+    _current_list = [];
   }
 
   var pop = function () {
-    return result_set.shift();
+    return _current_list.shift();
   };
 
   var contains = function (result) {
 
     var found = false;
-    _.each(result_set, function (element) {
+    _.each(_current_list, function (element) {
 
       if (element.url === result.url) {
         found = true;
@@ -660,22 +628,22 @@ var search_result = (function () {
   var getFirst = function () {
     console.log('getFirst()');
 
-    return result_set.pop();
+    return _current_list.pop();
   };
 
   var getAll = function () {
-    return clone(result_set);
+    return clone(_current_list);
   };
 
   var getByIndex = function (index) {
-    return result_set[ index ];
+    return _current_list[ index ];
   };
 
   var getByLabel = function ( label ) {
     //console.log( 'getByLabel(' + label + ')' );
 
     var result;
-    _.each(result_set, function (element) {
+    _.each(_current_list, function (element) {
 
       if (element.label === label) {
         result = element;
@@ -690,7 +658,7 @@ var search_result = (function () {
     //console.log( 'getByKey(' + key + ')' );
 
     var result;
-    _.each(result_set, function (element) {
+    _.each(_current_list, function (element) {
 
       if (element.key === key) {
         result = element;
@@ -705,7 +673,7 @@ var search_result = (function () {
     //console.log( 'getByURL(' + url + ')' );
 
     var result;
-    _.each(result_set, function (element) {
+    _.each(_current_list, function (element) {
 
       if (element.url === url) {
         result = element;
@@ -717,7 +685,7 @@ var search_result = (function () {
   };
 
   var setUI = function( new_ui_appendable ) {
-    ui_appendable = new_ui_appendable;
+    _ui_appendable = new_ui_appendable;
   }
 
 
@@ -757,14 +725,18 @@ var search_result = (function () {
 
         var root_result = getRoot();
         if (!root_result) {
+          var data_set_id = newman_data_source.parseDataSource( url_path );
+          if (!data_set_id) {
+            data_set_id = newman_data_source.getDefaultDataSourceID();
+          }
 
           root_result = setRoot(
             '* (' + data_set_selected.label + ')',
             '',
             'text',
             '',
-            url_search_all,
-            data_set_selected.label,
+            service_response_email_search_all.getServiceURL(),
+            data_set_id,
             'pst',
             0,
             0
@@ -781,7 +753,7 @@ var search_result = (function () {
         var row_index = 1;
 
         _.each(data_list, function (element) {
-          //console.log('\t' + element.label + ', ' + element.url );
+          //console.log('\t' + element.label + ', ' + element.url + ', ' + element.data_source_id + ', ' + element.parent_index );
 
           var button_html = "<button type=\"button\" class=\"btn btn-small outline\" id=\"" + element.key + "\">" + element.label + "</button>";
           var checkbox_html = "<input type=\"checkbox\" id=\"checkbox_" + element.key + "\"/>";
@@ -878,7 +850,7 @@ var search_result = (function () {
 
   var refreshUI = function() {
 
-    newUI( result_set );
+    newUI( _current_list );
 
     /*
     if (ui_appendable) {
@@ -971,12 +943,12 @@ var search_result = (function () {
 
   var clearUI = function () {
 
-    if(ui_appendable) {
+    if(_ui_appendable) {
       console.log('clearUI()');
 
       //ui_appendable.empty();
 
-      ui_appendable.children().each(function () {
+      _ui_appendable.children().each(function () {
         $(this).remove();
       });
 
@@ -1752,34 +1724,30 @@ function drawChartRank( count ) {
 
 
         var top_donut_chart_data = [];
-        var top_donut_chart_total = 1;
+        var top_donut_chart_total = 0;
         var top_donut_chart_colors = [];
 
 
         for (var i = 0; i < ranks.length; i++) {
-          top_donut_chart_total = top_donut_chart_total + ranks[i].rank;
+          top_donut_chart_total = top_donut_chart_total + parseFloat(ranks[i].rank);
 
           var entity_color = color_set_community(ranks[i].communityId)
 
           top_donut_chart_colors.push(entity_color);
-        }
-        ;
+        };
+
 
         for (var i = 0; i < ranks.length; i++) {
-          top_donut_chart_total = top_donut_chart_total + ranks[i].rank;
-        }
-        ;
+          var value = Math.round((ranks[i].rank / top_donut_chart_total) * width_bar_factor);
 
-        for (var i = 0; i < ranks.length; i++) {
-          var value = Math.round((ranks[i].rank / top_donut_chart_total) * 100);
+          //console.log('index ' + i + ', value ' +value + ', sum ' +top_donut_chart_total);
           var entry = {
             value: value,
             label: ranks[i].email,
             formatted: value + '%'
           };
           top_donut_chart_data.push(entry);
-        }
-        ;
+        };
 
 
         dashboard_donut_chart_rank = Morris.Donut({
@@ -2062,8 +2030,8 @@ function initDateTimeRange() {
         }]
       });
 
-      datetime_range.setDateMinText(default_start_date.toISOString().substring(0, 10));
-      datetime_range.setDateMaxText(end_date.toISOString().substring(0, 10));
+      newman_datetime_range.setDatetimeMinText(default_start_date.toISOString().substring(0, 10));
+      newman_datetime_range.setDatetimeMaxText(end_date.toISOString().substring(0, 10));
 
     });
 
