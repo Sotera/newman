@@ -23,23 +23,21 @@ def map_email_addr(email_addr_resp, total_emails):
                   ]
     return email_addr
 
-# Get rank
+#GET /rank?data_set_id=<dateset>&start_datetime=<start_datetime>&end_datetime=<end_datetime>&size=<size>
 def get_ranked_email_address(*args, **kwargs):
     
     index = kwargs.get('data_set_id','sample')
     start= kwargs.get('start_datetime','1970')
     end = kwargs.get('end_datetime','now')
     size = kwargs.get("size", 20)
-    
-    
+
     tangelo.content_type("application/json")
     email_addrs = _search_ranked_email_addrs(index, start, end, size)
     total_docs = count(index)
     ret = [map_email_addr(email_addr, total_docs) for email_addr in email_addrs.get('hits').get('hits')]
     return {"emails": ret }
 
-
-
+#GET /email/<id>
 def get_email(id):
     if not id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing id")
