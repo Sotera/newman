@@ -1,7 +1,7 @@
 import base64
 
-import cherrypy
 import tangelo
+import cherrypy
 from elasticsearch import Elasticsearch
 from param_utils import parseFormParameters
 from newman.utils.functions import nth

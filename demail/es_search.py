@@ -1,9 +1,10 @@
+import tangelo
+
 from elasticsearch import Elasticsearch
 from elasticsearch.client import IndicesClient
 from newman.utils.functions import nth
 from param_utils import parseFormParameters
 
-import tangelo
 
 # contains a cache of all email_address.addr, email_address
 _email_addr_cache = None
@@ -44,7 +45,7 @@ def _map_rows(doc):
     row = {}
     row["num"] =  fields["id"][0]
 
-    row["from"] = fields.get("senders")[0]
+    row["from"] = fields.get("senders", [""])[0]
     row["to"] = ';'.join(fields.get("tos"))
     row["cc"] = ';'.join(fields.get("ccs"))
     row["bcc"] = ';'.join(fields.get("bccs"))
@@ -59,7 +60,7 @@ def _map_emails(fields):
     row = {}
     row["num"] =  fields["id"][0]
 
-    row["from"] = fields.get("senders",[])[0]
+    row["from"] = fields.get("senders",[""])[0]
     row["to"] = fields.get("tos", [])
     row["cc"] = fields.get("ccs", [])
     row["bcc"] = fields.get("bccs", [])
