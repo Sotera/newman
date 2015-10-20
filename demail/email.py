@@ -12,8 +12,9 @@ from newman.utils.functions import nth
 from newman.settings import getOpt
 from newman.utils.file import rmrf, mkdir, mv
 from newman.utils.date_utils import fmtNow
-from emails import get_ranked_email_address, get_attachment, get_attachments_sender, get_email
+from es_email import get_ranked_email_address, get_attachment, get_attachments_sender, get_email
 from datasource import getDefaultDataSetID
+from param_utils import parseFormParameters
 
 stmt_email_by_id = (
     " select e.id, e.dir, e.datetime, e.exportable, e.from_addr, e.tos, e.ccs, e.bccs, e.subject, html.body_html, e.attach "
@@ -45,13 +46,23 @@ def queryEntity(email):
 
 #GET /email/<id>
 # deprecated slated for removal
-def getEmail(*args):
-    email=urllib.unquote(nth(args, 0, ''))
-    if not email:
+def getEmail(*args, **kwargs):
+    tangelo('getEmail(%s)' % str(args));
+    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**kwargs)
+
+    #re-direct based on data_set_id
+    if data_set_id != 'newman':
+        return get_email(*args, **kwargs)
+
+    #defaulting to old code
+    tangelo.log("\tdefaulting to old code...")
+    #email_id = args[-1]
+    email_id = urllib.unquote(nth(args, 0, ''))
+    if not email_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing id")
 
     tangelo.content_type("application/json")
-    return { "email" : queryEmail(email), "entities": queryEntity(email) }
+    return { "email_id" : queryEmail(email_id), "entities": queryEntity(email_id) }
 
 #GET /entities/<id>
 def getEntities(*args):
@@ -66,17 +77,15 @@ def getEntities(*args):
 # deprecated slated for removal
 def getRankedEmails(*args, **kwargs):
     tangelo.log("getRankedEmails(args: %s kwargs: %s)" % (str(args), str(kwargs)))
-
-    data_set_id = kwargs.get('data_set_id','default_data_set')
-
-    if data_set_id == 'default_data_set':
-        data_set_id = getDefaultDataSetID()
+    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**kwargs)
 
     #re-direct based on data_set_id
     if data_set_id != 'newman':
         return get_ranked_email_address(*args, **kwargs)
 
-
+    #defaulting to old code
+    tangelo.log("\tdefaulting to old code...")
+    
     tangelo.content_type("application/json")
     stmt = (
         " select email_addr, community, community_id, group_id, rank, total_received, total_sent "
@@ -87,7 +96,7 @@ def getRankedEmails(*args, **kwargs):
     with newman_connector() as read_cnx:
         with execute_query(read_cnx.conn(), stmt) as qry:
             rtn = [[str(val) for val in row] for row in qry.cursor()]
-            return { "emails" : rtn }
+            return { "es_email" : rtn }
 
 #GET /target
 #deprecated; use new service url http://<host>:<port>/datasource/all/
@@ -119,10 +128,8 @@ def getDomains(*args, **kwargs):
 
 #GET /attachments/<sender>
 def getAttachmentsSender(*args, **kwargs):
-    data_set_id = kwargs.get('data_set_id','default_data_set')
-
-    if data_set_id == 'default_data_set':
-        data_set_id = getDefaultDataSetID()
+    tangelo.log("getAttachmentsSender(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**kwargs)
 
     #re-direct based on data_set_id
     if data_set_id != 'newman':
@@ -152,7 +159,7 @@ def getExportable(*args, **kwargs):
     with newman_connector() as read_cnx:
         with execute_query(read_cnx.conn(), stmt) as qry:
             rtn = [[str(val) for val in row] for row in qry.cursor()]
-            return { "emails" : rtn }
+            return { "es_email" : rtn }
 
 #POST /exportable
 def setExportable(data):
@@ -178,7 +185,7 @@ def setExportable(data):
             return { "email" : queryEmail(email) }
 #POST /exportmany
 def setExportMany(data):
-    emails = data.get('emails', [])
+    emails = data.get('es_email', [])
     exportable= 'true' if data.get('exportable', True) else 'false'
     stmt = (
         " UPDATE email SET exportable=%s WHERE id = %s "
@@ -194,7 +201,7 @@ def setExportMany(data):
 def buildExportable(*args):
     webroot = cherrypy.config.get("webroot")
     target = getOpt('target')
-    base_src = "{}/emails/{}".format(webroot,target)
+    base_src = "{}/es_email/{}".format(webroot,target)
     tmp_dir = os.path.abspath("{}/../tmp/".format(webroot))
     download_dir = "{}/downloads/".format(webroot)
     tar_gz = "export_{}".format(fmtNow())
@@ -230,14 +237,14 @@ def buildExportable(*args):
 
 get_actions = {
     "target" : getTarget,
-    "email": get_email,
+    "email" : getEmail,
     "domains" : getDomains,
     "entities" : getEntities,
-    "rank" : get_ranked_email_address,
+    "rank" : getRankedEmails,
     "exportable" : getExportable,
     "download" : buildExportable,
     "attachment" : get_attachment,
-    "attachments" : get_attachments_sender
+    "attachments" : getAttachmentsSender
 
 }
 
@@ -255,7 +262,7 @@ def get(action, *args, **kwargs):
     cherrypy.log("email(args[%s] %s)" % (len(args), str(args)))
     cherrypy.log("email(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
 
-    if "data_set_id" not in kwargs or (kwargs["data_set_id"] == "default_data_set"):
+    if ("data_set_id" not in kwargs) or (kwargs["data_set_id"] == "default_data_set"):
         kwargs["data_set_id"] = getDefaultDataSetID()
 
     return get_actions.get(action, unknown)( *args, **kwargs)

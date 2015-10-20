@@ -5,8 +5,9 @@ from elasticsearch import Elasticsearch
 from newman.db.newman_db import newman_connector
 from newman.db.mysql import execute_query
 from newman.utils.functions import nth, rest, head, jsonGet
-from searches import build_ranked_graph, get_graph_for_email_address
-from datasource import getDefaultDataSetID, parseFormParameters
+from es_search import build_ranked_graph, get_graph_for_email_address
+from datasource import getDefaultDataSetID
+from param_utils import parseFormParameters
 
 
 ## node vals
@@ -258,8 +259,8 @@ def nodeQueryObj(conn, field, args_array):
 
 def getNodeVals(field, args_array):
     """
-    nodes should be all of the emails that an email addr is a part of,
-    and all of the email addresses associated with that set of emails 
+    nodes should be all of the es_email that an email addr is a part of,
+    and all of the email addresses associated with that set of es_email 
     """
     with newman_connector() as read_cnx:
         tangelo.log("start node query")
@@ -365,7 +366,7 @@ def createResults(field, args_array):
         if text:
             tangelo.log("\ttext search : %s" % text)
             es = Elasticsearch()
-            res = es.search(index="newman", doc_type="emails", size=1000, q=text, body= {"fields": ["_id"], "query": {"match_all": {}}})
+            res = es.search(index="newman", doc_type="es_email", size=1000, q=text, body= {"fields": ["_id"], "query": {"match_all": {}}})
             
             ingestESTextResults(jsonGet(['hits','hits'], res, []))
     
@@ -404,7 +405,7 @@ def querySearchResult(data_set_id, field, start_date, end_date, args_array):
                 body= {"fields": ["_id"], "query": {"match_all": {}}}
 
 
-            res = es.search(index=data_set_id, doc_type="emails", size=1000, q=text, body=body)
+            res = es.search(index=data_set_id, doc_type="es_email", size=1000, q=text, body=body)
 
             ingestESTextResults(jsonGet(['hits','hits'], res, []))
 
@@ -442,12 +443,14 @@ def search(*path_args, **param_args):
 
     #re-direct based on data_set_id
     if data_set_id != 'newman':
-        if path_args[0] == "all" and len(path_args) == 1:
-            return build_ranked_graph(*path_args, **param_args);
-        elif path_args[0] == "all" and len(path_args) == 2:
-            return get_graph_for_email_address(*path_args, **param_args)
+        if path_args[0] == "all":
+            if len(path_args) == 1:
+                return build_ranked_graph(*path_args, **param_args);
+            elif len(path_args) == 2:
+                return get_graph_for_email_address(*path_args, **param_args)
 
-    tangelo.log("search ERROR default to old code")
+    #defaulting to old code
+    tangelo.log("\tdefaulting to old code...")
 
     if start_datetime=='unknown_min' or end_datetime=='unknown_max':
         sorted_rows = queryAllDates()
@@ -472,7 +475,6 @@ def search(*path_args, **param_args):
     #tangelo.log("\targs_array : %s" %str(args_array))
 
 
-
     #return createResults(field, args_array)
     return querySearchResult(data_set_id, field, start_datetime, end_datetime, args_array)
 
@@ -490,7 +492,7 @@ def get(action, *args, **kwargs):
     cherrypy.log("search.%s(args[%s] %s)" % (action,len(args), str(args)))
     cherrypy.log("search.%s(kwargs[%s] %s)" % (action,len(kwargs), str(kwargs)))
 
-    # if "data_set_id" not in kwargs or (kwargs["data_set_id"] == "default_data_set"):
-    kwargs["data_set_id"] = getDefaultDataSetID()
+    if ("data_set_id" not in kwargs) or (kwargs["data_set_id"] == "default_data_set"):
+        kwargs["data_set_id"] = getDefaultDataSetID()
 
     return actions.get(action, unknown)(*args, **kwargs)

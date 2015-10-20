@@ -41,7 +41,7 @@ def download(data):
 
             try: 
                 session = newman_email.login(user, passwd, logfile)
-                fldr = "{}/emails/{}".format(webroot, user)    
+                fldr = "{}/es_email/{}".format(webroot, user)    
                 cherrypy.log("Login User: {}".format(user))
 
                 if os.path.exists(fldr):
@@ -51,7 +51,7 @@ def download(data):
 
                 spit("{}/output.csv".format(fldr), newman_email.headerrow() + "\n")
 
-                mkdir(fldr + "/emails")
+                mkdir(fldr + "/es_email")
 
                 newman_email.download(session, user, fldr, int(limit), logfile)
 
@@ -176,7 +176,7 @@ def getIngestLog(*args):
     return {'log' : sz }
 
 def getList(*args):
-    path = "{}/{}".format(webroot, "emails")
+    path = "{}/{}".format(webroot, "es_email")
     _, dirnames, _ = os.walk(path).next()
     tangelo.content_type("application/json")    
     return { 'items' : dirnames }

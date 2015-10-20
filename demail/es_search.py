@@ -1,6 +1,8 @@
 from elasticsearch import Elasticsearch
 from elasticsearch.client import IndicesClient
 from newman.utils.functions import nth
+from param_utils import parseFormParameters
+
 import tangelo
 
 # contains a cache of all email_address.addr, email_address
@@ -15,7 +17,7 @@ _sort_email_addrs_by_total={ "_script": { "script_file": "email_addr-sent-rcvd-s
 _query_all = {"bool":{"must":[{"match_all":{}}]}}
 
 
-def count(index, type="emails", start="2000-01-01", end="now"):
+def count(index, type="es_email", start="2000-01-01", end="now"):
     es = Elasticsearch()
     # TODO apply filter to query not to body
     filter = {"range" : {"datetime" : { "gte": start, "lte": end }}}
@@ -34,7 +36,7 @@ def stats():
             "min_date" : { "min" : { "field" : "datetime" } }
         }
     }
-    es.search(index="sample", doc_type="emails", body={})
+    es.search(index="sample", doc_type="es_email", body={})
     print indexes
 
 def _map_rows(doc):
@@ -82,7 +84,13 @@ def _map_node(email_addr, total_docs):
     node["group"] =  email_addr["community_id"][0]
     node["name"] = name
     node["num"] =  email_addr["sent_count"][0] + email_addr["received_count"][0]
-    node["rank"] = (email_addr["sent_count"][0] + email_addr["received_count"][0]) / float(total_docs)
+
+    #hack to address 0 total_emails
+    if total_docs > 0 :
+        node["rank"] = (email_addr["sent_count"][0] + email_addr["received_count"][0]) / float(total_docs)
+    else :
+        node["rank"] = 0.0
+        
     return node
 
 # Deprecated slated for removal
@@ -102,7 +110,13 @@ def create_graph(index, email_addresses):
         node["group"] =  fields["community_id"][0]
         node["name"] = name
         node["num"] =  fields["sent_count"][0] + fields["received_count"][0]
-        node["rank"] = (fields["sent_count"][0] + fields["received_count"][0]) / float(total_docs)
+        
+        #hack to address 0 total_emails
+        if total_docs > 0 :
+            node["rank"] = (fields["sent_count"][0] + fields["received_count"][0]) / float(total_docs)
+        else :
+            node["rank"] = 0
+        
         node["rcvr"] = []
         node["sender"] = []
         emailIndex[name] = index
@@ -164,14 +178,12 @@ def _search_ranked_email_addrs(index, start, end, size):
 # TODO
 # THis builds a graph for all top ranked email_addresses.  THis will require using the logic
 # def _create_graph_from_email(index, email_address, start, end, terms=[], size=2000) but to pass in a collection of
-# emails addesses to the initial graph email search
+# es_email addesses to the initial graph email search
 def build_ranked_graph(*args, **kwargs):
-    start = kwargs["start_datetime"]
-    end = kwargs["end_datetime"]
-    index = kwargs["data_set_id"]
+    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**kwargs)
 
-    graph_results = _search_ranked_email_addrs(index, start, end, 20)
-    graph_results = create_graph(index, graph_results.get('hits').get('hits'))
+    graph_results = _search_ranked_email_addrs(data_set_id, start_datetime, end_datetime, size)
+    graph_results = create_graph(data_set_id, graph_results.get('hits').get('hits'))
     return {"graph":{"nodes":[], "links":[]}, "rows":[]}
 
 def _load_email_addr_cache(index):
@@ -214,7 +226,7 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
 
 
     es = Elasticsearch()
-    emails_resp = es.search(index=index, doc_type="emails", size=size, fields=_row_fields, body=query_email_addr)
+    emails_resp = es.search(index=index, doc_type="es_email", size=size, fields=_row_fields, body=query_email_addr)
 
     emails = [_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]
 
@@ -243,13 +255,16 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
 # build a graph for a specific email address.
 # args should be a list of terms to search for in any document field
 def get_graph_for_email_address(*args, **kwargs):
+    tangelo.log("get_graph_for_email_address(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**kwargs)
+
     search_terms=[]
     email_address=nth(args, 1, '')
 
     if not email_address:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing email address")
 
-    return _create_graph_from_email(kwargs["data_set_id"], email_address, search_terms, kwargs["start_datetime"], kwargs["end_datetime"],  kwargs.get("size",2000))
+    return _create_graph_from_email(data_set_id, email_address, search_terms, start_datetime, end_datetime, size)
 
 
 def _mget_rows(ids=[]):
@@ -257,7 +272,7 @@ def _mget_rows(ids=[]):
 
     print len(ids)
     row_body= {"ids" : list(ids)}
-    row_results = es.mget(index="sample", doc_type="emails", fields=_row_fields, body=row_body)
+    row_results = es.mget(index="sample", doc_type="es_email", fields=_row_fields, body=row_body)
     row_results = row_results["docs"]
 
     return row_results

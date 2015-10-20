@@ -3,19 +3,27 @@ import base64
 import cherrypy
 import tangelo
 from elasticsearch import Elasticsearch
-from datasource import parseFormParameters
-from searches import _search_ranked_email_addrs, count
+from param_utils import parseFormParameters
+from newman.utils.functions import nth
+from es_search import _search_ranked_email_addrs, count
 
 
-#map the email_address for the email/rank ReST service
+#map the email_address for the email/rank REST service
 def map_email_addr(email_addr_resp, total_emails):
+
     fields = email_addr_resp["fields"]
+
+    #hack to address 0 total_emails
+    if total_emails > 0 :
+        rank = (fields["sent_count"][0] + fields["received_count"][0]) / float(total_emails)
+    else :
+        rank = 0.0
 
     email_addr = [fields["addr"][0],
                   fields["community"][0],
                   str(fields["community_id"][0]),
                   str(fields["community_id"][0]),
-                  str((fields["sent_count"][0] + fields["received_count"][0]) / float(total_emails)),
+                  str(rank),
                   str(fields["received_count"][0]),
                   str(fields["sent_count"][0])
                   ]
@@ -23,16 +31,13 @@ def map_email_addr(email_addr_resp, total_emails):
 
 #GET /rank?data_set_id=<dateset>&start_datetime=<start_datetime>&end_datetime=<end_datetime>&size=<size>
 def get_ranked_email_address(*args, **kwargs):
-    index = kwargs.get('data_set_id','sample')
-    start= kwargs.get('start_datetime','1970')
-    end = kwargs.get('end_datetime','now')
-    size = kwargs.get("size", 20)
+    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**kwargs)
 
     tangelo.content_type("application/json")
-    email_addrs = _search_ranked_email_addrs(index, start, end, size)
-    total_docs = count(index)
-    ret = [map_email_addr(email_addr, total_docs) for email_addr in email_addrs.get('hits').get('hits')]
-    return {"emails": ret }
+    email_addrs = _search_ranked_email_addrs(data_set_id, start_datetime, end_datetime, size)
+    total_docs = count(data_set_id)
+    email_address = [map_email_addr(email_addr, total_docs) for email_addr in email_addrs.get('hits').get('hits')]
+    return {"emails": email_address }
 
 def _get_email(index, email_id):
 
@@ -110,13 +115,15 @@ def get_attachment(index, email_id, attachment_name):
     # resp =  serve_fileobj(bytes, "application/x-download", "attachment", filename)
     return as_str
 
-# /GET
+#GET /attachments/<sender>
 # find all attachments for a specific email address
-def get_attachments_sender(index, sender, *args, **kwargs):
+def get_attachments_sender(*args, **kwargs):
+    tangelo.log("getAttachmentsSender(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**kwargs)
+    sender=nth(args, 0, '')
 
-    cherrypy.log("email.get_attachments_sender(index=%s, sender=%s)" % (index, sender))
-    if not index:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing index")
+    if not data_set_id:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing data_set_id")
     if not sender:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing sender")
 
@@ -126,7 +133,7 @@ def get_attachments_sender(index, sender, *args, **kwargs):
     body={"filter":{"exists":{"field":"attachments"}}, "query":{"match":{"senders":sender}}, "fields":fields}
 
     es = Elasticsearch()
-    attachments_resp = es.search(index=index, doc_type="emails", size=10, body=body)
+    attachments_resp = es.search(data_set_id=data_set_id, doc_type="emails", size=10, body=body)
 
     email_attachments = []
     for attachment_item in attachments_resp["hits"]["hits"]:
@@ -158,6 +165,7 @@ def get_email(*path_args, **param_args):
     email_id = path_args[-1]
     if not email_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing email_id")
+    
     return _get_email(data_set_id, email_id)
 
 
