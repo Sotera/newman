@@ -14,7 +14,7 @@ from newman.utils.file import rmrf, mkdir, mv
 from newman.utils.date_utils import fmtNow
 from es_email import get_ranked_email_address, get_attachment, get_attachments_sender, get_email
 from datasource import getDefaultDataSetID
-from param_utils import parseFormParameters
+from param_utils import parseParamDatetime
 
 stmt_email_by_id = (
     " select e.id, e.dir, e.datetime, e.exportable, e.from_addr, e.tos, e.ccs, e.bccs, e.subject, html.body_html, e.attach "
@@ -48,7 +48,7 @@ def queryEntity(email):
 # deprecated slated for removal
 def getEmail(*args, **kwargs):
     tangelo('getEmail(%s)' % str(args));
-    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**kwargs)
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
     #re-direct based on data_set_id
     if data_set_id != 'newman':
@@ -77,7 +77,7 @@ def getEntities(*args):
 # deprecated slated for removal
 def getRankedEmails(*args, **kwargs):
     tangelo.log("getRankedEmails(args: %s kwargs: %s)" % (str(args), str(kwargs)))
-    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**kwargs)
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
     #re-direct based on data_set_id
     if data_set_id != 'newman':
@@ -129,7 +129,7 @@ def getDomains(*args, **kwargs):
 #GET /attachments/<sender>
 def getAttachmentsSender(*args, **kwargs):
     tangelo.log("getAttachmentsSender(args: %s kwargs: %s)" % (str(args), str(kwargs)))
-    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**kwargs)
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
     #re-direct based on data_set_id
     if data_set_id != 'newman':

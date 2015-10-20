@@ -3,7 +3,7 @@ import tangelo
 from elasticsearch import Elasticsearch
 from elasticsearch.client import IndicesClient
 from newman.utils.functions import nth
-from param_utils import parseFormParameters
+from param_utils import parseParamDatetime
 
 
 # contains a cache of all email_address.addr, email_address
@@ -181,7 +181,7 @@ def _search_ranked_email_addrs(index, start, end, size):
 # def _create_graph_from_email(index, email_address, start, end, terms=[], size=2000) but to pass in a collection of
 # es_email addesses to the initial graph email search
 def build_ranked_graph(*args, **kwargs):
-    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**kwargs)
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
     graph_results = _search_ranked_email_addrs(data_set_id, start_datetime, end_datetime, size)
     graph_results = create_graph(data_set_id, graph_results.get('hits').get('hits'))
@@ -257,7 +257,7 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
 # args should be a list of terms to search for in any document field
 def get_graph_for_email_address(*args, **kwargs):
     tangelo.log("get_graph_for_email_address(args: %s kwargs: %s)" % (str(args), str(kwargs)))
-    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**kwargs)
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
     search_terms=[]
     email_address=nth(args, 1, '')

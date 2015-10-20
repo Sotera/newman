@@ -7,7 +7,7 @@ from newman.db.mysql import execute_query
 from newman.utils.functions import nth, rest, head, jsonGet
 from es_search import build_ranked_graph, get_graph_for_email_address
 from datasource import getDefaultDataSetID
-from param_utils import parseFormParameters
+from param_utils import parseParamDatetime
 
 
 ## node vals
@@ -439,7 +439,7 @@ def getDates(*args, **kwargs):
 def search(*path_args, **param_args):
     tangelo.log("search(path_args[%s] %s)" % (len(path_args), str(path_args)))
 
-    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**param_args)
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
 
     #re-direct based on data_set_id
     if data_set_id != 'newman':

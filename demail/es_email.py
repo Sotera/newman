@@ -3,7 +3,7 @@ import base64
 import tangelo
 import cherrypy
 from elasticsearch import Elasticsearch
-from param_utils import parseFormParameters
+from param_utils import parseParamDatetime
 from newman.utils.functions import nth
 from es_search import _search_ranked_email_addrs, count
 
@@ -31,7 +31,7 @@ def map_email_addr(email_addr_resp, total_emails):
 
 #GET /rank?data_set_id=<dateset>&start_datetime=<start_datetime>&end_datetime=<end_datetime>&size=<size>
 def get_ranked_email_address(*args, **kwargs):
-    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**kwargs)
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
     tangelo.content_type("application/json")
     email_addrs = _search_ranked_email_addrs(data_set_id, start_datetime, end_datetime, size)
@@ -119,7 +119,7 @@ def get_attachment(index, email_id, attachment_name):
 # find all attachments for a specific email address
 def get_attachments_sender(*args, **kwargs):
     tangelo.log("getAttachmentsSender(args: %s kwargs: %s)" % (str(args), str(kwargs)))
-    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**kwargs)
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
     sender=nth(args, 0, '')
 
     if not data_set_id:
@@ -161,7 +161,7 @@ def dump(bytes, name):
 
 #GET /email/<id>
 def get_email(*path_args, **param_args):
-    data_set_id, start_datetime, end_datetime, size = parseFormParameters(**param_args)
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
     email_id = path_args[-1]
     if not email_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing email_id")
