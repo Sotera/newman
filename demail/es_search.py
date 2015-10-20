@@ -1,4 +1,5 @@
 import tangelo
+import urllib
 
 from elasticsearch import Elasticsearch
 from elasticsearch.client import IndicesClient
@@ -252,7 +253,7 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
 
     return {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in emails]}
 
-# GET /search/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
+# GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
 # build a graph for a specific email address.
 # args should be a list of terms to search for in any document field
 def get_graph_for_email_address(*args, **kwargs):
@@ -260,7 +261,7 @@ def get_graph_for_email_address(*args, **kwargs):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
     search_terms=[]
-    email_address=nth(args, 1, '')
+    email_address=urllib.unquote(nth(args, 1, ''))
 
     if not email_address:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing email address")

@@ -7,7 +7,7 @@ var url_search_exportable = 'search/exportable/';
 
 
 /**
- * email-rank response container
+ * search-related response container
  * @type {{requestService, getResponse}}
  */
 var service_response_email_search_all = (function () {
@@ -611,6 +611,78 @@ var service_response_data_source = (function () {
     'getResponseMapKeys' : getResponseMapKeys,
     'getResponseMapValues' : getResponseMapValues,
     'getDataSet' : getDataSet
+  }
+
+}());
+
+/**
+ * activity-related response container
+ * @type {{requestService, getResponse}}
+ */
+var service_response_activity_account = (function () {
+
+  var _service_url = 'activity/account/';
+
+  var _response = {};
+  var _response_account_map = {};
+
+  function getServiceURLBase() {
+    return _service_url;
+  }
+
+  function getServiceURL(account) {
+
+    if (account) {
+      var service_url = newman_data_source.appendDataSource(_service_url + '/' + encodeURIComponent(account));
+      service_url = newman_datetime_range.appendDatetimeRange(service_url);
+      return service_url;
+    }
+  }
+
+  function requestService(account) {
+    console.log('service_response_activity_account.requestService('+account+')');
+
+    $.get( getServiceURL(account) ).then(function (response) {
+      setResponse( response );
+    });
+  }
+
+  function setResponse( response ) {
+    if (response) {
+
+      _response = response;
+      //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
+
+      mapResponse(_response);
+    }
+  }
+
+  function mapResponse( response ) {
+    if (response) {
+      _response_account_map[ response.account_id ] = response;
+      //console.log('_response_map: ' + JSON.stringify(_response_account_map, null, 2));
+    }
+  }
+
+  function getResponse( key ) {
+    if (key) {
+      var response = _response_account_map[key]
+      return response;
+    }
+    return key;
+  }
+
+  function isResponseMapEmpty() {
+    return _.isEmpty(_response_account_map);
+  }
+
+  return {
+    'getServiceURLBase' : getServiceURLBase,
+    'getServiceURL' : getServiceURL,
+    'requestService' : requestService,
+    'getResponse' : getResponse,
+    'setResponse' : setResponse,
+    'isResponseMapEmpty' : isResponseMapEmpty
   }
 
 }());

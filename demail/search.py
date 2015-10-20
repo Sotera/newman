@@ -479,7 +479,6 @@ def search(*path_args, **param_args):
     return querySearchResult(data_set_id, field, start_datetime, end_datetime, args_array)
 
 actions = {
-    # "search": get_graph_for_email_address,
     "search": search,
     "dates" : getDates
 }
