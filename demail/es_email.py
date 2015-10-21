@@ -25,7 +25,9 @@ def map_email_addr(email_addr_resp, total_emails):
                   str(fields["community_id"][0]),
                   str(rank),
                   str(fields["received_count"][0]),
-                  str(fields["sent_count"][0])
+                  str(fields["sent_count"][0]),
+                  # TODO num attach
+                  0
                   ]
     return email_addr
 

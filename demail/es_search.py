@@ -81,7 +81,7 @@ def _map_emails_to_row(row):
 def _map_node(email_addr, total_docs):
     node={}
     name = email_addr["addr"][0]
-    node["commumity"] =  email_addr["community"][0]
+    node["commumity"] = email_addr["community"][0]
     node["group"] =  email_addr["community_id"][0]
     node["name"] = name
     node["num"] =  email_addr["sent_count"][0] + email_addr["received_count"][0]
