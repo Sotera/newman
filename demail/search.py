@@ -6,7 +6,7 @@ from newman.db.newman_db import newman_connector
 from newman.db.mysql import execute_query
 from newman.utils.functions import nth, rest, head, jsonGet
 from es_search import build_ranked_graph, get_graph_for_email_address
-from datasource import getDefaultDataSetID
+from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime
 
 

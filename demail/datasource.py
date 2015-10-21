@@ -1,16 +1,13 @@
 from elasticsearch import Elasticsearch
 from elasticsearch.client import IndicesClient
 from newman.utils.functions import nth
-# from es_search import count
+from es_search import initialize_email_addr_cache
 import tangelo
 import urllib
 
-_selected_index = "sample"
-
-def getDefaultDataSetID():
-    global _selected_index
-    # initialize_email_addr_cache(_selected_index)
-    return _selected_index
+# def getDefaultDataSetID():
+#     initialize_email_addr_cache(_selected_index)
+#     return _selected_index
 
 def _date_aggs(date_field="datetime"):
     return {
@@ -25,13 +22,14 @@ def get_datetime_bounds(index, type="emails"):
 
 def _index_record(index):
     es = Elasticsearch()
-    count = es.count(index=index, body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
+    email_docs_count = es.count(index=index, doc_type="emails", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
+    emails_addrs_count = es.count(index=index, doc_type="email_address", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
 
     bounds = get_datetime_bounds(index)
     return {'data_set_id':index,
            'data_set_label':index,
-           'data_set_document_count' : count,
-           'data_set_node_count' : count,
+           'data_set_document_count' : email_docs_count,
+           'data_set_node_count' : emails_addrs_count,
            'data_set_start_datatime' : bounds[0],
            'data_set_end_datetime' : bounds[1],
            'start_datatime_selected' : bounds[0],
@@ -53,15 +51,17 @@ def getAll(*args):
     return results
 
 #GET /dataset/<id>
-def getDataSet(*args):
+def setSelectedDataSet(*args):
     data_set_id=urllib.unquote(nth(args, 0, ''))
     if not data_set_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing data_set_id")
 
+    resp = initialize_email_addr_cache(data_set_id)
+
     return _index_record(data_set_id)
 
 actions = {
-    "dataset" : getDataSet,
+    "dataset" : setSelectedDataSet,
     "all" : getAll
 }
 

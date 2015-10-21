@@ -1,6 +1,6 @@
 import tangelo
+from newman.newman_config import getDefaultDataSetID
 
-from datasource import getDefaultDataSetID
 
 def parseParamDatetime( **kwargs ):
     tangelo.log("parseParamDatetime(args[%s] %s)" % (len(kwargs), str(kwargs)))

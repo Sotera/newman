@@ -13,7 +13,7 @@ from newman.settings import getOpt
 from newman.utils.file import rmrf, mkdir, mv
 from newman.utils.date_utils import fmtNow
 from es_email import get_ranked_email_address, get_attachment, get_attachments_sender, get_email
-from datasource import getDefaultDataSetID
+from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime
 
 stmt_email_by_id = (

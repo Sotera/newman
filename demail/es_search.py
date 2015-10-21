@@ -7,7 +7,7 @@ from newman.utils.functions import nth
 from param_utils import parseParamDatetime
 
 # contains a cache of all email_address.addr, email_address
-_email_addr_cache = None
+_EMAIL_ADDR_CACHE = None
 
 _row_fields = ["id","tos","senders","ccs","bccs","datetime","subject"]
 _graph_fields = ["community", "community_id", "addr", "received_count", "sent_count", "recepient.email_id", "sender.email_id"]
@@ -189,10 +189,7 @@ def build_ranked_graph(*args, **kwargs):
 
 # This will generate the graph structure for a specific email address.  Will aply date filter and term query.
 def _create_graph_from_email(index, email_address, search_terms,start, end, size=2000):
-    global _email_addr_cache
-    tangelo.log("BFEORE")
-    initialize_email_addr_cache(index)
-    tangelo.log("AFTER")
+    global _EMAIL_ADDR_CACHE
 
     term_query = {"match_all" : {}} if not search_terms else {"match" : {"_all" : " ".join(search_terms)}}
 
@@ -223,11 +220,11 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
         if from_addr not in addr_index:
             # if from_addr not in _email_addr_cache:
             #     tangelo.log("NOT________________ %s" % email)
-            nodes.append(_email_addr_cache[from_addr])
+            nodes.append(_EMAIL_ADDR_CACHE[from_addr])
             addr_index[from_addr] = len(nodes)
         for rcvr_addr in email["to"]+email["cc"]+email["bcc"]:
             if rcvr_addr not in addr_index:
-                nodes.append(_email_addr_cache[rcvr_addr])
+                nodes.append(_EMAIL_ADDR_CACHE[rcvr_addr])
                 addr_index[rcvr_addr] = len(nodes)
             #TODO reduce by key instead of mapping?  src->target and sum on value
             edge_key = from_addr+"#"+rcvr_addr
@@ -267,11 +264,8 @@ def _mget_rows(ids=[]):
 
 def initialize_email_addr_cache(index):
     tangelo.log("INITIALIZING CACHE")
-    global _email_addr_cache
+    global _EMAIL_ADDR_CACHE
     _email_addr_cache_fields= ["community", "community_id", "addr", "received_count", "sent_count"]
-
-    if _email_addr_cache:
-        return _email_addr_cache
 
     es = Elasticsearch()
 
@@ -280,8 +274,8 @@ def initialize_email_addr_cache(index):
     num = count(index,"email_address")
     print num
     addrs = es.search(index=index, doc_type="email_address", size=num, fields=_email_addr_cache_fields, body=body)
-    _email_addr_cache = {f["addr"][0]:_map_node(f,num) for f in [hit["fields"] for hit in addrs["hits"]["hits"]]}
-    print "done: ", num
+    _EMAIL_ADDR_CACHE = {f["addr"][0]:_map_node(f,num) for f in [hit["fields"] for hit in addrs["hits"]["hits"]]}
+    tangelo.log("done: %s"% num)
     return {"acknowledge" : "ok"}
 
 if __name__ == "__main__":
