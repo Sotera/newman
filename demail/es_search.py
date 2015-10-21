@@ -6,12 +6,9 @@ from newman.utils.functions import nth
 from param_utils import parseParamDatetime
 
 
-# contains a cache of all email_address.addr, email_address
-_email_addr_cache = None
 
 _row_fields = ["id","tos","senders","ccs","bccs","datetime","subject"]
 _graph_fields = ["community", "community_id", "addr", "received_count", "sent_count", "recepient.email_id", "sender.email_id"]
-_email_addr_cache_fields= ["community", "community_id", "addr", "received_count", "sent_count"]
 
 # Sort which will add sent + rcvd and sort most to top
 _sort_email_addrs_by_total={ "_script": { "script_file": "email_addr-sent-rcvd-sum", "lang": "groovy", "type": "number","order": "desc" }}
@@ -26,6 +23,7 @@ def count(index, type="emails", start="2000-01-01", end="now"):
     count = es.count(index=index, doc_type=type, body={"query" : all_query})
 
     return count["count"]
+
 
 def stats():
     es = Elasticsearch()
@@ -187,28 +185,11 @@ def build_ranked_graph(*args, **kwargs):
     graph_results = create_graph(data_set_id, graph_results.get('hits').get('hits'))
     return {"graph":{"nodes":[], "links":[]}, "rows":[]}
 
-def _load_email_addr_cache(index):
-    global _email_addr_cache
-
-    if _email_addr_cache:
-        return _email_addr_cache
-
-    es = Elasticsearch()
-
-    body={"query" : {"match_all" : {}}}
-
-    num = count(index,"email_address")
-    print num
-    addrs = es.search(index=index, doc_type="email_address", size=num, fields=_email_addr_cache_fields, body=body)
-    _email_addr_cache = {f["addr"][0]:_map_node(f,num) for f in [hit["fields"] for hit in addrs["hits"]["hits"]]}
-    print "done: ", num
-    return _email_addr_cache
-
 # This will generate the graph structure for a specific email address.  Will aply date filter and term query.
 def _create_graph_from_email(index, email_address, search_terms,start, end, size=2000):
-    tangelo.log("BFEORE")
-    _load_email_addr_cache(index)
-    tangelo.log("AFTER")
+    # tangelo.log("BFEORE")
+    # _load_email_addr_cache(index)
+    # tangelo.log("AFTER")
 
     term_query = {"match_all" : {}} if not search_terms else {"match" : {"_all" : " ".join(search_terms)}}
 
@@ -237,6 +218,8 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
     for email in emails:
         from_addr = email["from"]
         if from_addr not in addr_index:
+            # if from_addr not in _email_addr_cache:
+            #     tangelo.log("NOT________________ %s" % email)
             nodes.append(_email_addr_cache[from_addr])
             addr_index[from_addr] = len(nodes)
         for rcvr_addr in email["to"]+email["cc"]+email["bcc"]:
@@ -277,6 +260,28 @@ def _mget_rows(ids=[]):
     row_results = row_results["docs"]
 
     return row_results
+
+# contains a cache of all email_address.addr, email_address
+_email_addr_cache = None
+
+def initialize_email_addr_cache(index):
+    tangelo.log("INITIALIZING CACHE")
+    global _email_addr_cache
+    _email_addr_cache_fields= ["community", "community_id", "addr", "received_count", "sent_count"]
+
+    if _email_addr_cache:
+        return _email_addr_cache
+
+    es = Elasticsearch()
+
+    body={"query" : {"match_all" : {}}}
+
+    num = count(index,"email_address")
+    print num
+    addrs = es.search(index=index, doc_type="email_address", size=num, fields=_email_addr_cache_fields, body=body)
+    _email_addr_cache = {f["addr"][0]:_map_node(f,num) for f in [hit["fields"] for hit in addrs["hits"]["hits"]]}
+    print "done: ", num
+    return {"acknowledge" : "ok"}
 
 if __name__ == "__main__":
     stats()

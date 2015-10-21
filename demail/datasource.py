@@ -1,8 +1,11 @@
 from newman.utils.functions import nth
-
+from es_search import initialize_email_addr_cache
 import tangelo
 import cherrypy
 import urllib
+
+def initialize_index(index):
+    initialize_email_addr_cache(index)
 
 def getDefaultDataSetID():
     return 'sample'
