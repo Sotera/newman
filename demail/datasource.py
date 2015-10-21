@@ -1,29 +1,50 @@
+from elasticsearch import Elasticsearch
+from elasticsearch.client import IndicesClient
 from newman.utils.functions import nth
+# from es_search import count
 import tangelo
-import cherrypy
 import urllib
 
 _selected_index = "sample"
 
 def getDefaultDataSetID():
-    # global _selected_index
-    # initialize_index(_selected_index)
+    global _selected_index
+    # initialize_email_addr_cache(_selected_index)
     return _selected_index
 
+def _date_aggs(date_field="datetime"):
+    return {
+        "min_date" : { "min" : { "field" : date_field} },
+        "max_date" : { "max" : { "field" : date_field } }
+    }
+
+def get_datetime_bounds(index, type="emails"):
+    es = Elasticsearch()
+    resp = es.search(index=index, doc_type=type, body={"aggregations":_date_aggs()})
+    return  (resp["aggregations"]["min_date"].get("value_as_string","default"), resp["aggregations"]["max_date"].get("value_as_string","default"))
+
+def _index_record(index):
+    es = Elasticsearch()
+    count = es.count(index=index, body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
+
+    bounds = get_datetime_bounds(index)
+    return {'data_set_id':index,
+           'data_set_label':index,
+           'data_set_document_count' : count,
+           'data_set_node_count' : count,
+           'data_set_start_datatime' : bounds[0],
+           'data_set_end_datetime' : bounds[1],
+           'start_datatime_selected' : bounds[0],
+           'end_datetime_selected' : bounds[1]
+           }
 
 def listAllDataSet():
-    cherrypy.log("listAllDataSet()")
-#    rows = [getDataSet(getDefaultDataSetID())]
-    rows = [{'data_set_id' : getDefaultDataSetID(),
-              'data_set_label' : 'sample_data_set_0',
-              'data_set_document_count' : 5000,
-              'data_set_node_count' : 2500,
-              'data_set_start_datatime' : 'default',
-              'data_set_end_datetime' : 'default',
-              'start_datatime_selected' : 'default',
-              'end_datetime_selected' : 'default'
-            }]
-    return rows
+    es = Elasticsearch()
+    ic = IndicesClient(es)
+    stats = ic.stats(index="_all")
+    indexes = [_index_record(index) for index in stats["indices"]]
+    return indexes
+
 
 #GET /all
 def getAll(*args):
@@ -37,17 +58,7 @@ def getDataSet(*args):
     if not data_set_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing data_set_id")
 
-    result = {'data_set_id':getDefaultDataSetID(),
-              'data_set_label':'sample_data_set_0',
-              'data_set_document_count' : 5000,
-              'data_set_node_count' : 2500,
-              'data_set_start_datatime' : 'default',
-              'data_set_end_datetime' : 'default',
-              'start_datatime_selected' : 'default',
-              'end_datetime_selected' : 'default'
-             }
-        
-    return result
+    return _index_record(data_set_id)
 
 actions = {
     "dataset" : getDataSet,
