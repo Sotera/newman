@@ -259,8 +259,8 @@ def nodeQueryObj(conn, field, args_array):
 
 def getNodeVals(field, args_array):
     """
-    nodes should be all of the es_email that an email addr is a part of,
-    and all of the email addresses associated with that set of es_email 
+    nodes should be all of the emails that an email addr is a part of,
+    and all of the email addresses associated with that set of emails
     """
     with newman_connector() as read_cnx:
         tangelo.log("start node query")
@@ -366,7 +366,7 @@ def createResults(field, args_array):
         if text:
             tangelo.log("\ttext search : %s" % text)
             es = Elasticsearch()
-            res = es.search(index="newman", doc_type="es_email", size=1000, q=text, body= {"fields": ["_id"], "query": {"match_all": {}}})
+            res = es.search(index="newman", doc_type="emails", size=1000, q=text, body= {"fields": ["_id"], "query": {"match_all": {}}})
             
             ingestESTextResults(jsonGet(['hits','hits'], res, []))
     
@@ -405,7 +405,7 @@ def querySearchResult(data_set_id, field, start_date, end_date, args_array):
                 body= {"fields": ["_id"], "query": {"match_all": {}}}
 
 
-            res = es.search(index=data_set_id, doc_type="es_email", size=1000, q=text, body=body)
+            res = es.search(index=data_set_id, doc_type="emails", size=1000, q=text, body=body)
 
             ingestESTextResults(jsonGet(['hits','hits'], res, []))
 

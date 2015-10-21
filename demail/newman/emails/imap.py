@@ -100,7 +100,7 @@ def download(srv, target_email, outdir, limit, logfile):
     for msgid in msgids:
         try:
             uid = getUIDForMessage(srv, msgid)
-            fldr ="es_email/{}".format(uid) 
+            fldr ="emails/{}".format(uid)
             mkdir("{}/{}".format(outdir, fldr))
 
             i = c.next()

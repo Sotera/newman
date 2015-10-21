@@ -1,14 +1,14 @@
 from newman.utils.functions import nth
-from es_search import initialize_email_addr_cache
 import tangelo
 import cherrypy
 import urllib
 
-def initialize_index(index):
-    initialize_email_addr_cache(index)
+_selected_index = "sample"
 
 def getDefaultDataSetID():
-    return 'sample'
+    # global _selected_index
+    # initialize_index(_selected_index)
+    return _selected_index
 
 
 def listAllDataSet():

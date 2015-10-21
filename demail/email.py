@@ -47,7 +47,7 @@ def queryEntity(email):
 #GET /email/<id>
 # deprecated slated for removal
 def getEmail(*args, **kwargs):
-    tangelo('getEmail(%s)' % str(args));
+    tangelo.log('getEmail(%s)' % str(args));
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
     #re-direct based on data_set_id
@@ -96,7 +96,7 @@ def getRankedEmails(*args, **kwargs):
     with newman_connector() as read_cnx:
         with execute_query(read_cnx.conn(), stmt) as qry:
             rtn = [[str(val) for val in row] for row in qry.cursor()]
-            return { "es_email" : rtn }
+            return { "emails" : rtn }
 
 #GET /target
 #deprecated; use new service url http://<host>:<port>/datasource/all/
@@ -159,7 +159,7 @@ def getExportable(*args, **kwargs):
     with newman_connector() as read_cnx:
         with execute_query(read_cnx.conn(), stmt) as qry:
             rtn = [[str(val) for val in row] for row in qry.cursor()]
-            return { "es_email" : rtn }
+            return { "emails" : rtn }
 
 #POST /exportable
 def setExportable(data):
@@ -185,7 +185,7 @@ def setExportable(data):
             return { "email" : queryEmail(email) }
 #POST /exportmany
 def setExportMany(data):
-    emails = data.get('es_email', [])
+    emails = data.get('emails', [])
     exportable= 'true' if data.get('exportable', True) else 'false'
     stmt = (
         " UPDATE email SET exportable=%s WHERE id = %s "
@@ -201,7 +201,7 @@ def setExportMany(data):
 def buildExportable(*args):
     webroot = cherrypy.config.get("webroot")
     target = getOpt('target')
-    base_src = "{}/es_email/{}".format(webroot,target)
+    base_src = "{}/emails/{}".format(webroot,target)
     tmp_dir = os.path.abspath("{}/../tmp/".format(webroot))
     download_dir = "{}/downloads/".format(webroot)
     tar_gz = "export_{}".format(fmtNow())

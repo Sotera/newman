@@ -6,7 +6,8 @@ from elasticsearch.client import IndicesClient
 from newman.utils.functions import nth
 from param_utils import parseParamDatetime
 
-
+# contains a cache of all email_address.addr, email_address
+_email_addr_cache = None
 
 _row_fields = ["id","tos","senders","ccs","bccs","datetime","subject"]
 _graph_fields = ["community", "community_id", "addr", "received_count", "sent_count", "recepient.email_id", "sender.email_id"]
@@ -178,7 +179,7 @@ def _search_ranked_email_addrs(index, start, end, size):
 # TODO
 # THis builds a graph for all top ranked email_addresses.  THis will require using the logic
 # def _create_graph_from_email(index, email_address, start, end, terms=[], size=2000) but to pass in a collection of
-# es_email addesses to the initial graph email search
+# email addesses to the initial graph email search
 def build_ranked_graph(*args, **kwargs):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
@@ -188,9 +189,10 @@ def build_ranked_graph(*args, **kwargs):
 
 # This will generate the graph structure for a specific email address.  Will aply date filter and term query.
 def _create_graph_from_email(index, email_address, search_terms,start, end, size=2000):
-    # tangelo.log("BFEORE")
-    # _load_email_addr_cache(index)
-    # tangelo.log("AFTER")
+    global _email_addr_cache
+    tangelo.log("BFEORE")
+    initialize_email_addr_cache(index)
+    tangelo.log("AFTER")
 
     term_query = {"match_all" : {}} if not search_terms else {"match" : {"_all" : " ".join(search_terms)}}
 
@@ -262,8 +264,6 @@ def _mget_rows(ids=[]):
 
     return row_results
 
-# contains a cache of all email_address.addr, email_address
-_email_addr_cache = None
 
 def initialize_email_addr_cache(index):
     tangelo.log("INITIALIZING CACHE")
