@@ -5,10 +5,9 @@ from elasticsearch import Elasticsearch
 from newman.db.newman_db import newman_connector
 from newman.db.mysql import execute_query
 from newman.utils.functions import nth, rest, head, jsonGet
-from es_search import build_ranked_graph, get_graph_for_email_address
+from es_search import get_graph_for_email_address
 from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime
-
 
 ## node vals
 stmt_node_vals = (
@@ -429,12 +428,6 @@ def querySearchResult(data_set_id, field, start_date, end_date, args_array):
 
     return results
 
-#GET /dates
-def getDates(*args, **kwargs):
-    tangelo.content_type("application/json")    
-    results = { 'doc_dates': queryAllDates() }
-    return results
-
 #GET /search/<data_set>/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
 def search(*path_args, **param_args):
     tangelo.log("search(path_args[%s] %s)" % (len(path_args), str(path_args)))
@@ -445,7 +438,7 @@ def search(*path_args, **param_args):
     if data_set_id != 'newman':
         if path_args[0] == "all":
             if len(path_args) == 1:
-                return build_ranked_graph(*path_args, **param_args);
+                return {"graph":{"nodes":[], "links":[]}, "rows":[]}
             elif len(path_args) == 2:
                 return get_graph_for_email_address(*path_args, **param_args)
 
@@ -480,7 +473,6 @@ def search(*path_args, **param_args):
 
 actions = {
     "search": search,
-    "dates" : getDates
 }
 
 def unknown(*args):

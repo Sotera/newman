@@ -4,27 +4,11 @@ from newman.utils.functions import nth
 from newman.newman_config import getDefaultDataSetID
 from es_search import initialize_email_addr_cache
 from es_email import get_ranked_email_address
-from time import gmtime, strftime
+from series import get_datetime_bounds
 import tangelo
 import urllib
 
 _current_data_set_selected = getDefaultDataSetID()
-
-def _date_aggs(date_field="datetime"):
-    return {
-        "min_date" : { "min" : { "field" : date_field} },
-        "max_date" : { "max" : { "field" : date_field } }
-    }
-
-def get_datetime_bounds(index, type="emails"):
-    es = Elasticsearch()
-    resp = es.search(index=index, doc_type=type, body={"aggregations":_date_aggs()})
-
-    now = strftime("%Y-%m-%d", gmtime())
-    min = resp["aggregations"]["min_date"].get("value_as_string", "1970")
-    max = resp["aggregations"]["max_date"].get("value_as_string", now)
-
-    return  (min if min >= "1970" else "1970", max if max <= now else now)
 
 def _index_record(index):
     es = Elasticsearch()
@@ -60,7 +44,6 @@ def listAllDataSet():
                          "email_addrs": email_addrs
                         }
            }
-
 
 #GET /all
 def getAll(*args):

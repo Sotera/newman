@@ -1,4 +1,22 @@
 from elasticsearch import Elasticsearch
+from time import gmtime, strftime
+
+
+def _date_aggs(date_field="datetime"):
+    return {
+        "min_date" : { "min" : { "field" : date_field} },
+        "max_date" : { "max" : { "field" : date_field } }
+    }
+
+def get_datetime_bounds(index, type="emails"):
+    es = Elasticsearch()
+    resp = es.search(index=index, doc_type=type, body={"aggregations":_date_aggs()})
+
+    now = strftime("%Y-%m-%d", gmtime())
+    min = resp["aggregations"]["min_date"].get("value_as_string", "1970")
+    max = resp["aggregations"]["max_date"].get("value_as_string", now)
+
+    return  (min if min >= "1970" else "1970", max if max <= now else now)
 
 
 def _map_activity(index, sent_rcvd):
@@ -30,6 +48,39 @@ def sender_histogram(actor_email_addr, start, end, interval="year"):
                     }
                 }
             }}}
+
+def entity_histogram(**kwargs):
+    def all():
+        return {
+            "entities" : {
+                "terms" : {"field" : "entities.entity_all"}
+            },
+            "person" : {
+                "terms" : {"field" : "entities.entity_person"}
+            },
+            "organization" : {
+                "terms" : {"field" : "entities.entity_organization"}
+            },
+                        "location" : {
+                "terms" : {"field" : "entities.entity_location"}
+            },
+
+                        "misc" : {
+                "terms" : {"field" : "entities.mics"}
+            }
+
+        }
+
+    return {"aggs": all(), "size":0}
+
+
+def get_entity_histogram(index, type, query_function, **kwargs):
+    es = Elasticsearch()
+    resp = es.search(index=index, doc_type=type,body=query_function(**kwargs))
+
+    entitites = (resp["aggregations"]["location"]+resp["aggregations"]["person"]+resp["aggregations"]["organization"])
+    resp = sorted(entitites.items(), key =entitites.itemgetter(1))
+    print resp
 
 # This function uses the date_histogram with the extended_bounds
 # Oddly the max part of the extended bounds doesnt seem to work unless the value is set to
@@ -106,6 +157,7 @@ def get_daily_activity(index, type, query_function, **kwargs):
                                                                  resp["aggregations"]["rcvr_agg"]["rcvd_emails_over_time"]["buckets"])]
 
 if __name__ == "__main__":
-    res = get_daily_activity("sample", "emails", actor_histogram, actor_email_addr="jeb@jeb.org", start="1970", end="now", interval="year")
-    for s in res:
-        print s
+    res = get_entity_histogram("sample", "emails", entity_histogram, actor_email_addr="jeb@jeb.org", start="1970", end="now", interval="year")
+    # res = get_daily_activity("sample", "emails", actor_histogram, actor_email_addr="jeb@jeb.org", start="1970", end="now", interval="year")
+    # for s in res:
+    #     print s
