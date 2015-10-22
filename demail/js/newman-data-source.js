@@ -4,9 +4,9 @@
 
 var newman_data_source = (function () {
   var _default_data_set_id = 'default_data_set';
-  var data_source_max = 20;
-  var data_source_list = [];
-  var data_source_selected;
+  var _data_source_max = 20;
+  var _data_source_list = [];
+  var _data_source_selected;
 
 
   var data_source = function( uid,
@@ -59,23 +59,23 @@ var newman_data_source = (function () {
                                       top_hits);
 
     if (!contains(new_data_source)) {
-      if (data_source_list.length == data_source_max) {
-        data_source_list.splice(data_source_list.length - 1, 1);
+      if (_data_source_list.length == _data_source_max) {
+        _data_source_list.splice(_data_source_list.length - 1, 1);
       }
-      data_source_list.unshift(new_data_source);
+      _data_source_list.unshift(new_data_source);
     }
 
     return new_data_source;
   };
 
   var pop = function () {
-    return data_source_list.shift();
+    return _data_source_list.shift();
   };
 
   var contains = function (data_source) {
 
     var found = false;
-    _.each(data_source_list, function (element) {
+    _.each(_data_source_list, function (element) {
 
       if (element.uid === data_source.uid && element.url_path === data_source.url_path) {
         found = true;
@@ -91,23 +91,23 @@ var newman_data_source = (function () {
   var getFirst = function () {
     console.log('getFirst()');
 
-    return data_source_list.shift();
+    return _data_source_list.shift();
   };
 
   var getLast = function () {
     console.log('getLast()');
 
-    return data_source_list.pop();
+    return _data_source_list.pop();
   };
 
   var getAll = function () {
-    return data_source_list;
+    return _data_source_list;
   };
 
   var getByID = function (uid) {
 
     var target;
-    _.each(data_source_list, function (element) {
+    _.each(_data_source_list, function (element) {
 
       if (element.uid === uid) {
         target = element;
@@ -121,7 +121,7 @@ var newman_data_source = (function () {
   var getByLabel = function (label) {
 
     var target;
-    _.each(data_source_list, function (element) {
+    _.each(_data_source_list, function (element) {
 
       if (element.label === label) {
         target = element;
@@ -136,11 +136,11 @@ var newman_data_source = (function () {
   var refreshUI = function() {
 
 
-    console.log( 'all_data_source_hist[' + data_source_list.length + ']' );
+    console.log( 'all_data_source_hist[' + _data_source_list.length + ']' );
 
     clearUI();
 
-    _.each(data_source_list, function( element ) {
+    _.each(_data_source_list, function( element ) {
 
       console.log( '\t' + element.label + ', ' + element.uid + ', ' + element.icon_class );
 
@@ -184,57 +184,60 @@ var newman_data_source = (function () {
 
   function setSelected( label, request_enabled ) {
     //console.log( 'setSelected(' + label + ')' );
-    if(data_source_selected && label) {
-      if(data_source_selected.label === label) {
-        console.log( 'data-set \'' + label + '\' aready selected!' );
+    if(_data_source_selected && label) {
+      if(_data_source_selected.label === label) {
+        console.log( 'data-set \'' + label + '\' already selected!' );
         return;
       }
     }
 
     $('#data_source_selected').find('.dropdown-toggle').html(  label + ' <span class=\"fa fa-database\"></span>');
 
-    if (request_enabled) {
-      data_source_selected = getByLabel(label);
-      if (data_source_selected) {
-        service_response_data_source.requestDataSetSelect(data_source_selected.uid);
+
+    _data_source_selected = getByLabel(label);
+    if (_data_source_selected) {
+      _default_data_set_id = _data_source_selected.uid;
+
+      if (request_enabled) {
+        service_response_data_source.requestDataSetSelect(_data_source_selected.uid);
       }
     }
   }
 
   function getSelected() {
-    if (!data_source_selected) {
-      data_source_selected = data_source_list[0];
+    if (!_data_source_selected) {
+      _data_source_selected = _data_source_list[0];
     }
-    return clone(data_source_selected);
+    return clone(_data_source_selected);
   }
 
   function getSelectedDatetimeBounds() {
-    if (!data_source_selected) {
-      data_source_selected = data_source_list[0];
+    if (!_data_source_selected) {
+      _data_source_selected = _data_source_list[0];
     }
 
-    var min_datetime = data_source_selected.start_datetime;
-    var max_datetime = data_source_selected.end_datetime;
+    var min_datetime = _data_source_selected.start_datetime;
+    var max_datetime = _data_source_selected.end_datetime;
     return min_datetime, max_datetime
   }
 
   function getSelectedDatetimeRange() {
-    if (!data_source_selected) {
-      data_source_selected = data_source_list[0];
+    if (!_data_source_selected) {
+      _data_source_selected = _data_source_list[0];
     }
 
-    var start_datetime = data_source_selected.start_datetime_selected;
-    var end_datetime = data_source_selected.end_datetime_selected;
+    var start_datetime = _data_source_selected.start_datetime_selected;
+    var end_datetime = _data_source_selected.end_datetime_selected;
     return start_datetime, end_datetime
   }
 
   function getSelectedTopHits(size) {
-    if (!data_source_selected) {
-      data_source_selected = data_source_list[0];
+    if (!_data_source_selected) {
+      _data_source_selected = _data_source_list[0];
     }
 
-    console.log('data_source_selected : ' + JSON.stringify(data_source_selected, null, 2));
-    var top_hits = data_source_selected.top_hits.email_addrs;
+    //console.log('data_source_selected : ' + JSON.stringify(data_source_selected, null, 2));
+    var top_hits = _data_source_selected.top_hits.email_addrs;
     var top_hits_email_address_list = _.values(top_hits);
     if (size > top_hits_email_address_list.length) {
       size = top_hits_email_address_list.length;
@@ -255,6 +258,10 @@ var newman_data_source = (function () {
       }
 
       var data_set_id = _default_data_set_id;
+      if (_data_source_selected) {
+        data_set_id = _data_source_selected.uid;
+      }
+
       var data_source = getSelected();
       if (data_source && data_source.uid) {
         data_set_id = data_source.uid;

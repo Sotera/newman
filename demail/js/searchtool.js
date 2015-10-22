@@ -1927,6 +1927,7 @@ function initDateTimeRange() {
       //validate service-response
       response = validateResponseDateRange( response );
 
+      var doc_dates = response.doc_dates;
       var start_datetime = doc_dates[0].datetime;
       var start_date_array = start_datetime.split('T')[0].split('-');
       var start_date = new Date(parseInt(start_date_array[0]), parseInt(start_date_array[1])-1, parseInt(start_date_array[2]));

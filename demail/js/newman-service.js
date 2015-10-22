@@ -527,7 +527,7 @@ var service_response_data_source = (function () {
   var _data_set_map = {};
 
   function requestService() {
-    console.log('service_response_email_pertinence.requestService()');
+    console.log('service_response_data_source.requestService()');
 
     $.when($.get('datasource/all')).done(function (response) {
       setResponse( response );
@@ -535,7 +535,7 @@ var service_response_data_source = (function () {
   }
 
   function requestDataSetSelect(data_set_id) {
-    console.log('service_response_email_pertinence.requestDataSetSelect('+data_set_id+')');
+    console.log('service_response_data_source.requestDataSetSelect('+data_set_id+')');
 
     if (data_set_id && containsDataSet(data_set_id)) {
 
