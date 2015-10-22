@@ -7,7 +7,7 @@ from newman.utils.functions import nth
 from param_utils import parseParamDatetime
 from datetime import timedelta, date
 from random import randint
-
+from series import get_daily_activity, actor_histogram
 
 
 
@@ -45,13 +45,14 @@ def getAccount(*args, **kwargs):
         return tangelo.HTTPStatusCode(400, "invalid service call - missing account_id")
 
 
+    activity = get_daily_activity(data_set_id, "emails", actor_histogram, actor_email_addr="jeb@jeb.org", start=start_datetime, end=end_datetime, interval="week")
 
     result = {
               'account_id' : account_id,
               'data_set_id' : data_set_id,
               'account_start_datatime' : start_datetime,
               'account_end_datetime' : end_datetime,
-              'activities' : _queryActivity(account_id)
+              'activities' : activity
              }
         
     return result

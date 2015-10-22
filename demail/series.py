@@ -1,5 +1,13 @@
 from elasticsearch import Elasticsearch
 
+
+def _map_activity(index, sent_rcvd):
+    return {"account_id" : index,
+            "interval_start_datatime" : sent_rcvd[0]["key_as_string"],
+            "interval_inbound_count" : sent_rcvd[0]["doc_count"],
+            "interval_outbound_count" : sent_rcvd[1]["doc_count"]
+            }
+
 def sender_histogram(actor_email_addr, start, end, interval="year"):
     return {
         "size":0,
@@ -23,11 +31,14 @@ def sender_histogram(actor_email_addr, start, end, interval="year"):
                 }
             }}}
 
+# This function uses the date_histogram with the extended_bounds
+# Oddly the max part of the extended bounds doesnt seem to work unless the value is set to
+# the string "now"...min works fine as 1970 or a number...
 def actor_histogram(actor_email_addr, start, end, interval="year"):
     return {
         "size":0,
         "aggs":{
-            "sender_agg":{"filter" : {"bool":{
+            "sent_agg":{"filter" : {"bool":{
                 "should":[
                     {"term" : { "senders" : actor_email_addr}}
                 ],
@@ -35,12 +46,17 @@ def actor_histogram(actor_email_addr, start, end, interval="year"):
             }},
 
                 "aggs" : {
-                    "emails_over_time" : {
+                    "sent_emails_over_time" : {
                         "date_histogram" : {
                             "field" : "datetime",
                             "interval" : interval,
                             "format" : "yyyy-MM-dd",
-                            "min_doc_count" : 0
+                            "min_doc_count" : 0,
+                            "extended_bounds":{
+                                "min": start,
+                                # "max" doesnt really work unless it's set to "now" 
+                                "max": end
+                            }
                         }
                     }
                 }
@@ -56,12 +72,16 @@ def actor_histogram(actor_email_addr, start, end, interval="year"):
             }},
 
                 "aggs" : {
-                    "emails_over_time" : {
+                    "rcvd_emails_over_time" : {
                         "date_histogram" : {
                             "field" : "datetime",
                             "interval" : interval,
                             "format" : "yyyy-MM-dd",
-                            "min_doc_count" : 0
+                            "min_doc_count" : 0,
+                            "extended_bounds":{
+                                "min": start,
+                                "max": end
+                            }
                         }
                     }
                 }
@@ -81,14 +101,11 @@ def get_total_daily_activity(index, type, query_function, **kwargs):
 
 def get_daily_activity(index, type, query_function, **kwargs):
     es = Elasticsearch()
-    resp = es.search(index=index, doc_type=type, body=query_function(**kwargs))
-    return {"sender": resp["aggregations"]["sender_agg"]["emails_over_time"]["buckets"],
-            "rcvr": resp["aggregations"]["sender_agg"]["emails_over_time"]["buckets"]}
+    resp = es.search(index=index, doc_type=type, request_cache="false", body=query_function(**kwargs))
+    return [_map_activity(index, sent_rcvd) for sent_rcvd in zip(resp["aggregations"]["sent_agg"]["sent_emails_over_time"]["buckets"],
+                                                                 resp["aggregations"]["rcvr_agg"]["rcvd_emails_over_time"]["buckets"])]
 
 if __name__ == "__main__":
-    res = get_daily_activity("sample", "emails", actor_histogram, actor_email_addr="jeb@jeb.org", start="2000", end="2002", interval="month")
-    for s in res["sender"]:
+    res = get_daily_activity("sample", "emails", actor_histogram, actor_email_addr="jeb@jeb.org", start="1970", end="now", interval="year")
+    for s in res:
         print s
-    for r in res["rcvr"]:
-        print r
-        # print get_daily_activity("sample", "emails", actor_histogram, actor_email_addr="tom.barry@myflorida.com", start="1970", end="now", interval="month")
