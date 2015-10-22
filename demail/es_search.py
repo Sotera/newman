@@ -83,6 +83,7 @@ def _map_node(email_addr, total_docs):
     name = email_addr["addr"][0]
     node["commumity"] = email_addr["community"][0]
     node["group"] =  email_addr["community_id"][0]
+    node["fromcolor"] =  email_addr["community_id"][0]
     node["name"] = name
     node["num"] =  email_addr["sent_count"][0] + email_addr["received_count"][0]
 
@@ -218,8 +219,6 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
     for email in emails:
         from_addr = email["from"]
         if from_addr not in addr_index:
-            # if from_addr not in _email_addr_cache:
-            #     tangelo.log("NOT________________ %s" % email)
             nodes.append(_EMAIL_ADDR_CACHE[from_addr])
             addr_index[from_addr] = len(nodes)
         for rcvr_addr in email["to"]+email["cc"]+email["bcc"]:
