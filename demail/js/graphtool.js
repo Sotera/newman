@@ -1997,7 +1997,8 @@ var email_analytics_content = (function () {
 $(function () {
   "use strict";
 
-  service_response_data_source.requestService();
+  $.when(service_response_data_source.requestService()).done();
+
   service_response_email_rank.requestService();
   service_response_email_exportable.requestService();
 
