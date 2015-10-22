@@ -471,8 +471,16 @@ def search(*path_args, **param_args):
     #return createResults(field, args_array)
     return querySearchResult(data_set_id, field, start_datetime, end_datetime, args_array)
 
+#GET /dates
+def getDates(*args, **kwargs):
+    tangelo.content_type("application/json")
+    results = { 'doc_dates': queryAllDates() }
+    return results
+
 actions = {
     "search": search,
+    "search_user": get_graph_for_email_address,
+    "dates" : getDates
 }
 
 def unknown(*args):
