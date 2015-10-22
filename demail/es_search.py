@@ -101,6 +101,10 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
     addr_index = {}
     for email in emails:
         from_addr = email["from"]
+        if from_addr not in _EMAIL_ADDR_CACHE:
+            tangelo.log("WARNING: From email address not found in cache <%s>" % email)
+            continue;
+
         if from_addr not in addr_index:
             nodes.append(_EMAIL_ADDR_CACHE[from_addr])
             addr_index[from_addr] = len(nodes)
