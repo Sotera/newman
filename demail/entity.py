@@ -35,6 +35,11 @@ def getTopRollup(*args):
             tangelo.content_type("application/json")
             return { "entities" : rtn }
 
+#GET /top/<amt>
+# def get_top_entities(*args):
+#
+#     return 
+
 #GET /rollup/<id>
 def getRollup(*args):
     entity=urllib.unquote(nth(args, 0, ''))

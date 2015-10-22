@@ -49,23 +49,19 @@ def sender_histogram(actor_email_addr, start, end, interval="year"):
                 }
             }}}
 
-def entity_histogram(**kwargs):
+def entity_histogram_query(**kwargs):
     def all():
         return {
-            "entities" : {
-                "terms" : {"field" : "entities.entity_all"}
-            },
             "person" : {
                 "terms" : {"field" : "entities.entity_person"}
             },
             "organization" : {
                 "terms" : {"field" : "entities.entity_organization"}
             },
-                        "location" : {
+            "location" : {
                 "terms" : {"field" : "entities.entity_location"}
             },
-
-                        "misc" : {
+            "misc" : {
                 "terms" : {"field" : "entities.mics"}
             }
 
@@ -77,10 +73,10 @@ def entity_histogram(**kwargs):
 def get_entity_histogram(index, type, query_function, **kwargs):
     es = Elasticsearch()
     resp = es.search(index=index, doc_type=type,body=query_function(**kwargs))
-
-    entitites = (resp["aggregations"]["location"]+resp["aggregations"]["person"]+resp["aggregations"]["organization"])
-    resp = sorted(entitites.items(), key =entitites.itemgetter(1))
-    print resp
+    return sorted([dict(d, **{"type":"location"}) for d in  resp["aggregations"]["location"]["buckets"]]
+                  + [dict(d, **{"type":"organization"}) for d in  resp["aggregations"]["organization"]["buckets"]]
+                  + [dict(d, **{"type":"person"}) for d in  resp["aggregations"]["person"]["buckets"]]
+                  + [dict(d, **{"type":"misc"}) for d in  resp["aggregations"]["misc"]["buckets"]],  key=lambda d:d["doc_count"], reverse=True)
 
 # This function uses the date_histogram with the extended_bounds
 # Oddly the max part of the extended bounds doesnt seem to work unless the value is set to
@@ -149,7 +145,7 @@ def get_total_daily_activity(index, type, query_function, **kwargs):
     resp = es.search(index=index, doc_type=type, body=query_function(**kwargs))
     return resp["aggregations"]["filter_agg"]["emails_over_time"]["buckets"]
 
-
+# Returns a sorted map of
 def get_daily_activity(index, type, query_function, **kwargs):
     es = Elasticsearch()
     resp = es.search(index=index, doc_type=type, request_cache="false", body=query_function(**kwargs))
@@ -157,7 +153,8 @@ def get_daily_activity(index, type, query_function, **kwargs):
                                                                  resp["aggregations"]["rcvr_agg"]["rcvd_emails_over_time"]["buckets"])]
 
 if __name__ == "__main__":
-    res = get_entity_histogram("sample", "emails", entity_histogram, actor_email_addr="jeb@jeb.org", start="1970", end="now", interval="year")
+    res = get_entity_histogram("sample", "emails", entity_histogram_query, actor_email_addr="jeb@jeb.org", start="1970", end="now", interval="year")
+    print res
     # res = get_daily_activity("sample", "emails", actor_histogram, actor_email_addr="jeb@jeb.org", start="1970", end="now", interval="year")
     # for s in res:
     #     print s
