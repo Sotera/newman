@@ -1998,389 +1998,406 @@ var email_analytics_content = (function () {
 $(function () {
   "use strict";
 
-  $.when(service_response_data_source.requestService()).done();
+  //$.when(service_response_data_source.requestService()).done();
+  service_response_data_source.requestService();
 
-  service_response_email_rank.requestService();
-  service_response_email_exportable.requestService();
-
-  // close existing analytics displays if applicable
-  email_analytics_content.close();
-
-  // close existing data-table displays if applicable
-  bottom_panel.close();
-
-  // initialize search-result UI
-  search_result.setUI( $('#search_result_container') );
-
-  // initialize navigation-history
-  history_nav.initialize();
-
-  // initialize dashboard
-  drawDashboardCharts();
-
-  // initialize datetime-range slider binding
-  newman_datetime_range.initialize();
+  setTimeout(function () {
 
 
-  $('a[data-toggle=\"tab\"]').on('shown.bs.tab', function (e) {
-    //var element_ID = $(e.target).html();
-    var element_ID = $(e.target).attr("href");
-    console.log( 'tab_select ' + element_ID);
+    service_response_email_rank.requestService();
+    service_response_email_exportable.requestService();
 
-    if (element_ID.endsWith( 'dashboard_tab_content_outbound_activities' )) {
-      if(dashboard_time_chart_outbound_activity) {
-        console.log('\tredraw() called');
+    // close existing analytics displays if applicable
+    email_analytics_content.close();
 
-        setTimeout(function () {
-          dashboard_time_chart_outbound_activity.groups([['acct-1', 'acct-2', 'acct-3', 'acct-4']])
-        }, 0);
+    // close existing data-table displays if applicable
+    bottom_panel.close();
+
+    // initialize search-result UI
+    search_result.setUI($('#search_result_container'));
+
+    // initialize navigation-history
+    history_nav.initialize();
+
+    // initialize dashboard
+    drawDashboardCharts();
+
+    // initialize datetime-range slider binding
+    newman_datetime_range.initialize();
+
+
+    $('a[data-toggle=\"tab\"]').on('shown.bs.tab', function (e) {
+      //var element_ID = $(e.target).html();
+      var element_ID = $(e.target).attr("href");
+      console.log('tab_select ' + element_ID);
+
+      if (element_ID.endsWith('dashboard_tab_content_outbound_activities')) {
+        if (dashboard_time_chart_outbound_activity) {
+          console.log('\tredraw() called');
+
+          setTimeout(function () {
+            dashboard_time_chart_outbound_activity.groups([['acct-1', 'acct-2', 'acct-3', 'acct-4']])
+          }, 0);
+        }
       }
-    }
-    else if (element_ID.endsWith( 'dashboard_tab_content_inbound_activities' )) {
-      if(dashboard_time_chart_inbound_activity) {
-        console.log('\tredraw() called');
+      else if (element_ID.endsWith('dashboard_tab_content_inbound_activities')) {
+        if (dashboard_time_chart_inbound_activity) {
+          console.log('\tredraw() called');
 
-        setTimeout(function () {
-          dashboard_time_chart_inbound_activity.groups([['acct-1', 'acct-2', 'acct-3']])
-        }, 0);
+          setTimeout(function () {
+            dashboard_time_chart_inbound_activity.groups([['acct-1', 'acct-2', 'acct-3']])
+          }, 0);
+        }
       }
-    }
-    else if (element_ID.endsWith( 'dashboard_tab_content_entities' )) {
-      if(dashboard_donut_chart_entity) {
-        dashboard_donut_chart_entity.redraw();
+      else if (element_ID.endsWith('dashboard_tab_content_entities')) {
+        if (dashboard_donut_chart_entity) {
+          dashboard_donut_chart_entity.redraw();
+        }
       }
-    }
-    else if (element_ID.endsWith( 'dashboard_tab_content_topics' )) {
-      if(dashboard_donut_chart_topic) {
-        dashboard_donut_chart_topic.redraw();
+      else if (element_ID.endsWith('dashboard_tab_content_topics')) {
+        if (dashboard_donut_chart_topic) {
+          dashboard_donut_chart_topic.redraw();
+        }
       }
-    }
-    else if (element_ID.endsWith( 'dashboard_tab_content_domains' )) {
-      if(dashboard_donut_chart_domain) {
-        dashboard_donut_chart_domain.redraw();
+      else if (element_ID.endsWith('dashboard_tab_content_domains')) {
+        if (dashboard_donut_chart_domain) {
+          dashboard_donut_chart_domain.redraw();
+        }
       }
-    }
-    else if (element_ID.endsWith( 'dashboard_tab_content_communities' )) {
-      if(dashboard_donut_chart_community) {
-        dashboard_donut_chart_community.redraw();
+      else if (element_ID.endsWith('dashboard_tab_content_communities')) {
+        if (dashboard_donut_chart_community) {
+          dashboard_donut_chart_community.redraw();
+        }
       }
-    }
-    else if (element_ID.endsWith( 'dashboard_tab_content_rank' )) {
-      if(dashboard_donut_chart_rank) {
-        dashboard_donut_chart_rank.redraw();
+      else if (element_ID.endsWith('dashboard_tab_content_rank')) {
+        if (dashboard_donut_chart_rank) {
+          dashboard_donut_chart_rank.redraw();
+        }
       }
-    }
 
 
-  });
-
-
-  $.when($.get("email/target"), $.get("email/domains")).done(function(resp1, resp2){
-
-    if(!service_response_email_domain) {
-      console.log('graphtool: request service_response_email_domains');
-      //validate service response
-      service_response_email_domain = validateResponseDomain(resp2);
-    }
-    var filtered_response = service_response_email_domain;
-    //console.log('\tfiltered_response: ' + JSON.stringify(filtered_response, null, 2));
-
-    data_source_selected = _.object(
-      ['email', 'community', 'community_id', 'group', 'total_received', 'total_sent', 'rank'],
-      _.first(resp1[0].email)
-    );
-
-    _.each(filtered_response.domains, function(o, i){
-
-      domain_set[o[0]] = {
-        count: o[1],
-        color: color_set_domain(i),
-        domain: o[0]
-      }
     });
-    //console.log('\tdomain_set: ' + JSON.stringify(domain_set, null, 2));
 
-    //all_data_source.push( data_source_selected.email, data_source_selected.email, '' );
-    //all_data_source.refreshUI();
 
-    $('#target_email').html(data_source_selected.email);
+    $.when($.get("email/target"), $.get("email/domains")).done(function (resp1, resp2) {
 
-    // initialize search keyboard event
-    $('#txt_search').keyup(function (event){
+      if (!service_response_email_domain) {
+        console.log('graphtool: request service_response_email_domains');
+        //validate service response
+        service_response_email_domain = validateResponseDomain(resp2);
+      }
+      var filtered_response = service_response_email_domain;
+      //console.log('\tfiltered_response: ' + JSON.stringify(filtered_response, null, 2));
+
+      data_source_selected = _.object(
+        ['email', 'community', 'community_id', 'group', 'total_received', 'total_sent', 'rank'],
+        _.first(resp1[0].email)
+      );
+
+      _.each(filtered_response.domains, function (o, i) {
+
+        domain_set[o[0]] = {
+          count: o[1],
+          color: color_set_domain(i),
+          domain: o[0]
+        }
+      });
+      //console.log('\tdomain_set: ' + JSON.stringify(domain_set, null, 2));
+
+      //all_data_source.push( data_source_selected.email, data_source_selected.email, '' );
+      //all_data_source.refreshUI();
+
+      $('#target_email').html(data_source_selected.email);
+
+      // initialize search keyboard event
+      $('#txt_search').keyup(function (event) {
 
         if (event.keyCode === 13) {
 
-          searchByField( 'all' );
+          searchByField('all');
 
         }
         event.preventDefault();
-    });
+      });
 
-    $('#search_field_all').on('click', function(){
-      searchByField( 'all' );
-    });
+      $('#search_field_all').on('click', function () {
+        searchByField('all');
+      });
 
-    $('#search_field_email').on('click', function(){
-      searchByField( 'email' );
-    });
+      $('#search_field_email').on('click', function () {
+        searchByField('email');
+      });
 
-    $('#search_field_topic').on('click', function(){
-      searchByField( 'topic' );
-    });
+      $('#search_field_topic').on('click', function () {
+        searchByField('topic');
+      });
 
-    $('#search_field_community').on('click', function(){
-      searchByField( 'community' );
-    });
+      $('#search_field_community').on('click', function () {
+        searchByField('community');
+      });
 
-    $('#search_field_entity').on('click', function(){
-      searchByField( 'entity' );
-    });
+      $('#search_field_entity').on('click', function () {
+        searchByField('entity');
+      });
 
 
-    $("#search_form").submit(function(e){
-      return false;
-    });
+      $("#search_form").submit(function (e) {
+        return false;
+      });
 
-    $('#target_email').on('dblclick', function(){
-      setSearchType('email');
-      $("#txt_search").val(data_source_selected.email);
-      requestSearch('email', data_source_selected.email, true);
-    });
+      $('#target_email').on('dblclick', function () {
+        setSearchType('email');
+        $("#txt_search").val(data_source_selected.email);
+        requestSearch('email', data_source_selected.email, true);
+      });
 
-    var highlight_target = (function(){
-      var groupId = data_source_selected.group;
-      var rank = data_source_selected.rank;
-      var highlight = function(){
-        //graph
-        d3.select("#g_circle_" + groupId).style("stroke","#ffff00");
-        d3.select("#g_circle_" + groupId).style("stroke-width",function(d) { return 10; });
-        //email-table
-        $('#result_table tbody tr td:nth-child(2)').each(function(i, el){
-          if (data_source_selected.email.localeCompare(el.innerText.trim()) == 0) {
-            $(el).addClass('highlight-td');
+      var highlight_target = (function () {
+        var groupId = data_source_selected.group;
+        var rank = data_source_selected.rank;
+        var highlight = function () {
+          //graph
+          d3.select("#g_circle_" + groupId).style("stroke", "#ffff00");
+          d3.select("#g_circle_" + groupId).style("stroke-width", function (d) {
+            return 10;
+          });
+          //email-table
+          $('#result_table tbody tr td:nth-child(2)').each(function (i, el) {
+            if (data_source_selected.email.localeCompare(el.innerText.trim()) == 0) {
+              $(el).addClass('highlight-td');
+            }
+          });
+        }
+
+        var unhighlight = function () {
+          //graph
+          d3.select("#g_circle_" + groupId).style("stroke", "#ff0000");
+          if (d3.select("#rankval").property("checked")) {
+            d3.select("#g_circle_" + groupId).style("opacity", function (d) {
+              return 0.2 + (rank);
+            });
+            d3.select("#g_circle_" + groupId).style("stroke-width", function (d) {
+              return 5 * (rank);
+            });
           }
-        });
-      }
+          else {
+            d3.select("#g_circle_" + groupId).style("opacity", "100");
+            d3.select("#g_circle_" + groupId).style("stroke-width", "0");
+          }
+          //email-table
+          $('#result_table tbody tr td:nth-child(2)').each(function (i, el) {
+            $(el).removeClass('highlight-td');
+          });
+        };
 
-      var unhighlight = function(){
-        //graph
-        d3.select("#g_circle_" + groupId).style("stroke","#ff0000");
+        return {
+          highlight: highlight,
+          unhighlight: unhighlight
+        }
+      }());
+
+      $('#target_email').on('mouseover', highlight_target.highlight);
+      $('#target_email').on('mouseout', highlight_target.unhighlight);
+
+      $('#email_group_conversation').on('click', group_email_conversation);
+      $('#email_view_export_all').on('click', add_view_to_export);
+      $('#email_view_export_all_remove').on('click', remove_view_from_export);
+
+      $('#top-entities').append(waiting_bar);
+
+      draw_entity_chart();
+      draw_rank_chart();
+      draw_topic_tab();
+
+      /* attach element event handlers */
+      $("#submit_search").click(function () {
+        requestSearch('all', $("#search_text").val(), false);
+      });
+
+
+      $('#tab-list li:eq(1) a').on('click', function () {
+        var _from = $('#email-body-tab').find(".from").first().html();
+        if (_from) {
+          draw_attachments_table(_from);
+        }
+      });
+
+      $("input[name='searchType']").change(function (e) {
+        if ($(this).val() == 'email') {
+          $('#txt_search').attr('placeholder', 'From/To/Cc/Bcc...');
+        } else {
+          $('#txt_search').attr('placeholder', 'Search text...');
+        }
+        $('#txt_search').val('');
+      });
+
+      $("#submit_activesearch_like").click(function () {
+        if (current_email == null) {
+          alert('please select an email to seed');
+          return;
+        }
+        $("#email-body").empty();
+        $("#email-body").append(waiting_bar);
+        $.get("activesearch/like").then(
+          function (resp) {
+            setEmailVisible(resp);
+            $.get("email/email/" + encodeURIComponent(resp)).then(
+              function (resp) {
+                if (resp.email.length > 0) {
+                  $("#email-body").empty();
+                  $("#email-body").append(produceHTMLView(resp));
+                }
+              });
+          });
+      });
+
+      $("#submit_activesearch_dislike").click(function () {
+        if (current_email == null) {
+          alert('please select an email to seed');
+          return;
+        }
+        $("#email-body").empty();
+        $("#email-body").append(waiting_bar);
+        $.get("activesearch/dislike").then(
+          function (resp) {
+            setEmailVisible(resp);
+            $.get("email/email/" + encodeURIComponent(resp)).then(
+              function (resp) {
+                if (resp.email.length > 0) {
+                  $("#email-body").empty();
+                  $("#email-body").append(produceHTMLView(resp));
+                }
+              });
+          });
+      });
+
+      $("#submit_activesearch").click(function () {
+        console.log("seed active search for email_id... ");
+        if (current_email == null) {
+          alert('please select an email to seed');
+          return;
+        }
+        var id = current_email;
+        $("#email-body").empty();
+        $("#email-body").append(waiting_bar);
+        $.get("activesearch/seed/" + encodeURIComponent(id)).then(
+          function (resp) {
+            setEmailVisible(resp);
+            $.get("email/email/" + encodeURIComponent(resp)).then(
+              function (resp) {
+                if (resp.email.length > 0) {
+                  $("#email-body").empty();
+                  $("#email-body").append(produceHTMLView(resp));
+                }
+              });
+          });
+      });
+
+      //on modal close event
+      $('#exportModal').on('hidden.bs.modal', function () {
+        $('#export_link_spin').show();
+        $('#export_download_link').hide();
+      });
+
+      $('#email_view_marked').click(function () {
+        do_search('exportable');
+      });
+
+      // initialize data-table events
+      initDataTableEvents();
+
+      $("#view_export_list").click(function () {
+        $.ajax({
+          url: 'email/download',
+          type: "GET",
+          contentType: "application/json; charset=utf-8",
+          dataType: "json"
+        }).done(function (response) {
+          console.log(response);
+          $('#export_download_link a').attr('href', response.file);
+          $('#export_link_spin').hide();
+          $('#export_download_link').show();
+        }).fail(function (resp) {
+          alert('fail');
+
+          console.log("fail");
+          $('#exportModal').modal('hide');
+        });
+      });
+
+      $("#colorby2").click(function () {
+        console.log($("#colorby2").val());
+        recolornodes('comm');
+      });
+
+      $("#colorby").click(function () {
+        console.log($("#colorby").val());
+        recolornodes('node');
+      });
+
+      $("#usetext").on("change", function () {
+        toggle_labels();
+      });
+
+      $("#rankval").click(function () {
+        console.log(d3.select("#rankval").property("checked"));
         if (d3.select("#rankval").property("checked")) {
-          d3.select("#g_circle_" + groupId).style("opacity",function(d) { return 0.2 + (rank); });
-          d3.select("#g_circle_" + groupId).style("stroke-width",function(d) { return 5 * (rank); });
+          d3.selectAll("circle").style("opacity", function (d) {
+            return 0.2 + (d.rank);
+          });
+          d3.selectAll("circle").style("stroke-width", function (d) {
+            return 5 * (d.rank);
+          });
         }
         else {
-          d3.select("#g_circle_" + groupId).style("opacity","100");
-          d3.select("#g_circle_" + groupId).style("stroke-width","0");
+          d3.selectAll("circle").style("opacity", "100");
+          d3.selectAll("circle").style("stroke-width", "0");
         }
-        //email-table
-        $('#result_table tbody tr td:nth-child(2)').each(function(i, el){
-          $(el).removeClass('highlight-td');
-        });
-      };
-
-      return {
-        highlight: highlight,
-        unhighlight: unhighlight
-      }
-    }());
-
-    $('#target_email').on('mouseover', highlight_target.highlight);
-    $('#target_email').on('mouseout', highlight_target.unhighlight);
-
-    $('#email_group_conversation').on('click', group_email_conversation);
-    $('#email_view_export_all').on('click', add_view_to_export);    
-    $('#email_view_export_all_remove').on('click', remove_view_from_export);    
-
-    $('#top-entities').append(waiting_bar);
-
-    draw_entity_chart();
-    draw_rank_chart();
-    draw_topic_tab();
-
-    /* attach element event handlers */
-    $("#submit_search").click(function(){
-      requestSearch('all', $("#search_text").val(), false);
-    });
-
-    
-    $('#tab-list li:eq(1) a').on('click', function(){
-      var _from = $('#email-body-tab').find(".from").first().html();
-      if (_from){
-        draw_attachments_table(_from);
-      }
-    });
-
-    $("input[name='searchType']").change(function(e){
-      if ($(this).val() == 'email'){
-        $('#txt_search').attr('placeholder', 'From/To/Cc/Bcc...');
-      } else {
-        $('#txt_search').attr('placeholder', 'Search text...');
-      }
-      $('#txt_search').val('');
-    });
-
-    $("#submit_activesearch_like").click(function(){
-      if (current_email == null) {
-        alert('please select an email to seed');
-        return;
-      }
-      $("#email-body").empty();
-      $("#email-body").append(waiting_bar);
-      $.get("activesearch/like").then(
-        function(resp){
-          setEmailVisible(resp);
-          $.get("email/email/" + encodeURIComponent(resp)).then(
-            function(resp) {
-              if(resp.email.length > 0){
-                $("#email-body").empty();
-                $("#email-body").append(produceHTMLView(resp));
-              }
-            });
-        });
-    });
-
-    $("#submit_activesearch_dislike").click(function(){
-      if (current_email == null) {
-        alert('please select an email to seed');
-        return;
-      }
-      $("#email-body").empty();
-      $("#email-body").append(waiting_bar);
-      $.get("activesearch/dislike").then(
-        function(resp){
-          setEmailVisible(resp);
-          $.get("email/email/" + encodeURIComponent(resp)).then(
-            function(resp) {
-              if(resp.email.length > 0){
-                $("#email-body").empty();
-                $("#email-body").append(produceHTMLView(resp));
-              }
-            });
-        });
-    });
-
-    $("#submit_activesearch").click(function(){
-      console.log("seed active search for email_id... ");
-      if (current_email == null) {
-        alert('please select an email to seed');
-        return;
-      }
-      var id = current_email;
-      $("#email-body").empty();
-      $("#email-body").append(waiting_bar);
-      $.get("activesearch/seed/" + encodeURIComponent(id)).then(
-        function(resp) {
-          setEmailVisible(resp);
-          $.get("email/email/" + encodeURIComponent(resp)).then(
-            function(resp) {
-              if(resp.email.length > 0){
-                $("#email-body").empty();
-                $("#email-body").append(produceHTMLView(resp));
-              }
-            });
-        });
-    });
-
-    //on modal close event
-    $('#exportModal').on('hidden.bs.modal', function () {
-      $('#export_link_spin').show();      
-      $('#export_download_link').hide();
-    });
-
-    $('#email_view_marked').click(function(){
-      do_search('exportable');
-    });
-
-    // initialize data-table events
-    initDataTableEvents();
-
-    $("#view_export_list").click(function() {
-      $.ajax({
-        url: 'email/download',
-        type: "GET",
-        contentType:"application/json; charset=utf-8",
-        dataType:"json"
-      }).done(function(response){
-        console.log(response);
-        $('#export_download_link a').attr('href', response.file);
-        $('#export_link_spin').hide();
-        $('#export_download_link').show();
-      }).fail(function(resp){
-        alert('fail');
-
-        console.log("fail");
-        $('#exportModal').modal('hide');
+        //recolornodes('rank');
       });
+
     });
 
-    $("#colorby2").click(function(){
-      console.log($("#colorby2").val());
-      recolornodes('comm');
-    });
 
-    $("#colorby").click(function(){
-      console.log($("#colorby").val());
-      recolornodes('node');
-    });
+    function parseHash(newHash, oldHash) {
+      console.log('parseHash( ' + newHash + ', ' + oldHash + ' )');
+      crossroads.parse(newHash);
+    }
 
-    $("#usetext").on("change", function(){
-      toggle_labels();
-    });
-
-    $("#rankval").click(function(){
-      console.log(d3.select("#rankval").property("checked"));
-      if (d3.select("#rankval").property("checked")) {
-        d3.selectAll("circle").style("opacity",function(d) { return 0.2 + (d.rank); });
-        d3.selectAll("circle").style("stroke-width",function(d) { return 5 * (d.rank); });
+    crossroads.addRoute("/search/{type}/:term:", function (type, term) {
+      var searchTypes = ['all', 'email', 'topic', 'entity', 'exportable', 'community'];
+      term = term || "";
+      type = type.toLowerCase();
+      if (_.contains(searchTypes, type)) {
+        do_search(type, term);
       }
-      else {
-        d3.selectAll("circle").style("opacity","100");
-        d3.selectAll("circle").style("stroke-width","0");
-      }
-      //recolornodes('rank');
     });
 
-  });
+    crossroads.addRoute("/email/{id}", function (id) {
+      requestSearch('all', id, true);
+      showEmailView(id);
+    });
+
+    crossroads.routed.add(function (request, data) {
+      console.log('routed: ' + request);
+      console.log(data.route + ' - ' + data.params + ' - ' + data.isFirst);
+    });
+
+    crossroads.bypassed.add(function (request) {
+      console.log('route not found: ' + request);
+      //alert('Error: route not found, go back');
+    });
+
+    hasher.prependHash = '!';
+    hasher.initialized.add(parseHash);
+    hasher.changed.add(parseHash);
+    hasher.init();
 
 
-  function parseHash(newHash, oldHash){
-    console.log('parseHash( ' + newHash + ', ' + oldHash + ' )');
-    crossroads.parse(newHash);
-  }
-  
-  crossroads.addRoute("/search/{type}/:term:", function(type, term){
-    var searchTypes = ['all', 'email', 'topic', 'entity', 'exportable', 'community'];
-    term = term || "";
-    type = type.toLowerCase();
-    if (_.contains(searchTypes, type)){
-      do_search(type, term);
-    }    
-  });
+    if (hasher.getHash().length < 1) {
+      hasher.setHash(service_response_email_search_all.getServiceURLBase());
+    }
 
-  crossroads.addRoute("/email/{id}", function(id){
-    requestSearch('all', id, true);
-    showEmailView(id);
-  });
+  }, 4000); //end of setTimeout
 
-  crossroads.routed.add(function(request, data){
-    console.log('routed: ' + request);
-    console.log(data.route +' - '+ data.params +' - '+ data.isFirst);
-  });
-
-  crossroads.bypassed.add(function(request){
-    console.log('route not found: ' + request);
-    //alert('Error: route not found, go back');
-  });
-  
-  hasher.prependHash = '!';
-  hasher.initialized.add(parseHash);
-  hasher.changed.add(parseHash); 
-  hasher.init();
-
-
-  if (hasher.getHash().length < 1){
-    hasher.setHash( service_response_email_search_all.getServiceURLBase() );
-  }
 
 });
