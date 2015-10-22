@@ -1,15 +1,14 @@
 from elasticsearch import Elasticsearch
 from elasticsearch.client import IndicesClient
 from newman.utils.functions import nth
+from newman.newman_config import getDefaultDataSetID
 from es_search import initialize_email_addr_cache
 from es_email import get_ranked_email_address
 from time import gmtime, strftime
 import tangelo
 import urllib
 
-# def getDefaultDataSetID():
-#     initialize_email_addr_cache(_selected_index)
-#     return _selected_index
+_current_data_set_selected = getDefaultDataSetID()
 
 def _date_aggs(date_field="datetime"):
     return {
@@ -53,7 +52,14 @@ def listAllDataSet():
     email_addrs = get_ranked_email_address()["emails"]
     email_addrs = {email_addr[0]:email_addr for email_addr in email_addrs}
 
-    return {"data_sets": indexes, "top_hits":{"order_by":"rank", "email_addrs": email_addrs}}
+    return {
+            "data_set_selected": _current_data_set_selected,
+            "data_sets": indexes,
+            "top_hits": {
+                         "order_by":"rank",
+                         "email_addrs": email_addrs
+                        }
+           }
 
 
 #GET /all
@@ -68,7 +74,7 @@ def setSelectedDataSet(*args):
         return tangelo.HTTPStatusCode(400, "invalid service call - missing data_set_id")
 
     resp = initialize_email_addr_cache(data_set_id)
-
+    _current_data_set_selected = data_set_id
     return _index_record(data_set_id)
 
 actions = {
