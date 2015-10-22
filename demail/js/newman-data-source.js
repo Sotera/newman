@@ -154,7 +154,7 @@ var newman_data_source = (function () {
           click: function () {
             console.log( 'data-source-item-selected : ' + this.id + ', label ' + element.label );
 
-            setSelected( element.label );
+            setSelected( element.label, true );
           }
         }
       });
@@ -182,13 +182,22 @@ var newman_data_source = (function () {
     }
   }
 
-  function setSelected( label ) {
+  function setSelected( label, request_enabled ) {
     //console.log( 'setSelected(' + label + ')' );
+    if(data_source_selected && label) {
+      if(data_source_selected.label === label) {
+        console.log( 'data-set \'' + label + '\' aready selected!' );
+        return;
+      }
+    }
+
     $('#data_source_selected').find('.dropdown-toggle').html(  label + ' <span class=\"fa fa-database\"></span>');
 
-    data_source_selected = getByLabel( label );
-    if (data_source_selected) {
-      service_response_data_source.requestDataSetSelect( data_source_selected.uid );
+    if (request_enabled) {
+      data_source_selected = getByLabel(label);
+      if (data_source_selected) {
+        service_response_data_source.requestDataSetSelect(data_source_selected.uid);
+      }
     }
   }
 
@@ -218,6 +227,25 @@ var newman_data_source = (function () {
     var end_datetime = data_source_selected.end_datetime_selected;
     return start_datetime, end_datetime
   }
+
+  function getSelectedTopHits(size) {
+    if (!data_source_selected) {
+      data_source_selected = data_source_list[0];
+    }
+
+    console.log('data_source_selected : ' + JSON.stringify(data_source_selected, null, 2));
+    var top_hits = data_source_selected.top_hits.email_addrs;
+    var top_hits_email_address_list = _.values(top_hits);
+    if (size > top_hits_email_address_list.length) {
+      size = top_hits_email_address_list.length;
+    }
+    top_hits_email_address_list.sort(descendingPredicatByIndex(4));
+    top_hits_email_address_list = top_hits_email_address_list.splice(0, size);
+    console.log('top-hits['+size+'] :\n' + JSON.stringify(top_hits_email_address_list, null, 2));
+
+    return top_hits_email_address_list;
+  }
+
 
   function appendDataSource( url_path ) {
 
@@ -264,6 +292,7 @@ var newman_data_source = (function () {
     "getSelected": getSelected,
     "getSelectedDatetimeBounds": getSelectedDatetimeBounds,
     "getSelectedDatetimeRange": getSelectedDatetimeRange,
+    "getSelectedTopHits": getSelectedTopHits,
     "appendDataSource": appendDataSource,
     "parseDataSource": parseDataSource,
     "getDefaultDataSourceID": getDefaultDataSourceID

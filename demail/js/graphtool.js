@@ -710,12 +710,13 @@ function requestSearch(field, search_text, load_on_response) {
 
       if (url_path.endsWith(current_data_set_url)) {
 
-        var ranks = service_response_email_rank.getResponseMapValues();
+        //var ranks = service_response_email_rank.getResponseMapValues();
+        var ranks = newman_data_source.getSelectedTopHits(10);
         //console.log( 'ranks: ' + JSON.stringify(ranks, null, 2) );
         if (ranks.length > 1) {
-          ranks = ranks.splice(0, 10);
+          //ranks = ranks.splice(0, 10);
           _.each(ranks, function (element) {
-            requestSearch( 'all', element.email, false );
+            requestSearch( 'all', element[0], false );
           });
         }
 

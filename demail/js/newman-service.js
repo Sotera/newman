@@ -577,18 +577,16 @@ var service_response_data_source = (function () {
 
         return [element['data_set_id'], element]
       }));
+      newman_data_source.refreshUI();
       //console.log('_response_map: ' + JSON.stringify(_response_map, null, 2));
 
       var id_selected = response.data_set_selected;
       var selected = _data_set_map[id_selected];
       if (selected) {
+        requestDataSetSelect( id_selected );
         newman_data_source.setSelected(selected.data_set_label);
       }
-      else {
-        newman_data_source.setSelected(response.data_sets[0].data_set_label);
-      }
-      //requestDataSetSelect( id_selected );
-      newman_data_source.refreshUI();
+
 
 
 
