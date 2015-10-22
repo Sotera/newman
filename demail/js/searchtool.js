@@ -1778,58 +1778,34 @@ function drawChartAccountActivity( count ) {
   if (count > 0 && chart_ui_id_element) {
 
     var top_count = count;
-    /*
-     if (top_count > 5) {
-     top_count = 5;
-     }
-     */
 
-    $.get('search/dates').then(function (response) {
-      console.log('draw_chart_account_activities()');
+    if (top_count > 5) {
+      top_count = 5;
+    }
 
-      var doc_dates = response.doc_dates;
+    var ranks = service_response_email_rank.getResponseMapValues();
+    var top_accounts = [];
 
-      var domains = _.map(doc_dates, function (element) {
-        var domain = _.object(["domain", "count"], element);
-        domain.count = parseInt(domain.count);
-        return domain;
+      ranks = ranks.splice(0, top_count);
+      _.each(ranks, function (element) {
+
+        service_response_activity_account.requestService( element.email );
+        top_accounts.push( element.email );
       });
 
-      domains = domains.sort(descendingPredicatByProperty("count"));
-      if (domains.length > count) {
-        domains = domains.splice(0, count);
-      }
+      var timeline_dates = service_response_activity_account.getResponseTimeline();
+      timeline_dates.shift('x')
 
-      /*
-       _.each(domains, function (item) {
-       console.log( 'domain : ' + item.domain + ' count : ' + item.count  );
 
-       });
-       */
+      console.log('draw_chart_account_activities()');
+
 
       var chart_outbound = c3.generate({
         bindto: '#chart_line_outbound_activities',
         data: {
           x: 'x',
-          columns: [
-            ['x',
-              '2012-01-01', '2012-02-01', '2012-03-01', '2012-04-01', '2012-05-01', '2012-06-01', '2012-07-01', '2012-08-01', '2012-09-01', '2012-10-01', '2012-11-01', '2012-12-01',
-              '2013-01-01', '2013-02-01', '2013-03-01', '2013-04-01', '2013-05-01', '2013-06-01', '2013-07-01', '2013-08-01', '2013-09-01', '2013-10-01', '2013-11-01', '2013-12-01'
-            ],
-            ['acct-1', 30, 200, 200, 400, 150, 250, 30, 200, 200, 400, 150, 250, 30, 200, 200, 400, 150, 250, 150, 250, 30, 200, 200, 400],
-            ['acct-2', 130, 100, 100, 200, 150, 50, 130, 100, 100, 200, 150, 50, 130, 100, 100, 200, 150, 50, 150, 50, 130, 100, 100, 200],
-            ['acct-3', 230, 200, 200, 300, 250, 250, 230, 200, 200, 300, 250, 250, 230, 200, 200, 300, 250, 250, 300, 250, 250, 230, 200, 200]
-          ],
-          type: 'bar',
-
-          groups: [
-            ['acct-1', 'acct-2', 'acct-3']
-          ]
-        },
-        colors: {
-          'acct-1': '#ff0000',
-          'acct-2': '#00ff00',
-          'acct-3': '#0000ff'
+          columns: [timeline_dates],
+          type: 'bar'
         },
         axis : {
           x : {
@@ -1846,6 +1822,31 @@ function drawChartAccountActivity( count ) {
           }
         }
       });
+
+    _.each(top_accounts, function (item, index) {
+
+      setTimeout(function () {
+        var response = service_response_activity_account.getResponse( item );
+
+        var acct_label = response.account_id;
+        var data_column = [acct_label];
+        var data_colors = {};
+        data_colors[acct_label] = color_set_domain(index);
+
+        _.each(response.activities, function (acct_activity) {
+          data_column.append(acct_activity.interval_outbound_count);
+        });
+        console.log( 'account : ' + response.account_id + ' activities : ' + response.activities.length  );
+
+
+        chart_outbound.load({
+          columns: [data_column],
+          colors: data_colors
+        });
+
+      }, 1500);
+    });
+
 
       var chart_inbound = c3.generate({
         bindto: '#chart_line_inbound_activities',
@@ -1893,15 +1894,7 @@ function drawChartAccountActivity( count ) {
       }, 1000);
       */
 
-      setTimeout(function () {
-        chart_outbound.load({
-          columns: [['acct-4', 0, 0, 0, 0, 0, 0, 100, 25, 50, 200, 300, 100, 100, 50, 150, 200, 300, 100, 100, 50, 150, 200, 300, 100]],
-          colors: {
-            'acct-4': color_set_domain(3)
-          }
-        });
-      }, 1500);
-
+      /*
       setTimeout(function () {
         chart_outbound.groups([['acct-1', 'acct-2', 'acct-3', 'acct-4']])
       }, 2000);
@@ -1909,62 +1902,12 @@ function drawChartAccountActivity( count ) {
       setTimeout(function () {
         chart_inbound.groups([['acct-1', 'acct-2', 'acct-3']])
       }, 2000);
-
-      dashboard_time_chart_outbound_activity = chart_outbound;
-      dashboard_time_chart_inbound_activity = chart_inbound;
-
-      /*
-      dashboard_time_chart_outbound_activities = Morris.Line({
-        element: 'chart_line_outbound_activities',
-        data: [
-          {period: '2010 Jan', user_0: 2666, user_1: null, user_2: 2647},
-          {period: '2010 Apr', user_0: 2778, user_1: 2294, user_2: 2441},
-          {period: '2010 Jul', user_0: 4912, user_1: 1969, user_2: 2501},
-          {period: '2010 Sep', user_0: 3767, user_1: 3597, user_2: 5689},
-          {period: '2011 Jan', user_0: 6810, user_1: 1914, user_2: 2293},
-          {period: '2011 Apr', user_0: 5670, user_1: 4293, user_2: 1881},
-          {period: '2011 Jul', user_0: 4820, user_1: 3795, user_2: 1588},
-          {period: '2011 Sep', user_0: 15073, user_1: 5967, user_2: 5175},
-          {period: '2012 Jan', user_0: 10687, user_1: 4460, user_2: 2028},
-          {period: '2012 Apr', user_0: 8432, user_1: 5713, user_2: 1791}
-        ],
-        xkey: 'period',
-        ykeys: ['user_0', 'user_1', 'user_2'],
-        labels: ['Alic', 'Bob', 'Charles'],
-        pointSize: 2,
-        parseTime: false,
-        hideHover: 'auto',
-        resize: true,
-        redraw: true
-      });
-
-      dashboard_time_chart_inbound_activities = Morris.Line({
-        element: 'chart_line_inbound_activities',
-        data: [
-          {period: '2010 Jan', user_0: 2666, user_1: null, user_2: 2647},
-          {period: '2010 Apr', user_0: 2778, user_1: 2294, user_2: 2441},
-          {period: '2010 Jul', user_0: 4912, user_1: 1969, user_2: 2501},
-          {period: '2010 Sep', user_0: 3767, user_1: 3597, user_2: 5689},
-          {period: '2011 Jan', user_0: 6810, user_1: 1914, user_2: 2293},
-          {period: '2011 Apr', user_0: 5670, user_1: 4293, user_2: 1881},
-          {period: '2011 Jul', user_0: 4820, user_1: 3795, user_2: 1588},
-          {period: '2011 Sep', user_0: 15073, user_1: 5967, user_2: 5175},
-          {period: '2012 Jan', user_0: 10687, user_1: 4460, user_2: 2028},
-          {period: '2012 Apr', user_0: 8432, user_1: 5713, user_2: 1791}
-        ],
-        xkey: 'period',
-        ykeys: ['user_0', 'user_1', 'user_2'],
-        labels: ['Alic', 'Bob', 'Charles'],
-        pointSize: 2,
-        parseTime: false,
-        hideHover: 'auto',
-        resize: true,
-        redraw: true
-      });
-
       */
 
-    });
+
+
+    dashboard_time_chart_outbound_activity = chart_outbound;
+    dashboard_time_chart_inbound_activity = chart_inbound;
   }
 }
 

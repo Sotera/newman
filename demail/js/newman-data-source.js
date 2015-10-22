@@ -8,20 +8,55 @@ var newman_data_source = (function () {
   var data_source_list = [];
   var data_source_selected;
 
-  var data_source = function( uid, label, url_path ) {
+
+  var data_source = function( uid,
+                              label,
+                              start_datetime,
+                              end_datetime,
+                              document_count,
+                              node_count,
+                              attach_count,
+                              start_datetime_selected,
+                              end_datetime_selected,
+                              top_hits ) {
 
     return {
       "uid" : uid,
       "label": label,
-      "url_path": url_path,
+      "start_datetime": start_datetime,
+      "end_datetime": end_datetime,
+      "document_count": document_count,
+      "node_count": node_count,
+      "attach_count": attach_count,
+      "start_datetime_selected": start_datetime_selected,
+      "end_datetime_selected": end_datetime_selected,
+      "top_hits" : top_hits
     };
   };
 
 
-  var push = function ( uid, label, url_path ) {
-    console.log('push( ' + uid + ', ' + label + ', ' + url_path + ' )');
+  var push = function ( uid,
+                        label,
+                        start_datetime,
+                        end_datetime,
+                        document_count,
+                        node_count,
+                        attach_count,
+                        start_datetime_selected,
+                        end_datetime_selected,
+                        top_hits ) {
+    console.log('push( ' + uid + ', ' + label + ' )');
 
-    var new_data_source = data_source(uid, label, url_path);
+    var new_data_source = data_source(uid,
+                                      label,
+                                      start_datetime,
+                                      end_datetime,
+                                      document_count,
+                                      node_count,
+                                      attach_count,
+                                      start_datetime_selected,
+                                      end_datetime_selected,
+                                      top_hits);
 
     if (!contains(new_data_source)) {
       if (data_source_list.length == data_source_max) {
@@ -97,29 +132,6 @@ var newman_data_source = (function () {
     return target;
   };
 
-  var getByURLPath = function (url_path) {
-    console.log( 'getHistByDataURL(' + url_path + ')' );
-
-    var target;
-    _.each(data_source_list, function (element) {
-
-      if (element.url_path === url_path) {
-        target = element;
-      }
-
-    });
-
-    return target;
-  };
-
-  var initialize = function(uid, label, url_path) {
-    data_source_list = [];
-
-    push(uid, label, url_path);
-    setSelected(label);
-    refreshUI();
-
-  }
 
   var refreshUI = function() {
 
@@ -130,7 +142,7 @@ var newman_data_source = (function () {
 
     _.each(data_source_list, function( element ) {
 
-      console.log( '\t' + element.label + ', ' + element.uid + ', ' + element.icon_class + ', ' + element.url_path );
+      console.log( '\t' + element.label + ', ' + element.uid + ', ' + element.icon_class );
 
       var button = $('<button />', {
         type: 'button',
@@ -140,7 +152,7 @@ var newman_data_source = (function () {
         id: element.uid,
         on: {
           click: function () {
-            console.log( 'data-source-item-selected : ' + this.id + ', url-path: ' + element.url_path );
+            console.log( 'data-source-item-selected : ' + this.id + ', label ' + element.label );
 
             setSelected( element.label );
           }
@@ -175,6 +187,9 @@ var newman_data_source = (function () {
     $('#data_source_selected').find('.dropdown-toggle').html(  label + ' <span class=\"fa fa-database\"></span>');
 
     data_source_selected = getByLabel( label );
+    if (data_source_selected) {
+      service_response_data_source.requestDataSetSelect( data_source_selected.uid );
+    }
   }
 
   function getSelected() {
@@ -182,6 +197,26 @@ var newman_data_source = (function () {
       data_source_selected = data_source_list[0];
     }
     return clone(data_source_selected);
+  }
+
+  function getSelectedDatetimeBounds() {
+    if (!data_source_selected) {
+      data_source_selected = data_source_list[0];
+    }
+
+    var min_datetime = data_source_selected.start_datetime;
+    var max_datetime = data_source_selected.end_datetime;
+    return min_datetime, max_datetime
+  }
+
+  function getSelectedDatetimeRange() {
+    if (!data_source_selected) {
+      data_source_selected = data_source_list[0];
+    }
+
+    var start_datetime = data_source_selected.start_datetime_selected;
+    var end_datetime = data_source_selected.end_datetime_selected;
+    return start_datetime, end_datetime
   }
 
   function appendDataSource( url_path ) {
@@ -224,11 +259,11 @@ var newman_data_source = (function () {
     "getAll": getAll,
     "getByLabel": getByLabel,
     "getByID": getByID,
-    "getByURLPath": getByURLPath,
     "refreshUI": refreshUI,
-    "initialize": initialize,
     "setSelected": setSelected,
     "getSelected": getSelected,
+    "getSelectedDatetimeBounds": getSelectedDatetimeBounds,
+    "getSelectedDatetimeRange": getSelectedDatetimeRange,
     "appendDataSource": appendDataSource,
     "parseDataSource": parseDataSource,
     "getDefaultDataSourceID": getDefaultDataSourceID

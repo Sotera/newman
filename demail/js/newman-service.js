@@ -524,22 +524,34 @@ var service_response_email_pertinence = (function () {
 var service_response_data_source = (function () {
 
   var _response = {};
-  var _response_map = {};
-  var _data_set_id_selected;
+  var _data_set_map = {};
 
   function requestService() {
     console.log('service_response_email_pertinence.requestService()');
 
-    $.get('datasource/all').then(function (response) {
+    $.when($.get('datasource/all')).done(function (response) {
       setResponse( response );
     });
+  }
+
+  function requestDataSetSelect(data_set_id) {
+    console.log('service_response_email_pertinence.requestDataSetSelect('+data_set_id+')');
+
+    if (data_set_id && containsDataSet(data_set_id)) {
+
+      $.when($.get('datasource/dataset/' + encodeURIComponent(data_set_id))).done(function (response) {
+
+        console.log(JSON.stringify(response, null, 2));
+
+      });
+    }
   }
 
   function setResponse( response ) {
     if (response) {
        _response = response;
        console.log('received service_response_data_source[' + response.data_sets.length + ']');
-       console.log(JSON.stringify(_response, null, 2));
+       //console.log(JSON.stringify(_response, null, 2));
 
        mapResponse(_response);
 
@@ -548,13 +560,37 @@ var service_response_data_source = (function () {
 
   function mapResponse( response ) {
     if (response) {
-      _response_map = _.object(_.map( response.data_sets, function (element) {
 
-        newman_data_source.initialize(element['data_set_id'], element['data_set_label'], element['data_set_id']);
+      _data_set_map = _.object(_.map( response.data_sets, function (element) {
+
+
+        newman_data_source.push( element.data_set_id,
+                                 element.data_set_label,
+                                 element.data_set_start_datetime,
+                                 element.data_set_end_datetime,
+                                 element.data_set_document_count,
+                                 element.data_set_node_count,
+                                 element.data_set_attachment_count,
+                                 element.start_datatime_selected,
+                                 element.end_datatime_selected,
+                                 response.top_hits );
 
         return [element['data_set_id'], element]
       }));
       //console.log('_response_map: ' + JSON.stringify(_response_map, null, 2));
+
+      var id_selected = response.data_set_selected;
+      var selected = _data_set_map[id_selected];
+      if (selected) {
+        newman_data_source.setSelected(selected.data_set_label);
+      }
+      else {
+        newman_data_source.setSelected(response.data_sets[0].data_set_label);
+      }
+      //requestDataSetSelect( id_selected );
+      newman_data_source.refreshUI();
+
+
 
     }
   }
@@ -568,49 +604,61 @@ var service_response_data_source = (function () {
   }
 
   function getResponseMap() {
-    if (_response_map) {
+    if (_data_set_map) {
       //create a deep-copy, return the copy
-      return clone( _response_map )
+      return clone( _data_set_map )
     }
-    return _response_map;
+    return _data_set_map;
   }
 
   function getResponseMapKeys() {
-    if (_response_map) {
-      var key = _.keys( _response_map );
+    if (_data_set_map) {
+      var key = _.keys( _data_set_map );
       //create a deep-copy, return the copy
       return clone( key )
     }
-    return _response_map;
+    return _data_set_map;
   }
 
   function getResponseMapValues() {
-    if (_response_map) {
-      var values = _.values( _response_map );
+    if (_data_set_map) {
+      var values = _.values( _data_set_map );
       //create a deep-copy, return the copy
       return clone( values )
     }
-    return _response_map;
+    return _data_set_map;
   }
 
   function getDataSet(key) {
-    if (_response_map) {
-      var data_set = _response_map[key];
+    if (_data_set_map) {
+      var data_set = _data_set_map[key];
       if(data_set) {
         return clone(data_set)
       }
       return data_set;
     }
-    return _response_map;
+    return _data_set_map;
+  }
+
+  function containsDataSet(key) {
+    if (_data_set_map) {
+      var data_set = _data_set_map[key];
+      if(data_set) {
+        return true;
+      }
+    }
+    return false;
   }
 
   return {
+    'requestDataSetSelect' : requestDataSetSelect,
     'requestService' : requestService,
     'getResponse' : getResponse,
     'setResponse' : setResponse,
     'getResponseMapKeys' : getResponseMapKeys,
     'getResponseMapValues' : getResponseMapValues,
-    'getDataSet' : getDataSet
+    'getDataSet' : getDataSet,
+    'containsDataSet' : containsDataSet
   }
 
 }());
@@ -625,6 +673,7 @@ var service_response_activity_account = (function () {
 
   var _response = {};
   var _response_account_map = {};
+  var _timeline = []
 
   function getServiceURLBase() {
     return _service_url;
@@ -661,7 +710,15 @@ var service_response_activity_account = (function () {
     if (response) {
       _response_account_map[ response.account_id ] = response;
       //console.log('_response_map: ' + JSON.stringify(_response_account_map, null, 2));
+      _timeline = [];
+      _.each(response.activities, function (element) {
+        _timeline.append( element.interval_end_datetime );
+      });
     }
+  }
+
+  function getResponseTimeline() {
+    return _timeline;
   }
 
   function getResponse( key ) {
@@ -682,7 +739,8 @@ var service_response_activity_account = (function () {
     'requestService' : requestService,
     'getResponse' : getResponse,
     'setResponse' : setResponse,
-    'isResponseMapEmpty' : isResponseMapEmpty
+    'isResponseMapEmpty' : isResponseMapEmpty,
+    'getResponseTimeline' : getResponseTimeline
   }
 
 }());
