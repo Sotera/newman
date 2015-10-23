@@ -49,20 +49,21 @@ def sender_histogram(actor_email_addr, start, end, interval="year"):
                 }
             }}}
 
-def entity_histogram_query(**kwargs):
+# TODO this should take a set of filters and query to apply
+def entity_histogram_query(size=10, **kwargs):
     def all():
         return {
             "person" : {
-                "terms" : {"field" : "entities.entity_person"}
+                "terms" : {"field" : "entities.entity_person", "size": size}
             },
             "organization" : {
-                "terms" : {"field" : "entities.entity_organization"}
+                "terms" : {"field" : "entities.entity_organization", "size": size}
             },
             "location" : {
-                "terms" : {"field" : "entities.entity_location"}
+                "terms" : {"field" : "entities.entity_location", "size": size}
             },
             "misc" : {
-                "terms" : {"field" : "entities.mics"}
+                "terms" : {"field" : "entities.mics", "size": size}
             }
 
         }
@@ -70,9 +71,10 @@ def entity_histogram_query(**kwargs):
     return {"aggs": all(), "size":0}
 
 
-def get_entity_histogram(index, type, query_function, **kwargs):
+def get_entity_histogram(index, type, query_function=entity_histogram_query, **kwargs):
     es = Elasticsearch()
-    resp = es.search(index=index, doc_type=type,body=query_function(**kwargs))
+    body = query_function(**kwargs)
+    resp = es.search(index=index, doc_type=type,body=body)
     return sorted([dict(d, **{"type":"location"}) for d in  resp["aggregations"]["location"]["buckets"]]
                   + [dict(d, **{"type":"organization"}) for d in  resp["aggregations"]["organization"]["buckets"]]
                   + [dict(d, **{"type":"person"}) for d in  resp["aggregations"]["person"]["buckets"]]
@@ -135,6 +137,7 @@ def actor_histogram(actor_email_addr, start, end, interval="year"):
             }
         }
     }
+
 def detect_activity(index, type, query_function, **kwargs):
     es = Elasticsearch()
     resp = es.search(index=index, doc_type=type, body=query_function(**kwargs))

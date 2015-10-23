@@ -1,10 +1,10 @@
 from newman.db.newman_db import newman_connector
-from newman.db.mysql import execute_query, execute_nonquery
+from newman.db.mysql import execute_query
 from newman.utils.functions import nth
+from series import get_entity_histogram
+from param_utils import parseParamDatetime
 
 import tangelo
-import cherrypy
-import json
 import urllib
 
 
@@ -21,6 +21,7 @@ stmt_top_rollup_entities = (
     " order by total_entities desc "
 )
 
+# DEPRECATED - remove me
 #GET /top/<amt>
 def getTopRollup(*args):
     amt=urllib.unquote(nth(args, 0, ''))
@@ -36,10 +37,15 @@ def getTopRollup(*args):
             return { "entities" : rtn }
 
 #GET /top/<amt>
-# def get_top_entities(*args):
-#
-#     return 
+def get_top_entities(*args, **kwargs):
+    tangelo.content_type("application/json")
+    tangelo.log("entity.get_top_entities(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    amount=int(urllib.unquote(nth(args, 0, 20)))
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    entities = get_entity_histogram(data_set_id, "emails", size=amount, start="1970", end="now")[:amount]
+    return {"entities" : [[str(i), entity ["type"], entity ["key"], entity ["doc_count"]] for i,entity in enumerate(entities)]}
 
+#TODO deprecated - remove at some point
 #GET /rollup/<id>
 def getRollup(*args):
     entity=urllib.unquote(nth(args, 0, ''))
@@ -53,8 +59,8 @@ def getRollup(*args):
             return { "rollupId" : rtn }
 
 actions = {
-    "rollup" : getRollup,
-    "top" : getTopRollup
+    # "rollup" : getRollup,  TODO deactivating slated for removal
+    "top" : get_top_entities
 }
 
 def unknown(*args):
