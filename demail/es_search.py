@@ -55,13 +55,8 @@ def _map_node(email_addr, total_docs):
     node["fromcolor"] =  email_addr["community_id"][0]
     node["name"] = name
     node["num"] =  email_addr["sent_count"][0] + email_addr["received_count"][0]
+    node["rank"] = (email_addr["sent_count"][0] + email_addr["received_count"][0]) / float(total_docs)
 
-    #hack to address 0 total_emails
-    if total_docs > 0 :
-        node["rank"] = (email_addr["sent_count"][0] + email_addr["received_count"][0]) / float(total_docs)
-    else :
-        node["rank"] = 0.0
-        
     return node
 
 # Get search all
@@ -73,7 +68,6 @@ def _search_ranked_email_addrs(index, start, end, size):
 
 # This will generate the graph structure for a specific email address.  Will aply date filter and term query.
 def _create_graph_from_email(index, email_address, search_terms,start, end, size=2000):
-    global _EMAIL_ADDR_CACHE
 
     term_query = {"match_all" : {}} if not search_terms else {"match" : {"_all" : " ".join(search_terms)}}
 
@@ -125,8 +119,12 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
 # build a graph for a specific email address.
 # args should be a list of terms to search for in any document field
 def get_graph_for_email_address(*args, **kwargs):
-    tangelo.log("get_graph_for_email_address(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.log("es_search.get_graph_for_email_address(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+
+    # TODO this needs to come fromm UI
+    size = size if size >500 else 2500
 
     search_terms=[]
     email_address=urllib.unquote(nth(args, 1, ''))

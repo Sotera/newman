@@ -430,7 +430,7 @@ def querySearchResult(data_set_id, field, start_date, end_date, args_array):
 
 #GET /search/<data_set>/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
 def search(*path_args, **param_args):
-    tangelo.log("search(path_args[%s] %s)" % (len(path_args), str(path_args)))
+    tangelo.log("search.search(path_args[%s] %s)" % (len(path_args), str(path_args)))
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
 
