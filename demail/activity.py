@@ -37,6 +37,7 @@ def dateRange(start_datetime, end_datetime):
 
 #GET /account/<id>
 def getAccount(*args, **kwargs):
+    tangelo.content_type("application/json")
     tangelo.log("getAccount(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
         
