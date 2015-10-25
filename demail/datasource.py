@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 from elasticsearch.client import IndicesClient
 from newman.utils.functions import nth
-from newman.newman_config import getDefaultDataSetID
+from newman.newman_config import getDefaultDataSetID, default_min_timeline_bound, default_max_timeline_bound
 from es_search import initialize_email_addr_cache
 from es_email import get_ranked_email_address
 from series import get_datetime_bounds
@@ -16,16 +16,17 @@ def _index_record(index):
     emails_addrs_count = es.count(index=index, doc_type="email_address", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
     emails_attch_count = es.count(index=index, doc_type="attachments", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
 
+    #TODO: still need to re-work the absolute date-time bounds and the suggested date-time bounds
     bounds = get_datetime_bounds(index)
     return {'data_set_id':index,
            'data_set_label':index,
            'data_set_document_count' : email_docs_count,
            'data_set_node_count' : emails_addrs_count,
            'data_set_attachment_count' : emails_attch_count,
-           'data_set_start_datatime' : bounds[0],
-           'data_set_end_datetime' : bounds[1],
-           'start_datatime_selected' : bounds[0],
-           'end_datetime_selected' : bounds[1]
+           'data_set_datetime_min' : default_min_timeline_bound(),
+           'data_set_datetime_max' : default_max_timeline_bound(),
+           'start_datetime_selected' : default_min_timeline_bound(),
+           'end_datetime_selected' : default_max_timeline_bound()
            }
 
 def listAllDataSet():
@@ -52,6 +53,7 @@ def getAll(*args):
 
 #GET /dataset/<id>
 def setSelectedDataSet(*args):
+    tangelo.content_type("application/json")
     data_set_id=urllib.unquote(nth(args, 0, ''))
     if not data_set_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing data_set_id")

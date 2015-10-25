@@ -141,6 +141,20 @@
             </div>
             -->
 
+            <!-- start data-set -->
+            <div class="col-xs-12 col-sm-2" style="padding: 0px 10px 0px 10px;">
+
+              <div class="dropdown" style="width: 100%; height: 100%; position:relative; display: inline-block;" id="data_source_selected">
+                <span class="dropdown-toggle btn navbar-btn button-dropdown-menu" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px"><span class="fa fa-database"></span> Default_PST</span>
+                <ul class="dropdown-menu" style="width: 100%; padding: 2px 0px 2px 0px; border-radius: 4px;" id="data_source_list">
+
+                </ul>
+              </div>
+
+            </div>
+            <!-- end data-set -->
+
+            <!-- start search -->
             <div class="col-xs-12 col-sm-3" style="padding: 0px 5px 0px 15px; text-align: left;">
 
               <div id="search">
@@ -149,6 +163,7 @@
               </div>
 
             </div>
+            <!-- end search -->
 
             <!-- start datetime-range -->
             <div class="col-xs-12 col-sm-5" style="padding: 0px;">
@@ -157,19 +172,6 @@
               </div>
             </div>
             <!-- end datetime-range -->
-
-            <!-- start data-set -->
-            <div class="col-xs-12 col-sm-2" style="padding: 0px 10px 0px 10px;">
-
-              <div class="dropdown" style="width: 100%; height: 100%; position:relative; display: inline-block; text-align: right;" id="data_source_selected">
-                <span class="dropdown-toggle btn navbar-btn button-dropdown-menu" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px"> Default_PST <span class="fa fa-database"></span></span>
-                <ul class="dropdown-menu" style="width: 100%; padding: 2px 0px 2px 0px; border-radius: 4px;" id="data_source_list">
-
-                </ul>
-              </div>
-
-            </div>
-            <!-- end data-set -->
 
             <div class="col-xs-10 col-sm-2 top-panel-right" style="padding: 0px 10px 0px 10px;">
 
@@ -513,26 +515,86 @@
               <!--Start Search-Aggregate-Filter -->
               <div class="row" style="margin: 0; border-bottom: 1px solid rgba(255, 255, 255, 1.0);">
                 <div class="col-sm-1" style="padding: 0; border-left: 1px solid rgba(255, 255, 255, 1.0);">
+                  <!--
                   <span class="checkbox-inline" >
                     <input type="checkbox" id="search_filter_data_set" value="rank" style="margin: 2px 0 0 -15px;" checked />
                     <i class="fa fa-database"></i>
                   </span>
-                </div>
-                <div class="col-sm-3" style="padding: 0; border-left: 1px solid rgba(255, 255, 255, 1.0);">
-                  <span class="checkbox-inline" >
-                    <input type="checkbox" id="search_filter_user_account" style="margin: 2px 0 0 -15px;" checked />
-                    <i class="fa fa-user-plus"></i> Account
-                  </span>
-                </div>
-                <div class="col-sm-2" style="padding: 0; border-left: 1px solid rgba(255, 255, 255, 1.0);">
-                  <!--
-                  <span class="checkbox-inline" >
-                    <input type="checkbox" id="search_filter_free_text" style="margin: 2px 0 0 -15px;" />
-                    <i class="fa fa-search"></i> Text
-                  </span>
                   -->
                 </div>
-                <div class="col-sm-6" style="padding: 0 0 0 2px;">
+
+                <div class="col-sm-3" style="padding: 0; border-left: 1px solid rgba(255, 255, 255, 1.0);">
+
+                  <span class="checkbox-inline" >
+                    <input type="checkbox" id="search_filter_node" style="margin: 0 0 0 -15px; height: 30px;" checked disabled />
+
+                    <!-- Start-Search-Aggregate-Data-Node-Filter -->
+                    <div class="dropdown" style="width: 100%; position:relative; display: inline-block;" id="data_node_type_selected">
+                      <span class="dropdown-toggle btn btn-small outline" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px; color: #555555">
+                        <i class="fa fa-user"></i> <i class="fa fa-envelope-o"></i> e-mail
+                      </span>
+                      <ul class="dropdown-menu" style="width: 100%; padding: 2px 0px 2px 0px; border-radius: 4px;" id="data_node_type_list">
+                        <li style="line-height: 20px; text-align: left;">
+                          <button type="button" class="button-dropdown-menu-item" value="data_category_email" id="data_node_type_email">
+                            <i class="fa fa-envelope-o"></i> e-mail
+                          </button>
+                        </li>
+                        <li style="line-height: 20px; text-align: left;">
+                          <button type="button" class="button-dropdown-menu-item" value="data_category_email" id="data_node_type_text">
+                            <i class="fa fa-terminal"></i> text
+                          </button>
+                        </li>
+                        <li style="line-height: 20px; text-align: left;">
+                          <button type="button" class="button-dropdown-menu-item" value="data_category_document" id="data_node_type_document" style="color: #c3c1cd;">
+                            <i class="fa fa-file-text-o"></i> document
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                    <!-- End-Search-Aggregate-Data-Node-Filter -->
+                  </span>
+
+                </div>
+
+                <div class="col-sm-3" style="padding: 0; border-left: 1px solid rgba(255, 255, 255, 1.0);">
+
+                  <span class="checkbox-inline" >
+                    <input type="checkbox" id="search_filter_node_attribute" style="margin: 0 0 0 -15px; height: 30px;" />
+
+                    <!-- Start-Search-Aggregate-Data-Node-Attribute-Filter -->
+                    <div class="dropdown" style="width: 100%; position:relative; display: inline-block;" id="data_node_attribute_selected">
+                      <span class="dropdown-toggle btn btn-small outline" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px; color: #555555">
+                        <i class="fa fa-files-o"></i> <i class="fa fa-terminal"></i> text
+                      </span>
+                      <ul class="dropdown-menu" style="width: 100%; padding: 2px 0px 2px 0px; border-radius: 4px;" id="data_node_attribute_list">
+                        <li style="line-height: 20px; text-align: left;">
+                          <button type="button" class="button-dropdown-menu-item" value="data_category_email" id="data_node_attribute_text">
+                            <i class="fa fa-terminal"></i> text
+                          </button>
+                        </li>
+                        <li style="line-height: 20px; text-align: left;">
+                          <button type="button" class="button-dropdown-menu-item" value="data_category_email" id="data_node_attribute_attach">
+                            <i class="fa fa-paperclip"></i> attach
+                          </button>
+                        </li>
+                        <li style="line-height: 20px; text-align: left;">
+                          <button type="button" class="button-dropdown-menu-item" value="data_category_document" id="data_node_attribute_entity" style="color: #c3c1cd;">
+                            <i class="fa fa-sitemap"></i> entity
+                          </button>
+                        </li>
+                        <li style="line-height: 20px; text-align: left;">
+                          <button type="button" class="button-dropdown-menu-item" value="data_category_document" id="data_node_attribute_topic" style="color: #c3c1cd;">
+                            <i class="fa fa-list-ul"></i> topic
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                    <!-- End-Search-Aggregate-Data-Node-Attribute-Filter -->
+                  </span>
+
+
+                </div>
+                <div class="col-sm-5" style="padding: 0 0 0 2px;">
 
                 </div>
               </div>
@@ -544,7 +606,7 @@
                 <thead>
                 <tr style="font-size: small;">
                   <th width="60%"></th>
-                  <th><i class="fa fa-filter"></i></th>
+                  <th><i class="fa fa-cubes"></i></th>
                   <th>Sent</th>
                   <th>Received</th>
                   <th><i class="fa fa-envelope-o"></i></th>
@@ -589,7 +651,7 @@
           <!--End Search-Research-Dashboard-Left-->
 
           <!--Start Dashboard-Right-->
-          <div class="col-sm-7" style= "height: 100%;">
+          <div class="col-sm-7" style= "height: 100%; padding: 0px 15px 0px 0px;">
             <div style= "height: 100%;">
 
               <!-- Start Dashboard-Right-Row-1 -->
@@ -597,10 +659,10 @@
                 <!--Start Dashboard-Right-Row-1-Panel-Nav-Tabs-->
                 <ul class="nav nav-tabs box-name" style="height: 30px;" role="tablist" id="dashboard_row1_tab_list">
                   <li class="active" style="height: inherit;">
-                    <a href="#dashboard_tab_content_outbound_activities" style="height: inherit;" role="tab" data-toggle="tab">Outbound Activities</a>
+                    <a href="#dashboard_tab_content_outbound_activities" style="height: inherit;" role="tab" data-toggle="tab"><i class="fa fa-paper-plane-o"></i> Outbound</a>
                   </li>
                   <li style="height: inherit;">
-                    <a href="#dashboard_tab_content_inbound_activities" style="height: inherit;" role="tab" data-toggle="tab">Inbound Activities</a>
+                    <a href="#dashboard_tab_content_inbound_activities" style="height: inherit;" role="tab" data-toggle="tab"><i class="fa fa-inbox"></i> Inbound</a>
                   </li>
                 </ul>
                 <!--End Dashboard-Right-Row-1-Panel-Nav-Tabs-->
@@ -1020,8 +1082,9 @@
 
     <script src="js/history-nav.js"></script>
     <script src="js/newman-data-validator.js"></script>
+    <script src="js/newman-activity-email.js"></script>
     <script src="js/newman-data-source.js"></script>
-    <script src="js/newman-datetime_range.js"></script>
+    <script src="js/newman-datetime-range.js"></script>
     <script src="js/newman-service.js"></script>
     <script src="js/newman-data-table.js"></script>
     <script src="js/searchtool.js"></script>

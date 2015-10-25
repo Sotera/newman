@@ -11,8 +11,8 @@ var newman_data_source = (function () {
 
   var data_source = function( uid,
                               label,
-                              start_datetime,
-                              end_datetime,
+                              datetime_min,
+                              datetime_max,
                               document_count,
                               node_count,
                               attach_count,
@@ -23,8 +23,8 @@ var newman_data_source = (function () {
     return {
       "uid" : uid,
       "label": label,
-      "start_datetime": start_datetime,
-      "end_datetime": end_datetime,
+      "datetime_min": datetime_min,
+      "datetime_max": datetime_max,
       "document_count": document_count,
       "node_count": node_count,
       "attach_count": attach_count,
@@ -37,8 +37,8 @@ var newman_data_source = (function () {
 
   var push = function ( uid,
                         label,
-                        start_datetime,
-                        end_datetime,
+                        datetime_min,
+                        datetime_max,
                         document_count,
                         node_count,
                         attach_count,
@@ -49,8 +49,8 @@ var newman_data_source = (function () {
 
     var new_data_source = data_source(uid,
                                       label,
-                                      start_datetime,
-                                      end_datetime,
+                                      datetime_min,
+                                      datetime_max,
                                       document_count,
                                       node_count,
                                       attach_count,
@@ -159,11 +159,11 @@ var newman_data_source = (function () {
         }
       });
 
-      var hist_item = $( '<li style=\"line-height: 20px; text-align: center\"/>' )
-      hist_item.append( button );
+      var data_source_item = $( '<li style=\"line-height: 20px; text-align: left\"/>' )
+      data_source_item.append( button );
 
       //console.log( '\t' + html_text );
-      $('#data_source_list').append( hist_item );
+      $('#data_source_list').append( data_source_item );
 
     });
 
@@ -191,9 +191,6 @@ var newman_data_source = (function () {
       }
     }
 
-    $('#data_source_selected').find('.dropdown-toggle').html(  label + ' <span class=\"fa fa-database\"></span>');
-
-
     _data_source_selected = getByLabel(label);
     if (_data_source_selected) {
       _default_data_set_id = _data_source_selected.uid;
@@ -201,7 +198,10 @@ var newman_data_source = (function () {
       if (request_enabled) {
         service_response_data_source.requestDataSetSelect(_data_source_selected.uid);
       }
+
+      $('#data_source_selected').find('.dropdown-toggle').html(  '<span class=\"fa fa-database\"></span> ' + label );
     }
+
   }
 
   function getSelected() {
@@ -212,16 +212,18 @@ var newman_data_source = (function () {
   }
 
   function getSelectedDatetimeBounds() {
+    console.log('getSelectedDatetimeBounds()');
     if (!_data_source_selected) {
       _data_source_selected = _data_source_list[0];
     }
 
-    var min_datetime = _data_source_selected.start_datetime;
-    var max_datetime = _data_source_selected.end_datetime;
+    var min_datetime = _data_source_selected.datetime_min;
+    var max_datetime = _data_source_selected.datetime_max;
     return min_datetime, max_datetime
   }
 
   function getSelectedDatetimeRange() {
+    console.log('getSelectedDatetimeRange()');
     if (!_data_source_selected) {
       _data_source_selected = _data_source_list[0];
     }
@@ -244,7 +246,7 @@ var newman_data_source = (function () {
     }
     top_hits_email_address_list.sort(descendingPredicatByIndex(4));
     top_hits_email_address_list = top_hits_email_address_list.splice(0, size);
-    console.log('top-hits['+size+'] :\n' + JSON.stringify(top_hits_email_address_list, null, 2));
+    //console.log('top-hits['+size+'] :\n' + JSON.stringify(top_hits_email_address_list, null, 2));
 
     return top_hits_email_address_list;
   }

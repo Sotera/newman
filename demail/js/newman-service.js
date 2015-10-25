@@ -539,10 +539,9 @@ var service_response_data_source = (function () {
 
     if (data_set_id && containsDataSet(data_set_id)) {
 
-      $.when($.get('datasource/dataset/' + encodeURIComponent(data_set_id))).done(function (response) {
+      $.get('datasource/dataset/' + encodeURIComponent(data_set_id)).then(function (response) {
 
-        console.log(JSON.stringify(response, null, 2));
-
+        //console.log(JSON.stringify(response, null, 2));
       });
     }
   }
@@ -566,13 +565,13 @@ var service_response_data_source = (function () {
 
         newman_data_source.push( element.data_set_id,
                                  element.data_set_label,
-                                 element.data_set_start_datetime,
-                                 element.data_set_end_datetime,
+                                 element.data_set_datetime_min,
+                                 element.data_set_datetime_max,
                                  element.data_set_document_count,
                                  element.data_set_node_count,
                                  element.data_set_attachment_count,
-                                 element.start_datatime_selected,
-                                 element.end_datatime_selected,
+                                 element.start_datetime_selected,
+                                 element.end_datetime_selected,
                                  response.top_hits );
 
         return [element['data_set_id'], element]
@@ -583,11 +582,21 @@ var service_response_data_source = (function () {
       var id_selected = response.data_set_selected;
       var selected = _data_set_map[id_selected];
       if (selected) {
-        requestDataSetSelect( id_selected );
+        console.log('selected data-set : ' + JSON.stringify(selected, null, 2));
+
         newman_data_source.setSelected(selected.data_set_label);
+
+        var datetime_min = new Date(selected.data_set_datetime_min, 0, 1, 0, 0, 0, 0);
+        var datetime_max = new Date(selected.data_set_datetime_max, 0, 1, 0, 0, 0, 0);
+        var default_start_date = new Date(selected.start_datetime_selected, 0, 1, 0, 0, 0, 0);
+        var default_end_date = new Date(selected.end_datetime_selected, 0, 1, 0, 0, 0, 0);
+
+        newman_datetime_range.setDateTimeRangeSlider(datetime_min, datetime_max, default_start_date, default_end_date);
+
+        requestDataSetSelect( id_selected );
+
+
       }
-
-
 
 
     }
@@ -689,8 +698,9 @@ var service_response_activity_account = (function () {
   function requestService(account) {
     console.log('service_response_activity_account.requestService('+account+')');
 
-    $.get( getServiceURL(account) ).then(function (response) {
+    $.when($.get( getServiceURL(account) )).done(function (response) {
       setResponse( response );
+      newman_activity_email.updateUIActivityEmail( response );
     });
   }
 
@@ -710,7 +720,7 @@ var service_response_activity_account = (function () {
       //console.log('_response_map: ' + JSON.stringify(_response_account_map, null, 2));
       _timeline = [];
       _.each(response.activities, function (element) {
-        _timeline.append( element.interval_end_datetime );
+        _timeline.push( element.interval_start_datetime );
       });
     }
   }

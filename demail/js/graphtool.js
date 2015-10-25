@@ -710,15 +710,11 @@ function requestSearch(field, search_text, load_on_response) {
 
       if (url_path.endsWith(current_data_set_url)) {
 
-        //var ranks = service_response_email_rank.getResponseMapValues();
         var ranks = newman_data_source.getSelectedTopHits(10);
         //console.log( 'ranks: ' + JSON.stringify(ranks, null, 2) );
-        if (ranks.length > 1) {
-          //ranks = ranks.splice(0, 10);
-          _.each(ranks, function (element) {
+        _.each(ranks, function (element) {
             requestSearch( 'all', element[0], false );
-          });
-        }
+        });
 
         var doc_count = 0;
         if (filtered_response.rows) {
@@ -2019,11 +2015,9 @@ $(function () {
     // initialize navigation-history
     history_nav.initialize();
 
-    // initialize dashboard
+    // initialize dashboard and its components and widgets
     drawDashboardCharts();
 
-    // initialize datetime-range slider binding
-    newman_datetime_range.initialize();
 
 
     $('a[data-toggle=\"tab\"]').on('shown.bs.tab', function (e) {
@@ -2032,22 +2026,14 @@ $(function () {
       console.log('tab_select ' + element_ID);
 
       if (element_ID.endsWith('dashboard_tab_content_outbound_activities')) {
-        if (dashboard_time_chart_outbound_activity) {
-          console.log('\tredraw() called');
+        console.log('\trevalidateUIActivityOutbound() called');
 
-          setTimeout(function () {
-            dashboard_time_chart_outbound_activity.groups([['acct-1', 'acct-2', 'acct-3', 'acct-4']])
-          }, 0);
-        }
+        newman_activity_email.revalidateUIActivityOutbound();
       }
       else if (element_ID.endsWith('dashboard_tab_content_inbound_activities')) {
-        if (dashboard_time_chart_inbound_activity) {
-          console.log('\tredraw() called');
+        console.log('\trevalidateUIActivityInbound() called');
 
-          setTimeout(function () {
-            dashboard_time_chart_inbound_activity.groups([['acct-1', 'acct-2', 'acct-3']])
-          }, 0);
-        }
+        newman_activity_email.revalidateUIActivityInbound();
       }
       else if (element_ID.endsWith('dashboard_tab_content_entities')) {
         if (dashboard_donut_chart_entity) {
@@ -2397,7 +2383,7 @@ $(function () {
       hasher.setHash(service_response_email_search_all.getServiceURLBase());
     }
 
-  }, 4000); //end of setTimeout
+  }, 6000); //end of setTimeout
 
 
 });

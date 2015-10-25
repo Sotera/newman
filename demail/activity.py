@@ -21,9 +21,9 @@ def _queryActivity(account_id):
     end_datetime = date(2012, 7, 1)
     for single_date in dateRange(start_datetime, end_datetime):
         date_as_text = single_date.strftime("%Y-%m-%d")
-        activity = {"account_id" : account_id,
-                    "interval_start_datatime" : date_as_text,
-                    "interval_end_datetime" : date_as_text,
+        activity = {
+                    "account_id" : account_id,
+                    "interval_start_datetime" : date_as_text,
                     "interval_inbound_count" : randint(0, 100),
                     "interval_outbound_count" : randint(0, 100)
                     }
@@ -46,14 +46,15 @@ def getAccount(*args, **kwargs):
         return tangelo.HTTPStatusCode(400, "invalid service call - missing account_id")
 
 
-    activity = get_daily_activity(data_set_id, "emails", actor_histogram, actor_email_addr="jeb@jeb.org", start=start_datetime, end=end_datetime, interval="week")
-
+    activity = get_daily_activity(data_set_id, account_id, "emails", actor_histogram, actor_email_addr=account_id, start=start_datetime, end=end_datetime, interval="week")
+    #activity = _queryActivity( account_id )
+    
     result = {
-              'account_id' : account_id,
-              'data_set_id' : data_set_id,
-              'account_start_datatime' : start_datetime,
-              'account_end_datetime' : end_datetime,
-              'activities' : activity
+              "account_id" : account_id,
+              "data_set_id" : data_set_id,
+              "account_start_datetime" : start_datetime,
+              "account_end_datetime" : end_datetime,
+              "activities" : activity
              }
         
     return result

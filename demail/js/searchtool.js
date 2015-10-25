@@ -58,9 +58,6 @@ function logUIEvent( ui_activity,
 }
 */
 
-var dashboard_time_chart_outbound_activity;
-var dashboard_time_chart_inbound_activity;
-
 var dashboard_donut_chart_entity;
 var dashboard_donut_chart_topic;
 var dashboard_donut_chart_domain;
@@ -808,10 +805,22 @@ var search_result = (function () {
 
           var parent_index = element.parent_index;
           var table_row;
-          if (parent_index > 0) {
+
+          if (parent_index == 0) {
+            // populate parent-node
+            table_row = $('<tr class=\"treegrid-' + row_index + '\"/>').append(
+              "<td><i class=\"fa fa-database\"></i> " + button_html + "</td>" +
+              "<td>" + checkbox_html + "</td>" +
+              "<td></td>" +
+              "<td></td>" +
+              "<td>" + element.document_count + "</td>" +
+              "<td>" + element.node_count + "</td>"
+            );
+          }
+          else if (parent_index == 1) {
             // populate leaf-node
             table_row = $('<tr class=\"treegrid-' + row_index + ' treegrid-parent-' + parent_index + '\"/>').append(
-              "<td>" + button_html + "</td>" +
+              "<td><i class=\"fa fa-user\"></i> " + button_html + "</td>" +
               "<td>" + checkbox_html + "</td>" +
               "<td>" + element.document_sent + "</td>" +
               "<td>" + element.document_received + "</td>" +
@@ -820,13 +829,13 @@ var search_result = (function () {
             );
 
           }
-          else {
-            // populate parent-node
-            table_row = $('<tr class=\"treegrid-' + row_index + '\"/>').append(
-              "<td>" + button_html + "</td>" +
+          else if (parent_index == 2) {
+            // populate leaf-node
+            table_row = $('<tr class=\"treegrid-' + row_index + ' treegrid-parent-' + parent_index + '\"/>').append(
+              "<td><i class=\"fa fa-files-o\"></i> " + button_html + "</td>" +
               "<td>" + checkbox_html + "</td>" +
-              "<td></td>" +
-              "<td></td>" +
+              "<td>" + element.document_sent + "</td>" +
+              "<td>" + element.document_received + "</td>" +
               "<td>" + element.document_count + "</td>" +
               "<td>" + element.node_count + "</td>"
             );
@@ -935,8 +944,8 @@ var search_result = (function () {
 
       }
 
-      console.log( 'data_list[' + data_list.length +']' );
-      //console.log( 'data_list : ' + JSON.stringify(data_list, null, 2) );
+      //console.log( 'newUI.data_list[' + data_list.length +']' );
+      //console.log( 'newUI.data_list : ' + JSON.stringify(data_list, null, 2) );
     }
 
   }
@@ -1771,224 +1780,42 @@ function drawChartRank( count ) {
  * @param count
  */
 function drawChartAccountActivity( count ) {
+  console.log('drawChartAccountActivity(' + count + ')');
 
   var chart_ui_id_text = 'chart_line_account_activities';
   var chart_ui_id_element = $('#' + chart_ui_id_text);
 
-  if (count > 0 && chart_ui_id_element) {
+  if (chart_ui_id_element) {
 
     var top_count = count;
 
-    if (top_count > 5) {
-      top_count = 5;
+    if (top_count > 4 || top_count < 2) {
+      top_count = 4;
     }
 
-    var ranks = service_response_email_rank.getResponseMapValues();
+    var top_rank_accounts = newman_data_source.getSelectedTopHits( count );
+    //console.log( 'ranks: ' + JSON.stringify(ranks, null, 2) );
+
     var top_accounts = [];
-
-      ranks = ranks.splice(0, top_count);
-      _.each(ranks, function (element) {
-
-        service_response_activity_account.requestService( element.email );
-        top_accounts.push( element.email );
-      });
-
-      var timeline_dates = service_response_activity_account.getResponseTimeline();
-      timeline_dates.shift('x')
-
-
-      console.log('draw_chart_account_activities()');
-
-
-      var chart_outbound = c3.generate({
-        bindto: '#chart_line_outbound_activities',
-        data: {
-          x: 'x',
-          columns: [timeline_dates],
-          type: 'bar'
-        },
-        axis : {
-          x : {
-            type : 'timeseries',
-            tick: {
-              //format: function (x) { return x.getFullYear(); }
-              format: '%Y-%m-%d' // format string is also available for timeseries data
-            }
-          }
-        },
-        grid: {
-          y: {
-            lines: [{value:0}]
-          }
-        }
-      });
-
-    _.each(top_accounts, function (item, index) {
-
-      setTimeout(function () {
-        var response = service_response_activity_account.getResponse( item );
-
-        var acct_label = response.account_id;
-        var data_column = [acct_label];
-        var data_colors = {};
-        data_colors[acct_label] = color_set_domain(index);
-
-        _.each(response.activities, function (acct_activity) {
-          data_column.append(acct_activity.interval_outbound_count);
-        });
-        console.log( 'account : ' + response.account_id + ' activities : ' + response.activities.length  );
-
-
-        chart_outbound.load({
-          columns: [data_column],
-          colors: data_colors
-        });
-
-      }, 1500);
-    });
-
-
-      var chart_inbound = c3.generate({
-        bindto: '#chart_line_inbound_activities',
-        data: {
-          x: 'x',
-          columns: [
-            ['x',
-              '2012-01-01', '2012-02-01', '2012-03-01', '2012-04-01', '2012-05-01', '2012-06-01', '2012-07-01', '2012-08-01', '2012-09-01', '2012-10-01', '2012-11-01', '2012-12-01',
-              '2013-01-01', '2013-02-01', '2013-03-01', '2013-04-01', '2013-05-01', '2013-06-01', '2013-07-01', '2013-08-01', '2013-09-01', '2013-10-01', '2013-11-01', '2013-12-01'
-            ],
-            ['acct-1', 30, 200, 200, 400, 150, 250, 30, 200, 200, 400, 150, 250, 30, 200, 200, 400, 150, 250, 150, 250, 30, 200, 200, 400],
-            ['acct-2', 130, 100, 100, 200, 150, 50, 130, 100, 100, 200, 150, 50, 130, 100, 100, 200, 150, 50, 150, 50, 130, 100, 100, 200],
-            ['acct-3', 230, 200, 200, 300, 250, 250, 230, 200, 200, 300, 250, 250, 230, 200, 200, 300, 250, 250, 300, 250, 250, 230, 200, 200]
-          ],
-          type: 'bar',
-
-          groups: [
-            ['acct-1', 'acct-2', 'acct-3']
-          ]
-        },
-        colors: {
-          'acct-1': color_set_domain(0),
-          'acct-2': color_set_domain(1),
-          'acct-3': color_set_domain(2)
-        },
-        axis : {
-          x : {
-            type : 'timeseries',
-            tick: {
-              //format: function (x) { return x.getFullYear(); }
-              format: '%Y-%m-%d' // format string is also available for timeseries data
-            }
-          }
-        },
-        grid: {
-          y: {
-            lines: [{value:0}]
-          }
-        }
-      });
-
-      /*
-      setTimeout(function () {
-        chart.groups([['acct-1', 'acct-2', 'acct-3']])
-      }, 1000);
-      */
-
-      /*
-      setTimeout(function () {
-        chart_outbound.groups([['acct-1', 'acct-2', 'acct-3', 'acct-4']])
-      }, 2000);
-
-      setTimeout(function () {
-        chart_inbound.groups([['acct-1', 'acct-2', 'acct-3']])
-      }, 2000);
-      */
-
-
-
-    dashboard_time_chart_outbound_activity = chart_outbound;
-    dashboard_time_chart_inbound_activity = chart_inbound;
-  }
-}
-
-/**
- * request and update date-time-range selector
- */
-function initDateTimeRange() {
-
-  var ui_id = '#date_range_slider';
-
-  if (ui_id) {
-
-
-    $.get('search/dates').then(function (response) {
-      console.log( 'initDateTimeRange()' );
-
-      //validate service-response
-      response = validateResponseDateRange( response );
-
-      var doc_dates = response.doc_dates;
-      var start_datetime = doc_dates[0].datetime;
-      var start_date_array = start_datetime.split('T')[0].split('-');
-      var start_date = new Date(parseInt(start_date_array[0]), parseInt(start_date_array[1])-1, parseInt(start_date_array[2]));
-
-      var end_datetime = doc_dates[doc_dates.length-1].datetime;
-      var end_date_array = end_datetime.split('T')[0].split('-');
-      var end_date = new Date(parseInt(end_date_array[0]), parseInt(end_date_array[1])-1, parseInt(end_date_array[2]));
-
-      console.log( '\tstart_date : ' + start_datetime + ' end_date : ' + end_datetime );
-
-      var default_interval_months = 3;
-      var default_start_year = end_date.getFullYear();
-      var default_start_month = end_date.getMonth() - default_interval_months;
-      if (default_start_month <= 0) {
-        default_start_month = default_start_month + 12;
-        default_start_year = default_start_year - 1;
-      }
-      var default_start_day = end_date.getDate();
-      if (default_start_day > 28) {
-        default_start_day = 28;
-      }
-
-      var default_start_date = new Date(default_start_year, default_start_month, default_start_day);
-
-
-
-      var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
-      //var months = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
-
-      $(ui_id).dateRangeSlider({
-        bounds: {min: start_date, max: end_date},
-        defaultValues: {min: default_start_date, max: end_date},
-        scales: [{
-          first: function(value){ return value; },
-          end: function(value) {return value; },
-          next: function(value){
-            var next = new Date(value);
-            return new Date(next.setMonth(value.getMonth() + 3));
-          },
-          label: function(value){
-            return months[value.getMonth()] + ', ' + value.getFullYear();
-          }
-        }]
-      });
-
-      newman_datetime_range.setDatetimeMinText(default_start_date.toISOString().substring(0, 10));
-      newman_datetime_range.setDatetimeMaxText(end_date.toISOString().substring(0, 10));
+    _.each(top_rank_accounts, function (element) {
+      var email_address = element[0];
+      var response = service_response_activity_account.requestService( email_address );
+      top_accounts.push( email_address );
 
     });
 
   }
 }
+
 
 /**
  * draw Morris Donut charts
  */
 function drawDashboardCharts() {
 
-  initDateTimeRange();
+  newman_datetime_range.initDateTimeRange();
 
-  drawChartAccountActivity(5);
+  drawChartAccountActivity(4);
   drawChartEntity(10);
   drawChartTopic(10);
   drawChartDomain(10);
