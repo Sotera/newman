@@ -12,7 +12,7 @@ var url_search_exportable = 'search/exportable/';
  */
 var service_response_email_search_all = (function () {
 
-  var _service_url = 'search/all/';
+  var _service_url = newman_search_filter.appendFilter( 'search' );
   var _service_url_init;
   var _is_init = true;
   var _response = {};

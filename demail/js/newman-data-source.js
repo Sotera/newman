@@ -77,7 +77,7 @@ var newman_data_source = (function () {
     var found = false;
     _.each(_data_source_list, function (element) {
 
-      if (element.uid === data_source.uid && element.url_path === data_source.url_path) {
+      if (element.uid === data_source.uid && element.label === data_source.label) {
         found = true;
       }
 
@@ -134,15 +134,13 @@ var newman_data_source = (function () {
 
 
   var refreshUI = function() {
-
-
-    console.log( 'all_data_source_hist[' + _data_source_list.length + ']' );
+    console.log( 'data_source_list[' + _data_source_list.length + ']' );
 
     clearUI();
 
     _.each(_data_source_list, function( element ) {
 
-      console.log( '\t' + element.label + ', ' + element.uid + ', ' + element.icon_class );
+      console.log( '\t' + element.label + ', ' + element.uid );
 
       var button = $('<button />', {
         type: 'button',
@@ -263,10 +261,11 @@ var newman_data_source = (function () {
       if (_data_source_selected) {
         data_set_id = _data_source_selected.uid;
       }
-
-      var data_source = getSelected();
-      if (data_source && data_source.uid) {
-        data_set_id = data_source.uid;
+      else {
+        var data_source = getSelected();
+        if (data_source && data_source.uid) {
+          data_set_id = data_source.uid;
+        }
       }
 
       if (url_path.indexOf('?') > 0) {

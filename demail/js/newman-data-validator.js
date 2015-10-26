@@ -647,9 +647,9 @@ function getURLParameter( url, parameter_key ) {
   if (url && parameter_key) {
     var url_parameter_list = url.split('&');
     for (var i = 0; i < url_parameter_list.length; i++) {
-      var parameter_name = url_parameter_list[i].split('=');
-      var key = parameter_name[0];
-      var value = parameter_name[1];
+      var parameter_name_list = url_parameter_list[i].split('=');
+      var key = parameter_name_list[0];
+      var value = parameter_name_list[1];
       //console.log('\tkey: ' + key + ' value: ' + value );
       if (key.endsWith( parameter_key )) {
         parameter_value = value;
@@ -657,4 +657,50 @@ function getURLParameter( url, parameter_key ) {
     }
   }
   return parameter_value;
+}
+
+/**
+ * return a path-value from a valid url
+ * @param a valid url
+ * @param a path index
+ * @returns path value
+ */
+function getURLPath( url, index ) {
+  if (url && index >= 0) {
+    var url_path = getURLPath(url);
+    if (url_path) {
+      url_path = trimURLPath( url_path );
+
+      var path_list = url_path.split('/');
+      return path_list[index];
+    }
+  }
+}
+
+function trimURLPath( url_path ) {
+  if (url_path.startsWith('/')) {
+    url_path = url_path.substring(1);
+  }
+
+  if (url_path.endsWith('/')) {
+    url_path = url_path.substring(0, url_path.length - 1);
+  }
+
+  return url_path;
+}
+
+function getURLParser( url ) {
+  var anchor = document.createElement("a");
+  anchor.href = url;
+  return anchor;
+}
+
+function getURLPath( url ) {
+  var link = getURLParser( url );
+  return link.pathname;
+}
+
+function getURLHost( url ) {
+  var link = getURLObject( url );
+  return link.host;
 }

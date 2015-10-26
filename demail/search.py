@@ -436,7 +436,7 @@ def search(*path_args, **param_args):
 
     #re-direct based on data_set_id
     if data_set_id != 'newman':
-        if path_args[0] == "all":
+        if path_args[0] == "text" or path_args[0] == "all":
             if len(path_args) == 1:
                 return {"graph":{"nodes":[], "links":[]}, "rows":[]}
             elif len(path_args) >= 2:

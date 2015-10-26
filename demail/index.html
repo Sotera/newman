@@ -528,30 +528,42 @@
                   <span class="checkbox-inline" >
                     <input type="checkbox" id="search_filter_node" style="margin: 0 0 0 -15px; height: 30px;" checked disabled />
 
-                    <!-- Start-Search-Aggregate-Data-Node-Filter -->
-                    <div class="dropdown" style="width: 100%; position:relative; display: inline-block;" id="data_node_type_selected">
+                    <!-- Start-Search-Aggregate-Search-Filter -->
+                    <div class="dropdown" style="width: 100%; position:relative; display: inline-block;" id="search_filter_selected">
                       <span class="dropdown-toggle btn btn-small outline" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px; color: #555555">
                         <i class="fa fa-user"></i> <i class="fa fa-envelope-o"></i> e-mail
                       </span>
-                      <ul class="dropdown-menu" style="width: 100%; padding: 2px 0px 2px 0px; border-radius: 4px;" id="data_node_type_list">
+                      <ul class="dropdown-menu" style="width: 100%; padding: 2px 0px 2px 0px; border-radius: 4px;" id="search_filter_list">
+                        <!--
                         <li style="line-height: 20px; text-align: left;">
-                          <button type="button" class="button-dropdown-menu-item" value="data_category_email" id="data_node_type_email">
-                            <i class="fa fa-envelope-o"></i> e-mail
+                          <button type="button" class="button-dropdown-menu-item" value="search_filter_email" id="search_filter_email">
+                            <i class="fa fa-envelope-o"></i> email
                           </button>
                         </li>
                         <li style="line-height: 20px; text-align: left;">
-                          <button type="button" class="button-dropdown-menu-item" value="data_category_email" id="data_node_type_text">
+                          <button type="button" class="button-dropdown-menu-item" value="search_filter_text" id="search_filter_text">
                             <i class="fa fa-terminal"></i> text
                           </button>
                         </li>
                         <li style="line-height: 20px; text-align: left;">
-                          <button type="button" class="button-dropdown-menu-item" value="data_category_document" id="data_node_type_document" style="color: #c3c1cd;">
-                            <i class="fa fa-file-text-o"></i> document
+                          <button type="button" class="button-dropdown-menu-item" value="search_filter_attach" id="search_filter_attach" style="color: #c3c1cd;">
+                            <i class="fa fa-paperclip"></i> attach
                           </button>
                         </li>
+                        <li style="line-height: 20px; text-align: left;">
+                          <button type="button" class="button-dropdown-menu-item" value="search_filter_entity" id="search_filter_entity" style="color: #c3c1cd;">
+                            <i class="fa fa-sitemap"></i> entity
+                          </button>
+                        </li>
+                        <li style="line-height: 20px; text-align: left;">
+                          <button type="button" class="button-dropdown-menu-item" value="search_filter_topic" id="search_filter_topic" style="color: #c3c1cd;">
+                            <i class="fa fa-list-ul"></i> topic
+                          </button>
+                        </li>
+                        -->
                       </ul>
                     </div>
-                    <!-- End-Search-Aggregate-Data-Node-Filter -->
+                    <!-- End-Search-Aggregate-Search-Filter -->
                   </span>
 
                 </div>
@@ -561,35 +573,25 @@
                   <span class="checkbox-inline" >
                     <input type="checkbox" id="search_filter_node_attribute" style="margin: 0 0 0 -15px; height: 30px;" />
 
-                    <!-- Start-Search-Aggregate-Data-Node-Attribute-Filter -->
-                    <div class="dropdown" style="width: 100%; position:relative; display: inline-block;" id="data_node_attribute_selected">
+                    <!-- Start-Search-Aggregate-Search-Sub-Filter -->
+                    <div class="dropdown" style="width: 100%; position:relative; display: inline-block;" id="search_sub_filter_selected">
                       <span class="dropdown-toggle btn btn-small outline" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px; color: #555555">
                         <i class="fa fa-files-o"></i> <i class="fa fa-terminal"></i> text
                       </span>
-                      <ul class="dropdown-menu" style="width: 100%; padding: 2px 0px 2px 0px; border-radius: 4px;" id="data_node_attribute_list">
+                      <ul class="dropdown-menu" style="width: 100%; padding: 2px 0px 2px 0px; border-radius: 4px;" id="search_sub_filter_list">
                         <li style="line-height: 20px; text-align: left;">
-                          <button type="button" class="button-dropdown-menu-item" value="data_category_email" id="data_node_attribute_text">
+                          <button type="button" class="button-dropdown-menu-item" value="search_sub_filter_text" id="search_sub_filter_text">
                             <i class="fa fa-terminal"></i> text
                           </button>
                         </li>
                         <li style="line-height: 20px; text-align: left;">
-                          <button type="button" class="button-dropdown-menu-item" value="data_category_email" id="data_node_attribute_attach">
+                          <button type="button" class="button-dropdown-menu-item" value="search_sub_filter_attach" id="search_sub_filter_attach" style="color: #c3c1cd;">
                             <i class="fa fa-paperclip"></i> attach
-                          </button>
-                        </li>
-                        <li style="line-height: 20px; text-align: left;">
-                          <button type="button" class="button-dropdown-menu-item" value="data_category_document" id="data_node_attribute_entity" style="color: #c3c1cd;">
-                            <i class="fa fa-sitemap"></i> entity
-                          </button>
-                        </li>
-                        <li style="line-height: 20px; text-align: left;">
-                          <button type="button" class="button-dropdown-menu-item" value="data_category_document" id="data_node_attribute_topic" style="color: #c3c1cd;">
-                            <i class="fa fa-list-ul"></i> topic
                           </button>
                         </li>
                       </ul>
                     </div>
-                    <!-- End-Search-Aggregate-Data-Node-Attribute-Filter -->
+                    <!-- End-Search-Aggregate-Search-Sub-Filter -->
                   </span>
 
 
@@ -1082,6 +1084,7 @@
 
     <script src="js/history-nav.js"></script>
     <script src="js/newman-data-validator.js"></script>
+    <script src="js/newman-search-filter.js"></script>
     <script src="js/newman-activity-email.js"></script>
     <script src="js/newman-data-source.js"></script>
     <script src="js/newman-datetime-range.js"></script>

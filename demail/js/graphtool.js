@@ -565,6 +565,7 @@ function showSearchPopup( search_field, search_text ) {
  */
 function searchByField( field ) {
 
+  /*
   var listItems = $('#search_field_list li');
   listItems.each(function(index, li) {
     $(li).removeClass('active')
@@ -595,13 +596,20 @@ function searchByField( field ) {
     field = 'all';
     $('#search_field_all').addClass('active');
   }
+   setSearchType( field );
+  */
+
+  if (!newman_search_filter.isValidFilter( field )) {
+    field = newman_search_filter.getSelectedFilter().label;
+  }
 
   search_result.clearAll();
-  setSearchType( field );
 
   var text_input = $("#txt_search").val();
-  if (text_input.length == 0){
+  requestSearch( field, text_input, false );
 
+  /*
+  if (text_input.length == 0){
     requestSearch( field, text_input, false);
   }
   else {
@@ -617,6 +625,7 @@ function searchByField( field ) {
     }
     //requestSearch( field, text_input, false);
   }
+  */
 
 }
 
@@ -649,8 +658,10 @@ function requestSearch(field, search_text, load_on_response) {
 
   console.log('\tsearch_text \'' + search_text + '\'');
 
-  var url_path = "search/search/" + field;
-  //console.log( '\turl :' + url_path );
+  var url_path = "search/search";
+  newman_search_filter.setSelectedFilter( field );
+  url_path = newman_search_filter.appendFilter( url_path );
+  console.log( '\turl : ' + url_path );
 
   if (search_text) {
     url_path = url_path +'/' + search_text;
@@ -1994,6 +2005,9 @@ var email_analytics_content = (function () {
 $(function () {
   "use strict";
 
+  // initialize search-filter
+  newman_search_filter.initFilter();
+
   //$.when(service_response_data_source.requestService()).done();
   service_response_data_source.requestService();
 
@@ -2100,12 +2114,14 @@ $(function () {
 
         if (event.keyCode === 13) {
 
-          searchByField('all');
+          var filter = newman_search_filter.getSelectedFilter().label;
+          searchByField( filter );
 
         }
         event.preventDefault();
       });
 
+      /*
       $('#search_field_all').on('click', function () {
         searchByField('all');
       });
@@ -2125,7 +2141,7 @@ $(function () {
       $('#search_field_entity').on('click', function () {
         searchByField('entity');
       });
-
+      */
 
       $("#search_form").submit(function (e) {
         return false;
@@ -2196,7 +2212,7 @@ $(function () {
 
       /* attach element event handlers */
       $("#submit_search").click(function () {
-        requestSearch('all', $("#search_text").val(), false);
+        requestSearch( newman_search_filter.getSelectedFilter().label , $("#search_text").val(), false);
       });
 
 
@@ -2350,7 +2366,7 @@ $(function () {
     }
 
     crossroads.addRoute("/search/{type}/:term:", function (type, term) {
-      var searchTypes = ['all', 'email', 'topic', 'entity', 'exportable', 'community'];
+      var searchTypes = ['text', 'all', 'email', 'attach', 'topic', 'entity', 'exportable', 'community'];
       term = term || "";
       type = type.toLowerCase();
       if (_.contains(searchTypes, type)) {
@@ -2359,7 +2375,7 @@ $(function () {
     });
 
     crossroads.addRoute("/email/{id}", function (id) {
-      requestSearch('all', id, true);
+      requestSearch('email', id, true);
       showEmailView(id);
     });
 

@@ -722,7 +722,7 @@ var search_result = (function () {
 
         var root_result = getRoot();
         if (!root_result) {
-          var data_set_id = newman_data_source.parseDataSource( url_path );
+          var data_set_id = data_set_selected.uid;
           if (!data_set_id) {
             data_set_id = newman_data_source.getDefaultDataSourceID();
           }
