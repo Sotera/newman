@@ -428,7 +428,7 @@ def querySearchResult(data_set_id, field, start_date, end_date, args_array):
 
     return results
 
-#GET /search/<data_set>/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
+#GET /search/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
 def search(*path_args, **param_args):
     tangelo.log("search.search(path_args[%s] %s)" % (len(path_args), str(path_args)))
 
@@ -439,8 +439,26 @@ def search(*path_args, **param_args):
         if path_args[0] == "all":
             if len(path_args) == 1:
                 return {"graph":{"nodes":[], "links":[]}, "rows":[]}
-            elif len(path_args) == 2:
+            elif len(path_args) >= 2:
+                #TODO implement search by text
+                return {"graph":{"nodes":[], "links":[]}, "rows":[]}
+        elif path_args[0] == "email":
+            if len(path_args) == 1:
+                return {"graph":{"nodes":[], "links":[]}, "rows":[]}
+            elif len(path_args) >= 2:
                 return get_graph_for_email_address(*path_args, **param_args)
+        elif path_args[0] == "entity":
+            if len(path_args) == 1:
+                return {"graph":{"nodes":[], "links":[]}, "rows":[]}
+            elif len(path_args) >= 2:
+                #TODO implement search by entity
+                return {"graph":{"nodes":[], "links":[]}, "rows":[]}
+        elif path_args[0] == "topic":
+            if len(path_args) == 1:
+                return {"graph":{"nodes":[], "links":[]}, "rows":[]}
+            elif len(path_args) >= 2:
+                #TODO implement search by topic
+                return {"graph":{"nodes":[], "links":[]}, "rows":[]}
 
     #defaulting to old code
     tangelo.log("\tdefaulting to old code...")
