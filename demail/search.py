@@ -5,7 +5,7 @@ from elasticsearch import Elasticsearch
 from newman.db.newman_db import newman_connector
 from newman.db.mysql import execute_query
 from newman.utils.functions import nth, rest, head, jsonGet
-from es_search import get_graph_for_email_address
+from es_search import get_graph_for_email_address, get_top_email_hits_for_text_query
 from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime
 
@@ -480,6 +480,7 @@ def getDates(*args, **kwargs):
 actions = {
     "search": search,
     "search_user": get_graph_for_email_address,
+    "search_text": get_top_email_hits_for_text_query,
     "dates" : getDates
 }
 

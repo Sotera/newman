@@ -4,6 +4,7 @@ import urllib
 from elasticsearch import Elasticsearch
 from newman.utils.functions import nth
 from param_utils import parseParamDatetime
+from es_queries import _build_email_query
 
 # contains a cache of all email_address.addr, email_address
 _EMAIL_ADDR_CACHE = None
@@ -66,6 +67,7 @@ def _search_ranked_email_addrs(index, start, end, size):
     graph_body= {"fields": _graph_fields, "sort" : _sort_email_addrs_by_total, "query" : _query_all}
     return es.search(index=index, doc_type="email_address", size=size, body=graph_body)
 
+# DEPRECATED -- this is being replaced by _create_graph_from_query
 # This will generate the graph structure for a specific email address.  Will aply date filter and term query.
 def _create_graph_from_email(index, email_address, search_terms,start, end, size=2000):
 
@@ -115,10 +117,45 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
 
     return {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in emails]}
 
+
+def _query_emails(index, size, emails_query):
+    es = Elasticsearch()
+    emails_resp = es.search(index=index, doc_type="emails", size=size, fields=_row_fields, body=emails_query)
+    tangelo.log("es_search._create_graph_from_query(total document hits = %s)" % emails_resp["hits"]["total"])
+
+    return [_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]
+
+# This will generate the graph structure for a specific email address.  Will aply date filter and term query.
+def _build_graph_for_emails(emails):
+    nodes = []
+    edge_map = {}
+    addr_index = {}
+    for email in emails:
+        from_addr = email["from"]
+        if from_addr not in _EMAIL_ADDR_CACHE:
+            tangelo.log("WARNING: From email address not found in cache <%s>" % email)
+            continue;
+
+        if from_addr not in addr_index:
+            nodes.append(_EMAIL_ADDR_CACHE[from_addr])
+            addr_index[from_addr] = len(nodes)
+        for rcvr_addr in email["to"]+email["cc"]+email["bcc"]:
+            if rcvr_addr not in addr_index:
+                nodes.append(_EMAIL_ADDR_CACHE[rcvr_addr])
+                addr_index[rcvr_addr] = len(nodes)
+            #TODO reduce by key instead of mapping?  src->target and sum on value
+            edge_key = from_addr+"#"+rcvr_addr
+            if edge_key not in edge_map:
+                edge_map[edge_key] = {"source" : addr_index[from_addr],"target": addr_index[rcvr_addr],"value": 1}
+            else:
+                edge_map[edge_key]["value"]=edge_map[edge_key]["value"]+1
+
+    return {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in emails]}
+
 # GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
 # build a graph for a specific email address.
 # args should be a list of terms to search for in any document field
-def get_graph_for_email_address(*args, **kwargs):
+def get_graph_for_email_address_old(*args, **kwargs):
     tangelo.log("es_search.get_graph_for_email_address(args: %s kwargs: %s)" % (str(args), str(kwargs)))
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
@@ -133,6 +170,49 @@ def get_graph_for_email_address(*args, **kwargs):
         return tangelo.HTTPStatusCode(400, "invalid service call - missing email address")
 
     return _create_graph_from_email(data_set_id, email_address, search_terms, start_datetime, end_datetime, size)
+
+# GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
+# build a graph for a specific email address.
+# args should be a list of terms to search for in any document field
+def get_graph_for_email_address(*args, **kwargs):
+    tangelo.log("es_search.get_graph_for_email_address(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+
+    # TODO this needs to come fromm UI
+    size = size if size >500 else 2500
+
+    email_address=urllib.unquote(nth(args, 1, ''))
+
+    if not email_address:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing email address")
+    query  = _build_email_query(email_addrs=[email_address], query_terms='', date_bounds=(start_datetime, end_datetime))
+    tangelo.log("es_search.get_graph_for_email_address(query: %s)" % (query))
+
+    return _build_graph_for_emails(_query_emails(data_set_id, size, query))
+
+# GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
+# build a graph for a specific email address.
+# args should be a list of terms to search for in any document field
+def get_top_email_hits_for_text_query(*args, **kwargs):
+    tangelo.log("es_search.get_graph_for_text_query(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+
+    # TODO this needs to come fromm UI
+    size = size if size >500 else 2500
+
+    search_terms=urllib.unquote(nth(args, 1, ''))
+
+    if not search_terms:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing email address")
+
+    query  = _build_email_query(email_addrs=[], query_terms=search_terms, date_bounds=(start_datetime, end_datetime))
+    tangelo.log("es_search.get_graph_for_text_query(query: %s)" % (query))
+
+    emails = _query_emails(data_set_id, size, query)
+    return {"emails": [[row["subject"],row["from"],row["num"],0,0,0,0,0] for row in emails]}
+
 
 def initialize_email_addr_cache(index):
     tangelo.log("INITIALIZING CACHE")
@@ -150,10 +230,10 @@ def initialize_email_addr_cache(index):
     tangelo.log("done: %s"% num)
     return {"acknowledge" : "ok"}
 
-# if __name__ == "__main__":
-    # res = buildGraph()
-    # _email_addr_cache = _load_email_addr_cache("sample")
-    # res = _create_graph_from_email("sample","tom.barry@myflorida.com","2001","now", terms=["swamped"])
-    # text_file = open("/home/elliot/graph.json", "w")
-    # text_file.write(json.dumps(res))
-    # text_file.close()
+if __name__ == "__main__":
+    print "foo"
+# _email_addr_cache = _load_email_addr_cache("sample")
+# res = _create_graph_from_email("sample","tom.barry@myflorida.com","2001","now", terms=["swamped"])
+# text_file = open("/home/elliot/graph.json", "w")
+# text_file.write(json.dumps(res))
+# text_file.close()
