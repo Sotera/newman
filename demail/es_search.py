@@ -210,10 +210,10 @@ def get_top_email_hits_for_text_query(*args, **kwargs):
     query  = _build_email_query(email_addrs=[], query_terms=search_terms, date_bounds=(start_datetime, end_datetime))
     tangelo.log("es_search.get_graph_for_text_query(query: %s)" % (query))
 
-    emails = _query_emails(data_set_id, size, query)
+    return _build_graph_for_emails(_query_emails(data_set_id, size, query))
 
     # TODO Neither of these are correct -- need to figure out this calling convention
-    return {"graph":{"nodes":[], "links":[]}, "rows":emails}
+    # return {"graph":{"nodes":[], "links":[]}, "rows":emails}
     # return {"emails": [[row["subject"],row["from"],row["num"],0,0,0,0,0] for row in emails]}
 
 

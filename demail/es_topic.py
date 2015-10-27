@@ -6,7 +6,7 @@ from newman.utils.functions import nth
 from param_utils import parseParamDatetime
 
 
-_sort_email_addrs_by_total={ "_script": { "script_file": "email_addr-sent-rcvd-sum", "lang": "groovy", "type": "number","order": "desc" }}
+_sort_lda_clusters={"query": { "match_all": {}},"sort":{ "_script": { "script_file": "lda-cluster-sum-score", "lang": "groovy", "type": "number","order": "desc" }}}
 
 def get_lda_clusters(index):
     es = Elasticsearch()
