@@ -709,7 +709,7 @@ function requestSearch(field, search_text, load_on_response) {
         url_path,
         field);
 
-      showSearchPopup( field, decodeURIComponent(search_text) );
+      //showSearchPopup( field, decodeURIComponent(search_text) );
       loadSearchResult( url_path );
 
       is_load_on_response = false;
@@ -724,7 +724,7 @@ function requestSearch(field, search_text, load_on_response) {
         var ranks = newman_data_source.getSelectedTopHits(10);
         //console.log( 'ranks: ' + JSON.stringify(ranks, null, 2) );
         _.each(ranks, function (element) {
-            requestSearch( 'all', element[0], false );
+            requestSearch( 'email', element[0], false );
         });
 
         var doc_count = 0;
@@ -732,9 +732,9 @@ function requestSearch(field, search_text, load_on_response) {
           doc_count = filtered_response.rows.length;
         }
 
-        var node_count = 0;
+        var associate_count = 0;
         if (filtered_response.graph && filtered_response.graph.nodes) {
-          node_count = filtered_response.graph.nodes.length;
+          associate_count = filtered_response.graph.nodes.length;
         }
 
         var data_set_id = newman_data_source.parseDataSource( url_path );
@@ -743,8 +743,10 @@ function requestSearch(field, search_text, load_on_response) {
         }
         console.log('data_set_id: ' + data_set_id);
 
+        var filter_icon = newman_search_filter.parseFilterIconClass( url_path );
+
         var root_result = search_result.setRoot(
-          '* (' + data_set_selected.label + ')',
+          '(' + data_set_selected.label + ')',
           '',
           'text',
           '',
@@ -752,7 +754,9 @@ function requestSearch(field, search_text, load_on_response) {
           data_set_id,
           'pst',
           doc_count,
-          node_count
+          associate_count,
+          0,
+          filter_icon
         );
 
       }
@@ -763,9 +767,9 @@ function requestSearch(field, search_text, load_on_response) {
           doc_count = filtered_response.rows.length;
         }
 
-        var node_count = 0;
+        var associate_count = 0;
         if (filtered_response.graph && filtered_response.graph.nodes) {
-          node_count = filtered_response.graph.nodes.length;
+          associate_count = filtered_response.graph.nodes.length;
         }
 
         var doc_sent = service_response_email_rank.getDocSent( search_text );
@@ -776,6 +780,9 @@ function requestSearch(field, search_text, load_on_response) {
         if (!data_set_id) {
           data_set_id = newman_data_source.getDefaultDataSourceID();
         }
+
+        var filter_icon = newman_search_filter.parseFilterIconClass( url_path );
+
         search_result.push(
           search_text,
           search_text,
@@ -787,8 +794,10 @@ function requestSearch(field, search_text, load_on_response) {
           doc_count,
           doc_sent,
           doc_received,
-          node_count,
-          rank
+          associate_count,
+          0,
+          rank,
+          filter_icon
         );
 
       }

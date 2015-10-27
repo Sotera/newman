@@ -665,9 +665,9 @@ function getURLParameter( url, parameter_key ) {
  * @param a path index
  * @returns path value
  */
-function getURLPath( url, index ) {
+function getURLPathByIndex( url, index ) {
   if (url && index >= 0) {
-    var url_path = getURLPath(url);
+    var url_path = getURLPathName(url);
     if (url_path) {
       url_path = trimURLPath( url_path );
 
@@ -695,7 +695,7 @@ function getURLParser( url ) {
   return anchor;
 }
 
-function getURLPath( url ) {
+function getURLPathName( url ) {
   var link = getURLParser( url );
   return link.pathname;
 }

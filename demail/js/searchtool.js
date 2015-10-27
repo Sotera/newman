@@ -433,8 +433,10 @@ var search_result = (function () {
                          document_count,
                          document_sent,
                          document_received,
-                         node_count,
-                         rank ) {
+                         associate_count,
+                         attach_count,
+                         rank,
+                         icon_class ) {
     if (!label) {
       if (search_text) {
         label = search_text;
@@ -478,14 +480,14 @@ var search_result = (function () {
       document_received = 0;
     }
 
-    if (node_count) {
-      node_count = parseInt( node_count );
-      if (node_count < 0 ) {
-        node_count = 0;
+    if (associate_count) {
+      associate_count = parseInt( associate_count );
+      if (associate_count < 0 ) {
+        associate_count = 0;
       }
     }
     else {
-      node_count = 0;
+      associate_count = 0;
     }
 
     if (rank) {
@@ -520,8 +522,10 @@ var search_result = (function () {
       "document_count" : document_count,
       "document_sent" : document_sent,
       "document_received" : document_received,
-      "node_count" : node_count,
+      "associate_count" : associate_count,
+      "attach_count" : attach_count,
       "rank" : rank,
+      "icon_class" : icon_class
     }
   }
 
@@ -535,8 +539,10 @@ var search_result = (function () {
                         document_count,
                         document_sent,
                         document_received,
-                        node_count,
-                        rank ) {
+                        associate_count,
+                        attach_count,
+                        rank,
+                        icon_class ) {
     //console.log('push( ' + label + ', ' + search_text + ', ' + search_field + ', ' + url + ' )');
 
     var new_result = result( decodeURIComponent(label),
@@ -549,8 +555,10 @@ var search_result = (function () {
                              document_count,
                              document_sent,
                              document_received,
-                             node_count,
-                             rank );
+                             associate_count,
+                             attach_count,
+                             rank,
+                             icon_class );
 
     if (!contains(new_result)) {
       if (_current_list.length == _current_list_max) {
@@ -574,21 +582,27 @@ var search_result = (function () {
                            data_source_id,
                            data_source_category,
                            document_count,
-                           node_count ) {
+                           associate_count,
+                           attach_count,
+                           icon_class ) {
     console.log('setRoot( ' + label + ', ' + data_source_id + ', ' + search_field + ', ' + url + ' )');
 
-    _current_list_root = result( decodeURIComponent(label),
-                          decodeURIComponent(search_text),
-                          search_field,
-                          description,
-                          url,
-                          data_source_id,
-                          data_source_category,
-                          document_count,
-                          0,
-                          0,
-                          node_count,
-                          0.0 );
+    _current_list_root = result(
+      decodeURIComponent(label),
+      decodeURIComponent(search_text),
+      search_field,
+      description,
+      url,
+      data_source_id,
+      data_source_category,
+      document_count,
+      0,
+      0,
+      associate_count,
+      attach_count,
+      0.0,
+      icon_class
+    );
 
 
     return clone(_current_list_root);
@@ -728,7 +742,7 @@ var search_result = (function () {
           }
 
           root_result = setRoot(
-            '* (' + data_set_selected.label + ')',
+            '(' + data_set_selected.label + ')',
             '',
             'text',
             '',
@@ -736,7 +750,9 @@ var search_result = (function () {
             data_set_id,
             'pst',
             0,
-            0
+            0,
+            0,
+            'fa fa-user'
           );
         }
 
@@ -809,35 +825,38 @@ var search_result = (function () {
           if (parent_index == 0) {
             // populate parent-node
             table_row = $('<tr class=\"treegrid-' + row_index + '\"/>').append(
-              "<td><i class=\"fa fa-database\"></i> " + button_html + "</td>" +
-              "<td>" + checkbox_html + "</td>" +
+              "<td><i class=\"fa fa-database\"></i> " + "<i class=\"" + element.icon_class + "\"></i> " + button_html + "</td>" +
+              "<td></td>" +
               "<td></td>" +
               "<td></td>" +
               "<td>" + element.document_count + "</td>" +
-              "<td>" + element.node_count + "</td>"
+              "<td>" + element.associate_count + "</td>" +
+              "<td>" + checkbox_html + "</td>"
             );
           }
           else if (parent_index == 1) {
             // populate leaf-node
             table_row = $('<tr class=\"treegrid-' + row_index + ' treegrid-parent-' + parent_index + '\"/>').append(
-              "<td><i class=\"fa fa-user\"></i> " + button_html + "</td>" +
-              "<td>" + checkbox_html + "</td>" +
+              "<td><i class=\"" + element.icon_class + "\"></i> " + button_html + "</td>" +
               "<td>" + element.document_sent + "</td>" +
               "<td>" + element.document_received + "</td>" +
+              "<td>" + element.attach_count + "</td>" +
               "<td>" + element.document_count + "</td>" +
-              "<td>" + element.node_count + "</td>"
+              "<td>" + element.associate_count + "</td>" +
+              "<td>" + checkbox_html + "</td>"
             );
 
           }
           else if (parent_index == 2) {
             // populate leaf-node
             table_row = $('<tr class=\"treegrid-' + row_index + ' treegrid-parent-' + parent_index + '\"/>').append(
-              "<td><i class=\"fa fa-files-o\"></i> " + button_html + "</td>" +
-              "<td>" + checkbox_html + "</td>" +
+              "<td><i class=\"" + element.icon_class + "\"></i> " + button_html + "</td>" +
               "<td>" + element.document_sent + "</td>" +
               "<td>" + element.document_received + "</td>" +
+              "<td>" + element.attach_count + "</td>" +
               "<td>" + element.document_count + "</td>" +
-              "<td>" + element.node_count + "</td>"
+              "<td>" + element.associate_count + "</td>" +
+              "<td>" + checkbox_html + "</td>"
             );
           }
 
@@ -909,7 +928,7 @@ var search_result = (function () {
           "<i class=\"fa fa-envelope-o \"></i>" + "  document  " + element.document_count + "  " +
           "<i class=\"fa fa-expand \"></i>" + "  sent  " + element.document_sent + "  " +
           "<i class=\"fa fa-compress \"></i>" + "  received  " + element.document_received + "  " +
-          "<i class=\"fa fa-user \"></i>" + "  account  " + element.node_count + "  " +
+          "<i class=\"fa fa-user \"></i>" + "  account  " + element.associate_count + "  " +
           "</p>" +
           "</a>"
           );
