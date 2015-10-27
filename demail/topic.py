@@ -9,8 +9,6 @@ import json
 from urllib import unquote
 
 
-
-
 #GET /category/<category>
 # returns topic in sorted order by the idx
 def topic_list(*args):

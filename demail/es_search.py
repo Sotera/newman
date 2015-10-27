@@ -121,7 +121,7 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
 def _query_emails(index, size, emails_query):
     es = Elasticsearch()
     emails_resp = es.search(index=index, doc_type="emails", size=size, fields=_row_fields, body=emails_query)
-    tangelo.log("es_search._create_graph_from_query(total document hits = %s)" % emails_resp["hits"]["total"])
+    tangelo.log("es_search._query_emails(total document hits = %s)" % emails_resp["hits"]["total"])
 
     return [_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]
 
@@ -195,7 +195,7 @@ def get_graph_for_email_address(*args, **kwargs):
 # build a graph for a specific email address.
 # args should be a list of terms to search for in any document field
 def get_top_email_hits_for_text_query(*args, **kwargs):
-    tangelo.log("es_search.get_graph_for_text_query(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.log("es_search.get_top_email_hits_for_text_query(args: %s kwargs: %s)" % (str(args), str(kwargs)))
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
@@ -205,13 +205,16 @@ def get_top_email_hits_for_text_query(*args, **kwargs):
     search_terms=urllib.unquote(nth(args, 1, ''))
 
     if not search_terms:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing email address")
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing search term(s)")
 
     query  = _build_email_query(email_addrs=[], query_terms=search_terms, date_bounds=(start_datetime, end_datetime))
     tangelo.log("es_search.get_graph_for_text_query(query: %s)" % (query))
 
     emails = _query_emails(data_set_id, size, query)
-    return {"emails": [[row["subject"],row["from"],row["num"],0,0,0,0,0] for row in emails]}
+
+    # TODO Neither of these are correct -- need to figure out this calling convention
+    return {"graph":{"nodes":[], "links":[]}, "rows":emails}
+    # return {"emails": [[row["subject"],row["from"],row["num"],0,0,0,0,0] for row in emails]}
 
 
 def initialize_email_addr_cache(index):
@@ -230,8 +233,8 @@ def initialize_email_addr_cache(index):
     tangelo.log("done: %s"% num)
     return {"acknowledge" : "ok"}
 
-if __name__ == "__main__":
-    print "foo"
+# if __name__ == "__main__":
+#     print "foo"
 # _email_addr_cache = _load_email_addr_cache("sample")
 # res = _create_graph_from_email("sample","tom.barry@myflorida.com","2001","now", terms=["swamped"])
 # text_file = open("/home/elliot/graph.json", "w")

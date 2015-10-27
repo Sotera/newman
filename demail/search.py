@@ -440,8 +440,7 @@ def search(*path_args, **param_args):
             if len(path_args) == 1:
                 return {"graph":{"nodes":[], "links":[]}, "rows":[]}
             elif len(path_args) >= 2:
-                #TODO implement search by text
-                return {"graph":{"nodes":[], "links":[]}, "rows":[]}
+                return get_top_email_hits_for_text_query(*path_args, **param_args)
         elif path_args[0] == "email":
             if len(path_args) == 1:
                 return {"graph":{"nodes":[], "links":[]}, "rows":[]}
