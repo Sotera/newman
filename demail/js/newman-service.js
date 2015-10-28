@@ -43,7 +43,7 @@ var newman_service_email_search_all = (function () {
   }
 
   function requestService() {
-    console.log('service_response_email_search_all.requestService()');
+    console.log('newman_service_email_search_all.requestService()');
 
     $.get( getServiceURL() ).then(function (response) {
       setResponse( response );
@@ -182,7 +182,7 @@ var newman_service_email_rank = (function () {
   }
 
   function requestService() {
-    console.log('service_response_email_rank.requestService()');
+    console.log('newman_service_email_rank.requestService()');
 
     $.get(getServiceURL()).then(function (response) {
 
@@ -300,7 +300,7 @@ var newman_service_email_exportable = (function () {
   var _not_exportable_html = '';
 
   function requestService() {
-    console.log('service_response_email_exportable.requestService()');
+    console.log('newman_service_email_exportable.requestService()');
 
     $.get('email/exportable').then(function (response) {
       setResponse( response );
@@ -417,7 +417,7 @@ var newman_service_email_pertinence = (function () {
   var _unknown_pertinence_html = '';
 
   function requestService() {
-    console.log('service_response_email_pertinence.requestService()');
+    console.log('newman_service_email_pertinence.requestService()');
 
     $.get('email/pertinence').then(function (response) {
       setResponse( response );
@@ -527,7 +527,7 @@ var newman_service_data_source = (function () {
   var _data_set_map = {};
 
   function requestService() {
-    console.log('service_response_data_source.requestService()');
+    console.log('newman_service_data_source.requestService()');
 
     $.when($.get('datasource/all')).done(function (response) {
       setResponse( response );
@@ -696,7 +696,7 @@ var newman_service_activity_account = (function () {
   }
 
   function requestService(account) {
-    console.log('service_response_activity_account.requestService('+account+')');
+    console.log('newman_service_activity_account.requestService('+account+')');
 
     $.when($.get( getServiceURL(account) )).done(function (response) {
     //$.get( getServiceURL(account) ).then(function (response) {

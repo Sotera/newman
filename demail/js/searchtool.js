@@ -422,6 +422,7 @@ var search_result = (function () {
   var _current_list = [];
   var _current_list_root;
   var _ui_appendable;
+  var _ui_container;
 
   var result = function( label,
                          search_text,
@@ -615,6 +616,7 @@ var search_result = (function () {
   var clearAll = function () {
     //console.log('clearAll()');
     _current_list = [];
+    clearUI();
   }
 
   var pop = function () {
@@ -695,7 +697,8 @@ var search_result = (function () {
     return result;
   };
 
-  var setUI = function( new_ui_appendable ) {
+  var setUI = function( new_ui_container, new_ui_appendable ) {
+    _ui_container = new_ui_container;
     _ui_appendable = new_ui_appendable;
   }
 
@@ -949,6 +952,7 @@ var search_result = (function () {
 
       var ui_container_treetable = $('#search_result_treetable');
       var ui_container_treetable_body = $('#search_result_treetable_body');
+      setUI(ui_container_treetable, ui_container_treetable_body);
 
       if (ui_container_treetable && ui_container_treetable_body) {
         ui_container_treetable_body.empty();
@@ -972,15 +976,14 @@ var search_result = (function () {
   var clearUI = function () {
 
     if(_ui_appendable) {
-      console.log('clearUI()');
+      //console.log('clearUI()');
+      _ui_appendable.empty();
 
-      //ui_appendable.empty();
-
+      /*
       _ui_appendable.children().each(function () {
         $(this).remove();
       });
-
-
+      */
     }
   }
 
@@ -1829,14 +1832,17 @@ function drawChartAccountActivity( count ) {
 }
 */
 
+function loadDashboardTimelineActivity() {
+  newman_datetime_range.initDateTimeRange();
+  newman_activity_email.displayUIActivityEmail(4);
+}
 
 /**
  * draw Morris Donut charts
  */
 function drawDashboardCharts() {
 
-  newman_datetime_range.initDateTimeRange();
-  newman_activity_email.displayUIActivityEmail(4);
+  loadDashboardTimelineActivity();
 
   drawChartEntity(10);
   drawChartTopic(10);

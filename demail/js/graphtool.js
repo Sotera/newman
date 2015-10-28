@@ -2017,10 +2017,10 @@ $(function () {
   // initialize search-filter
   newman_search_filter.initFilter();
 
-  //$.when(service_response_data_source.requestService()).done();
+  //$.when(newman_service_data_source.requestService()).done(function() {
   newman_service_data_source.requestService();
 
-  setTimeout(function () {
+  setTimeout(function() {
 
 
     newman_service_email_rank.requestService();
@@ -2040,7 +2040,6 @@ $(function () {
 
     // initialize dashboard and its components and widgets
     drawDashboardCharts();
-
 
 
     $('a[data-toggle=\"tab\"]').on('shown.bs.tab', function (e) {
@@ -2124,33 +2123,33 @@ $(function () {
         if (event.keyCode === 13) {
 
           var filter = newman_search_filter.getSelectedFilter().label;
-          searchByField( filter );
+          searchByField(filter);
 
         }
         event.preventDefault();
       });
 
       /*
-      $('#search_field_all').on('click', function () {
-        searchByField('all');
-      });
+       $('#search_field_all').on('click', function () {
+       searchByField('all');
+       });
 
-      $('#search_field_email').on('click', function () {
-        searchByField('email');
-      });
+       $('#search_field_email').on('click', function () {
+       searchByField('email');
+       });
 
-      $('#search_field_topic').on('click', function () {
-        searchByField('topic');
-      });
+       $('#search_field_topic').on('click', function () {
+       searchByField('topic');
+       });
 
-      $('#search_field_community').on('click', function () {
-        searchByField('community');
-      });
+       $('#search_field_community').on('click', function () {
+       searchByField('community');
+       });
 
-      $('#search_field_entity').on('click', function () {
-        searchByField('entity');
-      });
-      */
+       $('#search_field_entity').on('click', function () {
+       searchByField('entity');
+       });
+       */
 
       $("#search_form").submit(function (e) {
         return false;
@@ -2215,13 +2214,13 @@ $(function () {
 
       $('#top-entities').append(waiting_bar);
 
-      draw_entity_chart();
-      draw_rank_chart();
-      draw_topic_tab();
+      //draw_entity_chart();
+      //draw_rank_chart();
+      //draw_topic_tab();
 
       /* attach element event handlers */
       $("#submit_search").click(function () {
-        requestSearch( newman_search_filter.getSelectedFilter().label , $("#search_text").val(), false);
+        requestSearch(newman_search_filter.getSelectedFilter().label, $("#search_text").val(), false);
       });
 
 
@@ -2409,6 +2408,6 @@ $(function () {
     }
 
   }, 6000); //end of setTimeout
-
+  //});
 
 });

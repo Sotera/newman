@@ -193,11 +193,24 @@ var newman_data_source = (function () {
     if (_data_source_selected) {
       _default_data_set_id = _data_source_selected.uid;
 
+      $('#data_source_selected').find('.dropdown-toggle').html(  '<span class=\"fa fa-database\"></span> ' + label );
+
       if (request_enabled) {
         newman_service_data_source.requestDataSetSelect(_data_source_selected.uid);
+
+        setTimeout(function() {
+
+          search_result.clearAll();
+          requestSearch(newman_search_filter.getSelectedFilter().label, $("#search_text").val(), false);
+
+          loadDashboardTimelineActivity();
+
+          //drawDashboardCharts();
+        }, 2000);
+
       }
 
-      $('#data_source_selected').find('.dropdown-toggle').html(  '<span class=\"fa fa-database\"></span> ' + label );
+
     }
 
   }
