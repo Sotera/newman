@@ -56,11 +56,11 @@ function updateDataTableColumn( column_index, value_map ) {
           if (target) {
             if (target === 'true') {
               //console.log('updateDataTableColumn[' + row_index + ', ' + column_index + '] value \'' + value + '\' key \'' + key + '\' target \'' + target + '\'');
-              table.cell(row_index, column_index).data(service_response_email_exportable.getExportableHTML());
+              table.cell(row_index, column_index).data(newman_service_email_exportable.getExportableHTML());
 
             }
             else {
-              table.cell(row_index, column_index).data(service_response_email_exportable.getNotExportableHTML());
+              table.cell(row_index, column_index).data(newman_service_email_exportable.getNotExportableHTML());
 
             }
           }
@@ -175,14 +175,14 @@ function populateDataTable( data_rows ) {
       attach_count = '';
     }
 
-    var exportable_icon = service_response_email_exportable.getNotExportableHTML();
-    if (service_response_email_exportable.isExportable(row.num)) {
-      exportable_icon = service_response_email_exportable.getExportableHTML();
+    var exportable_icon = newman_service_email_exportable.getNotExportableHTML();
+    if (newman_service_email_exportable.isExportable(row.num)) {
+      exportable_icon = newman_service_email_exportable.getExportableHTML();
     }
 
-    var pertinence_icon = service_response_email_pertinence.getUnknownPertinentHTML();
-    if (service_response_email_pertinence.isPertinent(row.num)) {
-      pertinence_icon = service_response_email_pertinence.getPertinentHTML();
+    var pertinence_icon = newman_service_email_pertinence.getUnknownPertinentHTML();
+    if (newman_service_email_pertinence.isPertinent(row.num)) {
+      pertinence_icon = newman_service_email_pertinence.getPertinentHTML();
     }
 
     return [ row.datetime, row.from, recipient_count, row.bodysize, attach_count, row.subject, exportable_icon, pertinence_icon, row.num ];
@@ -320,7 +320,7 @@ function table_mark_exportable(is_marked, id_list_selected){
     value_map[value] = String(is_marked);
   });
 
-  var exportable_list = service_response_email_exportable.getResponseMapKeys();
+  var exportable_list = newman_service_email_exportable.getResponseMapKeys();
   _.each(exportable_list, function (value) {
     var existing_value = value_map[value];
     if (!existing_value) {

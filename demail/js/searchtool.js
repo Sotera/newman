@@ -503,8 +503,8 @@ var search_result = (function () {
     var key = label.replace(' ', '_');
     var parent_index = 1;
 
-    if (url.endsWith(service_response_email_search_all.getServiceURL()) ||
-        url.endsWith(service_response_email_search_all.getServiceURLInit())) {
+    if (url.endsWith(newman_service_email_search_all.getServiceURL()) ||
+        url.endsWith(newman_service_email_search_all.getServiceURLInit())) {
       parent_index = 0;
     }
     //console.log('result( ' + key + ', ' + data_source_id + ', ' + parent_index + ', ' + url + ' )');
@@ -746,7 +746,7 @@ var search_result = (function () {
             '',
             'text',
             '',
-            service_response_email_search_all.getServiceURL(),
+            newman_service_email_search_all.getServiceURL(),
             data_set_id,
             'pst',
             0,
@@ -1618,14 +1618,14 @@ function drawChartRank( count ) {
 
     $.get('email/rank').then(function (response) {
 
-      var ranks = service_response_email_rank.getResponseMapValues();
+      var ranks = newman_service_email_rank.getResponseMapValues();
 
       if (ranks) {
         console.log('loaded service_response_email_rank[' + ranks.length + ']');
       }
       else {
-        service_response_email_rank.setResponse(response);
-        ranks = service_response_email_rank.getResponseMapValues();
+        newman_service_email_rank.setResponse(response);
+        ranks = newman_service_email_rank.getResponseMapValues();
       }
 
       /*

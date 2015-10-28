@@ -194,7 +194,7 @@ var newman_data_source = (function () {
       _default_data_set_id = _data_source_selected.uid;
 
       if (request_enabled) {
-        service_response_data_source.requestDataSetSelect(_data_source_selected.uid);
+        newman_service_data_source.requestDataSetSelect(_data_source_selected.uid);
       }
 
       $('#data_source_selected').find('.dropdown-toggle').html(  '<span class=\"fa fa-database\"></span> ' + label );

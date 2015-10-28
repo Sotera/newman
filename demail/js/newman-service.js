@@ -10,7 +10,7 @@ var url_search_exportable = 'search/exportable/';
  * search-related response container
  * @type {{requestService, getResponse}}
  */
-var service_response_email_search_all = (function () {
+var newman_service_email_search_all = (function () {
 
   var _service_url = newman_search_filter.appendFilter( 'search' );
   var _service_url_init;
@@ -155,7 +155,7 @@ var service_response_email_search_all = (function () {
  * email-rank response container
  * @type {{requestService, getResponse}}
  */
-var service_response_email_rank = (function () {
+var newman_service_email_rank = (function () {
 
   var _service_url = 'email/rank';
   var _response = {};
@@ -292,7 +292,7 @@ var service_response_email_rank = (function () {
  * email-exportable response container
  * @type {{requestService, getResponse}}
  */
-var service_response_email_exportable = (function () {
+var newman_service_email_exportable = (function () {
 
   var _response = {};
   var _response_map = {};
@@ -407,7 +407,7 @@ var service_response_email_exportable = (function () {
  * email-pertinence response container
  * @type {{requestService, getResponse}}
  */
-var service_response_email_pertinence = (function () {
+var newman_service_email_pertinence = (function () {
 
   var _response = {};
   var _response_map = {};
@@ -521,7 +521,7 @@ var service_response_email_pertinence = (function () {
  * email-pertinence response container
  * @type {{requestService, getResponse}}
  */
-var service_response_data_source = (function () {
+var newman_service_data_source = (function () {
 
   var _response = {};
   var _data_set_map = {};
@@ -674,7 +674,7 @@ var service_response_data_source = (function () {
  * activity-related response container
  * @type {{requestService, getResponse}}
  */
-var service_response_activity_account = (function () {
+var newman_service_activity_account = (function () {
 
   var _service_url = 'activity/account/';
 

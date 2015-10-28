@@ -203,12 +203,12 @@ var newman_activity_email = (function () {
 
     if (inbound_chart) {
 
-      inbound_chart.groups([inbound_data_set_keys]);
-      /*
+      //inbound_chart.groups([inbound_data_set_keys]);
+
       setTimeout(function () {
         inbound_chart.groups([inbound_data_set_keys]);
-      }, 2000);
-      */
+      }, 500);
+
     }
   }
 
@@ -216,12 +216,12 @@ var newman_activity_email = (function () {
 
     if (outbound_chart) {
 
-      outbound_chart.groups([outbound_data_set_keys]);
-      /*
+      //outbound_chart.groups([outbound_data_set_keys]);
+
       setTimeout(function () {
         outbound_chart.groups([outbound_data_set_keys]);
-      }, 2000);
-      */
+      }, 500);
+
     }
   }
 
@@ -253,7 +253,7 @@ var newman_activity_email = (function () {
       var top_accounts = [];
       _.each(top_rank_accounts, function (element) {
         var email_address = element[0];
-        var response = service_response_activity_account.requestService( email_address );
+        var response = newman_service_activity_account.requestService( email_address );
         top_accounts.push( email_address );
 
       });

@@ -673,7 +673,7 @@ function requestSearch(field, search_text, load_on_response) {
     url_path = newman_datetime_range.appendDatetimeRange( url_path );
   }
 
-  var current_data_set_url = service_response_email_search_all.getServiceURL();
+  var current_data_set_url = newman_service_email_search_all.getServiceURL();
 
   console.log( '\turl : \'' + url_path + '\'' );
   //console.log( '\tservice_response_email_search_all.getServiceURL(): \'' + current_data_set_url +'\'' );
@@ -687,7 +687,7 @@ function requestSearch(field, search_text, load_on_response) {
 
     if (url_path.endsWith( current_data_set_url )) {
       //console.log( 'url_path.endsWith(service_response_email_search_all.getServiceURL())' );
-      service_response_email_search_all.setResponse( search_response );
+      newman_service_email_search_all.setResponse( search_response );
     }
 
     if (url_path.indexOf( url_search_exportable ) >= 0) {
@@ -772,9 +772,9 @@ function requestSearch(field, search_text, load_on_response) {
           associate_count = filtered_response.graph.nodes.length;
         }
 
-        var doc_sent = service_response_email_rank.getDocSent( search_text );
-        var doc_received = service_response_email_rank.getDocReceived( search_text );
-        var rank = service_response_email_rank.getRank( search_text );
+        var doc_sent = newman_service_email_rank.getDocSent( search_text );
+        var doc_received = newman_service_email_rank.getDocReceived( search_text );
+        var rank = newman_service_email_rank.getRank( search_text );
 
         var data_set_id = newman_data_source.parseDataSource( url_path );
         if (!data_set_id) {
@@ -812,7 +812,7 @@ function loadSearchResult( url_path ) {
   bottom_panel.unhide();
 
   $.get("email/exportable").then(function(response_exportable) {
-    service_response_email_exportable.setResponse(response_exportable);
+    newman_service_email_exportable.setResponse(response_exportable);
 
     $.getJSON( url_path , function (search_response) {
 
@@ -2018,13 +2018,13 @@ $(function () {
   newman_search_filter.initFilter();
 
   //$.when(service_response_data_source.requestService()).done();
-  service_response_data_source.requestService();
+  newman_service_data_source.requestService();
 
   setTimeout(function () {
 
 
-    service_response_email_rank.requestService();
-    service_response_email_exportable.requestService();
+    newman_service_email_rank.requestService();
+    newman_service_email_exportable.requestService();
 
     // close existing analytics displays if applicable
     email_analytics_content.close();
@@ -2405,7 +2405,7 @@ $(function () {
 
 
     if (hasher.getHash().length < 1) {
-      hasher.setHash(service_response_email_search_all.getServiceURLBase());
+      hasher.setHash(newman_service_email_search_all.getServiceURLBase());
     }
 
   }, 6000); //end of setTimeout
