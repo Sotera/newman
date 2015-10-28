@@ -1,38 +1,36 @@
-
 from newman.db.newman_db import newman_connector
 from newman.db.mysql import execute_query
 from newman.utils.functions import nth, head
 
 import tangelo
 import cherrypy
-import json
 from urllib import unquote
-from es_topic import get_lda_clusters
+from es_topic import get_categories
+from es_search import _query_emails_for_cluster, _build_graph_for_emails
 from param_utils import parseParamDatetime
-
-#GET /category
-# returns { "categories" :[[idx#, "cluster string", fake_score]]
-def get_topics(*args, **kwargs):
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
-    return  { "categories" : [(cluster["idx"], " ".join(cluster["cluster"]), 10) for cluster in get_lda_clusters(data_set_id)]}
-
 
 
 #GET /category/<category>
 # returns topic in sorted order by the idx
-def topic_list(*args):
+def topic_list(*args, **kwargs):
     category=nth(args, 0, 'all')
-    with newman_connector() as read_cnx:
-        stmt = (
-            " select idx, value, docs from topic_category "
-            " where category_id = %s "
-            " order by idx "
-        ) 
-        with execute_query(read_cnx.conn(), stmt, category) as qry:
-            rtn = [r for r in qry.cursor()]
-            tangelo.content_type("application/json")
-            return { "categories" : rtn }
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    tangelo.content_type("application/json")
+    return get_categories(data_set_id)
 
+#GET /graph/
+def topic_email_graph(*args, **kwargs):
+    foo=nth(args, 0, 'all')
+    topic_idx=nth(args, 1, 0)
+    score=nth(args, 2, 0.5)
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    tangelo.content_type("application/json")
+
+    emails = _query_emails_for_cluster(data_set_id, cluster_idx=topic_idx, score=score, size=100)
+    return _build_graph_for_emails(emails)
+
+# TODO DEPRECATED REMOVE!
 #GET /email/<email_id>/<category>
 def email_scores(*args):
     email_id=unquote(nth(args, 0, ''))
@@ -54,7 +52,8 @@ def email_scores(*args):
 
 actions = {
     "category": topic_list,
-    "email" : email_scores
+    "email" : email_scores,
+    "graph" : topic_email_graph
 }
 
 def unknown(*args):
@@ -62,4 +61,6 @@ def unknown(*args):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-    return actions.get(action, unknown)(*args)
+    cherrypy.log("search.%s(args[%s] %s)" % (action,len(args), str(args)))
+    cherrypy.log("search.%s(kwargs[%s] %s)" % (action,len(kwargs), str(kwargs)))
+    return actions.get(action, unknown)(*args, **kwargs)

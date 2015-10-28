@@ -9,13 +9,14 @@ from es_queries import _build_email_query
 # contains a cache of all email_address.addr, email_address
 _EMAIL_ADDR_CACHE = None
 
-_row_fields = ["id","tos","senders","ccs","bccs","datetime","subject"]
 _graph_fields = ["community", "community_id", "addr", "received_count", "sent_count", "recepient.email_id", "sender.email_id"]
 
 # Sort which will add sent + rcvd and sort most to top
 _sort_email_addrs_by_total={ "_script": { "script_file": "email_addr-sent-rcvd-sum", "lang": "groovy", "type": "number","order": "desc" }}
 _query_all = {"bool":{"must":[{"match_all":{}}]}}
 
+def get_graph_row_fields():
+    return ["id","tos","senders","ccs","bccs","datetime","subject"]
 
 def count(index, type="emails", start="2000-01-01", end="now"):
     es = Elasticsearch()
@@ -92,7 +93,7 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
 
 
     es = Elasticsearch()
-    emails_resp = es.search(index=index, doc_type="emails", size=size, fields=_row_fields, body=query_email_addr)
+    emails_resp = es.search(index=index, doc_type="emails", size=size, fields=get_graph_row_fields(), body=query_email_addr)
 
     emails = [_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]
 
@@ -121,10 +122,20 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
 
     return {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in emails]}
 
+# get top score docs for a cluster_idx as per the lda-clustering index type
+def _query_emails_for_cluster(index, cluster_idx=0,  score=0.5, size=100):
+    es = Elasticsearch()
+    query = _build_email_query(topic_score=(cluster_idx, score))
+    # print query
+    sort=["topic_scores.idx_"+str(cluster_idx)+":desc"]
+    emails_resp = es.search(index=index, doc_type='emails', fields=get_graph_row_fields(), sort=sort, size=size, body=query)
+
+    tangelo.log("es_search._query_emails(total document hits = %s)" % emails_resp["hits"]["total"])
+    return [_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]
 
 def _query_emails(index, size, emails_query):
     es = Elasticsearch()
-    emails_resp = es.search(index=index, doc_type="emails", size=size, fields=_row_fields, body=emails_query)
+    emails_resp = es.search(index=index, doc_type="emails", size=size, fields=get_graph_row_fields(), body=emails_query)
     tangelo.log("es_search._query_emails(total document hits = %s)" % emails_resp["hits"]["total"])
 
     return [_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]
