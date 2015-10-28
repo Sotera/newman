@@ -7,6 +7,15 @@ import tangelo
 import cherrypy
 import json
 from urllib import unquote
+from es_topic import get_lda_clusters
+from param_utils import parseParamDatetime
+
+#GET /category
+# returns { "categories" :[[idx#, "cluster string", fake_score]]
+def get_topics(*args, **kwargs):
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    return  { "categories" : [(cluster["idx"], " ".join(cluster["cluster"]), 10) for cluster in get_lda_clusters(data_set_id)]}
+
 
 
 #GET /category/<category>

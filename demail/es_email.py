@@ -38,7 +38,7 @@ def get_ranked_email_address(*args, **kwargs):
     tangelo.content_type("application/json")
     email_addrs = _search_ranked_email_addrs(data_set_id, start_datetime, end_datetime, size)
     total_docs = count(data_set_id)
-    email_address = [map_email_addr(email_addr, total_docs) for email_addr in email_addrs.get('hits').get('hits')]
+    email_address = [map_email_addr(email_addr, total_docs) for email_addr in email_addrs['hits']['hits']]
     return {"emails": email_address }
 
 def _get_email(index, email_id):

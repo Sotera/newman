@@ -65,7 +65,11 @@ def _search_ranked_email_addrs(index, start, end, size):
     tangelo.content_type("application/json")
     es = Elasticsearch()
     graph_body= {"fields": _graph_fields, "sort" : _sort_email_addrs_by_total, "query" : _query_all}
-    return es.search(index=index, doc_type="email_address", size=size, body=graph_body)
+    # tangelo.log("getRankedEmails(query: %s)" % (graph_body))
+
+    resp = es.search(index=index, doc_type="email_address", size=size, body=graph_body)
+    # tangelo.log("getRankedEmails(resp: %s)" % (resp))
+    return resp
 
 # DEPRECATED -- this is being replaced by _create_graph_from_query
 # This will generate the graph structure for a specific email address.  Will aply date filter and term query.
