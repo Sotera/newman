@@ -200,10 +200,9 @@ var newman_data_source = (function () {
 
         setTimeout(function() {
 
-          search_result.clearAll();
-          requestSearch(newman_search_filter.getSelectedFilter().label, $("#search_text").val(), false);
+          reloadDashboardSearchResult();
 
-          loadDashboardTimelineActivity();
+          reloadDashboardActivityTimeline();
 
           //drawDashboardCharts();
         }, 2000);

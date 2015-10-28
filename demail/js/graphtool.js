@@ -336,7 +336,7 @@ function searchByEntity(entityid, type, value){
   $.get("entity/rollup/" + encodeURIComponent(entityid)).then(
     function(resp) {
       is_load_on_response = true;
-      do_search('entity', resp.rollupId, value);
+      do_search(true, 'entity', resp.rollupId, value);
     });
 }
 
@@ -488,7 +488,7 @@ function group_email_conversation(){
 }
 
 
-
+/*
 function toString( map ) {
   if (map) {
     var mapAsText = "";
@@ -500,6 +500,7 @@ function toString( map ) {
 
   return "";
 }
+*/
 
 /**
  * displays search status popup
@@ -634,16 +635,21 @@ function searchByField( field ) {
  * @param field
  * @param value
  */
-function do_search(field, value) {
+function do_search(load_on_response, field, value) {
+  if (!load_on_response) {
+    load_on_response = true;
+  }
+  if (!field) {
+    field = 'all';
+  }
+  //console.log('do_search(' + load_on_response + ', ' + JSON.stringify(arguments, null, 2) + ')');
 
-  if (!field) { field = 'all'; }
-  console.log('do_search(' + toString(arguments) + ')');
+  var search_text = _.map(_.rest(arguments, 2), function(s){
+    return encodeURIComponent(s);
+  })
+  search_text = search_text.join('/');
 
-  var search_text = _.map(_.rest(arguments), function(s){ return encodeURIComponent(s); })
-  //search_text = search_text.join('/');
-
-  requestSearch(field, search_text, false );
-
+  requestSearch(field, search_text, load_on_response);
 }
 
 /**
@@ -653,9 +659,18 @@ function do_search(field, value) {
  */
 function requestSearch(field, search_text, load_on_response) {
 
-  if (!field) { field = 'all'; }
-  //console.log('requestSearch(' + toString(arguments)  + ')');
+  if (!field) {
+    field = 'email';
+  }
 
+  if (!load_on_response) {
+    load_on_response = false;
+  }
+
+  if (is_load_on_response) {
+    load_on_response = true;
+  }
+  //console.log('requestSearch(' + JSON.stringify(arguments, null, 2)  + ')');
   console.log('\tsearch_text \'' + search_text + '\'');
 
   var url_path = "search/search";
@@ -693,7 +708,7 @@ function requestSearch(field, search_text, load_on_response) {
     if (url_path.indexOf( url_search_exportable ) >= 0) {
       loadSearchResult( url_path );
     }
-    else if (is_load_on_response) {
+    else if (load_on_response) {
 
       email_analytics_content.open();
 
@@ -1601,7 +1616,7 @@ function draw_rank_chart() {
       .text(function(d) { return (d.email.length > 25) ? d.email.substr(0,25) + ".." : d.email; })
       .on("click", function(d){
         setSearchType('email');
-        $("#txt_search").val(d.email);
+        //$("#txt_search").val(d.email);
         is_load_on_response = true;
         requestSearch('email', $("#txt_search").val(), true);
       })
@@ -1637,7 +1652,7 @@ function draw_topic_tab(){
       .on("click", function(d, i){
         bottom_panel.open();
         is_load_on_response = true;
-        do_search('topic','all', d.idx, '0.5');
+        do_search(true, 'topic', d.idx, '0.5');
       });
     tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td").text(function(d){ return d; });
   });
@@ -1863,7 +1878,7 @@ function draw_entity_chart() {
       .attr("class", "label clickable")
       .on("click", function(d){
         is_load_on_response = true;
-        do_search('entity', d[0], d[2]);
+        do_search(true, 'entity', d[0], d[2]);
       })
       .text(function(d) { return (d[2].length > 25) ? d[2].substr(0,25) + ".." : d[2]; })
       .append('title').text(function(d) { return d[2];});
@@ -2157,7 +2172,7 @@ $(function () {
 
       $('#target_email').on('dblclick', function () {
         setSearchType('email');
-        $("#txt_search").val(data_source_selected.email);
+        //$("#txt_search").val(data_source_selected.email);
         requestSearch('email', data_source_selected.email, true);
       });
 
@@ -2309,7 +2324,7 @@ $(function () {
       });
 
       $('#email_view_marked').click(function () {
-        do_search('exportable');
+        do_search(true, 'exportable');
       });
 
       // initialize data-table events
@@ -2378,12 +2393,12 @@ $(function () {
       term = term || "";
       type = type.toLowerCase();
       if (_.contains(searchTypes, type)) {
-        do_search(type, term);
+        requestSearch(type, term, false);
       }
     });
 
     crossroads.addRoute("/email/{id}", function (id) {
-      requestSearch('email', id, true);
+      requestSearch('email', id, false);
       showEmailView(id);
     });
 

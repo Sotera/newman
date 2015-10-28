@@ -1227,7 +1227,7 @@ function drawChartTopic( count ) {
         .attr("class", "label highlight clickable")
         .on("click", function (d) {
           console.log( 'clicked on \'' + d.topics + '\'');
-
+          do_search(true, 'topic', d.index, '0.5');
         })
         .style("fill", function (d, i) {
           return colors(i);
@@ -1256,7 +1256,7 @@ function drawChartTopic( count ) {
         .attr("class", "label clickable")
         .on("click", function (d) {
           console.log( 'clicked on \'' + d.topics + '\'');
-
+          do_search(true, 'topic', d.index, '0.5');
         })
         .text(function (d) {
           var max_length = 30;
@@ -1722,10 +1722,10 @@ function drawChartRank( count ) {
           .on("click", function (d) {
             console.log('clicked on \'' + d.rank + '\'');
 
-            setSearchType('email');
-            $("#txt_search").val(d.email);
+            //setSearchType('email');
+            //$("#txt_search").val(d.email);
             is_load_on_response = true;
-            do_search('email', $("#txt_search").val());
+            do_search(true, 'email', $("#txt_search").val());
 
           })
           .on("mouseover", function (d) {
@@ -1832,7 +1832,12 @@ function drawChartAccountActivity( count ) {
 }
 */
 
-function loadDashboardTimelineActivity() {
+function reloadDashboardSearchResult() {
+  search_result.clearAll();
+  requestSearch(newman_search_filter.getSelectedFilter().label, $("#search_text").val(), false);
+}
+
+function reloadDashboardActivityTimeline() {
   newman_datetime_range.initDateTimeRange();
   newman_activity_email.displayUIActivityEmail(4);
 }
@@ -1842,7 +1847,7 @@ function loadDashboardTimelineActivity() {
  */
 function drawDashboardCharts() {
 
-  loadDashboardTimelineActivity();
+  reloadDashboardActivityTimeline();
 
   drawChartEntity(10);
   drawChartTopic(10);

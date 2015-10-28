@@ -92,7 +92,9 @@ var newman_datetime_range = (function () {
         setDatetimeMaxText(data.values.max.toISOString().substring(0, 10));
         //console.log("date-range {" +  getDatetimeMinText() + ', ' + getDatetimeMinText() + "}");
 
-        //re-render charts
+        //re-render search-results
+        reloadDashboardSearchResult();
+        //re-render activity-time-series
         newman_activity_email.displayUIActivityEmail(4);
       });
     }
