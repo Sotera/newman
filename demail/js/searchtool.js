@@ -1794,10 +1794,12 @@ function drawChartRank( count ) {
   }
 }
 
+
 /**
  * request and display activity-related charts
  * @param count
  */
+/*
 function drawChartAccountActivity( count ) {
   console.log('drawChartAccountActivity(' + count + ')');
 
@@ -1825,6 +1827,7 @@ function drawChartAccountActivity( count ) {
 
   }
 }
+*/
 
 
 /**
@@ -1833,8 +1836,8 @@ function drawChartAccountActivity( count ) {
 function drawDashboardCharts() {
 
   newman_datetime_range.initDateTimeRange();
+  newman_activity_email.displayUIActivityEmail(4);
 
-  drawChartAccountActivity(4);
   drawChartEntity(10);
   drawChartTopic(10);
   drawChartDomain(10);

@@ -699,6 +699,7 @@ var service_response_activity_account = (function () {
     console.log('service_response_activity_account.requestService('+account+')');
 
     $.when($.get( getServiceURL(account) )).done(function (response) {
+    //$.get( getServiceURL(account) ).then(function (response) {
       setResponse( response );
       newman_activity_email.updateUIActivityEmail( response );
     });

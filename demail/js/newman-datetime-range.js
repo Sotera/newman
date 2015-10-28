@@ -90,8 +90,10 @@ var newman_datetime_range = (function () {
       $(ui_id).bind("userValuesChanged", function(e, data){
         setDatetimeMinText(data.values.min.toISOString().substring(0, 10));
         setDatetimeMaxText(data.values.max.toISOString().substring(0, 10));
-
         //console.log("date-range {" +  getDatetimeMinText() + ', ' + getDatetimeMinText() + "}");
+
+        //re-render charts
+        newman_activity_email.displayUIActivityEmail(4);
       });
     }
   }

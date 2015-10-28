@@ -22,18 +22,18 @@ var history_nav = (function () {
     console.log('push( ' + uid + ', ' + label + ', ' + data_url + ' )');
 
     if(!icon_class) {
-      icon_class = 'fa fa-asterisk';
+      icon_class = 'fa fa-file-text-o';
       if (data_field === 'email') {
-        icon_class = 'fa fa-envelope-o';
+        icon_class = 'fa fa-user';
       }
       else if (data_field === 'community') {
         icon_class = 'fa fa-connectdevelop';
       }
       else if (data_field === 'topic') {
-        icon_class = 'fa fa-list-ol';
+        icon_class = 'fa fa-list-ul';
       }
       else if (data_field === 'entity') {
-        icon_class = 'fa fa-th';
+        icon_class = 'fa fa-sitemap';
       }
     }
 
@@ -140,7 +140,7 @@ var history_nav = (function () {
       var button = $('<button />', {
         type: 'button',
         class: 'breadcrumb-button',
-        html: '<i class=\"' + element.icon_class + '\"/></i>' + element.label,
+        html: '<i class=\"' + element.icon_class + '\"/></i> ' + element.label,
         value: element.uid,
         id: element.uid,
         on: {
