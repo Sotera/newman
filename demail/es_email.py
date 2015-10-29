@@ -31,6 +31,17 @@ def map_email_addr(email_addr_resp, total_emails):
                   ]
     return email_addr
 
+# GET domains for email_address index
+def get_domain(index):
+    es = Elasticsearch()
+    query = {"aggs":{ "domain_agg":{"terms":{"field":"domain", "size":9}}}}
+    domains_agg = es.search(index=index, doc_type='email_address', size=0, body=query)
+    total_other = domains_agg["aggregations"]["domain_agg"]["doc_count_error_upper_bound"]
+    domains = [[domain["key"], int(domain["doc_count"])] for domain in domains_agg["aggregations"]["domain_agg"]["buckets"]] +[["other", total_other]]
+    total = sum(domain[1] for domain in domains)
+    domains = [[domain[0],"{0:.2f}".format(round(100.0*domain[1]/total,2))] for domain in domains]
+    return {"domains":domains}
+
 #GET /rank?data_set_id=<dateset>&start_datetime=<start_datetime>&end_datetime=<end_datetime>&size=<size>
 def get_ranked_email_address(*args, **kwargs):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)

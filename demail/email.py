@@ -12,7 +12,7 @@ from newman.utils.functions import nth
 from newman.settings import getOpt
 from newman.utils.file import rmrf, mkdir, mv
 from newman.utils.date_utils import fmtNow
-from es_email import get_ranked_email_address, get_attachment, get_attachments_sender, get_email
+from es_email import get_ranked_email_address, get_attachment, get_attachments_sender, get_email, get_domain
 from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime
 
@@ -117,14 +117,10 @@ def getTarget(*args, **kwargs):
 
 #GET /domains
 def getDomains(*args, **kwargs):
-    stmt = (
-        "SELECT SUBSTRING_INDEX(email_addr, '@', -1) as eml, count(1) from email_addr group by eml"
-    )
+    tangelo.log("getDomains(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     tangelo.content_type("application/json")
-    with newman_connector() as read_cnx:
-        with execute_query(read_cnx.conn(), stmt) as qry:
-            rtn = [[str(val) for val in row] for row in qry.cursor()]
-            return { "domains" : rtn }
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    return get_domain(data_set_id)
 
 #GET /attachments/<sender>
 def getAttachmentsSender(*args, **kwargs):
