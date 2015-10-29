@@ -56,7 +56,7 @@ def _get_email(index, email_id):
 
     es = Elasticsearch()
     fields=["id","datetime","senders_line","tos_line","ccs_line","bccs_line","subject","body","attachments.filename","entities.entity_organization","entities.entity_location","entities.entity_person","entities.entity_misc"]
-    email = es.get(index="sample", doc_type="emails", id=email_id, fields=fields)
+    email = es.get(index, doc_type="emails", id=email_id, fields=fields)
 
     default=[""]
     fields = email["fields"]
