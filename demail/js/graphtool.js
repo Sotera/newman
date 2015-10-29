@@ -1174,7 +1174,7 @@ function drawGraph(graph){
         $('#doc_count_inbound').text( ' Inbound ' + generateRandomInt(0, 500) );
         $('#doc_count_outbound').text( ' Outbound ' + generateRandomInt(0, 500) );
 
-        $('#txt_search').val(n.name);
+        //$('#txt_search').val(n.name);
         var t = Math.floor($('#radial-wrap').height() / 2);
         var l = Math.floor($('#radial-wrap').width() / 2);
         $('#radial-wrap')
@@ -1618,7 +1618,7 @@ function draw_rank_chart() {
         setSearchType('email');
         //$("#txt_search").val(d.email);
         is_load_on_response = true;
-        requestSearch('email', $("#txt_search").val(), true);
+        requestSearch('email', d.email, true);
       })
       .on("mouseover", function(d){
         d3.select("#g_circle_" + d.groupId).style("stroke","#ffff00");
