@@ -529,7 +529,7 @@
             <!--End Search-Result-Category-Left-->
 
             <!--Start Search-Result-Link-Center-->
-            <div class="col-xs-12" style="padding: 0px 0px 0px 5px; max-height: 700px; overflow-y: scroll;">
+            <div class="col-xs-12" style="padding: 0px 0px 0px 5px; max-height: 700px;">
 
               <!--Start Search-Aggregate-Filter -->
               <div class="row" style="margin: 0; border-bottom: 1px solid rgba(255, 255, 255, 1.0);">
@@ -593,50 +593,107 @@
               </div>
               <!--End Search-Aggregate-Filter -->
 
-              <div id="search_result_container"></div>
+              <!--Start Search-Result-Container -->
+              <div id="search_result_container" style="padding: 0; height: 550px; max-height: 550px; overflow-y: scroll;">
 
-              <table id="search_result_treetable" class="table tree-2 table-bordered table-striped table-condensed">
-                <thead>
-                <tr style="font-size: small;">
-                  <th width="60%"></th>
-                  <th><i class="fa fa-paper-plane-o"></i></th>
-                  <th><i class="fa fa-inbox"></i></th>
-                  <th><i class="fa fa-paperclip"></i></th>
-                  <th><i class="fa fa-envelope-o"></i></th>
-                  <th><i class="fa fa-users"></i></th>
-                  <th><i class="fa fa-cubes"></i></th>
-                </tr>
-                </thead>
-                <tbody style="font-size: 11px;" id="search_result_treetable_body">
-                </tbody>
+                <table id="search_result_treetable" class="table tree-2 table-bordered table-striped table-condensed">
+                  <thead>
+                  <tr style="font-size: small;">
+                    <th width="60%"></th>
+                    <th><i class="fa fa-paper-plane-o"></i></th>
+                    <th><i class="fa fa-inbox"></i></th>
+                    <th><i class="fa fa-paperclip"></i></th>
+                    <th><i class="fa fa-envelope-o"></i></th>
+                    <th><i class="fa fa-users"></i></th>
+                    <th><i class="fa fa-cubes"></i></th>
+                  </tr>
+                  </thead>
+                  <tbody style="font-size: 11px;" id="search_result_treetable_body">
+                  </tbody>
+                  <!--
+                  <tbody>
+                  <tr class="treegrid-1">
+                    <td>Root node</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
+                  </tr>
+                  <tr class="treegrid-2 treegrid-parent-1">
+                    <td>Node 1-1 no-child</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
+                  </tr>
+                  <tr class="treegrid-3 treegrid-parent-1">
+                    <td>Node 1-2</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
+                  </tr>
+                  <tr class="treegrid-4 treegrid-parent-3">
+                    <td>Node 1-2-1</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
+                  </tr>
+                  <tr class="treegrid-5 treegrid-parent-3">
+                    <td>Node 1-2-2</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
+                  </tr>
+                  <tr class="treegrid-6 treegrid-parent-5">
+                    <td>Node 1-5-1</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
+                  </tr>
+                  </tbody>
+                  -->
+                </table>
+              </div>
+              <!--End Search-Result-Container-->
+
+              <!--Start Search-Control-Bottom -->
+              <div class="row" style="margin: 0; border: 1px solid rgba(255, 255, 255, 1.0);">
+                <div class="col-sm-2" style="padding: 0; border-left: 1px solid rgba(255, 255, 255, 1.0);">
+
+                  <!-- Start-Search-Sort-Filter -->
+                  <div class="btn-group dropup" style="width: 100%; position:relative; display: inline-block;" id="display_sort_filter_selected">
+                    <span class="dropdown-toggle btn btn-small outline" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px; color: #555555">
+                      <i class="fa fa-sort-amount-desc"></i> <i class="fa fa-user"></i> Rank
+                    </span>
+                    <ul class="dropdown-menu" style="width: 100%; padding: 2px 0px 2px 0px; border-radius: 4px;" id="display_sort_filter_list">
+                      <li style="line-height: 20px; text-align: center;">
+                        <button type="button" class="button-dropdown-menu-item" value="search_sub_filter_text" id="display_sort_filter_rank">
+                          <i class="fa fa-user"></i> Rank
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                  <!-- End-Search-Sort-Filter -->
+
+                </div>
+
+                <div class="col-sm-2" style="padding: 0; border-left: 1px solid rgba(255, 255, 255, 1.0);">
+
+                  <!-- Start-Search-Sort-Filter -->
+                  <div class="btn-group dropup" style="width: 100%; position:relative; display: inline-block;" id="display_max_count_selected">
+                    <span class="dropdown-toggle btn btn-small outline" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px; color: #555555">
+                      <i class="fa fa-arrows-v"></i> Show 10
+                    </span>
+                    <ul class="dropdown-menu" style="width: 100%; padding: 2px 0px 2px 0px; border-radius: 4px;" id="display_max_count_list">
+                      <li style="line-height: 20px; text-align: center;">
+                        <button type="button" class="button-dropdown-menu-item" value="search_sub_filter_text" id="display_max_count_10"> 10 </button>
+                      </li>
+                      <li style="line-height: 20px; text-align: center;">
+                        <button type="button" class="button-dropdown-menu-item" value="search_sub_filter_text" id="display_max_count_20"> 20 </button>
+                      </li>
+                    </ul>
+                  </div>
+                  <!-- End-Search-Sort-Filter -->
+
+                </div>
+
+                <div class="col-sm-8" style="padding: 0; border-left: 1px solid rgba(255, 255, 255, 1.0);">
+
+                </div>
+
                 <!--
-                <tbody>
-                <tr class="treegrid-1">
-                  <td>Root node</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
-                </tr>
-                <tr class="treegrid-2 treegrid-parent-1">
-                  <td>Node 1-1 no-child</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
-                </tr>
-                <tr class="treegrid-3 treegrid-parent-1">
-                  <td>Node 1-2</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
-                </tr>
-                <tr class="treegrid-4 treegrid-parent-3">
-                  <td>Node 1-2-1</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
-                </tr>
-                <tr class="treegrid-5 treegrid-parent-3">
-                  <td>Node 1-2-2</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
-                </tr>
-                <tr class="treegrid-6 treegrid-parent-5">
-                  <td>Node 1-5-1</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
-                </tr>
-                </tbody>
+                <ul class="pagination">
+                  <li class="prev disabled"><a href="#">← Previous</a></li>
+                  <li class="active"><a href="#">1</a></li>
+                  <li><a href="#">2</a></li>
+                  <li><a href="#">3</a></li>
+                  <li><a href="#">4</a></li>
+                  <li><a href="#">5</a></li>
+                  <li class="next"><a href="#">Next 20 → </a></li>
+                </ul>
                 -->
-              </table>
-
-
-              <!--
-              <ul class="pagination"><li class="prev disabled"><a href="#">← Previous</a></li><li class="active"><a href="#">1</a></li><li><a href="#">2</a></li><li><a href="#">3</a></li><li><a href="#">4</a></li><li><a href="#">5</a></li><li class="next"><a href="#">Next → </a></li></ul>
-              -->
+              </div>
+              <!--End Search-Control-Bottom -->
 
             </div>
             <!--End Search-Result-Link-Center-->

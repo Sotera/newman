@@ -1725,7 +1725,7 @@ function drawChartRank( count ) {
             //setSearchType('email');
             //$("#txt_search").val(d.email);
             is_load_on_response = true;
-            do_search(true, 'email', $("#txt_search").val());
+            do_search(true, 'email', d.email);
 
           })
           .on("mouseover", function (d) {
