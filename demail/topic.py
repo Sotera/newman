@@ -1,9 +1,7 @@
-from newman.db.newman_db import newman_connector
-from newman.db.mysql import execute_query
-from newman.utils.functions import nth, head
-
 import tangelo
 import cherrypy
+
+from newman.utils.functions import nth
 from urllib import unquote
 from es_topic import get_categories
 from es_search import _query_emails_for_cluster, _build_graph_for_emails
@@ -38,17 +36,7 @@ def email_scores(*args):
     if not email_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing email")
 
-    stmt = (
-        " select score from xref_email_topic_score "
-        " where category_id = %s and email_id = %s "
-        " order by idx "
-    )
-
-    with newman_connector() as read_cnx:
-        with execute_query(read_cnx.conn(), stmt, category, email_id) as qry:
-            rtn = [head(r) for r in qry.cursor()]
-            tangelo.content_type("application/json")
-            return { "scores" : rtn, "email" : email_id, "category" : category }
+    return { "scores" : [], "email" : email_id, "category" : category }
 
 actions = {
     "category": topic_list,

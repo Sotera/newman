@@ -9,7 +9,7 @@ from es_queries import _build_email_query
 # contains a cache of all email_address.addr, email_address
 _EMAIL_ADDR_CACHE = None
 
-_graph_fields = ["community", "community_id", "addr", "received_count", "sent_count", "recepient.email_id", "sender.email_id"]
+_graph_fields = ["community", "community_id", "addr", "attachments_count", "received_count", "sent_count", "recepient.email_id", "sender.email_id"]
 
 # Sort which will add sent + rcvd and sort most to top
 _sort_email_addrs_by_total={ "_script": { "script_file": "email_addr-sent-rcvd-sum", "lang": "groovy", "type": "number","order": "desc" }}

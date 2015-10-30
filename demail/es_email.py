@@ -13,28 +13,21 @@ def map_email_addr(email_addr_resp, total_emails):
 
     fields = email_addr_resp["fields"]
 
-    #hack to address 0 total_emails
-    if total_emails > 0 :
-        rank = (fields["sent_count"][0] + fields["received_count"][0]) / float(total_emails)
-    else :
-        rank = 0.0
-
     email_addr = [fields["addr"][0],
                   fields["community"][0],
                   str(fields["community_id"][0]),
                   str(fields["community_id"][0]),
-                  str(rank),
+                  (fields["sent_count"][0] + fields["received_count"][0]) / float(total_emails),
                   str(fields["received_count"][0]),
                   str(fields["sent_count"][0]),
-                  # TODO num attach
-                  0
+                  str(fields["attachments_count"][0])
                   ]
     return email_addr
 
 # GET domains for email_address index
 def get_domain(index):
     es = Elasticsearch()
-    query = {"aggs":{ "domain_agg":{"terms":{"field":"domain", "size":9}}}}
+    query = {"aggs":{ "domain_agg":{"terms":{"field":"domain", "size":10}}}}
     domains_agg = es.search(index=index, doc_type='email_address', size=0, body=query)
     total_other = domains_agg["aggregations"]["domain_agg"]["doc_count_error_upper_bound"]
     domains = [[domain["key"], int(domain["doc_count"])] for domain in domains_agg["aggregations"]["domain_agg"]["buckets"]] +[["other", total_other]]
