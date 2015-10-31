@@ -10,14 +10,14 @@ def application_properties():
     }
 
 def default_min_timeline_bound():
-    return application_properties()["default_min_timeline_bound"]
+    return str(application_properties()["default_min_timeline_bound"])
 
 def default_max_timeline_bound():
-    return application_properties()["default_max_timeline_bound"]
+    return str(application_properties()["default_max_timeline_bound"])
 
 def default_timeline_interval():
-    return application_properties()["default_timeline_interval"]
+    return str(application_properties()["default_timeline_interval"])
 
 def getDefaultDataSetID():
-    return application_properties()["default_data_set_id"]
+    return str(application_properties()["default_data_set_id"])
 

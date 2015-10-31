@@ -1,15 +1,18 @@
 
 
-def _build_filter(email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None):
-    # One of these addresses should apear on the email
-    address_filter = [] if not email_addrs else [
-        {"terms" : { "senders" : email_addrs}},
-        {"terms" : { "tos" : email_addrs}},
-        {"terms" : { "ccs" : email_addrs}},
-        {"terms" : { "bccs" : email_addrs}}
-    ]
 
-    date_range = [] if not date_bounds else [{"range" : {"datetime" : { "gte": date_bounds[0], "lte": date_bounds[1]}}}]
+def _terms_filter(field='', values=[]):
+    return [] if (not field or not values) else [{"terms" : { field : values}}]
+
+def _addrs_filter(senders=[], tos=[], ccs=[], bccs=[]):
+    return _terms_filter("senders", senders) + _terms_filter("tos", tos) + _terms_filter("ccs", ccs) + _terms_filter("bccs", bccs)
+
+def _build_filter(email_senders=[], email_rcvrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None):
+
+    # One of these addresses should apear on the email
+    address_filter = [] if (not email_senders or not email_rcvrs) else _addrs_filter(email_senders,email_rcvrs,email_rcvrs,email_rcvrs)
+
+    date_range = [] if not date_bounds else [{"range" : {"datetime" : { "gte": str(date_bounds[0]), "lte": str(date_bounds[1])}}}]
     topic_range= [] if not topic_score else [{"range" : {"topic_scores.idx_"+str(topic_score[0]) : { "gte": topic_score[1]}}}]
 
 
@@ -42,7 +45,7 @@ def _build_email_query(email_addrs=[], query_terms='', topic_score=None, entity=
         "query" : {
             "filtered" : {
                 "query" : term_query,
-                "filter" :  _build_filter(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, entity=entity, date_bounds=date_bounds)
+                "filter" :  _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, query_terms=query_terms, topic_score=topic_score, entity=entity, date_bounds=date_bounds)
             }
         }
     }

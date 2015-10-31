@@ -1,7 +1,8 @@
 from elasticsearch import Elasticsearch
 from time import gmtime, strftime
 import tangelo
-from newman.newman_config import getDefaultDataSetID, default_min_timeline_bound, default_max_timeline_bound
+from newman.newman_config import default_min_timeline_bound, default_max_timeline_bound
+from es_queries import _build_filter
 
 
 def _date_aggs(date_field="datetime"):
@@ -27,75 +28,59 @@ def _map_activity(index, account_id, sent_rcvd):
             "interval_inbound_count" : sent_rcvd[0]["doc_count"],
             "interval_outbound_count" : sent_rcvd[1]["doc_count"]
             }
-
-def sender_histogram(actor_email_addr, start, end, interval="year"):
-    return {
-        "size":0,
-        "aggs":{
-            "filter_agg":{"filter" : {"bool":{
-                "should":[
-                    {"term" : { "senders" : actor_email_addr}}
-                ],
-                "must":[{"range" : {"datetime" : { "gte": start, "lte": end }}}]
-            }},
-
-                "aggs" : {
-                    "emails_over_time" : {
-                        "date_histogram" : {
-                            "field" : "datetime",
-                            "interval" : interval,
-                            "format" : "yyyy-MM-dd",
-                            "min_doc_count" : 0
-                        }
-                    }
-                }
-            }}}
-
 # TODO this should take a set of filters and query to apply
-def entity_histogram_query(size=10, **kwargs):
-    def all():
-        return {
-            "person" : {
-                "terms" : {"field" : "entities.entity_person", "size": size}
-            },
-            "organization" : {
-                "terms" : {"field" : "entities.entity_organization", "size": size}
-            },
-            "location" : {
-                "terms" : {"field" : "entities.entity_location", "size": size}
-            },
-            "misc" : {
-                "terms" : {"field" : "entities.mics", "size": size}
+def entity_histogram_query(email_addrs=[], query_terms='', topic_score=None, date_bounds=None, entity_agg_size=10):
+    return {"aggs" : {
+        "filtered_entity_agg" : {
+            "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, query_terms=query_terms, date_bounds=date_bounds),
+            "aggs": {
+                "person" : {
+                    "terms" : {"field" : "entities.entity_person", "size": entity_agg_size}
+                },
+                "organization" : {
+                    "terms" : {"field" : "entities.entity_organization", "size": entity_agg_size}
+                },
+                "location" : {
+                    "terms" : {"field" : "entities.entity_location", "size": entity_agg_size}
+                },
+                "misc" : {
+                    "terms" : {"field" : "entities.mics", "size": entity_agg_size}
+                }
+
             }
-
-        }
-
-    return {"aggs": all(), "size":0}
+        }}, "size":0}
 
 
-def get_entity_histogram(index, type, query_function=entity_histogram_query, **kwargs):
+def get_entity_histogram(index, type, email_addrs=[], query_terms='', topic_score=None, date_bounds=None, entity_agg_size=10):
+    tangelo.log("===================================================")
     es = Elasticsearch()
-    body = query_function(**kwargs)
+    body = entity_histogram_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity_agg_size=entity_agg_size)
+
+    tangelo.log("%s"%body)
+
     resp = es.search(index=index, doc_type=type,body=body)
-    return sorted([dict(d, **{"type":"location"}) for d in  resp["aggregations"]["location"]["buckets"]]
-                  + [dict(d, **{"type":"organization"}) for d in  resp["aggregations"]["organization"]["buckets"]]
-                  + [dict(d, **{"type":"person"}) for d in  resp["aggregations"]["person"]["buckets"]]
-                  + [dict(d, **{"type":"misc"}) for d in  resp["aggregations"]["misc"]["buckets"]],  key=lambda d:d["doc_count"], reverse=True)
+    return sorted([dict(d, **{"type":"location"}) for d in resp["aggregations"]["filtered_entity_agg"]["location"]["buckets"]]
+                  + [dict(d, **{"type":"organization"}) for d in resp["aggregations"]["filtered_entity_agg"]["organization"]["buckets"]]
+                  + [dict(d, **{"type":"person"}) for d in resp["aggregations"]["filtered_entity_agg"]["person"]["buckets"]]
+                  + [dict(d, **{"type":"misc"}) for d in resp["aggregations"]["filtered_entity_agg"]["misc"]["buckets"]], key=lambda d:d["doc_count"], reverse=True)
 
 # This function uses the date_histogram with the extended_bounds
 # Oddly the max part of the extended bounds doesnt seem to work unless the value is set to
 # the string "now"...min works fine as 1970 or a number...
+# NOTE:  These filters are specific to a user
 def actor_histogram(actor_email_addr, start, end, interval="week"):
     tangelo.log('actor_histogram(%s, %s, %s, %s)' %(actor_email_addr, start, end, interval))
     return {
         "size":0,
         "aggs":{
-            "sent_agg":{"filter" : {"bool":{
-                "should":[
-                    {"term" : { "senders" : actor_email_addr}}
-                ],
-                "must":[{"range" : {"datetime" : { "gte": start, "lte": end }}}]
-            }},
+            "sent_agg":{"filter" :
+                {"bool":{
+                    "should":[
+                        {"term" : { "senders" : actor_email_addr}}
+                    ],
+                    "must":[{"range" : {"datetime" : { "gte": start, "lte": end }}}]
+                }
+                },
 
                 "aggs" : {
                     "sent_emails_over_time" : {
@@ -156,10 +141,17 @@ def get_daily_activity(index, account_id, type, query_function, **kwargs):
     es = Elasticsearch()
     resp = es.search(index=index, doc_type=type, request_cache="false", body=query_function(**kwargs))
     return [_map_activity(index, account_id, sent_rcvd) for sent_rcvd in zip(resp["aggregations"]["sent_agg"]["sent_emails_over_time"]["buckets"],
-                                                                 resp["aggregations"]["rcvr_agg"]["rcvd_emails_over_time"]["buckets"])]
+                                                                             resp["aggregations"]["rcvr_agg"]["rcvd_emails_over_time"]["buckets"])]
 
 if __name__ == "__main__":
-    res = get_entity_histogram("sample", "emails", entity_histogram_query, actor_email_addr="jeb@jeb.org", start="1970", end="now", interval="year")
+    # es = Elasticsearch()
+    # body = entity_histogram_query(email_addrs=["jeb@jeb.org"], query_terms="", topic_score=None, date_bounds=("1970","now"), entity_agg_size=10)
+    # print body
+    # resp = es.search(index="sample", doc_type="emails",body=body)
+    res = get_entity_histogram("sample", "emails", email_addrs=[], query_terms="", topic_score=None, date_bounds=("2000","2002"))
+    print {"entities" : [[str(i), entity ["type"], entity ["key"], entity ["doc_count"]] for i,entity in enumerate(res)]}
+
+    res = get_entity_histogram("sample", "emails", email_addrs=["oviedon@sso.org"], query_terms="", topic_score=None, date_bounds=("2000","2002"))
     print res
     # res = get_daily_activity("sample", "emails", actor_histogram, actor_email_addr="jeb@jeb.org", start="1970", end="now", interval="year")
     # for s in res:

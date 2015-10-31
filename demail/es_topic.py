@@ -1,5 +1,5 @@
 from elasticsearch import Elasticsearch
-from es_queries import _build_email_query, _build_filter
+from es_queries import _build_filter
 
 
 # _score_lda_clusters={"query": { "match_all": {}},"sort":{ "_script": { "script_file": "lda-cluster-sum-score", "lang": "groovy", "type": "number","order": "desc" }}}
@@ -13,7 +13,7 @@ def _cluster_agg(num_clusters, email_addrs=[], query_terms='', entity=[], topic_
         "size":0,
         "aggs" : {
             "idx_{0}_agg".format(idx) : {
-                "filter" : _build_filter(email_addrs=email_addrs, query_terms=query_terms, topic_score=(idx, topic_score), entity=entity, date_bounds=date_bounds),
+                "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, query_terms=query_terms, topic_score=(idx, topic_score), entity=entity, date_bounds=date_bounds),
                 "aggs" : {
                     "idx_{0}_ranges".format(idx) : {
                         "range" : {
