@@ -38,6 +38,7 @@ def getAccountActivity(*args, **kwargs):
 def getAttachCount(*args, **kwargs):
     tangelo.content_type("application/json")
     tangelo.log("getAttachCount(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
         
     account_id = urllib.unquote(nth(args, 0, ''))
@@ -45,10 +46,10 @@ def getAttachCount(*args, **kwargs):
         return tangelo.HTTPStatusCode(400, "invalid service call - missing account_id")
 
     if account_id == 'all' :
-        activity = get_attachment_activity("sample", account_id=data_set_id, query_function=attachment_histogram, sender_email_addr="", start=start_datetime, end=end_datetime, interval="week")
+        activity = get_attachment_activity(data_set_id, account_id=data_set_id, query_function=attachment_histogram, sender_email_addr="", start=start_datetime, end=end_datetime, interval="week")
 
     else :
-        activity = get_attachment_activity("sample", account_id=data_set_id, query_function=attachment_histogram, sender_email_addr="", start=start_datetime, end=end_datetime, interval="week")
+        activity = get_attachment_activity(data_set_id, account_id=data_set_id, query_function=attachment_histogram, sender_email_addr="", start=start_datetime, end=end_datetime, interval="week")
 
     result = {
               "account_id" : account_id,
