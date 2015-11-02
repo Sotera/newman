@@ -12,9 +12,8 @@ from series import get_daily_activity, actor_histogram
 
 
 
-def _queryActivity(account_id):
-    cherrypy.log("_queryActivity()")
-#    rows = [getAccountActivity(getDefaultDataSetID())]
+def _simulateActivityAttach(account_id):
+    cherrypy.log("_simulateActivityAttach()")
     rows = [];
     
     start_datetime = date(2012, 1, 1)
@@ -24,8 +23,7 @@ def _queryActivity(account_id):
         activity = {
                     "account_id" : account_id,
                     "interval_start_datetime" : date_as_text,
-                    "interval_inbound_count" : randint(0, 100),
-                    "interval_outbound_count" : randint(0, 100)
+                    "interval_attach_count" : randint(0, 100)
                     }
         rows.append(activity)
 
@@ -36,9 +34,9 @@ def dateRange(start_datetime, end_datetime):
         yield start_datetime + timedelta(n)
 
 #GET /account/<id>
-def getAccount(*args, **kwargs):
+def getAccountActivity(*args, **kwargs):
     tangelo.content_type("application/json")
-    tangelo.log("getAccount(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.log("getAccountActivity(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
         
     account_id = urllib.unquote(nth(args, 0, ''))
@@ -47,7 +45,33 @@ def getAccount(*args, **kwargs):
 
 
     activity = get_daily_activity(data_set_id, account_id, "emails", actor_histogram, actor_email_addr=account_id, start=start_datetime, end=end_datetime, interval="week")
-    #activity = _queryActivity( account_id )
+    
+    result = {
+              "account_id" : account_id,
+              "data_set_id" : data_set_id,
+              "account_start_datetime" : start_datetime,
+              "account_end_datetime" : end_datetime,
+              "activities" : activity
+             }
+        
+    return result
+
+#GET /attach/<id>
+def getAttachCount(*args, **kwargs):
+    tangelo.content_type("application/json")
+    tangelo.log("getAttachCount(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+        
+    account_id = urllib.unquote(nth(args, 0, ''))
+    if not account_id:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing account_id")
+
+    if account_id == 'all' :
+        #TODO: implement populating all attachment activities; simulate result for now
+        activity = _simulateActivityAttach( account_id )
+    else :
+        #TODO: implement populating individual account attachment activities; simulate result for now
+        activity = _simulateActivityAttach( account_id )
     
     result = {
               "account_id" : account_id,
@@ -60,7 +84,8 @@ def getAccount(*args, **kwargs):
     return result
 
 actions = {
-    "account" : getAccount
+    "account" : getAccountActivity,
+    "attach" : getAttachCount
 }
 
 def unknown(*args):

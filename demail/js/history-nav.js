@@ -22,8 +22,14 @@ var history_nav = (function () {
     console.log('push( ' + uid + ', ' + label + ', ' + data_url + ' )');
 
     if(!icon_class) {
-      icon_class = 'fa fa-file-text-o';
-      if (data_field === 'email') {
+      icon_class = 'fa fa-asterisk';
+      if (data_field === 'all') {
+        icon_class = 'fa fa-asterisk';
+      }
+      else if (data_field === 'text') {
+        icon_class = 'fa fa-file-text-o';
+      }
+      else if (data_field === 'email') {
         icon_class = 'fa fa-user';
       }
       else if (data_field === 'community') {

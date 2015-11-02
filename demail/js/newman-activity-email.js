@@ -3,7 +3,7 @@
  */
 
 /**
- * date-time range related container
+ * email-activity-over-time related container
  */
 var newman_activity_email = (function () {
 
@@ -22,6 +22,7 @@ var newman_activity_email = (function () {
   var outbound_data_set_keys = [];
   var outbound_data_color_map = {};
   var outbound_data_value_max = 0;
+
 
   function initUIActivityInbound( timeline, data_set, data_set_value_max, data_group, data_color_collection ) {
     console.log('initUIActivityInbound(...)');
@@ -253,7 +254,7 @@ var newman_activity_email = (function () {
       var top_accounts = [];
       _.each(top_rank_accounts, function (element) {
         var email_address = element[0];
-        var response = newman_service_activity_account.requestService( email_address );
+        var response = newman_service_activity_email_account.requestService( email_address );
         top_accounts.push( email_address );
 
       });
@@ -288,6 +289,185 @@ var newman_activity_email = (function () {
     'updateUIActivityEmail' : updateUIActivityEmail,
     'revalidateUIActivityInbound' : revalidateUIActivityInbound,
     'revalidateUIActivityOutbound' : revalidateUIActivityOutbound
+  }
+
+}());
+
+/**
+ * attachment-activity-over-time related container
+ */
+var newman_activity_attachment = (function () {
+
+  var chart_ui_id_text = 'chart_line_account_activities';
+  var chart_ui_id_element = $('#' + chart_ui_id_text);
+
+  var account_index = 0, account_index_max = 4;
+  var color_set = d3.scale.category20();
+
+  var attach_chart;
+  var attach_data_set_keys = [];
+  var attach_data_color_map = {};
+  var attach_data_value_max = 0;
+
+  function initUIActivityAttach( timeline, data_set, data_set_value_max, data_group, data_color_collection ) {
+    console.log('initUIActivityAttach(...)');
+    //console.log('timeline :\n' + JSON.stringify(timeline, null, 2));
+
+    if (chart_ui_id_element) {
+
+      var attach_activities_as_json =
+      {
+        bindto: '#chart_line_attach_activities',
+        data: {
+          x: 'x',
+          columns: [
+            timeline,
+            data_set,
+          ],
+          type: 'bar',
+          groups: [
+            data_group
+          ]
+        },
+        colors: data_color_collection,
+        axis: {
+          x: {
+            type: 'timeseries',
+            tick: {
+              //format: function (x) { return x.getFullYear(); }
+              format: '%Y-%m-%d' // format string is also available for timeseries data
+            }
+          },
+          grid: {
+            y: {
+              lines: [{value: 0}]
+            }
+          },
+          y: {
+            max: data_set_value_max,
+            min: 0,
+            padding: {top: 0, bottom: 0}
+          }
+        }
+      }
+      //console.log('outbound_activities_as_json :\n' + JSON.stringify(outbound_activities_as_json, null, 2));
+
+      attach_chart = c3.generate(attach_activities_as_json);
+    }
+  }
+
+  function updateUIActivityAttach( response ) {
+
+    if (response) {
+      console.log('updateUIActivityAttach('+response["data_set_id"]+')');
+      //console.log('response :\n' + JSON.stringify(response, null, 2));
+
+      if (account_index < account_index_max) {
+
+        if (chart_ui_id_element) {
+
+          var acct_id = response.account_id;
+          if (acct_id === 'all') {
+            acct_id = '* (' + response["data_set_id"] + ')'
+          }
+          var acct_color = color_set(account_index);
+          var attach_data_set = [acct_id];
+
+          _.each(response["activities"], function (acct_activity) {
+            //console.log('acct_activity :\n' + JSON.stringify(acct_activity, null, 2));
+            var attach_count = acct_activity.interval_attach_count;
+            attach_data_set.push(attach_count);
+            if (attach_count > attach_data_value_max) {
+              attach_data_value_max = attach_count;
+              attach_data_value_max = parseInt(attach_data_value_max * 1.10);
+              //console.log('\tinbound_value_max = ' + attach_data_value_max);
+            }
+          });
+          //console.log( 'account : ' + response.account_id + ' activities : ' + response.activities.length  );
+
+          attach_data_set_keys.push(acct_id);
+          attach_data_color_map[acct_id] = acct_color;
+
+          if (account_index == 0 || !attach_chart) {
+
+            var timeline_dates = ['x'];
+            _.each(response["activities"], function (acct_activity) {
+              timeline_dates.push( acct_activity.interval_start_datetime );
+            });
+
+            initUIActivityAttach(timeline_dates, attach_data_set, attach_data_value_max, attach_data_set_keys, attach_data_color_map);
+            account_index = 0;
+          }
+          else {
+
+            attach_chart.axis.max({
+              y: attach_data_value_max
+            });
+            attach_chart.load({
+              columns: [attach_data_set],
+              colors: attach_data_color_map
+            });
+
+          }
+
+          revalidateUIActivityAttach();
+        }
+
+        account_index ++;
+      }
+    }
+
+
+  }
+
+  function revalidateUIActivityAttach() {
+
+    if (attach_chart) {
+
+      //attach_chart.groups([outbound_data_set_keys]);
+      setTimeout(function () {
+        attach_chart.groups([attach_data_set_keys]);
+      }, 500);
+
+    }
+  }
+
+
+  /**
+   * request and display attachment-activity-related chart
+   */
+  function displayUIActivityAttachAll() {
+    console.log('displayUIActivityAttachAll()');
+
+    var chart_ui_id_text = 'chart_line_account_activities';
+    var chart_ui_id_element = $('#' + chart_ui_id_text);
+
+    if (chart_ui_id_element) {
+
+      initUI();
+      newman_service_activity_email_attach.requestService();
+
+    }
+  }
+
+  function initUI() {
+    console.log( 'initUI()' );
+
+    account_index = 0;
+    attach_data_value_max = 0;
+
+    if (attach_chart) {
+
+      attach_chart.unload();
+      attach_chart = undefined;
+    }
+  }
+
+  return {
+    'initUI' : initUI,
+    'displayUIActivityAttachAll' : displayUIActivityAttachAll,
+    'updateUIActivityAttach' : updateUIActivityAttach,
+    'revalidateUIActivityAttach' : revalidateUIActivityAttach
   }
 
 }());

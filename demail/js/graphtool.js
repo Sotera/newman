@@ -1,7 +1,5 @@
 /*globals tangelo, CryptoJS, $, d3, escape, FileReader, console */
 
-//is_load_on_response - flag to whether or not to load result immediately
-var is_load_on_response = false;
 
 var width = 400, height = 500;
 
@@ -335,8 +333,7 @@ function searchByEntity(entityid, type, value){
 
   $.get("entity/rollup/" + encodeURIComponent(entityid)).then(
     function(resp) {
-      is_load_on_response = true;
-      do_search(true, 'entity', resp.rollupId, value);
+        do_search(true, 'entity', resp.rollupId, value);
     });
 }
 
@@ -667,9 +664,6 @@ function requestSearch(field, search_text, load_on_response) {
     load_on_response = false;
   }
 
-  if (is_load_on_response) {
-    load_on_response = true;
-  }
   //console.log('requestSearch(' + JSON.stringify(arguments, null, 2)  + ')');
   console.log('\tsearch_text \'' + search_text + '\'');
 
@@ -727,7 +721,6 @@ function requestSearch(field, search_text, load_on_response) {
       //showSearchPopup( field, decodeURIComponent(search_text) );
       loadSearchResult( url_path );
 
-      is_load_on_response = false;
     }
     else {
 
@@ -787,8 +780,9 @@ function requestSearch(field, search_text, load_on_response) {
           associate_count = filtered_response.graph.nodes.length;
         }
 
-        var doc_sent = newman_service_email_rank.getDocSent( search_text );
-        var doc_received = newman_service_email_rank.getDocReceived( search_text );
+        var outbound_count = newman_service_email_rank.getOutboundCount( search_text );
+        var inbound_count = newman_service_email_rank.getInboundCount( search_text );
+        var attach_count = newman_service_email_rank.getAttachCount( search_text );
         var rank = newman_service_email_rank.getRank( search_text );
 
         var data_set_id = newman_data_source.parseDataSource( url_path );
@@ -807,10 +801,10 @@ function requestSearch(field, search_text, load_on_response) {
           data_set_id,
           'pst',
           doc_count,
-          doc_sent,
-          doc_received,
+          outbound_count,
+          inbound_count,
           associate_count,
-          0,
+          attach_count,
           rank,
           filter_icon
         );
@@ -1194,7 +1188,6 @@ function drawGraph(graph){
           .unbind('click')
           .on("click", function(){
             console.log( 'node-clicked search-by-email' );
-            is_load_on_response = true;
             requestSearch("email", n.name, true);
           }).find("span").first()
           .css("color", getDomainColor(n.name));
@@ -1203,7 +1196,6 @@ function drawGraph(graph){
           .unbind('click')
           .on("click", function(){
             console.log( 'node-clicked search-by-community' );
-            is_load_on_response = true;
             requestSearch("community", n.community, true);
         }).find("span").first()
          // .css("color", color_set_community(n.community));
@@ -1617,7 +1609,6 @@ function draw_rank_chart() {
       .on("click", function(d){
         setSearchType('email');
         //$("#txt_search").val(d.email);
-        is_load_on_response = true;
         requestSearch('email', d.email, true);
       })
       .on("mouseover", function(d){
@@ -1651,7 +1642,6 @@ function draw_topic_tab(){
     var tr = d3.select("#topics-table").select("tbody").selectAll("tr").data(categories).enter().append("tr").attr('class', 'clickable')
       .on("click", function(d, i){
         bottom_panel.open();
-        is_load_on_response = true;
         do_search(true, 'topic', d.idx, '0.5');
       });
     tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td").text(function(d){ return d; });
@@ -1877,7 +1867,6 @@ function draw_entity_chart() {
       .attr("y", barHeight / 2)
       .attr("class", "label clickable")
       .on("click", function(d){
-        is_load_on_response = true;
         do_search(true, 'entity', d[0], d[2]);
       })
       .text(function(d) { return (d[2].length > 25) ? d[2].substr(0,25) + ".." : d[2]; })
@@ -2056,6 +2045,17 @@ $(function () {
     // initialize dashboard and its components and widgets
     drawDashboardCharts();
 
+    $("[rel=tooltip]").tooltip();
+    /*$('[data-toggle="popover"]').popover();
+    $("i.fa").popover({'trigger':'hover'});
+
+    $('body').on('click', function (e) {
+      if ($(e.target).data('toggle') !== 'popover'
+        && $(e.target).parents('.popover.in').length === 0) {
+        $('[data-toggle="popover"]').popover('hide');
+      }
+    });
+    */
 
     $('a[data-toggle=\"tab\"]').on('shown.bs.tab', function (e) {
       //var element_ID = $(e.target).html();
@@ -2071,6 +2071,11 @@ $(function () {
         console.log('\trevalidateUIActivityInbound() called');
 
         newman_activity_email.revalidateUIActivityInbound();
+      }
+      else if (element_ID.endsWith('dashboard_tab_content_attach_activities')) {
+        console.log('\trevalidateUIActivityAttach() called');
+
+        newman_activity_attachment.revalidateUIActivityAttach();
       }
       else if (element_ID.endsWith('dashboard_tab_content_entities')) {
         if (dashboard_donut_chart_entity) {
@@ -2092,7 +2097,10 @@ $(function () {
           dashboard_donut_chart_community.redraw();
         }
       }
-      else if (element_ID.endsWith('dashboard_tab_content_rank')) {
+      else if (element_ID.endsWith('dashboard_tab_content_attach_types')) {
+        newman_file_type_attach.revalidateUIFileTypeAttach();
+      }
+      else if (element_ID.endsWith('dashboard_tab_content_ranks')) {
         if (dashboard_donut_chart_rank) {
           dashboard_donut_chart_rank.redraw();
         }

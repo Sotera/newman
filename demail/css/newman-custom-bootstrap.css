@@ -236,3 +236,20 @@ text.label.highlight:hover {
     border-radius: 12px;
     margin-left: 12px;
 }
+
+/***********************
+  icon tooltip
+************************/
+
+.tooltip.top .tooltip-arrow {
+    bottom: 0;
+    left: 50%;
+    margin-left: -5px;
+    border-top-color: #FFFFFF;
+    border-width: 5px 5px 0;
+}
+.tooltip-inner {
+    /*background: rgba(94, 159, 245, 0.60);*/
+    background: rgba(40, 70, 165, 0.75);
+    border: solid 1px #FFFFFF;
+}

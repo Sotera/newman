@@ -3,7 +3,7 @@
  */
 
 var newman_search_filter = (function () {
-  var _search_filter_selected_default_label = 'email';
+  var _search_filter_selected_default_label = 'all';
   var _search_filter_max = 20;
   var _search_filter_list = [];
   var _search_filter_selected;
@@ -17,6 +17,7 @@ var newman_search_filter = (function () {
   };
 
   var initFilter = function() {
+    pushFilter('search_filter_all', 'all', 'fa fa-asterisk');
     pushFilter('search_filter_email', 'email', 'fa fa-user');
     pushFilter('search_filter_text', 'text', 'fa fa-file-text-o');
     pushFilter('search_filter_attach', 'attach', 'fa fa-paperclip');
@@ -24,7 +25,7 @@ var newman_search_filter = (function () {
     pushFilter('search_filter_topic', 'topic', 'fa fa-list-ul');
 
     refreshUIFilter();
-    setSelectedFilter( 'email', true );
+    setSelectedFilter( 'all', true );
   };
 
   var pushFilter = function ( uid, label, icon_class ) {
