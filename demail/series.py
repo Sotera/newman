@@ -26,7 +26,7 @@ def get_datetime_bounds(index, type="emails"):
 def _map_attachments(index, account_id, attchments):
     return {"account_id" : account_id,
             "interval_start_datetime" : attchments[0]["key_as_string"],
-            "interval_inbound_count" : attchments[0]["doc_count"]
+            "interval_attach_count" : attchments[0]["doc_count"]
             }
 
 def _map_activity(index, account_id, sent_rcvd):
@@ -63,7 +63,7 @@ def get_entity_histogram(index, type, email_addrs=[], query_terms='', topic_scor
     es = Elasticsearch()
     body = entity_histogram_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity_agg_size=entity_agg_size)
 
-    tangelo.log("%s"%body)
+    tangelo.log("get_entity_histogram: query = %s"%body)
 
     resp = es.search(index=index, doc_type=type,body=body)
     return sorted([dict(d, **{"type":"location"}) for d in resp["aggregations"]["filtered_entity_agg"]["location"]["buckets"]]

@@ -205,7 +205,7 @@ var newman_service_email_rank = (function () {
     if (response) {
 
       var object_array = _.map(_.take(response.emails, 20), function (element) {
-        return _.object(["email", "community", "communityId", "groupId", "rank", "totalReceived", "totalSent"], element);
+        return _.object(["email", "community", "community_id", "group_id", "rank", "inbound_count", "outbound_count", 'attach_count'], element);
       });
       //console.log('object_array: ' + JSON.stringify(object_array, null, 2));
 
@@ -252,22 +252,33 @@ var newman_service_email_rank = (function () {
     return 0.0;
   }
 
-  function getDocReceived( key ) {
+  function getInboundCount( key ) {
     if (_response_map) {
       var value = _response_map[key];
       if (value) {
-        return value.totalReceived;
+        return value.inbound_count;
       }
       return 0;
     }
     return 0;
   }
 
-  function getDocSent( key ) {
+  function getOutboundCount( key ) {
     if (_response_map) {
       var value = _response_map[key];
       if (value) {
-        return value.totalSent;
+        return value.outbound_count;
+      }
+      return 0;
+    }
+    return 0;
+  }
+
+  function getAttachCount( key ) {
+    if (_response_map) {
+      var value = _response_map[key];
+      if (value) {
+        return value.attach_count;
       }
       return 0;
     }
@@ -282,8 +293,9 @@ var newman_service_email_rank = (function () {
     'getResponseMap' : getResponseMap,
     'getResponseMapValues' : getResponseMapValues,
     'getRank' : getRank,
-    'getDocReceived' : getDocReceived,
-    'getDocSent' : getDocSent
+    'getInboundCount' : getInboundCount,
+    'getOutboundCount' : getOutboundCount,
+    'getAttachCount' : getAttachCount
   }
 
 }());
@@ -671,10 +683,10 @@ var newman_service_data_source = (function () {
 }());
 
 /**
- * activity-related response container
+ * email-address-activity-related response container
  * @type {{requestService, getResponse}}
  */
-var newman_service_activity_account = (function () {
+var newman_service_activity_email_account = (function () {
 
   var _service_url = 'activity/account/';
 
@@ -696,7 +708,7 @@ var newman_service_activity_account = (function () {
   }
 
   function requestService(account) {
-    console.log('newman_service_activity_account.requestService('+account+')');
+    console.log('newman_service_activity_email_account.requestService('+account+')');
 
     $.when($.get( getServiceURL(account) )).done(function (response) {
     //$.get( getServiceURL(account) ).then(function (response) {
@@ -750,6 +762,116 @@ var newman_service_activity_account = (function () {
     'setResponse' : setResponse,
     'isResponseMapEmpty' : isResponseMapEmpty,
     'getResponseTimeline' : getResponseTimeline
+  }
+
+}());
+
+/**
+ * attachment-activity-related response container
+ * @type {{requestService, getResponse}}
+ */
+var newman_service_activity_email_attach = (function () {
+
+  var _service_url = 'activity/attach/';
+  var _response;
+
+  function getServiceURLBase() {
+    return _service_url;
+  }
+
+  function getServiceURL(account) {
+
+    if (account) {
+      var service_url = newman_data_source.appendDataSource(_service_url + '/' + encodeURIComponent(account));
+      service_url = newman_datetime_range.appendDatetimeRange(service_url);
+      return service_url;
+    }
+  }
+
+  function requestService() {
+    console.log('newman_service_activity_email_attach.requestService()');
+
+    $.when($.get( getServiceURL('all') )).done(function (response) {
+      //$.get( getServiceURL(account) ).then(function (response) {
+      setResponse( response );
+      newman_activity_attachment.updateUIActivityAttach( response );
+    });
+  }
+
+  function setResponse( response ) {
+    if (response) {
+
+      _response = response;
+      //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
+    }
+  }
+
+  function getResponse() {
+    return _response;
+  }
+
+
+  return {
+    'getServiceURLBase' : getServiceURLBase,
+    'getServiceURL' : getServiceURL,
+    'requestService' : requestService,
+    'getResponse' : getResponse,
+    'setResponse' : setResponse
+  }
+
+}());
+
+/**
+ * attachment-file-type-related response container
+ * @type {{requestService, getResponse}}
+ */
+var newman_service_attachment_types = (function () {
+
+  var _service_url = 'attachment/types/';
+  var _response;
+
+  function getServiceURLBase() {
+    return _service_url;
+  }
+
+  function getServiceURL(account) {
+
+    if (account) {
+      var service_url = newman_data_source.appendDataSource(_service_url + '/' + encodeURIComponent(account));
+      service_url = newman_datetime_range.appendDatetimeRange(service_url);
+      return service_url;
+    }
+  }
+
+  function requestService() {
+    console.log('newman_service_attachment_types.requestService()');
+
+    $.when($.get( getServiceURL('all') )).done(function (response) {
+      //$.get( getServiceURL(account) ).then(function (response) {
+      setResponse( response );
+      newman_file_type_attach.updateUIFileTypeAttach( response );
+    });
+  }
+
+  function setResponse( response ) {
+    if (response) {
+
+      _response = response;
+      //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
+    }
+  }
+
+  function getResponse() {
+    return _response;
+  }
+
+
+  return {
+    'getServiceURLBase' : getServiceURLBase,
+    'getServiceURL' : getServiceURL,
+    'requestService' : requestService,
+    'getResponse' : getResponse,
+    'setResponse' : setResponse
   }
 
 }());

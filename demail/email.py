@@ -5,7 +5,7 @@ import urllib
 
 from newman.utils.functions import nth
 from newman.settings import getOpt
-from es_email import get_ranked_email_address, get_attachment, get_attachments_sender, get_email, get_top_domains, get_top_attachment_types
+from es_email import get_ranked_email_address, get_attachment, get_attachments_by_sender, get_email, get_top_domains
 from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime
 
@@ -46,23 +46,12 @@ def getDomains(*args, **kwargs):
 
     return {"domains":get_top_domains(data_set_id, date_bounds=(start_datetime, end_datetime))[:amount]}
 
-#GET /attachment_types
-def getAttachmentTypes(*args, **kwargs):
-    tangelo.log("getAttachmentTypes(args: %s kwargs: %s)" % (str(args), str(kwargs)))
-    tangelo.content_type("application/json")
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
-
-    amount=int(urllib.unquote(nth(args, 0, "20")))
-
-    return {"AttachmentTypes": get_top_attachment_types(data_set_id, date_bounds=(start_datetime, end_datetime))[:amount]}
-
-
 #GET /attachments/<sender>
-def getAttachmentsSender(*args, **kwargs):
+def getAttachmentsBySender(*args, **kwargs):
     tangelo.log("getAttachmentsSender(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
-    return get_attachments_sender(*args, **kwargs)
+    return get_attachments_by_sender(*args, **kwargs)
 
 # DEPRECATED TODO remove me
 #GET /exportable
@@ -95,8 +84,7 @@ get_actions = {
     "exportable" : getExportable,
     "download" : buildExportable,
     "attachment" : get_attachment,
-    "attachments" : getAttachmentsSender,
-    "attachment_types": getAttachmentTypes
+    "attachments" : getAttachmentsBySender
 }
 
 post_actions = {

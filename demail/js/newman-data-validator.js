@@ -228,7 +228,8 @@ function validateResponseEmailRank(response) {
           parseInt(email[3]),
           parseFloat(email[4]).toFixed(3),
           parseInt(email[5]),
-          parseInt(email[6])
+          parseInt(email[6]),
+          parseInt(email[7])
         ];
 
         if (new_email) {

@@ -106,7 +106,7 @@
     <div class="container-fluid expanded-panel">
       <div class="row">
 
-        <div id="top-panel" class="col-xs-12 col-sm-11">
+        <div id="top-panel" class="col-xs-12 col-sm-12">
           <div class="row">
 
             <!--
@@ -128,7 +128,7 @@
             -->
 
             <!-- Start-Data-Set-Select -->
-            <div class="col-xs-6 col-sm-1" style="padding: 0px 10px 0px 10px;">
+            <div class="col-xs-6 col-sm-2" style="padding: 0px 10px 0px 10px;">
 
               <div class="dropdown" style="width: 100%; height: 100%; position:relative; display: inline-block;" id="data_source_selected">
                 <span class="dropdown-toggle btn navbar-btn button-dropdown-menu" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px"><span class="fa fa-database"></span> Default_PST</span>
@@ -140,27 +140,8 @@
             </div>
             <!-- End-Data-Set-Select -->
 
-            <!-- Start-Search-Aggregate-Search-Filter -->
-            <div class="col-xs-6 col-sm-1" style="padding: 0px 10px 0px 10px;">
-              <!--
-              <span class="checkbox-inline" >
-                <input type="checkbox" id="checkbox_search_filter" style="margin: 0 0 0 -15px; height: 100%;" checked disabled />
-              -->
-                  <div class="dropdown" style="width: 100%; position:relative; display: inline-block;" id="search_filter_selected">
-                    <span class="dropdown-toggle btn navbar-btn button-dropdown-menu" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px;">
-                      <i class="fa fa-check-square-o"></i> <i class="fa fa-user"></i> email
-                    </span>
-                    <ul class="dropdown-menu" style="width: 100%; padding: 2px 0px 2px 0px; border-radius: 4px;" id="search_filter_list">
-                    </ul>
-                  </div>
-              <!--
-              </span>
-              -->
-            </div>
-            <!-- End-Search-Aggregate-Search-Filter -->
-
             <!-- start search -->
-            <div class="col-xs-12 col-sm-3" style="padding: 0px 5px 0px 15px; text-align: left;">
+            <div class="col-xs-12 col-sm-3" style="padding: 0px 5px 0px 0px; text-align: right;">
 
               <div id="search">
                 <input id="txt_search" type="text" placeholder="search"/>
@@ -170,19 +151,42 @@
             </div>
             <!-- end search -->
 
+            <!-- Start-Search-Aggregate-Search-Filter -->
+            <div class="col-xs-6 col-sm-1" style="padding: 0px 10px 0px 10px; text-align: left;">
+
+              <div class="dropdown" style="width: 100%; position:relative; display: inline-block;" id="search_filter_selected">
+                <span class="dropdown-toggle btn navbar-btn button-dropdown-menu" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px;">
+                  <i class="fa fa-check-square-o"></i> <i class="fa fa-asterisk"></i> all
+                </span>
+                <ul class="dropdown-menu" style="width: 100%; padding: 2px 0px 2px 0px; border-radius: 4px;" id="search_filter_list">
+                </ul>
+              </div>
+
+            </div>
+            <!-- End-Search-Aggregate-Search-Filter -->
+
             <!-- start datetime-range -->
-            <div class="col-xs-12 col-sm-5" style="padding: 0px;">
+            <div class="col-xs-12 col-sm-4" style="padding: 0;">
               <div class="ui-rangeSliderZone">
                 <div id="date_range_slider"></div>
               </div>
             </div>
             <!-- end datetime-range -->
 
-            <div class="col-xs-10 col-sm-2 top-panel-right" style="padding: 0px 10px 0px 10px;">
+            <div class="col-xs-10 col-sm-1" style="padding: 0px 10px 0px 10px; text-align: right;">
 
-              <ul class="nav navbar-nav pull-right panel-menu">
+              <button id="view_export_list" type="button" class="btn navbar-btn button-dropdown-menu" data-toggle="modal" data-target="#exportModal"
+                      style="font-size: 12px; padding: 0px 2px 0px 2px; margin: 0;">
+                <span class="fa fa-download fa-inverse"> Export</span>
+              </button>
 
-                <!--
+            </div>
+
+            <div class="col-xs-10 col-sm-1" style="padding: 0px 10px 0px 10px; text-align: right; border-left: 1px solid rgba(255, 255, 255, 0.5);">
+
+
+              <!--
+              <ul class="nav navbar-nav" style="padding: 0; width: 100%;">
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                     <i class="fa fa-angle-down fa-inverse pull-right"></i>
@@ -204,79 +208,21 @@
                     </li>
                   </ul>
                 </li>
-                -->
-
-                <li class="hidden-xs">
-
-                  <a id="view_export_list" type="button" class="btn btn-inverse" data-toggle="modal" data-target="#exportModal"
-                     style="font-size: 14px; font-weight:normal; color: #E1E1E1;">Export
-                    <span class="fa fa-download fa-inverse fa-lg"></span>
-                  </a>
-
-                </li>
-
-                <li class="hidden-xs">
-
-                  <a class="help" data-fancybox-type="iframe" href="help.html" style="font-size: 14px; font-weight:normal; color: #E1E1E1;">Help
-                    <span id="help-icon" class="fa fa-question-circle fa-inverse fa-lg"></span>
-                  </a>
-
-                </li>
-
-                <!--
-                <li class="dropdown">
-                  <a href="#" class="dropdown-toggle account" data-toggle="dropdown">
-                    <div class="avatar">
-                      <img src="imgs/logo_darpa_160x120.png" class="img-circle" alt="avatar" />
-                    </div>
-                    <i class="fa fa-angle-down fa-inverse pull-right"></i>
-                    <div class="user-mini pull-right">
-                      <span class="welcome">DARPA</span>
-                      <span>Developer</span>
-                    </div>
-                  </a>
-                  <ul class="dropdown-menu">
-                    <li>
-                      <a href="#">
-                        <i class="fa fa-user"></i>
-                        <span>Profile</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="ajax/page_messages.html" class="ajax-link">
-                        <i class="fa fa-envelope"></i>
-                        <span>Messages</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="ajax/gallery_simple.html" class="ajax-link">
-                        <i class="fa fa-picture-o"></i>
-                        <span>Albums</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="ajax/calendar.html" class="ajax-link">
-                        <i class="fa fa-tasks"></i>
-                        <span>Tasks</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#">
-                        <i class="fa fa-cog"></i>
-                        <span>Settings</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#">
-                        <i class="fa fa-power-off"></i>
-                        <span>Logout</span>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-                -->
-
               </ul>
+              -->
+              <div class="dropdown" style="width: 100%; position:relative; display: inline-block;" id="logo_dropdown_selected">
+                <span class="dropdown-toggle btn navbar-btn button-dropdown-menu" style="padding: 0px 2px 0px 2px; margin: 0;" data-toggle="dropdown">
+                      <span class="fa fa-user-secret fa-inverse"> Newman 2.0</span>
+                </span>
+                <ul class="dropdown-menu" style="width: 100%; padding: 2px 0px 2px 0px; border-radius: 4px;" id="logo_dropdown_list">
+                  <li style="line-height: 20px; text-align: center;">
+                    <a data-fancybox-type="iframe" href="help.html" style="background: none; color: #011d4b; font-size: 12px; font-weight:normal;">Help
+                      <span id="help-icon" class="fa fa-question-circle"></span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
             </div>
             <!--
             <div class="col-xs-2 col-sm-1" style="padding: 0px 15px 0px 0px; text-align: center;">
@@ -286,19 +232,20 @@
           </div>
         </div>
 
+        <!--
         <div id="logo" class="col-xs-12 col-sm-1" style="padding: 0px 0px 0px 15px;">
           <div class="row">
-            <!--
+
             <div class="col-xs-5 col-sm-4" style="padding: 0px 5px 0px 15px;">
               <button class="button-sidebar"><i class="fa fa-outdent fa-inverse fa-lg"></i></button>
             </div>
             <div class="col-xs-7 col-sm-8" style="padding: 0px; text-align: left">
               <button class="button-logo" id="toggle_dashboard_home">Newman <i class="fa fa-user-secret"></i></button>
             </div>
-            -->
-            <button class="button-logo" id="toggle_dashboard_home"><i class="fa fa-user-secret"></i> Newman 2.0</button>
+
           </div>
         </div>
+        -->
 
       </div>
     </div>
@@ -599,13 +546,14 @@
                 <table id="search_result_treetable" class="table tree-2 table-bordered table-striped table-condensed">
                   <thead>
                   <tr style="font-size: small;">
-                    <th width="60%"></th>
-                    <th><i class="fa fa-paper-plane-o"></i></th>
-                    <th><i class="fa fa-inbox"></i></th>
-                    <th><i class="fa fa-paperclip"></i></th>
-                    <th><i class="fa fa-envelope-o"></i></th>
-                    <th><i class="fa fa-users"></i></th>
-                    <th><i class="fa fa-cubes"></i></th>
+                    <th width="60%"><i class="fa fa-sort-amount-desc"></i></th>
+                    <!--<th><i class="fa fa-paper-plane-o" data-toggle="tooltip" data-placement="left" title="" data-content="total sent"></i></th>-->
+                    <th><i class="fa fa-send-o" rel="tooltip" data-placement="top" title="Email Sent"></i></th>
+                    <th><i class="fa fa-inbox" rel="tooltip" data-placement="top" title="Email Received"></i></th>
+                    <th><i class="fa fa-paperclip" rel="tooltip" data-placement="top" title="File Attached"></i></th>
+                    <th><i class="fa fa-envelope-o" rel="tooltip" data-placement="top" title="Query Matched"></i></th>
+                    <th><i class="fa fa-users" rel="tooltip" data-placement="top" title="User Associated"></i></th>
+                    <th><i class="fa fa-cubes" rel="tooltip" data-placement="top" title="Subset"></i></th>
                   </tr>
                   </thead>
                   <tbody style="font-size: 11px;" id="search_result_treetable_body">
@@ -710,10 +658,19 @@
                 <!--Start Dashboard-Right-Row-1-Panel-Nav-Tabs-->
                 <ul class="nav nav-tabs box-name" style="height: 30px;" role="tablist" id="dashboard_row1_tab_list">
                   <li class="active" style="height: inherit;">
-                    <a href="#dashboard_tab_content_outbound_activities" style="height: inherit;" role="tab" data-toggle="tab"><i class="fa fa-paper-plane-o"></i> Sent</a>
+                    <a href="#dashboard_tab_content_outbound_activities" style="height: inherit;" role="tab" data-toggle="tab">
+                      <i class="fa fa-send-o" rel="tooltip" data-placement="bottom" title="Email Sent"></i> Sent
+                    </a>
                   </li>
                   <li style="height: inherit;">
-                    <a href="#dashboard_tab_content_inbound_activities" style="height: inherit;" role="tab" data-toggle="tab"><i class="fa fa-inbox"></i> Received</a>
+                    <a href="#dashboard_tab_content_inbound_activities" style="height: inherit;" role="tab" data-toggle="tab">
+                      <i class="fa fa-inbox" rel="tooltip" data-placement="bottom" title="Email Received"></i> Received
+                    </a>
+                  </li>
+                  <li style="height: inherit;">
+                    <a href="#dashboard_tab_content_attach_activities" style="height: inherit;" role="tab" data-toggle="tab">
+                      <i class="fa fa-paperclip" rel="tooltip" data-placement="bottom" title="File Attached"></i> Attached
+                    </a>
                   </li>
                 </ul>
                 <!--End Dashboard-Right-Row-1-Panel-Nav-Tabs-->
@@ -722,16 +679,17 @@
                 <div class="tab-content" style= "height: 100%;">
                   <div class="tab-pane active" id="dashboard_tab_content_outbound_activities">
                     <div class="box-content" style="padding: 0px; width: 100%; height: 164px;">
-
-                          <div id="chart_line_outbound_activities" style="width: 100%; height: 100%;"></div>
-
+                      <div id="chart_line_outbound_activities" style="width: 100%; height: 100%;"></div>
                     </div>
                   </div>
                   <div class="tab-pane" id="dashboard_tab_content_inbound_activities">
                     <div class="box-content" style="padding: 0px; width: 100%; height: 164px;">
-
-                          <div id="chart_line_inbound_activities" style="width: 100%; height: 100%;"></div>
-
+                      <div id="chart_line_inbound_activities" style="width: 100%; height: 100%;"></div>
+                    </div>
+                  </div>
+                  <div class="tab-pane" id="dashboard_tab_content_attach_activities">
+                    <div class="box-content" style="padding: 0px; width: 100%; height: 164px;">
+                      <div id="chart_line_attach_activities" style="width: 100%; height: 100%;"></div>
                     </div>
                   </div>
                 </div>
@@ -791,20 +749,25 @@
                 <!--Start Dashboard-Right-Row-3-Panel-Nav-Tabs-->
                 <ul class="nav nav-tabs box-name" style="height: 30px;" role="tablist" id="dashboard_row3_tab_list">
                   <li class="active" style="height: inherit;">
-                    <a href="#dashboard_tab_content_rank" style="height: inherit;" role="tab" data-toggle="tab">Rank</a>
+                    <a href="#dashboard_tab_content_ranks" style="height: inherit;" role="tab" data-toggle="tab">Ranks</a>
                   </li>
                   <li style="height: inherit;">
                     <a href="#dashboard_tab_content_domains" style="height: inherit;" role="tab" data-toggle="tab">Domains</a>
                   </li>
                   <li style="height: inherit;">
+                    <a href="#dashboard_tab_content_attach_types" style="height: inherit;" role="tab" data-toggle="tab">Attach Types</a>
+                  </li>
+                  <!--
+                  <li style="height: inherit;">
                     <a href="#dashboard_tab_content_communities" style="height: inherit;" role="tab" data-toggle="tab">Communities</a>
                   </li>
+                  -->
                 </ul>
                 <!--End Dashboard-Right-Row-3-Panel-Nav-Tabs-->
 
                 <!--Start Dashboard-Right-Row-3-Panel-Tab-Content-->
                 <div class="tab-content" style= "height: 100%;">
-                  <div class="tab-pane active" id="dashboard_tab_content_rank">
+                  <div class="tab-pane active" id="dashboard_tab_content_ranks">
                     <div class="box-content" style="padding: 0px; height: 164px;">
                       <div class="row">
                         <div class="col-xs-3">
@@ -828,6 +791,19 @@
                       </div>
                     </div>
                   </div>
+                  <div class="tab-pane" id="dashboard_tab_content_attach_types">
+                    <div class="box-content" style="padding: 0px; height: 164px;">
+                      <div class="row">
+                        <div class="col-xs-3">
+                          <div id="chart_donut_attach_types" style="width: 160px; height: 160px;"></div>
+                        </div>
+                        <div class="col-xs-9" style="padding: 0px;">
+                          <div id="chart_horizontal_bar_attach_types" style="width: 100%; height: 100%; position: relative"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!--
                   <div class="tab-pane" id="dashboard_tab_content_communities">
                     <div class="box-content" style="padding: 0px; height: 164px;">
                       <div class="row">
@@ -840,10 +816,11 @@
                       </div>
                     </div>
                   </div>
+                  -->
                 </div>
-                <!-- Start Dashboard-Right-Row-3-Panel-Tab-Content -->
+                <!-- End-Dashboard-Right-Row-3-Panel-Tab-Content -->
               </div>
-              <!-- End Dashboard-Right-Row-3 -->
+              <!-- End-Dashboard-Right-Row-3 -->
 
             </div>
           </div>
@@ -1135,6 +1112,7 @@
     <script src="js/newman-data-validator.js"></script>
     <script src="js/newman-search-filter.js"></script>
     <script src="js/newman-activity-email.js"></script>
+    <script src="js/newman-file-type-attach.js"></script>
     <script src="js/newman-data-source.js"></script>
     <script src="js/newman-datetime-range.js"></script>
     <script src="js/newman-service.js"></script>

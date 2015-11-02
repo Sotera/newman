@@ -1798,39 +1798,7 @@ function drawChartRank( count ) {
 }
 
 
-/**
- * request and display activity-related charts
- * @param count
- */
-/*
-function drawChartAccountActivity( count ) {
-  console.log('drawChartAccountActivity(' + count + ')');
 
-  var chart_ui_id_text = 'chart_line_account_activities';
-  var chart_ui_id_element = $('#' + chart_ui_id_text);
-
-  if (chart_ui_id_element) {
-
-    var top_count = count;
-
-    if (top_count > 4 || top_count < 2) {
-      top_count = 4;
-    }
-
-    var top_rank_accounts = newman_data_source.getSelectedTopHits( count );
-    //console.log( 'ranks: ' + JSON.stringify(ranks, null, 2) );
-
-    var top_accounts = [];
-    _.each(top_rank_accounts, function (element) {
-      var email_address = element[0];
-      var response = service_response_activity_account.requestService( email_address );
-      top_accounts.push( email_address );
-
-    });
-
-  }
-}
-*/
 
 function reloadDashboardSearchResult() {
   search_result.clearAll();
@@ -1840,6 +1808,11 @@ function reloadDashboardSearchResult() {
 function reloadDashboardActivityTimeline() {
   newman_datetime_range.initDateTimeRange();
   newman_activity_email.displayUIActivityEmail(4);
+  newman_activity_attachment.displayUIActivityAttachAll();
+}
+
+function reloadDashboardFileTypeAttachment() {
+  newman_file_type_attach.displayUIFileTypeAttach(10);
 }
 
 /**
@@ -1855,6 +1828,7 @@ function drawDashboardCharts() {
   drawChartCommunity(10);
   drawChartRank(10);
 
+  reloadDashboardFileTypeAttachment();
 
 }
 

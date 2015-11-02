@@ -42,7 +42,7 @@ def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, ent
     # total_other = domains_agg["aggregations"]["domain_agg"]["doc_count_error_upper_bound"]
     domains = [[domain["key"], int(domain["doc_count"])] for domain in domains_agg["aggregations"]["domain_filtered_agg"]["domain_agg"]["buckets"]]
     total = sum(domain[1] for domain in domains)
-    domains = [[domain[0],"{0:.2f}".format(round(100.0*domain[1]/total,2))] for domain in domains]
+    domains = [[domain[0],domain[1], "{0:.2f}".format(round(100.0*domain[1]/total,2))] for domain in domains]
     return domains
 
 # GET top 10 Attchment types for index
@@ -56,7 +56,7 @@ def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=
     # total_other = domains_agg["aggregations"]["attachment_type_agg"]["doc_count_error_upper_bound"]
     types = [[attch_type["key"], int(attch_type["doc_count"])] for attch_type in attch_agg_resp["aggregations"]["attachment_filtered_agg"]["attachment_type_agg"]["buckets"]]
     total = sum(type[1] for type in types)
-    types = [[attch_type[0],"{0:.2f}".format(round(100.0*attch_type[1]/total,2))] for attch_type in types]
+    types = [[attch_type[0], attch_type[1], "{0:.2f}".format(round(100.0*attch_type[1]/total,2))] for attch_type in types]
     return types
 
 
@@ -148,7 +148,7 @@ def get_attachment(index, email_id, attachment_name):
 
 #GET /attachments/<sender>
 # find all attachments for a specific email address
-def get_attachments_sender(*args, **kwargs):
+def get_attachments_by_sender(*args, **kwargs):
     tangelo.log("getAttachmentsSender(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
     sender=nth(args, 0, '')

@@ -13,7 +13,7 @@ def search(*path_args, **param_args):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
 
     #re-direct based on data_set_id
-    if path_args[0] == "text" or path_args[0] == "all":
+    if path_args[0] == "text" :
         if len(path_args) == 1:
             return {"graph":{"nodes":[], "links":[]}, "rows":[]}
         elif len(path_args) >= 2:
