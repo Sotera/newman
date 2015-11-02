@@ -6,7 +6,7 @@ from elasticsearch import Elasticsearch
 from param_utils import parseParamDatetime
 from newman.utils.functions import nth
 from es_search import _search_ranked_email_addrs, count
-
+from es_queries import _build_filter
 
 #map the email_address for the email/rank REST service
 def map_email_addr(email_addr_resp, total_emails):
@@ -24,16 +24,41 @@ def map_email_addr(email_addr_resp, total_emails):
                   ]
     return email_addr
 
+def filtered_agg_query(email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None, aggs={}, name=""):
+    return {"aggs" : {
+        name+"_filtered_agg" : {
+            "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, query_terms=query_terms, date_bounds=date_bounds),
+            "aggs": aggs
+        }}, "size":0}
+
 # GET domains for email_address index
-def get_domain(index):
+def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None):
     es = Elasticsearch()
-    query = {"aggs":{ "domain_agg":{"terms":{"field":"domain", "size":10}}}}
+    aggs = { "domain_agg":{"terms":{"field":"domain", "size":10}}}
+    query = filtered_agg_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="domain")
+    tangelo.log("Query %s"%query)
+
     domains_agg = es.search(index=index, doc_type='email_address', size=0, body=query)
-    total_other = domains_agg["aggregations"]["domain_agg"]["doc_count_error_upper_bound"]
-    domains = [[domain["key"], int(domain["doc_count"])] for domain in domains_agg["aggregations"]["domain_agg"]["buckets"]] +[["other", total_other]]
+    # total_other = domains_agg["aggregations"]["domain_agg"]["doc_count_error_upper_bound"]
+    domains = [[domain["key"], int(domain["doc_count"])] for domain in domains_agg["aggregations"]["domain_filtered_agg"]["domain_agg"]["buckets"]]
     total = sum(domain[1] for domain in domains)
     domains = [[domain[0],"{0:.2f}".format(round(100.0*domain[1]/total,2))] for domain in domains]
-    return {"domains":domains}
+    return domains
+
+# GET top 10 Attchment types for index
+def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None):
+    es = Elasticsearch()
+    aggs = { "attachment_type_agg":{"terms":{"field":"extension", "size":10}}}
+    query = filtered_agg_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="attachment")
+    tangelo.log("Query %s"%query)
+
+    attch_agg_resp = es.search(index=index, doc_type='attachments', size=0, body=query)
+    # total_other = domains_agg["aggregations"]["attachment_type_agg"]["doc_count_error_upper_bound"]
+    types = [[attch_type["key"], int(attch_type["doc_count"])] for attch_type in attch_agg_resp["aggregations"]["attachment_filtered_agg"]["attachment_type_agg"]["buckets"]]
+    total = sum(type[1] for type in types)
+    types = [[attch_type[0],"{0:.2f}".format(round(100.0*attch_type[1]/total,2))] for attch_type in types]
+    return types
+
 
 #GET /rank?data_set_id=<dateset>&start_datetime=<start_datetime>&end_datetime=<end_datetime>&size=<size>
 def get_ranked_email_address(*args, **kwargs):
@@ -176,9 +201,16 @@ def get_email(*path_args, **param_args):
 
 
 if __name__ == "__main__":
+    # email= "katie.baur@myflorida.com"
     email="arlene.dibenigno@myflorida.com"
-    for x in get_attachments_sender("sample",email)["email_attachments"]:
-        print x
+    res = get_top_domains("sample", email_addrs=[email], query_terms='', topic_score=None, entity=[], date_bounds=None)
+    print res
+    res = get_top_attachment_types("sample", email_addrs=[email], query_terms='', topic_score=None, entity=[], date_bounds=None)
+    print res
+    print "done"
+    # email="arlene.dibenigno@myflorida.com"
+    # for x in get_attachments_sender("sample",email)["email_attachments"]:
+    #     print x
     # res = buildGraph()
     # res = get_ranked_email_address("2000-01-01", "now", 20)
     # res=get_email("d6d86d10-6879-11e5-bb05-08002705cb99")

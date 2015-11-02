@@ -22,13 +22,20 @@ def get_datetime_bounds(index, type="emails"):
     return  (min if min >= "1970" else "1970", max if max <= now else now)
 
 
+
+def _map_attachments(index, account_id, attchments):
+    return {"account_id" : account_id,
+            "interval_start_datetime" : attchments[0]["key_as_string"],
+            "interval_inbound_count" : attchments[0]["doc_count"]
+            }
+
 def _map_activity(index, account_id, sent_rcvd):
     return {"account_id" : account_id,
             "interval_start_datetime" : sent_rcvd[0]["key_as_string"],
             "interval_inbound_count" : sent_rcvd[0]["doc_count"],
             "interval_outbound_count" : sent_rcvd[1]["doc_count"]
             }
-# TODO this should take a set of filters and query to apply
+
 def entity_histogram_query(email_addrs=[], query_terms='', topic_score=None, date_bounds=None, entity_agg_size=10):
     return {"aggs" : {
         "filtered_entity_agg" : {
@@ -63,6 +70,47 @@ def get_entity_histogram(index, type, email_addrs=[], query_terms='', topic_scor
                   + [dict(d, **{"type":"organization"}) for d in resp["aggregations"]["filtered_entity_agg"]["organization"]["buckets"]]
                   + [dict(d, **{"type":"person"}) for d in resp["aggregations"]["filtered_entity_agg"]["person"]["buckets"]]
                   + [dict(d, **{"type":"misc"}) for d in resp["aggregations"]["filtered_entity_agg"]["misc"]["buckets"]], key=lambda d:d["doc_count"], reverse=True)
+
+def attachment_histogram(sender_email_addr, start, end, interval="week"):
+    tangelo.log('attachment_histogram(%s, %s, %s, %s)' %(sender_email_addr, start, end, interval))
+    return {
+        "size":0,
+        "aggs":{
+            "attachments_filter_agg":{"filter" :
+                {"bool":{
+                    "must":[{"range" : {"datetime" : { "gte": start, "lte": end }}}]
+                }
+                },
+
+                "aggs" : {
+                    "attachments_over_time" : {
+                        "date_histogram" : {
+                            "field" : "datetime",
+                            "interval" : interval,
+                            "format" : "yyyy-MM-dd",
+                            "min_doc_count" : 0,
+                            "extended_bounds":{
+                                "min": start,
+                                # "max" doesnt really work unless it's set to "now"
+                                "max": end
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+
+
+# Returns a sorted map of
+def get_daily_activity(index, account_id, type, query_function, **kwargs):
+    es = Elasticsearch()
+    resp = es.search(index=index, doc_type=type, request_cache="false", body=query_function(**kwargs))
+    return [_map_activity(index, account_id, sent_rcvd) for sent_rcvd in zip(resp["aggregations"]["sent_agg"]["sent_emails_over_time"]["buckets"],
+                                                                             resp["aggregations"]["rcvr_agg"]["rcvd_emails_over_time"]["buckets"])]
+
 
 # This function uses the date_histogram with the extended_bounds
 # Oddly the max part of the extended bounds doesnt seem to work unless the value is set to
@@ -137,22 +185,29 @@ def get_total_daily_activity(index, type, query_function, **kwargs):
     return resp["aggregations"]["filter_agg"]["emails_over_time"]["buckets"]
 
 # Returns a sorted map of
-def get_daily_activity(index, account_id, type, query_function, **kwargs):
+def get_email_activity(index, account_id, query_function, **kwargs):
     es = Elasticsearch()
-    resp = es.search(index=index, doc_type=type, request_cache="false", body=query_function(**kwargs))
+    resp = es.search(index=index, doc_type="emails", request_cache="false", body=query_function(**kwargs))
     return [_map_activity(index, account_id, sent_rcvd) for sent_rcvd in zip(resp["aggregations"]["sent_agg"]["sent_emails_over_time"]["buckets"],
                                                                              resp["aggregations"]["rcvr_agg"]["rcvd_emails_over_time"]["buckets"])]
+
+
+# Returns a sorted map of
+def get_attachment_activity(index, account_id, query_function, **kwargs):
+    es = Elasticsearch()
+    resp = es.search(index=index, doc_type="attachments", request_cache="false", body=query_function(**kwargs))
+    return [_map_attachments(index, account_id, attachments) for attachments in zip(resp["aggregations"]["attachments_filter_agg"]["attachments_over_time"]["buckets"])]
 
 if __name__ == "__main__":
     # es = Elasticsearch()
     # body = entity_histogram_query(email_addrs=["jeb@jeb.org"], query_terms="", topic_score=None, date_bounds=("1970","now"), entity_agg_size=10)
     # print body
     # resp = es.search(index="sample", doc_type="emails",body=body)
-    res = get_entity_histogram("sample", "emails", email_addrs=[], query_terms="", topic_score=None, date_bounds=("2000","2002"))
-    print {"entities" : [[str(i), entity ["type"], entity ["key"], entity ["doc_count"]] for i,entity in enumerate(res)]}
-
-    res = get_entity_histogram("sample", "emails", email_addrs=["oviedon@sso.org"], query_terms="", topic_score=None, date_bounds=("2000","2002"))
+    # res = get_entity_histogram("sample", "emails", email_addrs=[], query_terms="", topic_score=None, date_bounds=("2000","2002"))
+    # print {"entities" : [[str(i), entity ["type"], entity ["key"], entity ["doc_count"]] for i,entity in enumerate(res)]}
+    #
+    # res = get_entity_histogram("sample", "emails", email_addrs=["oviedon@sso.org"], query_terms="", topic_score=None, date_bounds=("2000","2002"))
+    # print res
+    res = get_attachment_activity("sample", account_id="", query_function=attachment_histogram, sender_email_addr="", start="1970", end="now", interval="year")
     print res
-    # res = get_daily_activity("sample", "emails", actor_histogram, actor_email_addr="jeb@jeb.org", start="1970", end="now", interval="year")
     # for s in res:
-    #     print s

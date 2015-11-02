@@ -1,8 +1,6 @@
 import cherrypy
 import os
 import json
-import tangelo
-
 
 CONFIG=None
 APP_CONFIG=None

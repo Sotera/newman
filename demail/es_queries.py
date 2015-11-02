@@ -15,7 +15,6 @@ def _build_filter(email_senders=[], email_rcvrs=[], query_terms='', topic_score=
     date_range = [] if not date_bounds else [{"range" : {"datetime" : { "gte": str(date_bounds[0]), "lte": str(date_bounds[1])}}}]
     topic_range= [] if not topic_score else [{"range" : {"topic_scores.idx_"+str(topic_score[0]) : { "gte": topic_score[1]}}}]
 
-
     filter =  {
         "bool":{
             "should":[],
@@ -31,7 +30,7 @@ def _build_filter(email_senders=[], email_rcvrs=[], query_terms='', topic_score=
 
     # This needs to occur last as it adds a default search filter if none is available
     if not (bool_filter["must"] or bool_filter["should"] or bool_filter["must_not"]) :
-        bool_filter["bool"]["must"].append({"match_all":{}})
+        bool_filter["must"].append({"match_all":{}})
 
     return filter
 

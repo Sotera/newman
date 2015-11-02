@@ -15,7 +15,8 @@ def getTopRollup(*args):
 def get_top_entities(*args, **kwargs):
     tangelo.content_type("application/json")
     tangelo.log("entity.get_top_entities(args: %s kwargs: %s)" % (str(args), str(kwargs)))
-    amount=int(urllib.unquote(nth(args, 0, 20)))
+    amount=int(urllib.unquote(nth(args, 0, "20")))
+
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
     entities = get_entity_histogram(data_set_id, "emails", date_bounds=(start_datetime, end_datetime))[:amount]
     return {"entities" : [[str(i), entity ["type"], entity ["key"], entity ["doc_count"]] for i,entity in enumerate(entities)]}

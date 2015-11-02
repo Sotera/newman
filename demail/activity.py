@@ -7,7 +7,7 @@ from newman.utils.functions import nth
 from param_utils import parseParamDatetime
 from datetime import timedelta, date
 from random import randint
-from series import get_daily_activity, actor_histogram
+from series import get_email_activity, get_attachment_activity, actor_histogram, attachment_histogram
 
 
 
@@ -46,9 +46,8 @@ def getAccount(*args, **kwargs):
         return tangelo.HTTPStatusCode(400, "invalid service call - missing account_id")
 
 
-    activity = get_daily_activity(data_set_id, account_id, "emails", actor_histogram, actor_email_addr=account_id, start=start_datetime, end=end_datetime, interval="week")
-    #activity = _queryActivity( account_id )
-    
+    activity = get_email_activity(data_set_id, account_id, actor_histogram, actor_email_addr=account_id, start=start_datetime, end=end_datetime, interval="week")
+
     result = {
               "account_id" : account_id,
               "data_set_id" : data_set_id,
@@ -59,12 +58,38 @@ def getAccount(*args, **kwargs):
         
     return result
 
+
+#GET /attachment_histogram
+def get_attachment_histogram(*args, **kwargs):
+    tangelo.content_type("application/json")
+    tangelo.log("attachment_histogram(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+
+    sender_id = urllib.unquote(nth(args, 0, 'all'))
+
+    histogram = get_attachment_activity("sample", account_id="", query_function=attachment_histogram, sender_email_addr="", start="1970", end="now", interval="year")
+
+    result = {
+              "account_id" : sender_id,
+              "data_set_id" : data_set_id,
+              "account_start_datetime" : start_datetime,
+              "account_end_datetime" : end_datetime,
+              "activities" : histogram
+             }
+
+    return result
+
+
+
 actions = {
-    "account" : getAccount
+    "account" : getAccount,
+    "get_attachment_histogram": get_attachment_histogram
 }
 
 def unknown(*args):
     return tangelo.HTTPStatusCode(400, "invalid service call")
+
+
 
 @tangelo.restful
 def get(action, *args, **kwargs):
