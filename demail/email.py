@@ -5,7 +5,7 @@ import urllib
 
 from newman.utils.functions import nth
 from newman.settings import getOpt
-from es_email import get_ranked_email_address, get_attachment, get_attachments_by_sender, get_email, get_top_domains
+from es_email import get_ranked_email_address_from_email_addrs_index, get_attachment, get_attachments_by_sender, get_email, get_top_domains
 from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime
 
@@ -25,7 +25,7 @@ def getRankedEmails(*args, **kwargs):
     tangelo.log("getRankedEmails(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
-    return get_ranked_email_address(*args, **kwargs)
+    return get_ranked_email_address_from_email_addrs_index(*args, **kwargs)
 
 # DEPRECATED  TODO remove
 #GET /target

@@ -190,8 +190,6 @@ def get_email_activity(index, account_id, query_function, **kwargs):
     resp = es.search(index=index, doc_type="emails", request_cache="false", body=query_function(**kwargs))
     return [_map_activity(index, account_id, sent_rcvd) for sent_rcvd in zip(resp["aggregations"]["sent_agg"]["sent_emails_over_time"]["buckets"],
                                                                              resp["aggregations"]["rcvr_agg"]["rcvd_emails_over_time"]["buckets"])]
-
-
 # Returns a sorted map of
 def get_attachment_activity(index, account_id, query_function, **kwargs):
     es = Elasticsearch()

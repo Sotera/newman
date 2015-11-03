@@ -63,7 +63,6 @@ def _map_node(email_addr, total_docs):
 
 # Get search all
 def _search_ranked_email_addrs(index, start, end, size):
-    tangelo.content_type("application/json")
     es = Elasticsearch()
     graph_body= {"fields": _graph_fields, "sort" : _sort_email_addrs_by_total, "query" : _query_all}
     # tangelo.log("getRankedEmails(query: %s)" % (graph_body))
@@ -141,10 +140,14 @@ def _query_emails(index, size, emails_query):
     return [_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]
 
 # This will generate the graph structure for a specific email address.  Will aply date filter and term query.
-def _build_graph_for_emails(emails):
+def _build_graph_for_emails(index, emails):
     nodes = []
     edge_map = {}
     addr_index = {}
+
+    total = count(index,"email_address")
+    print total
+
     for email in emails:
         from_addr = email["from"]
         if from_addr not in _EMAIL_ADDR_CACHE:
@@ -152,11 +155,11 @@ def _build_graph_for_emails(emails):
             continue;
 
         if from_addr not in addr_index:
-            nodes.append(_EMAIL_ADDR_CACHE[from_addr])
+            nodes.append(_map_node(_EMAIL_ADDR_CACHE[from_addr],total))
             addr_index[from_addr] = len(nodes)
         for rcvr_addr in email["to"]+email["cc"]+email["bcc"]:
             if rcvr_addr not in addr_index:
-                nodes.append(_EMAIL_ADDR_CACHE[rcvr_addr])
+                nodes.append(_map_node(_EMAIL_ADDR_CACHE[rcvr_addr], total))
                 addr_index[rcvr_addr] = len(nodes)
             #TODO reduce by key instead of mapping?  src->target and sum on value
             edge_key = from_addr+"#"+rcvr_addr
@@ -204,7 +207,7 @@ def get_graph_for_email_address(*args, **kwargs):
     query  = _build_email_query(email_addrs=[email_address], query_terms='', date_bounds=(start_datetime, end_datetime))
     tangelo.log("es_search.get_graph_for_email_address(query: %s)" % (query))
 
-    return _build_graph_for_emails(_query_emails(data_set_id, size, query))
+    return _build_graph_for_emails(data_set_id, _query_emails(data_set_id, size, query))
 
 # GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
 # build a graph for a specific email address.
@@ -225,7 +228,7 @@ def get_top_email_hits_for_text_query(*args, **kwargs):
     query  = _build_email_query(email_addrs=[], query_terms=search_terms, date_bounds=(start_datetime, end_datetime))
     tangelo.log("es_search.get_graph_for_text_query(query: %s)" % (query))
 
-    return _build_graph_for_emails(_query_emails(data_set_id, size, query))
+    return _build_graph_for_emails(data_set_id, _query_emails(data_set_id, size, query))
 
     # TODO Neither of these are correct -- need to figure out this calling convention
     # return {"graph":{"nodes":[], "links":[]}, "rows":emails}
@@ -235,7 +238,7 @@ def get_top_email_hits_for_text_query(*args, **kwargs):
 def initialize_email_addr_cache(index):
     tangelo.log("INITIALIZING CACHE")
     global _EMAIL_ADDR_CACHE
-    _email_addr_cache_fields= ["community", "community_id", "addr", "received_count", "sent_count"]
+    _email_addr_cache_fields= ["community", "community_id", "addr", "received_count", "sent_count", "attachments_count"]
 
     es = Elasticsearch()
 
@@ -244,9 +247,12 @@ def initialize_email_addr_cache(index):
     num = count(index,"email_address")
     print num
     addrs = es.search(index=index, doc_type="email_address", size=num, fields=_email_addr_cache_fields, body=body)
-    _EMAIL_ADDR_CACHE = {f["addr"][0]:_map_node(f,num) for f in [hit["fields"] for hit in addrs["hits"]["hits"]]}
+    _EMAIL_ADDR_CACHE = {f["addr"][0] : f for f in [hit["fields"] for hit in addrs["hits"]["hits"]]}
     tangelo.log("done: %s"% num)
     return {"acknowledge" : "ok"}
+
+def get_cached_email_addr(addr):
+    return _EMAIL_ADDR_CACHE[addr]
 
 # if __name__ == "__main__":
 #     print "foo"

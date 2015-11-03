@@ -5,7 +5,7 @@ import cherrypy
 from elasticsearch import Elasticsearch
 from param_utils import parseParamDatetime
 from newman.utils.functions import nth
-from es_search import _search_ranked_email_addrs, count
+from es_search import _search_ranked_email_addrs, count, get_cached_email_addr, initialize_email_addr_cache
 from es_queries import _build_filter
 
 #map the email_address for the email/rank REST service
@@ -13,16 +13,27 @@ def map_email_addr(email_addr_resp, total_emails):
 
     fields = email_addr_resp["fields"]
 
-    email_addr = [fields["addr"][0],
-                  fields["community"][0],
-                  str(fields["community_id"][0]),
-                  str(fields["community_id"][0]),
-                  (fields["sent_count"][0] + fields["received_count"][0]) / float(total_emails),
-                  str(fields["received_count"][0]),
-                  str(fields["sent_count"][0]),
-                  str(fields["attachments_count"][0])
-                  ]
-    return email_addr
+    return  [fields["addr"][0],
+             fields["community"][0],
+             str(fields["community_id"][0]),
+             str(fields["community_id"][0]),
+             (fields["sent_count"][0] + fields["received_count"][0]) / float(total_emails),
+             str(fields["received_count"][0]),
+             str(fields["sent_count"][0]),
+             str(fields["attachments_count"][0])
+             ]
+
+def map_email_filtered(fields, emailer_filtered, filtered_total):
+    return [fields["addr"][0],
+            fields["community"][0],
+            str(fields["community_id"][0]),
+            str(fields["community_id"][0]),
+            (emailer_filtered) / float(filtered_total),
+            str(fields["received_count"][0]),
+            str(fields["sent_count"][0]),
+            str(fields["attachments_count"][0]),
+            emailer_filtered
+            ]
 
 def filtered_agg_query(email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None, aggs={}, name=""):
     return {"aggs" : {
@@ -60,8 +71,34 @@ def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=
     return types
 
 
+
 #GET /rank?data_set_id=<dateset>&start_datetime=<start_datetime>&end_datetime=<end_datetime>&size=<size>
-def get_ranked_email_address(*args, **kwargs):
+def get_ranked_email_address(data_set_id, query_terms='', topic_score=None, entity=[], date_bounds=None, num_top_hits=30):
+    body = {
+        "aggs" : {
+            "filtered_addrs_agg" : {
+                "filter" : _build_filter(query_terms=query_terms, topic_score=None, entity=[], date_bounds=date_bounds),
+                "aggs": {
+                    "top_addrs_agg" : {
+                        "terms" : {"field" : "addrs", "size": num_top_hits}
+                    }
+                }
+            }
+        },
+        "size":0}
+
+    es = Elasticsearch()
+
+    resp = es.search(index=data_set_id, doc_type="emails", body=body)
+
+    total_docs =resp["aggregations"]["filtered_addrs_agg"]["doc_count"]
+    email_addrs = [map_email_filtered(get_cached_email_addr(email_addr["key"]), email_addr["doc_count"],total_docs) for email_addr in resp["aggregations"]["filtered_addrs_agg"]["top_addrs_agg"]["buckets"]]
+    return {"emails": email_addrs }
+
+# TODO This calculation is based on the email_address type which can not easily be filtered over time / entity/ topic / etc
+# TODO as such using get_ranked_email_address() instead for most things even through the NUmbers are not as accurate
+#GET /rank?data_set_id=<dateset>&start_datetime=<start_datetime>&end_datetime=<end_datetime>&size=<size>
+def get_ranked_email_address_from_email_addrs_index(*args, **kwargs):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
     tangelo.content_type("application/json")
@@ -73,7 +110,7 @@ def get_ranked_email_address(*args, **kwargs):
 def _get_email(index, email_id):
 
     es = Elasticsearch()
-    fields=["id","datetime","senders_line","tos_line","ccs_line","bccs_line","subject","body","attachments.filename","entities.entity_organization","entities.entity_location","entities.entity_person","entities.entity_misc"]
+    fields=["id","datetime","senders","senders_line","tos_line","ccs_line","bccs_line","subject","body","attachments.filename","entities.entity_organization","entities.entity_location","entities.entity_person","entities.entity_misc"]
     email = es.get(index, doc_type="emails", id=email_id, fields=fields)
 
     default=[""]
@@ -82,7 +119,7 @@ def _get_email(index, email_id):
              "DEPRECATED",
              fields.get("datetime",default)[0],
              "false",
-             fields.get("senders_line", default)[0],
+             fields.get("senders", default)[0],
              fields.get("tos_line", default)[0],
              fields.get("ccs_line", default)[0],
              fields.get("bccs_line", default)[0],
@@ -107,9 +144,15 @@ def header(h, t=None):
 
     return r
 
-def get_attachment(index, email_id, attachment_name):
-    cherrypy.log("email.get_attachments_sender(index=%s, sender=%s, attachment_name=%s)" % (index, email_id, attachment_name))
-    if not index:
+# GET email/attachment/<Attachmnet-GUID>/<attachmnet-filename>
+def get_attachment(*args, **kwargs):
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    email_id =nth(args, 0, '')
+    attachment_name=nth(args, 1, '')
+
+    cherrypy.log("email.get_attachments_sender(index=%s, sender=%s, attachment_name=%s)" % (data_set_id, email_id, attachment_name))
+    if not data_set_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing index")
     if not email_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing email_id")
@@ -119,14 +162,14 @@ def get_attachment(index, email_id, attachment_name):
     tangelo.content_type("application/x-download")
 
     es = Elasticsearch()
-    attachments_resp = es.search(index=index, doc_type="attachments", size=10, body={"query":{"bool":{"must":[
+    attachments_resp = es.search(index=data_set_id, doc_type="attachments", size=10, body={"query":{"bool":{"must":[
         {"term": {"id":email_id}},
         {"term": {"filename":attachment_name}}
     ]}}})
 
     attachments_json = attachments_resp["hits"]["hits"]
     if not attachments_json:
-        return tangelo.HTTPStatusCode(400, "no attachments found for (index=%s, sender=%s, attachment_name=%s)" % (index, email_id, attachment_name))
+        return tangelo.HTTPStatusCode(400, "no attachments found for (index=%s, sender=%s, attachment_name=%s)" % (data_set_id, email_id, attachment_name))
 
     attachments_json = attachments_json[0]
     # TODO ensure len should be only 1 attachment
@@ -164,19 +207,19 @@ def get_attachments_by_sender(*args, **kwargs):
     body={"filter":{"exists":{"field":"attachments"}}, "query":{"match":{"senders":sender}}, "fields":fields}
 
     es = Elasticsearch()
-    attachments_resp = es.search(data_set_id=data_set_id, doc_type="emails", size=10, body=body)
+    attachments_resp = es.search(index=data_set_id, doc_type="emails", size=10, body=body)
 
     email_attachments = []
     for attachment_item in attachments_resp["hits"]["hits"]:
         fields = attachment_item["fields"]
         attachment_fields = [fields["id"][0],
-                "deprecated",
-                 fields["datetime"][0],
-                 fields.get("senders","")[0],
-                 ';'.join(fields.get("tos","")),
-                 ';'.join(fields.get("ccs","")),
-                 ';'.join(fields.get("bccs","")),
-                 ';'.join(fields.get("subject",""))]
+                             "deprecated",
+                             fields["datetime"][0],
+                             fields.get("senders","")[0],
+                             ';'.join(fields.get("tos","")),
+                             ';'.join(fields.get("ccs","")),
+                             ';'.join(fields.get("bccs","")),
+                             ';'.join(fields.get("subject",""))]
         for attachment_name in fields["attachments.filename"]:
             l = list(attachment_fields)
             l.append(attachment_name)
@@ -196,13 +239,22 @@ def get_email(*path_args, **param_args):
     email_id = path_args[-1]
     if not email_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing email_id")
-    
+
     return _get_email(data_set_id, email_id)
 
 
 if __name__ == "__main__":
     # email= "katie.baur@myflorida.com"
     email="arlene.dibenigno@myflorida.com"
+    initialize_email_addr_cache("sample")
+
+
+    # res = [[f[0],f[8]] for f in get_ranked_email_address("sample", date_bounds=("2001-12", "2002-03"))["emails"]]
+    res = [[f[0],f[8]] for f in get_ranked_email_address("sample", date_bounds=("1970", "now"))["emails"]]
+
+    print res
+    res = [[f[0],f[8]] for f in get_ranked_email_address("sample", date_bounds=("2001-10", "2002-12"))["emails"]]
+    print res
     res = get_top_domains("sample", email_addrs=[email], query_terms='', topic_score=None, entity=[], date_bounds=None)
     print res
     res = get_top_attachment_types("sample", email_addrs=[email], query_terms='', topic_score=None, entity=[], date_bounds=None)

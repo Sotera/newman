@@ -18,15 +18,15 @@ def topic_list(*args, **kwargs):
 
 #GET /graph/
 def topic_email_graph(*args, **kwargs):
+    tangelo.content_type("application/json")
     foo=nth(args, 0, 'all')
     topic_idx=nth(args, 1, 0)
     score=nth(args, 2, 0.5)
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
-    tangelo.content_type("application/json")
 
     emails = _query_emails_for_cluster(data_set_id, cluster_idx=topic_idx, score=score, size=100)
-    return _build_graph_for_emails(emails)
+    return _build_graph_for_emails(data_set_id, emails)
 
 # TODO DEPRECATED REMOVE!
 #GET /email/<email_id>/<category>

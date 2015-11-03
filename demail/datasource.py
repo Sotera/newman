@@ -3,7 +3,7 @@ from elasticsearch.client import IndicesClient
 from newman.utils.functions import nth
 from newman.newman_config import getDefaultDataSetID, default_min_timeline_bound, default_max_timeline_bound
 from es_search import initialize_email_addr_cache
-from es_email import get_ranked_email_address
+from es_email import get_ranked_email_address_from_email_addrs_index
 from series import get_datetime_bounds
 import tangelo
 import urllib
@@ -16,8 +16,10 @@ def _index_record(index):
     emails_addrs_count = es.count(index=index, doc_type="email_address", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
     emails_attch_count = es.count(index=index, doc_type="attachments", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
 
+
     #TODO: still need to re-work the absolute date-time bounds and the suggested date-time bounds
     bounds = get_datetime_bounds(index)
+
     return {'data_set_id':index,
            'data_set_label':index,
            'data_set_document_count' : email_docs_count,
@@ -34,7 +36,7 @@ def listAllDataSet():
     ic = IndicesClient(es)
     stats = ic.stats(index="_all")
     indexes = [_index_record(index) for index in stats["indices"]]
-    email_addrs = get_ranked_email_address()["emails"]
+    email_addrs = get_ranked_email_address_from_email_addrs_index()["emails"]
     email_addrs = {email_addr[0]:email_addr for email_addr in email_addrs}
 
     return {
