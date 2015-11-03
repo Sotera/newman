@@ -94,8 +94,10 @@ var newman_datetime_range = (function () {
 
         //re-render search-results
         reloadDashboardSearchResult();
+
         //re-render activity-time-series
-        newman_activity_email.displayUIActivityEmail(4);
+        newman_activity_email_account.displayUIActivityEmailSelected();
+        //newman_activity_email_account.displayUIActivityEmailTopRanked(4);
       });
     }
   }

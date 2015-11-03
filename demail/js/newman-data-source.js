@@ -319,3 +319,157 @@ var newman_data_source = (function () {
   }
 
 }());
+
+
+/**
+ * data-source service response container
+ * @type {{requestService, getResponse}}
+ */
+var newman_service_data_source = (function () {
+
+  var _response = {};
+  var _data_set_map = {};
+
+  function requestService() {
+    console.log('newman_service_data_source.requestService()');
+
+    $.when($.get('datasource/all')).done(function (response) {
+      setResponse( response );
+    });
+  }
+
+  function requestDataSetSelect(data_set_id) {
+    console.log('service_response_data_source.requestDataSetSelect('+data_set_id+')');
+
+    if (data_set_id && containsDataSet(data_set_id)) {
+
+      $.get('datasource/dataset/' + encodeURIComponent(data_set_id)).then(function (response) {
+
+        //console.log(JSON.stringify(response, null, 2));
+      });
+    }
+  }
+
+  function setResponse( response ) {
+    if (response) {
+      _response = response;
+      console.log('received service_response_data_source[' + response.data_sets.length + ']');
+      //console.log(JSON.stringify(_response, null, 2));
+
+      mapResponse(_response);
+
+    }
+  }
+
+  function mapResponse( response ) {
+    if (response) {
+
+      _data_set_map = _.object(_.map( response.data_sets, function (element) {
+
+
+        newman_data_source.push( element.data_set_id,
+          element.data_set_label,
+          element.data_set_datetime_min,
+          element.data_set_datetime_max,
+          element.data_set_document_count,
+          element.data_set_node_count,
+          element.data_set_attachment_count,
+          element.start_datetime_selected,
+          element.end_datetime_selected,
+          response.top_hits );
+
+        return [element['data_set_id'], element]
+      }));
+      newman_data_source.refreshUI();
+      //console.log('_response_map: ' + JSON.stringify(_response_map, null, 2));
+
+      var id_selected = response.data_set_selected;
+      var selected = _data_set_map[id_selected];
+      if (selected) {
+        console.log('selected data-set : ' + JSON.stringify(selected, null, 2));
+
+        newman_data_source.setSelected(selected.data_set_label);
+
+        var datetime_min = new Date(selected.data_set_datetime_min, 0, 1, 0, 0, 0, 0);
+        var datetime_max = new Date(selected.data_set_datetime_max, 0, 1, 0, 0, 0, 0);
+        var default_start_date = new Date(selected.start_datetime_selected, 0, 1, 0, 0, 0, 0);
+        var default_end_date = new Date(selected.end_datetime_selected, 0, 1, 0, 0, 0, 0);
+
+        newman_datetime_range.setDateTimeRangeSlider(datetime_min, datetime_max, default_start_date, default_end_date);
+
+        requestDataSetSelect( id_selected );
+
+
+      }
+
+
+    }
+  }
+
+  function getResponse() {
+    if (_response) {
+      //create a deep-copy, return the copy
+      return clone( _response )
+    }
+    return _response;
+  }
+
+  function getResponseMap() {
+    if (_data_set_map) {
+      //create a deep-copy, return the copy
+      return clone( _data_set_map )
+    }
+    return _data_set_map;
+  }
+
+  function getResponseMapKeys() {
+    if (_data_set_map) {
+      var key = _.keys( _data_set_map );
+      //create a deep-copy, return the copy
+      return clone( key )
+    }
+    return _data_set_map;
+  }
+
+  function getResponseMapValues() {
+    if (_data_set_map) {
+      var values = _.values( _data_set_map );
+      //create a deep-copy, return the copy
+      return clone( values )
+    }
+    return _data_set_map;
+  }
+
+  function getDataSet(key) {
+    if (_data_set_map) {
+      var data_set = _data_set_map[key];
+      if(data_set) {
+        return clone(data_set)
+      }
+      return data_set;
+    }
+    return _data_set_map;
+  }
+
+  function containsDataSet(key) {
+    if (_data_set_map) {
+      var data_set = _data_set_map[key];
+      if(data_set) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  return {
+    'requestDataSetSelect' : requestDataSetSelect,
+    'requestService' : requestService,
+    'getResponse' : getResponse,
+    'setResponse' : setResponse,
+    'getResponseMapKeys' : getResponseMapKeys,
+    'getResponseMapValues' : getResponseMapValues,
+    'getDataSet' : getDataSet,
+    'containsDataSet' : containsDataSet
+  }
+
+}());

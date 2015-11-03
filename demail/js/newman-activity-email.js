@@ -5,7 +5,7 @@
 /**
  * email-activity-over-time related container
  */
-var newman_activity_email = (function () {
+var newman_activity_email_account = (function () {
 
   var chart_ui_id_text = 'chart_line_account_activities';
   var chart_ui_id_element = $('#' + chart_ui_id_text);
@@ -196,32 +196,48 @@ var newman_activity_email = (function () {
         account_index ++;
       }
     }
-
-
   }
 
   function revalidateUIActivityInbound() {
 
-    if (inbound_chart) {
+    //inbound_chart.groups([inbound_data_set_keys]);
 
-      //inbound_chart.groups([inbound_data_set_keys]);
-
-      setTimeout(function () {
+    setTimeout(function () {
+      if (inbound_chart && inbound_data_set_keys) {
         inbound_chart.groups([inbound_data_set_keys]);
-      }, 500);
-
-    }
+      }
+    }, 500);
   }
 
   function revalidateUIActivityOutbound() {
 
-    if (outbound_chart) {
+    //outbound_chart.groups([outbound_data_set_keys]);
 
-      //outbound_chart.groups([outbound_data_set_keys]);
-
-      setTimeout(function () {
+    setTimeout(function () {
+      if (outbound_chart && outbound_data_set_keys) {
         outbound_chart.groups([outbound_data_set_keys]);
-      }, 500);
+      }
+    }, 500);
+  }
+
+  /**
+   * request and display activity-related charts
+   * @param count
+   */
+  function displayUIActivityEmailSelected() {
+    console.log('displayUIActivityEmailSelected()');
+
+    var chart_ui_id_text = 'chart_line_account_activities';
+    var chart_ui_id_element = $('#' + chart_ui_id_text);
+
+    if (chart_ui_id_element) {
+
+      var address_list = newman_aggregate_filter.getAggregateFilterKeySet();
+      initUI();
+
+      _.each(address_list, function (element) {
+        newman_service_activity_email_account.requestService( element );
+      });
 
     }
   }
@@ -230,8 +246,8 @@ var newman_activity_email = (function () {
    * request and display activity-related charts
    * @param count
    */
-  function displayUIActivityEmail( top_count ) {
-    console.log('displayUIActivityEmail(' + top_count + ')');
+  function displayUIActivityEmailTopRanked( top_count ) {
+    console.log('displayUIActivityEmailTopRanked(' + top_count + ')');
 
     var chart_ui_id_text = 'chart_line_account_activities';
     var chart_ui_id_element = $('#' + chart_ui_id_text);
@@ -251,11 +267,9 @@ var newman_activity_email = (function () {
 
       initUI();
 
-      var top_accounts = [];
       _.each(top_rank_accounts, function (element) {
         var email_address = element[0];
-        var response = newman_service_activity_email_account.requestService( email_address );
-        top_accounts.push( email_address );
+        newman_service_activity_email_account.requestService( email_address );
 
       });
 
@@ -285,7 +299,8 @@ var newman_activity_email = (function () {
 
   return {
     'initUI' : initUI,
-    'displayUIActivityEmail' : displayUIActivityEmail,
+    'displayUIActivityEmailTopRanked' : displayUIActivityEmailTopRanked,
+    'displayUIActivityEmailSelected' : displayUIActivityEmailSelected,
     'updateUIActivityEmail' : updateUIActivityEmail,
     'revalidateUIActivityInbound' : revalidateUIActivityInbound,
     'revalidateUIActivityOutbound' : revalidateUIActivityOutbound
@@ -294,9 +309,94 @@ var newman_activity_email = (function () {
 }());
 
 /**
+ * email-address-activity-related response container
+ * @type {{requestService, getResponse}}
+ */
+var newman_service_activity_email_account = (function () {
+
+  var _service_url = 'activity/account/';
+
+  var _response = {};
+  var _response_account_map = {};
+  var _timeline = []
+
+  function getServiceURLBase() {
+    return _service_url;
+  }
+
+  function getServiceURL(account) {
+
+    if (account) {
+      var service_url = newman_data_source.appendDataSource(_service_url + '/' + encodeURIComponent(account));
+      service_url = newman_datetime_range.appendDatetimeRange(service_url);
+      return service_url;
+    }
+  }
+
+  function requestService(account) {
+    console.log('newman_service_activity_email_account.requestService('+account+')');
+
+    $.when($.get( getServiceURL(account) )).done(function (response) {
+      //$.get( getServiceURL(account) ).then(function (response) {
+      setResponse( response );
+      newman_activity_email_account.updateUIActivityEmail( response );
+    });
+  }
+
+  function setResponse( response ) {
+    if (response) {
+
+      _response = response;
+      //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
+
+      mapResponse(_response);
+    }
+  }
+
+  function mapResponse( response ) {
+    if (response) {
+      _response_account_map[ response.account_id ] = response;
+      //console.log('_response_map: ' + JSON.stringify(_response_account_map, null, 2));
+      _timeline = [];
+      _.each(response.activities, function (element) {
+        _timeline.push( element.interval_start_datetime );
+      });
+    }
+  }
+
+  function getResponseTimeline() {
+    return _timeline;
+  }
+
+  function getResponse( key ) {
+    if (key) {
+      var response = _response_account_map[key]
+      return response;
+    }
+    return key;
+  }
+
+  function isResponseMapEmpty() {
+    return _.isEmpty(_response_account_map);
+  }
+
+  return {
+    'getServiceURLBase' : getServiceURLBase,
+    'getServiceURL' : getServiceURL,
+    'requestService' : requestService,
+    'getResponse' : getResponse,
+    'setResponse' : setResponse,
+    'isResponseMapEmpty' : isResponseMapEmpty,
+    'getResponseTimeline' : getResponseTimeline
+  }
+
+}());
+
+
+/**
  * attachment-activity-over-time related container
  */
-var newman_activity_attachment = (function () {
+var newman_activity_email_attach = (function () {
 
   var chart_ui_id_text = 'chart_line_account_activities';
   var chart_ui_id_element = $('#' + chart_ui_id_text);
@@ -468,6 +568,61 @@ var newman_activity_attachment = (function () {
     'displayUIActivityAttachAll' : displayUIActivityAttachAll,
     'updateUIActivityAttach' : updateUIActivityAttach,
     'revalidateUIActivityAttach' : revalidateUIActivityAttach
+  }
+
+}());
+
+/**
+ * attachment-activity-related response container
+ * @type {{requestService, getResponse}}
+ */
+var newman_service_activity_email_attach = (function () {
+
+  var _service_url = 'activity/attach/';
+  var _response;
+
+  function getServiceURLBase() {
+    return _service_url;
+  }
+
+  function getServiceURL(account) {
+
+    if (account) {
+      var service_url = newman_data_source.appendDataSource(_service_url + '/' + encodeURIComponent(account));
+      service_url = newman_datetime_range.appendDatetimeRange(service_url);
+      return service_url;
+    }
+  }
+
+  function requestService() {
+    console.log('newman_service_activity_email_attach.requestService()');
+
+    $.when($.get( getServiceURL('all') )).done(function (response) {
+      //$.get( getServiceURL(account) ).then(function (response) {
+      setResponse( response );
+      newman_activity_email_attach.updateUIActivityAttach( response );
+    });
+  }
+
+  function setResponse( response ) {
+    if (response) {
+
+      _response = response;
+      //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
+    }
+  }
+
+  function getResponse() {
+    return _response;
+  }
+
+
+  return {
+    'getServiceURLBase' : getServiceURLBase,
+    'getServiceURL' : getServiceURL,
+    'requestService' : requestService,
+    'getResponse' : getResponse,
+    'setResponse' : setResponse
   }
 
 }());

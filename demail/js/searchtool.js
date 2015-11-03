@@ -768,14 +768,33 @@ var search_result = (function () {
 
         var row_index = 1;
 
-        _.each(data_list, function (element) {
+        _.each(data_list, function (element, index) {
           //console.log('\t' + element.label + ', ' + element.url + ', ' + element.data_source_id + ', ' + element.parent_index );
 
+          var checkbox_id = 'checkbox_' + element.key;
+          var checkbox_html = "<input type=\"checkbox\" id=\"" + checkbox_id + "\"/>";
+
+          if (newman_aggregate_filter.containsAggregateFilter(checkbox_id)) {
+            checkbox_html = "<input type=\"checkbox\" id=\"" + checkbox_id + "\" checked/>";
+          }
+
+          ui_appendable.on('change', 'td input:checkbox', function (event) {
+            // Ignore this event if preventDefault has been called.
+            if (event.defaultPrevented) return;
+
+            var attr_id = $(this).attr('id');
+            if (attr_id) {
+              console.log('\tid : ' + attr_id + ' is-checked : ' + this.checked );
+              newman_aggregate_filter.setAggregateFilterSelected( attr_id, this.checked );
+            }
+
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          });
+
           var button_html = "<button type=\"button\" class=\"btn btn-small outline\" id=\"" + element.key + "\">" + element.label + "</button>";
-          var checkbox_html = "<input type=\"checkbox\" id=\"checkbox_" + element.key + "\"/>";
 
           ui_appendable.on('click', 'td button:button', function (event) {
-
             // Ignore this event if preventDefault has been called.
             if (event.defaultPrevented) return;
 
@@ -812,14 +831,11 @@ var search_result = (function () {
 
               //showSearchPopup(element.search_field, element.search_text);
               loadSearchResult(item.url);
-
-
             }
 
 
             event.preventDefault();
             event.stopImmediatePropagation();
-
           });
 
           var parent_index = element.parent_index;
@@ -1011,19 +1027,13 @@ var search_result = (function () {
  * request and display top entity-related charts
  * @param count
  */
+/*
 function drawChartEntity( count ) {
 
   var chart_ui_id = '#chart_horizontal_bar_entities';
   var legend_ui_id = '#chart_legend_entities';
 
   if (count > 0 && chart_ui_id) {
-
-    var top_count = count;
-    /*
-    if (top_count > 5) {
-      top_count = 5;
-    }
-    */
 
     $.get('entity/top/' + count).then(function (response) {
 
@@ -1163,6 +1173,7 @@ function drawChartEntity( count ) {
 
   }
 }
+*/
 
 /**
  * request and display top topic-related charts
@@ -1805,10 +1816,20 @@ function reloadDashboardSearchResult() {
   requestSearch(newman_search_filter.getSelectedFilter().label, $("#search_text").val(), false);
 }
 
+function initDashboardActivityTimeline() {
+  newman_datetime_range.initDateTimeRange();
+  newman_activity_email_account.displayUIActivityEmailTopRanked();
+  newman_activity_email_attach.displayUIActivityAttachAll();
+}
+
 function reloadDashboardActivityTimeline() {
   newman_datetime_range.initDateTimeRange();
-  newman_activity_email.displayUIActivityEmail(4);
-  newman_activity_attachment.displayUIActivityAttachAll();
+  newman_activity_email_account.displayUIActivityEmailSelected();
+  newman_activity_email_attach.displayUIActivityAttachAll();
+}
+
+function reloadDashboardEntityEmail() {
+  newman_entity_email.displayUIEntityEmail(10);
 }
 
 function reloadDashboardFileTypeAttachment() {
@@ -1820,9 +1841,9 @@ function reloadDashboardFileTypeAttachment() {
  */
 function drawDashboardCharts() {
 
-  reloadDashboardActivityTimeline();
-
-  drawChartEntity(10);
+  initDashboardActivityTimeline();
+  reloadDashboardEntityEmail();
+  //drawChartEntity(10);
   drawChartTopic(10);
   drawChartDomain(10);
   drawChartCommunity(10);

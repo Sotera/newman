@@ -27,7 +27,7 @@ var newman_file_type_attach = (function () {
         _top_count = _top_count_max;
       }
 
-      newman_service_attachment_types.requestService();
+      newman_service_file_type_attach.requestService();
     }
   }
 
@@ -41,6 +41,7 @@ var newman_file_type_attach = (function () {
     var chart_donut_ui_id = '#chart_donut_attach_types';
 
     if (response && chart_bar_ui_id) {
+      $(chart_bar_ui_id).empty();
 
       //console.log('\tfiltered_response: ' + JSON.stringify(response, null, 2));
       var data_set_id = response.data_set_id;
@@ -186,6 +187,61 @@ var newman_file_type_attach = (function () {
     'updateUIFileTypeAttach' : updateUIFileTypeAttach,
     'revalidateUIFileTypeAttach' : revalidateUIFileTypeAttach,
     'getTopCount' : getTopCount
+  }
+
+}());
+
+/**
+ * attachment-file-type-related response container
+ * @type {{requestService, getResponse}}
+ */
+var newman_service_file_type_attach = (function () {
+
+  var _service_url = 'attachment/types/';
+  var _response;
+
+  function getServiceURLBase() {
+    return _service_url;
+  }
+
+  function getServiceURL(account) {
+
+    if (account) {
+      var service_url = newman_data_source.appendDataSource(_service_url + '/' + encodeURIComponent(account));
+      service_url = newman_datetime_range.appendDatetimeRange(service_url);
+      return service_url;
+    }
+  }
+
+  function requestService() {
+    console.log('newman_service_attachment_types.requestService()');
+
+    $.when($.get( getServiceURL('all') )).done(function (response) {
+      //$.get( getServiceURL(account) ).then(function (response) {
+      setResponse( response );
+      newman_file_type_attach.updateUIFileTypeAttach( response );
+    });
+  }
+
+  function setResponse( response ) {
+    if (response) {
+
+      _response = response;
+      //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
+    }
+  }
+
+  function getResponse() {
+    return _response;
+  }
+
+
+  return {
+    'getServiceURLBase' : getServiceURLBase,
+    'getServiceURL' : getServiceURL,
+    'requestService' : requestService,
+    'getResponse' : getResponse,
+    'setResponse' : setResponse
   }
 
 }());
