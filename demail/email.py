@@ -5,7 +5,7 @@ import urllib
 
 from newman.utils.functions import nth
 from newman.settings import getOpt
-from es_email import get_ranked_email_address_from_email_addrs_index, get_attachment, get_attachments_by_sender, get_email, get_top_domains
+from es_email import get_ranked_email_address_from_email_addrs_index, get_attachment, get_attachments_by_sender, get_email, get_top_domains, get_top_communities
 from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime
 
@@ -44,7 +44,19 @@ def getDomains(*args, **kwargs):
 
     amount=int(urllib.unquote(nth(args, 0, "20")))
 
-    return {"domains":get_top_domains(data_set_id, date_bounds=(start_datetime, end_datetime))[:amount]}
+    return {"domains" : get_top_domains(data_set_id, date_bounds=(start_datetime, end_datetime))[:amount]}
+
+
+#GET /community
+def getCommunities(*args, **kwargs):
+    tangelo.log("getCommunities(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.content_type("application/json")
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+
+    amount=int(urllib.unquote(nth(args, 0, "20")))
+
+    return {"community" : get_top_communities(data_set_id, date_bounds=(start_datetime, end_datetime))[:amount]}
+
 
 #GET /attachments/<sender>
 def getAttachmentsBySender(*args, **kwargs):
@@ -80,6 +92,7 @@ get_actions = {
     "target" : getTarget,
     "email" : getEmail,
     "domains" : getDomains,
+    "communities": getCommunities,
     "rank" : getRankedEmails,
     "exportable" : getExportable,
     "download" : buildExportable,

@@ -36,11 +36,31 @@ def map_email_filtered(fields, emailer_filtered, filtered_total):
             ]
 
 def filtered_agg_query(email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None, aggs={}, name=""):
-    return {"aggs" : {
-        name+"_filtered_agg" : {
-            "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, query_terms=query_terms, date_bounds=date_bounds),
-            "aggs": aggs
-        }}, "size":0}
+    return {"aggs" :
+        {
+            name+"_filtered_agg" : {
+                "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, query_terms=query_terms, date_bounds=date_bounds),
+                "aggs": aggs
+            }
+        },
+        "size":0
+    }
+
+
+# GET communities for email_address index
+def get_top_communities(index, query_terms='', topic_score=None, entity=[], date_bounds=None, num_communities=20):
+    es = Elasticsearch()
+    aggs = { "community_agg":{"terms":{"field":"community", "size":num_communities}}}
+    query = filtered_agg_query(topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="community")
+    tangelo.log("Query %s"%query)
+
+    communities_agg = es.search(index=index, doc_type='email_address', size=0, body=query)
+    # total_other = communities_agg["aggregations"]["community_agg"]["doc_count_error_upper_bound"]
+    communities = [[community["key"], int(community["doc_count"])] for community in communities_agg["aggregations"]["community_filtered_agg"]["community_agg"]["buckets"]]
+    total = sum(domain[1] for domain in communities)
+    communities = [[community[0],community[1], "{0:.2f}".format(round(100.0*community[1]/total,2))] for community in communities]
+    return communities
+
 
 # GET domains for email_address index
 def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None):
@@ -64,7 +84,7 @@ def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=
     tangelo.log("Query %s"%query)
 
     attch_agg_resp = es.search(index=index, doc_type='attachments', size=0, body=query)
-    # total_other = domains_agg["aggregations"]["attachment_type_agg"]["doc_count_error_upper_bound"]
+
     types = [[attch_type["key"], int(attch_type["doc_count"])] for attch_type in attch_agg_resp["aggregations"]["attachment_filtered_agg"]["attachment_type_agg"]["buckets"]]
     total = sum(type[1] for type in types)
     types = [[attch_type[0], attch_type[1], "{0:.2f}".format(round(100.0*attch_type[1]/total,2))] for attch_type in types]
@@ -148,7 +168,7 @@ def header(h, t=None):
 def get_attachment(*args, **kwargs):
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
-    email_id =nth(args, 0, '')
+    email_id=nth(args, 0, '')
     attachment_name=nth(args, 1, '')
 
     cherrypy.log("email.get_attachments_sender(index=%s, sender=%s, attachment_name=%s)" % (data_set_id, email_id, attachment_name))
@@ -248,14 +268,15 @@ if __name__ == "__main__":
     email="arlene.dibenigno@myflorida.com"
     initialize_email_addr_cache("sample")
 
+    res = get_top_communities("sample", query_terms='', topic_score=None, entity=[], date_bounds=None)
+    print res
+
 
     # res = [[f[0],f[8]] for f in get_ranked_email_address("sample", date_bounds=("2001-12", "2002-03"))["emails"]]
     res = [[f[0],f[8]] for f in get_ranked_email_address("sample", date_bounds=("1970", "now"))["emails"]]
 
     print res
     res = [[f[0],f[8]] for f in get_ranked_email_address("sample", date_bounds=("2001-10", "2002-12"))["emails"]]
-    print res
-    res = get_top_domains("sample", email_addrs=[email], query_terms='', topic_score=None, entity=[], date_bounds=None)
     print res
     res = get_top_attachment_types("sample", email_addrs=[email], query_terms='', topic_score=None, entity=[], date_bounds=None)
     print res
