@@ -174,6 +174,10 @@ var newman_search_filter = (function () {
       }
     }
 
+    if (!label) {
+      label = _search_filter_selected_default_label;
+    }
+
     _search_filter_selected = getFilterByLabel(label);
     if (_search_filter_selected) {
 

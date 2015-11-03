@@ -657,7 +657,7 @@ function do_search(load_on_response, field, value) {
 function requestSearch(field, search_text, load_on_response) {
 
   if (!field) {
-    field = 'email';
+    field = 'all';
   }
 
   if (!load_on_response) {
@@ -732,8 +732,11 @@ function requestSearch(field, search_text, load_on_response) {
         var ranks = newman_data_source.getSelectedTopHits(10);
         //console.log( 'ranks: ' + JSON.stringify(ranks, null, 2) );
         _.each(ranks, function (element) {
-            requestSearch( 'email', element[0], false );
+          var email_address = element[0];
+          requestSearch( 'email', email_address, false );
+          //newman_aggregate_filter.initAggregateFilterSelected( email_address );
         });
+        newman_search_filter.setSelectedFilter();
 
         var doc_count = 0;
         if (filtered_response.rows) {
@@ -1817,6 +1820,8 @@ function redraw_legend(){
   }
 };
 
+//deprecated
+/*
 function draw_entity_chart() {
 
   $.get('entity/top/20').then(function(response){
@@ -1876,6 +1881,7 @@ function draw_entity_chart() {
   });
 
 }
+*/
 
 function refresh_dashboard() {
   console.log( 'refresh_dashboard()' );
@@ -2065,22 +2071,20 @@ $(function () {
       if (element_ID.endsWith('dashboard_tab_content_outbound_activities')) {
         console.log('\trevalidateUIActivityOutbound() called');
 
-        newman_activity_email.revalidateUIActivityOutbound();
+        newman_activity_email_account.revalidateUIActivityOutbound();
       }
       else if (element_ID.endsWith('dashboard_tab_content_inbound_activities')) {
         console.log('\trevalidateUIActivityInbound() called');
 
-        newman_activity_email.revalidateUIActivityInbound();
+        newman_activity_email_account.revalidateUIActivityInbound();
       }
       else if (element_ID.endsWith('dashboard_tab_content_attach_activities')) {
         console.log('\trevalidateUIActivityAttach() called');
 
-        newman_activity_attachment.revalidateUIActivityAttach();
+        newman_activity_email_attach.revalidateUIActivityAttach();
       }
       else if (element_ID.endsWith('dashboard_tab_content_entities')) {
-        if (dashboard_donut_chart_entity) {
-          dashboard_donut_chart_entity.redraw();
-        }
+        newman_entity_email.revalidateUIEntityEmail();
       }
       else if (element_ID.endsWith('dashboard_tab_content_topics')) {
         if (dashboard_donut_chart_topic) {
@@ -2241,7 +2245,6 @@ $(function () {
       //draw_rank_chart();
       //draw_topic_tab();
 
-      /* attach element event handlers */
       $("#submit_search").click(function () {
         requestSearch(newman_search_filter.getSelectedFilter().label, $("#search_text").val(), false);
       });
