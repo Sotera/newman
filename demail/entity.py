@@ -1,6 +1,6 @@
 from newman.utils.functions import nth
 from series import get_entity_histogram
-from param_utils import parseParamDatetime
+from param_utils import parseParamDatetime, parseParamEmailAddress
 
 import tangelo
 import urllib
@@ -18,6 +18,8 @@ def get_top_entities(*args, **kwargs):
     amount=int(urllib.unquote(nth(args, 0, "20")))
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    email_address_list = parseParamEmailAddress(**kwargs);
+    
     entities = get_entity_histogram(data_set_id, "emails", date_bounds=(start_datetime, end_datetime))[:amount]
     return {"entities" : [[str(i), entity ["type"], entity ["key"], entity ["doc_count"]] for i,entity in enumerate(entities)]}
 
@@ -35,4 +37,4 @@ def unknown(*args):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-    return actions.get(action, unknown)(*args)
+    return actions.get(action, unknown)(*args, **kwargs)
