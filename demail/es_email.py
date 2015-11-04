@@ -165,27 +165,24 @@ def header(h, t=None):
 
     return r
 
-# GET email/attachment/<Attachmnet-GUID>/<attachmnet-filename>
+# GET email/attachment/<Attachmnet-GUID>
 def get_attachment(*args, **kwargs):
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
     attachment_id=nth(args, 0, '')
-    attachment_name=nth(args, 1, '')
 
-    cherrypy.log("email.get_attachments_sender(index=%s, attachment_id=%s, attachment_name=%s)" % (data_set_id, attachment_id, attachment_name))
+    cherrypy.log("email.get_attachments_sender(index=%s, attachment_id=%s)" % (data_set_id, attachment_id))
     if not data_set_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing index")
     if not attachment_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing attachment_id")
-    if not attachment_name:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing attachment_name")
 
 
     es = Elasticsearch()
     attachment = es.get(index=data_set_id, doc_type="attachments", id=attachment_id)
 
     if not attachment:
-        return tangelo.HTTPStatusCode(400, "no attachments found for (index=%s, attachment_id=%s, attachment_name=%s)" % (data_set_id, attachment_id, attachment_name))
+        return tangelo.HTTPStatusCode(400, "no attachments found for (index=%s, attachment_id=%s)" % (data_set_id, attachment_id))
 
     attachment = attachment["_source"]
     ext = attachment["extension"]
@@ -207,7 +204,6 @@ def get_attachment(*args, **kwargs):
     as_str = str(bytes)
     tangelo.log(str(len(as_str)), "Uploading Attachment - length = ")
 
-    # resp =  serve_fileobj(bytes, "application/x-download", "attachment", filename)
     return as_str
 
 #GET /attachments/<sender>
