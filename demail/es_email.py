@@ -165,7 +165,7 @@ def header(h, t=None):
 
     return r
 
-# GET email/attachment/<Attachmnet-GUID>
+# GET email/attachment/<Attachment-GUID>
 def get_attachment(*args, **kwargs):
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
@@ -220,26 +220,27 @@ def get_attachments_by_sender(*args, **kwargs):
 
     tangelo.content_type("application/json")
     # fields= ["id", "dir", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"]
-    fields= ["id", "datetime", "senders", "tos", "ccs", "bccs", "subject", "attachments.filename"]
-    body={"filter":{"exists":{"field":"attachments"}}, "query":{"match":{"senders":sender}}, "fields":fields}
+    # fields= ["id", "datetime", "senders", "tos", "ccs", "bccs", "subject", "attachments.filename"]
+    body={"filter":{"exists":{"field":"attachments"}}, "query":{"match":{"senders":sender}}}
 
     es = Elasticsearch()
     attachments_resp = es.search(index=data_set_id, doc_type="emails", size=10, body=body)
 
     email_attachments = []
     for attachment_item in attachments_resp["hits"]["hits"]:
-        fields = attachment_item["fields"]
-        attachment_fields = [fields["id"][0],
-                             "deprecated",
-                             fields["datetime"][0],
-                             fields.get("senders","")[0],
-                             ';'.join(fields.get("tos","")),
-                             ';'.join(fields.get("ccs","")),
-                             ';'.join(fields.get("bccs","")),
-                             ';'.join(fields.get("subject",""))]
-        for attachment_name in fields["attachments.filename"]:
-            l = list(attachment_fields)
-            l.append(attachment_name)
+        _source = attachment_item["_source"]
+        attachment_entry = [_source["id"],
+                             "PLACEHOLDER",
+                             _source["datetime"],
+                             _source.get("senders","")[0],
+                             ';'.join(_source.get("tos","")),
+                             ';'.join(_source.get("ccs","")),
+                             ';'.join(_source.get("bccs","")),
+                             _source.get("subject","")]
+        for attachment in _source["attachments"]:
+            l = list(attachment_entry)
+            l[1] = attachment["guid"]
+            l.append(attachment["filename"])
             l.append(0)
             email_attachments.append(l)
     return {"sender":sender, "email_attachments":email_attachments}
@@ -265,7 +266,11 @@ if __name__ == "__main__":
     email="arlene.dibenigno@myflorida.com"
     initialize_email_addr_cache("sample")
 
+    res = get_attachments_by_sender("jeb@jeb.org")
+    print res
+
     get_attachment("e141ec96-7fe8-11e5-bb05-08002705cb99", "dalmation.jpg")
+
 
     # res = [[f[0],f[8]] for f in get_ranked_email_address("sample", date_bounds=("2001-12", "2002-03"))["emails"]]
     res = [[f[0],f[8]] for f in get_ranked_email_address("sample", date_bounds=("1970", "now"))["emails"]]
