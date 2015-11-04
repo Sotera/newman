@@ -128,6 +128,7 @@ def get_ranked_email_address_from_email_addrs_index(*args, **kwargs):
     email_address = [map_email_addr(email_addr, total_docs) for email_addr in email_addrs['hits']['hits']]
     return {"emails": email_address }
 
+# TODO get attachment guid and file names
 def _get_email(index, email_id):
 
     es = Elasticsearch()
@@ -146,7 +147,7 @@ def _get_email(index, email_id):
              fields.get("bccs_line", default)[0],
              fields.get("subject", default)[0],
              fields.get("body", default)[0],
-             ' '.join(str(item) for item in fields.get("attachments.filename", default))
+             fields.get("attachments.filename", [])
              ]
 
     entities = []
