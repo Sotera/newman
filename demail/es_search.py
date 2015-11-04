@@ -37,9 +37,10 @@ def _map_emails(fields):
     row["bcc"] = fields.get("bccs", [])
     row["datetime"] = fields.get("datetime",[""])[0]
     row["subject"] =  fields.get("subject",[""])[0]
-    row["fromcolor"] =  1950
+    row["fromcolor"] =  "1950"
     row["attach"] =  ""
     row["bodysize"] =  0
+    row["directory"] = "deprecated"
     return row
 
 def _map_emails_to_row(row):
@@ -54,11 +55,11 @@ def _map_node(email_addr, total_docs):
     name = email_addr["addr"][0]
     node["commumity"] = email_addr.get("community", ["<address_not_specified>"])[0]
     node["group"] =  email_addr["community_id"][0]
-    node["fromcolor"] =  email_addr["community_id"][0]
+    node["fromcolor"] =  str(email_addr["community_id"][0])
     node["name"] = name
     node["num"] =  email_addr["sent_count"][0] + email_addr["received_count"][0]
     node["rank"] = (email_addr["sent_count"][0] + email_addr["received_count"][0]) / float(total_docs)
-
+    node["directory"] = "deprecated"
     return node
 
 # Get search all

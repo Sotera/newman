@@ -2,6 +2,7 @@ import base64
 
 import tangelo
 import cherrypy
+import mimetypes
 from elasticsearch import Elasticsearch
 from param_utils import parseParamDatetime
 from newman.utils.functions import nth
@@ -168,38 +169,38 @@ def header(h, t=None):
 def get_attachment(*args, **kwargs):
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
-    email_id=nth(args, 0, '')
+    attachment_id=nth(args, 0, '')
     attachment_name=nth(args, 1, '')
 
-    cherrypy.log("email.get_attachments_sender(index=%s, sender=%s, attachment_name=%s)" % (data_set_id, email_id, attachment_name))
+    cherrypy.log("email.get_attachments_sender(index=%s, attachment_id=%s, attachment_name=%s)" % (data_set_id, attachment_id, attachment_name))
     if not data_set_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing index")
-    if not email_id:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing email_id")
+    if not attachment_id:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing attachment_id")
     if not attachment_name:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing attachment_name")
 
-    tangelo.content_type("application/x-download")
 
     es = Elasticsearch()
-    attachments_resp = es.search(index=data_set_id, doc_type="attachments", size=10, body={"query":{"bool":{"must":[
-        {"term": {"id":email_id}},
-        {"term": {"filename":attachment_name}}
-    ]}}})
+    attachment = es.get(index=data_set_id, doc_type="attachments", id=attachment_id)
 
-    attachments_json = attachments_resp["hits"]["hits"]
-    if not attachments_json:
-        return tangelo.HTTPStatusCode(400, "no attachments found for (index=%s, sender=%s, attachment_name=%s)" % (data_set_id, email_id, attachment_name))
+    if not attachment:
+        return tangelo.HTTPStatusCode(400, "no attachments found for (index=%s, attachment_id=%s, attachment_name=%s)" % (data_set_id, attachment_id, attachment_name))
 
-    attachments_json = attachments_json[0]
-    # TODO ensure len should be only 1 attachment
+    attachment = attachment["_source"]
+    ext = attachment["extension"]
+    filename = attachment["filename"]
 
-    filename = attachments_json["_source"]["filename"]
-    header("Content-Disposition", 'attachment; filename="{}"'.format(filename))
+    mime_type = mimetypes.guess_type(filename)[0]
 
-    ext = attachments_json["_source"]["extension"]
+    if not mime_type:
+        tangelo.content_type("application/x-download")
+        header("Content-Disposition", 'attachment; filename="{}"'.format(filename))
+    else:
+        tangelo.content_type(mime_type)
+        header("Content-Disposition", 'inline; filename="{}"'.format(filename))
 
-    content = attachments_json["_source"]["contents64"]
+    content = attachment["contents64"]
     bytes = base64.b64decode(content)
     # dump(bytes, filename)
 
@@ -268,9 +269,7 @@ if __name__ == "__main__":
     email="arlene.dibenigno@myflorida.com"
     initialize_email_addr_cache("sample")
 
-    res = get_top_communities("sample", query_terms='', topic_score=None, entity=[], date_bounds=None)
-    print res
-
+    get_attachment("e141ec96-7fe8-11e5-bb05-08002705cb99", "dalmation.jpg")
 
     # res = [[f[0],f[8]] for f in get_ranked_email_address("sample", date_bounds=("2001-12", "2002-03"))["emails"]]
     res = [[f[0],f[8]] for f in get_ranked_email_address("sample", date_bounds=("1970", "now"))["emails"]]
