@@ -93,7 +93,7 @@ def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=
 
 
 
-#GET /rank?data_set_id=<dateset>&start_datetime=<start_datetime>&end_datetime=<end_datetime>&size=<size>
+#GET /rank?data_set_id=<data_set>&start_datetime=<start_datetime>&end_datetime=<end_datetime>&size=<size>
 def get_ranked_email_address(data_set_id, query_terms='', topic_score=None, entity=[], date_bounds=None, num_top_hits=30):
     body = {
         "aggs" : {
@@ -118,7 +118,7 @@ def get_ranked_email_address(data_set_id, query_terms='', topic_score=None, enti
 
 # TODO This calculation is based on the email_address type which can not easily be filtered over time / entity/ topic / etc
 # TODO as such using get_ranked_email_address() instead for most things even through the NUmbers are not as accurate
-#GET /rank?data_set_id=<dateset>&start_datetime=<start_datetime>&end_datetime=<end_datetime>&size=<size>
+#GET /rank?data_set_id=<data_set>&start_datetime=<start_datetime>&end_datetime=<end_datetime>&size=<size>
 def get_ranked_email_address_from_email_addrs_index(*args, **kwargs):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
@@ -147,7 +147,7 @@ def _get_email(index, email_id):
              fields.get("bccs_line", default)[0],
              fields.get("subject", default)[0],
              fields.get("body", default)[0],
-             fields.get("attachments.filename", [])
+             ";".join([str(f) for f in fields.get("attachments.filename", default)])
              ]
 
     entities = []
@@ -166,8 +166,8 @@ def header(h, t=None):
 
     return r
 
-# GET email/attachment/<Attachment-GUID>
-def get_attachment(*args, **kwargs):
+# GET email/attachment/<attachment-GUID>?data_set_id=<data_set>
+def get_attachment_by_id(*args, **kwargs):
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
     attachment_id=nth(args, 0, '')
@@ -270,7 +270,7 @@ if __name__ == "__main__":
     res = get_attachments_by_sender("jeb@jeb.org")
     print res
 
-    get_attachment("e141ec96-7fe8-11e5-bb05-08002705cb99", "dalmation.jpg")
+    get_attachment_by_id("e141ec96-7fe8-11e5-bb05-08002705cb99", "dalmation.jpg")
 
 
     # res = [[f[0],f[8]] for f in get_ranked_email_address("sample", date_bounds=("2001-12", "2002-03"))["emails"]]

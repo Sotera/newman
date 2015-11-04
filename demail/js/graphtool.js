@@ -337,13 +337,14 @@ function searchByEntity(entityid, type, value){
     });
 }
 
-function produceHTMLView(emailObj) {
+function produceHTMLView(email_obj) {
 
-  var d = _.object(['num', 'directory','datetime', 'exportable', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], emailObj.email);
-  console.log(d);
-  draw_mini_topic_chart(d.num);
+  var d = _.object(['email_id', 'attach_id','datetime', 'exportable', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], email_obj.email);
+  //console.log('produceHTMLView()\n' + JSON.stringify(d, null, 2));
+
+  draw_mini_topic_chart(d.email_id);
   var el = $('<div>').addClass('body-view');
-  //html += "<b>ID: </b>" + d.num + "<BR>";
+  //html += "<b>ID: </b>" + d.email_id + "<BR>";
 
   el.append(
     $('<div>').append(
@@ -352,8 +353,8 @@ function produceHTMLView(emailObj) {
   el.append(
     $('<p>').append(
       $('<span>').addClass('bold').text("ID: "))
-      .append($('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'emails/' + data_source_selected.email + '/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.txt'}).text(d.num), $('<span>').text('    '),
-              $('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'emails/' + data_source_selected.email + '/' + d.directory + '/' + d.num.replace(/scottwalker(1|2)\//,'') + '.html'}).append($('<span>').addClass('glyphicon glyphicon-print'))));
+      .append($('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'email/' + d.email_id + '/' + d.email_id + '.txt'}).text(d.email_id), $('<span>').text('    '),
+              $('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'email/' + d.email_id + '/' + d.email_id + '.html'}).append($('<span>').addClass('glyphicon glyphicon-print'))));
 
 
   var afrom = $('<a>', { 'class': 'from clickable'}).on("click", function(){
@@ -394,17 +395,21 @@ function produceHTMLView(emailObj) {
   });
 
   var attachments = $('<p>').append($('<span>').addClass('bold').text("Attachments: "));
-  _.each(d.attach.split(';'),
-         function(attach){
-           attachments.append($('<a>', { 'class': 'clickable', "target": "_blank" ,"href" : 'emails/' + data_source_selected.email + '/' + d.directory + '/' + encodeURIComponent(attach) }).html(attach));
-           attachments.append($('<span>').html(';&nbsp'));
-         });
-
+  var attach_field = d.attach;
+  if (attach_field) {
+    _.each(attach_field.split(';'), function (attach) {
+      console.log('email-body-attachments : \n' + JSON.stringify(attach, null, 2));
+      var attach_url = 'email/attachment/' + d.attach_id + '/' + encodeURIComponent(attach);
+      attach_url = newman_data_source.appendDataSource(attach_url);
+      attachments.append($('<a>', {'class': 'clickable', "target": "_blank", "href": attach_url}).html(attach));
+      attachments.append($('<span>').html(';&nbsp'));
+    });
+  }
   el.append(attachments);
   el.append($('<p>'));
 
   //sort by index
-  var ents = _.sortBy(emailObj.entities, function(o){ return o[2]});
+  var ents = _.sortBy(email_obj.entities, function(o){ return o[2]});
 
   el.append($('<div>').addClass("email-body-view").append(d.body));
 
@@ -852,195 +857,6 @@ function loadSearchResult( url_path ) {
       $('#doc_count_inbound').text( ' Inbound ' + generateRandomInt(0, 500) );
       $('#doc_count_outbound').text( ' Outbound ' + generateRandomInt(0, 500) );
 
-      /*
-      var lastSort = "";
-
-      // create the table header
-      var thead = d3.select("#result_table").select("thead")
-        .append("tr")
-        .selectAll("tr")
-        //no need to display doc-UID
-        //.data(['ID','Date','From','Recipient Count','Body Size','Attachment Count', 'Subject', " "])
-        .data(['Date','From','Recipient Count','Body Size','Attachment Count', 'Subject', " "])
-        .enter().append("th")
-        .html(function(d, i){
-          //no need to display doc-UID
-          //if (i == 7){
-          //  return "<span class='glyphicon glyphicon-star' ></span>";
-          //}
-
-          if (i == 6){
-            return "<span class='glyphicon glyphicon-star' ></span>";
-          }
-          return d;
-        }).attr('class', 'clickable')
-        .on("click", function(k, i){
-          console.log(arguments);
-          var direction = (lastSort == k) ? -1 : 1;
-          lastSort = (direction == -1) ? "" : k; //toggle
-          d3.select("#result_table").select("tbody").selectAll("tr").sort(function(a, b) {
-            //no need to display doc-UID
-            //if (i == 0){
-            //  return a.num.localeCompare(b.num) * direction;
-            //}
-            //if (i == 1) {
-            //  return a.datetime.localeCompare(b.datetime) * direction;
-            //}
-            //if (i == 2) {
-            //  return a.from.localeCompare(b.from) * direction;
-            //}
-            //if (i == 3) {
-            //  return (recipientCount(a.to, a.cc, a.bcc) - recipientCount(b.to, b.cc, b.bcc)) * direction * -1; //desc first
-            //}
-            //if (i == 4){
-            //  return (a.bodysize - b.bodysize) * direction * -1; //desc first
-            //}
-            //if (i == 5){
-            //  return (splitAttachCount(a.attach) - splitAttachCount(b.attach)) * direction * -1; //desc first
-            //}
-            //if (i == 6) {
-            //  return a.subject.localeCompare(b.subject) * direction;
-            //}
-            //if (i == 7){
-            //  return (+(a.exported) - +(b.exported)) * direction * -1; //put the marked items on top first
-            //}
-
-            if (i == 0) {
-              return a.datetime.localeCompare(b.datetime) * direction;
-            }
-            if (i == 1) {
-              return a.from.localeCompare(b.from) * direction;
-            }
-            if (i == 2) {
-              return (recipientCount(a.to, a.cc, a.bcc) - recipientCount(b.to, b.cc, b.bcc)) * direction * -1; //desc first
-            }
-            if (i == 3){
-              return (a.bodysize - b.bodysize) * direction * -1; //desc first
-            }
-            if (i == 4){
-              return (splitAttachCount(a.attach) - splitAttachCount(b.attach)) * direction * -1; //desc first
-            }
-            if (i == 5) {
-              return a.subject.localeCompare(b.subject) * direction;
-            }
-            if (i == 6){
-              return (+(a.exported) - +(b.exported)) * direction * -1; //put the marked items on top first
-            }
-
-          });
-        });
-
-
-      // create rows
-      var tr = d3.select("#result_table").select("tbody").selectAll("tr").data(data).enter().append("tr");
-
-      tr.attr('class', 'clickable')
-        .on("click", function(d) {
-
-          show_email_view( d.num );
-
-        })
-        .on("mouseover", function(d) {
-
-          tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(';');
-          for (i = 0; i < tos.length; i++) {
-            d3.select("#" + d.from.replace(/\./g,'_').replace(/@/g,'_') + '_' + tos[i]).style("stroke", "red");
-          }
-        })
-        .on("mouseout", function(d) {
-          tos = d.to.replace(/\./g,'_').replace(/@/g,'_').split(';');
-          for (i = 0; i < tos.length; i++) {
-            d3.select("#" + d.from.replace(/\./g,'_').replace(/@/g,'_') + '_' + tos[i]).style("stroke", "#bbb");
-          }
-        });
-
-      // cells
-      var td = tr.selectAll("td").data(function(d){
-
-        var recipient_count = recipientCount(d.to, d.cc, d.bcc);
-        var attach_count = splitAttachCount(d.attach)
-
-        //no need to display doc-UID
-        //return [d.num, d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject, d.exported ];
-        return [d.datetime, d.from + '::' + d.fromcolor, recipient_count, d.bodysize, attach_count, d.subject, d.exported ];
-      })
-        .enter().append("td")
-        //.text(function(d){return ['no'];})
-        //.html(function(d) {return ["<a href='"+d.directory+"'>"+d.directory+"</a>"]; })
-        .style("padding", "5px")
-        .style("font-size","10px")
-        .style("fill","blue")
-        .append('div')
-        .html(function(d,i) {
-
-          //no need to display doc-UID
-          //if (i == 0 ) {
-          //  return $('<div>').append($('<span>', { 'title' : d }).html((d.length > 40) ? d.substring(0, 37) + "..." : d)).html();
-          //}
-          //if( i == 2 ) {
-          //  return d.split('::')[0];
-          //}
-          //if (i == 3) {
-          //  var px = d > 100 ? 100 : d;
-          //  return "<div style='background-color: blue;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
-          //}
-          //if (i == 4) {
-          //  var px = (d / 1000.0) > 100 ? 100 : (d / 1000.0);
-          //  return "<div style='background-color: green;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
-          //}
-          //if (i == 5) {
-          //  var px = (d * 10) > 100 ? 100 : (d * 10);
-          //  return "<div style='background-color: orange;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
-          //}
-          //if ( i == 7 ){
-          //  if (d){
-          //    return "<div><span class='glyphicon glyphicon-star' ></span></div>";
-          //  } else {
-          //    return "<div></div>";
-          //  }
-          //}
-
-          if( i == 1 ) {
-            return d.split('::')[0];
-          }
-          if (i == 2) {
-            var px = d > 100 ? 100 : d;
-            return "<div style='background-color: blue;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
-          }
-          if (i == 3) {
-            var px = (d / 1000.0) > 100 ? 100 : (d / 1000.0);
-            return "<div style='background-color: green;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
-          }
-          if (i == 4) {
-            var px = (d * 10) > 100 ? 100 : (d * 10);
-            return "<div style='background-color: orange;height: 10px;width: " +px +"px;' title='" + +d + "'/>";
-          }
-          if ( i == 6 ){
-            if (d){
-              return "<div><span class='glyphicon glyphicon-star' ></span></div>";
-            } else {
-              return "<div></div>";
-            }
-          }
-
-          return d;
-        })
-        .style("color", function(d,i) {
-          //no need to display doc-UID
-          //if(i == 2) {
-          //  return getDomainColor(d.split('::')[0]);
-          //}
-
-          if(i == 1) {
-            return getDomainColor(d.split('::')[0]);
-          }
-          else {
-            return 'black';
-          }
-        })
-        .style("stroke","#FFFFFF");
-
-      */
 
       // populate data-table
       populateDataTable( filtered_response.rows )
@@ -1455,8 +1271,8 @@ function document_type(ext){
 function draw_attachments_table(email_addr){
   var deferred = $.Deferred();
   $.ajax('email/attachments/' + email_addr).done(function(response){
-    var emails = _.mapcat(response.email_attachments, function(r){
-      var o = _.object(["id", "dir", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"], r);
+    var email_attach_list = _.mapcat(response.email_attachments, function(r){
+      var o = _.object(["email_id", "attach_id", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"], r);
       var copy = _.omit(o, "attach");
       var attachments = _.map(o.attach.split(';'), function(attach){
         return _.extend(_.clone(copy), {'attach': attach });
@@ -1464,7 +1280,7 @@ function draw_attachments_table(email_addr){
       return attachments;
     });
 
-    //console.log( 'attachment: ' + JSON.stringify(emails, null, 2) );
+    //console.log( 'attachment under : ' + email_addr + '\n' + JSON.stringify(email_attach_list, null, 2) );
 
     $('#attach-sender').html(response.sender);
     $('#attach-table').empty();
@@ -1492,16 +1308,17 @@ function draw_attachments_table(email_addr){
         });
       });
 
-    var tr = d3.select("#attach-table").select("tbody").selectAll("tr").data(emails).enter().append("tr");
+    var tr = d3.select("#attach-table").select("tbody").selectAll("tr").data(email_attach_list).enter().append("tr");
 
     var popover = image_preview_popover();
 
     tr.selectAll("td").data(function(d){
-      return [d.datetime, d.subject, [d.dir, d.attach], [d.dir, d.attach], d.id]
+      return [d.datetime, d.subject, [d.attach_id, d.attach], [d.attach_id, d.attach], d.email_id]
     }).enter()
       .append("td")
       .on("click", function(d, i){
         if (i != 4) return;
+        console.log('clicked d : ' + JSON.stringify(d, null, 2));
         $.get("email/email/" + encodeURIComponent(d)).then(
           function(resp) {
             setEmailVisible(d);
@@ -1513,8 +1330,11 @@ function draw_attachments_table(email_addr){
           });
       })
       .html(function(d, i){
-        if (i == 2){
-          var el = $('<div>').append($('<a>', { "target": "_blank" ,"href" : 'emails/' + data_source_selected.email + '/' + d[0] + '/' + encodeURIComponent(d[1]) }).html(d[1]));
+        if (i == 2){ // attachment link
+          //console.log( 'attachment under : ' + email_addr + '\n' + JSON.stringify(d, null, 2) );
+          var attach_url = 'email/attachment/' + encodeURIComponent(d[0]);
+          attach_url = newman_data_source.appendDataSource( attach_url );
+          var el = $('<div>').append($('<a>', { "target": "_blank" ,"href" : attach_url }).html(d[1]));
           return el.html();
         }
         if (i == 3){
@@ -1525,9 +1345,10 @@ function draw_attachments_table(email_addr){
           }());
           var img = (function(){
             var img = $('<img>').css('max-height', '50px').css('width','50px');
-
+            var attach_image_url = 'email/attachment/' + encodeURIComponent(d[0]) + '/' + encodeURIComponent(d[1]);
+            attach_image_url = newman_data_source.appendDataSource( attach_image_url );
             switch (document_type(ext)){
-            case "image" : return img.attr('src', 'emails/' + data_source_selected.email + '/' + d[0] + '/' + encodeURIComponent(d[1]));
+            case "image" : return img.attr('src', attach_image_url );
             case "pdf" : return img.attr('src', 'imgs/document-icons/pdf-2.png');
             case "powerpoint" : return img.attr('src', 'imgs/document-icons/powerpoint-2.png');
             case "word" : return img.attr('src', 'imgs/document-icons/word-2.png');
