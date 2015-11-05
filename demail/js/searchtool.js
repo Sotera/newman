@@ -703,6 +703,7 @@ var search_result = (function () {
   }
 
 
+  /*
   var onTreeTableRowEvent = function( element ) {
 
     var label = ' all';
@@ -719,10 +720,14 @@ var search_result = (function () {
       element.search_field
     );
 
-    showSearchPopup(element.search_field, element.search_text);
+    //showSearchPopup(element.search_field, element.search_text);
     loadSearchResult(element.url);
-
+    if (element.search_field === 'email') {
+      console.log( 'on_tree_table_row_event: search_field : ' + element.search_field + ', search_text : ' + element.search_text  );
+      draw_attachments_table( element.search_text );
+    }
   }
+  */
 
   var populateTreeTableRow = function( ui_appendable, data_list ) {
 
@@ -831,6 +836,10 @@ var search_result = (function () {
 
               //showSearchPopup(element.search_field, element.search_text);
               loadSearchResult(item.url);
+              if (item.search_field === 'email') {
+                //console.log( 'on_tree_table_row_event: search_field : ' + item.search_field + ', search_text : ' + item.search_text  );
+                draw_attachments_table( item.search_text );
+              }
             }
 
 

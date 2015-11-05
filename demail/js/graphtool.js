@@ -1326,9 +1326,9 @@ function document_type(ext){
 }
 
 
-function draw_attachments_table(email_addr){
+function draw_attachments_table(email_address){
   var deferred = $.Deferred();
-  $.ajax('email/attachments/' + email_addr).done(function(response){
+  $.ajax('email/attachments/' + email_address).done(function(response){
     var email_attach_list = _.mapcat(response.email_attachments, function(r){
       var o = _.object(["email_id", "attach_id", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"], r);
       var copy = _.omit(o, "attach");
@@ -1787,7 +1787,16 @@ var dashboard_content = (function () {
 
       dashboard_content_container.fadeToggle('fast');
       //container.show();
+
+      newman_activity_email_account.displayUIActivityEmailSelected();
+      newman_activity_email_attach.displayUIActivityAttachAll();
+
+      reloadDashboardEntityEmail();
+
+      reloadDashboardRankEmail();
+      reloadDashboardFileTypeAttachment();
     }
+
 
   };
 
