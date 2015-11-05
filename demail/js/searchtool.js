@@ -1614,6 +1614,7 @@ function drawChartCommunity( count ) {
  * request and display top rank-related charts
  * @param count
  */
+/*
 function drawChartRank( count ) {
 
   var chart_ui_id = '#chart_horizontal_bar_rank';
@@ -1621,35 +1622,23 @@ function drawChartRank( count ) {
 
   if (count > 0 && chart_ui_id) {
 
-    var top_count = count;
-    /*
-     if (top_count > 5) {
-     top_count = 5;
+    var top_count = 10;
+
+     if (count && count > 0 && count < 11) {
+      top_count = count;
      }
-     */
-
-
 
     $.get('email/rank').then(function (response) {
 
-      var ranks = newman_service_email_rank.getResponseMapValues();
+      var ranks = newman_rank_email.getResponseMapValues();
 
       if (ranks) {
         console.log('loaded service_response_email_rank[' + ranks.length + ']');
       }
       else {
-        newman_service_email_rank.setResponse(response);
-        ranks = newman_service_email_rank.getResponseMapValues();
+        newman_rank_email.setResponse(response);
+        ranks = newman_rank_email.getResponseMapValues();
       }
-
-      /*
-       var filtered_response = service_response_email_rank;
-       //console.log('\tfiltered_response: ' + JSON.stringify(filtered_response, null, 2));
-
-       var emails = _.map(_.take(filtered_response.emails, 20), function(email) {
-       return _.object(["email", "community", "communityId", "groupId", "rank", "totalReceived", "totalSent"], email);
-       });
-       */
 
       if (ranks.length < 1) {
         $('#chart_horizontal_bar_rank').append($('<p>').html("No results for ranking"));
@@ -1807,7 +1796,7 @@ function drawChartRank( count ) {
     });
   }
 }
-
+*/
 
 
 
@@ -1832,6 +1821,11 @@ function reloadDashboardEntityEmail() {
   newman_entity_email.displayUIEntityEmail(10);
 }
 
+function reloadDashboardRankEmail() {
+  console.log('reloadDashboardRankEmail()');
+  newman_rank_email.displayUIRankEmail(10);
+}
+
 function reloadDashboardFileTypeAttachment() {
   newman_file_type_attach.displayUIFileTypeAttach(10);
 }
@@ -1847,8 +1841,9 @@ function drawDashboardCharts() {
   drawChartTopic(10);
   drawChartDomain(10);
   drawChartCommunity(10);
-  drawChartRank(10);
+  //drawChartRank(10);
 
+  reloadDashboardRankEmail();
   reloadDashboardFileTypeAttachment();
 
 }

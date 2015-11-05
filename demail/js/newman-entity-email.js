@@ -28,7 +28,7 @@ var newman_entity_email = (function () {
         _top_count = _top_count_max;
       }
 
-      newman_service_email_entity.requestService( _top_count );
+      newman_service_entity_email.requestService( _top_count );
     }
   }
 
@@ -215,7 +215,7 @@ var newman_entity_email = (function () {
  * email-entities-related service response container
  * @type {{requestService, getResponse}}
  */
-var newman_service_email_entity = (function () {
+var newman_service_entity_email = (function () {
 
   var _service_url = 'entity/top';
   var _response;

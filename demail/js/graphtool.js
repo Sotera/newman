@@ -673,153 +673,211 @@ function requestSearch(field, search_text, load_on_response) {
   console.log('\tsearch_text \'' + search_text + '\'');
 
   var url_path = "search/search";
-  newman_search_filter.setSelectedFilter( field );
-  url_path = newman_search_filter.appendFilter( url_path );
-  console.log( '\turl : ' + url_path );
 
-  if (search_text) {
-    url_path = url_path +'/' + search_text;
+  if (field === 'all' && search_text) {
+    requestSearch('text', search_text, false);
   }
+  else {
 
-  url_path = newman_data_source.appendDataSource( url_path );
+    newman_search_filter.setSelectedFilter(field);
+    url_path = newman_search_filter.appendFilter(url_path);
+    console.log('\turl : ' + url_path);
 
-  if (url_path.indexOf( url_search_exportable ) < 0) {
-    url_path = newman_datetime_range.appendDatetimeRange( url_path );
-  }
-
-  var current_data_set_url = newman_service_email_search_all.getServiceURL();
-
-  console.log( '\turl : \'' + url_path + '\'' );
-  //console.log( '\tservice_response_email_search_all.getServiceURL(): \'' + current_data_set_url +'\'' );
-
-  $.getJSON( url_path , function (search_response) {
-
-
-    console.log( '.getJSON(' + url_path + ')' );
-
-    var filtered_response = validateResponseSearch( search_response );
-
-    if (url_path.endsWith( current_data_set_url )) {
-      //console.log( 'url_path.endsWith(service_response_email_search_all.getServiceURL())' );
-      newman_service_email_search_all.setResponse( search_response );
+    if (search_text) {
+      url_path = url_path + '/' + search_text;
     }
 
-    if (url_path.indexOf( url_search_exportable ) >= 0) {
-      loadSearchResult( url_path );
+    url_path = newman_data_source.appendDataSource(url_path);
+
+    if (url_path.indexOf(url_search_exportable) < 0) {
+      url_path = newman_datetime_range.appendDatetimeRange(url_path);
     }
-    else if (load_on_response) {
 
-      email_analytics_content.open();
+    var current_data_set_url = newman_service_email_search_all.getServiceURL();
 
-      var label = ' all';
-      if(search_text) {
-        label = ' ' + decodeURIComponent(search_text);
-      }
-      var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',','_');
+    console.log('\turl : \'' + url_path + '\'');
+    //console.log( '\tservice_response_email_search_all.getServiceURL(): \'' + current_data_set_url +'\'' );
 
-      history_nav.push(id,
-        label,
-        '',
-        url_path,
-        field);
+    $.getJSON(url_path, function (search_response) {
 
-      //showSearchPopup( field, decodeURIComponent(search_text) );
-      loadSearchResult( url_path );
 
-    }
-    else {
+      console.log('.getJSON(' + url_path + ')');
 
-      dashboard_content.open();
-      var data_set_selected = newman_data_source.getSelected();
+      var filtered_response = validateResponseSearch(search_response);
 
       if (url_path.endsWith(current_data_set_url)) {
+        //console.log( 'url_path.endsWith(service_response_email_search_all.getServiceURL())' );
+        newman_service_email_search_all.setResponse(search_response);
+      }
 
-        var ranks = newman_data_source.getSelectedTopHits(10);
-        //console.log( 'ranks: ' + JSON.stringify(ranks, null, 2) );
-        _.each(ranks, function (element) {
-          var email_address = element[0];
-          requestSearch( 'email', email_address, false );
-          //newman_aggregate_filter.initAggregateFilterSelected( email_address );
-        });
-        newman_search_filter.setSelectedFilter();
+      if (url_path.indexOf(url_search_exportable) >= 0) {
+        loadSearchResult(url_path);
+      }
+      else if (load_on_response) {
 
-        var doc_count = 0;
-        if (filtered_response.rows) {
-          doc_count = filtered_response.rows.length;
+        email_analytics_content.open();
+
+        var label = ' all';
+        if (search_text) {
+          label = ' ' + decodeURIComponent(search_text);
         }
+        var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
 
-        var associate_count = 0;
-        if (filtered_response.graph && filtered_response.graph.nodes) {
-          associate_count = filtered_response.graph.nodes.length;
-        }
-
-        var data_set_id = newman_data_source.parseDataSource( url_path );
-        if (!data_set_id) {
-          data_set_id = newman_data_source.getDefaultDataSourceID();
-        }
-        console.log('data_set_id: ' + data_set_id);
-
-        var filter_icon = newman_search_filter.parseFilterIconClass( url_path );
-
-        var root_result = search_result.setRoot(
-          '(' + data_set_selected.label + ')',
-          '',
-          'text',
+        history_nav.push(id,
+          label,
           '',
           url_path,
-          data_set_id,
-          'pst',
-          doc_count,
-          associate_count,
-          0,
-          filter_icon
-        );
+          field);
+
+        //showSearchPopup( field, decodeURIComponent(search_text) );
+        loadSearchResult(url_path);
 
       }
       else {
 
-        var doc_count = 0;
-        if (filtered_response.rows) {
-          doc_count = filtered_response.rows.length;
+        dashboard_content.open();
+        var data_set_selected = newman_data_source.getSelected();
+
+        if (url_path.endsWith(current_data_set_url)) {
+
+          //initiate subsequent searches
+          //var ranks = newman_data_source.getSelectedTopHits(10);
+          var ranked_email_accounts = newman_rank_email.getRankedList();
+          //console.log('ranked_emails[' + ranked_email_accounts.length + '] : ' + JSON.stringify(ranked_email_accounts, null, 2));
+          _.each(ranked_email_accounts, function (element) {
+            var email_address = element["email"];
+            requestSearch('email', email_address, false);
+            newman_aggregate_filter.initAggregateFilterSelected( email_address );
+          });
+          newman_search_filter.setSelectedFilter();
+
+          var doc_count = 0;
+          if (filtered_response.rows) {
+            doc_count = filtered_response.rows.length;
+          }
+
+          var associate_count = 0;
+          if (filtered_response.graph && filtered_response.graph.nodes) {
+            associate_count = filtered_response.graph.nodes.length;
+          }
+
+          var data_set_id = newman_data_source.parseDataSource(url_path);
+          if (!data_set_id) {
+            data_set_id = newman_data_source.getDefaultDataSourceID();
+          }
+          console.log('data_set_id: ' + data_set_id);
+
+          var filter_icon = newman_search_filter.parseFilterIconClass(url_path);
+
+          var root_result = search_result.setRoot(
+            '(' + data_set_selected.label + ')',
+            '',
+            'text',
+            '',
+            url_path,
+            data_set_id,
+            'pst',
+            doc_count,
+            associate_count,
+            0,
+            filter_icon
+          );
+
         }
+        else {
 
-        var associate_count = 0;
-        if (filtered_response.graph && filtered_response.graph.nodes) {
-          associate_count = filtered_response.graph.nodes.length;
+
+          var doc_count = 0;
+          if (filtered_response.rows) {
+            doc_count = filtered_response.rows.length;
+          }
+
+          var associate_count = 0;
+          if (filtered_response.graph && filtered_response.graph.nodes) {
+            associate_count = filtered_response.graph.nodes.length;
+          }
+
+          var outbound_count = newman_rank_email.getEmailOutboundCount(search_text);
+          var inbound_count = newman_rank_email.getEmailInboundCount(search_text);
+          var attach_count = newman_rank_email.getEmailAttachCount(search_text);
+          var rank = newman_rank_email.getEmailRank(search_text);
+
+          var data_set_id = newman_data_source.parseDataSource(url_path);
+          if (!data_set_id) {
+            data_set_id = newman_data_source.getDefaultDataSourceID();
+          }
+
+          var filter_icon = newman_search_filter.parseFilterIconClass(url_path);
+
+          search_result.push(
+            search_text,
+            search_text,
+            field,
+            "",
+            url_path,
+            data_set_id,
+            'pst',
+            doc_count,
+            outbound_count,
+            inbound_count,
+            associate_count,
+            attach_count,
+            rank,
+            filter_icon
+          );
+
+          //initiate subsequent-email searches
+          if (field != 'email') {
+            propagateSearch(search_text, filtered_response.rows);
+          }
         }
-
-        var outbound_count = newman_service_email_rank.getOutboundCount( search_text );
-        var inbound_count = newman_service_email_rank.getInboundCount( search_text );
-        var attach_count = newman_service_email_rank.getAttachCount( search_text );
-        var rank = newman_service_email_rank.getRank( search_text );
-
-        var data_set_id = newman_data_source.parseDataSource( url_path );
-        if (!data_set_id) {
-          data_set_id = newman_data_source.getDefaultDataSourceID();
-        }
-
-        var filter_icon = newman_search_filter.parseFilterIconClass( url_path );
-
-        search_result.push(
-          search_text,
-          search_text,
-          field,
-          "",
-          url_path,
-          data_set_id,
-          'pst',
-          doc_count,
-          outbound_count,
-          inbound_count,
-          associate_count,
-          attach_count,
-          rank,
-          filter_icon
-        );
-
       }
+    });
+  } // end of if (field === 'all')
+}
+
+function  propagateSearch( search_text, email_doc_rows ) {
+  var ranked_email_accounts = getTopRankedEmailAccountList(email_doc_rows, 10);
+  console.log('ranked_emails[' + ranked_email_accounts.length + '] : ' + JSON.stringify(ranked_email_accounts, null, 2));
+  _.each(ranked_email_accounts, function (element) {
+    var email_account = element;
+    if (email_account != search_text) {
+      requestSearch( 'email', email_account, false );
     }
   });
+  newman_search_filter.setSelectedFilter();
+
+}
+
+function getTopRankedEmailAccountList(email_doc_rows, top_count ) {
+  if (email_doc_rows) {
+    if (!top_count) {
+      top_count = 10;
+    }
+    //console.log('getTopRankedEmailAccountList([' + email_doc_rows.length + '], ' + top_count);
+
+    var email_account_map = {};
+    var size = 0, index = 0;
+    while (size < top_count && index < email_doc_rows.length) {
+      var sender_address = email_doc_rows[index]["from"];
+      if (sender_address) {
+        email_account_map[sender_address] = true;
+      }
+      var receiver_address = email_doc_rows[index]["to"];
+      if (receiver_address) {
+        var receiver_address_list = receiver_address.split(';');
+        _.each(receiver_address_list, function(element) {
+          email_account_map[element] = true;
+        })
+      }
+      size = _.size( email_account_map );
+      index++;
+      //console.log('\tsize : ' + size + ', index : ' + index);
+    }
+    var email_account_list = _.keys(email_account_map);
+    return email_account_list;
+  }
+  return email_doc_rows;
 }
 
 /**
@@ -1848,13 +1906,15 @@ $(function () {
   // initialize search-filter
   newman_search_filter.initFilter();
 
-  //$.when(newman_service_data_source.requestService()).done(function() {
+  // initialize data-source
   newman_service_data_source.requestService();
 
   setTimeout(function() {
 
+    // initialize top-ranked email-accounts
+    //newman_rank_email.requestService(20);
+    newman_rank_email.displayUIRankEmail(10);
 
-    newman_service_email_rank.requestService();
     newman_service_email_exportable.requestService();
 
     // close existing analytics displays if applicable
@@ -1873,16 +1933,7 @@ $(function () {
     drawDashboardCharts();
 
     $("[rel=tooltip]").tooltip();
-    /*$('[data-toggle="popover"]').popover();
-    $("i.fa").popover({'trigger':'hover'});
 
-    $('body').on('click', function (e) {
-      if ($(e.target).data('toggle') !== 'popover'
-        && $(e.target).parents('.popover.in').length === 0) {
-        $('[data-toggle="popover"]').popover('hide');
-      }
-    });
-    */
 
     $('a[data-toggle=\"tab\"]').on('shown.bs.tab', function (e) {
       //var element_ID = $(e.target).html();
@@ -1926,9 +1977,7 @@ $(function () {
         newman_file_type_attach.revalidateUIFileTypeAttach();
       }
       else if (element_ID.endsWith('dashboard_tab_content_ranks')) {
-        if (dashboard_donut_chart_rank) {
-          dashboard_donut_chart_rank.redraw();
-        }
+        newman_rank_email.revalidateUIRankEmail();
       }
 
 
@@ -2253,6 +2302,7 @@ $(function () {
     if (hasher.getHash().length < 1) {
       hasher.setHash(newman_service_email_search_all.getServiceURLBase());
     }
+
 
   }, 6000); //end of setTimeout
   //});
