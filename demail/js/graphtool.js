@@ -747,7 +747,7 @@ function requestSearch(field, search_text, load_on_response) {
           _.each(ranked_email_accounts, function (element) {
             var email_address = element["email"];
             requestSearch('email', email_address, false);
-            newman_aggregate_filter.initAggregateFilterSelected( email_address );
+            //newman_aggregate_filter.initAggregateFilterSelected( email_address );
           });
           newman_search_filter.setSelectedFilter();
 

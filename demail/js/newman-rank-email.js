@@ -28,15 +28,17 @@ var newman_rank_email = (function () {
         _top_count = _top_count_max;
       }
 
+      /*
       var response = newman_service_rank_email.getResponse();
       if (response) {
         console.log("Previous service response retrieved ...");
         updateUIRankEmail(response);
       }
       else {
+      */
         console.log("Requesting service ...");
         newman_service_rank_email.requestService(_top_count);
-      }
+      //}
     }
   }
 
