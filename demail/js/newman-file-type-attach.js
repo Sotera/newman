@@ -7,6 +7,9 @@
  */
 var newman_file_type_attach = (function () {
 
+  var chart_bar_ui_id = '#chart_horizontal_bar_attach_types';
+  var chart_donut_ui_id = '#chart_donut_attach_types';
+
   var _donut_chart_file_type_attach;
 
   var _top_count, _top_count_max = 10;
@@ -16,9 +19,6 @@ var newman_file_type_attach = (function () {
    * @param count
    */
   function displayUIFileTypeAttach( count ) {
-
-    var chart_bar_ui_id = '#chart_horizontal_bar_attach_types';
-    var chart_donut_ui_id = '#chart_donut_attach_types';
 
     if (chart_bar_ui_id) {
 
@@ -37,11 +37,8 @@ var newman_file_type_attach = (function () {
    */
   function updateUIFileTypeAttach( response ) {
 
-    var chart_bar_ui_id = '#chart_horizontal_bar_attach_types';
-    var chart_donut_ui_id = '#chart_donut_attach_types';
-
     if (response && chart_bar_ui_id) {
-      $(chart_bar_ui_id).empty();
+      initUI();
 
       //console.log('\tfiltered_response: ' + JSON.stringify(response, null, 2));
       var data_set_id = response.data_set_id;
@@ -167,7 +164,13 @@ var newman_file_type_attach = (function () {
   }
 
   function initUI() {
+    if (chart_bar_ui_id) {
+      $(chart_bar_ui_id).empty();
+    }
 
+    if (chart_donut_ui_id) {
+      $(chart_donut_ui_id).empty();
+    }
 
   }
 
