@@ -1973,9 +1973,7 @@ $(function () {
         }
       }
       else if (element_ID.endsWith('dashboard_tab_content_domains')) {
-        if (dashboard_donut_chart_domain) {
-          dashboard_donut_chart_domain.redraw();
-        }
+        newman_domain_email.revalidateUIDomainEmail();
       }
       else if (element_ID.endsWith('dashboard_tab_content_communities')) {
         if (dashboard_donut_chart_community) {
@@ -1998,7 +1996,7 @@ $(function () {
       if (!service_response_email_domain) {
         console.log('graphtool: request service_response_email_domains');
         //validate service response
-        service_response_email_domain = validateResponseDomain(resp2);
+        service_response_email_domain = validateResponseDomainEmail(resp2);
       }
       var filtered_response = service_response_email_domain;
       //console.log('\tfiltered_response: ' + JSON.stringify(filtered_response, null, 2));

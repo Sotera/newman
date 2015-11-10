@@ -7,7 +7,7 @@
  */
 var newman_datetime_range = (function () {
 
-  var datetime_min_as_text = '1970';
+  var datetime_min_as_text = '1970-01-01';
   var datetime_max_as_text = 'now';
   var start_datetime_as_text = datetime_min_as_text;
   var end_datetime_as_text = datetime_max_as_text;
