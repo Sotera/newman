@@ -1,5 +1,6 @@
 import tangelo
 import urllib
+import json
 
 from elasticsearch import Elasticsearch
 from newman.utils.functions import nth
@@ -255,7 +256,44 @@ def initialize_email_addr_cache(index):
 def get_cached_email_addr(addr):
     return _EMAIL_ADDR_CACHE[addr]
 
-# if __name__ == "__main__":
+
+import operator
+def export_edges(index):
+    es = Elasticsearch()
+    body = {
+        "query": {
+            "filtered": {
+                "query": {"bool":{"must":[{"match_all":{}}]}},
+                "filter": {
+                    "bool": {
+                        "must": [ { "exists": { "field": "senders"}}],
+                        "should" :[
+                            { "exists": { "field": "tos"}},
+                            { "exists": { "field": "ccs"}},
+                            { "exists": { "field": "bccs"}}
+                        ]
+                    }
+                }
+            }
+        }
+    }
+    def rcvrs(fields={}):
+        return fields.get("tos",[]) +fields.get("ccs",[])+fields.get("bccs",[])
+
+    count = es.count(index=index, doc_type="emails", body=body)["count"]
+    # TODO add batch processing
+    addrs = es.search(index=index, doc_type="emails", size=count, from_=0, fields=["senders", "tos", "ccs", "bccs"], body=body)
+
+    edges = reduce(operator.add, [[{"from":hit["fields"]["senders"][0], "to":rcvr}for rcvr in rcvrs(hit["fields"]) ]for hit in addrs["hits"]["hits"]])
+
+    text_file = open("/home/elliot/big_graph.json", "w")
+    text_file.write(json.dumps({"edges" : edges}))
+    text_file.close()
+
+
+if __name__ == "__main__":
+    export_edges("sample")
+    print "done"
 #     print "foo"
 # _email_addr_cache = _load_email_addr_cache("sample")
 # res = _create_graph_from_email("sample","tom.barry@myflorida.com","2001","now", terms=["swamped"])

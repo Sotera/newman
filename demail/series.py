@@ -103,6 +103,33 @@ def attachment_histogram(sender_email_addr, start, end, interval="week"):
     }
 
 
+def attachment_histogram_from_emails(email_addr, date_bounds, interval="week"):
+    tangelo.log('attachment_histogram(%s, %s, %s)' %(email_addr, date_bounds, interval))
+    return {
+        "size":0,
+        "aggs":{
+            "attachments_filter_agg":{
+                "filter" : _build_filter(email_senders=[email_addr], email_rcvr=[email_addr], date_bounds=date_bounds),
+                "aggs" : {
+                    "attachments_over_time" : {
+                        "date_histogram" : {
+                            "field" : "datetime",
+                            "interval" : interval,
+                            "format" : "yyyy-MM-dd",
+                            "min_doc_count" : 0,
+                            "extended_bounds":{
+                                "min": date_bounds[0],
+                                # "max" doesnt really work unless it's set to "now"
+                                "max": date_bounds[1]
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
 
 # Returns a sorted map of
 def get_daily_activity(index, account_id, type, query_function, **kwargs):
@@ -187,7 +214,9 @@ def get_total_daily_activity(index, type, query_function, **kwargs):
 # Returns a sorted map of
 def get_email_activity(index, account_id, query_function, **kwargs):
     es = Elasticsearch()
-    resp = es.search(index=index, doc_type="emails", request_cache="false", body=query_function(**kwargs))
+    body = query_function(**kwargs)
+    print body
+    resp = es.search(index=index, doc_type="emails", request_cache="false", body=body)
     return [_map_activity(index, account_id, sent_rcvd) for sent_rcvd in zip(resp["aggregations"]["sent_agg"]["sent_emails_over_time"]["buckets"],
                                                                              resp["aggregations"]["rcvr_agg"]["rcvd_emails_over_time"]["buckets"])]
 # Returns a sorted map of
@@ -206,6 +235,9 @@ if __name__ == "__main__":
     #
     # res = get_entity_histogram("sample", "emails", email_addrs=["oviedon@sso.org"], query_terms="", topic_score=None, date_bounds=("2000","2002"))
     # print res
-    res = get_attachment_activity("sample", account_id="", query_function=attachment_histogram, sender_email_addr="", start="1970", end="now", interval="year")
-    print res
+    # res = get_attachment_activity("sample", account_id="", query_function=attachment_histogram, sender_email_addr="", start="1970", end="now", interval="year")
+    # print res
+
+    activity = get_email_activity("sample", "jeb@jeb.org", actor_histogram, actor_email_addr="jeb@jeb.org", start="2000", end="2002", interval="week")
+    print activity
     # for s in res:

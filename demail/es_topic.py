@@ -1,5 +1,9 @@
 from elasticsearch import Elasticsearch
 from es_queries import _build_filter
+from es_queries import _build_email_query
+from operator import itemgetter
+
+
 
 
 # _score_lda_clusters={"query": { "match_all": {}},"sort":{ "_script": { "script_file": "lda-cluster-sum-score", "lang": "groovy", "type": "number","order": "desc" }}}
@@ -8,7 +12,35 @@ from es_queries import _build_filter
 # _sort_lda_clusters={"query": { "match_all": {}},"sort":{ "_script": { "script_file": "lda-cluster-sum-score", "lang": "groovy", "type": "number","order": "desc" }}}
 _lda_clusters={"query": { "match_all": {}},"sort":[{"idx":{"order": "asc" }}]}
 
-def _cluster_agg(num_clusters, email_addrs=[], query_terms='', entity=[], topic_score=0.5, date_bounds=None):
+
+def _cluster_carrot2(index, type, email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None, cluster_fields=["_source.body"], cluster_title_fields=["_source.subject"], algorithm="lingo", max_doc_pool_size=500):
+    query = _build_email_query(email_addrs, query_terms,  entity, date_bounds)
+    carrot_query = {
+        "search_request": {
+            "query": query["query"],
+            "size": max_doc_pool_size
+        },
+        "algorithm":algorithm,
+        "max_hits": 0,
+        "query_hint": query_terms,
+        "field_mapping": {
+            "title": cluster_title_fields,
+            "content": cluster_fields
+        }
+    }
+    es = Elasticsearch()
+    resp = es.transport.perform_request("POST", "/{}/{}/_search_with_clusters".format(index,type), {}, body=carrot_query)
+    total_docs = min(resp[1]["hits"]["total"], max_doc_pool_size)
+    return resp
+
+def get_dynamic_clusters(index, type, email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None, cluster_fields=["_source.body"], cluster_title_fields=["_source.subject"], algorithm="lingo", max_doc_pool_size=500):
+    resp = _cluster_carrot2(index, type, email_addrs, query_terms, topic_score, entity, date_bounds, cluster_fields, cluster_title_fields, algorithm, max_doc_pool_size)
+    clusters = [[cluster["label"], cluster["score"], len(cluster["documents"])] for cluster in resp[1]["clusters"]]
+    total_cluster_docs=sum(cluster[2] for cluster in clusters)
+    clusters = sorted(clusters, key=itemgetter(1), reverse=True)
+    return [[i, cluster[0], "{0:.2f}".format(round(100.0*cluster[2]/total_cluster_docs,2)), cluster[1], cluster[2]] for i, cluster in enumerate(clusters)]
+
+def _cluster_lda(num_clusters, email_addrs=[], query_terms='', entity=[], topic_score=0.5, date_bounds=None):
     return {
         "size":0,
         "aggs" : {
@@ -27,7 +59,7 @@ def _cluster_agg(num_clusters, email_addrs=[], query_terms='', entity=[], topic_
                     }
                 }
             }
-        for idx in range(0, num_clusters)}
+            for idx in range(0, num_clusters)}
     }
 
 #
@@ -43,7 +75,6 @@ def get_lda_clusters(index):
     return [{"idx":hit["_source"]["idx"],"cluster": [term["term"] for term in hit["_source"]["topic"]]} for hit in resp["hits"]["hits"]]
 
 
-
 # get aggregated cluster stats
 # NOTE:  This only returns the count value from the top level filter agg.  But much more detail is calculated by the agg code.
 # In order to get the more detailed range view look at the nested idx_N_agg and extract the bucket fields.
@@ -52,7 +83,7 @@ def agg_cluster_counts(index):
     es = Elasticsearch()
     count = es.count(index=index, doc_type='lda-clustering', body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
     # print count
-    query = _cluster_agg(count, email_addrs=[], query_terms='', entity=[], date_bounds=None)
+    query = _cluster_lda(count, email_addrs=[], query_terms='', entity=[], date_bounds=None)
     # print query
     resp = es.search(index=index, doc_type='emails', body=query)
     return {k: v["doc_count"]for k,v in resp["aggregations"].iteritems()}
@@ -66,13 +97,16 @@ def get_categories(index):
     return {"categories":categories}
 
 if __name__ == "__main__":
-    resp = get_lda_clusters("sample")
-    print "======CLUSTERS==============="
-    print [(cluster["idx"], " ".join(cluster["cluster"])) for cluster in resp]
-    print "======CLUSTER COUNTS===============s"
-    print agg_cluster_counts("sample")
-    print "======Categories===============s"
-    print get_categories("sample")
-    print "======TOP DOCS===============s"
+    # resp = get_lda_clusters("sample")
+    # print "======CLUSTERS==============="
+    # print [(cluster["idx"], " ".join(cluster["cluster"])) for cluster in resp]
+    # print "======CLUSTER COUNTS===============s"
+    # print agg_cluster_counts("sample")
+    # print "======Categories===============s"
+    # print get_categories("sample")
+    # print "======TOP DOCS===============s"
     # print get_top_cluster_emails("sample", 0, 0.5)
     # load_lda_map("/QCR/pst-extraction-master-temp/tmp/lda.map.txt", args.index)
+    resp = get_dynamic_clusters("sample", "emails")
+    print resp
+    print "done"
