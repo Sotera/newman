@@ -434,7 +434,7 @@ function validateEmailDomain(email_domain) {
  * @param response data received from service
  * @returns filtered response
  */
-function validateResponseDomain(response) {
+function validateResponseDomainEmail(response) {
 
 
   if (response) {
@@ -449,10 +449,11 @@ function validateResponseDomain(response) {
 
         var domain_text = decodeURIComponent( domain[0] );
         var domain_count = parseInt(domain[1]);
+        var total_percent = parseFloat(domain[2]);
 
         if (domain_text && validateEmailDomain(domain_text)) {
           //console.log('\tdomain : \'' + domain_text + '\'');
-          new_domains.push([domain_text, domain_count]);
+          new_domains.push([domain_text, domain_count, total_percent]);
         }
         else {
           //console.log('\tinvalid domain : ' + domain_text);

@@ -1350,7 +1350,7 @@ function drawChartDomain( count ) {
       if(!service_response_email_domain) {
         console.log('searchtool: request service_response_email_domains');
         //validate service response
-        service_response_email_domain = validateResponseDomain(response);
+        service_response_email_domain = validateResponseDomainEmail(response);
       }
       var filtered_response = service_response_email_domain;
       //console.log('\tfiltered_response: ' + JSON.stringify(filtered_response, null, 2));
@@ -1830,6 +1830,10 @@ function reloadDashboardEntityEmail() {
   newman_entity_email.displayUIEntityEmail(10);
 }
 
+function reloadDashboardDomainEmail() {
+  newman_domain_email.displayUIDomainEmail(10);
+}
+
 function reloadDashboardRankEmail() {
   console.log('reloadDashboardRankEmail()');
   newman_rank_email.displayUIRankEmail(10);
@@ -1845,14 +1849,20 @@ function reloadDashboardFileTypeAttachment() {
 function drawDashboardCharts() {
 
   initDashboardActivityTimeline();
+
   reloadDashboardEntityEmail();
   //drawChartEntity(10);
-  drawChartTopic(10);
-  drawChartDomain(10);
-  drawChartCommunity(10);
-  //drawChartRank(10);
 
+  drawChartTopic(10);
+
+  //drawChartDomain(10);
+  reloadDashboardDomainEmail();
+
+  drawChartCommunity(10);
+
+  //drawChartRank(10);
   reloadDashboardRankEmail();
+
   reloadDashboardFileTypeAttachment();
 
 }
