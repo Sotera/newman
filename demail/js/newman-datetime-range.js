@@ -7,25 +7,42 @@
  */
 var newman_datetime_range = (function () {
 
-  var datetime_min_as_text = '1970-01-01';
-  var datetime_max_as_text = 'now';
-  var start_datetime_as_text = datetime_min_as_text;
-  var end_datetime_as_text = datetime_max_as_text;
+  var _datetime_min = _datetime_min_default;
+  var _datetime_max = _datetime_max_default;
+  var _datetime_min_selected = _datetime_min;
+  var _datetime_max_selected = _datetime_max;
+
+  var _datetime_min_default = '1970-01-01';
+  var _datetime_max_default = function() {
+    var current_date = new Date();
+    /*
+    var current_datetime_text = current_date.getFullYear() + '-' +
+                                (current_date.getMonth()+1) + '-' +
+                                current_date.getDate() + "T" +
+                                current_date.getHours() + ":" +
+                                current_date.getMinutes() + ":" +
+                                current_date.getSeconds();
+    */
+    var current_datetime_text = current_date.getFullYear() + '-' +
+                                (current_date.getMonth()+1) + '-' +
+                                current_date.getDate();
+    return current_datetime_text;
+  };
 
   var setDatetimeMinText = function (new_min_text) {
-    start_datetime_as_text = new_min_text;
+    _datetime_min_selected = new_min_text;
   };
 
   var setDatetimeMaxText = function (new_max_text) {
-    end_datetime_as_text = new_max_text;
+    _datetime_max_selected = new_max_text;
   };
 
   var getDatetimeMinText = function () {
-    return start_datetime_as_text;
+    return _datetime_min_selected;
   };
 
   var getDatetimeMaxText = function () {
-    return end_datetime_as_text;
+    return _datetime_max_selected;
   };
 
   function appendDatetimeRange( url_path ) {
@@ -54,12 +71,12 @@ var newman_datetime_range = (function () {
 
 
   function setDateTimeRangeSlider(datetime_min, datetime_max, default_start_date, default_end_date) {
-    //console.log('setDateTimeRangeSlider(' + datetime_min + ',' + datetime_max + ',' + default_start_date + ',' + default_end_date + ')');
+    console.log('setDateTimeRangeSlider(' + datetime_min + ',' + datetime_max + ',' + default_start_date + ',' + default_end_date + ')');
 
-    datetime_min_as_text = datetime_min.toISOString();
-    datetime_max_as_text = datetime_max.toISOString();
-    start_datetime_as_text = default_start_date.toISOString();
-    end_datetime_as_text = default_end_date.toISOString();
+    _datetime_min = datetime_min.toISOString();
+    _datetime_max = datetime_max.toISOString();
+    _datetime_min_selected = default_start_date.toISOString();
+    _datetime_max_selected = default_end_date.toISOString();
 
     var ui_id = '#date_range_slider';
 
@@ -110,17 +127,24 @@ var newman_datetime_range = (function () {
     if (ui_id && $(ui_id)) {
 
 
-      if (datetime_min_as_text === '1970' || datetime_max_as_text === 'now') {
+      if (_datetime_min == _datetime_min_default || _datetime_max == _datetime_max_default()) {
 
-        datetime_min_as_text, datetime_max_as_text = newman_data_source.getSelectedDatetimeBounds();
-        start_datetime_as_text, end_datetime_as_text = newman_data_source.getSelectedDatetimeRange();
+        _datetime_min, _datetime_max = newman_data_source.getSelectedDatetimeBounds();
+        _datetime_min_selected, _datetime_max_selected = newman_data_source.getSelectedDatetimeRange();
+        console.log('\tdatetime_min_as_text = ' + _datetime_min + ', datetime_max_as_text = ' + _datetime_max + '\n' +
+                    '\tstart_datetime_as_text = ' + _datetime_min_selected + ' end_datetime_as_text = ' + _datetime_max_selected);
 
-        var datetime_min = new Date(datetime_min_as_text);
-        var datetime_max = new Date(datetime_max_as_text);
-        var default_start_date = new Date(start_datetime_as_text);
-        var default_end_date = new Date(end_datetime_as_text);
+        var datetime_min_array = _datetime_min.split('-');
+        var datetime_max_array = _datetime_max.split('-');
+        var datetime_min = new Date(datetime_min_array[0], datetime_min_array[1], datetime_min_array[2], 0, 0, 0, 0);
+        var datetime_max = new Date(datetime_max_array[0], datetime_max_array[1], datetime_max_array[2], 0, 0, 0, 0);
 
-        setDateTimeRangeSlider(datetime_min, datetime_max, default_start_date, default_end_date);
+        var datetime_min_selected_array = _datetime_min_selected.split('-');
+        var datetime_max_selected_array = _datetime_max_selected.split('-');
+        var datetime_min_selected = new Date(datetime_min_selected_array[0], datetime_min_selected_array[1], datetime_min_selected_array[2], 0, 0, 0, 0);
+        var datetime_max_selected = new Date(datetime_max_selected_array[0], datetime_max_selected_array[1], datetime_max_selected_array[2], 0, 0, 0, 0);
+
+        setDateTimeRangeSlider(datetime_min, datetime_max, datetime_min_selected, datetime_max_selected);
       }
 
       /*
