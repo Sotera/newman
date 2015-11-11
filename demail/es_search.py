@@ -292,6 +292,8 @@ def export_edges(index):
 
 
 if __name__ == "__main__":
+    initialize_email_addr_cache("sample")
+
     export_edges("sample")
     print "done"
 #     print "foo"

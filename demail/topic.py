@@ -3,10 +3,22 @@ import cherrypy
 
 from newman.utils.functions import nth
 from urllib import unquote
-from es_topic import get_categories
+from es_topic import get_categories, get_dynamic_clusters
 from es_search import _query_emails_for_cluster, _build_graph_for_emails
-from param_utils import parseParamDatetime
+from param_utils import parseParamDatetime, parseParamEmailAddress
 
+# GET /topic/<querystr>?data_set_id=<>&start_datetime=<>&end_datetime=<>&size=<>&algorithm=<>&analysis_field=<list of fields from ES>
+# analysis_field should be a field name in elasticsearch where the data to cluster is located.  This is optional as it defaults to body. but can be set to "attachments.content" or "_all" or anything valid
+def get_topics_by_query(*args, **kwargs):
+    tangelo.content_type("application/json")
+    algorithm = kwargs.get('algorithm', 'lingo')
+    # TODO -------------------------------------------------------------------------
+    # TODO  REMEMBER TO EVALUATE QUERY TERMS -- VERY IMPORTANT for good clustering!
+    # TODO -------------------------------------------------------------------------
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    email_address_list = parseParamEmailAddress(**kwargs);
+
+    return get_dynamic_clusters(data_set_id, "emails", email_addrs=email_address_list, query_terms='', topic_score=None, entity=[], date_bounds=(start_datetime, end_datetime), cluster_fields=["_source.body"], cluster_title_fields=["_source.subject"], algorithm=algorithm, max_doc_pool_size=500)
 
 #GET /category/<category>
 # returns topic in sorted order by the idx
@@ -40,6 +52,7 @@ def email_scores(*args):
 
 actions = {
     "category": topic_list,
+    "topic": get_topics_by_query,
     "email" : email_scores,
     "graph" : topic_email_graph
 }
@@ -49,6 +62,6 @@ def unknown(*args):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-    cherrypy.log("search.%s(args[%s] %s)" % (action,len(args), str(args)))
-    cherrypy.log("search.%s(kwargs[%s] %s)" % (action,len(kwargs), str(kwargs)))
+    cherrypy.log("topic.%s(args[%s] %s)" % (action,len(args), str(args)))
+    cherrypy.log("topic.%s(kwargs[%s] %s)" % (action,len(kwargs), str(kwargs)))
     return actions.get(action, unknown)(*args, **kwargs)
