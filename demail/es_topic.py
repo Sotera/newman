@@ -33,6 +33,7 @@ def _cluster_carrot2(index, type, email_addrs=[], query_terms='', topic_score=No
     total_docs = min(resp[1]["hits"]["total"], max_doc_pool_size)
     return resp
 
+# GET dynamic clusters based on algorithm of choice
 def get_dynamic_clusters(index, type, email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None, cluster_fields=["_source.body"], cluster_title_fields=["_source.subject"], algorithm="lingo", max_doc_pool_size=500):
     resp = _cluster_carrot2(index, type, email_addrs, query_terms, topic_score, entity, date_bounds, cluster_fields, cluster_title_fields, algorithm, max_doc_pool_size)
     clusters = [[cluster["label"], cluster["score"], len(cluster["documents"])] for cluster in resp[1]["clusters"]]

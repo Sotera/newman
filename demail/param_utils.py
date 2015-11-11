@@ -6,8 +6,10 @@ from newman.newman_config import getDefaultDataSetID, default_min_timeline_bound
 def parseParamDatetime( **kwargs ):
     tangelo.log("parseParamDatetime(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     data_set_id = kwargs.get('data_set_id', getDefaultDataSetID())
+
     start_datetime = str(kwargs.get('start_datetime', default_min_timeline_bound()))
     end_datetime = str(kwargs.get('end_datetime', default_max_timeline_bound()))
+
     size = kwargs.get('size', 20)
     
     if data_set_id == 'default_data_set':
