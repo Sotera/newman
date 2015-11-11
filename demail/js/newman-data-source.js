@@ -389,17 +389,19 @@ var newman_service_data_source = (function () {
         console.log('selected data-set : ' + JSON.stringify(selected, null, 2));
 
         newman_data_source.setSelected(selected.data_set_label);
+        var data_set_datetime_min_array = selected.data_set_datetime_min.split('-');
+        var data_set_datetime_max_array = selected.data_set_datetime_max.split('-');
+        var datetime_min = new Date(data_set_datetime_min_array[0], data_set_datetime_min_array[1], data_set_datetime_min_array[2], 0, 0, 0, 0);
+        var datetime_max = new Date(data_set_datetime_max_array[0], data_set_datetime_max_array[1], data_set_datetime_max_array[2], 0, 0, 0, 0);
 
-        var datetime_min = new Date(selected.data_set_datetime_min, 0, 1, 0, 0, 0, 0);
-        var datetime_max = new Date(selected.data_set_datetime_max, 0, 1, 0, 0, 0, 0);
-        var default_start_date = new Date(selected.start_datetime_selected, 0, 1, 0, 0, 0, 0);
-        var default_end_date = new Date(selected.end_datetime_selected, 0, 1, 0, 0, 0, 0);
+        var start_datetime_selected_array = selected.start_datetime_selected.split('-');
+        var end_datetime_selected_array = selected.end_datetime_selected.split('-');
+        var default_start_date = new Date(start_datetime_selected_array[0], start_datetime_selected_array[1], start_datetime_selected_array[2], 0, 0, 0, 0);
+        var default_end_date = new Date(end_datetime_selected_array[0], end_datetime_selected_array[1], end_datetime_selected_array[2], 0, 0, 0, 0);
 
         newman_datetime_range.setDateTimeRangeSlider(datetime_min, datetime_max, default_start_date, default_end_date);
 
         requestDataSetSelect( id_selected );
-
-
       }
 
 
