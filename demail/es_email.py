@@ -50,6 +50,10 @@ def filtered_agg_query(email_addrs=[], query_terms='', topic_score=None, entity=
 
 # GET communities for email_address index
 def get_top_communities(index, query_terms='', topic_score=None, entity=[], date_bounds=None, num_communities=20):
+    # TODO fix -hack until we can do date filtering on the email_address
+    date_bounds = None
+    # TODO fix
+
     es = Elasticsearch()
     aggs = { "community_agg":{"terms":{"field":"community", "size":num_communities}}}
     query = filtered_agg_query(topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="community")
@@ -65,6 +69,10 @@ def get_top_communities(index, query_terms='', topic_score=None, entity=[], date
 
 # GET domains for email_address index
 def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None):
+    # TODO fix -hack until we can do date filtering on the email_address
+    date_bounds = None
+    # TODO fix
+
     es = Elasticsearch()
     aggs = { "domain_agg":{"terms":{"field":"domain", "size":10}}}
     query = filtered_agg_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="domain")
