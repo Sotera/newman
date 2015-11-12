@@ -8,17 +8,26 @@ from es_search import _query_emails_for_cluster, _build_graph_for_emails
 from param_utils import parseParamDatetime, parseParamEmailAddress
 
 # GET /topic/<querystr>?data_set_id=<>&start_datetime=<>&end_datetime=<>&size=<>&algorithm=<>&analysis_field=<list of fields from ES>
-# analysis_field should be a field name in elasticsearch where the data to cluster is located.  This is optional as it defaults to body. but can be set to "attachments.content" or "_all" or anything valid
+# analysis_field should be a field name in elasticsearch where the data to cluster is located.  This is optional as it defaults to "_source.body" but can be set to "_source.attachments.content" or "_all" or anything valid
 def get_topics_by_query(*args, **kwargs):
     tangelo.content_type("application/json")
     algorithm = kwargs.get('algorithm', 'lingo')
-    # TODO -------------------------------------------------------------------------
-    # TODO  REMEMBER TO EVALUATE QUERY TERMS -- VERY IMPORTANT for good clustering!
-    # TODO -------------------------------------------------------------------------
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
     email_address_list = parseParamEmailAddress(**kwargs);
 
-    return get_dynamic_clusters(data_set_id, "emails", email_addrs=email_address_list, query_terms='', topic_score=None, entity=[], date_bounds=(start_datetime, end_datetime), cluster_fields=["_source.body"], cluster_title_fields=["_source.subject"], algorithm=algorithm, max_doc_pool_size=500)
+
+    # TODO -------------------------------------------------------------------------
+    # TODO  REMEMBER TO EVALUATE QUERY TERMS -- VERY IMPORTANT for good clustering!
+    # TODO -------------------------------------------------------------------------
+    query_terms=''
+    # TODO set from UI
+    analysis_field = kwargs.get("analysis_field","_source.body")
+    # TODO set from UI
+    num_returned = 20
+
+    clusters = get_dynamic_clusters(data_set_id, "emails", email_addrs=email_address_list, query_terms=query_terms, topic_score=None, entity=[], date_bounds=(start_datetime, end_datetime), cluster_fields=[analysis_field], cluster_title_fields=["_source.subject"], algorithm=algorithm, max_doc_pool_size=500)
+
+    return {"topics" : clusters[:num_returned]}
 
 #GET /category/<category>
 # returns topic in sorted order by the idx
