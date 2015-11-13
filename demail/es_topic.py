@@ -108,7 +108,7 @@ if __name__ == "__main__":
     # print "======TOP DOCS===============s"
     # print get_top_cluster_emails("sample", 0, 0.5)
     # load_lda_map("/QCR/pst-extraction-master-temp/tmp/lda.map.txt", args.index)
-    resp = get_dynamic_clusters("sample", "emails", cluster_fields=["_source.attachments.content"], algorithm="lingo", date_bounds=('2001-02-01','2014-02-01'))
+    resp = get_dynamic_clusters("sample", "emails", cluster_fields=["_source.attachment.content"], algorithm="lingo", date_bounds=('2001-02-01','2014-02-01'))
     print resp
     print "done"
 

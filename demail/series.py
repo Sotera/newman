@@ -103,32 +103,60 @@ def attachment_histogram(sender_email_addr, start, end, interval="week"):
     }
 
 
+# Get the atachment activity histogram for a specific email address
 def attachment_histogram_from_emails(email_addr, date_bounds, interval="week"):
     tangelo.log('attachment_histogram(%s, %s, %s)' %(email_addr, date_bounds, interval))
-    return {
-        "size":0,
-        "aggs":{
-            "attachments_filter_agg":{
-                "filter" : _build_filter(email_senders=[email_addr], email_rcvr=[email_addr], date_bounds=date_bounds),
-                "aggs" : {
-                    "attachments_over_time" : {
-                        "date_histogram" : {
-                            "field" : "datetime",
-                            "interval" : interval,
-                            "format" : "yyyy-MM-dd",
-                            "min_doc_count" : 0,
-                            "extended_bounds":{
-                                "min": date_bounds[0],
-                                # "max" doesnt really work unless it's set to "now"
-                                "max": date_bounds[1]
+
+    # TODO extrac this as an "email_address" generic query
+    query  = {
+        "filtered": {
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "match_all": {}
+                        }
+                    ]
+                }
+            },
+            "filter": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "addr": email_addr
                             }
+                        }
+                    ],
+                    "should": [
+                    ]
+                }
+            }
+        }
+    }
+    agg = {
+        "emailer_attach_agg" : {
+            "nested" : {
+                "path" : "sender_attachments"
+            },
+            "aggs" : {
+                "sent_attachments_over_time" : {
+                    "date_histogram" : {
+                        "field" : "sender_attachments.datetime",
+                        "interval" : interval,
+                        "format" : "yyyy-MM-dd",
+                        "min_doc_count" : 0,
+                        "extended_bounds":{
+                            "min": date_bounds[0],
+                            "max": date_bounds[1]
                         }
                     }
                 }
             }
-
         }
     }
+    return {"query": query, "aggs":agg, "size":0}
+
 
 
 # Returns a sorted map of
@@ -220,10 +248,19 @@ def get_email_activity(index, account_id, query_function, **kwargs):
     return [_map_activity(index, account_id, sent_rcvd) for sent_rcvd in zip(resp["aggregations"]["sent_agg"]["sent_emails_over_time"]["buckets"],
                                                                              resp["aggregations"]["rcvr_agg"]["rcvd_emails_over_time"]["buckets"])]
 # Returns a sorted map of
-def get_attachment_activity(index, account_id, query_function, **kwargs):
+def get_total_attachment_activity(index, account_id, query_function, **kwargs):
     es = Elasticsearch()
-    resp = es.search(index=index, doc_type="attachments", request_cache="false", body=query_function(**kwargs))
+    body=query_function(**kwargs)
+    resp = es.search(index=index, doc_type="attachments", body=body)
     return [_map_attachments(index, account_id, attachments) for attachments in zip(resp["aggregations"]["attachments_filter_agg"]["attachments_over_time"]["buckets"])]
+
+# Returns a sorted map of
+def get_emailer_attachment_activity(index, email_address, date_bounds, interval="week"):
+    es = Elasticsearch()
+    body=attachment_histogram_from_emails(email_address, date_bounds, interval)
+    resp = es.search(index=index, doc_type="email_address", body=body)
+    return [_map_attachments(index, email_address, attachments) for attachments in zip(resp["aggregations"]["emailer_attach_agg"]["sent_attachments_over_time"]["buckets"])]
+
 
 if __name__ == "__main__":
     # es = Elasticsearch()
@@ -235,9 +272,9 @@ if __name__ == "__main__":
     #
     # res = get_entity_histogram("sample", "emails", email_addrs=["oviedon@sso.org"], query_terms="", topic_score=None, date_bounds=("2000","2002"))
     # print res
-    # res = get_attachment_activity("sample", account_id="", query_function=attachment_histogram, sender_email_addr="", start="1970", end="now", interval="year")
-    # print res
-
-    activity = get_email_activity("sample", "jeb@jeb.org", actor_histogram, actor_email_addr="jeb@jeb.org", start="2000", end="2002", interval="week")
-    print activity
+    res = get_emailer_attachment_activity("sample", email_address="jeb@jeb.org", date_bounds=("2000-01-01", "2002-01-01"), interval="week")
+    print res
+    print "done"
+    # activity = get_email_activity("sample", "jeb@jeb.org", actor_histogram, actor_email_addr="jeb@jeb.org", start="2000", end="2002", interval="week")
+    # print activity
     # for s in res:
