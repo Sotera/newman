@@ -736,9 +736,12 @@ function requestSearch(field, search_text, load_on_response) {
       else {
 
         dashboard_content.open();
+        //newman_aggregate_filter.clearAllAggregateFilter();
         var data_set_selected = newman_data_source.getSelected();
 
+
         if (url_path.endsWith(current_data_set_url)) {
+          // result from search-all under the current data-set
 
           //initiate subsequent searches
           //var ranks = newman_data_source.getSelectedTopHits(10);
@@ -785,7 +788,7 @@ function requestSearch(field, search_text, load_on_response) {
 
         }
         else {
-
+          // result from search-field-keywords under the current data-set
 
           var doc_count = 0;
           if (filtered_response.rows) {

@@ -41,7 +41,7 @@ var newman_aggregate_filter = (function () {
       console.log('\tselected-aggregates : ' + JSON.stringify(aggregate_list, null, 2));
 
       //trigger activities-overtime refresh
-      newman_activity_email_account.displayUIActivityEmailSelected();
+      reloadDashboardActivityTimeline();
 
       //trigger entities refresh
       newman_entity_email.displayUIEntityEmail();
@@ -89,6 +89,10 @@ var newman_aggregate_filter = (function () {
   function appendAggregateFilter( url_path ) {
 
     if (url_path) {
+      if (_.size(_aggregate_filter_set) == 0) {
+        return url_path;
+      }
+
       if (url_path.endsWith('/')) {
         url_path = url_path.substring(0, url_path.length - 1);
       }

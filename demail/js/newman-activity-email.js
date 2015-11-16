@@ -329,6 +329,7 @@ var newman_service_activity_email_account = (function () {
     if (account) {
       var service_url = newman_data_source.appendDataSource(_service_url + '/' + encodeURIComponent(account));
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
+      service_url = newman_aggregate_filter.appendAggregateFilter(service_url);
       return service_url;
     }
   }
@@ -459,62 +460,63 @@ var newman_activity_email_attach = (function () {
   function updateUIActivityAttach( response ) {
 
     if (response) {
-      console.log('updateUIActivityAttach('+response["data_set_id"]+')');
+      console.log('updateUIActivityAttach(' + response.account_activity_list.length + ')');
       //console.log('response :\n' + JSON.stringify(response, null, 2));
 
-      if (account_index < account_index_max) {
+      _.each(response.account_activity_list, function (account_activity, account_index) {
+        if (account_index < account_index_max) {
 
-        if (chart_ui_id_element) {
+          if (chart_ui_id_element) {
 
-          var acct_id = response.account_id;
-          if (acct_id === 'all') {
-            acct_id = '* (' + response["data_set_id"] + ')'
-          }
-          var acct_color = color_set(account_index);
-          var attach_data_set = [acct_id];
-
-          _.each(response["activities"], function (acct_activity) {
-            //console.log('acct_activity :\n' + JSON.stringify(acct_activity, null, 2));
-            var attach_count = acct_activity.interval_attach_count;
-            attach_data_set.push(attach_count);
-            if (attach_count > attach_data_value_max) {
-              attach_data_value_max = attach_count;
-              attach_data_value_max = parseInt(attach_data_value_max * 1.10);
-              //console.log('\tinbound_value_max = ' + attach_data_value_max);
+            var data_set_id = account_activity.data_set_id;
+            var acct_id = account_activity.account_id;
+            if (acct_id === data_set_id) {
+              acct_id = '* (' + data_set_id + ')'
             }
-          });
-          //console.log( 'account : ' + response.account_id + ' activities : ' + response.activities.length  );
+            var acct_color = color_set(account_index);
+            var attach_data_set = [acct_id];
 
-          attach_data_set_keys.push(acct_id);
-          attach_data_color_map[acct_id] = acct_color;
-
-          if (account_index == 0 || !attach_chart) {
-
-            var timeline_dates = ['x'];
-            _.each(response["activities"], function (acct_activity) {
-              timeline_dates.push( acct_activity.interval_start_datetime );
+            _.each(account_activity.activities, function (activity) {
+              //console.log('activity :\n' + JSON.stringify(activity, null, 2));
+              var attach_count = activity.interval_attach_count;
+              attach_data_set.push(attach_count);
+              if (attach_count > attach_data_value_max) {
+                attach_data_value_max = attach_count;
+                attach_data_value_max = parseInt(attach_data_value_max * 1.10);
+                //console.log('\tinbound_value_max = ' + attach_data_value_max);
+              }
             });
+            //console.log( 'account : ' + acct_id + ' activities : ' + account_activity.activities.length  );
 
-            initUIActivityAttach(timeline_dates, attach_data_set, attach_data_value_max, attach_data_set_keys, attach_data_color_map);
-            account_index = 0;
+            attach_data_set_keys.push(acct_id);
+            attach_data_color_map[acct_id] = acct_color;
+
+            if (account_index == 0 || !attach_chart) {
+
+              var timeline_dates = ['x'];
+              _.each(account_activity.activities, function (activity) {
+                timeline_dates.push(activity.interval_start_datetime);
+              });
+
+              initUIActivityAttach(timeline_dates, attach_data_set, attach_data_value_max, attach_data_set_keys, attach_data_color_map);
+            }
+            else {
+
+              attach_chart.axis.max({
+                y: attach_data_value_max
+              });
+              attach_chart.load({
+                columns: [attach_data_set],
+                colors: attach_data_color_map
+              });
+
+            }
+
+            revalidateUIActivityAttach();
           }
-          else {
 
-            attach_chart.axis.max({
-              y: attach_data_value_max
-            });
-            attach_chart.load({
-              columns: [attach_data_set],
-              colors: attach_data_color_map
-            });
-
-          }
-
-          revalidateUIActivityAttach();
-        }
-
-        account_index ++;
-      }
+        }// end of if (account_index < account_index_max)
+      });
     }
 
 
@@ -522,9 +524,9 @@ var newman_activity_email_attach = (function () {
 
   function revalidateUIActivityAttach() {
 
-    if (attach_chart) {
+    if (attach_chart && attach_data_set_keys) {
 
-      //attach_chart.groups([outbound_data_set_keys]);
+      //attach_chart.groups([attach_data_set_keys]);
       setTimeout(function () {
         attach_chart.groups([attach_data_set_keys]);
       }, 500);
@@ -585,11 +587,12 @@ var newman_service_activity_email_attach = (function () {
     return _service_url;
   }
 
-  function getServiceURL(account) {
+  function getServiceURL(attach_type) {
 
-    if (account) {
-      var service_url = newman_data_source.appendDataSource(_service_url + '/' + encodeURIComponent(account));
+    if (attach_type) {
+      var service_url = newman_data_source.appendDataSource(_service_url + '/' + encodeURIComponent(attach_type));
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
+      service_url = newman_aggregate_filter.appendAggregateFilter(service_url);
       return service_url;
     }
   }
