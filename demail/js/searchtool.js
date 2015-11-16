@@ -1821,7 +1821,6 @@ function initDashboardActivityTimeline() {
 }
 
 function reloadDashboardActivityTimeline() {
-  newman_datetime_range.initDateTimeRange();
   newman_activity_email_account.displayUIActivityEmailSelected();
   newman_activity_email_attach.displayUIActivityAttachAll();
 }
