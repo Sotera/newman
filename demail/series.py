@@ -230,12 +230,13 @@ def get_total_daily_activity(index, type, query_function, **kwargs):
     return resp["aggregations"]["filter_agg"]["emails_over_time"]["buckets"]
 
 # Returns a sorted map of
-def get_email_activity(index, account_id, date_bounds, interval="week"):
+def get_email_activity(index, data_set_id, account_id=None, date_bounds=None, interval="week"):
     es = Elasticsearch()
-    body = actor_histogram(None if account_id == 'all' else account_id, date_bounds, interval)
+    body = actor_histogram(account_id, date_bounds, interval)
     print body
     resp = es.search(index=index, doc_type="emails", request_cache="false", body=body)
-    return [_map_activity(index, account_id, sent_rcvd) for sent_rcvd in zip(resp["aggregations"]["sent_agg"]["emails_over_time"]["buckets"],
+    id = data_set_id if not account_id else account_id
+    return [_map_activity(index, id, sent_rcvd) for sent_rcvd in zip(resp["aggregations"]["sent_agg"]["emails_over_time"]["buckets"],
                                                                              resp["aggregations"]["rcvr_agg"]["emails_over_time"]["buckets"])]
 # Returns a sorted map of
 def get_total_attachment_activity(index, account_id, query_function, **kwargs):

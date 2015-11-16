@@ -22,7 +22,7 @@ def getAccountActivity(*args, **kwargs):
         return tangelo.HTTPStatusCode(400, "invalid service call - missing account_id")
 
     if account_id == 'all' :
-        activity = get_email_activity(data_set_id, account_id, date_bounds=(start_datetime, end_datetime), interval="week")
+        activity = get_email_activity(data_set_id, date_bounds=(start_datetime, end_datetime), interval="week")
     else:
         activity = get_email_activity(data_set_id, account_id, date_bounds=(start_datetime, end_datetime), interval="week")
 
