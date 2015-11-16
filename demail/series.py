@@ -232,8 +232,7 @@ def get_total_daily_activity(index, type, query_function, **kwargs):
 # Returns a sorted map of
 def get_email_activity(index, account_id, date_bounds, interval="week"):
     es = Elasticsearch()
-    account_id = None if account_id == 'all' else account_id
-    body = actor_histogram(account_id, date_bounds, interval)
+    body = actor_histogram(None if account_id == 'all' else account_id, date_bounds, interval)
     print body
     resp = es.search(index=index, doc_type="emails", request_cache="false", body=body)
     return [_map_activity(index, account_id, sent_rcvd) for sent_rcvd in zip(resp["aggregations"]["sent_agg"]["emails_over_time"]["buckets"],
