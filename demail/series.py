@@ -1,14 +1,16 @@
 from elasticsearch import Elasticsearch
 from time import gmtime, strftime
 import tangelo
-from newman.newman_config import default_min_timeline_bound, default_max_timeline_bound
+from newman.newman_config import default_min_timeline_bound, default_max_timeline_bound, default_timeline_span, default_timeline_interval
 from es_queries import _build_filter
-
+from dateutil.parser import parse
+from datetime import timedelta
 
 def _date_aggs(date_field="datetime"):
     return {
-        "min_date" : { "min" : { "field" : date_field} },
-        "max_date" : { "max" : { "field" : date_field } }
+        "min_date" : { "min" : { "field" : date_field } },
+        "max_date" : { "max" : { "field" : date_field } },
+        "avg_date" : { "avg" : { "field" : date_field } }
     }
 
 def get_datetime_bounds(index, type="emails"):
@@ -19,9 +21,15 @@ def get_datetime_bounds(index, type="emails"):
     min = resp["aggregations"]["min_date"].get("value_as_string", default_min_timeline_bound())
     max = resp["aggregations"]["max_date"].get("value_as_string", default_max_timeline_bound())
 
-    return  (min if min >= "1970" else "1970", max if max <= now else now)
+    avg = resp["aggregations"]["avg_date"].get("value_as_string", None)
+    if not avg:
+        return  (min if min >= "1970" else "1970-01-01", max if max <= now else now)
 
+    avg_datetime = parse(avg)
 
+    delta = timedelta(**{default_timeline_interval() : int(default_timeline_span())/2})
+
+    return ((avg_datetime-delta).strftime("%Y-%m-%d"), (avg_datetime+delta).strftime("%Y-%m-%d"))
 
 def _map_attachments(index, account_id, attchments):
     return {"account_id" : account_id,
@@ -263,6 +271,7 @@ def get_emailer_attachment_activity(index, email_address, date_bounds, interval=
 
 
 if __name__ == "__main__":
+    print get_datetime_bounds("sample")
     # es = Elasticsearch()
     # body = entity_histogram_query(email_addrs=["jeb@jeb.org"], query_terms="", topic_score=None, date_bounds=("1970","now"), entity_agg_size=10)
     # print body

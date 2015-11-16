@@ -63,6 +63,23 @@ def _map_node(email_addr, total_docs):
     node["directory"] = "deprecated"
     return node
 
+
+# Get attachment info from the email_address type
+def _get_attachment_info_from_email_address(index, email_address, date_time=None):
+    es = Elasticsearch()
+    query_email_addr =  {"query":{"filtered" : {
+        "query" : _query_all,
+        "filter" : {"bool":{
+            "must":[
+                {"term" : { "addr" : email_address}}
+            ]
+        }}}}}
+
+    resp = es.search(index=index, doc_type="email_address", body=query_email_addr)
+    # tangelo.log("getRankedEmails(resp: %s)" % (resp))
+    return resp
+
+
 # Get search all
 def _search_ranked_email_addrs(index, start, end, size):
     es = Elasticsearch()
@@ -293,8 +310,9 @@ def export_edges(index):
 
 if __name__ == "__main__":
     initialize_email_addr_cache("sample")
-
-    export_edges("sample")
+    resp = _get_attachment_info_from_email_address("sample", "tom.barry@myflorida.com")
+    print resp
+    # export_edges("sample")
     print "done"
 #     print "foo"
 # _email_addr_cache = _load_email_addr_cache("sample")

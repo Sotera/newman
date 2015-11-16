@@ -25,10 +25,10 @@ def _index_record(index):
            'data_set_document_count' : email_docs_count,
            'data_set_node_count' : emails_addrs_count,
            'data_set_attachment_count' : emails_attch_count,
-           'data_set_datetime_min' : default_min_timeline_bound(),
-           'data_set_datetime_max' : default_max_timeline_bound(),
-           'start_datetime_selected' : default_min_timeline_bound(),
-           'end_datetime_selected' : default_max_timeline_bound()
+           'data_set_datetime_min' : bounds[0],
+           'data_set_datetime_max' : bounds[1],
+           'start_datetime_selected' : bounds[0],
+           'end_datetime_selected' : bounds[1]
            }
 
 def listAllDataSet():
