@@ -1,6 +1,5 @@
 
 
-
 def _terms_filter(field='', values=[]):
     return [] if (not field or not values) else [{"terms" : { field : values}}]
 
@@ -13,6 +12,8 @@ def _entity_filter(persons=[], locations=[], organizations=[], miscs=[]):
            + _terms_filter("entities.entity_organization", organizations) \
            + _terms_filter("entities.entity_misc", miscs)
 
+def _date_filter(date_bounds=None):
+    return [] if not date_bounds else [{"range" : {"datetime" : { "gte": str(date_bounds[0]), "lte": str(date_bounds[1])}}}]
 
 # TODO how do we apply the query_terms as a filter?  Seems that it makes sense to do this as a query only but
 # TODO it is possible we will want to use a term filter on "_all"
@@ -23,7 +24,7 @@ def _build_filter(email_senders=[], email_rcvrs=[], query_terms='', topic_score=
 
     query_terms_filter = [] if not query_terms else _terms_filter("_all", query_terms.split(" "))
 
-    date_range = [] if not date_bounds else [{"range" : {"datetime" : { "gte": str(date_bounds[0]), "lte": str(date_bounds[1])}}}]
+    date_range = _date_filter(date_bounds)
     topic_range= [] if not topic_score else [{"range" : {"topic_scores.idx_"+str(topic_score[0]) : { "gte": topic_score[1]}}}]
 
     # TODO need to figure out where to hook this

@@ -2,7 +2,7 @@ from elasticsearch import Elasticsearch
 from time import gmtime, strftime
 import tangelo
 from newman.newman_config import default_min_timeline_bound, default_max_timeline_bound, default_timeline_span, default_timeline_interval
-from es_queries import _build_filter
+from es_queries import _build_filter, _addrs_filter, _date_filter
 from dateutil.parser import parse
 from datetime import timedelta
 
@@ -179,60 +179,42 @@ def get_daily_activity(index, account_id, type, query_function, **kwargs):
 # Oddly the max part of the extended bounds doesnt seem to work unless the value is set to
 # the string "now"...min works fine as 1970 or a number...
 # NOTE:  These filters are specific to a user
-def actor_histogram(actor_email_addr, start, end, interval="week"):
-    tangelo.log('actor_histogram(%s, %s, %s, %s)' %(actor_email_addr, start, end, interval))
+def actor_histogram(actor_email_addr, date_bound=None, interval="week"):
+    tangelo.log('actor_histogram(%s, %s, %s)' %(actor_email_addr, date_bound, interval))
+    def hist():
+        return {
+                    "emails_over_time" : {
+                        "date_histogram" : {
+                            "field" : "datetime",
+                            "interval" : interval,
+                            "format" : "yyyy-MM-dd",
+                            "min_doc_count" : 0,
+                            "extended_bounds":{
+                                "min": date_bound[0],
+                                # "max" doesnt really work unless it's set to "now"
+                                "max": date_bound[1]
+                            }
+                        }
+                    }
+                }
+
     return {
         "size":0,
         "aggs":{
-            "sent_agg":{"filter" :
-                {"bool":{
-                    "should":[
-                        {"term" : { "senders" : actor_email_addr}}
-                    ],
-                    "must":[{"range" : {"datetime" : { "gte": start, "lte": end }}}]
-                }
-                },
-
-                "aggs" : {
-                    "sent_emails_over_time" : {
-                        "date_histogram" : {
-                            "field" : "datetime",
-                            "interval" : interval,
-                            "format" : "yyyy-MM-dd",
-                            "min_doc_count" : 0,
-                            "extended_bounds":{
-                                "min": start,
-                                # "max" doesnt really work unless it's set to "now" 
-                                "max": end
-                            }
-                        }
+            "sent_agg":{
+                "filter" : {
+                    "bool":{
+                        "should": _addrs_filter([actor_email_addr]),
+                        "must": _date_filter(date_bound)
                     }
-                }
+                },
+                "aggs" : hist()
             },
             "rcvr_agg":{"filter" : {"bool":{
-                "should":[
-                    {"term" : { "tos" : actor_email_addr}},
-                    {"term" : { "ccs" : actor_email_addr}},
-                    {"term" : { "bccs" : actor_email_addr}}
-
-                ],
-                "must":[{"range" : {"datetime" : { "gte": start, "lte": end }}}]
+                "should": _addrs_filter([], tos=[actor_email_addr], ccs=[actor_email_addr], bccs=[actor_email_addr]),
+                "must": _date_filter(date_bound)
             }},
-
-                "aggs" : {
-                    "rcvd_emails_over_time" : {
-                        "date_histogram" : {
-                            "field" : "datetime",
-                            "interval" : interval,
-                            "format" : "yyyy-MM-dd",
-                            "min_doc_count" : 0,
-                            "extended_bounds":{
-                                "min": start,
-                                "max": end
-                            }
-                        }
-                    }
-                }
+                "aggs" : hist()
             }
         }
     }
@@ -248,13 +230,13 @@ def get_total_daily_activity(index, type, query_function, **kwargs):
     return resp["aggregations"]["filter_agg"]["emails_over_time"]["buckets"]
 
 # Returns a sorted map of
-def get_email_activity(index, account_id, query_function, **kwargs):
+def get_email_activity(index, account_id, date_bounds, interval="week"):
     es = Elasticsearch()
-    body = query_function(**kwargs)
+    body = actor_histogram(account_id, date_bounds, interval)
     print body
     resp = es.search(index=index, doc_type="emails", request_cache="false", body=body)
-    return [_map_activity(index, account_id, sent_rcvd) for sent_rcvd in zip(resp["aggregations"]["sent_agg"]["sent_emails_over_time"]["buckets"],
-                                                                             resp["aggregations"]["rcvr_agg"]["rcvd_emails_over_time"]["buckets"])]
+    return [_map_activity(index, account_id, sent_rcvd) for sent_rcvd in zip(resp["aggregations"]["sent_agg"]["emails_over_time"]["buckets"],
+                                                                             resp["aggregations"]["rcvr_agg"]["emails_over_time"]["buckets"])]
 # Returns a sorted map of
 def get_total_attachment_activity(index, account_id, query_function, **kwargs):
     es = Elasticsearch()
