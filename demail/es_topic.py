@@ -35,7 +35,7 @@ def _cluster_carrot2(index, type, email_addrs=[], query_terms='', topic_score=No
 
 # GET dynamic clusters based on algorithm of choice
 def get_dynamic_clusters(index, type, email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None, cluster_fields=["_source.body"], cluster_title_fields=["_source.subject"], algorithm="lingo", max_doc_pool_size=500):
-    resp = _cluster_carrot2(index, type, email_addrs, query_terms, topic_score, entity, date_bounds, cluster_fields, cluster_title_fields, algorithm, max_doc_pool_size)
+    resp = _cluster_carrot2(index, type, email_addrs, query_terms, topic_score, entity, date_bounds, cluster_fields=cluster_fields, cluster_title_fields=cluster_title_fields, algorithm=algorithm, max_doc_pool_size=max_doc_pool_size)
     clusters = [[cluster["label"], cluster["score"], len(cluster["documents"])] for cluster in resp[1]["clusters"]]
     total_cluster_docs=sum(cluster[2] for cluster in clusters)
     clusters = sorted(clusters, key=itemgetter(1), reverse=True)
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     # print "======TOP DOCS===============s"
     # print get_top_cluster_emails("sample", 0, 0.5)
     # load_lda_map("/QCR/pst-extraction-master-temp/tmp/lda.map.txt", args.index)
-    resp = get_dynamic_clusters("sample", "emails", cluster_fields=["_source.attachment.content"], algorithm="lingo", date_bounds=('2001-02-01','2014-02-01'))
+    resp = get_dynamic_clusters("sample", "emails", cluster_fields=["_source.body"], cluster_title_fields=["_source.senders","_source.subject"], algorithm="kmeans", date_bounds=('2001-02-01','2014-02-01'))
     print resp
     print "done"
 
