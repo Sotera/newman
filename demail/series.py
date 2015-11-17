@@ -184,8 +184,8 @@ def get_daily_activity(index, account_id, type, query_function, **kwargs):
 # Oddly the max part of the extended bounds doesnt seem to work unless the value is set to
 # the string "now"...min works fine as 1970 or a number...
 # NOTE:  These filters are specific to a user
-def actor_histogram(actor_email_addr, date_bound=None, interval="week"):
-    tangelo.log('actor_histogram(%s, %s, %s)' %(actor_email_addr, date_bound, interval))
+def actor_histogram(email_addrs, date_bound=None, interval="week"):
+    tangelo.log('actor_histogram(%s, %s, %s)' %(email_addrs, date_bound, interval))
     def hist():
         return {
                     "emails_over_time" : {
@@ -209,14 +209,14 @@ def actor_histogram(actor_email_addr, date_bound=None, interval="week"):
             "sent_agg":{
                 "filter" : {
                     "bool":{
-                        "should": _addrs_filter([actor_email_addr]),
+                        "should": _addrs_filter(email_addrs),
                         "must": _date_filter(date_bound)
                     }
                 },
                 "aggs" : hist()
             },
             "rcvr_agg":{"filter" : {"bool":{
-                "should": _addrs_filter([], tos=[actor_email_addr], ccs=[actor_email_addr], bccs=[actor_email_addr]),
+                "should": _addrs_filter([], tos=email_addrs, ccs=email_addrs, bccs=email_addrs),
                 "must": _date_filter(date_bound)
             }},
                 "aggs" : hist()
@@ -237,7 +237,7 @@ def get_total_daily_activity(index, type, query_function, **kwargs):
 # Returns a sorted map of
 def get_email_activity(index, data_set_id, account_id=None, date_bounds=None, interval="week"):
     es = Elasticsearch()
-    body = actor_histogram(account_id, date_bounds, interval)
+    body = actor_histogram([] if not account_id else [account_id], date_bounds, interval)
     print body
     resp = es.search(index=index, doc_type="emails", request_cache="false", body=body)
     id = data_set_id if not account_id else account_id

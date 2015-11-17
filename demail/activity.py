@@ -4,7 +4,7 @@ import urllib
 from newman.utils.functions import nth
 from param_utils import parseParamDatetime, parseParamEmailAddress
 from datetime import timedelta, date
-from series import get_email_activity, get_total_attachment_activity, get_emailer_attachment_activity, actor_histogram, attachment_histogram
+from series import get_email_activity, get_total_attachment_activity, get_emailer_attachment_activity, attachment_histogram
 
 
 def dateRange(start_datetime, end_datetime):
@@ -21,9 +21,7 @@ def getAccountActivity(*args, **kwargs):
     account_type = urllib.unquote(nth(args, 0, ''))
     if not account_type:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing account_type")
-        account_type = urllib.unquote(nth(args, 0, ''))
 
-    account_type = 'all' #hack for now
     email_address_list = parseParamEmailAddress(**kwargs);
 
     if not email_address_list :
