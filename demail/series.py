@@ -10,7 +10,8 @@ def _date_aggs(date_field="datetime"):
     return {
         "min_date" : { "min" : { "field" : date_field } },
         "max_date" : { "max" : { "field" : date_field } },
-        "avg_date" : { "avg" : { "field" : date_field } }
+        "avg_date" : { "avg" : { "field" : date_field } },
+        "pct_date" : { "percentiles" : { "field" : date_field } }
     }
 
 def get_datetime_bounds(index, type="emails"):
@@ -21,11 +22,15 @@ def get_datetime_bounds(index, type="emails"):
     min = resp["aggregations"]["min_date"].get("value_as_string", default_min_timeline_bound())
     max = resp["aggregations"]["max_date"].get("value_as_string", default_max_timeline_bound())
 
+    # Average
     avg = resp["aggregations"]["avg_date"].get("value_as_string", None)
-    if not avg:
+    # Estimated median
+    pct = resp["aggregations"]["pct_date"]["values"].get("50.0_as_string", None)
+
+    if not pct:
         return  (min if min >= "1970" else "1970-01-01", max if max <= now else now)
 
-    avg_datetime = parse(avg)
+    avg_datetime = parse(pct)
 
     delta = timedelta(**{default_timeline_interval() : int(default_timeline_span())/2})
 
