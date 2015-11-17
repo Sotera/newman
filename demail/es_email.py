@@ -55,7 +55,7 @@ def get_top_communities(index, query_terms='', topic_score=None, entity=[], date
     # TODO fix
 
     es = Elasticsearch()
-    aggs = { "community_agg":{"terms":{"field":"community", "size":num_communities}}}
+    aggs = { "community_agg" : { "terms" : { "field" : "community", "size" : num_communities }}}
     query = filtered_agg_query(topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="community")
     tangelo.log("Query %s"%query)
 
@@ -68,13 +68,13 @@ def get_top_communities(index, query_terms='', topic_score=None, entity=[], date
 
 
 # GET domains for email_address index
-def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None):
+def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None, num_domains=20):
     # TODO fix -hack until we can do date filtering on the email_address
     date_bounds = None
     # TODO fix
 
     es = Elasticsearch()
-    aggs = { "domain_agg":{"terms":{"field":"domain", "size":10}}}
+    aggs = { "domain_agg" : { "terms" : { "field" : "domain", "size" : num_domains }}}
     query = filtered_agg_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="domain")
     tangelo.log("Query %s"%query)
 
@@ -86,9 +86,9 @@ def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, ent
     return domains
 
 # GET top 10 Attchment types for index
-def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None):
+def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None, num_top_attachments=20):
     es = Elasticsearch()
-    aggs = { "attachment_type_agg":{"terms":{"field":"extension", "size":10}}}
+    aggs = { "attachment_type_agg" : { "terms" : { "field" : "extension", "size" : num_top_attachments }}}
     query = filtered_agg_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="attachment")
     tangelo.log("Query %s"%query)
 
