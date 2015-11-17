@@ -11,28 +11,48 @@ def dateRange(start_datetime, end_datetime):
     for n in range(int ((end_datetime - start_datetime).days)):
         yield start_datetime + timedelta(n)
 
-#GET /account/<id>
+#GET /account/<account_type>
+#GET /account/<account_type>?user0@gbc.com=1&user1@abc.com=1&...&data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
 def getAccountActivity(*args, **kwargs):
     tangelo.content_type("application/json")
     tangelo.log("getAccountActivity(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
-    account_id = urllib.unquote(nth(args, 0, ''))
-    if not account_id:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing account_id")
+    account_type = urllib.unquote(nth(args, 0, ''))
+    if not account_type:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing account_type")
+        account_type = urllib.unquote(nth(args, 0, ''))
 
-    if account_id == 'all' :
-        activity = get_email_activity(data_set_id, date_bounds=(start_datetime, end_datetime), interval="week")
+    account_type = 'all' #hack for now
+    email_address_list = parseParamEmailAddress(**kwargs);
+
+    if not email_address_list :
+        result = {"account_activity_list" :
+                  [
+                   {
+                    "account_id" : data_set_id,
+                    "data_set_id" : data_set_id,
+                    "account_start_datetime" : start_datetime,
+                    "account_end_datetime" : end_datetime,
+                    "activities" : get_email_activity(data_set_id, data_set_id, date_bounds=(start_datetime, end_datetime), interval="week")
+                   }
+                  ]
+                 }
     else:
-        activity = get_email_activity(data_set_id, account_id, date_bounds=(start_datetime, end_datetime), interval="week")
+        result = {"account_activity_list" :
+                  [
+                   {
+                    "account_id" : account_id,
+                    "data_set_id" : data_set_id,
+                    "account_start_datetime" : start_datetime,
+                    "account_end_datetime" : end_datetime,
+                    "activities" : get_email_activity(data_set_id, data_set_id, account_id, date_bounds=(start_datetime, end_datetime), interval="week")
+                   } for account_id in email_address_list
+                  ]
+                 }
 
-    return {
-        "account_id" : account_id,
-        "data_set_id" : data_set_id,
-        "account_start_datetime" : start_datetime,
-        "account_end_datetime" : end_datetime,
-        "activities" : activity
-    }
+
+    return result
 
 
 #GET /attach/<attach_type>?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
