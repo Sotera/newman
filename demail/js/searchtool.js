@@ -179,7 +179,7 @@ var activity_monthly = (function () {
 /**
  * all domain colors
  */
-var color_set_domain = d3.scale.category20();
+//var color_set_domain = d3.scale.category20();
 
 /**
  * all community colors
@@ -790,7 +790,7 @@ var search_result = (function () {
             var attr_id = $(this).attr('id');
             if (attr_id) {
               console.log('\tid : ' + attr_id + ' is-checked : ' + this.checked );
-              newman_aggregate_filter.setAggregateFilterSelected( attr_id, this.checked );
+              newman_aggregate_filter.setAggregateFilterSelected( attr_id, this.checked, true );
             }
 
             event.preventDefault();
@@ -1330,6 +1330,7 @@ function drawChartTopic( count ) {
  * request and display top domain-related charts
  * @param count
  */
+/*
 function drawChartDomain( count ) {
 
   var chart_ui_id = '#chart_horizontal_bar_domains';
@@ -1338,11 +1339,10 @@ function drawChartDomain( count ) {
   if (count > 0 && chart_ui_id) {
 
     var top_count = count;
-    /*
-     if (top_count > 5) {
-     top_count = 5;
-     }
-     */
+
+    //if (top_count > 5) {
+    //  top_count = 5;
+    //}
 
     $.get('email/domains').then(function (response) {
 
@@ -1367,11 +1367,9 @@ function drawChartDomain( count ) {
       }
       //console.log('domains: ' + JSON.stringify(domains, null, 2));
 
-      /*
-      _.each(domains, function (item) {
-        console.log( 'domain : ' + item.domain + ' count : ' + item.count  );
-      });
-      */
+      //_.each(domains, function (item) {
+      //  console.log( 'domain : ' + item.domain + ' count : ' + item.count  );
+      //});
 
       var colors = d3.scale.category20b();
       var width = 530, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
@@ -1477,6 +1475,7 @@ function drawChartDomain( count ) {
     });
   }
 }
+*/
 
 /**
  * request and display top community-related charts

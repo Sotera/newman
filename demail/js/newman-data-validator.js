@@ -467,11 +467,6 @@ function validateResponseDomainEmail(response) {
 
       console.log( '\tnew domains[' + new_response.domains.length + ']' );
 
-      // initialize domain-map
-      _.each(new_domains, function(object, index) {
-        all_domain_map.put(object[0], object[0], object[1], color_set_domain(index));
-      });
-
       return new_response;
 
     }

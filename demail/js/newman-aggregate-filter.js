@@ -27,7 +27,7 @@ var newman_aggregate_filter = (function () {
     }
   }
 
-  function setAggregateFilterSelected(id, is_selected) {
+  function setAggregateFilterSelected(id, is_selected, refresh_ui) {
     if (id) {
       var key = generateKey(id);
       if (is_selected) {
@@ -40,12 +40,13 @@ var newman_aggregate_filter = (function () {
       var aggregate_list = getAggregateFilterKeySet();
       console.log('\tselected-aggregates : ' + JSON.stringify(aggregate_list, null, 2));
 
-      //trigger activities-overtime refresh
-      reloadDashboardActivityTimeline();
+      if (refresh_ui) {
+        //trigger activities-overtime refresh
+        reloadDashboardActivityTimeline();
 
-      //trigger entities refresh
-      newman_entity_email.displayUIEntityEmail();
-
+        //trigger entities refresh
+        reloadDashboardEntityEmail();
+      }
     }
   }
 

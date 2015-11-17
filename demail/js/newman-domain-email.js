@@ -14,10 +14,11 @@ var newman_domain_email = (function () {
   var _donut_chart_domain_email;
 
   var _domain_map = {};
-  var _top_count_max = 20;
+  var _top_count_max = 40;
   var _top_count = 10;
 
-  var _color_scale = d3.scale.category20b();
+  var _color_scale_0 = d3.scale.category20b();
+  var _color_scale_1 = d3.scale.category20c();
 
   /**
    * request and display the top attachment-file-type-related charts
@@ -54,7 +55,12 @@ var newman_domain_email = (function () {
         if (!current_domain) {
           //new domain
           element["index"] = index;
-          element["color"] = _color_scale(index);
+          if (index < 21) {
+            element["color"] = _color_scale_0(index);
+          }
+          else {
+            element["color"] = _color_scale_1(index);
+          }
           _domain_map[element.domain] = element;
         }
 
@@ -232,7 +238,7 @@ var newman_domain_email = (function () {
   }
 
   function getEmailDomainColor( key ) {
-    var value = 'rgb(255,255,255,0)';
+    var value = 'rgb(245,245,245)';
     if (key) {
       value = getEmailDomainObject( key );
       if (value) {
