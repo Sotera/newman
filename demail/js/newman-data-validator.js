@@ -430,54 +430,6 @@ function validateEmailDomain(email_domain) {
 }
 
 /**
- * validate domain-service response
- * @param response data received from service
- * @returns filtered response
- */
-function validateResponseDomainEmail(response) {
-
-
-  if (response) {
-    console.log('validateResponseDomain(...)');
-
-    if (response.domains) {
-      console.log( '\tdomains[' + response.domains.length + ']' );
-
-      var new_domains = [];
-      var invalid_item_count = 0;
-      _.each(response.domains, function (domain) {
-
-        var domain_text = decodeURIComponent( domain[0] );
-        var domain_count = parseInt(domain[1]);
-        var total_percent = parseFloat(domain[2]);
-
-        if (domain_text && validateEmailDomain(domain_text)) {
-          //console.log('\tdomain : \'' + domain_text + '\'');
-          new_domains.push([domain_text, domain_count, total_percent]);
-        }
-        else {
-          //console.log('\tinvalid domain : ' + domain_text);
-          invalid_item_count++;
-        }
-      });
-
-      new_domains = new_domains.sort( descendingPredicatByIndex(1) );
-      var new_response = { "domains": new_domains };
-      //console.log( 'validated-response:\n' + JSON.stringify(new_response, null, 2) );
-
-      console.log( '\tnew domains[' + new_response.domains.length + ']' );
-
-      return new_response;
-
-    }
-    console.log( 'response.domains undefined' );
-  }
-
-  console.log( 'response undefined' );
-  return response;
-}
-
-/**
  * validate email-topic-score response
  * @param response data received from service
  * @returns filtered response

@@ -15,12 +15,10 @@ var newman_activity_email_account = (function () {
 
   var inbound_chart;
   var inbound_data_set_keys = [];
-  var inbound_data_color_map = {};
   var inbound_data_value_max = 0;
 
   var outbound_chart;
   var outbound_data_set_keys = [];
-  var outbound_data_color_map = {};
   var outbound_data_value_max = 0;
 
 
@@ -137,7 +135,11 @@ var newman_activity_email_account = (function () {
             }
             var acct_color = color_set(account_index);
             var inbound_data_set = [acct_id];
+            inbound_data_set_keys = [];
+            var inbound_data_color_map = {};
             var outbound_data_set = [acct_id];
+            outbound_data_set_keys = [];
+            var outbound_data_color_map = {};
 
             _.each(account_activity.activities, function (activity) {
               //console.log('acct_activity :\n' + JSON.stringify(activity, null, 2));
@@ -405,7 +407,6 @@ var newman_activity_email_attach = (function () {
 
   var attach_chart;
   var attach_data_set_keys = [];
-  var attach_data_color_map = {};
   var attach_data_value_max = 0;
 
   function initUIActivityAttach( timeline, data_set, data_set_value_max, data_group, data_color_collection ) {
@@ -473,6 +474,8 @@ var newman_activity_email_attach = (function () {
             }
             var acct_color = color_set(account_index);
             var attach_data_set = [acct_id];
+            attach_data_set_keys = [];
+            var attach_data_color_map = {};
 
             _.each(account_activity.activities, function (activity) {
               //console.log('activity :\n' + JSON.stringify(activity, null, 2));

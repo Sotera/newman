@@ -42,9 +42,9 @@ def getDomains(*args, **kwargs):
     tangelo.content_type("application/json")
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
-    amount = int(urllib.unquote(nth(args, 0, "20")))
+    top_count = int(urllib.unquote(nth(args, 0, "40")))
 
-    return {"domains" : get_top_domains(data_set_id, date_bounds=(start_datetime, end_datetime), num_domains=amount)[:amount]}
+    return {"domains" : get_top_domains(data_set_id, date_bounds=(start_datetime, end_datetime), num_domains=top_count)[:top_count]}
 
 
 #GET /community
@@ -53,9 +53,9 @@ def getCommunities(*args, **kwargs):
     tangelo.content_type("application/json")
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
-    amount = int(urllib.unquote(nth(args, 0, "20")))
+    top_count = int(urllib.unquote(nth(args, 0, "40")))
 
-    return {"community" : get_top_communities(data_set_id, date_bounds=(start_datetime, end_datetime), num_communities=amount)[:amount]}
+    return {"communities" : get_top_communities(data_set_id, date_bounds=(start_datetime, end_datetime), num_communities=top_count)[:top_count]}
 
 
 #GET /attachments/<sender>

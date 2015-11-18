@@ -2,40 +2,10 @@
  * Created by jlee on 10/31/15.
  */
 
-function getEmailDomain(email) {
-  return email.replace(/.*@/, "");
-}
-
-function getEmailDomainColor(email) {
-  var color = 'rgb(245,245,245)';
-  if(email) {
-    //console.log('getEmailDomainColor(' + email + ')');
-    var domain = getEmailDomain(email);
-    if (domain) {
-      newman_domain_email.addDomain( domain )
-      var value = newman_domain_email.getDomainColor( domain );
-      if (value) {
-        color =  value;
-      }
-      else {
-        console.log('\tNo color matched for domain \'' + domain + '\'!');
-      }
-    }
-    else {
-      console.log('\tDomain undefined for email \'' + email + '\'!');
-    }
-  }
-  else {
-    console.log('getEmailDomain( undefined )');
-  }
-
-  return color;
-}
-
 /**
- * email-domain related container
+ * email-community related container
  */
-var newman_domain_email = (function () {
+var newman_community_email = (function () {
 
   var chart_bar_ui_id = '#chart_horizontal_bar_domains';
   var chart_donut_ui_id = '#chart_donut_domains';
@@ -47,14 +17,14 @@ var newman_domain_email = (function () {
   var _top_count_max = 40;
   var _top_count = 10;
 
-  var _color_scale_0 = d3.scale.category20b();
-  var _color_scale_1 = d3.scale.category20c();
+  var _color_scale_0 = d3.scale.category20();
+  var _color_scale_1 = d3.scale.category20b();
 
   /**
    * request and display the top attachment-file-type-related charts
    * @param count
    */
-  function displayUIDomain( count ) {
+  function displayUICommunity( count ) {
 
     if (chart_bar_ui_id) {
       if (count) {
@@ -65,7 +35,7 @@ var newman_domain_email = (function () {
       }
 
       console.log("Requesting service ...");
-      newman_service_domain_email.requestService(_top_count);
+      newman_service_community_email.requestService(_top_count);
 
     }
   }
@@ -73,16 +43,28 @@ var newman_domain_email = (function () {
   function mapResponse( response ) {
     if (response) {
 
-      var domain_list = _.map(response.domains, function( element ){
-        var domain_object =  _.object(["domain", "count", "total_percent"], element);
+      var domain_list = _.map(response.communities, function( element ){
+        var domain_object =  _.object(["community", "count", "total_percent"], element);
         return domain_object;
       });
       domain_list = domain_list.sort( descendingPredicatByProperty("count"));
 
-      //cache domain set and map color
-      _.each(domain_list, function(element, index) {
+      //cache community set and map color
+      _.each( domain_list, function(element, index) {
 
-        addDomain(element.domain, element.count, element.total_percent);
+        var current_domain = _domain_map[element.community];
+        if (!current_domain) {
+          //new community
+          element["index"] = index;
+          if (index < 21) {
+            element["color"] = _color_scale_0(index);
+          }
+          else {
+            element["color"] = _color_scale_1(index);
+          }
+          _domain_map[element.community] = element;
+        }
+
       })
       console.log('mapResponse(...)\n' + JSON.stringify(domain_list, null, 2));
 
@@ -91,41 +73,12 @@ var newman_domain_email = (function () {
     return response;
   }
 
-  function addDomain( new_domain, count, total_percent ) {
-    if (new_domain && count && total_percent) {
-      var existing_domain = _domain_map[new_domain];
-      if (!existing_domain) { //new domain
-        var size = _.size(_domain_map);
-        var index = size - 1;
-        if (size == 0) {
-          index = 0;
-        }
-
-        if (size <= _top_count_max) {
-
-          var color;
-          if (index < 21) {
-            color = _color_scale_0(index);
-          }
-          else {
-            color = _color_scale_1(index);
-          }
-
-          var element = {"domain": new_domain, "count": count, "total_percent": total_percent, "index": index, "color": color};
-          _domain_map[element.domain] = element;
-        }
-        else {
-          console.log('Max domain cache size reached; unable to append new domain \'' + new_domain + '\'!');
-        }
-      }
-    }
-  }
 
   /**
    * update from service the top email-entities-related charts
    * @param service_response
    */
-  function updateUIDomain( service_response ) {
+  function updateUICommunity( service_response ) {
 
     var _domain_list = mapResponse( service_response );
 
@@ -165,7 +118,7 @@ var newman_domain_email = (function () {
         .attr("height", height_bar - 1)
         .attr("class", "label highlight clickable")
         .on("click", function (d) {
-          console.log( 'clicked on \'' + d.domain + '\'');
+          console.log( 'clicked on \'' + d.community + '\'');
 
         })
         .style("fill", function (d, i) {
@@ -194,21 +147,21 @@ var newman_domain_email = (function () {
         .attr("y", height_bar / 2)
         .attr("class", "label clickable")
         .on("click", function (d) {
-          console.log( 'clicked on \'' + d.domain + '\'');
+          console.log( 'clicked on \'' + d.community + '\'');
 
         })
         .text(function (d) {
           var max_length = 30;
-          if (d.domain.length > max_length) {
-            var text = d.domain.substr(0, max_length);
+          if (d.community.length > max_length) {
+            var text = d.community.substr(0, max_length);
             text = text.substr( 0, text.lastIndexOf(' '));
             return text + " ...";
           }
 
-          return d.domain;
+          return d.community;
         })
         .append('title').text(function (d) {
-        return d.domain;
+        return d.community;
       });
 
 
@@ -224,7 +177,7 @@ var newman_domain_email = (function () {
         var value = Math.round((_domain_list[i].count / top_donut_chart_total) * 100);
         var entry = {
           value: value,
-          label: (_.take((_domain_list[i].domain).split(' '), 3).join(' ')),
+          label: (_.take((_domain_list[i].community).split(' '), 3).join(' ')),
           formatted: value + '%'
         };
         top_donut_chart_data.push(entry);
@@ -253,7 +206,7 @@ var newman_domain_email = (function () {
     }
   }
 
-  function revalidateUIDomain() {
+  function revalidateUICommunity() {
     if (_donut_chart_domain_email) {
       _donut_chart_domain_email.redraw();
     }
@@ -276,7 +229,7 @@ var newman_domain_email = (function () {
     return _element_list;
   }
 
-  function getDomainObject( key ) {
+  function getCommunityObject( key ) {
 
     var value = undefined;
     if (key) {
@@ -285,10 +238,10 @@ var newman_domain_email = (function () {
     return value;
   }
 
-  function getDomainColor( key ) {
+  function getCommunityColor( key ) {
     var color = 'rgb(225, 225, 225)';
     if (key) {
-      var value = getDomainObject( key );
+      var value = getCommunityObject( key );
       if (value) {
         color = value.color;
       }
@@ -296,10 +249,10 @@ var newman_domain_email = (function () {
     return color;
   }
 
-  function getDomainIndex( key ) {
+  function getCommunityIndex( key ) {
     var value = -1;
     if (key) {
-      value = getDomainObject( key );
+      value = getCommunityObject( key );
       if (value) {
         return value.index;
       }
@@ -309,27 +262,26 @@ var newman_domain_email = (function () {
 
   return {
     'initUI' : initUI,
-    'displayUIDomain' : displayUIDomain,
-    'updateUIDomain' : updateUIDomain,
-    'revalidateUIDomain' : revalidateUIDomain,
+    'displayUICommunity' : displayUICommunity,
+    'updateUICommunity' : updateUICommunity,
+    'revalidateUICommunity' : revalidateUICommunity,
     'getTopCount' : getTopCount,
     'getTopCountMax' : getTopCountMax,
     'getAllAsList' : getAllAsList,
-    'getDomainObject' : getDomainObject,
-    'getDomainColor' : getDomainColor,
-    'addDomain' : addDomain,
-    'getDomainIndex' : getDomainIndex
+    'getCommunityObject' : getCommunityObject,
+    'getCommunityColor' : getCommunityColor,
+    'getCommunityIndex' : getCommunityIndex
   }
 
 }());
 
 /**
- * email-domain-related service response container
+ * email-community-related service response container
  * @type {{requestService, getResponse}}
  */
-var newman_service_domain_email = (function () {
+var newman_service_community_email = (function () {
 
-  var _service_url = 'email/domains';
+  var _service_url = 'email/communities';
   var _response;
 
   function getServiceURL(top_count) {
@@ -355,7 +307,7 @@ var newman_service_domain_email = (function () {
   }
 
   /**
-   * validate domain-service response
+   * validate community-service response
    * @param response data received from service
    * @returns filtered response
    */
@@ -363,22 +315,22 @@ var newman_service_domain_email = (function () {
 
 
     if (response) {
-      console.log('newman_service_domain_email.validateResponse(...)');
+      console.log('newman_service_community_email.validateResponse(...)');
 
-      if (response.domains) {
-        console.log( '\tdomains[' + response.domains.length + ']' );
+      if (response.communities) {
+        console.log( '\tcommunities[' + response.communities.length + ']' );
 
-        var new_domains = [];
+        var new_communities = [];
         var invalid_item_count = 0;
-        _.each(response.domains, function (domain) {
+        _.each(response.communities, function (community) {
 
-          var domain_text = decodeURIComponent( domain[0] );
-          var domain_count = parseInt(domain[1]);
-          var total_percent = parseFloat(domain[2]);
+          var community_text = decodeURIComponent( community[0] );
+          var community_count = parseInt(community[1]);
+          var total_percent = parseFloat(community[2]);
 
-          if (domain_text && validateEmailDomain(domain_text)) {
-            //console.log('\tdomain : \'' + domain_text + '\'');
-            new_domains.push([domain_text, domain_count, total_percent]);
+          if (community_text && validateEmailDomain(community_text)) {
+            //console.log('\tcommunity : \'' + community_text + '\'');
+            new_communities.push([community_text, community_count, total_percent]);
           }
           else {
             //console.log('\tinvalid domain : ' + domain_text);
@@ -386,16 +338,16 @@ var newman_service_domain_email = (function () {
           }
         });
 
-        new_domains = new_domains.sort( descendingPredicatByIndex(1) );
-        var new_response = { "domains": new_domains };
+        new_communities = new_communities.sort( descendingPredicatByIndex(1) );
+        var new_response = { "communities": new_communities };
         //console.log( 'validated-response:\n' + JSON.stringify(new_response, null, 2) );
 
-        console.log( '\tnew domains[' + new_response.domains.length + ']' );
+        console.log( '\tnew communities[' + new_response.communities.length + ']' );
 
         return new_response;
 
       }
-      console.log( 'response.domains undefined' );
+      console.log( 'response.communities undefined' );
     }
 
     console.log( 'response undefined' );
@@ -405,10 +357,10 @@ var newman_service_domain_email = (function () {
   function setResponse( response ) {
     if (response) {
       _response = validateResponse(response);
-      console.log('received service_response_email_domain[' + response.domains.length + ']');
+      console.log('received service_response_email_domain[' + response.communities.length + ']');
       //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
 
-      newman_domain_email.updateUIDomain( _response );
+      newman_community_email.updateUICommunity( _response );
     }
   }
 
