@@ -14,7 +14,7 @@ var svg = d3.select("#node_graph").append("svg")
 
 var vis = svg.append('svg:g');
 
-var labels = false;
+var node_label_on = false;
 var data_source_selected = null;
 
 var doubleEncodeURIComponent= function(uri){
@@ -267,34 +267,45 @@ function dragended(d){
   d3.select(this).classed("fixed", d.fixed = true);
 }
 
-function recolornodes(category) {
-  if( category == 'comm') {
-    redraw_community_table()
+function recolornodes(color_category) {
+  console.log('recolornodes(' + color_category + ')');
+  if( color_category == 'community') {
+    redraw_legend_table_community();
     d3.selectAll("circle").style("fill", function(d) {
+      //console.log('\tcolor_by_community\n' + JSON.stringify(d, null, 2));
       return newman_community_email.getCommunityColor( d.community );
     });
   }
-  if( category == 'node') {
-    redraw_domains_table();
+  if( color_category == 'domain') {
+    redraw_legend_table_domain();
     d3.selectAll("circle").style("fill", function(d) {
       if(d && d.name) {
-        //console.log('node' + JSON.stringify(d, null, 2));
-        return getEmailDomainColor(d.name);
-        //return color(d.group);
+        //console.log('\tcolor_by_domain\n' + JSON.stringify(d, null, 2));
+        return getEmailDomainColor( d.name );
       }
     });
   }
 }
 
-function getDocInboundCount( key ) {
-  "use strict";
-
+function updateUIInboundCount( count ) {
+  if (count) {
+    $('#doc_count_inbound').text(' Inbound ' + count);
+  }
+  else {
+    $('#doc_count_inbound').text(' Inbound' );
+  }
 }
 
-function getDocOutboundCount( key ) {
-  "use strict";
-
+function updateUIOutboundCount( count ) {
+  if (count) {
+    $('#doc_count_outbound').text(' Outbound ' + count);
+  }
+  else {
+    $('#doc_count_outbound').text(' Outbound' );
+  }
 }
+
+
 
 
 
@@ -859,6 +870,9 @@ function getTopRankedEmailAccountList(email_doc_rows, top_count ) {
 function loadSearchResult( url_path ) {
   bottom_panel.unhide();
 
+  updateUIInboundCount();
+  updateUIOutboundCount();
+
   $.get("email/exportable").then(function(response_exportable) {
     newman_service_email_exportable.setResponse(response_exportable);
 
@@ -884,10 +898,6 @@ function loadSearchResult( url_path ) {
         return _.extend(o, {'exported': (o.num in exported)})
       });
       */
-
-      $('#doc_count_inbound').text( ' Inbound ' + generateRandomInt(0, 500) );
-      $('#doc_count_outbound').text( ' Outbound ' + generateRandomInt(0, 500) );
-
 
       // populate data-table
       populateDataTable( filtered_response.rows )
@@ -975,12 +985,14 @@ function drawGraph(graph){
     .attr("r", function(d) { return Math.log((d.num * 100 ));  })
     .attr("id", function(d) { return "g_circle_" + d.group; })
     .style("fill", function(d) {
-      if (d3.select("#colorby").property("checked")) {
+      //console.log('node.append("svg:circle").style("fill")\n' + JSON.stringify(d, null, 2));
+      if (d3.select("#color_by_domain").property("checked")) {
         if(d && d.name) {
           return getEmailDomainColor(d.name);
           //return color(d.group);
         }
-      } else {
+      }
+      else if (d3.select("#color_by_community").property("checked")) {
         if(d && d.community) {
           return newman_community_email.getCommunityColor( d.community );
         }
@@ -1014,8 +1026,6 @@ function drawGraph(graph){
         clicks=0;
       };
       if (clicks == 1) {
-        $('#doc_count_inbound').text( ' Inbound ' + generateRandomInt(0, 500) );
-        $('#doc_count_outbound').text( ' Outbound ' + generateRandomInt(0, 500) );
 
         //$('#txt_search').val(n.name);
         var t = Math.floor($('#radial-wrap').height() / 2);
@@ -1060,11 +1070,19 @@ function drawGraph(graph){
     click_node(n);
   });
 
-  node.on("mouseover", function() { d3.select(this).select("svg text").style("opacity","100"); });
+  node.on("mouseover", function(n) {
+    d3.select(this).select("svg text").style("opacity","100");
+
+    updateUIInboundCount( n.email_received );
+    updateUIOutboundCount( n.email_sent );
+  });
   node.on("mouseout", function() {
-    if (!labels){
+    if (!node_label_on){
       d3.select(this).select("svg text").style("opacity","0");
     }
+
+    updateUIInboundCount();
+    updateUIOutboundCount();
   });
 
 
@@ -1089,7 +1107,7 @@ function drawGraph(graph){
     .attr("font-size","5pt")
     .attr("stroke-width","0.5px")
     .style("opacity",function() {
-      if (labels) return 100;
+      if (node_label_on) return 100;
       else return 0;
     });
 
@@ -1104,6 +1122,7 @@ function drawGraph(graph){
       return "translate(" + d.x + "," + d.y + ")";
     });
   });
+
   redraw_legend();
 }
 
@@ -1114,14 +1133,13 @@ function redraw() {
 }
 
 function toggle_labels() {
-  if (labels) {
+  if (node_label_on) {
     d3.selectAll("#node_graph svg text").style("opacity","0");
-    labels = false;
+    node_label_on = false;
   }
-
   else {
     d3.selectAll("#node_graph svg text").style("opacity","100");
-    labels = true;
+    node_label_on = true;
   }
 }
 
@@ -1401,88 +1419,6 @@ function draw_attachments_table(email_address){
   return deferred.promise();
 }
 
-//deprecated
-/*
-function draw_rank_chart() {
-  $.get('email/rank').then(function(resp){
-    $('#top-rank').empty();
-    var emails = _.map(_.take(resp.emails, 20), function(email) {
-      return _.object(["email", "community", "communityId", "groupId", "rank", "totalReceived", "totalSent"], email);
-    });
-
-    if (emails.length < 1) {
-      $('#top-rank').append($('<p>').html("No results for rank."));
-    }
-
-    var width = 400, barHeight = 20;
-    var margin = {top: 20, right: 10, bottom: 20, left: 150};
-    width = width - margin.left - margin.right;
-
-    var x = d3.scale.linear().range([0, width]);
-    var chart = d3.select("#top-rank").append('svg')
-      .attr('class', 'chart')
-      .attr("width", width + margin.left + margin.right);
-
-    x.domain([0, 100]);
-    chart.attr("height", barHeight * (emails.length + 1));
-
-    var bar = chart.selectAll("g")
-      .data(emails).enter()
-      .append("g")
-      .attr("transform", function(d, i) { return "translate(" + margin.left + "," + (+(i * barHeight) + +margin.top) + ")";});
-
-    bar.append("rect")
-      .attr("width", function(d) {
-        return x((+d.rank * 100));
-      })
-      .attr("height", barHeight - 1)
-      .style("fill", function(d) {
-        return newman_community_email.getCommunityColor( +d.communityId );
-      })
-      .on("click", function(d){ })
-      .append('title').text(function(d) { return d.email;});
-
-    bar.append("text")
-      .attr("x", function(d) { return x((+d.rank * 100)) - 3;})
-      .attr("y", barHeight / 2)
-      .attr("dy", ".35em")
-      .text(function(d) { return +d.rank;});
-
-    bar.append("text")
-      .attr("x", function(d) { return -margin.left;})
-      .attr("y", barHeight / 2)
-      .attr("class", "label clickable")
-      .style("fill", function(d) {
-        if(d && d.name) {
-          return getDomainColor(d.email);
-          //return color(+d.groupId);
-        }
-      })
-      .text(function(d) { return (d.email.length > 25) ? d.email.substr(0,25) + ".." : d.email; })
-      .on("click", function(d){
-        setSearchType('email');
-        //$("#txt_search").val(d.email);
-        requestSearch('email', d.email, true);
-      })
-      .on("mouseover", function(d){
-        d3.select("#g_circle_" + d.groupId).style("stroke","#ffff00");
-        d3.select("#g_circle_" + d.groupId).style("stroke-width",function(d) { return 10 * (d.rank); });
-      })
-      .on("mouseout", function(d){
-        d3.select("#g_circle_" + d.groupId).style("stroke","#ff0000");
-        if (d3.select("#rankval").property("checked")) {
-          d3.select("#g_circle_" + d.groupId).style("opacity",function(d) { return 0.2 + (d.rank); });
-          d3.select("#g_circle_" + d.groupId).style("stroke-width",function(d) { return 5 * (d.rank); });
-        }
-        else {
-          d3.select("#g_circle_" + d.groupId).style("opacity","100");
-          d3.select("#g_circle_" + d.groupId).style("stroke-width","0");
-        }
-      })
-      .append('title').text(function(d) { return d.email; });
-  });
-}
-*/
 
 function draw_topic_tab(){
   $.ajax('topic/category/all').then(function(resp){
@@ -1503,7 +1439,7 @@ function draw_topic_tab(){
 }
 
 
-function redraw_domains_table(){
+function redraw_legend_table_domain(){
 
   var lastSort = "";
   $("#legend-table tbody").empty();
@@ -1586,7 +1522,7 @@ function redraw_domains_table(){
     });
 }
 
-function redraw_community_table() {
+function redraw_legend_table_community() {
   var lastSort = "";
   $("#legend-table tbody").empty();
   $("#legend-table thead").empty();
@@ -1656,82 +1592,27 @@ function redraw_community_table() {
   tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td")
     .html(function(d, i){
       if (i == 1){
-        return $('<div>').append($('<div>').css({ 'min-height': '14px', 'width' : '100%', 'background-color' : newman_community_email.getCommunityColor( +d )})).html();
+        console.log('tr.selectAll("td").data(d)\n' + JSON.stringify(d, null, 2));
+        return $('<div>').append($('<div>').css(
+          { 'min-height': '14px',
+            'width' : '100%',
+            'background-color' : newman_community_email.getCommunityColor( d )
+          })).html();
       }
       return d;
     });
 }
 
-function redraw_legend(){
-  if ($('input[name=optionRadios]:checked').val()=="comm"){
-    redraw_community_table();
-  } else {
-    redraw_domains_table();
+function redraw_legend() {
+
+  if ($('#color_by_community').prop('checked')) {
+    redraw_legend_table_community();
+  }
+  else if ($('#color_by_domain').prop('checked')) {
+    redraw_legend_table_domain();
   }
 };
 
-//deprecated
-/*
-function draw_entity_chart() {
-
-  $.get('entity/top/20').then(function(response){
-
-    $('#top-entities').empty();
-    var legend_items = ["Person", "Location", "Organization", "Misc"];
-
-    var legend = $('<div>').css('padding-top', '15px');
-    _.each(legend_items, function(item){
-      legend.append($('<div>').css({'display':'inline-block', 'width': '20px', 'height': '12px', 'padding-left': '5px', 'padding-right': '5px;'}).addClass(item.toLowerCase()))
-        .append($('<span>').css({'padding-left': '5px', 'padding-right': '5px'}).text(item))
-        .append($('<br/>'));
-    });
-
-    var entities = response.entities;
-
-    var width = 400, barHeight = 20, margin_top = 20, margin_bottom = 20;
-    var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
-    width = width - margin.left - margin.right;
-
-    var x = d3.scale.linear().range([0, width]);
-    var chart = d3.select("#top-entities").append('svg')
-      .attr('class', 'chart')
-      .attr("width", width + margin.left + margin.right);
-
-    x.domain([0, _.first(entities)[3]]);
-    chart.attr("height", barHeight * entities.length);
-
-    var bar = chart.selectAll("g")
-      .data(entities).enter()
-      .append("g")
-      .attr("transform", function(d, i) { return "translate(" + margin.left + "," + (+(i * barHeight) + +margin.top) + ")";});
-
-    bar.append("rect")
-      .attr("width", function(d) { return x(+d[3]);})
-      .attr("height", barHeight - 1)
-      .attr("class", function(d) { return d[1];})
-      .append('title').text(function(d) { return d[2];});
-
-    bar.append("text")
-      .attr("x", function(d) { return x(+d[3]) - 3;})
-      .attr("y", barHeight / 2)
-      .attr("dy", ".35em")
-      .text(function(d) { return +d[3];});
-
-    bar.append("text")
-      .attr("x", function(d) { return -margin.left;})
-      .attr("y", barHeight / 2)
-      .attr("class", "label clickable")
-      .on("click", function(d){
-        do_search(true, 'entity', d[0], d[2]);
-      })
-      .text(function(d) { return (d[2].length > 25) ? d[2].substr(0,25) + ".." : d[2]; })
-      .append('title').text(function(d) { return d[2];});
-
-    $('#top-entities').append(legend);
-  });
-
-}
-*/
 
 function refresh_dashboard() {
   console.log( 'refresh_dashboard()' );
@@ -1759,8 +1640,7 @@ var dashboard_content = (function () {
       dashboard_content_container.fadeToggle('fast');
       //container.show();
 
-      newman_activity_email_account.displayUIActivityEmailSelected();
-      newman_activity_email_attach.displayUIActivityAttachAll();
+      reloadDashboardActivityTimeline();
 
       reloadDashboardEntityEmail();
 
@@ -2153,14 +2033,14 @@ $(function () {
       });
     });
 
-    $("#colorby2").click(function () {
-      console.log($("#colorby2").val());
-      recolornodes('comm');
+    $("#color_by_community").click(function () {
+      //console.log($("#color_by_community").val());
+      recolornodes('community');
     });
 
-    $("#colorby").click(function () {
-      console.log($("#colorby").val());
-      recolornodes('node');
+    $("#color_by_domain").click(function () {
+      //console.log($("#color_by_domain").val());
+      recolornodes('domain');
     });
 
     $("#usetext").on("change", function () {

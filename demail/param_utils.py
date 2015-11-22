@@ -14,7 +14,7 @@ def parseParamDatetime( **kwargs ):
     
     if data_set_id == 'default_data_set':
         data_set_id = getDefaultDataSetID()
-    if start_datetime == '1970':
+    if start_datetime == '1970-01-01':
         start_datetime = default_min_timeline_bound()   
     if end_datetime == 'now':
         end_datetime = default_max_timeline_bound()

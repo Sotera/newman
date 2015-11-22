@@ -12,21 +12,23 @@ function getEmailDomainColor(email) {
     //console.log('getEmailDomainColor(' + email + ')');
     var domain = getEmailDomain(email);
     if (domain) {
-      newman_domain_email.addDomain( domain )
+
       var value = newman_domain_email.getDomainColor( domain );
       if (value) {
-        color =  value;
+        color = value;
       }
       else {
+        console.log('getEmailDomainColor(' + email + ')');
         console.log('\tNo color matched for domain \'' + domain + '\'!');
       }
     }
     else {
-      console.log('\tDomain undefined for email \'' + email + '\'!');
+      console.log('getEmailDomainColor(' + email + ')');
+      console.log('\tDomain undefined!');
     }
   }
   else {
-    console.log('getEmailDomain( undefined )');
+    console.log('getEmailDomainColor(' + email + ')');
   }
 
   return color;
@@ -84,7 +86,7 @@ var newman_domain_email = (function () {
 
         addDomain(element.domain, element.count, element.total_percent);
       })
-      console.log('mapResponse(...)\n' + JSON.stringify(domain_list, null, 2));
+      //console.log('newman_domain_email.mapResponse(...)\n' + JSON.stringify(_domain_map, null, 2));
 
       return domain_list;
     }
@@ -92,17 +94,14 @@ var newman_domain_email = (function () {
   }
 
   function addDomain( new_domain, count, total_percent ) {
-    if (new_domain && count && total_percent) {
+    var element;
+    if (new_domain) {
       var existing_domain = _domain_map[new_domain];
       if (!existing_domain) { //new domain
         var size = _.size(_domain_map);
-        var index = size - 1;
-        if (size == 0) {
-          index = 0;
-        }
+        var index = size;
 
         if (size <= _top_count_max) {
-
           var color;
           if (index < 21) {
             color = _color_scale_0(index);
@@ -111,14 +110,21 @@ var newman_domain_email = (function () {
             color = _color_scale_1(index);
           }
 
-          var element = {"domain": new_domain, "count": count, "total_percent": total_percent, "index": index, "color": color};
+          element = {"domain": new_domain, "count": count, "total_percent": total_percent, "index": index, "color": color};
           _domain_map[element.domain] = element;
         }
         else {
           console.log('Max domain cache size reached; unable to append new domain \'' + new_domain + '\'!');
         }
       }
+      else { // existing domain
+        //console.log('Domain \'' + new_domain + '\' found');
+        //existing_domain["count"] = count;
+        //existing_domain["total_percent"] = total_percent;
+        //_domain_map[existing_domain.domain] = existing_domain;
+      }
     }
+    return element;
   }
 
   /**
@@ -138,7 +144,10 @@ var newman_domain_email = (function () {
         _domain_list = _domain_list.splice(0, _top_count);
       }
 
-      var colors = d3.scale.category20b();
+      //var colors = d3.scale.category20b();
+      var colors = getAllColorAsList();
+      //console.log('color_list:\n' + JSON.stringify(colors, null, 2));
+
       var width = 530, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
       width = width - margin.left - margin.right;
@@ -169,7 +178,8 @@ var newman_domain_email = (function () {
 
         })
         .style("fill", function (d, i) {
-          return colors(i);
+          //return colors(i);
+          return colors[i];
         })
         .append('title').text(function (d) {
         return d.count;
@@ -233,7 +243,8 @@ var newman_domain_email = (function () {
 
       _donut_chart_domain_email = Morris.Donut({
         element: 'chart_donut_domains',
-        colors: colors.range(),
+        //colors: colors.range(),
+        colors: colors,
         data: top_donut_chart_data,
         formatter: function (x, data) { return data.formatted; }
       });
@@ -271,9 +282,20 @@ var newman_domain_email = (function () {
     var _element_list = _.values( _domain_map );
     if (_element_list) {
       //create a deep-copy, return the copy
-      return clone(_element_list);
+      return clone(_element_list.sort(ascendingPredicatByProperty('index')));
     }
     return _element_list;
+  }
+
+  function getAllColorAsList() {
+    var color_list = [];
+    var _element_list = getAllAsList();
+    if (_element_list) {
+      _.each(_element_list, function(element, index) {
+        color_list.push( element.color );
+      });
+    }
+    return color_list;
   }
 
   function getDomainObject( key ) {
@@ -286,11 +308,19 @@ var newman_domain_email = (function () {
   }
 
   function getDomainColor( key ) {
+    //console.log('newman_domain_email.getDomainColor(' + key + ')');
     var color = 'rgb(225, 225, 225)';
     if (key) {
       var value = getDomainObject( key );
       if (value) {
         color = value.color;
+      }
+      else {
+        value = addDomain( key, 0, 0.0 );
+        if (value) {
+          color = value.color;
+          //console.log('\tDomain not found; added new color ' + color);
+        }
       }
     }
     return color;
@@ -315,6 +345,7 @@ var newman_domain_email = (function () {
     'getTopCount' : getTopCount,
     'getTopCountMax' : getTopCountMax,
     'getAllAsList' : getAllAsList,
+    'getAllColorAsList' : getAllColorAsList,
     'getDomainObject' : getDomainObject,
     'getDomainColor' : getDomainColor,
     'addDomain' : addDomain,
@@ -334,7 +365,7 @@ var newman_service_domain_email = (function () {
 
   function getServiceURL(top_count) {
     if (!top_count || top_count < 1 ) {
-      top_count = newman_rank_email.getTopCountMax();
+      top_count = newman_domain_email.getTopCountMax();
     }
 
     var service_url = newman_data_source.appendDataSource( _service_url );

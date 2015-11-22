@@ -65,10 +65,12 @@ var newman_service_email_search_all = (function () {
 
 
       //initialize domain and community color if not already registered
+      /*
       _.each(response.graph.nodes, function(object, index) {
         newman_domain_email.addDomain(getEmailDomain(object.name), 0, 0.0);
-        //newman_community_email.addCommunity(object.community, 0, 0.0);
+        newman_community_email.addCommunity(object.community, 0, 0.0);
       });
+      */
 
       mapResponseEmailDocs(_response.rows);
     }

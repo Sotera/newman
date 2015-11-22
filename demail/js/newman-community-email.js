@@ -7,13 +7,13 @@
  */
 var newman_community_email = (function () {
 
-  var chart_bar_ui_id = '#chart_horizontal_bar_domains';
-  var chart_donut_ui_id = '#chart_donut_domains';
-  var chart_legend_ui_id = '#chart_legend_domains';
+  var chart_bar_ui_id = '#chart_horizontal_bar_communities';
+  var chart_donut_ui_id = '#chart_donut_communities';
 
-  var _donut_chart_domain_email;
 
-  var _domain_map = {};
+  var _donut_chart_community_email;
+
+  var _community_map = {};
   var _top_count_max = 40;
   var _top_count = 10;
 
@@ -43,34 +43,49 @@ var newman_community_email = (function () {
   function mapResponse( response ) {
     if (response) {
 
-      var domain_list = _.map(response.communities, function( element ){
-        var domain_object =  _.object(["community", "count", "total_percent"], element);
-        return domain_object;
+      var community_list = _.map(response.communities, function( element ){
+        var community_object =  _.object(["community", "count", "total_percent"], element);
+        return community_object;
       });
-      domain_list = domain_list.sort( descendingPredicatByProperty("count"));
+      community_list = community_list.sort( descendingPredicatByProperty("count"));
 
       //cache community set and map color
-      _.each( domain_list, function(element, index) {
-
-        var current_domain = _domain_map[element.community];
-        if (!current_domain) {
-          //new community
-          element["index"] = index;
-          if (index < 21) {
-            element["color"] = _color_scale_0(index);
-          }
-          else {
-            element["color"] = _color_scale_1(index);
-          }
-          _domain_map[element.community] = element;
-        }
-
+      _.each( community_list, function(element, index) {
+        addCommunity(element.community, element.count, element.total_percent);
       })
-      console.log('mapResponse(...)\n' + JSON.stringify(domain_list, null, 2));
+      //console.log('newman_community_email.mapResponse(...)\n' + JSON.stringify(_community_map, null, 2));
 
-      return domain_list;
+      return community_list;
     }
     return response;
+  }
+
+  function addCommunity( new_community, count, total_percent ) {
+    var element;
+    if (new_community) {
+      var existing_community = _community_map[new_community];
+      if (!existing_community) { //new community
+        var size = _.size(_community_map);
+        var index = size;
+
+        if (size <= _top_count_max) {
+          var color;
+          if (index < 21) {
+            color = _color_scale_0(index);
+          }
+          else {
+            color = _color_scale_1(index);
+          }
+
+          element = {"community": new_community, "count": count, "total_percent": total_percent, "index": index, "color": color};
+          _community_map[element.community] = element;
+        }
+        else {
+          console.log('Max community cache size reached; unable to append new community \'' + new_community + '\'!');
+        }
+      }
+    }
+    return element;
   }
 
 
@@ -80,18 +95,21 @@ var newman_community_email = (function () {
    */
   function updateUICommunity( service_response ) {
 
-    var _domain_list = mapResponse( service_response );
+    var _community_list = mapResponse( service_response );
 
-    if (_domain_list) {
+    if (_community_list) {
       initUI();
 
-      //console.log('\tfiltered_response: ' + JSON.stringify(_domain_list, null, 2));
+      //console.log('\tfiltered_response: ' + JSON.stringify(_community_list, null, 2));
 
-      if (_domain_list.length > _top_count) {
-        _domain_list = _domain_list.splice(0, _top_count);
+      if (_community_list.length > _top_count) {
+        _community_list = _community_list.splice(0, _top_count);
       }
 
-      var colors = d3.scale.category20b();
+      //var colors = d3.scale.category20b();
+      var colors = getAllColorAsList();
+      //console.log('color_list:\n' + JSON.stringify(colors, null, 2));
+
       var width = 530, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
       width = width - margin.left - margin.right;
@@ -102,10 +120,10 @@ var newman_community_email = (function () {
         .attr("width", width + margin.left + margin.right);
 
       x.domain([0, 100]);
-      chart.attr("height", height_bar * _domain_list.length + margin_top + margin_bottom);
+      chart.attr("height", height_bar * _community_list.length + margin_top + margin_bottom);
 
       var bar = chart.selectAll("g")
-        .data(_domain_list).enter()
+        .data(_community_list).enter()
         .append("g")
         .attr("transform", function (d, i) {
           return "translate(" + margin.left + "," + (+(i * height_bar) + +margin.top) + ")";
@@ -122,7 +140,8 @@ var newman_community_email = (function () {
 
         })
         .style("fill", function (d, i) {
-          return colors(i);
+          //return colors(i);
+          return colors[i];
         })
         .append('title').text(function (d) {
         return d.count;
@@ -169,28 +188,29 @@ var newman_community_email = (function () {
       var top_donut_chart_total = 1;
 
 
-      for( var i = 0; i < _domain_list.length; i++ ){
-        top_donut_chart_total = top_donut_chart_total + _domain_list[i].count;
+      for( var i = 0; i < _community_list.length; i++ ){
+        top_donut_chart_total = top_donut_chart_total + _community_list[i].count;
       };
 
-      for( var i = 0; i < _domain_list.length; i++ ){
-        var value = Math.round((_domain_list[i].count / top_donut_chart_total) * 100);
+      for( var i = 0; i < _community_list.length; i++ ){
+        var value = Math.round((_community_list[i].count / top_donut_chart_total) * 100);
         var entry = {
           value: value,
-          label: (_.take((_domain_list[i].community).split(' '), 3).join(' ')),
+          label: (_.take((_community_list[i].community).split(' '), 3).join(' ')),
           formatted: value + '%'
         };
         top_donut_chart_data.push(entry);
       };
 
 
-      _donut_chart_domain_email = Morris.Donut({
-        element: 'chart_donut_domains',
-        colors: colors.range(),
+      _donut_chart_community_email = Morris.Donut({
+        element: 'chart_donut_communities',
+        //colors: colors.range(),
+        colors: colors,
         data: top_donut_chart_data,
         formatter: function (x, data) { return data.formatted; }
       });
-      _donut_chart_domain_email.select(0);
+      _donut_chart_community_email.select(0);
 
     };
   }
@@ -207,8 +227,8 @@ var newman_community_email = (function () {
   }
 
   function revalidateUICommunity() {
-    if (_donut_chart_domain_email) {
-      _donut_chart_domain_email.redraw();
+    if (_donut_chart_community_email) {
+      _donut_chart_community_email.redraw();
     }
   }
 
@@ -221,29 +241,48 @@ var newman_community_email = (function () {
   }
 
   function getAllAsList() {
-    var _element_list = _.values( _domain_map );
+    var _element_list = _.values( _community_map );
     if (_element_list) {
       //create a deep-copy, return the copy
-      return clone(_element_list);
+      return clone(_element_list.sort(ascendingPredicatByProperty('index')));
     }
     return _element_list;
+  }
+
+  function getAllColorAsList() {
+    var color_list = [];
+    var _element_list = getAllAsList();
+    if (_element_list) {
+      _.each(_element_list, function(element, index) {
+        color_list.push( element.color );
+      });
+    }
+    return color_list;
   }
 
   function getCommunityObject( key ) {
 
     var value = undefined;
     if (key) {
-      value = _domain_map[key];
+      value = _community_map[key];
     }
     return value;
   }
 
   function getCommunityColor( key ) {
+    //console.log('newman_domain_email.getCommunityColor(' + key + ')');
     var color = 'rgb(225, 225, 225)';
     if (key) {
-      var value = getCommunityObject( key );
+      var value = getCommunityObject(key);
       if (value) {
         color = value.color;
+      }
+      else {
+        value = addCommunity(key, 0, 0.0);
+        if (value) {
+          color = value.color;
+          //console.log('\tCommunity not found; added new color ' + color);
+        }
       }
     }
     return color;
@@ -268,8 +307,10 @@ var newman_community_email = (function () {
     'getTopCount' : getTopCount,
     'getTopCountMax' : getTopCountMax,
     'getAllAsList' : getAllAsList,
+    'getAllColorAsList' : getAllColorAsList,
     'getCommunityObject' : getCommunityObject,
     'getCommunityColor' : getCommunityColor,
+    'addCommunity' : addCommunity,
     'getCommunityIndex' : getCommunityIndex
   }
 
@@ -286,7 +327,7 @@ var newman_service_community_email = (function () {
 
   function getServiceURL(top_count) {
     if (!top_count || top_count < 1 ) {
-      top_count = newman_rank_email.getTopCountMax();
+      top_count = newman_community_email.getTopCountMax();
     }
 
     var service_url = newman_data_source.appendDataSource( _service_url );
@@ -297,7 +338,7 @@ var newman_service_community_email = (function () {
   }
 
   function requestService(top_count) {
-    console.log('newman_service_domain_email.requestService('+top_count+')');
+    console.log('newman_service_community_email.requestService('+top_count+')');
 
 
     //$.get(getServiceURL(top_count)).then(function (response) {
@@ -328,12 +369,12 @@ var newman_service_community_email = (function () {
           var community_count = parseInt(community[1]);
           var total_percent = parseFloat(community[2]);
 
-          if (community_text && validateEmailDomain(community_text)) {
+          if (community_text) {
             //console.log('\tcommunity : \'' + community_text + '\'');
             new_communities.push([community_text, community_count, total_percent]);
           }
           else {
-            //console.log('\tinvalid domain : ' + domain_text);
+            //console.log('\tinvalid community : ' + community_text);
             invalid_item_count++;
           }
         });
@@ -357,7 +398,7 @@ var newman_service_community_email = (function () {
   function setResponse( response ) {
     if (response) {
       _response = validateResponse(response);
-      console.log('received service_response_email_domain[' + response.communities.length + ']');
+      console.log('received service_response_email_community[' + response.communities.length + ']');
       //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
 
       newman_community_email.updateUICommunity( _response );

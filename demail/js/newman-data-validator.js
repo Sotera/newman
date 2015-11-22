@@ -502,7 +502,7 @@ function removeAllWhitespace(text) {
 }
 
 /**
- * sort predicate based on property
+ * sort predicate based on property in descending order
  */
 function descendingPredicatByProperty(property){
   return function (a, b) {
@@ -520,7 +520,25 @@ function descendingPredicatByProperty(property){
 }
 
 /**
- * sort predicate based on index
+ * sort predicate based on property in ascending order
+ */
+function ascendingPredicatByProperty(property){
+  return function (a, b) {
+
+    if (a[property] > b[property]) {
+      return 1;
+    }
+
+    if (a[property] < b[property]) {
+      return -1;
+    }
+
+    return 0;
+  }
+}
+
+/**
+ * sort predicate based on index in descending order
  */
 function descendingPredicatByIndex(index){
   return function(a, b) {
@@ -538,7 +556,25 @@ function descendingPredicatByIndex(index){
 }
 
 /**
- * sort predicate based on descending value
+ * sort predicate based on index in ascending order
+ */
+function ascendingPredicatByIndex(index){
+  return function(a, b) {
+
+    if( a[index] > b[index]){
+      return -1;
+    }
+
+    if( a[index] < b[index] ){
+      return 1;
+    }
+
+    return 0;
+  }
+}
+
+/**
+ * sort predicate based on value in descending order
  */
 function descendingPredicatByValue(){
   return function(a, b) {
@@ -547,7 +583,7 @@ function descendingPredicatByValue(){
 }
 
 /**
- * sort predicate based on ascending value
+ * sort predicate based on value in ascending order
  */
 function ascendingPredicatByValue(){
   return function(a, b) {
