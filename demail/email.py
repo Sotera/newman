@@ -6,6 +6,7 @@ import urllib
 from newman.utils.functions import nth
 from newman.settings import getOpt
 from es_email import get_ranked_email_address_from_email_addrs_index, get_attachment_by_id, get_attachments_by_sender, get_email, get_top_domains, get_top_communities
+from es_export import export_emails_archive
 from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime
 
@@ -79,9 +80,8 @@ def setExportable(data):
 
 # DEPRECATED TODO remove me
 #POST /exportmany
-def setExportMany(data):
-    tangelo.content_type("application/json")
-    return { 'exported' : []}
+def setExportMany(*args, **kwargs):
+    return export_emails_archive("sample")
 
 # DEPRECATED TODO remove me
 #POST /download
@@ -97,12 +97,12 @@ get_actions = {
     "exportable" : getExportable,
     "download" : buildExportable,
     "attachment" : get_attachment_by_id,
-    "attachments" : getAllAttachmentBySender
+    "attachments" : getAllAttachmentBySender,
+    "exportmany" : setExportMany
 }
 
 post_actions = {
     "exportable" : setExportable,
-    "exportmany" : setExportMany
 }
 
 def unknown(*args):
