@@ -47,19 +47,32 @@ var newman_file_type_attach = (function () {
         acct_id = '* (' + data_set_id + ')';
       }
 
-        var file_type_list = _.map(response.types, function( element ){
-          var file_type =  _.object(["file_type", "count"], element);
-          return file_type;
-        });
+      var file_type_list = _.map(response.types, function( element ){
+        var file_type =  _.object(["file_type", "count"], element);
+        return file_type;
+      });
 
-        file_type_list = file_type_list.sort( descendingPredicatByProperty("count"));
+      file_type_list = file_type_list.sort( descendingPredicatByProperty("count"));
 
-        if (file_type_list.length > _top_count) {
-          file_type_list = file_type_list.splice(0, _top_count);
+      if (file_type_list.length > _top_count) {
+        file_type_list = file_type_list.splice(0, _top_count);
+      }
+      //console.log('file_types: ' + JSON.stringify(file_type_list, null, 2));
+
+
+      var colors = [];
+      var partial_color_0 = [];
+      var partial_color_1 = [];
+      _.each(d3.scale.category20c().range(), function(element, index) {
+        if (index >= 8) {
+          partial_color_0.push(element);
         }
-        //console.log('file_types: ' + JSON.stringify(file_type_list, null, 2));
+        else {
+          partial_color_1.push(element);
+        }
+      });
+      colors =partial_color_0.concat(partial_color_1);
 
-        var colors = d3.scale.category20b();
         var width = 530, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
         var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
         width = width - margin.left - margin.right;
@@ -90,7 +103,7 @@ var newman_file_type_attach = (function () {
 
           })
           .style("fill", function (d, i) {
-            return colors(i);
+            return colors[i];
           })
           .append('title').text(function (d) {
             return d.count;
@@ -154,7 +167,7 @@ var newman_file_type_attach = (function () {
 
         _donut_chart_file_type_attach = Morris.Donut({
           element: 'chart_donut_attach_types',
-          colors: colors.range(),
+          colors: colors,
           data: top_donut_chart_data,
           formatter: function (x, data) { return data.formatted; }
         });
