@@ -12,7 +12,7 @@ var newman_file_type_attach = (function () {
 
   var _donut_chart_file_type_attach;
 
-  var _top_count, _top_count_max = 10;
+  var _top_count, _top_count_max = 20;
 
   /**
    * request and display the top attachment-file-type-related charts
@@ -27,7 +27,7 @@ var newman_file_type_attach = (function () {
         _top_count = _top_count_max;
       }
 
-      newman_service_file_type_attach.requestService();
+      newman_service_file_type_attach.requestService(_top_count);
     }
   }
 
@@ -213,26 +213,27 @@ var newman_file_type_attach = (function () {
  */
 var newman_service_file_type_attach = (function () {
 
-  var _service_url = 'attachment/types/';
+  var _service_url = 'attachment/types';
   var _response;
 
   function getServiceURLBase() {
     return _service_url;
   }
 
-  function getServiceURL(account) {
+  function getServiceURL(top_count) {
 
-    if (account) {
-      var service_url = newman_data_source.appendDataSource(_service_url + '/' + encodeURIComponent(account));
+    if (top_count) {
+      var service_url = newman_data_source.appendDataSource(_service_url);
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
+      service_url += '&size=' + top_count;
       return service_url;
     }
   }
 
-  function requestService() {
+  function requestService(top_count) {
     console.log('newman_service_attachment_types.requestService()');
 
-    $.when($.get( getServiceURL('all') )).done(function (response) {
+    $.when($.get( getServiceURL(top_count) )).done(function (response) {
       //$.get( getServiceURL(account) ).then(function (response) {
       setResponse( response );
       newman_file_type_attach.updateUIFileTypeAttach( response );

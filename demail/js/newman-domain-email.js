@@ -57,6 +57,7 @@ var newman_domain_email = (function () {
    * @param count
    */
   function displayUIDomain( count ) {
+    console.log('newman_domain_email.displayUIDomain(' + count + ')');
 
     if (chart_bar_ui_id) {
       if (count) {
@@ -66,7 +67,6 @@ var newman_domain_email = (function () {
         _top_count = _top_count_max;
       }
 
-      console.log("Requesting service ...");
       newman_service_domain_email.requestService(_top_count);
 
     }

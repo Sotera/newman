@@ -429,7 +429,7 @@ var newman_activity_inbound = (function () {
  */
 var newman_service_activity_email_account = (function () {
 
-  var _service_url = 'activity/account/';
+  var _service_url = 'activity/account';
 
   var _response = {};
   var _response_account_map = {};
@@ -730,7 +730,7 @@ var newman_activity_attachment = (function () {
  */
 var newman_service_activity_email_attach = (function () {
 
-  var _service_url = 'activity/attach/';
+  var _service_url = 'activity/attach';
   var _response;
 
   function getServiceURLBase() {

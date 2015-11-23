@@ -1763,6 +1763,9 @@ var email_analytics_content = (function () {
 $(function () {
   "use strict";
 
+  initDashboardDomain();
+  initDashboardCommunity();
+
   // initialize search-filter
   newman_search_filter.initFilter();
 

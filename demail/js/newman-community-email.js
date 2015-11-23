@@ -25,6 +25,7 @@ var newman_community_email = (function () {
    * @param count
    */
   function displayUICommunity( count ) {
+    console.log('newman_community_email.displayUICommunity(' + count +')');
 
     if (chart_bar_ui_id) {
       if (count) {
@@ -34,7 +35,6 @@ var newman_community_email = (function () {
         _top_count = _top_count_max;
       }
 
-      console.log("Requesting service ...");
       newman_service_community_email.requestService(_top_count);
 
     }

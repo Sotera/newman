@@ -1080,8 +1080,16 @@ function reloadDashboardEntityEmail() {
   newman_entity_email.displayUIEntityEmail(10);
 }
 
+function initDashboardDomain() {
+  reloadDashboardDomain();
+}
+
 function reloadDashboardDomain() {
   newman_domain_email.displayUIDomain(10);
+}
+
+function initDashboardCommunity() {
+  reloadDashboardCommunity();
 }
 
 function reloadDashboardCommunity() {
