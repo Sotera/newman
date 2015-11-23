@@ -115,6 +115,9 @@ var newman_datetime_range = (function () {
         //re-render activity-time-series
         reloadDashboardActivityTimeline();
 
+        //re-render entity displayes
+        reloadDashboardEntityEmail();
+
         //newman_activity_email_account.displayUIActivityEmailTopRanked(4);
       });
     }

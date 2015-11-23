@@ -37,26 +37,28 @@ def getTarget(*args, **kwargs):
     tangelo.content_type("application/json")
     return { "email" : []}
 
-#GET /domains
+#GET /domains?data_set_id=<data_set>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 def getDomains(*args, **kwargs):
     tangelo.log("getDomains(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     tangelo.content_type("application/json")
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
-    amount = int(urllib.unquote(nth(args, 0, "20")))
+    #top_count = int(urllib.unquote(nth(args, 0, "40")))
+    top_count = int(size);
 
-    return {"domains" : get_top_domains(data_set_id, date_bounds=(start_datetime, end_datetime), num_domains=amount)[:amount]}
+    return {"domains" : get_top_domains(data_set_id, date_bounds=(start_datetime, end_datetime), num_domains=top_count)[:top_count]}
 
 
-#GET /community
+#GET /communities?data_set_id=<data_set>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 def getCommunities(*args, **kwargs):
     tangelo.log("getCommunities(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     tangelo.content_type("application/json")
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
-    amount = int(urllib.unquote(nth(args, 0, "20")))
+    #top_count = int(urllib.unquote(nth(args, 0, "40")))
+    top_count = int(size);
 
-    return {"community" : get_top_communities(data_set_id, date_bounds=(start_datetime, end_datetime), num_communities=amount)[:amount]}
+    return {"communities" : get_top_communities(data_set_id, date_bounds=(start_datetime, end_datetime), num_communities=top_count)[:top_count]}
 
 
 #GET /attachments/<sender>

@@ -430,59 +430,6 @@ function validateEmailDomain(email_domain) {
 }
 
 /**
- * validate domain-service response
- * @param response data received from service
- * @returns filtered response
- */
-function validateResponseDomainEmail(response) {
-
-
-  if (response) {
-    console.log('validateResponseDomain(...)');
-
-    if (response.domains) {
-      console.log( '\tdomains[' + response.domains.length + ']' );
-
-      var new_domains = [];
-      var invalid_item_count = 0;
-      _.each(response.domains, function (domain) {
-
-        var domain_text = decodeURIComponent( domain[0] );
-        var domain_count = parseInt(domain[1]);
-        var total_percent = parseFloat(domain[2]);
-
-        if (domain_text && validateEmailDomain(domain_text)) {
-          //console.log('\tdomain : \'' + domain_text + '\'');
-          new_domains.push([domain_text, domain_count, total_percent]);
-        }
-        else {
-          //console.log('\tinvalid domain : ' + domain_text);
-          invalid_item_count++;
-        }
-      });
-
-      new_domains = new_domains.sort( descendingPredicatByIndex(1) );
-      var new_response = { "domains": new_domains };
-      //console.log( 'validated-response:\n' + JSON.stringify(new_response, null, 2) );
-
-      console.log( '\tnew domains[' + new_response.domains.length + ']' );
-
-      // initialize domain-map
-      _.each(new_domains, function(object, index) {
-        all_domain_map.put(object[0], object[0], object[1], color_set_domain(index));
-      });
-
-      return new_response;
-
-    }
-    console.log( 'response.domains undefined' );
-  }
-
-  console.log( 'response undefined' );
-  return response;
-}
-
-/**
  * validate email-topic-score response
  * @param response data received from service
  * @returns filtered response
@@ -555,7 +502,7 @@ function removeAllWhitespace(text) {
 }
 
 /**
- * sort predicate based on property
+ * sort predicate based on property in descending order
  */
 function descendingPredicatByProperty(property){
   return function (a, b) {
@@ -573,7 +520,25 @@ function descendingPredicatByProperty(property){
 }
 
 /**
- * sort predicate based on index
+ * sort predicate based on property in ascending order
+ */
+function ascendingPredicatByProperty(property){
+  return function (a, b) {
+
+    if (a[property] > b[property]) {
+      return 1;
+    }
+
+    if (a[property] < b[property]) {
+      return -1;
+    }
+
+    return 0;
+  }
+}
+
+/**
+ * sort predicate based on index in descending order
  */
 function descendingPredicatByIndex(index){
   return function(a, b) {
@@ -591,7 +556,25 @@ function descendingPredicatByIndex(index){
 }
 
 /**
- * sort predicate based on descending value
+ * sort predicate based on index in ascending order
+ */
+function ascendingPredicatByIndex(index){
+  return function(a, b) {
+
+    if( a[index] > b[index]){
+      return -1;
+    }
+
+    if( a[index] < b[index] ){
+      return 1;
+    }
+
+    return 0;
+  }
+}
+
+/**
+ * sort predicate based on value in descending order
  */
 function descendingPredicatByValue(){
   return function(a, b) {
@@ -600,7 +583,7 @@ function descendingPredicatByValue(){
 }
 
 /**
- * sort predicate based on ascending value
+ * sort predicate based on value in ascending order
  */
 function ascendingPredicatByValue(){
   return function(a, b) {

@@ -135,7 +135,7 @@ var newman_rank_email = (function () {
           .attr("class", "label clickable")
           .style("fill", function (d) {
             if (d && d.email) {
-              return getDomainColor(d.email);
+              return getEmailDomainColor(d.email);
             }
           })
           .text(function (d) {

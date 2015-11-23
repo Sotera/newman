@@ -63,12 +63,14 @@ var newman_service_email_search_all = (function () {
       console.log('received service_response_email_search_all.rows[' + response.rows.length + ']');
       //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
 
-      // hack to initialize community-map
+
+      //initialize domain and community color if not already registered
+      /*
       _.each(response.graph.nodes, function(object, index) {
-        all_community_map.put(object.community, parseInt(object.community), 1, color_set_community(object.community));
+        newman_domain_email.addDomain(getEmailDomain(object.name), 0, 0.0);
+        newman_community_email.addCommunity(object.community, 0, 0.0);
       });
-      console.log( '\tcommunity_map[' + all_community_map.getAllCount() + ']' );
-      //console.log( 'all_community_map: ' + JSON.stringify(all_community_map.getAll(), null, 2) );
+      */
 
       mapResponseEmailDocs(_response.rows);
     }

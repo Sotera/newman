@@ -755,18 +755,17 @@
                     <a href="#dashboard_tab_content_domains" style="height: inherit;" role="tab" data-toggle="tab">Domains</a>
                   </li>
                   <li style="height: inherit;">
-                    <a href="#dashboard_tab_content_attach_types" style="height: inherit;" role="tab" data-toggle="tab">Attach Types</a>
-                  </li>
-                  <!--
-                  <li style="height: inherit;">
                     <a href="#dashboard_tab_content_communities" style="height: inherit;" role="tab" data-toggle="tab">Communities</a>
                   </li>
-                  -->
+                  <li style="height: inherit;">
+                    <a href="#dashboard_tab_content_attach_types" style="height: inherit;" role="tab" data-toggle="tab">Attach Types</a>
+                  </li>
                 </ul>
                 <!--End Dashboard-Right-Row-3-Panel-Nav-Tabs-->
 
                 <!--Start Dashboard-Right-Row-3-Panel-Tab-Content-->
                 <div class="tab-content" style= "height: 100%;">
+
                   <div class="tab-pane active" id="dashboard_tab_content_ranks">
                     <div class="box-content" style="padding: 0px; height: 164px;">
                       <div class="row">
@@ -779,6 +778,7 @@
                       </div>
                     </div>
                   </div>
+
                   <div class="tab-pane" id="dashboard_tab_content_domains">
                     <div class="row box">
                       <div class="box-content" style="height: 164px;">
@@ -791,19 +791,7 @@
                       </div>
                     </div>
                   </div>
-                  <div class="tab-pane" id="dashboard_tab_content_attach_types">
-                    <div class="box-content" style="padding: 0px; height: 164px;">
-                      <div class="row">
-                        <div class="col-xs-3">
-                          <div id="chart_donut_attach_types" style="width: 160px; height: 160px;"></div>
-                        </div>
-                        <div class="col-xs-9" style="padding: 0px;">
-                          <div id="chart_horizontal_bar_attach_types" style="width: 100%; height: 100%; position: relative"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <!--
+
                   <div class="tab-pane" id="dashboard_tab_content_communities">
                     <div class="box-content" style="padding: 0px; height: 164px;">
                       <div class="row">
@@ -816,7 +804,20 @@
                       </div>
                     </div>
                   </div>
-                  -->
+
+                  <div class="tab-pane" id="dashboard_tab_content_attach_types">
+                    <div class="box-content" style="padding: 0px; height: 164px;">
+                      <div class="row">
+                        <div class="col-xs-3">
+                          <div id="chart_donut_attach_types" style="width: 160px; height: 160px;"></div>
+                        </div>
+                        <div class="col-xs-9" style="padding: 0px;">
+                          <div id="chart_horizontal_bar_attach_types" style="width: 100%; height: 100%; position: relative"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
                 <!-- End-Dashboard-Right-Row-3-Panel-Tab-Content -->
               </div>
@@ -841,16 +842,16 @@
               </div>
               <div class="col-sm-3" style="padding: 0;" >
                 <label class="radio-inline" >
-                  <input type="radio" name="optionRadios" id="colorby" value="node" style="margin: 2px 0 0 -15px;" checked="checked"/> Domain
+                  <input type="radio" name="optionRadios" id="color_by_domain" value="domain" style="margin: 2px 0 0 -15px;" checked="checked"/> Domain
                 </label>
               </div>
               <div class="col-sm-3" style="padding: 0; border-right: 1px solid rgba(255, 255, 255, 0.6);">
                 <label class="radio-inline" >
-                  <input type="radio" name="optionRadios" id="colorby2" value="comm" style="margin: 2px 0 0 -15px;" /> Community
+                  <input type="radio" name="optionRadios" id="color_by_community" value="community" style="margin: 2px 0 0 -15px;" /> Community
                 </label>
               </div>
               <div class="col-sm-4" style="padding: 0 0 0 2px;">
-                <span class="fa fa-envelope-o" id="doc_count_inbound" style="padding: 0;"> Received </span>
+                <span class="fa fa-envelope-o" id="doc_count_inbound" style="padding: 0;"> Inbound </span>
               </div>
             </div>
             <div class="row" style="margin: 0;">
@@ -868,7 +869,7 @@
                 </label>
               </div>
               <div class="col-sm-4" style="padding: 0 0 0 2px;">
-                <span class="fa fa-envelope-o" id="doc_count_outbound" style="padding: 0;"> Sent </span>
+                <span class="fa fa-envelope-o" id="doc_count_outbound" style="padding: 0;"> Outbound </span>
               </div>
             </div>
 
@@ -881,7 +882,7 @@
               <div class="col-sm-12">
                 <div id="toggle_legends"><span class="glyphicon glyphicon-chevron-down">Legend</span></div>
                 <div id="legend_list" style="height: 0px; max-height:375px; overflow-y:scroll;">
-                  <table id="legend-table" class="table" style="display: table; table-layout: fixed;">
+                  <table id="legend-table" class="table" style="display: table; table-layout: fixed; width: 98%;">
                     <thead />
                     <tbody />
                   </table>
@@ -1116,6 +1117,7 @@
     <script src="js/newman-activity-email.js"></script>
     <script src="js/newman-entity-email.js"></script>
     <script src="js/newman-domain-email.js"></script>
+    <script src="js/newman-community-email.js"></script>
     <script src="js/newman-rank-email.js"></script>
     <script src="js/newman-file-type-attach.js"></script>
     <script src="js/newman-data-source.js"></script>

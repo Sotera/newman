@@ -2,61 +2,29 @@
  * Created by jlee on 10/31/15.
  */
 
-function getEmailDomain(email) {
-  return email.replace(/.*@/, "");
-}
-
-function getEmailDomainColor(email) {
-  var color = 'rgb(245,245,245)';
-  if(email) {
-    //console.log('getEmailDomainColor(' + email + ')');
-    var domain = getEmailDomain(email);
-    if (domain) {
-
-      var value = newman_domain_email.getDomainColor( domain );
-      if (value) {
-        color = value;
-      }
-      else {
-        console.log('getEmailDomainColor(' + email + ')');
-        console.log('\tNo color matched for domain \'' + domain + '\'!');
-      }
-    }
-    else {
-      console.log('getEmailDomainColor(' + email + ')');
-      console.log('\tDomain undefined!');
-    }
-  }
-  else {
-    console.log('getEmailDomainColor(' + email + ')');
-  }
-
-  return color;
-}
-
 /**
- * email-domain related container
+ * email-community related container
  */
-var newman_domain_email = (function () {
+var newman_community_email = (function () {
 
-  var chart_bar_ui_id = '#chart_horizontal_bar_domains';
-  var chart_donut_ui_id = '#chart_donut_domains';
-  var chart_legend_ui_id = '#chart_legend_domains';
+  var chart_bar_ui_id = '#chart_horizontal_bar_communities';
+  var chart_donut_ui_id = '#chart_donut_communities';
 
-  var _donut_chart_domain_email;
 
-  var _domain_map = {};
+  var _donut_chart_community_email;
+
+  var _community_map = {};
   var _top_count_max = 40;
   var _top_count = 10;
 
-  var _color_scale_0 = d3.scale.category20b();
-  var _color_scale_1 = d3.scale.category20c();
+  var _color_scale_0 = d3.scale.category20();
+  var _color_scale_1 = d3.scale.category20b();
 
   /**
    * request and display the top attachment-file-type-related charts
    * @param count
    */
-  function displayUIDomain( count ) {
+  function displayUICommunity( count ) {
 
     if (chart_bar_ui_id) {
       if (count) {
@@ -67,7 +35,7 @@ var newman_domain_email = (function () {
       }
 
       console.log("Requesting service ...");
-      newman_service_domain_email.requestService(_top_count);
+      newman_service_community_email.requestService(_top_count);
 
     }
   }
@@ -75,30 +43,29 @@ var newman_domain_email = (function () {
   function mapResponse( response ) {
     if (response) {
 
-      var domain_list = _.map(response.domains, function( element ){
-        var domain_object =  _.object(["domain", "count", "total_percent"], element);
-        return domain_object;
+      var community_list = _.map(response.communities, function( element ){
+        var community_object =  _.object(["community", "count", "total_percent"], element);
+        return community_object;
       });
-      domain_list = domain_list.sort( descendingPredicatByProperty("count"));
+      community_list = community_list.sort( descendingPredicatByProperty("count"));
 
-      //cache domain set and map color
-      _.each(domain_list, function(element, index) {
-
-        addDomain(element.domain, element.count, element.total_percent);
+      //cache community set and map color
+      _.each( community_list, function(element, index) {
+        addCommunity(element.community, element.count, element.total_percent);
       })
-      //console.log('newman_domain_email.mapResponse(...)\n' + JSON.stringify(_domain_map, null, 2));
+      //console.log('newman_community_email.mapResponse(...)\n' + JSON.stringify(_community_map, null, 2));
 
-      return domain_list;
+      return community_list;
     }
     return response;
   }
 
-  function addDomain( new_domain, count, total_percent ) {
+  function addCommunity( new_community, count, total_percent ) {
     var element;
-    if (new_domain) {
-      var existing_domain = _domain_map[new_domain];
-      if (!existing_domain) { //new domain
-        var size = _.size(_domain_map);
+    if (new_community) {
+      var existing_community = _community_map[new_community];
+      if (!existing_community) { //new community
+        var size = _.size(_community_map);
         var index = size;
 
         if (size <= _top_count_max) {
@@ -110,38 +77,33 @@ var newman_domain_email = (function () {
             color = _color_scale_1(index);
           }
 
-          element = {"domain": new_domain, "count": count, "total_percent": total_percent, "index": index, "color": color};
-          _domain_map[element.domain] = element;
+          element = {"community": new_community, "count": count, "total_percent": total_percent, "index": index, "color": color};
+          _community_map[element.community] = element;
         }
         else {
-          console.log('Max domain cache size reached; unable to append new domain \'' + new_domain + '\'!');
+          console.log('Max community cache size reached; unable to append new community \'' + new_community + '\'!');
         }
-      }
-      else { // existing domain
-        //console.log('Domain \'' + new_domain + '\' found');
-        //existing_domain["count"] = count;
-        //existing_domain["total_percent"] = total_percent;
-        //_domain_map[existing_domain.domain] = existing_domain;
       }
     }
     return element;
   }
 
+
   /**
    * update from service the top email-entities-related charts
    * @param service_response
    */
-  function updateUIDomain( service_response ) {
+  function updateUICommunity( service_response ) {
 
-    var _domain_list = mapResponse( service_response );
+    var _community_list = mapResponse( service_response );
 
-    if (_domain_list) {
+    if (_community_list) {
       initUI();
 
-      //console.log('\tfiltered_response: ' + JSON.stringify(_domain_list, null, 2));
+      //console.log('\tfiltered_response: ' + JSON.stringify(_community_list, null, 2));
 
-      if (_domain_list.length > _top_count) {
-        _domain_list = _domain_list.splice(0, _top_count);
+      if (_community_list.length > _top_count) {
+        _community_list = _community_list.splice(0, _top_count);
       }
 
       //var colors = d3.scale.category20b();
@@ -158,10 +120,10 @@ var newman_domain_email = (function () {
         .attr("width", width + margin.left + margin.right);
 
       x.domain([0, 100]);
-      chart.attr("height", height_bar * _domain_list.length + margin_top + margin_bottom);
+      chart.attr("height", height_bar * _community_list.length + margin_top + margin_bottom);
 
       var bar = chart.selectAll("g")
-        .data(_domain_list).enter()
+        .data(_community_list).enter()
         .append("g")
         .attr("transform", function (d, i) {
           return "translate(" + margin.left + "," + (+(i * height_bar) + +margin.top) + ")";
@@ -174,7 +136,7 @@ var newman_domain_email = (function () {
         .attr("height", height_bar - 1)
         .attr("class", "label highlight clickable")
         .on("click", function (d) {
-          console.log( 'clicked on \'' + d.domain + '\'');
+          console.log( 'clicked on \'' + d.community + '\'');
 
         })
         .style("fill", function (d, i) {
@@ -204,21 +166,21 @@ var newman_domain_email = (function () {
         .attr("y", height_bar / 2)
         .attr("class", "label clickable")
         .on("click", function (d) {
-          console.log( 'clicked on \'' + d.domain + '\'');
+          console.log( 'clicked on \'' + d.community + '\'');
 
         })
         .text(function (d) {
           var max_length = 30;
-          if (d.domain.length > max_length) {
-            var text = d.domain.substr(0, max_length);
+          if (d.community.length > max_length) {
+            var text = d.community.substr(0, max_length);
             text = text.substr( 0, text.lastIndexOf(' '));
             return text + " ...";
           }
 
-          return d.domain;
+          return d.community;
         })
         .append('title').text(function (d) {
-        return d.domain;
+        return d.community;
       });
 
 
@@ -226,29 +188,29 @@ var newman_domain_email = (function () {
       var top_donut_chart_total = 1;
 
 
-      for( var i = 0; i < _domain_list.length; i++ ){
-        top_donut_chart_total = top_donut_chart_total + _domain_list[i].count;
+      for( var i = 0; i < _community_list.length; i++ ){
+        top_donut_chart_total = top_donut_chart_total + _community_list[i].count;
       };
 
-      for( var i = 0; i < _domain_list.length; i++ ){
-        var value = Math.round((_domain_list[i].count / top_donut_chart_total) * 100);
+      for( var i = 0; i < _community_list.length; i++ ){
+        var value = Math.round((_community_list[i].count / top_donut_chart_total) * 100);
         var entry = {
           value: value,
-          label: (_.take((_domain_list[i].domain).split(' '), 3).join(' ')),
+          label: (_.take((_community_list[i].community).split(' '), 3).join(' ')),
           formatted: value + '%'
         };
         top_donut_chart_data.push(entry);
       };
 
 
-      _donut_chart_domain_email = Morris.Donut({
-        element: 'chart_donut_domains',
+      _donut_chart_community_email = Morris.Donut({
+        element: 'chart_donut_communities',
         //colors: colors.range(),
         colors: colors,
         data: top_donut_chart_data,
         formatter: function (x, data) { return data.formatted; }
       });
-      _donut_chart_domain_email.select(0);
+      _donut_chart_community_email.select(0);
 
     };
   }
@@ -264,9 +226,9 @@ var newman_domain_email = (function () {
     }
   }
 
-  function revalidateUIDomain() {
-    if (_donut_chart_domain_email) {
-      _donut_chart_domain_email.redraw();
+  function revalidateUICommunity() {
+    if (_donut_chart_community_email) {
+      _donut_chart_community_email.redraw();
     }
   }
 
@@ -279,7 +241,7 @@ var newman_domain_email = (function () {
   }
 
   function getAllAsList() {
-    var _element_list = _.values( _domain_map );
+    var _element_list = _.values( _community_map );
     if (_element_list) {
       //create a deep-copy, return the copy
       return clone(_element_list.sort(ascendingPredicatByProperty('index')));
@@ -298,38 +260,38 @@ var newman_domain_email = (function () {
     return color_list;
   }
 
-  function getDomainObject( key ) {
+  function getCommunityObject( key ) {
 
     var value = undefined;
     if (key) {
-      value = _domain_map[key];
+      value = _community_map[key];
     }
     return value;
   }
 
-  function getDomainColor( key ) {
-    //console.log('newman_domain_email.getDomainColor(' + key + ')');
+  function getCommunityColor( key ) {
+    //console.log('newman_domain_email.getCommunityColor(' + key + ')');
     var color = 'rgb(225, 225, 225)';
     if (key) {
-      var value = getDomainObject( key );
+      var value = getCommunityObject(key);
       if (value) {
         color = value.color;
       }
       else {
-        value = addDomain( key, 0, 0.0 );
+        value = addCommunity(key, 0, 0.0);
         if (value) {
           color = value.color;
-          //console.log('\tDomain not found; added new color ' + color);
+          //console.log('\tCommunity not found; added new color ' + color);
         }
       }
     }
     return color;
   }
 
-  function getDomainIndex( key ) {
+  function getCommunityIndex( key ) {
     var value = -1;
     if (key) {
-      value = getDomainObject( key );
+      value = getCommunityObject( key );
       if (value) {
         return value.index;
       }
@@ -339,33 +301,33 @@ var newman_domain_email = (function () {
 
   return {
     'initUI' : initUI,
-    'displayUIDomain' : displayUIDomain,
-    'updateUIDomain' : updateUIDomain,
-    'revalidateUIDomain' : revalidateUIDomain,
+    'displayUICommunity' : displayUICommunity,
+    'updateUICommunity' : updateUICommunity,
+    'revalidateUICommunity' : revalidateUICommunity,
     'getTopCount' : getTopCount,
     'getTopCountMax' : getTopCountMax,
     'getAllAsList' : getAllAsList,
     'getAllColorAsList' : getAllColorAsList,
-    'getDomainObject' : getDomainObject,
-    'getDomainColor' : getDomainColor,
-    'addDomain' : addDomain,
-    'getDomainIndex' : getDomainIndex
+    'getCommunityObject' : getCommunityObject,
+    'getCommunityColor' : getCommunityColor,
+    'addCommunity' : addCommunity,
+    'getCommunityIndex' : getCommunityIndex
   }
 
 }());
 
 /**
- * email-domain-related service response container
+ * email-community-related service response container
  * @type {{requestService, getResponse}}
  */
-var newman_service_domain_email = (function () {
+var newman_service_community_email = (function () {
 
-  var _service_url = 'email/domains';
+  var _service_url = 'email/communities';
   var _response;
 
   function getServiceURL(top_count) {
     if (!top_count || top_count < 1 ) {
-      top_count = newman_domain_email.getTopCountMax();
+      top_count = newman_community_email.getTopCountMax();
     }
 
     var service_url = newman_data_source.appendDataSource( _service_url );
@@ -376,7 +338,7 @@ var newman_service_domain_email = (function () {
   }
 
   function requestService(top_count) {
-    console.log('newman_service_domain_email.requestService('+top_count+')');
+    console.log('newman_service_community_email.requestService('+top_count+')');
 
 
     //$.get(getServiceURL(top_count)).then(function (response) {
@@ -386,7 +348,7 @@ var newman_service_domain_email = (function () {
   }
 
   /**
-   * validate domain-service response
+   * validate community-service response
    * @param response data received from service
    * @returns filtered response
    */
@@ -394,39 +356,39 @@ var newman_service_domain_email = (function () {
 
 
     if (response) {
-      console.log('newman_service_domain_email.validateResponse(...)');
+      console.log('newman_service_community_email.validateResponse(...)');
 
-      if (response.domains) {
-        console.log( '\tdomains[' + response.domains.length + ']' );
+      if (response.communities) {
+        console.log( '\tcommunities[' + response.communities.length + ']' );
 
-        var new_domains = [];
+        var new_communities = [];
         var invalid_item_count = 0;
-        _.each(response.domains, function (domain) {
+        _.each(response.communities, function (community) {
 
-          var domain_text = decodeURIComponent( domain[0] );
-          var domain_count = parseInt(domain[1]);
-          var total_percent = parseFloat(domain[2]);
+          var community_text = decodeURIComponent( community[0] );
+          var community_count = parseInt(community[1]);
+          var total_percent = parseFloat(community[2]);
 
-          if (domain_text && validateEmailDomain(domain_text)) {
-            //console.log('\tdomain : \'' + domain_text + '\'');
-            new_domains.push([domain_text, domain_count, total_percent]);
+          if (community_text) {
+            //console.log('\tcommunity : \'' + community_text + '\'');
+            new_communities.push([community_text, community_count, total_percent]);
           }
           else {
-            //console.log('\tinvalid domain : ' + domain_text);
+            //console.log('\tinvalid community : ' + community_text);
             invalid_item_count++;
           }
         });
 
-        new_domains = new_domains.sort( descendingPredicatByIndex(1) );
-        var new_response = { "domains": new_domains };
+        new_communities = new_communities.sort( descendingPredicatByIndex(1) );
+        var new_response = { "communities": new_communities };
         //console.log( 'validated-response:\n' + JSON.stringify(new_response, null, 2) );
 
-        console.log( '\tnew domains[' + new_response.domains.length + ']' );
+        console.log( '\tnew communities[' + new_response.communities.length + ']' );
 
         return new_response;
 
       }
-      console.log( 'response.domains undefined' );
+      console.log( 'response.communities undefined' );
     }
 
     console.log( 'response undefined' );
@@ -436,10 +398,10 @@ var newman_service_domain_email = (function () {
   function setResponse( response ) {
     if (response) {
       _response = validateResponse(response);
-      console.log('received service_response_email_domain[' + response.domains.length + ']');
+      console.log('received service_response_email_community[' + response.communities.length + ']');
       //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
 
-      newman_domain_email.updateUIDomain( _response );
+      newman_community_email.updateUICommunity( _response );
     }
   }
 
