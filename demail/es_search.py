@@ -128,11 +128,11 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
 
         if from_addr not in addr_index:
             nodes.append(_EMAIL_ADDR_CACHE[from_addr])
-            addr_index[from_addr] = len(nodes)
+            addr_index[from_addr] = len(nodes)-1
         for rcvr_addr in email["to"]+email["cc"]+email["bcc"]:
             if rcvr_addr not in addr_index:
                 nodes.append(_EMAIL_ADDR_CACHE[rcvr_addr])
-                addr_index[rcvr_addr] = len(nodes)
+                addr_index[rcvr_addr] = len(nodes)-1
             #TODO reduce by key instead of mapping?  src->target and sum on value
             edge_key = from_addr+"#"+rcvr_addr
             if edge_key not in edge_map:
@@ -177,11 +177,11 @@ def _build_graph_for_emails(index, emails):
 
         if from_addr not in addr_index:
             nodes.append(_map_node(_EMAIL_ADDR_CACHE[from_addr],total))
-            addr_index[from_addr] = len(nodes)
+            addr_index[from_addr] = len(nodes)-1
         for rcvr_addr in email["to"]+email["cc"]+email["bcc"]:
             if rcvr_addr not in addr_index:
                 nodes.append(_map_node(_EMAIL_ADDR_CACHE[rcvr_addr], total))
-                addr_index[rcvr_addr] = len(nodes)
+                addr_index[rcvr_addr] = len(nodes)-1
             #TODO reduce by key instead of mapping?  src->target and sum on value
             edge_key = from_addr+"#"+rcvr_addr
             if edge_key not in edge_map:
