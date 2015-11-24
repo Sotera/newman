@@ -1763,6 +1763,9 @@ var email_analytics_content = (function () {
 $(function () {
   "use strict";
 
+  initDashboardDomain();
+  initDashboardCommunity();
+
   // initialize search-filter
   newman_search_filter.initFilter();
 
@@ -1804,17 +1807,17 @@ $(function () {
       if (element_ID.endsWith('dashboard_tab_content_outbound_activities')) {
         console.log('\trevalidateUIActivityOutbound() called');
 
-        newman_activity_email_account.revalidateUIActivityOutbound();
+        newman_activity_outbound.revalidateUIActivityOutbound();
       }
       else if (element_ID.endsWith('dashboard_tab_content_inbound_activities')) {
         console.log('\trevalidateUIActivityInbound() called');
 
-        newman_activity_email_account.revalidateUIActivityInbound();
+        newman_activity_inbound.revalidateUIActivityInbound();
       }
       else if (element_ID.endsWith('dashboard_tab_content_attach_activities')) {
         console.log('\trevalidateUIActivityAttach() called');
 
-        newman_activity_email_attach.revalidateUIActivityAttach();
+        newman_activity_attachment.revalidateUIActivityAttach();
       }
       else if (element_ID.endsWith('dashboard_tab_content_entities')) {
         newman_entity_email.revalidateUIEntityEmail();

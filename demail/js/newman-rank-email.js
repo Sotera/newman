@@ -76,8 +76,7 @@ var newman_rank_email = (function () {
         if (ranked_email_address_elements.length > _top_count) {
           ranked_email_address_elements = ranked_email_address_elements.splice(0, _top_count);
         }
-        //console.log('ranks: ' + JSON.stringify(ranks, null, 2));
-
+        //console.log('ranks: ' + JSON.stringify(ranked_email_address_elements, null, 2));
 
         var width = 530, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 100;
         var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
@@ -104,7 +103,7 @@ var newman_rank_email = (function () {
           })
           .attr("height", height_bar - 1)
           .style("fill", function (d, i) {
-            return color_set_community(+d.communityId);
+            return getEmailDomainColor(d.email);
           })
           .on("click", function (d) {
             console.log('clicked on \'' + d.email + '\'');
@@ -186,13 +185,13 @@ var newman_rank_email = (function () {
         var top_donut_chart_colors = [];
 
 
-        for (var i = 0; i < ranked_email_address_elements.length; i++) {
-          top_donut_chart_total = top_donut_chart_total + parseFloat(ranked_email_address_elements[i].rank);
+        _.each( ranked_email_address_elements, function(element, index) {
+          top_donut_chart_total = top_donut_chart_total + parseFloat(element.rank);
 
-          var entity_color = color_set_community(ranked_email_address_elements[i].communityId)
+          var entity_color = getEmailDomainColor(element.email);
 
           top_donut_chart_colors.push(entity_color);
-        };
+        });
 
 
         for (var i = 0; i < ranked_email_address_elements.length; i++) {

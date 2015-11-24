@@ -1065,21 +1065,31 @@ function reloadDashboardSearchResult() {
 
 function initDashboardActivityTimeline() {
   newman_datetime_range.initDateTimeRange();
-  newman_activity_email_account.displayUIActivityEmailTopRanked();
-  newman_activity_email_attach.displayUIActivityAttachAll();
+  newman_activity_outbound.displayUIActivityOutboundTopRanked();
+  newman_activity_inbound.displayUIActivityInboundTopRanked();
+  newman_activity_attachment.displayUIActivityAttachTopRanked();
 }
 
 function reloadDashboardActivityTimeline() {
-  newman_activity_email_account.displayUIActivityEmailSelected();
-  newman_activity_email_attach.displayUIActivityAttachAll();
+  newman_activity_outbound.displayUIActivityOutboundSelected();
+  newman_activity_inbound.displayUIActivityInboundSelected();
+  newman_activity_attachment.displayUIActivityAttachSelected();
 }
 
 function reloadDashboardEntityEmail() {
   newman_entity_email.displayUIEntityEmail(10);
 }
 
+function initDashboardDomain() {
+  reloadDashboardDomain();
+}
+
 function reloadDashboardDomain() {
   newman_domain_email.displayUIDomain(10);
+}
+
+function initDashboardCommunity() {
+  reloadDashboardCommunity();
 }
 
 function reloadDashboardCommunity() {
