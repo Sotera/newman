@@ -8,7 +8,7 @@
 var newman_aggregate_filter = (function () {
 
   var _max_count_default = 2500;
-  var _max_init_selected = 4;
+  var _max_selected = newman_config_aggregate_filter.getMaxSelectable();
   var _key_prefix = 'checkbox_';
   var _aggregate_filter_set = {};
 
@@ -22,7 +22,7 @@ var newman_aggregate_filter = (function () {
   }
 
   function initAggregateFilterSelected(id) {
-    if (_.size(_aggregate_filter_set) < _max_init_selected) {
+    if (_.size(_aggregate_filter_set) < _max_selected) {
       setAggregateFilterSelected(id, true);
     }
   }
@@ -31,6 +31,10 @@ var newman_aggregate_filter = (function () {
     if (id) {
       var key = generateKey(id);
       if (is_selected) {
+        var size = getCountSelected();
+        if (size == _max_selected) {
+
+        }
         _putAggregateFilter(key, _max_count_default);
       }
       else {
@@ -51,7 +55,9 @@ var newman_aggregate_filter = (function () {
   }
 
   function _putAggregateFilter(key, value) {
-    _aggregate_filter_set[key] = value;
+    var index = _.size(_aggregate_filter_set);
+    var object = {"key" : key, "index" : index, "query_max" : value}
+    _aggregate_filter_set[key] = object;
   }
 
   function getAggregateFilter(id) {
@@ -105,10 +111,10 @@ var newman_aggregate_filter = (function () {
           if(value) {
 
             if (url_path.indexOf('?') > 0) {
-              url_path += '&' + key + '=' + value;
+              url_path += '&' + key + '=' + value.index;
             }
             else {
-              url_path += '?' + key + '=' + value;
+              url_path += '?' + key + '=' + value.index;
             }
           }
         });
@@ -125,6 +131,10 @@ var newman_aggregate_filter = (function () {
     clearAllAggregateFilter();
   }
 
+  function getCountSelected() {
+    return _.size(_aggregate_filter_set);
+  }
+
   return {
     'initAggregateFilterSelected' : initAggregateFilterSelected,
     'setAggregateFilterSelected' : setAggregateFilterSelected,
@@ -133,7 +143,8 @@ var newman_aggregate_filter = (function () {
     'getAggregateFilterKeySet' : getAggregateFilterKeySet,
     'clearAllAggregateFilter' : clearAllAggregateFilter,
     'appendAggregateFilter' : appendAggregateFilter,
-    'initAggregateFilter' : initAggregateFilter
+    'initAggregateFilter' : initAggregateFilter,
+    'getCountSelected' : getCountSelected
   }
 
 }());

@@ -10,7 +10,8 @@ var newman_activity_outbound = (function () {
   var chart_ui_id_text = 'chart_line_account_activities';
   var chart_ui_id_element = $('#' + chart_ui_id_text);
 
-  var account_index = 0, account_index_max = 4;
+  var account_index = 0;
+  var account_index_max = newman_config_aggregate_filter.getMaxSelectable();
   var color_set = d3.scale.category20();
 
   var outbound_chart;
@@ -221,7 +222,8 @@ var newman_activity_inbound = (function () {
   var chart_ui_id_text = 'chart_line_account_activities';
   var chart_ui_id_element = $('#' + chart_ui_id_text);
 
-  var account_index = 0, account_index_max = 4;
+  var account_index = 0;
+  var account_index_max = newman_config_aggregate_filter.getMaxSelectable();;
   var color_set = d3.scale.category20();
 
   var inbound_chart;
@@ -518,7 +520,8 @@ var newman_activity_attachment = (function () {
   var chart_ui_id_text = 'chart_line_account_activities';
   var chart_ui_id_element = $('#' + chart_ui_id_text);
 
-  var account_index = 0, account_index_max = 4;
+  var account_index = 0;
+  var account_index_max = newman_config_aggregate_filter.getMaxSelectable();
   var color_set = d3.scale.category20();
 
   var attach_chart;
