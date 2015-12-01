@@ -41,7 +41,7 @@ def map_email_filtered(fields, emailer_filtered, filtered_total):
             emailer_filtered
             ]
 
-def filtered_agg_query(email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None, aggs={}, name=""):
+def filtered_agg_query(email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, aggs={}, name=""):
     return {"aggs" :
         {
             name+"_filtered_agg" : {
@@ -54,7 +54,7 @@ def filtered_agg_query(email_addrs=[], query_terms='', topic_score=None, entity=
 
 
 # GET communities for email_address index
-def get_top_communities(index, query_terms='', topic_score=None, entity=[], date_bounds=None, num_communities=20):
+def get_top_communities(index, query_terms='', topic_score=None, entity={}, date_bounds=None, num_communities=20):
     # TODO fix -hack until we can do date filtering on the email_address
     date_bounds = None
     # TODO fix
@@ -73,7 +73,7 @@ def get_top_communities(index, query_terms='', topic_score=None, entity=[], date
 
 
 # GET domains for email_address index
-def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None, num_domains=20):
+def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, num_domains=20):
     # TODO fix -hack until we can do date filtering on the email_address
     date_bounds = None
     # TODO fix
@@ -91,7 +91,7 @@ def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, ent
     return domains
 
 # GET top 10 Attchment types for index
-def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None, num_top_attachments=20):
+def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, num_top_attachments=20):
     es = Elasticsearch()
     aggs = { "attachment_type_agg" : { "terms" : { "field" : "extension", "size" : num_top_attachments }}}
     query = filtered_agg_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="attachment")
@@ -107,11 +107,11 @@ def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=
 
 
 #GET /rank?data_set_id=<data_set>&start_datetime=<start_datetime>&end_datetime=<end_datetime>&size=<size>
-def get_ranked_email_address(data_set_id, query_terms='', topic_score=None, entity=[], date_bounds=None, num_top_hits=30):
+def get_ranked_email_address(data_set_id, query_terms='', topic_score=None, entity={}, date_bounds=None, num_top_hits=30):
     body = {
         "aggs" : {
             "filtered_addrs_agg" : {
-                "filter" : _build_filter(query_terms=query_terms, topic_score=None, entity=[], date_bounds=date_bounds),
+                "filter" : _build_filter(query_terms=query_terms, topic_score=topic_score, entity_dict=entity, date_bounds=date_bounds),
                 "aggs": {
                     "top_addrs_agg" : {
                         "terms" : {"field" : "addrs", "size": num_top_hits}
@@ -132,17 +132,14 @@ def get_ranked_email_address(data_set_id, query_terms='', topic_score=None, enti
 # TODO This calculation is based on the email_address type which can not easily be filtered over time / entity/ topic / etc
 # TODO as such using get_ranked_email_address() instead for most things even through the NUmbers are not as accurate
 #GET /rank?data_set_id=<data_set>&start_datetime=<start_datetime>&end_datetime=<end_datetime>&size=<size>
-def get_ranked_email_address_from_email_addrs_index(*args, **kwargs):
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+def get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size):
 
-    tangelo.content_type("application/json")
     email_addrs = _search_ranked_email_addrs(data_set_id, start_datetime, end_datetime, size)
     total_docs = count(data_set_id)
     email_address = [map_email_addr(email_addr, total_docs) for email_addr in email_addrs['hits']['hits']]
     return {"emails": email_address }
 
-# TODO get attachment guid and file names
-def _get_email(index, email_id):
+def get_email(index, email_id):
 
     es = Elasticsearch()
     fields=["id","datetime","senders","senders_line","tos_line","ccs_line","bccs_line","subject","body","attachments.filename","entities.entity_organization","entities.entity_location","entities.entity_person","entities.entity_misc"]
@@ -168,7 +165,6 @@ def _get_email(index, email_id):
         if ("entities.entity_"+type) in fields:
             entities += [ [fields["id"][0]+"_entity_"+str(i), type ,i, val] for i,val in enumerate(fields.get("entities.entity_"+type, default), len(entities))]
 
-    tangelo.content_type("application/json")
     return { "email" : email, "entities": entities}
 
 def header(h, t=None):
@@ -267,16 +263,6 @@ def dump(bytes, name):
     text_file.write(bytes)
     text_file.close()
 
-#GET /email/<id>
-def get_email(*path_args, **param_args):
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
-    email_id = path_args[-1]
-    if not email_id:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing email_id")
-
-    return _get_email(data_set_id, email_id)
-
-
 if __name__ == "__main__":
     # email= "katie.baur@myflorida.com"
     email="arlene.dibenigno@myflorida.com"
@@ -294,7 +280,7 @@ if __name__ == "__main__":
     print res
     res = [[f[0],f[8]] for f in get_ranked_email_address("sample", date_bounds=("2001-10", "2002-12"))["emails"]]
     print res
-    res = get_top_attachment_types("sample", email_addrs=[email], query_terms='', topic_score=None, entity=[], date_bounds=None)
+    res = get_top_attachment_types("sample", email_addrs=[email], query_terms='', topic_score=None, entity={}, date_bounds=None)
     print res
     print "done"
     # email="arlene.dibenigno@myflorida.com"

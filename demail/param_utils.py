@@ -30,7 +30,13 @@ def parseParamEmailAddress( **kwargs ):
     
     return key_list
 
+# Entity_dict should be of the form
+# entity_dict={"entities.entity_person":[],"entities.entity_location":[],"entities.entity_organization":[],"entities.entity_misc":[]}
+def parseParamEntity( **kwargs ):
+    tangelo.log("parseParamEntity(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    entity_dict= {k:v.split(",") for k,v in kwargs.iteritems() if k.startswith("entities")}
 
+    return entity_dict
 
 
 

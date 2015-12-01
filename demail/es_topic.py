@@ -13,7 +13,7 @@ from operator import itemgetter
 _lda_clusters={"query": { "match_all": {}},"sort":[{"idx":{"order": "asc" }}]}
 
 
-def _cluster_carrot2(index, type, email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None, cluster_fields=["_source.body"], cluster_title_fields=["_source.subject"], algorithm="lingo", max_doc_pool_size=500):
+def _cluster_carrot2(index, type, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, cluster_fields=["_source.body"], cluster_title_fields=["_source.subject"], algorithm="lingo", max_doc_pool_size=500):
     query = _build_email_query(email_addrs, query_terms,  entity, date_bounds)
     carrot_query = {
         "search_request": {
@@ -34,19 +34,19 @@ def _cluster_carrot2(index, type, email_addrs=[], query_terms='', topic_score=No
     return resp
 
 # GET dynamic clusters based on algorithm of choice
-def get_dynamic_clusters(index, type, email_addrs=[], query_terms='', topic_score=None, entity=[], date_bounds=None, cluster_fields=["_source.body"], cluster_title_fields=["_source.subject"], algorithm="lingo", max_doc_pool_size=500):
+def get_dynamic_clusters(index, type, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, cluster_fields=["_source.body"], cluster_title_fields=["_source.subject"], algorithm="lingo", max_doc_pool_size=500):
     resp = _cluster_carrot2(index, type, email_addrs, query_terms, topic_score, entity, date_bounds, cluster_fields=cluster_fields, cluster_title_fields=cluster_title_fields, algorithm=algorithm, max_doc_pool_size=max_doc_pool_size)
     clusters = [[cluster["label"], cluster["score"], len(cluster["documents"])] for cluster in resp[1]["clusters"]]
     total_cluster_docs=sum(cluster[2] for cluster in clusters)
     clusters = sorted(clusters, key=itemgetter(1), reverse=True)
     return [[i, cluster[0], "{0:.2f}".format(round(100.0*cluster[2]/total_cluster_docs,2)), cluster[1], cluster[2]] for i, cluster in enumerate(clusters)]
 
-def _cluster_lda(num_clusters, email_addrs=[], query_terms='', entity=[], topic_score=0.5, date_bounds=None):
+def _cluster_lda(num_clusters, email_addrs=[], query_terms='', entity_dict={}, topic_score=0.5, date_bounds=None):
     return {
         "size":0,
         "aggs" : {
             "idx_{0}_agg".format(idx) : {
-                "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, query_terms=query_terms, topic_score=(idx, topic_score), entity=entity, date_bounds=date_bounds),
+                "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, query_terms=query_terms, topic_score=(idx, topic_score), entity_dict=entity_dict, date_bounds=date_bounds),
                 "aggs" : {
                     "idx_{0}_ranges".format(idx) : {
                         "range" : {
@@ -84,7 +84,7 @@ def agg_cluster_counts(index):
     es = Elasticsearch()
     count = es.count(index=index, doc_type='lda-clustering', body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
     # print count
-    query = _cluster_lda(count, email_addrs=[], query_terms='', entity=[], date_bounds=None)
+    query = _cluster_lda(count, email_addrs=[], query_terms='', entity_dict=[], date_bounds=None)
     # print query
     resp = es.search(index=index, doc_type='emails', body=query)
     return {k: v["doc_count"]for k,v in resp["aggregations"].iteritems()}

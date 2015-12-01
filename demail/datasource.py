@@ -7,6 +7,7 @@ from es_email import get_ranked_email_address_from_email_addrs_index
 from series import get_datetime_bounds
 import tangelo
 import urllib
+from param_utils import parseParamDatetime
 
 _current_data_set_selected = getDefaultDataSetID()
 
@@ -36,7 +37,9 @@ def listAllDataSet():
     ic = IndicesClient(es)
     stats = ic.stats(index="_all")
     indexes = [_index_record(index) for index in stats["indices"]]
-    email_addrs = get_ranked_email_address_from_email_addrs_index()["emails"]
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**{})
+
+    email_addrs = get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size)["emails"]
     email_addrs = {email_addr[0]:email_addr for email_addr in email_addrs}
 
     return {

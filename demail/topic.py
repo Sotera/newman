@@ -25,7 +25,7 @@ def get_topics_by_query(*args, **kwargs):
     # TODO set from UI
     num_returned = 20
 
-    clusters = get_dynamic_clusters(data_set_id, "emails", email_addrs=email_address_list, query_terms=query_terms, topic_score=None, entity=[], date_bounds=(start_datetime, end_datetime), cluster_fields=[analysis_field], cluster_title_fields=["_source.subject"], algorithm=algorithm, max_doc_pool_size=500)
+    clusters = get_dynamic_clusters(data_set_id, "emails", email_addrs=email_address_list, query_terms=query_terms, topic_score=None, entity={}, date_bounds=(start_datetime, end_datetime), cluster_fields=[analysis_field], cluster_title_fields=["_source.subject"], algorithm=algorithm, max_doc_pool_size=500)
 
     return {"topics" : clusters[:num_returned]}
 

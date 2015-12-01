@@ -1,15 +1,40 @@
 from newman.utils.functions import nth
 from series import get_entity_histogram
-from param_utils import parseParamDatetime, parseParamEmailAddress
+from param_utils import parseParamDatetime, parseParamEmailAddress, parseParamEntity
 
 import tangelo
 import urllib
-
+from es_queries import _build_email_query
+from es_search import _build_graph_for_emails, _query_emails
 
 #TODO deprecated - remove at some point
 #GET /top/<amt>
 def getTopRollup(*args):
     return { "entities" : []}
+
+#TODO deprecated - remove at some point
+#GET /rollup/<id>
+def getRollup(*args):
+    return { "rollupId" : [] }
+
+#GET /entity?entities.entity_person=mike,joe&entities.entity_location=paris,los angeles
+def get_graph_for_entity(*args, **kwargs):
+    tangelo.content_type("application/json")
+    tangelo.log("entity.get_graph_for_entity(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    email_address_list = parseParamEmailAddress(**kwargs);
+    entity_dict = parseParamEntity(**kwargs)
+    # TODO set from UI
+    size = size if size >500 else 2500
+
+    # TODO set from UI
+    query_terms=''
+
+    query = _build_email_query(email_address_list, query_terms, entity=entity_dict, date_bounds=(start_datetime, end_datetime))
+    tangelo.log("entity.get_graph_for_entity(query: %s)" % (query))
+
+    return _build_graph_for_emails(data_set_id, _query_emails(data_set_id, size, query))
 
 #GET /top/<count>
 def get_top_entities(*args, **kwargs):
@@ -49,13 +74,9 @@ def get_top_entities(*args, **kwargs):
     return result    
     
 
-#TODO deprecated - remove at some point
-#GET /rollup/<id>
-def getRollup(*args):
-    return { "rollupId" : [] }
-
 actions = {
-    "top" : get_top_entities
+    "top" : get_top_entities,
+    "entity" : get_graph_for_entity
 }
 
 def unknown(*args):

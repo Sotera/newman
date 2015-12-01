@@ -15,18 +15,23 @@ from param_utils import parseParamDatetime
 # deprecated slated for removal
 def getEmail(*args, **kwargs):
     tangelo.log('getEmail(%s)' % str(args));
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    tangelo.content_type("application/json")
 
-    return get_email(*args, **kwargs)
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    email_id = args[-1]
+    if not email_id:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing email_id")
+
+    return get_email(data_set_id, email_id)
 
 
 #GET /rank
-# deprecated slated for removal
 def getRankedEmails(*args, **kwargs):
+    tangelo.content_type("application/json")
     tangelo.log("getRankedEmails(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
-    return get_ranked_email_address_from_email_addrs_index(*args, **kwargs)
+    return get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size)
 
 # DEPRECATED  TODO remove
 #GET /target
