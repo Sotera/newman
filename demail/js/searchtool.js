@@ -65,6 +65,7 @@ var dashboard_donut_chart_topic;
 /**
  * all community colors
  */
+/*
 var color_set_community = (function(){
   var colors = d3.scale.category20();
   var cache = {};
@@ -82,10 +83,12 @@ var color_set_community = (function(){
   };
   return getColor;
 }());
+*/
 
 /**
  * all communities container
  */
+/*
 var all_community_map = (function () {
 
   var _community_map = {};
@@ -189,10 +192,12 @@ var all_community_map = (function () {
     "getCount" : getCount
   }
 }());
+*/
 
 /**
  * all domains container
  */
+/*
 var all_domain_map = (function () {
 
   var _domain_map = {};
@@ -291,7 +296,7 @@ var all_domain_map = (function () {
     "getCount" : getCount
   }
 }());
-
+*/
 
 
 /**
@@ -299,7 +304,7 @@ var all_domain_map = (function () {
  */
 var search_result = (function () {
   var _search_result_map = {};
-  var _current_list_max = 20;
+  var _current_list_max = 25;
   var _current_list = [];
   var _current_list_root;
   var _ui_appendable;
@@ -1135,6 +1140,7 @@ function drawDashboardCharts() {
 //  homepage: http://www.oesmith.co.uk/morris.js/ v0.4.3 License - MIT
 //  require Raphael http://raphael.js
 //
+/*
 function LoadMorrisScripts(callback){
     function LoadMorrisScript(){
         if(!$.fn.Morris){
@@ -1153,3 +1159,6 @@ function LoadMorrisScripts(callback){
         LoadMorrisScript();
     }
 }
+*/
+
+

@@ -15,6 +15,11 @@ var newman_entity_email = (function () {
 
   var _top_count, _top_count_max = 10;
 
+  var _entity_selected_person = {};
+  var _entity_selected_location = {};
+  var _entity_selected_org = {};
+  var _entity_selected_misc = {};
+
   /**
    * request and display the top attachment-file-type-related charts
    * @param count
@@ -40,6 +45,7 @@ var newman_entity_email = (function () {
 
     if (response) {
       initUI();
+      clearAllEntitySelected();
 
         var legend_items = ["Person", "Location", "Organization", "Misc"];
 
@@ -110,7 +116,10 @@ var newman_entity_email = (function () {
           .attr("y", height_bar / 2)
           .attr("class", "label clickable")
           .on("click", function (d) {
-            //do_search('entity', d[0], d[2]);
+            //console.log('entity-text clicked\n' + JSON.stringify(d, null, 2));
+            clearAllEntitySelected();
+            setEntitySelected(d[2], d[1], true, false);
+            newman_service_entity_search.requestService();
           })
           .text(function (d) {
 
@@ -201,12 +210,174 @@ var newman_entity_email = (function () {
     _top_count;
   }
 
+  function appendEntity(url_path) {
+
+    if (url_path) {
+
+      if (url_path.endsWith('/')) {
+        url_path = url_path.substring(0, url_path.length - 1);
+      }
+
+      var entity_set_as_string = '';
+      var keys = _.keys(_entity_selected_org);
+      if (keys) {
+        _.each(keys, function(key) {
+          entity_set_as_string += key + ' ';
+        });
+      }
+
+      if(entity_set_as_string) {
+        entity_set_as_string = entity_set_as_string.trim().replace(' ', ',');
+        var key = 'entities.entity_organization'
+        if (url_path.indexOf('?') > 0) {
+          url_path += '&' + key + '=' + entity_set_as_string;
+        }
+        else {
+          url_path += '?' + key + '=' + entity_set_as_string;
+        }
+      }
+
+      entity_set_as_string = '';
+      keys = _.keys(_entity_selected_person);
+      if (keys) {
+        _.each(keys, function(key) {
+          entity_set_as_string += key + ' ';
+        });
+      }
+
+      if(entity_set_as_string) {
+        entity_set_as_string = entity_set_as_string.trim().replace(' ', ',');
+        var key = 'entities.entity_person'
+        if (url_path.indexOf('?') > 0) {
+          url_path += '&' + key + '=' + entity_set_as_string;
+        }
+        else {
+          url_path += '?' + key + '=' + entity_set_as_string;
+        }
+      }
+
+      entity_set_as_string = '';
+      keys = _.keys(_entity_selected_location);
+      if (keys) {
+        _.each(keys, function(key) {
+          entity_set_as_string += key + ' ';
+        });
+      }
+
+      if(entity_set_as_string) {
+        entity_set_as_string = entity_set_as_string.trim().replace(' ', ',');
+        var key = 'entities.entity_location'
+        if (url_path.indexOf('?') > 0) {
+          url_path += '&' + key + '=' + entity_set_as_string;
+        }
+        else {
+          url_path += '?' + key + '=' + entity_set_as_string;
+        }
+      }
+
+      entity_set_as_string = '';
+      keys = _.keys(_entity_selected_misc);
+      if (keys) {
+        _.each(keys, function(key) {
+          entity_set_as_string += key + ' ';
+        });
+      }
+
+      if(entity_set_as_string) {
+        entity_set_as_string = entity_set_as_string.trim().replace(' ', ',');
+        var key = 'entities.entity_misc'
+        if (url_path.indexOf('?') > 0) {
+          url_path += '&' + key + '=' + entity_set_as_string;
+        }
+        else {
+          url_path += '?' + key + '=' + entity_set_as_string;
+        }
+      }
+
+    }
+
+    return url_path;
+
+  }
+
+  function _putEntity(key, value) {
+    if (key && value) {
+      key = encodeURIComponent(key);
+
+      if (value === 'organization') {
+        var index = _.size(_entity_selected_org);
+        var object = {"key": key, "index": index, "type": value}
+        _entity_selected_org[key] = object;
+      }
+      else if (value === 'person') {
+        var index = _.size(_entity_selected_person);
+        var object = {"key": key, "index": index, "type": value}
+        _entity_selected_person[key] = object;
+      }
+      else if (value === 'location') {
+        var index = _.size(_entity_selected_location);
+        var object = {"key": key, "index": index, "type": value}
+        _entity_selected_location[key] = object;
+      }
+      else if (value === 'misc') {
+        var index = _.size(_entity_selected_misc);
+        var object = {"key": key, "index": index, "type": value}
+        _entity_selected_misc[key] = object;
+      }
+      else {
+        var index = _.size(_entity_selected_misc);
+        var object = {"key": key, "index": index, "type": value}
+        _entity_selected_misc[key] = object;
+      }
+    }
+  }
+
+  function _removeEntity(key) {
+    if (key) {
+      delete _entity_selected_org[key];
+      delete _entity_selected_person[key];
+      delete _entity_selected_location[key];
+      delete _entity_selected_misc[key];
+    }
+  }
+
+  function setEntitySelected(key, type, is_selected, refresh_ui) {
+    if (key && type) {
+
+      if (is_selected) {
+        _putEntity(key, type);
+      }
+      else {
+        _removeEntity(key)
+      }
+
+      console.log('selected-entities-org : ' + JSON.stringify(_entity_selected_org, null, 2));
+      console.log('selected-entities-person : ' + JSON.stringify(_entity_selected_person, null, 2));
+      console.log('selected-entities-location : ' + JSON.stringify(_entity_selected_location, null, 2));
+      console.log('selected-entities-misc : ' + JSON.stringify(_entity_selected_misc, null, 2));
+
+      if (refresh_ui) {
+        //trigger refresh
+
+      }
+    }
+  }
+
+  function clearAllEntitySelected() {
+    _entity_selected_org = {};
+    _entity_selected_person = {};
+    _entity_selected_location = {};
+    _entity_selected_misc = {};
+  }
+
   return {
     'initUI' : initUI,
     'displayUIEntityEmail' : displayUIEntityEmail,
     'updateUIEntityEmail' : updateUIEntityEmail,
     'revalidateUIEntityEmail' : revalidateUIEntityEmail,
-    'getTopCount' : getTopCount
+    'getTopCount' : getTopCount,
+    'appendEntity' : appendEntity,
+    'setEntitySelected' : setEntitySelected
   }
 
 }());
@@ -262,6 +433,98 @@ var newman_service_entity_email = (function () {
 
   function getResponse() {
     return _response;
+  }
+
+  return {
+    'getServiceURLBase' : getServiceURLBase,
+    'getServiceURL' : getServiceURL,
+    'requestService' : requestService,
+    'getResponse' : getResponse,
+    'setResponse' : setResponse
+  }
+
+}());
+
+/**
+ * entity-based-email-search service response container
+ * @type {{requestService, getResponse}}
+ */
+var newman_service_entity_search = (function () {
+
+  var _service_url = 'entity/entity';
+  var _response;
+
+  function getServiceURLBase() {
+    return _service_url;
+  }
+
+  function getServiceURL() {
+
+    var service_url = newman_data_source.appendDataSource(_service_url);
+    service_url = newman_datetime_range.appendDatetimeRange(service_url);
+    service_url = newman_entity_email.appendEntity(service_url);
+    return service_url;
+  }
+
+  function requestService() {
+
+    console.log('newman_service_entity_search.requestService()');
+    var service_url = getServiceURL();
+    $.get( service_url ).then(function (response) {
+      setResponse( response );
+      updateUISocialGraph( response );
+    });
+  }
+
+  function setResponse( response ) {
+    if (response) {
+
+      _response = response;
+      //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
+    }
+  }
+
+  function getResponse() {
+    return _response;
+  }
+
+  function updateHistory(url_path, field, label) {
+
+    var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
+
+    history_nav.push(id,
+      label,
+      '',
+      url_path,
+      field);
+
+    history_nav.refreshUI();
+  }
+
+  function updateUISocialGraph(search_response) {
+
+    //validate search-response
+    var filtered_response = validateResponseSearch( search_response );
+
+    email_analytics_content.open();
+    bottom_panel.unhide();
+
+    // initialize to blank
+    updateUIInboundCount();
+    updateUIOutboundCount();
+
+    $('#document_count').text(filtered_response.rows.length);
+
+    // populate data-table
+    populateDataTable( filtered_response.rows )
+
+    if (bottom_panel.isOpen()){
+      //resize bottom_panel
+      bottom_panel.open();
+    }
+
+    // render graph display
+    drawGraph( filtered_response.graph );
   }
 
 

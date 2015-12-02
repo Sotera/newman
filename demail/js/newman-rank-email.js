@@ -37,7 +37,7 @@ var newman_rank_email = (function () {
       else {
       */
         console.log("Requesting service ...");
-        newman_service_rank_email.requestService(_top_count);
+        newman_service_rank_email.requestService(_top_count_max);
       //}
     }
   }
@@ -51,7 +51,7 @@ var newman_rank_email = (function () {
       });
       //console.log('mapResponse(...)\n' + JSON.stringify(_ranked_element_list, null, 2));
 
-      return _ranked_element_list;
+      return clone(_ranked_element_list);
     }
     return response;
   }

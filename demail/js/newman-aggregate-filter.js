@@ -136,7 +136,7 @@ var newman_aggregate_filter = (function () {
   }
 
   return {
-    'initAggregateFilterSelected' : initAggregateFilterSelected,
+//    'initAggregateFilterSelected' : initAggregateFilterSelected,
     'setAggregateFilterSelected' : setAggregateFilterSelected,
     'getAggregateFilter' : getAggregateFilter,
     'containsAggregateFilter' : containsAggregateFilter,

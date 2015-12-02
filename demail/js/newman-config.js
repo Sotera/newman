@@ -8,7 +8,7 @@
 var newman_config_aggregate_filter = (function () {
 
   function getMaxSelectable() {
-    return 6;
+    return 4;
   }
 
 

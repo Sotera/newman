@@ -669,6 +669,7 @@ function requestSearch(field, search_text, load_on_response) {
     }
 
     url_path = newman_data_source.appendDataSource(url_path);
+    //url_path = newman_entity_email.appendEntity(url_path);
 
     if (url_path.indexOf(url_search_exportable) < 0) {
       url_path = newman_datetime_range.appendDatetimeRange(url_path);
@@ -727,8 +728,9 @@ function requestSearch(field, search_text, load_on_response) {
           //initiate subsequent searches
           //var ranks = newman_data_source.getSelectedTopHits(10);
           var ranked_email_accounts = newman_rank_email.getRankedList();
+          console.log('ranked_emails[' + ranked_email_accounts.length + ']');
           //console.log('ranked_emails[' + ranked_email_accounts.length + '] : ' + JSON.stringify(ranked_email_accounts, null, 2));
-          _.each(ranked_email_accounts, function (element) {
+          _.each(ranked_email_accounts, function (element, index) {
             var email_address = element["email"];
             requestSearch('email', email_address, false);
             //newman_aggregate_filter.initAggregateFilterSelected( email_address );
@@ -870,8 +872,8 @@ function getTopRankedEmailAccountList(email_doc_rows, top_count ) {
 function loadSearchResult( url_path ) {
   bottom_panel.unhide();
 
-  updateUIInboundCount();
-  updateUIOutboundCount();
+  updateUIInboundCount(); // initialize to blank
+  updateUIOutboundCount(); // initialize to blank
 
   $.get("email/exportable").then(function(response_exportable) {
     newman_service_email_exportable.setResponse(response_exportable);
@@ -1419,7 +1421,7 @@ function draw_attachments_table(email_address){
   return deferred.promise();
 }
 
-
+/*
 function draw_topic_tab(){
   $.ajax('topic/category/all').then(function(resp){
     var categories = _.map(resp.categories, function(r){
@@ -1437,7 +1439,7 @@ function draw_topic_tab(){
     tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td").text(function(d){ return d; });
   });
 }
-
+*/
 
 function redraw_legend_table_domain(){
 
