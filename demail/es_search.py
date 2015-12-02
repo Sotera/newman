@@ -3,6 +3,7 @@ import urllib
 import json
 
 from elasticsearch import Elasticsearch
+from newman.newman_config import elasticsearch_hosts
 from newman.utils.functions import nth
 from param_utils import parseParamDatetime
 from es_queries import _build_email_query
@@ -20,7 +21,7 @@ def get_graph_row_fields():
     return ["id","tos","senders","ccs","bccs","datetime","subject"]
 
 def count(index, type="emails", start="2000-01-01", end="now"):
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     # TODO apply filter to query not to body
     filter = {"range" : {"datetime" : { "gte": start, "lte": end }}}
     all_query = {"bool":{"must":[{"match_all":{}}]}}
@@ -68,7 +69,7 @@ def _map_node(email_addr, total_docs):
 
 # Get attachment info from the email_address type
 def _get_attachment_info_from_email_address(index, email_address, date_time=None):
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     query_email_addr =  {"query":{"filtered" : {
         "query" : _query_all,
         "filter" : {"bool":{
@@ -84,7 +85,7 @@ def _get_attachment_info_from_email_address(index, email_address, date_time=None
 
 # Get search all
 def _search_ranked_email_addrs(index, start, end, size):
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     graph_body= {"fields": _graph_fields, "sort" : _sort_email_addrs_by_total, "query" : _query_all}
     # tangelo.log("getRankedEmails(query: %s)" % (graph_body))
 
@@ -112,7 +113,7 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
         }}}}}
 
 
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     emails_resp = es.search(index=index, doc_type="emails", size=size, fields=get_graph_row_fields(), body=query_email_addr)
 
     query_hits = emails_resp["hits"]["total"]
@@ -146,7 +147,7 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
 # get top score docs for a cluster_idx as per the lda-clustering index type
 # returns {"total":n "hits":[]}
 def _query_emails_for_cluster(index, cluster_idx=0,  score=0.5, size=100):
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     query = _build_email_query(topic_score=(cluster_idx, score))
     # print query
     sort=["topic_scores.idx_"+str(cluster_idx)+":desc"]
@@ -157,7 +158,7 @@ def _query_emails_for_cluster(index, cluster_idx=0,  score=0.5, size=100):
 
 # returns {"total":n "hits":[]}
 def _query_emails(index, size, emails_query):
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     emails_resp = es.search(index=index, doc_type="emails", size=size, fields=get_graph_row_fields(), body=emails_query)
     tangelo.log("es_search._query_emails(total document hits = %s)" % emails_resp["hits"]["total"])
 
@@ -266,7 +267,7 @@ def initialize_email_addr_cache(index):
     global _EMAIL_ADDR_CACHE
     _email_addr_cache_fields= ["community", "community_id", "addr", "received_count", "sent_count", "attachments_count"]
 
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
 
     body={"query" : {"match_all" : {}}}
 
@@ -283,7 +284,7 @@ def get_cached_email_addr(addr):
 
 import operator
 def export_edges(index):
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     body = {
         "query": {
             "filtered": {

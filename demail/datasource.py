@@ -1,5 +1,7 @@
 from elasticsearch import Elasticsearch
 from elasticsearch.client import IndicesClient
+from newman.newman_config import elasticsearch_hosts
+
 from newman.utils.functions import nth
 from newman.newman_config import getDefaultDataSetID, default_min_timeline_bound, default_max_timeline_bound
 from es_search import initialize_email_addr_cache
@@ -12,7 +14,7 @@ from param_utils import parseParamDatetime
 _current_data_set_selected = getDefaultDataSetID()
 
 def _index_record(index):
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     email_docs_count = es.count(index=index, doc_type="emails", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
     emails_addrs_count = es.count(index=index, doc_type="email_address", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
     emails_attch_count = es.count(index=index, doc_type="attachments", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
@@ -33,7 +35,7 @@ def _index_record(index):
            }
 
 def listAllDataSet():
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     ic = IndicesClient(es)
     stats = ic.stats(index="_all")
     indexes = [_index_record(index) for index in stats["indices"]]

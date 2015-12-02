@@ -8,6 +8,8 @@ import csv
 import tangelo
 import cherrypy
 from elasticsearch import Elasticsearch
+from newman.newman_config import elasticsearch_hosts
+
 
 def attch_ext_query(extension):
     return {
@@ -133,7 +135,7 @@ def export_attachments(data_set_id, sender='', attachment_extension='jpg', date_
         print "invalid service call - missing index"
         return 1
 
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
 
     # TODO get accurate count -- this is not strictly needed as attachments will be accessed as inner docs on the email_address
     max_inner_attachments_returned = 100000
@@ -200,7 +202,7 @@ def export_emails_archive(data_set_id, email_ids=["f9c9c59a-7fe8-11e5-bb05-08002
     # if not email:
     #     return tangelo.HTTPStatusCode(400, "invalid service call - missing attachment_id")
 
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     # TODO can implement with multiple doc_types and combine attachments in
     emails = es.mget(index=data_set_id, doc_type="emails", body={"docs":[{"_id":id} for id in email_ids]})
 

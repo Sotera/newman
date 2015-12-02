@@ -1,4 +1,5 @@
 from elasticsearch import Elasticsearch
+from newman.newman_config import elasticsearch_hosts
 from time import gmtime, strftime
 import tangelo
 from newman.newman_config import default_min_timeline_bound, default_max_timeline_bound, default_timeline_span, default_timeline_interval
@@ -15,7 +16,7 @@ def _date_aggs(date_field="datetime"):
     }
 
 def get_datetime_bounds(index, type="emails"):
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     resp = es.search(index=index, doc_type=type, body={"aggregations":_date_aggs()})
 
     now = strftime("%Y-%m-%d", gmtime())
@@ -73,7 +74,7 @@ def entity_histogram_query(email_addrs=[], query_terms='', topic_score=None, dat
 
 def get_entity_histogram(index, type, email_addrs=[], query_terms='', topic_score=None, date_bounds=None, entity_agg_size=10):
     tangelo.log("===================================================")
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     body = entity_histogram_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity_agg_size=entity_agg_size)
 
     tangelo.log("get_entity_histogram: query = %s"%body)
@@ -174,7 +175,7 @@ def attachment_histogram_from_emails(email_addr, date_bounds, interval="week"):
 
 # Returns a sorted map of
 def get_daily_activity(index, account_id, type, query_function, **kwargs):
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     resp = es.search(index=index, doc_type=type, request_cache="false", body=query_function(**kwargs))
     return [_map_activity(index, account_id, sent_rcvd) for sent_rcvd in zip(resp["aggregations"]["sent_agg"]["sent_emails_over_time"]["buckets"],
                                                                              resp["aggregations"]["rcvr_agg"]["rcvd_emails_over_time"]["buckets"])]
@@ -225,18 +226,18 @@ def actor_histogram(email_addrs, date_bound=None, interval="week"):
     }
 
 def detect_activity(index, type, query_function, **kwargs):
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     resp = es.search(index=index, doc_type=type, body=query_function(**kwargs))
     return resp["aggregations"]["filter_agg"]["emails_over_time"]["buckets"]
 
 def get_total_daily_activity(index, type, query_function, **kwargs):
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     resp = es.search(index=index, doc_type=type, body=query_function(**kwargs))
     return resp["aggregations"]["filter_agg"]["emails_over_time"]["buckets"]
 
 # Returns a sorted map of
 def get_email_activity(index, data_set_id, account_id=None, date_bounds=None, interval="week"):
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     body = actor_histogram([] if not account_id else [account_id], date_bounds, interval)
     tangelo.log("get_email_activity(query body: %s )" % body)
 
@@ -246,14 +247,14 @@ def get_email_activity(index, data_set_id, account_id=None, date_bounds=None, in
                                                                              resp["aggregations"]["rcvr_agg"]["emails_over_time"]["buckets"])]
 # Returns a sorted map of
 def get_total_attachment_activity(index, account_id, query_function, **kwargs):
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     body=query_function(**kwargs)
     resp = es.search(index=index, doc_type="attachments", body=body)
     return [_map_attachments(index, account_id, attachments) for attachments in zip(resp["aggregations"]["attachments_filter_agg"]["attachments_over_time"]["buckets"])]
 
 # Returns a sorted map of
 def get_emailer_attachment_activity(index, email_address, date_bounds, interval="week"):
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     body=attachment_histogram_from_emails(email_address, date_bounds, interval)
     resp = es.search(index=index, doc_type="email_address", body=body)
     return [_map_attachments(index, email_address, attachments) for attachments in zip(resp["aggregations"]["emailer_attach_agg"]["sent_attachments_over_time"]["buckets"])]
@@ -261,7 +262,6 @@ def get_emailer_attachment_activity(index, email_address, date_bounds, interval=
 
 if __name__ == "__main__":
     print get_datetime_bounds("sample")
-    # es = Elasticsearch()
     # body = entity_histogram_query(email_addrs=["jeb@jeb.org"], query_terms="", topic_score=None, date_bounds=("1970","now"), entity_agg_size=10)
     # print body
     # resp = es.search(index="sample", doc_type="emails",body=body)

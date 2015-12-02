@@ -1,9 +1,4 @@
 import base64
-import cStringIO
-import tarfile
-import time
-import json
-import shutil
 
 import tangelo
 import cherrypy
@@ -11,6 +6,7 @@ import mimetypes
 from elasticsearch import Elasticsearch
 from param_utils import parseParamDatetime
 from newman.utils.functions import nth
+from newman.newman_config import elasticsearch_hosts
 from es_search import _search_ranked_email_addrs, count, get_cached_email_addr, initialize_email_addr_cache
 from es_queries import _build_filter
 
@@ -59,7 +55,7 @@ def get_top_communities(index, query_terms='', topic_score=None, entity={}, date
     date_bounds = None
     # TODO fix
 
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     aggs = { "community_agg" : { "terms" : { "field" : "community", "size" : num_communities }}}
     query = filtered_agg_query(topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="community")
     tangelo.log("Query %s"%query)
@@ -78,7 +74,7 @@ def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, ent
     date_bounds = None
     # TODO fix
 
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     aggs = { "domain_agg" : { "terms" : { "field" : "domain", "size" : num_domains }}}
     query = filtered_agg_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="domain")
     tangelo.log("Query %s"%query)
@@ -92,7 +88,7 @@ def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, ent
 
 # GET top 10 Attchment types for index
 def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, num_top_attachments=20):
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     aggs = { "attachment_type_agg" : { "terms" : { "field" : "extension", "size" : num_top_attachments }}}
     query = filtered_agg_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="attachment")
     tangelo.log("Query %s"%query)
@@ -121,7 +117,7 @@ def get_ranked_email_address(data_set_id, query_terms='', topic_score=None, enti
         },
         "size":0}
 
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
 
     resp = es.search(index=data_set_id, doc_type="emails", body=body)
 
@@ -141,7 +137,7 @@ def get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime,
 
 def get_email(index, email_id):
 
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     fields=["id","datetime","senders","senders_line","tos_line","ccs_line","bccs_line","subject","body","attachments.filename","entities.entity_organization","entities.entity_location","entities.entity_person","entities.entity_misc"]
     email = es.get(index, doc_type="emails", id=email_id, fields=fields)
 
@@ -188,7 +184,7 @@ def get_attachment_by_id(*args, **kwargs):
         return tangelo.HTTPStatusCode(400, "invalid service call - missing attachment_id")
 
 
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     attachment = es.get(index=data_set_id, doc_type="attachments", id=attachment_id)
 
     if not attachment:
@@ -235,7 +231,7 @@ def get_attachments_by_sender(*args, **kwargs):
     # fields= ["id", "datetime", "senders", "tos", "ccs", "bccs", "subject", "attachments.filename"]
     body={"filter":{"exists":{"field":"attachments"}}, "query":{"match":{"senders":sender}}}
 
-    es = Elasticsearch()
+    es = Elasticsearch(elasticsearch_hosts())
     attachments_resp = es.search(index=data_set_id, doc_type="emails", size=10, body=body)
 
     email_attachments = []
