@@ -156,7 +156,7 @@ def get_email(index, email_id):
              fields.get("ccs_line", default)[0],
              fields.get("bccs_line", default)[0],
              fields.get("subject", default)[0],
-             fields.get("body", default)[0],
+             fields.get("body", default)[0].replace('\n',"<br/>"),
              ";".join([str(f) for f in fields.get("attachments.filename", default)])
              ]
 
