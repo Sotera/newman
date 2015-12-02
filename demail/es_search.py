@@ -115,6 +115,7 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
     es = Elasticsearch()
     emails_resp = es.search(index=index, doc_type="emails", size=size, fields=get_graph_row_fields(), body=query_email_addr)
 
+    query_hits = emails_resp["hits"]["total"]
     emails = [_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]
 
     nodes = []
@@ -140,9 +141,10 @@ def _create_graph_from_email(index, email_address, search_terms,start, end, size
             else:
                 edge_map[edge_key]["value"]=edge_map[edge_key]["value"]+1
 
-    return {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in emails]}
+    return {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in emails], "query_hits" : query_hits}
 
 # get top score docs for a cluster_idx as per the lda-clustering index type
+# returns {"total":n "hits":[]}
 def _query_emails_for_cluster(index, cluster_idx=0,  score=0.5, size=100):
     es = Elasticsearch()
     query = _build_email_query(topic_score=(cluster_idx, score))
@@ -151,17 +153,18 @@ def _query_emails_for_cluster(index, cluster_idx=0,  score=0.5, size=100):
     emails_resp = es.search(index=index, doc_type='emails', fields=get_graph_row_fields(), sort=sort, size=size, body=query)
 
     tangelo.log("es_search._query_emails(total document hits = %s)" % emails_resp["hits"]["total"])
-    return [_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]
+    return {"total":emails_resp["hits"]["total"], "hits":[_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]}
 
+# returns {"total":n "hits":[]}
 def _query_emails(index, size, emails_query):
     es = Elasticsearch()
     emails_resp = es.search(index=index, doc_type="emails", size=size, fields=get_graph_row_fields(), body=emails_query)
     tangelo.log("es_search._query_emails(total document hits = %s)" % emails_resp["hits"]["total"])
 
-    return [_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]
+    return {"total":emails_resp["hits"]["total"], "hits":[_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]}
 
 # This will generate the graph structure for a specific email address.  Will aply date filter and term query.
-def _build_graph_for_emails(index, emails):
+def _build_graph_for_emails(index, emails, query_hits):
     nodes = []
     edge_map = {}
     addr_index = {}
@@ -189,7 +192,7 @@ def _build_graph_for_emails(index, emails):
             else:
                 edge_map[edge_key]["value"]=edge_map[edge_key]["value"]+1
 
-    return {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in emails]}
+    return {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in emails], "query_hits" : query_hits}
 
 # GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
 # build a graph for a specific email address.
@@ -228,7 +231,8 @@ def get_graph_for_email_address(*args, **kwargs):
     query  = _build_email_query(email_addrs=[email_address], query_terms='', date_bounds=(start_datetime, end_datetime))
     tangelo.log("es_search.get_graph_for_email_address(query: %s)" % (query))
 
-    return _build_graph_for_emails(data_set_id, _query_emails(data_set_id, size, query))
+    results = _query_emails(data_set_id, size, query)
+    return _build_graph_for_emails(data_set_id, results["hits"], results["total"])
 
 # GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
 # build a graph for a specific email address.
@@ -249,7 +253,8 @@ def get_top_email_hits_for_text_query(*args, **kwargs):
     query  = _build_email_query(email_addrs=[], query_terms=search_terms, date_bounds=(start_datetime, end_datetime))
     tangelo.log("es_search.get_graph_for_text_query(query: %s)" % (query))
 
-    return _build_graph_for_emails(data_set_id, _query_emails(data_set_id, size, query))
+    results = _query_emails(data_set_id, size, query)
+    return _build_graph_for_emails(data_set_id, results["hits"], results["total"])
 
     # TODO Neither of these are correct -- need to figure out this calling convention
     # return {"graph":{"nodes":[], "links":[]}, "rows":emails}

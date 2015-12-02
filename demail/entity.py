@@ -34,7 +34,8 @@ def get_graph_for_entity(*args, **kwargs):
     query = _build_email_query(email_address_list, query_terms, entity=entity_dict, date_bounds=(start_datetime, end_datetime))
     tangelo.log("entity.get_graph_for_entity(query: %s)" % (query))
 
-    return _build_graph_for_emails(data_set_id, _query_emails(data_set_id, size, query))
+    results = _query_emails(data_set_id, size, query)
+    return _build_graph_for_emails(data_set_id, results["hits"], results["total"])
 
 #GET /top/<count>
 def get_top_entities(*args, **kwargs):
@@ -44,9 +45,12 @@ def get_top_entities(*args, **kwargs):
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
     email_address_list = parseParamEmailAddress(**kwargs);
-    
+
+    # TODO set from UI
+    query_terms=''
+
     if not email_address_list :
-        entities = get_entity_histogram(data_set_id, "emails", date_bounds=(start_datetime, end_datetime))[:top_count]        
+        entities = get_entity_histogram(data_set_id, "emails", query_terms=query_terms, date_bounds=(start_datetime, end_datetime))[:top_count]
         result = {"entities" :
                   [
                    [
@@ -59,7 +63,7 @@ def get_top_entities(*args, **kwargs):
                  }
         
     else:
-        entities = get_entity_histogram(data_set_id, "emails", email_address_list, date_bounds=(start_datetime, end_datetime))[:top_count]
+        entities = get_entity_histogram(data_set_id, "emails", email_address_list, query_terms=query_terms, date_bounds=(start_datetime, end_datetime))[:top_count]
         result = {"entities" :
                   [
                    [

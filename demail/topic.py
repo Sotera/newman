@@ -47,7 +47,8 @@ def topic_email_graph(*args, **kwargs):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
     emails = _query_emails_for_cluster(data_set_id, cluster_idx=topic_idx, score=score, size=100)
-    return _build_graph_for_emails(data_set_id, emails)
+
+    return _build_graph_for_emails(data_set_id, emails["hits"], emails["total"])
 
 # TODO DEPRECATED REMOVE!
 #GET /email/<email_id>/<category>
