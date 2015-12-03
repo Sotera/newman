@@ -41,11 +41,14 @@ ul {
 .mitie-organization {  padding: 2px; background-color: #ffcc33; }
 .mitie-misc { padding: 2px; background-color: #c0c0c0; }
 
-.person { padding: 2px; background-color: #00ccff; }
-.location {  padding: 2px; background-color: #00ff00; }
-.organization {  padding: 2px; background-color: #ffcc33; }
-.misc { padding: 2px; background-color: #c0c0c0; }
+.newman-entity-person { padding: 2px; background-color: #00ccff; }
+.newman-entity-location {  padding: 2px; background-color: #00ff00; }
+.newman-entity-organization {  padding: 2px; background-color: #ffcc33; }
+.newman-entity-misc { padding: 2px; background-color: #c0c0c0; }
 
+.chart rect.person {
+    fill: #00ccff;
+}
 .chart rect.organization {
     fill: #ffcc33;
 }
@@ -54,9 +57,6 @@ ul {
 }
 .chart rect.misc {
     fill: #c0c0c0;
-}
-.chart rect.person {
-    fill: #00ccff;
 }
 
 .chart text {

@@ -15,10 +15,30 @@ var newman_entity_email = (function () {
 
   var _top_count, _top_count_max = 10;
 
+  var _entity_type_color_map =
+  {
+    "person": "#00ccff",
+    "organization": "#ffcc33",
+    "location": "#00ff00",
+    "misc": "#c0c0c0"
+  }
+
   var _entity_selected_person = {};
   var _entity_selected_location = {};
   var _entity_selected_org = {};
   var _entity_selected_misc = {};
+
+  function getEntityTypeColor(key) {
+    var color = _entity_type_color_map['misc'];
+    if (key) {
+      var value = _entity_type_color_map[key]
+      if (value) {
+        color = value;
+      }
+    }
+    return color;
+  }
+
 
   /**
    * request and display the top attachment-file-type-related charts
@@ -370,8 +390,11 @@ var newman_entity_email = (function () {
     _entity_selected_misc = {};
   }
 
+
+
   return {
     'initUI' : initUI,
+    'getEntityTypeColor' : getEntityTypeColor,
     'displayUIEntityEmail' : displayUIEntityEmail,
     'updateUIEntityEmail' : updateUIEntityEmail,
     'revalidateUIEntityEmail' : revalidateUIEntityEmail,
