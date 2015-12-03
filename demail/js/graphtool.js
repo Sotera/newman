@@ -760,7 +760,10 @@ function requestSearch(field, search_text, load_on_response) {
           newman_search_filter.setSelectedFilter();
 
           var doc_count = 0;
-          if (filtered_response.rows) {
+          if (filtered_response.query_hits) {
+            doc_count = filtered_response.query_hits;
+          }
+          else if (filtered_response.rows) {
             doc_count = filtered_response.rows.length;
           }
 
@@ -796,7 +799,10 @@ function requestSearch(field, search_text, load_on_response) {
           // result from search-field-keywords under the current data-set
 
           var doc_count = 0;
-          if (filtered_response.rows) {
+          if (filtered_response.query_hits) {
+            doc_count = filtered_response.query_hits;
+          }
+          else if (filtered_response.rows) {
             doc_count = filtered_response.rows.length;
           }
 
