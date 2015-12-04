@@ -159,8 +159,8 @@ def get_email(index, email_id):
 
     entities = []
     for type in ["person","location","organization","misc"]:
-        if ("entities.entity_"+type) in source:
-            entities += [ [source["id"][0]+"_entity_"+str(i), type ,i, val] for i,val in enumerate(source.get("entities.entity_"+type, default), len(entities))]
+        if ("entity_"+type) in source["entities"]:
+            entities += [ [source["id"][0]+"_entity_"+str(i), type ,i, val] for i,val in enumerate(source["entities"].get("entity_"+type, default), len(entities))]
 
     return { "email" : email, "entities": entities}
 
