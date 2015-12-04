@@ -138,28 +138,29 @@ def get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime,
 def get_email(index, email_id):
 
     es = Elasticsearch(elasticsearch_hosts())
-    fields=["id","datetime","senders","senders_line","tos_line","ccs_line","bccs_line","subject","body","attachments.filename","entities.entity_organization","entities.entity_location","entities.entity_person","entities.entity_misc"]
-    email = es.get(index, doc_type="emails", id=email_id, fields=fields)
+    # fields=["id","datetime","senders","senders_line","tos_line","ccs_line","bccs_line","subject","body","attachments.filename","entities.entity_organization","entities.entity_location","entities.entity_person","entities.entity_misc"]
+    # email = es.get(index, doc_type="emails", id=email_id, fields=fields)
+    email = es.get(index, doc_type="emails", id=email_id)
 
     default=[""]
-    fields = email["fields"]
-    email = [fields["id"][0],
+    source = email["_source"]
+    email = [source["id"],
              "DEPRECATED",
-             fields.get("datetime",default)[0],
+             source.get("datetime",""),
              "false",
-             fields.get("senders", default)[0],
-             fields.get("tos_line", default)[0],
-             fields.get("ccs_line", default)[0],
-             fields.get("bccs_line", default)[0],
-             fields.get("subject", default)[0],
-             fields.get("body", default)[0].replace('\n',"<br/>"),
-             ";".join([str(f) for f in fields.get("attachments.filename", default)])
+             "".join(source["senders"]),
+             "".join(source["tos_line"]),
+             "".join(source["ccs_line"]),
+             "".join(source["bccs_line"]),
+             source["subject"],
+             source["body"].replace('\n',"<br/>"),
+             [[f["guid"],f["filename"]] for f in source.get("attachments", default)]
              ]
 
     entities = []
     for type in ["person","location","organization","misc"]:
-        if ("entities.entity_"+type) in fields:
-            entities += [ [fields["id"][0]+"_entity_"+str(i), type ,i, val] for i,val in enumerate(fields.get("entities.entity_"+type, default), len(entities))]
+        if ("entities.entity_"+type) in source:
+            entities += [ [source["id"][0]+"_entity_"+str(i), type ,i, val] for i,val in enumerate(source.get("entities.entity_"+type, default), len(entities))]
 
     return { "email" : email, "entities": entities}
 
@@ -260,6 +261,7 @@ def dump(bytes, name):
     text_file.close()
 
 if __name__ == "__main__":
+    res=get_email("sample","ea57b82e-7fe8-11e5-bb05-08002705cb99")
     # email= "katie.baur@myflorida.com"
     email="arlene.dibenigno@myflorida.com"
     initialize_email_addr_cache("sample")
@@ -284,7 +286,6 @@ if __name__ == "__main__":
     #     print x
     # res = buildGraph()
     # res = get_ranked_email_address("2000-01-01", "now", 20)
-    # res=get_email("d6d86d10-6879-11e5-bb05-08002705cb99")
     # text_file = open("/home/elliot/email.json", "w")
     # text_file.write(json.dumps(res))
     # text_file.close()

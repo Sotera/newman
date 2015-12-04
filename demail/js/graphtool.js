@@ -378,11 +378,11 @@ function produceHTMLView(email_obj) {
   var attachments = $('<p>').append($('<span>').addClass('bold').text("Attachments: "));
   var attach_field = d.attach;
   if (attach_field) {
-    _.each(attach_field.split(';'), function (attach) {
-      console.log('email-body-attachments : \n' + JSON.stringify(attach, null, 2));
-      var attach_url = 'email/attachment/' + d.attach_id + '/' + encodeURIComponent(attach);
+    _.each(attach_field, function (attach) {
+      console.log('email-body-attachments : \n' + JSON.stringify(attach[0]+"#"+attach[1], null, 2));
+      var attach_url = 'email/attachment/' + attach[0];
       attach_url = newman_data_source.appendDataSource(attach_url);
-      attachments.append($('<a>', {'class': 'clickable', "target": "_blank", "href": attach_url}).html(attach));
+      attachments.append($('<a>', {'class': 'clickable', "target": "_blank", "href": attach_url}).html(attach[1]));
       attachments.append($('<span>').html(';&nbsp'));
     });
   }
