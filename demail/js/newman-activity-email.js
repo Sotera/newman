@@ -178,15 +178,18 @@ var newman_activity_outbound = (function () {
         top_count = account_index_max;
       }
 
-      var top_rank_accounts = newman_data_source.getSelectedTopHits( top_count );
-      //console.log( 'ranks: ' + JSON.stringify(ranks, null, 2) );
-
       initUI();
 
-      _.each(top_rank_accounts, function (element) {
-        var email_address = element[0];
-        newman_aggregate_filter.setAggregateFilterSelected( email_address, true, false );
+      var ranked_email_accounts = newman_rank_email.getRankedList();
+      console.log('ranked_emails[' + ranked_email_accounts.length + ']');
+
+      _.each(ranked_email_accounts, function (element, index) {
+        if (index < top_count) {
+          var email_address = element["email"];
+          newman_aggregate_filter.setAggregateFilterSelected(email_address, true, false);
+        }
       });
+      
       newman_service_activity_email_account.requestService( 'all' );
     }
   }
@@ -389,15 +392,18 @@ var newman_activity_inbound = (function () {
         top_count = account_index_max;
       }
 
-      var top_rank_accounts = newman_data_source.getSelectedTopHits( top_count );
-      //console.log( 'ranks: ' + JSON.stringify(ranks, null, 2) );
-
       initUI();
 
-      _.each(top_rank_accounts, function (element) {
-        var email_address = element[0];
-        newman_aggregate_filter.setAggregateFilterSelected( email_address, true, false );
+      var ranked_email_accounts = newman_rank_email.getRankedList();
+      //console.log('ranked_emails[' + ranked_email_accounts.length + ']');
+
+      _.each(ranked_email_accounts, function (element, index) {
+        if (index < top_count) {
+          var email_address = element["email"];
+          newman_aggregate_filter.setAggregateFilterSelected(email_address, true, false);
+        }
       });
+
       newman_service_activity_email_account.requestService( 'all' );
     }
   }
@@ -691,15 +697,18 @@ var newman_activity_attachment = (function () {
         top_count = account_index_max;
       }
 
-      var top_rank_accounts = newman_data_source.getSelectedTopHits( top_count );
-      //console.log( 'ranks: ' + JSON.stringify(top_rank_accounts, null, 2) );
-
       initUI();
 
-      _.each(top_rank_accounts, function (element) {
-        var email_address = element[0];
-        newman_aggregate_filter.setAggregateFilterSelected( email_address, true, false );
+      var ranked_email_accounts = newman_rank_email.getRankedList();
+      //console.log('ranked_emails[' + ranked_email_accounts.length + ']');
+
+      _.each(ranked_email_accounts, function (element, index) {
+        if (index < top_count) {
+          var email_address = element["email"];
+          newman_aggregate_filter.setAggregateFilterSelected(email_address, true, false);
+        }
       });
+
       newman_service_activity_email_attach.requestService();
     }
   }

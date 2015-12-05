@@ -36,7 +36,6 @@ var newman_rank_email = (function () {
       }
       else {
       */
-        console.log("Requesting service ...");
         newman_service_rank_email.requestService(_top_count_max);
       //}
     }

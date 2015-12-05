@@ -50,6 +50,9 @@ var newman_aggregate_filter = (function () {
 
         //trigger entities refresh
         reloadDashboardEntityEmail();
+
+        //trigger topics refresh
+        reloadDashboardTopicEmail();
       }
     }
   }

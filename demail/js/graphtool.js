@@ -379,11 +379,11 @@ function produceHTMLView(email_obj) {
   var attach_field = d.attach;
   if (attach_field) {
     _.each(attach_field, function (attach) {
-      console.log('email-body-attachments : \n' + JSON.stringify(attach, null, 2));
+      //console.log('email-body-attachments : \n' + JSON.stringify(attach, null, 2));
       var attach_url = 'email/attachment/' + attach[0];
       attach_url = newman_data_source.appendDataSource(attach_url);
       attachments.append($('<a>', {'class': 'clickable', "target": "_blank", "href": attach_url}).html(attach[1]));
-      attachments.append($('<span>').html(';&nbsp'));
+      attachments.append($('<span>').html('&nbsp'));
     });
   }
   el.append(attachments);
@@ -1848,7 +1848,7 @@ $(function () {
     history_nav.initialize();
 
     // initialize dashboard and its components and widgets
-    drawDashboardCharts();
+    initDashboardCharts();
 
     $("[rel=tooltip]").tooltip();
 
@@ -1877,9 +1877,7 @@ $(function () {
         newman_entity_email.revalidateUIEntityEmail();
       }
       else if (element_ID.endsWith('dashboard_tab_content_topics')) {
-        if (dashboard_donut_chart_topic) {
-          dashboard_donut_chart_topic.redraw();
-        }
+        newman_topic_email.revalidateUITopicEmail();
       }
       else if (element_ID.endsWith('dashboard_tab_content_domains')) {
         newman_domain_email.revalidateUIDomain();

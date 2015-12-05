@@ -922,6 +922,7 @@ var search_result = (function () {
  * request and display top topic-related charts
  * @param count
  */
+/*
 function drawChartTopic( count ) {
 
   var chart_ui_id = '#chart_horizontal_bar_topics';
@@ -929,11 +930,6 @@ function drawChartTopic( count ) {
   if (count > 0 && chart_ui_id) {
 
     var top_count = count;
-    /*
-     if (top_count > 5) {
-     top_count = 5;
-     }
-     */
 
     $.get('topic/category/all').then(function (response) {
 
@@ -945,13 +941,6 @@ function drawChartTopic( count ) {
         category.score = parseFloat(category.score);
         return category;
       });
-
-      /*
-      _.each(categories, function (item) {
-        console.log( 'index : ' + item.index + ' topics : ' + item.topics + " score : " + item.score );
-
-      });
-      */
 
       var colors = d3.scale.category20b();
       var width = 530, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 7;
@@ -1059,7 +1048,7 @@ function drawChartTopic( count ) {
 
   }
 }
-
+*/
 
 
 
@@ -1085,6 +1074,10 @@ function reloadDashboardEntityEmail() {
   newman_entity_email.displayUIEntityEmail(10);
 }
 
+function reloadDashboardTopicEmail() {
+  newman_topic_email.displayUITopicEmail(10);
+}
+
 function initDashboardDomain() {
   reloadDashboardDomain();
 }
@@ -1101,8 +1094,11 @@ function reloadDashboardCommunity() {
   newman_community_email.displayUICommunity(10);
 }
 
+function initDashboardRankEmail() {
+  reloadDashboardRankEmail();
+}
+
 function reloadDashboardRankEmail() {
-  console.log('reloadDashboardRankEmail()');
   newman_rank_email.displayUIRankEmail(10);
 }
 
@@ -1111,26 +1107,17 @@ function reloadDashboardFileTypeAttachment() {
 }
 
 /**
- * draw Morris Donut charts
+ * draw dashboard charts and widgets
  */
-function drawDashboardCharts() {
+function initDashboardCharts() {
 
+  // initialize dashboard components and widgets
   initDashboardActivityTimeline();
-
   reloadDashboardEntityEmail();
-  //drawChartEntity(10);
-
-  drawChartTopic(10);
-
-  //drawChartDomain(10);
+  reloadDashboardTopicEmail()
   reloadDashboardDomain();
-
-  //drawChartCommunity(10);
   reloadDashboardCommunity();
-
-  //drawChartRank(10);
   reloadDashboardRankEmail();
-
   reloadDashboardFileTypeAttachment();
 
 }

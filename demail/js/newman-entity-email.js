@@ -77,7 +77,7 @@ var newman_entity_email = (function () {
             'height': '12px',
             'padding-left': '5px',
             'padding-right': '5px;'
-          }).addClass(item.toLowerCase()))
+          }).addClass('newman-entity-' + item.toLowerCase()))
             .append($('<span>').css({'padding-left': '5px', 'padding-right': '5px'}).text(item))
             .append($('<br/>'));
         });
@@ -166,16 +166,8 @@ var newman_entity_email = (function () {
         for( var i = 0; i < entities.length; i++ ){
           top_donut_chart_total = top_donut_chart_total + entities[i][3];
           var entity_type = entities[i][1];
-          var entity_color = '#c0c0c0';
-          if (entity_type === 'person') {
-            entity_color = '#00ccff';
-          }
-          else if (entity_type === 'location') {
-            entity_color = '#00ff00';
-          }
-          else if (entity_type === 'organization') {
-            entity_color = '#ffcc33';
-          }
+          var entity_color = getEntityTypeColor(entity_type);
+
           top_donut_chart_colors.push( entity_color );
         };
 
