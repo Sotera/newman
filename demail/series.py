@@ -2,6 +2,9 @@ from elasticsearch import Elasticsearch
 from newman.newman_config import elasticsearch_hosts
 from time import gmtime, strftime
 import tangelo
+
+import csv
+
 from newman.newman_config import default_min_timeline_bound, default_max_timeline_bound, default_timeline_span, default_timeline_interval
 from es_queries import _build_filter, _addrs_filter, _date_filter
 from dateutil.parser import parse
@@ -245,7 +248,15 @@ def get_email_activity(index, data_set_id, account_id=None, date_bounds=None, in
     id = data_set_id if not account_id else account_id
     return [_map_activity(index, id, sent_rcvd) for sent_rcvd in zip(resp["aggregations"]["sent_agg"]["emails_over_time"]["buckets"],
                                                                              resp["aggregations"]["rcvr_agg"]["emails_over_time"]["buckets"])]
-# Returns a sorted map of
+
+def get_email_activity_csv(scv_file, index, data_set_id, account_id=None, date_bounds=None, interval="week"):
+    rows = get_email_activity(index, data_set_id, account_id, date_bounds, interval)
+    with open(scv_file, 'wb') as sent_rcvd_csvfile:
+        csv_file=csv.writer( sent_rcvd_csvfile )
+        # Add all rows to attachment csv
+        csv_file.writerows ([[row["interval_start_datetime"],row["interval_outbound_count"],row["interval_inbound_count"]] for row in rows])
+        # Returns a sorted map of
+
 def get_total_attachment_activity(index, account_id, query_function, **kwargs):
     es = Elasticsearch(elasticsearch_hosts())
     body=query_function(**kwargs)
@@ -260,19 +271,36 @@ def get_emailer_attachment_activity(index, email_address, date_bounds, interval=
     return [_map_attachments(index, email_address, attachments) for attachments in zip(resp["aggregations"]["emailer_attach_agg"]["sent_attachments_over_time"]["buckets"])]
 
 
+#
+# if __name__ == "__main__":
+#    print ""
+#
+
+import argparse
+from series import get_email_activity_csv
+
 if __name__ == "__main__":
-    print get_datetime_bounds("sample")
-    # body = entity_histogram_query(email_addrs=["jeb@jeb.org"], query_terms="", topic_score=None, date_bounds=("1970","now"), entity_agg_size=10)
-    # print body
-    # resp = es.search(index="sample", doc_type="emails",body=body)
-    # res = get_entity_histogram("sample", "emails", email_addrs=[], query_terms="", topic_score=None, date_bounds=("2000","2002"))
-    # print {"entities" : [[str(i), entity ["type"], entity ["key"], entity ["doc_count"]] for i,entity in enumerate(res)]}
-    #
-    # res = get_entity_histogram("sample", "emails", email_addrs=["oviedon@sso.org"], query_terms="", topic_score=None, date_bounds=("2000","2002"))
-    # print res
-    res = get_emailer_attachment_activity("sample", email_address="jeb@jeb.org", date_bounds=("2000-01-01", "2002-01-01"), interval="week")
-    print res
-    print "done"
-    # activity = get_email_activity("sample", "jeb@jeb.org", actor_histogram, actor_email_addr="jeb@jeb.org", start="2000", end="2002", interval="week")
-    # print activity
-    # for s in res:
+    desc='Export attachments from ElassticSearch.'
+    parser = argparse.ArgumentParser(
+        description=desc,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=desc)
+
+    parser.add_argument("index", help="index name")
+    parser.add_argument("outfile", help="output tar file, e.g. out.tar")
+    parser.add_argument("--email_addr", help="email address to export from", default='')
+    parser.add_argument("--start_date", help="Start date to export from in yyyy-MM-dd format",default='1970-01-01')
+    parser.add_argument("--end_date", help="End date to export from in yyyy-MM-dd format, e.g. 20001-10-23", default="now")
+
+
+    args = parser.parse_args()
+    print args.index
+    print args.email_addr
+
+    print args.start_date
+    print args.end_date
+
+    date_bounds=(args.start_date, args.end_date)
+
+    r = get_email_activity_csv(args.outfile, args.index, args.index, args.email_addr, date_bounds, interval="week")
+    print r
