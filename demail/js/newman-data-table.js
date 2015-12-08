@@ -297,7 +297,10 @@ function showEmailView(email_id){
     }
   }
 
-  $.get("email/email/" + encodeURIComponent(email_id)).then(
+  var email_url = 'email/email/' + encodeURIComponent(email_id);
+  email_url = newman_data_source.appendDataSource(email_url);
+
+  $.get(email_url).then(
     function(response) {
       setEmailVisible(email_id);
       if(response.email.length > 0){

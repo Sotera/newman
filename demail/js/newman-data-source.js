@@ -200,11 +200,17 @@ var newman_data_source = (function () {
 
         setTimeout(function() {
 
-          reloadDashboardSearchResult();
+          // initialize search-filter
+          newman_search_filter.initFilter();
 
-          reloadDashboardActivityTimeline();
+          newman_service_email_exportable.requestService();
 
-          //drawDashboardCharts();
+          // initialize dashboard components and widgets
+          initDashboardCharts();
+
+          search_result.clearAll();
+          requestSearch('all', '', false);
+
         }, 2000);
 
       }
@@ -344,8 +350,13 @@ var newman_service_data_source = (function () {
     if (data_set_id && containsDataSet(data_set_id)) {
 
       $.get('datasource/dataset/' + encodeURIComponent(data_set_id)).then(function (response) {
-
         //console.log(JSON.stringify(response, null, 2));
+
+        // re-initialize top-ranked email-accounts
+        newman_rank_email.displayUIRankEmail(10);
+
+        // re-initialize aggregate-filter
+        newman_aggregate_filter.clearAllAggregateFilter();
       });
     }
   }

@@ -379,38 +379,47 @@ function produceHTMLView(email_obj) {
   var attach_field = d.attach;
   if (attach_field) {
     _.each(attach_field, function (attach) {
-      console.log('email-body-attachments : \n' + JSON.stringify(attach[0]+"#"+attach[1], null, 2));
+      //console.log('email-body-attachments : \n' + JSON.stringify(attach, null, 2));
       var attach_url = 'email/attachment/' + attach[0];
       attach_url = newman_data_source.appendDataSource(attach_url);
       attachments.append($('<a>', {'class': 'clickable', "target": "_blank", "href": attach_url}).html(attach[1]));
-      attachments.append($('<span>').html(';&nbsp'));
+      attachments.append($('<span>').html('&nbsp'));
     });
   }
   el.append(attachments);
   el.append($('<p>'));
 
-  //sort by index
-  var entity_matched_list = _.sortBy(email_obj.entities, function(o){ return o[2]});
-  //console.log('entity_matched_list :\n' + JSON.stringify(entity_matched_list, null, 2));
-  if (entity_matched_list) {
-    var body_text = d.body;
-    var new_text_tokens = [];
-    _.each(entity_matched_list, function(entity_matched) {
-      var entity_type = entity_matched[1]
-      var entity_key = entity_matched[3];
-      var index = body_text.toLocaleLowerCase().indexOf(entity_key.toLocaleLowerCase());
-      var split_index = index + entity_key.length;
-      var text_token = body_text.substring(0, index);
-      text_token += '<span class=\"newman-entity-' + entity_type + '\">' + entity_key + '</span>';
-      new_text_tokens.push(text_token);
-      body_text = body_text.substring(split_index);
+  //console.log('email-body : \n' + JSON.stringify(d.body, null, 2));
+
+  if (email_obj.entities && email_obj.entities.length > 0) {
+    //sort by index
+    var entity_matched_list = _.sortBy(email_obj.entities, function (o) {
+      return o[2]
     });
-    body_text = '';
-    _.each(new_text_tokens, function(text_token) {
-      body_text += text_token;
-    });
-    //console.log('new_body_text :\n\n' + body_text + '\n');
-    d.body = body_text;
+    //console.log('entity_matched_list :\n' + JSON.stringify(entity_matched_list, null, 2));
+    if (entity_matched_list) {
+      var body_text = d.body;
+      var new_text_tokens = [];
+      _.each(entity_matched_list, function (entity_matched) {
+        var entity_type = entity_matched[1]
+        var entity_key = entity_matched[3];
+        var index = body_text.toLocaleLowerCase().indexOf(entity_key.toLocaleLowerCase());
+        var split_index = index + entity_key.length;
+        var text_token = body_text.substring(0, index);
+        text_token += '<span class=\"newman-entity-' + entity_type + '\">' + entity_key + '</span>';
+        new_text_tokens.push(text_token);
+        body_text = body_text.substring(split_index);
+      });
+      body_text = '';
+      _.each(new_text_tokens, function (text_token) {
+        body_text += text_token;
+      });
+      //console.log('new_body_text :\n\n' + body_text + '\n');
+      d.body = body_text;
+    }
+  }
+  else {
+    console.log('No entity set provided!');
   }
 
   el.append($('<div>').addClass("email-body-view").append(d.body));
@@ -1822,7 +1831,7 @@ $(function () {
     data_source_selected = newman_data_source.getSelected();
 
     // initialize top-ranked email-accounts
-    newman_rank_email.displayUIRankEmail(10);
+    //newman_rank_email.displayUIRankEmail(10);
 
     newman_service_email_exportable.requestService();
 
@@ -1839,7 +1848,7 @@ $(function () {
     history_nav.initialize();
 
     // initialize dashboard and its components and widgets
-    drawDashboardCharts();
+    initDashboardCharts();
 
     $("[rel=tooltip]").tooltip();
 
@@ -1868,9 +1877,7 @@ $(function () {
         newman_entity_email.revalidateUIEntityEmail();
       }
       else if (element_ID.endsWith('dashboard_tab_content_topics')) {
-        if (dashboard_donut_chart_topic) {
-          dashboard_donut_chart_topic.redraw();
-        }
+        newman_topic_email.revalidateUITopicEmail();
       }
       else if (element_ID.endsWith('dashboard_tab_content_domains')) {
         newman_domain_email.revalidateUIDomain();

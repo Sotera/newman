@@ -33,6 +33,7 @@ def get_topics_by_query(*args, **kwargs):
 # returns topic in sorted order by the idx
 def topic_list(*args, **kwargs):
     category=nth(args, 0, 'all')
+    #tangelo.log("category %s" %(category))
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
     tangelo.content_type("application/json")
     return get_categories(data_set_id)
@@ -40,13 +41,13 @@ def topic_list(*args, **kwargs):
 #GET /graph/
 def topic_email_graph(*args, **kwargs):
     tangelo.content_type("application/json")
-    foo=nth(args, 0, 'all')
-    topic_idx=nth(args, 1, 0)
+    category=nth(args, 0, 'all')
+    topic_index=nth(args, 1, 0)
     score=nth(args, 2, 0.5)
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
-    emails = _query_emails_for_cluster(data_set_id, cluster_idx=topic_idx, score=score, size=100)
+    emails = _query_emails_for_cluster(data_set_id, cluster_idx=topic_index, score=score, size=100)
 
     return _build_graph_for_emails(data_set_id, emails["hits"], emails["total"])
 
