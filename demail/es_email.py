@@ -261,6 +261,8 @@ def dump(bytes, name):
     text_file.close()
 
 if __name__ == "__main__":
+    val = get_ranked_email_address_from_email_addrs_index("sample", "1970","now", 20)
+
     res=get_email("sample","ea57b82e-7fe8-11e5-bb05-08002705cb99")
     # email= "katie.baur@myflorida.com"
     email="arlene.dibenigno@myflorida.com"

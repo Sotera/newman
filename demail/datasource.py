@@ -39,6 +39,8 @@ def listAllDataSet():
     ic = IndicesClient(es)
     stats = ic.stats(index="_all")
     indexes = [_index_record(index) for index in stats["indices"]]
+
+
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**{})
 
     email_addrs = get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size)["emails"]

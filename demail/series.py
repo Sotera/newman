@@ -36,7 +36,8 @@ def get_datetime_bounds(index, type="emails"):
 
     avg_datetime = parse(pct)
 
-    delta = timedelta(**{default_timeline_interval() : int(default_timeline_span())/2})
+
+    delta = timedelta(**{default_timeline_interval(index) : int(default_timeline_span(index))/2})
 
     return ((avg_datetime-delta).strftime("%Y-%m-%d"), (avg_datetime+delta).strftime("%Y-%m-%d"))
 
