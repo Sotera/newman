@@ -1370,7 +1370,10 @@ function document_type(ext){
 
 function draw_attachments_table(email_address){
   var deferred = $.Deferred();
-  $.ajax('email/attachments/' + email_address).done(function(response){
+  var attachment_url = 'email/attachments/' + email_address;
+  attachment_url = newman_data_source.appendDataSource( attachment_url );
+
+  $.ajax(attachment_url).done(function(response){
     var email_attach_list = _.mapcat(response.email_attachments, function(r){
       var o = _.object(["email_id", "attach_id", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"], r);
       var copy = _.omit(o, "attach");
