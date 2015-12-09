@@ -519,7 +519,7 @@ var search_result = (function () {
       }
     });
 
-    console.log('contains( ' + result.label + ' ) ' + found);
+    //console.log('contains( ' + result.label + ' ) ' + found);
 
     return found;
   };

@@ -67,12 +67,11 @@ function validateResponseEmailDocs(response) {
 function validateResponseSearch(response) {
   var debug_enabled = false;
   if (response) {
-    console.log('validateResponseSearch(...)');
-
 
     // validate graph nodes and links
     if (response.graph) {
       if (debug_enabled) {
+        console.log('validateResponseSearch(response.graph)');
         console.log('\tnodes[' + response.graph.nodes.length + '] links[' + response.graph.links.length + ']');
       }
 
@@ -688,4 +687,18 @@ function getURLPathName( url ) {
 function getURLHost( url ) {
   var link = getURLObject( url );
   return link.host;
+}
+
+function newDateTimeInstance(datetime_as_string) {
+  var _datetime;
+  if (datetime_as_string) {
+    //console.log('newDateTimeInstance(' + datetime_as_string + ')');
+    var _datetime_string_array = datetime_as_string.split('-');
+    _datetime= new Date(_datetime_string_array[0], (parseInt(_datetime_string_array[1]) - 1), _datetime_string_array[2], 0, 0, 0, 0);
+  }
+  else {
+    _datetime= new Date();
+  }
+  //console.log('\tdatetime-object ' + _datetime.toISOString() + '');
+  return _datetime;
 }

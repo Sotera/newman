@@ -182,20 +182,32 @@ var newman_data_source = (function () {
 
   function setSelected( label, request_enabled ) {
     //console.log( 'setSelected(' + label + ')' );
+    /*
     if(_data_source_selected && label) {
       if(_data_source_selected.label === label) {
         console.log( 'data-set \'' + label + '\' already selected!' );
         return;
       }
     }
+    */
 
     _data_source_selected = getByLabel(label);
     if (_data_source_selected) {
+      console.log('selected data-source : ' + JSON.stringify(_data_source_selected, null, 2));
+
       _default_data_set_id = _data_source_selected.uid;
 
       $('#data_source_selected').find('.dropdown-toggle').html(  '<span class=\"fa fa-database\"></span> ' + label );
 
       if (request_enabled) {
+
+        // hack for now; can abstract better
+        var datetime_min = newDateTimeInstance(_data_source_selected.datetime_min);
+        var datetime_max = newDateTimeInstance(_data_source_selected.datetime_max);
+        var default_start_date = newDateTimeInstance(_data_source_selected.start_datetime_selected);
+        var default_end_date = newDateTimeInstance(_data_source_selected.end_datetime_selected);
+        newman_datetime_range.setDateTimeRangeSlider(datetime_min, datetime_max, default_start_date, default_end_date);
+
         newman_service_data_source.requestDataSetSelect(_data_source_selected.uid);
 
         setTimeout(function() {
@@ -400,17 +412,13 @@ var newman_service_data_source = (function () {
         console.log('selected data-set : ' + JSON.stringify(selected, null, 2));
 
         newman_data_source.setSelected(selected.data_set_label);
-        var data_set_datetime_min_array = selected.data_set_datetime_min.split('-');
-        var data_set_datetime_max_array = selected.data_set_datetime_max.split('-');
-        var datetime_min = new Date(data_set_datetime_min_array[0], data_set_datetime_min_array[1], data_set_datetime_min_array[2], 0, 0, 0, 0);
-        var datetime_max = new Date(data_set_datetime_max_array[0], data_set_datetime_max_array[1], data_set_datetime_max_array[2], 0, 0, 0, 0);
 
-        var start_datetime_selected_array = selected.start_datetime_selected.split('-');
-        var end_datetime_selected_array = selected.end_datetime_selected.split('-');
-        var default_start_date = new Date(start_datetime_selected_array[0], start_datetime_selected_array[1], start_datetime_selected_array[2], 0, 0, 0, 0);
-        var default_end_date = new Date(end_datetime_selected_array[0], end_datetime_selected_array[1], end_datetime_selected_array[2], 0, 0, 0, 0);
-
+        var datetime_min = newDateTimeInstance(selected.data_set_datetime_min);
+        var datetime_max = newDateTimeInstance(selected.data_set_datetime_max);
+        var default_start_date = newDateTimeInstance(selected.start_datetime_selected);
+        var default_end_date = newDateTimeInstance(selected.end_datetime_selected);
         newman_datetime_range.setDateTimeRangeSlider(datetime_min, datetime_max, default_start_date, default_end_date);
+        
 
         requestDataSetSelect( id_selected );
       }
