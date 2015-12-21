@@ -27,6 +27,7 @@
     <link href="plugins/chartist/chartist.min.css" rel="stylesheet" type="text/css">
     <link href="css/newman-style-dark.css" rel="stylesheet" type="text/css">
     <link href="css/newman-slider-theme.css" rel="stylesheet" type="text/css">
+    <link href="css/newman-datatable.css" rel="stylesheet" type="text/css">
     <link href="css/default.css" rel="stylesheet" type="text/css">
     <!--<link href="css/ner.css" rel="stylesheet">-->
     <link href="css/newman-custom-bootstrap.css" rel="stylesheet" type="text/css">
@@ -43,17 +44,17 @@
       <div class="email_addr"><a><span></span></a></div>
       <ul id="radial">
         <li class='slice'>
-          <a class="clickable attach" title="Show Attachments">
+          <a class="clickable attach" title="Show Attachments" id="popup_show_attachment">
             <span class="glyphicon glyphicon-file"></span>
           </a>
         </li>
         <li class='slice'>
-          <a class="clickable email" title="Search By Email">
+          <a class="clickable email" title="Search By Email" id="popup_search_email_address">
             <span class="glyphicon glyphicon-envelope"></span> 
           </a>
         </li>
         <li class='slice'>
-          <a class="clickable community" title="Search By Community">
+          <a class="clickable community" title="Search By Community" id="popup_search_community">
             <span class="glyphicon glyphicon-search"></span> 
           </a>
         </li>
@@ -555,8 +556,8 @@
                     <!--<th><i class="fa fa-paper-plane-o" data-toggle="tooltip" data-placement="left" title="" data-content="total sent"></i></th>-->
                     <th><i class="fa fa-send-o" rel="tooltip" data-placement="top" title="Email Sent"></i></th>
                     <th><i class="fa fa-inbox" rel="tooltip" data-placement="top" title="Email Received"></i></th>
-                    <th><i class="fa fa-paperclip" rel="tooltip" data-placement="top" title="File Attached"></i></th>
-                    <th><i class="fa fa-envelope-o" rel="tooltip" data-placement="top" title="Query Matched"></i></th>
+                    <th><i class="fa fa-paperclip" rel="tooltip" data-placement="top" title="File Attachment(s)"></i></th>
+                    <th><i class="fa fa-envelope-o" rel="tooltip" data-placement="top" title="Search Matched"></i></th>
                     <th><i class="fa fa-users" rel="tooltip" data-placement="top" title="User Associated"></i></th>
                     <th><i class="fa fa-cubes" rel="tooltip" data-placement="top" title="Subset"></i></th>
                   </tr>
@@ -674,7 +675,7 @@
                   </li>
                   <li style="height: inherit;">
                     <a href="#dashboard_tab_content_attach_activities" style="height: inherit;" role="tab" data-toggle="tab">
-                      <i class="fa fa-paperclip" rel="tooltip" data-placement="bottom" title="File Attached"></i> Attached
+                      <i class="fa fa-paperclip" rel="tooltip" data-placement="bottom" title="File Attachment(s)"></i> Attached
                     </a>
                   </li>
                 </ul>
@@ -838,7 +839,7 @@
         <div id="content-analytics-email" class="container-fluid analytics-content" >
 
           <!--Start Visual-Filter-->
-          <div style="position: fixed; left: 10%; background-color: rgba(210, 210, 210, 0.6); z-index: 999; font-size: 11px;
+          <div style="position: fixed; left: 1%; background-color: rgba(210, 210, 210, 0.6); z-index: 999; font-size: 11px;
              border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; width: 30%;">
 
             <div class="row" style="margin: 0;">
@@ -886,7 +887,7 @@
               -->
               <div class="col-sm-12">
                 <div id="toggle_legends"><span class="glyphicon glyphicon-chevron-down">Legend</span></div>
-                <div id="legend_list" style="height: 0px; max-height:375px; overflow-y:scroll;">
+                <div id="legend_list" style="height: 0px; max-height:375px; overflow-y: scroll;">
                   <table id="legend-table" class="table" style="display: table; table-layout: fixed; width: 98%;">
                     <thead />
                     <tbody />
@@ -898,91 +899,76 @@
           <!--End Visual-Filter-->
 
           <!--Start Data-Visual-Left-->
-          <div class="col-sm-5"  style= "height: 100%; padding: 0px;">
+          <div class="col-sm-5"  style= "height: 100%; padding: 0;">
             <div id="node_graph"  style= "height: 580px;"> </div>
           </div>
           <!--End Data-Visual-Left-->
 
           <!--Start Data-Panel-Right-->
-          <div class="col-sm-7" style= "height: 100%;">
-            <div class="row">
+          <div class="col-sm-7" style= "height: 100%; padding: 0;">
+            <div class="row col-sm-12" style= "height: 100%; margin: 0;">
               <!--Start Data-Panel-Nav-Tabs-->
-              <div class="row">
+              <div class="row" style="height: 35px;">
                 <ul class="col-sm-12 nav nav-tabs" role="tablist" id="tab-list" style= "height: 30px; padding: 0px; font-size: 13px;">
-                  <li class="active" style= "height: 30px;"><a style= "height: 30px;" href="#email-body-tab" role="tab" data-toggle="tab"><i class="fa fa-envelope-o"></i> Email</a></li>
-                  <li style= "height: 30px;"><a style= "height: 30px;" href="#attach-tab" role="tab" data-toggle="tab"><i class="fa fa-paperclip"></i> Attachments</a></li>
+                  <li class="active" style= "height: 30px;"><a style= "height: 30px;" href="#email-table-tab" role="tab" data-toggle="tab"><i class="fa fa-envelope-o"></i> Email</a></li>
+                  <li style= "height: 30px;"><a style= "height: 30px;" href="#attachment-table-tab" role="tab" data-toggle="tab"><i class="fa fa-paperclip"></i> Attachments</a></li>
                 </ul>
               </div>
               <!--End Data-Panel-Nav-Tabs-->
 
               <!--Start Data-Panel-Tab-Content-->
-              <div class="row">
-                <div class="col-sm-12 tab-content" style= "height: 100%; overflow-y: scroll;">
+              <div class="row" style="height: calc(100% - 35px);">
+                <div class="col-sm-12 tab-content" style= "width: 100%; height: 92%;">
+
 
                   <!--Start Data-Panel-Tab-Content-Email-->
-                  <div class="tab-pane active" id="email-body-tab" style="height: 100%;">
-                    <div class="row" style="display: table;">
+                  <div class="tab-pane active" id="email-table-tab" style="height: 100%;">
 
-                      <!--Start Data-Panel-Tab-Content-Email-Star(Like)-Button -->
-                      <div style="display: inline-block; float: left; margin-top: 5px; margin-left: 10px;" class="active">
-                        <a id="toggle_mark_for_export" class="btn btn-xs btn-default">
-                          <span><i class="fa fa-star fa-lg" style="color: #4888f3"></i></span>
+                    <div style="height: 20px; padding-top: 4px;">
+                      <!-- <div style="float: right;padding-right: 9px;"> -->
+                      <!--   <a class="clickable"> -->
+                      <!--     <span class="glyphicon glyphicon-folder-open" /> -->
+                      <!--   </a> -->
+                      <!-- </div> -->
+                      <div style="float: left;padding-right: 9px;">
+                        <span>Documents </span> <span id="document_count"></span>
+                      </div>
+                      <div style="float: right;padding-right: 9px;">
+                        <a class="clickable" id="email_view_marked">
+                          <span> View Exportable  </span>
                         </a>
+                        |
+                        <a class="clickable" id="email_view_export_all" title="Mark All">
+                          <span class="glyphicon glyphicon-plus"> </span>
+                        </a>
+                        |
+                        <a class="clickable" id="email_view_export_all_remove" title="Unmark All">
+                          <span class="glyphicon glyphicon-minus"> </span>
+                        </a>
+                        |
+                        <!-- <a class="clickable" id="email_group_conversation" title="Conversations"> -->
+                        <!--   <span class="glyphicon glyphicon-tasks"></span> -->
+                        <!-- </a> -->
                       </div>
-                      <!--End Data-Panel-Tab-Content-Email-Star(Like)-Button -->
-
-                      <!--Start Data-Panel-Tab-Content-Email-Mark-Read-Toggle -->
-                      <div style="display: inline-block; float: left; margin-top: 5px; margin-left: 10px;">
-                        <button id="toggle_mark_as_read" class="btn btn-xs btn-default">
-                          <span><i class="fa fa-check-square-o fa-lg"></i> Mark As Read</span>
-                        </button>
-                      </div>
-                      <!--End Data-Panel-Tab-Content-Email-Mark-Read-Toggle -->
-
-                      <!--Start Data-Panel-Tab-Content-Email-Pertinence-Select -->
-                      <div style="display: inline-block; float:left; margin: 5px 0px 5px 15px;">
-                        <div class="btn-group" style="margin: 0px; font-size: 12px; font-weight: normal;">
-                          <a class="btn btn-xs btn-default" href="#level_pertinence_not" data-toggle="dropdown" style="color: #bbbbbb">
-                            <i class="fa fa-flag fa-lg"></i> Not Pertinent
-                          </a>
-                          <a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#level_pertinence_not">
-                            <span class="fa fa-caret-down"></span>
-                          </a>
-                          <ul class="dropdown-menu" role="menu" >
-                            <li>
-                              <a href="#level_pertinence_very" role="menuitem" data-toggle="dropdown" style="color: #ff3200">
-                                <i class="fa fa-flag fa-lg"></i> Very Pertinent
-                              </a>
-                            </li>
-                            <li>
-                              <a href="#level_pertinence_pertinent" role="menuitem" data-toggle="dropdown" style="color: #00ff64">
-                                <i class="fa fa-flag fa-lg"></i> Pertinent
-                              </a>
-                            </li>
-                            <li>
-                              <a href="#level_pertinence_not" role="menuitem" data-toggle="dropdown" style="color: #bbbbbb">
-                                <i class="fa fa-flag fa-lg"></i> Not Pertinent
-                              </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                              <a href="#level_pertinence_irrelevant" role="menuitem" data-toggle="dropdown" style="color: rgb(175, 173, 185)">
-                                <i class="fa fa-square-o fa-lg"></i> Clear Flag
-                              </a>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                      <!--End Data-Panel-Tab-Content-Email-Pertinence-Select -->
-
-                      <div style="background-color: #f0f0f0; padding: 5px; margin-left: 20px; float: left; display: inline-block;" id="topic_mini_chart"></div>
-
                     </div>
-                    <div class="row" style= "padding: 0px 0px 0px 15px; font-size: 13px;" id="email-body"> Select an Email to preview </div>
+                    <!-- Start Data-Table-Documents -->
+                    <div class="datatable_container" style="width: 100%; height: 95%; overflow-y: scroll;">
+                      <!--
+                      <table id="result_table" class="table" style="display: table; table-layout: fixed; overflow-y: scroll;" >
+                        <thead class="result_thead"></thead>
+                        <tbody class="result_tbody"></tbody>
+                      </table>
+                      -->
+                      <table id="result_table" class="datatable display" cellspacing="0"
+                             style="width: 100%; height: 100%; display: table; table-layout: fixed; vertical-align: top" >
+                      </table>
+                    </div>
+                    <!-- End Data-Table-Documents -->
+
                   </div>
                   <!--End Data-Panel-Tab-Content-Email-->
 
-                  <div class="tab-pane" id="attach-tab">
+                  <div class="tab-pane" id="attachment-table-tab">
                     <div style="padding-bottom: 10px;">
                       <span>Attachments under : </span><span id="attach-sender" style="font-weight: bold;"></span>
                     </div>
@@ -993,7 +979,7 @@
                   </div>
                 </div>
               </div>
-              <!--Start Data-Panel-Tab-Content-->
+              <!--End Data-Panel-Tab-Content-->
 
               <!-- Create an SVG element to represent the legend -->
               <svg id="legend" style="position:fixed; top:100px; right:0px; pointer-events:none;"></svg>
@@ -1021,60 +1007,83 @@
     <!--End Main-Container-->
 
   <!-- Start Data-Table-Container -->
-  <div class="container-fluid" id="container-data-table" style="position: fixed; bottom: 0px;">
-    <div class="row" id="bottom-panel-toggle">
-      <div class="col-sm-12">
+  <div class="container-fluid col-sm-5" id="container-bottom-left" style="position: fixed; bottom: 0px; margin: 0; padding: 0;">
+    <div class="row col-sm-12" style="margin: 0; padding: 0;" id="bottom-panel-toggle">
+      <div class="col-sm-12" style="margin: 0; padding: 0px 0px 0px 10px;">
         <!-- Start Data-Table-Toggle -->
-        <div class="col-sm-2 col-sm-offset-5 toggle-button" id="button-toggle-data-table">
+        <div class="col-sm-offset-10 toggle-button" id="button-toggle-container-bottom-left">
           <a><i class="fa fa-files-o"></i> <span class="glyphicon glyphicon-chevron-up"></span></a>
         </div>
         <!-- End Data-Table-Toggle -->
 
-        <div class="col-sm-12" style="height: calc(100% - 20px); max-height: 300px; background-color:#d3d3d3;">
-          <div style="height: 100%; max-height: 300px;">
-            <div style="height: 20px; padding-top: 4px;">
-              <!-- <div style="float: right;padding-right: 9px;"> -->
-              <!--   <a class="clickable"> -->
-              <!--     <span class="glyphicon glyphicon-folder-open" /> -->
-              <!--   </a> -->
-              <!-- </div> -->
-              <div style="float: left;padding-right: 9px;">
-                <span><i class="fa fa-envelope-o"></i> Documents: </span> <span id="document_count"></span>
+        <!--<div style="height: 600px; background-color:#d3d3d3;">-->
+          <div class="col-sm-12" style="display: table; height: 100%; margin: 0; padding: 0; height: 600px; background-color:#d3d3d3;">
+            <!--
+            <div style="background-color: #f0f0f0; padding: 5px; margin-left: 20px; float: left; display: inline-block;" id="topic_mini_chart"></div>
+            -->
+
+            <div class="row col-sm-12" style="height: 35px; margin: 0; padding: 0;">
+
+              <!--Start Data-Panel-Tab-Content-Email-Star(Like)-Button -->
+              <div style="display: inline-block; float: left; margin-top: 5px; margin-left: 10px;" class="active">
+                <a id="toggle_mark_for_export" class="btn btn-xs btn-default">
+                  <span><i class="fa fa-star fa-lg" style="color: #4888f3"></i></span>
+                </a>
               </div>
-              <div style="float: right;padding-right: 9px;">
-                <a class="clickable" id="email_view_marked">
-                  <span> View Exportable  </span>
-                </a>
-                |
-                <a class="clickable" id="email_view_export_all" title="Mark All">
-                  <span class="glyphicon glyphicon-plus"> </span>
-                </a>
-                |
-                <a class="clickable" id="email_view_export_all_remove" title="Unmark All">
-                  <span class="glyphicon glyphicon-minus"> </span>
-                </a>
-                |
-                <!-- <a class="clickable" id="email_group_conversation" title="Conversations"> -->
-                <!--   <span class="glyphicon glyphicon-tasks"></span> -->
-                <!-- </a> -->
+              <!--End Data-Panel-Tab-Content-Email-Star(Like)-Button -->
+
+              <!--Start Data-Panel-Tab-Content-Email-Mark-Read-Toggle -->
+              <div style="display: inline-block; float: left; margin-top: 5px; margin-left: 10px;">
+                <button id="toggle_mark_as_read" class="btn btn-xs btn-default">
+                  <span><i class="fa fa-check-square-o fa-lg"></i> Mark As Read</span>
+                </button>
               </div>
+              <!--End Data-Panel-Tab-Content-Email-Mark-Read-Toggle -->
+
+              <!--Start Data-Panel-Tab-Content-Email-Pertinence-Select -->
+              <div style="display: inline-block; float:left; margin: 5px 0px 5px 15px;">
+                <div class="btn-group" style="margin: 0px; font-size: 12px; font-weight: normal;">
+                  <a class="btn btn-xs btn-default" href="#level_pertinence_not" data-toggle="dropdown" style="color: #bbbbbb">
+                    <i class="fa fa-flag fa-lg"></i> Not Pertinent
+                  </a>
+                  <a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#level_pertinence_not">
+                    <span class="fa fa-caret-down"></span>
+                  </a>
+                  <ul class="dropdown-menu" role="menu" >
+                    <li>
+                      <a href="#level_pertinence_very" role="menuitem" data-toggle="dropdown" style="color: #ff3200">
+                        <i class="fa fa-flag fa-lg"></i> Very Pertinent
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#level_pertinence_pertinent" role="menuitem" data-toggle="dropdown" style="color: #00ff64">
+                        <i class="fa fa-flag fa-lg"></i> Pertinent
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#level_pertinence_not" role="menuitem" data-toggle="dropdown" style="color: #bbbbbb">
+                        <i class="fa fa-flag fa-lg"></i> Not Pertinent
+                      </a>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                      <a href="#level_pertinence_irrelevant" role="menuitem" data-toggle="dropdown" style="color: rgb(175, 173, 185)">
+                        <i class="fa fa-square-o fa-lg"></i> Clear Flag
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <!--End Data-Panel-Tab-Content-Email-Pertinence-Select -->
             </div>
-            <!-- Start Data-Table-Documents -->
-            <div style="width: 100%; height: 100%; max-height: 280px; overflow-y: scroll;">
-              <!--
-              <table id="result_table" class="table" style="display: table; table-layout: fixed; overflow-y: scroll;" >
-                <thead class="result_thead"></thead>
-                <tbody class="result_tbody"></tbody>
-              </table>
-              -->
-              <table id="result_table" class="display" width="100%" cellspacing="0"
-                     style="display: table; table-layout: fixed; font-size: 12px; padding: 0; margin: 0px 2px 0px 2px; vertical-align: middle; line-height: 6px;" >
-              </table>
+
+            <div class="row col-sm-12" style="height: calc(100% - 35px); margin: 0; padding: 0; max-height: 565px; max-width: 545px; overflow: scroll;">
+              <div class="col-sm-12" style="margin: 0; padding: 0px 5px 5px 10px; font-size: 13px; height: 100%; width: 100%;" id="email-body">  Please select an email to view ...</div>
             </div>
-            <!-- Start Data-Table-Documents -->
-          </div>
+
+
         </div>
-      </div>
+
     </div>
   </div>
   <!-- End Data-Table-Container -->
@@ -1110,6 +1119,7 @@
     <script src="plugins/tinymce/jquery.tinymce.min.js"></script>
     <script src="plugins/morris/morris.min.js"></script>
     <script src="plugins/raphael/raphael-min.js"></script>
+    <script src="plugins/font-awesome/font-awesome-unicode-map.js"></script>
 
     <script src="plugins/user-ale/userale.js"></script>
 

@@ -185,7 +185,8 @@ function populateDataTable( data_rows ) {
       pertinence_icon = newman_service_email_pertinence.getPertinentHTML();
     }
 
-    return [ row.datetime, row.from, recipient_count, row.bodysize, attach_count, row.subject, exportable_icon, pertinence_icon, row.num ];
+    var date_text = row.datetime.substring(0, 10);
+    return [ date_text, row.from, recipient_count, row.bodysize, attach_count, row.subject, exportable_icon, pertinence_icon, row.num ];
 
   });
 
@@ -201,6 +202,8 @@ function populateDataTable( data_rows ) {
   if (data_table_rows) {
     data_table_ui = $('#result_table').DataTable({
       destroy: true,
+      "lengthMenu": [[10, 20, 40, -1],[10, 20, 40, "All"]],
+      "autoWidth": true,
       /*fixedHeader: {
         header: true,
         footer: true
@@ -208,15 +211,15 @@ function populateDataTable( data_rows ) {
       //rowId: 'ID',
       data: data_table_rows,
       columns: [
-        {title: "Date", "width": "12%"},
+        {title: "Date", "width": "9%"},
         {title: "From", "width": "20%"},
-        {title: "Recipient(s)", "width": "7%"},
-        {title: "Size", "width": "7%"},
-        {title: "<i class=\"fa fa-paperclip\"></i>", "width": "5%"},
-        {title: "Subject", "width": "43%"},
-        {title: "<i class=\"fa fa-download\"></i>", "width": "3%"},
-        {title: "<i class=\"fa fa-flag\"></i>", "width": "3%"},
-        {title: "ID"},
+        {title: "<i class=\"fa fa-inbox\" rel=\"tooltip\" data-placement=\"top\" title=\"Recipient(s)\"></i>", "width": "5%"},
+        {title: "Size", "width": "6%"},
+        {title: "<i class=\"fa fa-paperclip\" rel=\"tooltip\" data-placement=\"top\" title=\"Attachment(s)\"></i>", "width": "5%"},
+        {title: "Subject", "width": "35%"},
+        {title: "<i class=\"fa fa-download\"></i>", "width": "5%"},
+        {title: "<i class=\"fa fa-flag\"></i>", "width": "5%"},
+        {title: "ID", "width": "0%"}
       ],
       "order": [[ 0, "desc" ]]
       //bug in dataTables lib
@@ -267,12 +270,15 @@ function populateDataTable( data_rows ) {
 
   }
 
-  bottom_panel.open();
-
 }
 
 function showEmailView(email_id){
-  $('#tab-list li:eq(2) a').tab('show')
+  if (!bottom_panel.isOpen()){
+    //resize bottom_panel
+    bottom_panel.open();
+  }
+
+  //$('#tab-list li:eq(2) a').tab('show')
   $(document).scrollTop(0);
   $("#email-body").empty();
   $("#email-body").append($('<span>').text('Loading... ')).append(waiting_bar);

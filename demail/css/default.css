@@ -254,8 +254,8 @@ div.bootstrap-growl >span.close {
     color: #777;
 }
 .tab-pane { height: 100%;}
-#email-body { height: calc(100% - 80px); }
-.body-view { height: 100%; overflow-y: scroll; }
+#email-body { width: 100%; height: 100%; }
+.body-view { width: 100%; height: 100%; }
 
 .marked {
     color: #ffd700;
@@ -396,13 +396,10 @@ a.ctrl:focus, .ctrl a:focus { outline: none; }
     /* "unskew" & rotate by -A°/2 */
     transform: skewY(-60deg) rotate(-15deg);
     background: /* lateral separators */
-    linear-gradient(75deg,
-                    transparent 50%, grey 50%, transparent 54%) no-repeat 36.5% 0,
-    linear-gradient(-75deg,
-                    transparent 50%, grey 50%, transparent 54%) no-repeat 63.5% 0,
+    linear-gradient(75deg, transparent 50%, grey 50%, transparent 54%) no-repeat 36.5% 0,
+    linear-gradient(-75deg, transparent 50%, grey 50%, transparent 54%) no-repeat 63.5% 0,
     /* make sure inner part is transparent */
-    radial-gradient(rgba(127,127,127,0) 49%,
-                    rgba(255,255,255,.7) 51%, #333 52%);
+    radial-gradient(rgba(127,127,127,0) 49%, rgba(255,255,255,.7) 51%, #333 52%);
     background-size: 15% 15%, 15% 15%, cover;
     line-height: 1.4;
 }

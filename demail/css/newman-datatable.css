@@ -1,0 +1,38 @@
+.datatable_container {
+    width: 100%;
+    margin: 0 auto;
+}
+
+.datatable {
+    cellspacing: 0;
+    cellspacing: 0;
+    padding: 0;
+    margin: 0;
+    vertical-align: top;
+    border-spacing: 0;
+    line-height: 9px;
+}
+
+.datatable th {
+    font-size: 12px;
+}
+
+.datatable td {
+    font-size: 12px;
+}
+
+.datatable th div.dataTables_sizing {
+    font-size: 12px;
+}
+
+.dataTables_length {
+    font-size: 12px;
+}
+
+.dataTables_info {
+    font-size: 12px;
+}
+
+.dataTables_paginate {
+    font-size: 12px;
+}
