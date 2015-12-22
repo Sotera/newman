@@ -4,6 +4,8 @@
 
 var current_email = null;
 var current_export = null;
+var data_column_key_index = 7;
+var data_column_export_index = 6;
 
 function setEmailVisible(email_id){
   console.log("setEmailVisible(" + email_id + ")");
@@ -12,7 +14,8 @@ function setEmailVisible(email_id){
 
 var data_table_ui;
 var data_table_rows;
-var data_table_rows_map = {};
+var data_row_is_read_map = {};
+var data_row_is_exportable_map = {};
 
 function recipientCount(to, cc, bcc){
   return _.reduce(_.map([to, cc, bcc], splitItemCount), function(a,b){ return a+b;}, 0);
@@ -51,17 +54,17 @@ function updateDataTableColumn( column_index, value_map ) {
         .data()
         .each(function (value, row_index) {
 
-          var key = table.cell( row_index, 8).data();
+          var key = table.cell( row_index, data_column_key_index).data();
           var target = value_map[key];
           if (target) {
             if (target === 'true') {
               //console.log('updateDataTableColumn[' + row_index + ', ' + column_index + '] value \'' + value + '\' key \'' + key + '\' target \'' + target + '\'');
               table.cell(row_index, column_index).data(newman_service_email_exportable.getExportableHTML());
-
+              data_row_is_exportable_map[key] = true;
             }
             else {
               table.cell(row_index, column_index).data(newman_service_email_exportable.getNotExportableHTML());
-
+              data_row_is_exportable_map[key] = false;
             }
           }
 
@@ -83,15 +86,14 @@ function markDataTableRowAsRead( value_map ) {
           var jquery_row = $(this.node());
           //console.log( 'row_data: ' + JSON.stringify(row_data, null, 2) );
 
-          var key = row_data[8];
+          var key = row_data[data_column_key_index];
           var value = value_map[key];
           if (value) {
             console.log( 'matched row: ' + key + ', ' + value );
 
             if (value === 'true') {
               jquery_row.addClass( 'data-table-row-read' );
-              var is_read = {"is_read" : true};
-              data_table_rows_map[ key ] = is_read;
+              data_row_is_read_map[ key ] = true;
             }
             else {
               jquery_row.removeClass( 'data-table-row-read' );
@@ -117,8 +119,8 @@ function markAsRead(is_marked, id_list_selected){
         id_map[value] = String(true);
       });
 
-      _.each(data_table_rows_map, function (value, key) {
-        if (value["is_read"]) {
+      _.each(data_row_is_read_map, function (value, key) {
+        if (value) {
           id_map[key] = String(true);
         }
       });
@@ -128,15 +130,15 @@ function markAsRead(is_marked, id_list_selected){
         id_map[value] = String(false);
       });
 
-      var new_data_rows_map = {};
-      _.each(data_table_rows_map, function (value, key) {
+      var new_data_row_is_read_map = {};
+      _.each(data_row_is_read_map, function (value, key) {
         var row_id = id_map[key];
         if(!row_id) {
-          new_data_rows_map[key] = value;
+          new_data_row_is_read_map[key] = value;
         }
 
       });
-      data_table_rows_map = new_data_rows_map;
+      data_row_is_read_map = new_data_row_is_read_map;
     }
 
     //console.log('id_set: ' + JSON.stringify(value_map, null, 2));
@@ -166,7 +168,8 @@ function getAllDataTableColumn( column_index ) {
 function populateDataTable( data_rows ) {
   console.log( 'populateDataTable( ' + data_rows.length + ' )' );
 
-  data_table_rows_map = {};
+  data_row_is_read_map = {};
+  data_row_is_exportable_map = {};
   data_table_rows = _.map( data_rows, function( row ) {
 
     var recipient_count = recipientCount( row.to, row.cc, row.bcc );
@@ -186,7 +189,7 @@ function populateDataTable( data_rows ) {
     }
 
     var date_text = row.datetime.substring(0, 10);
-    return [ date_text, row.from, recipient_count, row.bodysize, attach_count, row.subject, exportable_icon, pertinence_icon, row.num ];
+    return [ date_text, row.from, recipient_count, row.bodysize, attach_count, row.subject, exportable_icon, row.num ];
 
   });
 
@@ -211,14 +214,13 @@ function populateDataTable( data_rows ) {
       //rowId: 'ID',
       data: data_table_rows,
       columns: [
-        {title: "Date", "width": "9%"},
+        {title: "Date", "width": "10%"},
         {title: "From", "width": "20%"},
-        {title: "<i class=\"fa fa-inbox\" rel=\"tooltip\" data-placement=\"top\" title=\"Recipient(s)\"></i>", "width": "5%"},
+        {title: "<i class=\"fa fa-inbox\" rel=\"tooltip\" data-placement=\"bottom\" title=\"Recipient(s)\"></i>", "width": "6%"},
         {title: "Size", "width": "6%"},
-        {title: "<i class=\"fa fa-paperclip\" rel=\"tooltip\" data-placement=\"top\" title=\"Attachment(s)\"></i>", "width": "5%"},
-        {title: "Subject", "width": "35%"},
-        {title: "<i class=\"fa fa-download\"></i>", "width": "5%"},
-        {title: "<i class=\"fa fa-flag\"></i>", "width": "5%"},
+        {title: "<i class=\"fa fa-paperclip\" rel=\"tooltip\" data-placement=\"bottom\" title=\"Attachment(s)\"></i>", "width": "6%"},
+        {title: "Subject", "width": "37%"},
+        {title: "<i class=\"fa fa-star-o\" rel=\"tooltip\" data-placement=\"bottom\" title=\"Exportable(s)\"></i>", "width": "5%"},
         {title: "ID", "width": "0%"}
       ],
       "order": [[ 0, "desc" ]]
@@ -226,7 +228,7 @@ function populateDataTable( data_rows ) {
       /*
       "columnDefs": [
         {
-          "targets": 8,
+          "targets": data_row_key_index,
           "visible": false,
           "searchable": false
         }
@@ -235,7 +237,7 @@ function populateDataTable( data_rows ) {
     });
 
     /*
-    var column = data_table_ui.column( 6 );
+    var column = data_table_ui.column( data_column_key_index );
     column.visible( false );
     */
 
@@ -247,10 +249,10 @@ function populateDataTable( data_rows ) {
       console.log('result_table [' + row_index + ',' + column_index + '] selected');
 
       var row_selected = data_table_ui.row( this ).data();
-      console.log( 'data_table_row ID \'' + row_selected[8] + '\' selected' );
+      console.log( 'data_table_row ID \'' + row_selected[data_column_key_index] + '\' selected' );
       //console.log( 'data_table_row: ' + JSON.stringify(row_selected, null, 2));
 
-      showEmailView( row_selected[8] );
+      showEmailView( row_selected[data_column_key_index] );
 
       //var visible_cell_text_1 = $("td:eq(0)", this).text();
       //var visible_cell_text_4 = $("td:eq(3)", this).text();
@@ -283,16 +285,32 @@ function showEmailView(email_id){
   $("#email-body").empty();
   $("#email-body").append($('<span>').text('Loading... ')).append(waiting_bar);
 
-  //update toggle button
-  var mark_read = data_table_rows_map[email_id];
-  if(mark_read) {
+  //update exportable toggle button
+  var is_exportable = data_row_is_exportable_map[email_id];
+  if(is_exportable) {
     //already marked as read, mark as unread
-    if (mark_read["is_read"]) {
-      var toggle_ui = $("#toggle_mark_as_read");
-      if (toggle_ui) {
-        toggle_ui.empty();
-        toggle_ui.append( '<span><i class=\"fa fa-square-o fa-lg\"></i> Mark As Unread</span>' );
-      }
+    var toggle_ui = $("#toggle_mark_for_export");
+    if (toggle_ui) {
+      toggle_ui.empty();
+      toggle_ui.append( '<span><i class=\"fa fa-star fa-lg\" style=\"color: #4888f3\"></i></span>' );
+    }
+  }
+  else {
+    var toggle_ui = $("#toggle_mark_for_export");
+    if (toggle_ui) {
+      toggle_ui.empty();
+      toggle_ui.append( '<span><i class=\"fa fa-star-o fa-lg\"></i></span>' );
+    }
+  }
+
+  //update read-unread toggle button
+  var is_read = data_row_is_read_map[email_id];
+  if(is_read) {
+    //already marked as read, mark as unread
+    var toggle_ui = $("#toggle_mark_as_read");
+    if (toggle_ui) {
+      toggle_ui.empty();
+      toggle_ui.append( '<span><i class=\"fa fa-square-o fa-lg\"></i> Mark As Unread</span>' );
     }
   }
   else {
@@ -321,7 +339,7 @@ function table_mark_exportable(is_marked, id_list_selected){
 
   var value_map = {};
   if (!id_list_selected) {
-    id_list_selected = getAllDataTableColumn( 8 );
+    id_list_selected = getAllDataTableColumn( data_column_key_index );
   }
 
   //console.log('is_marked ' + is_marked + ' id_set: ' + JSON.stringify(id_list_selected, null, 2));
@@ -338,13 +356,13 @@ function table_mark_exportable(is_marked, id_list_selected){
   });
   //console.log('value_map: ' + JSON.stringify(value_map, null, 2));
 
-  updateDataTableColumn(6, value_map);
+  updateDataTableColumn(data_column_export_index, value_map);
 
 }
 
 function add_view_to_export(){
 
-  var email_id_array = getAllDataTableColumn( 8 );
+  var email_id_array = getAllDataTableColumn( data_column_key_index );
 
   $.ajax({
     url: 'email/exportmany',
@@ -366,7 +384,7 @@ function add_view_to_export(){
 
 function remove_view_from_export(){
 
-  var email_id_array = getAllDataTableColumn( 8 );
+  var email_id_array = getAllDataTableColumn( data_column_key_index );
 
   $.ajax({
     url: 'email/exportmany',
@@ -396,7 +414,7 @@ function initDataTableEvents() {
     }
     var id = current_email;
 
-    var ajaxToggle = function(id, exportable){
+    var exportableToggle = function(id, exportable){
       $.ajax({
         url: 'email/exportable',
         type: "POST",
@@ -418,7 +436,8 @@ function initDataTableEvents() {
         });
     };
 
-    ajaxToggle(id, $("#toggle_mark_for_export").hasClass('marked'));
+    exportableToggle(id, $("#toggle_mark_for_export").hasClass('marked'));
+
 
   });
 
@@ -427,18 +446,16 @@ function initDataTableEvents() {
     if (current_email) {
       var id = current_email;
       var id_set = [id];
-      var mark_read = data_table_rows_map[id];
+      var mark_read = data_row_is_read_map[id];
       if(mark_read) {
         //already marked as read, mark as unread
-        if (mark_read["is_read"]) {
-          markAsRead(false, id_set);
+        markAsRead(false, id_set);
 
-          //update toggle-button
-          var toggle_ui = $("#toggle_mark_as_read");
-          if (toggle_ui) {
-            toggle_ui.empty();
-            toggle_ui.append( '<span><i class=\"fa fa-check-square-o fa-lg\"></i> Mark As Read</span>' );
-          }
+        //update toggle-button
+        var toggle_ui = $("#toggle_mark_as_read");
+        if (toggle_ui) {
+          toggle_ui.empty();
+          toggle_ui.append( '<span><i class=\"fa fa-check-square-o fa-lg\"></i> Mark As Read</span>' );
         }
       }
       else {

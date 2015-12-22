@@ -1809,8 +1809,6 @@ var dashboard_content = (function () {
         email_analytics_content.close();
       }
 
-      bottom_panel.hide();
-
       dashboard_content_container.fadeToggle('fast');
       //container.show();
 
@@ -1821,7 +1819,7 @@ var dashboard_content = (function () {
       reloadDashboardRankEmail();
       reloadDashboardFileTypeAttachment();
     }
-
+    bottom_panel.hide();
 
   };
 
@@ -1883,11 +1881,12 @@ var email_analytics_content = (function () {
         dashboard_content.close();
       }
 
-      bottom_panel.unhide();
+      //bottom_panel.unhide();
 
       email_container.fadeToggle('fast');
       //container.show();
     }
+    bottom_panel.hide();
   };
 
   var close = function () {
