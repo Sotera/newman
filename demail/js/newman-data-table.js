@@ -7,6 +7,11 @@ var current_export = null;
 var data_column_key_index = 7;
 var data_column_export_index = 6;
 
+function resetEmailVisible() {
+  $("#email-body").empty();
+  current_email = undefined;
+}
+
 function setEmailVisible(email_id){
   console.log("setEmailVisible(" + email_id + ")");
   current_email = email_id;
@@ -407,9 +412,10 @@ function remove_view_from_export(){
 function initDataTableEvents() {
 
   $("#toggle_mark_for_export").click(function() {
-    console.log("toggle export flag for email_id... ");
+    console.log("clicked toggle_mark_for_export");
     if (!current_email) {
       //alert("please select an email first");
+      console.log("current_email_document undefined!");
       return;
     }
     var id = current_email;

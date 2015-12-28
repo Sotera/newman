@@ -137,9 +137,12 @@ var newman_entity_email = (function () {
           .attr("class", "label clickable")
           .on("click", function (d) {
             //console.log('entity-text clicked\n' + JSON.stringify(d, null, 2));
-            clearAllEntitySelected();
-            setEntitySelected(d[2], d[1], true, false);
-            newman_service_entity_search.requestService();
+
+            onEntityClicked( d[2], d[1] );
+
+            //clearAllEntitySelected();
+            //setEntitySelected(d[2], d[1], true, false);
+            //newman_service_entity_search.requestService();
           })
           .text(function (d) {
 
@@ -220,6 +223,42 @@ var newman_entity_email = (function () {
 
   function getTopCount() {
     _top_count;
+  }
+
+  function getAllEntityAsString() {
+
+    var entity_set_as_string = '';
+    var keys = _.keys(_entity_selected_org);
+    if (keys) {
+      _.each(keys, function(key) {
+        entity_set_as_string += key + ' ';
+      });
+    }
+
+    keys = _.keys(_entity_selected_person);
+    if (keys) {
+      _.each(keys, function(key) {
+        entity_set_as_string += key + ' ';
+      });
+    }
+
+    keys = _.keys(_entity_selected_location);
+    if (keys) {
+      _.each(keys, function(key) {
+        entity_set_as_string += key + ' ';
+      });
+    }
+
+    keys = _.keys(_entity_selected_misc);
+    if (keys) {
+      _.each(keys, function(key) {
+        entity_set_as_string += key + ' ';
+      });
+    }
+
+    entity_set_as_string = entity_set_as_string.trim().replace(' ', ',');
+
+    return entity_set_as_string;
   }
 
   function appendEntity(url_path) {
@@ -382,6 +421,15 @@ var newman_entity_email = (function () {
     _entity_selected_misc = {};
   }
 
+  function onEntityClicked(key, type) {
+    console.log( 'onEntityClicked( ' + key + ', ' + type + ' )' );
+
+    clearAllEntitySelected();
+
+    setEntitySelected(key, type, true, false);
+
+    newman_service_entity_search.requestService();
+  }
 
 
   return {
@@ -392,7 +440,9 @@ var newman_entity_email = (function () {
     'revalidateUIEntityEmail' : revalidateUIEntityEmail,
     'getTopCount' : getTopCount,
     'appendEntity' : appendEntity,
-    'setEntitySelected' : setEntitySelected
+    'setEntitySelected' : setEntitySelected,
+    'onEntityClicked' : onEntityClicked,
+    'getAllEntityAsString' : getAllEntityAsString
   }
 
 }());
@@ -478,6 +528,15 @@ var newman_service_entity_search = (function () {
     var service_url = newman_data_source.appendDataSource(_service_url);
     service_url = newman_datetime_range.appendDatetimeRange(service_url);
     service_url = newman_entity_email.appendEntity(service_url);
+
+    // add to history
+    var entity_list_as_string = newman_entity_email.getAllEntityAsString();
+    if (entity_list_as_string.length > 30) {
+      entity_list_as_string = entity_list_as_string.substring(0, 30);
+    }
+    entity_list_as_string = decodeURIComponent(entity_list_as_string);
+    updateHistory(service_url, 'entity', entity_list_as_string);
+
     return service_url;
   }
 
@@ -530,16 +589,21 @@ var newman_service_entity_search = (function () {
 
     $('#document_count').text(filtered_response.rows.length);
 
+    // clear existing content if any
+    clear_content_view_email();
+
     // populate data-table
     populateDataTable( filtered_response.rows )
 
     if (bottom_panel.isOpen()){
       //resize bottom_panel
-      bottom_panel.open();
+      bottom_panel.close();
+
     }
 
     // render graph display
     drawGraph( filtered_response.graph );
+
   }
 
 

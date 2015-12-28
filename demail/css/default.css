@@ -33,18 +33,73 @@ ul {
     font-weight: bold;
 }
 
-.clickable { cursor: pointer; }
+.clickable {
+    cursor: pointer;
+}
 
-.mitie { cursor: pointer; }
-.mitie-person { padding: 2px; background-color: #00ccff; }
-.mitie-location {  padding: 2px; background-color: #00ff00; }
-.mitie-organization {  padding: 2px; background-color: #ffcc33; }
-.mitie-misc { padding: 2px; background-color: #c0c0c0; }
+.mitie {
+    cursor: pointer;
+}
+.mitie-person {
+    padding: 2px;
+    background-color: #00ccff;
+}
+.mitie-location {
+    padding: 2px;
+    background-color: #00ff00;
+}
+.mitie-organization {
+    padding: 2px;
+    background-color: #ffcc33;
+}
+.mitie-misc {
+    padding: 2px;
+    background-color: #c0c0c0;
+}
 
-.newman-entity-person { padding: 2px; background-color: #00ccff; }
-.newman-entity-location {  padding: 2px; background-color: #00ff00; }
-.newman-entity-organization {  padding: 2px; background-color: #ffcc33; }
-.newman-entity-misc { padding: 2px; background-color: #c0c0c0; }
+.newman-entity-person {
+    padding: 2px;
+    background-color: #00ccff;
+    border-radius: 2px;
+    border: 0px;
+}
+.newman-entity-person:focus, .newman-entity-person:active, .newman-entity-person:hover {
+    border-radius: 2px;
+    border: 1px solid #FFFFFF;
+}
+
+.newman-entity-location {
+    padding: 2px;
+    background-color: #00ff00;
+    border-radius: 2px;
+    border: 0px;
+}
+.newman-entity-location:focus, .newman-entity-location:active, .newman-entity-location:hover {
+    border-radius: 2px;
+    border: 1px solid #FFFFFF;
+}
+
+.newman-entity-organization {
+    padding: 2px;
+    background-color: #ffcc33;
+    border-radius: 2px;
+    border: 0px;
+}
+.newman-entity-organization:focus, .newman-entity-organization:active, .newman-entity-organization:hover {
+    border-radius: 2px;
+    border: 1px solid #FFFFFF;
+}
+
+.newman-entity-misc {
+    padding: 2px;
+    background-color: #c0c0c0;
+    border-radius: 2px;
+    border: 0px;
+}
+.newman-entity-misc:focus, .newman-entity-misc:active, .newman-entity-misc:hover {
+    border-radius: 2px;
+    border: 1px solid #FFFFFF;
+}
 
 .chart rect.person {
     fill: #00ccff;

@@ -318,6 +318,10 @@ function searchByEntity(entityid, type, value){
     });
 }
 
+function clear_content_view_email() {
+  resetEmailVisible();
+}
+
 function produceHTMLView(email_obj) {
 
   var d = _.object(['email_id', 'attach_id','datetime', 'exportable', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], email_obj.email);
@@ -406,7 +410,10 @@ function produceHTMLView(email_obj) {
         var index = body_text.toLocaleLowerCase().indexOf(entity_key.toLocaleLowerCase());
         var split_index = index + entity_key.length;
         var text_token = body_text.substring(0, index);
-        text_token += '<span class=\"newman-entity-' + entity_type + '\">' + entity_key + '</span>';
+
+        //text_token += '<a class=\"newman-entity-' + entity_type + '\" href=\"\">' + entity_key + '</a>';
+        text_token += '<button class="newman-entity-' + entity_type + '" onclick="onEntityClicked(\''+entity_key+'\',\''+ entity_type + '\')">' + entity_key + '</button>';
+
         new_text_tokens.push(text_token);
         body_text = body_text.substring(split_index);
       });
@@ -445,6 +452,9 @@ function produceHTMLView(email_obj) {
   return el;
 }
 
+function onEntityClicked(entity_key, entity_type) {
+  newman_entity_email.onEntityClicked(entity_key, entity_type);
+}
 
 
 function group_email_conversation(){
@@ -1958,7 +1968,8 @@ $(function () {
     email_analytics_content.close();
 
     // close existing data-table displays if applicable
-    bottom_panel.close();
+    //bottom_panel.close();
+    bottom_panel.hide();
 
     // initialize search-result UI
     search_result.setUI($('#search_result_container'));
