@@ -1,10 +1,12 @@
 import tangelo
 import cherrypy
 
-from es_search import get_graph_for_email_address, get_top_email_hits_for_text_query, _build_graph_for_emails, _query_emails
+from es_search import get_graph_for_email_address, get_rows_for_email_address, get_top_email_hits_for_text_query, _build_graph_for_emails, _query_emails
 from newman.newman_config import getDefaultDataSetID, default_min_timeline_bound, default_max_timeline_bound
 from param_utils import parseParamDatetime, parseParamEmailAddress, parseParamEntity
 from es_queries import _build_email_query
+import urllib
+from newman.utils.functions import nth
 
 
 #GET /search/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
@@ -12,6 +14,12 @@ def search(*path_args, **param_args):
     tangelo.log("search.search(path_args[%s] %s)" % (len(path_args), str(path_args)))
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
+
+
+    # TODO this needs to come fromm UI
+    size = size if size >500 else 2500
+
+    email_address=urllib.unquote(nth(path_args, 1, ''))
 
     #re-direct based on field
     if path_args[0] == "text" :
@@ -23,7 +31,7 @@ def search(*path_args, **param_args):
         if len(path_args) == 1:
             return {"graph":{"nodes":[], "links":[]}, "rows":[]}
         elif len(path_args) >= 2:
-            return get_graph_for_email_address(*path_args, **param_args)
+            return get_graph_for_email_address(data_set_id, email_address, start_datetime, end_datetime, size )
     elif path_args[0] == "entity":
         return get_graph_for_entity(*path_args, **param_args)
     elif path_args[0] == "topic":
@@ -33,6 +41,20 @@ def search(*path_args, **param_args):
             #TODO implement search by topic
             return {"graph":{"nodes":[], "links":[]}, "rows":[]}
     return {"graph":{"nodes":[], "links":[]}, "rows":[]}
+
+#GET /graphrows/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>&order=prev
+# 'order' param controls if we are paging the next or previous sets of data and can be next or prev, default is next
+def get_rows(*path_args, **param_args):
+    tangelo.content_type("application/json")
+    tangelo.log("search.get_graphrows(path_args[%s] %s)" % (len(path_args), str(path_args)))
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
+
+    order = param_args.get('order', 'next')
+    order = 'desc' if order=='prev' else 'asc'
+    email_address=urllib.unquote(nth(path_args, 1, ''))
+
+    return get_rows_for_email_address(data_set_id, email_address, start_datetime, end_datetime, size, order)
 
 #GET /search/entity?entities.entity_person=mike,joe&entities.entity_location=paris,los angeles
 def get_graph_for_entity(*args, **kwargs):
@@ -56,6 +78,7 @@ def get_graph_for_entity(*args, **kwargs):
 actions = {
     "search": search,
     "search_user": get_graph_for_email_address,
+    "search_rows": get_rows,
     "search_text": get_top_email_hits_for_text_query,
     "search_entity" : get_graph_for_entity
 }

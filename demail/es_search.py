@@ -195,45 +195,27 @@ def _build_graph_for_emails(index, emails, query_hits):
 
     return {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in emails], "query_hits" : query_hits}
 
-# GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
-# build a graph for a specific email address.
-# args should be a list of terms to search for in any document field
-def get_graph_for_email_address_old(*args, **kwargs):
-    tangelo.log("es_search.get_graph_for_email_address(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+# Build a graph with rows for a specific email address.
+def get_graph_for_email_address(data_set_id, email_address, start_datetime, end_datetime, size):
+    tangelo.log("es_search.get_graph_for_email_address(%s)" % (str(email_address)))
 
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
-
-    # TODO this needs to come fromm UI
-    size = size if size >500 else 2500
-
-    search_terms=[]
-    email_address=urllib.unquote(nth(args, 1, ''))
-
-    if not email_address:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing email address")
-
-    return _create_graph_from_email(data_set_id, email_address, search_terms, start_datetime, end_datetime, size)
-
-# GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
-# build a graph for a specific email address.
-# args should be a list of terms to search for in any document field
-def get_graph_for_email_address(*args, **kwargs):
-    tangelo.log("es_search.get_graph_for_email_address(args: %s kwargs: %s)" % (str(args), str(kwargs)))
-
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
-
-    # TODO this needs to come fromm UI
-    size = size if size >500 else 2500
-
-    email_address=urllib.unquote(nth(args, 1, ''))
-
-    if not email_address:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing email address")
     query  = _build_email_query(email_addrs=[email_address], query_terms='', date_bounds=(start_datetime, end_datetime))
     tangelo.log("es_search.get_graph_for_email_address(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
     return _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+
+# Get all rows for a email address results will be sorted by time asc
+def get_rows_for_email_address(data_set_id, email_address, start_datetime, end_datetime, size, sort_order="asc"):
+    tangelo.log("es_search.get_graph_for_email_address(%s)" % (str(email_address)))
+
+    query  = _build_email_query(email_addrs=[email_address], query_terms='', date_bounds=(start_datetime, end_datetime), sort_order=sort_order, date_mode_inclusive=False)
+    tangelo.log("es_search.get_graph_for_email_address(query: %s)" % (query))
+
+    results = _query_emails(data_set_id, size, query)
+
+    return {"graph":{"nodes":[], "links":[]}, "rows": [_map_emails_to_row(email) for email in results["hits"]], "query_hits" : results["total"]}
+
 
 # GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
 # build a graph for a specific email address.
