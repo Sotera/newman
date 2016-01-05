@@ -18,7 +18,7 @@ _sort_email_addrs_by_total={ "_script": { "script_file": "email_addr-sent-rcvd-s
 _query_all = {"bool":{"must":[{"match_all":{}}]}}
 
 def get_graph_row_fields():
-    return ["id","tos","senders","ccs","bccs","datetime","subject"]
+    return ["id","tos","senders","ccs","bccs","datetime","subject","body","attachments.guid"]
 
 def count(index, type="emails", start="2000-01-01", end="now"):
     es = Elasticsearch(elasticsearch_hosts())
@@ -40,8 +40,8 @@ def _map_emails(fields):
     row["datetime"] = fields.get("datetime",[""])[0]
     row["subject"] =  fields.get("subject",[""])[0]
     row["fromcolor"] =  "1950"
-    row["attach"] =  ""
-    row["bodysize"] =  0
+    row["attach"] =  str(len(fields.get("attachments.guid",[])))
+    row["bodysize"] = len(fields.get("body",[""])[0])
     row["directory"] = "deprecated"
     return row
 
@@ -92,57 +92,6 @@ def _search_ranked_email_addrs(index, start, end, size):
     resp = es.search(index=index, doc_type="email_address", size=size, body=graph_body)
     # tangelo.log("getRankedEmails(resp: %s)" % (resp))
     return resp
-
-# DEPRECATED -- this is being replaced by _create_graph_from_query
-# This will generate the graph structure for a specific email address.  Will aply date filter and term query.
-def _create_graph_from_email(index, email_address, search_terms,start, end, size=2000):
-
-    term_query = {"match_all" : {}} if not search_terms else {"match" : {"_all" : " ".join(search_terms)}}
-
-    query_email_addr =  {"query":{"filtered" : {
-        "query" : term_query,
-        "filter" : {"bool":{
-            "should":[
-                {"term" : { "senders" : email_address}},
-                {"term" : { "tos" : email_address}},
-                {"term" : { "ccs" : email_address}},
-                {"term" : { "bccs" : email_address}}
-            ],
-            # TODO must not contain owner
-            "must":[{"range" : {"datetime" : { "gte": start, "lte": end }}}]
-        }}}}}
-
-
-    es = Elasticsearch(elasticsearch_hosts())
-    emails_resp = es.search(index=index, doc_type="emails", size=size, fields=get_graph_row_fields(), body=query_email_addr)
-
-    query_hits = emails_resp["hits"]["total"]
-    emails = [_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]
-
-    nodes = []
-    edge_map = {}
-    addr_index = {}
-    for email in emails:
-        from_addr = email["from"]
-        if from_addr not in _EMAIL_ADDR_CACHE:
-            tangelo.log("WARNING: From email address not found in cache <%s>" % email)
-            continue;
-
-        if from_addr not in addr_index:
-            nodes.append(_EMAIL_ADDR_CACHE[from_addr])
-            addr_index[from_addr] = len(nodes)-1
-        for rcvr_addr in email["to"]+email["cc"]+email["bcc"]:
-            if rcvr_addr not in addr_index:
-                nodes.append(_EMAIL_ADDR_CACHE[rcvr_addr])
-                addr_index[rcvr_addr] = len(nodes)-1
-            #TODO reduce by key instead of mapping?  src->target and sum on value
-            edge_key = from_addr+"#"+rcvr_addr
-            if edge_key not in edge_map:
-                edge_map[edge_key] = {"source" : addr_index[from_addr],"target": addr_index[rcvr_addr],"value": 1}
-            else:
-                edge_map[edge_key]["value"]=edge_map[edge_key]["value"]+1
-
-    return {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in emails], "query_hits" : query_hits}
 
 # get top score docs for a cluster_idx as per the lda-clustering index type
 # returns {"total":n "hits":[]}

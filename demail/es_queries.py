@@ -78,3 +78,25 @@ def _build_email_query(email_addrs=[], query_terms='', topic_score=None, entity=
     # ]
     }
     return query_email_addr
+
+# Build a query for sender email attachments
+def _build_email_attachment_query(sender_address, query_terms='', topic_score=None, entity={}, date_bounds=None, sort_order="acs", date_mode_inclusive=True):
+
+    term_query = {"match_all" : {}} if not query_terms else {"match" : {"_all" : query_terms}}
+
+    query_email_addr =  {
+        "filter":{"exists":{"field":"attachments"}},
+        "query" : {
+            "filtered" : {
+                "query" : term_query,
+                "filter" :  _build_filter(email_senders=[sender_address], topic_score=topic_score, entity_dict=entity, date_bounds=date_bounds, date_mode_inclusive=date_mode_inclusive)
+            }
+        },
+        "sort":  {} if not term_query else { "datetime": { "order": sort_order }}
+    # Multilevel sort
+    #     "sort": [
+    #     { "_score": { "order": "desc" }},
+    #     { "datetime": { "order": "desc" }}
+    # ]
+    }
+    return query_email_addr

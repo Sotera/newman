@@ -50,8 +50,8 @@ def _map_attachments(index, account_id, attchments):
 def _map_activity(index, account_id, sent_rcvd):
     return {"account_id" : account_id,
             "interval_start_datetime" : sent_rcvd[0]["key_as_string"],
-            "interval_inbound_count" : sent_rcvd[0]["doc_count"],
-            "interval_outbound_count" : sent_rcvd[1]["doc_count"]
+            "interval_outbound_count" : sent_rcvd[0]["doc_count"],
+            "interval_inbound_count" : sent_rcvd[1]["doc_count"]
             }
 
 def entity_histogram_query(email_addrs=[], query_terms='', topic_score=None, date_bounds=None, entity_agg_size=10):

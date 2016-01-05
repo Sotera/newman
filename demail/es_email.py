@@ -8,7 +8,7 @@ from param_utils import parseParamDatetime
 from newman.utils.functions import nth
 from newman.newman_config import elasticsearch_hosts
 from es_search import _search_ranked_email_addrs, count, get_cached_email_addr, initialize_email_addr_cache
-from es_queries import _build_filter
+from es_queries import _build_filter, _build_email_attachment_query
 
 #map the email_address for the email/rank REST service
 def map_email_addr(email_addr_resp, total_emails):
@@ -149,9 +149,9 @@ def get_email(index, email_id):
              source.get("datetime",""),
              "false",
              "".join(source["senders"]),
-             "".join(source["tos_line"]),
-             "".join(source["ccs_line"]),
-             "".join(source["bccs_line"]),
+             ["".join(source["tos_line"]), ";".join(source["tos"])],
+             ["".join(source["ccs_line"]), ";".join(source["ccs"])],
+             ["".join(source["bccs_line"]), ";".join(source["bccs"])],
              source["subject"],
              source["body"].replace('\n',"<br/>"),
              [[f["guid"],f["filename"]] for f in source.get("attachments", default)]
@@ -217,23 +217,16 @@ def get_attachment_by_id(*args, **kwargs):
 
 #GET /attachments/<sender>
 # find all attachments for a specific email address
-def get_attachments_by_sender(*args, **kwargs):
-    tangelo.log("getAttachmentsSender(args: %s kwargs: %s)" % (str(args), str(kwargs)))
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
-    sender=nth(args, 0, '')
+def get_attachments_by_sender(data_set_id, sender, start_datetime, end_datetime, size):
 
-    if not data_set_id:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing data_set_id")
-    if not sender:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing sender")
-
-    tangelo.content_type("application/json")
     # fields= ["id", "dir", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"]
     # fields= ["id", "datetime", "senders", "tos", "ccs", "bccs", "subject", "attachments.filename"]
-    body={"filter":{"exists":{"field":"attachments"}}, "query":{"match":{"senders":sender}}}
+    # body={"filter":{"exists":{"field":"attachments"}}, "query":{"match":{"senders":sender}}}
+
+    body = _build_email_attachment_query(sender, date_bounds=(start_datetime, end_datetime))
 
     es = Elasticsearch(elasticsearch_hosts())
-    attachments_resp = es.search(index=data_set_id, doc_type="emails", size=10, body=body)
+    attachments_resp = es.search(index=data_set_id, doc_type="emails", size=size, body=body)
 
     email_attachments = []
     for attachment_item in attachments_resp["hits"]["hits"]:

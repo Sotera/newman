@@ -70,8 +70,15 @@ def getCommunities(*args, **kwargs):
 def getAllAttachmentBySender(*args, **kwargs):
     tangelo.log("getAttachmentsSender(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    sender=nth(args, 0, '')
+    if not data_set_id:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing data_set_id")
+    if not sender:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing sender")
 
-    return get_attachments_by_sender(*args, **kwargs)
+    tangelo.content_type("application/json")
+
+    return get_attachments_by_sender(data_set_id, sender, start_datetime, end_datetime, size )
 
 # DEPRECATED TODO remove me
 #GET /exportable
