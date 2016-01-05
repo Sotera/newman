@@ -49,6 +49,8 @@ def get_rows(*path_args, **param_args):
     tangelo.log("search.get_graphrows(path_args[%s] %s)" % (len(path_args), str(path_args)))
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
+    # TODO set from UI
+    size = param_args.get('size', 2500)
 
     order = param_args.get('order', 'next')
     order = 'desc' if order=='prev' else 'asc'

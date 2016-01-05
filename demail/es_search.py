@@ -162,8 +162,11 @@ def get_rows_for_email_address(data_set_id, email_address, start_datetime, end_d
     tangelo.log("es_search.get_graph_for_email_address(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
+    # If you do not want to generate a graph each time this is called use this code
+    # return {"graph":{"nodes":[], "links":[]}, "rows": [_map_emails_to_row(email) for email in results["hits"]], "query_hits" : results["total"]}
 
-    return {"graph":{"nodes":[], "links":[]}, "rows": [_map_emails_to_row(email) for email in results["hits"]], "query_hits" : results["total"]}
+    return _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+
 
 
 # GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
