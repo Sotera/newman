@@ -30,6 +30,14 @@ def parseParamEmailAddress( **kwargs ):
     
     return key_list
 
+def parseParam_sender_recipient( **kwargs ):
+    tangelo.log("parseParam_sender_recipient(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    sender = kwargs.get('sender','').split(",")[0]
+    recipient = kwargs.get('recipient','').split(",")
+
+    recipient = [x for x in recipient if x is not None]
+    return sender, recipient
+
 # Entity_dict should be of the form
 # entity_dict={"entities.entity_person":[],"entities.entity_location":[],"entities.entity_organization":[],"entities.entity_misc":[]}
 def parseParamEntity( **kwargs ):
