@@ -3,7 +3,7 @@ import cherrypy
 
 from es_search import get_graph_for_email_address, get_rows_for_email_address, get_top_email_hits_for_text_query, _build_graph_for_emails, _query_emails
 from newman.newman_config import getDefaultDataSetID, default_min_timeline_bound, default_max_timeline_bound
-from param_utils import parseParamDatetime, parseParamEmailAddress, parseParamEntity, parseParamEmailSender, parseParamEmailRecipient
+from param_utils import parseParamDatetime, parseParamEmailAddress, parseParam_sender_recipient, parseParamEntity, parseParamEmailSender, parseParamEmailRecipient
 from es_queries import _build_email_query
 import urllib
 from newman.utils.functions import nth
@@ -68,11 +68,10 @@ def search_email_by_address_set(*path_args, **param_args):
     recipient_list = parseParamEmailRecipient(**param_args)
     cherrypy.log("\trecipient_list: %s)" % str(recipient_list))
     
-    sender_address=urllib.unquote(sender_list[0])
-    recipient_address=urllib.unquote(recipient_list[0])
+    sender_address, recipient_address=parseParam_sender_recipient(**param_args)
 
     #TODO: Need to pass the entire sender and recipient lists of address to ES
-    return get_rows_for_email_address(data_set_id, sender_address, start_datetime, end_datetime, size, order)
+    return get_rows_for_email_address(data_set_id, sender_address, recipient_address, start_datetime, end_datetime, size, order)
 
 #GET /search/entity?entities.entity_person=mike,joe&entities.entity_location=paris,los angeles
 def get_graph_for_entity(*args, **kwargs):
@@ -88,7 +87,7 @@ def get_graph_for_entity(*args, **kwargs):
     # TODO: set from UI
     query_terms=''
 
-    query = _build_email_query(email_address_list, query_terms, entity=entity_dict, date_bounds=(start_datetime, end_datetime))
+    query = _build_email_query(email_addrs=email_address_list, query_terms=query_terms, entity=entity_dict, date_bounds=(start_datetime, end_datetime))
     tangelo.log("entity.get_graph_for_entity(query: %s)" % (query))
 
     return _build_graph_for_emails(data_set_id, _query_emails(data_set_id, size, query))

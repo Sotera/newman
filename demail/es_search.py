@@ -155,10 +155,11 @@ def get_graph_for_email_address(data_set_id, email_address, start_datetime, end_
     return _build_graph_for_emails(data_set_id, results["hits"], results["total"])
 
 # Get all rows for a email address results will be sorted by time asc
-def get_rows_for_email_address(data_set_id, email_address, start_datetime, end_datetime, size, sort_order="asc"):
-    tangelo.log("es_search.get_graph_for_email_address(%s)" % (str(email_address)))
+def get_rows_for_email_address(data_set_id, sender, recipients, start_datetime, end_datetime, size, sort_order="asc"):
+    tangelo.log("es_search.get_graph_for_email_address(senders=%s, recipients=%s)" % (str(sender),str(recipients)))
 
-    query  = _build_email_query(email_addrs=[email_address], query_terms='', date_bounds=(start_datetime, end_datetime), sort_order=sort_order, date_mode_inclusive=False)
+    # apply query with address intersection behaviour
+    query  = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, query_terms='', date_bounds=(start_datetime, end_datetime), sort_order=sort_order, date_mode_inclusive=False, address_filter_mode="intersect")
     tangelo.log("es_search.get_graph_for_email_address(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
@@ -185,7 +186,7 @@ def get_top_email_hits_for_text_query(*args, **kwargs):
     if not search_terms:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing search term(s)")
 
-    query  = _build_email_query(email_addrs=[], query_terms=search_terms, date_bounds=(start_datetime, end_datetime))
+    query  = _build_email_query(query_terms=search_terms, date_bounds=(start_datetime, end_datetime))
     tangelo.log("es_search.get_graph_for_text_query(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
