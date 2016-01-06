@@ -280,6 +280,8 @@ function populateDataTable( data_rows ) {
 }
 
 function showEmailView(email_id){
+  newman_graph_email.clearAllNodeSelected();
+
   if (!bottom_panel.isOpen()){
     //resize bottom_panel
     bottom_panel.open();

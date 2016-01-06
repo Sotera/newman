@@ -298,6 +298,7 @@ var newman_data_source = (function () {
         }
       }
 
+      data_set_id = encodeURIComponent( data_set_id );
       if (url_path.indexOf('?') > 0) {
         url_path = url_path + '&data_set_id=' + data_set_id;
       }

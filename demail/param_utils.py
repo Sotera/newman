@@ -38,5 +38,18 @@ def parseParamEntity( **kwargs ):
 
     return entity_dict
 
+def parseParamEmailSender( **kwargs ):
+    tangelo.log("parseParamEmailSender(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    value = kwargs.get('sender')
+    sender_list = value.split(",")
+
+    return sender_list
+
+def parseParamEmailRecipient( **kwargs ):
+    tangelo.log("parseParamEmailRecipient(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    value = kwargs.get('recipient')
+    recipient_list = value.split(",")
+    
+    return recipient_list
 
 
