@@ -159,7 +159,7 @@ def get_rows_for_email_address(data_set_id, sender, recipients, start_datetime, 
     tangelo.log("es_search.get_graph_for_email_address(senders=%s, recipients=%s)" % (str(sender),str(recipients)))
 
     # apply query with address intersection behaviour
-    query  = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, query_terms='', date_bounds=(start_datetime, end_datetime), sort_order=sort_order, date_mode_inclusive=False, address_filter_mode="intersect")
+    query  = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, query_terms='', date_bounds=(start_datetime, end_datetime), sort_order=sort_order, date_mode_inclusive=False, address_filter_mode="conversation")
     tangelo.log("es_search.get_graph_for_email_address(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)

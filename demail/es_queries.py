@@ -1,21 +1,14 @@
 import itertools
-import tangelo
 
 def _terms_filter(field='', values=[]):
     return [] if (not field or not values) else [{"terms" : { field : values}}]
 
-# address_filter_mode = "union"|"intersect" , union will match any emails with any of the addresses, intersect will match the sender AND any rcvr addresses
+# address_filter_mode = "union"|"intersect"|"conversation" ,
+#   union will match any emails with any of the addresses,
+#   intersect will match the sender AND any rcvr addresses
+#   conversation will reconstruct a converstation where senders are manditory to occur on email and at least one rcvr address is on email
 def _addrs_filter(senders=[], tos=[], ccs=[], bccs=[], address_filter_mode="union"):
-    if address_filter_mode=="intersect":
-        addrs = _terms_filter("tos", tos) + _terms_filter("ccs", ccs) + _terms_filter("bccs", bccs)
-        return {
-            "bool":{
-                "should":[addrs],
-                "must":[_terms_filter("senders", senders)],
-                "must_not":[]
-            }
-        }
-    else:
+    if address_filter_mode=="union":
         addrs = _terms_filter("senders", senders) + _terms_filter("tos", tos) + _terms_filter("ccs", ccs) + _terms_filter("bccs", bccs)
         return {
             "bool":{
@@ -24,6 +17,52 @@ def _addrs_filter(senders=[], tos=[], ccs=[], bccs=[], address_filter_mode="unio
                 "must_not":[]
             }
         }
+    elif address_filter_mode=="intersect":
+        addrs = _terms_filter("tos", tos) + _terms_filter("ccs", ccs) + _terms_filter("bccs", bccs)
+        return {
+            "bool":{
+                "should":[addrs],
+                "must":[_terms_filter("senders", senders)],
+                "must_not":[]
+            }
+        }
+    # View the exchange of emails between a set of [senders] <-> [recvr] email addresses
+    # This query filter gets all (from: ANY sender -> to: ANY rcvr) OR  (from: ANY rcvr -> to: ANY sender)
+    # if only one sender and one rcvr are specified this will be all messages sent between them.
+    # TODO next step is to rollup the reply chains like gmail
+    elif address_filter_mode=="conversation":
+        return {
+            "bool":{
+                "should":[
+                    {
+                        "bool":{
+                            "should":[_terms_filter("tos", tos) + _terms_filter("ccs", ccs) + _terms_filter("bccs", bccs)],
+                            "must":[_terms_filter("senders", senders)],
+                            "must_not":[]
+                        }
+                    },
+                    {
+                        "bool":{
+                            "should":[_terms_filter("senders", tos + ccs + bccs)],
+                            "must":[
+                                {
+                                    "bool":{
+                                        "should":[_terms_filter("tos", senders) + _terms_filter("ccs", senders) + _terms_filter("bccs", senders)],
+                                        "must":[],
+                                        "must_not":[]
+                                    }
+                                }
+                            ],
+                            "must_not":[]
+                        }
+                    }
+                ],
+                "must":[],
+                "must_not":[]
+            }
+        }
+    else:
+        return []
 
 # Expects entity_map to be of the form
 # {"entities.entity_person":[],"entities.entity_location":[],"entities.entity_organization":[],"entities.entity_misc":[]}
@@ -39,12 +78,11 @@ def _date_filter_not_equal(date_bounds=None):
 
 # TODO how do we apply the query_terms as a filter?  Seems that it makes sense to do this as a query only but
 # TODO it is possible we will want to use a term filter on "_all"
-# address_filter_mode = "union"|"intersect" , union will match any emails with any of the addresses, intersect will match the sender AND any rcvr addresses
 def _build_filter(email_senders=[], email_rcvrs=[], query_terms='', topic_score=None, entity_dict={}, date_bounds=None, date_mode_inclusive=True, address_filter_mode="union"):
 
     # One of these addresses should apear on the email
     address_filter = [] if (not email_senders or not email_rcvrs) else [_addrs_filter(email_senders,email_rcvrs,email_rcvrs,email_rcvrs, address_filter_mode=address_filter_mode)]
-    tangelo.log("====================================(query: %s)" % (address_filter))
+    # tangelo.log("====================================(query: %s)" % (address_filter))
 
     query_terms_filter = [] if not query_terms else _terms_filter("_all", query_terms.split(" "))
 
@@ -69,12 +107,12 @@ def _build_filter(email_senders=[], email_rcvrs=[], query_terms='', topic_score=
     bool_filter["must"] += date_range
     bool_filter["must"] += topic_range
     bool_filter["must"] += entity_filter
-    tangelo.log("====================================2(query: %s)" % (bool_filter))
+    # tangelo.log("====================================2(query: %s)" % (bool_filter))
 
     # This needs to occur last as it adds a default search filter if none is available
     if not (bool_filter["must"] or bool_filter["should"] or bool_filter["must_not"]) :
         bool_filter["must"].append({"match_all":{}})
-    tangelo.log("====================================3(query: %s)" % (filter))
+    # tangelo.log("====================================3(query: %s)" % (filter))
 
     return filter
 
@@ -83,7 +121,7 @@ def _build_filter(email_senders=[], email_rcvrs=[], query_terms='', topic_score=
 # topic_score = (<idx>, <score>) returns docs with topic idx=<idx> and score >= <score>
 # date_mode will control if the date bounds uses gte / lte or gt/lt values are ("inclusive", "exclusive")
 # send_addrs or recipient_addrs are provided they will be used instead of email_addrs for the respective parts of the query
-# address_filter_mode = "union"|"intersect" , union will match any emails with any of the addresses, intersect will match the sender AND any rcvr addresses
+# address_filter_mode - see address_filter
 def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, sort_order="acs", date_mode_inclusive=True, address_filter_mode="union"):
 
     term_query = {"match_all" : {}} if not query_terms else {"match" : {"_all" : query_terms}}
