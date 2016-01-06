@@ -702,3 +702,49 @@ function newDateTimeInstance(datetime_as_string) {
   //console.log('\tdatetime-object ' + _datetime.toISOString() + '');
   return _datetime;
 }
+
+function tokenize( text ) {
+  var tokens = [];
+  if (text) {
+    var separators = [';', ','];
+    var token_array = text.split(new RegExp(separators.join('|'), 'g'));
+    _.each(token_array, function(element) {
+      if (element) {
+        tokens.push(element.trim())
+      }
+    });
+  }
+  return tokens;
+}
+
+function extractEmailAddress( text ) {
+  var address = '';
+  if (text && text.indexOf('@') >= 0) {
+    if (text.indexOf('<') >= 0) {
+      var matches = text.match(/\<(.*?)\>/);
+      if (matches) {
+        if (validateEmailAddress(matches[1])) {
+          address = matches[1];
+        }
+        else {
+          console.log('email matched invalid ' + matches[1] );
+        }
+      }
+    }
+    else if (text.indexOf('(') >= 0) {
+      var matches = text.match(/\((.*?)\)/);
+      if (matches) {
+        if (validateEmailAddress(matches[1])) {
+          address = matches[1];
+        }
+        else {
+          console.log('email matched invalid ' + matches[1] );
+        }
+      }
+    }
+    else {
+      address = text;
+    }
+  }
+  return address;
+}

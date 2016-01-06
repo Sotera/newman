@@ -3,7 +3,7 @@ import cherrypy
 
 from es_search import get_graph_for_email_address, get_rows_for_email_address, get_top_email_hits_for_text_query, _build_graph_for_emails, _query_emails
 from newman.newman_config import getDefaultDataSetID, default_min_timeline_bound, default_max_timeline_bound
-from param_utils import parseParamDatetime, parseParamEmailAddress, parseParamEntity
+from param_utils import parseParamDatetime, parseParamEmailAddress, parseParamEntity, parseParamEmailSender, parseParamEmailRecipient
 from es_queries import _build_email_query
 import urllib
 from newman.utils.functions import nth
@@ -16,7 +16,7 @@ def search(*path_args, **param_args):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
 
 
-    # TODO this needs to come fromm UI
+    # TODO this needs to come from UI
     size = size if size >500 else 2500
 
     email_address=urllib.unquote(nth(path_args, 1, ''))
@@ -40,23 +40,39 @@ def search(*path_args, **param_args):
         elif len(path_args) >= 2:
             #TODO implement search by topic
             return {"graph":{"nodes":[], "links":[]}, "rows":[]}
+    elif path_args[0] == "community":
+        if len(path_args) == 1:
+            return {"graph":{"nodes":[], "links":[]}, "rows":[]}
+        elif len(path_args) >= 2:
+            #TODO implement search by community
+            return {"graph":{"nodes":[], "links":[]}, "rows":[]}        
     return {"graph":{"nodes":[], "links":[]}, "rows":[]}
 
-#GET /graphrows/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>&order=prev
+#GET /search/email/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>&order=prev&sender=<s1,s2...>&recipient=<r1,r2..>
 # 'order' param controls if we are paging the next or previous sets of data and can be next or prev, default is next
-def get_rows(*path_args, **param_args):
+def search_email_by_address_set(*path_args, **param_args):
     tangelo.content_type("application/json")
     tangelo.log("search.get_graphrows(path_args[%s] %s)" % (len(path_args), str(path_args)))
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
-    # TODO set from UI
+    # TODO: set from UI
     size = param_args.get('size', 2500)
 
     order = param_args.get('order', 'next')
     order = 'desc' if order=='prev' else 'asc'
-    email_address=urllib.unquote(nth(path_args, 1, ''))
+    
+    # parse the sender address and the recipient address
+    sender_list = parseParamEmailSender(**param_args)
+    cherrypy.log("\tsender_list: %s)" % str(sender_list))
+    
+    recipient_list = parseParamEmailRecipient(**param_args)
+    cherrypy.log("\trecipient_list: %s)" % str(recipient_list))
+    
+    sender_address=urllib.unquote(sender_list[0])
+    recipient_address=urllib.unquote(recipient_list[0])
 
-    return get_rows_for_email_address(data_set_id, email_address, start_datetime, end_datetime, size, order)
+    #TODO: Need to pass the entire sender and recipient lists of address to ES
+    return get_rows_for_email_address(data_set_id, sender_address, start_datetime, end_datetime, size, order)
 
 #GET /search/entity?entities.entity_person=mike,joe&entities.entity_location=paris,los angeles
 def get_graph_for_entity(*args, **kwargs):
@@ -66,10 +82,10 @@ def get_graph_for_entity(*args, **kwargs):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
     email_address_list = parseParamEmailAddress(**kwargs);
     entity_dict = parseParamEntity(**kwargs)
-    # TODO set from UI
+    # TODO: set from UI
     size = size if size >500 else 2500
 
-    # TODO set from UI
+    # TODO: set from UI
     query_terms=''
 
     query = _build_email_query(email_address_list, query_terms, entity=entity_dict, date_bounds=(start_datetime, end_datetime))
@@ -80,7 +96,7 @@ def get_graph_for_entity(*args, **kwargs):
 actions = {
     "search": search,
     "search_user": get_graph_for_email_address,
-    "search_rows": get_rows,
+    "search_email_by_address_set": search_email_by_address_set,
     "search_text": get_top_email_hits_for_text_query,
     "search_entity" : get_graph_for_entity
 }

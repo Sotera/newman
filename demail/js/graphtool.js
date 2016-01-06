@@ -8,7 +8,7 @@ var force = d3.layout.force()
   .linkStrength(2)
   .size([width, height]);
 
-var svg = d3.select("#node_graph").append("svg")
+var svg = d3.select("#graph_email").append("svg")
   .attr("width", "100%")
   .attr("height", height);
 
@@ -326,6 +326,7 @@ function produceHTMLView(email_obj) {
 
   var d = _.object(['email_id', 'attach_id','datetime', 'exportable', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], email_obj.email);
   //console.log('produceHTMLView()\n' + JSON.stringify(d, null, 2));
+  var datetime_selected = d.datetime;
 
   draw_mini_topic_chart(d.email_id);
   var el = $('<div>').addClass('body-view');
@@ -341,29 +342,118 @@ function produceHTMLView(email_obj) {
               $('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'email/' + d.email_id + '/' + d.email_id + '.html'}).append($('<span>').addClass('glyphicon glyphicon-print'))));
 
 
-  var afrom = $('<a>', { 'class': 'from clickable'}).on("click", function(){
-        draw_attachments_table(d.from).done(function(){
+  var anchor_sender = $('<a>', { 'class': 'from clickable'}).on("click", function() {
+        draw_attachments_table(d.from).done(function() {
           $('#tab-list li:eq(4) a').tab('show');
+
         });
         return false;
       }).text(d.from);
 
+  var sender_checkbox = $('<input>', {
+    'type': 'checkbox',
+    'id': 'checkbox.' + d.from,
+    'value': d.from,
+    'checked': 'checked',
+    'disabled': 'true',
+    'style': 'margin: 2px 2px 2px 2px;'
+  });
+  console.log('sender_checkbox : checked,  id : ' + sender_checkbox.prop('id') + ', value : ' + sender_checkbox.prop('value'));
+  newman_graph_email.setGraphSelected(sender_checkbox.prop('value'), 'source', sender_checkbox.prop('id'), true, false);
+  anchor_sender.append( sender_checkbox );
+
+
   var from_hover = node_highlight(d.from);
-  afrom.on('mouseover', from_hover.highlight);
-  afrom.on('mouseout', from_hover.unhighlight);
+  anchor_sender.on('mouseover', from_hover.highlight);
+  anchor_sender.on('mouseout', from_hover.unhighlight);
 
   el.append(
-    $('<p>').append($('<span>').addClass('bold').text("From: "))
-      .append(afrom));
+    $('<p>')
+      .append($('<span>').addClass('bold').text("From: "))
+      .append(anchor_sender)
+
+  );
+
+
 
   var recipients = _.zip(['To', 'Cc', 'Bcc'], [d.to, d.cc, d.bcc]);
-  _.each(recipients, function(item){
-    var emails = _.uniq(item[1].split(';'));
-    el.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
+  _.each(recipients, function(recipient) {
+    //console.log('email-recipient : ' + JSON.stringify(recipient, null, 2));
+    var tokens_original = tokenize(recipient[1][0]);
+    console.log('email-recipient-tokens(original) : ' + JSON.stringify(tokens_original, null, 2));
+    var tokens_extracted = tokenize(recipient[1][1]);
+    //console.log('email-recipient-tokens(extracted) : ' + JSON.stringify(tokens_extracted, null, 2));
+
+    var emails = _.uniq(tokens_extracted);
+    el.append($('<p>').append($('<span>').addClass('bold').text( recipient[0]+ ': '))
               .append(
-                _.map(emails, function(addr){
-                  var hover = node_highlight(addr);
-                  var span = $('<span>').text(addr + "; ");
+                _.map(emails, function(address_text){
+                  var hover = node_highlight(address_text);
+                  var span = $('<span>').text(address_text);
+                  //var address_extracted = extractEmailAddress( address_text );
+                  var address_extracted = address_text;
+
+                  if (address_extracted) {
+                    var checkbox = $('<input>', {
+                      'type': 'checkbox',
+                      'id': 'checkbox.' + address_extracted,
+                      'value': address_extracted,
+                      'style': 'margin: 2px 2px 2px 2px;'
+                    }).change(function() {
+                      var attr_id = $(this).prop('id');
+                      var attr_value = $(this).prop('value');
+
+                      if (this.checked) {
+                        console.log('checkbox : checked, id : ' + attr_id + ', value : ' + attr_value);
+
+                        // for now, only allow one email recipient
+                        var keys = newman_graph_email.getAllTargetNodeSelected();
+                        if (keys) {
+                          _.each(keys, function(key) {
+                            if (key != address_extracted) {
+                              document.getElementById("checkbox." + key).checked = false;
+                            }
+                          });
+                          newman_graph_email.clearAllTargetNodeSelected();
+                        }
+
+                        newman_graph_email.setGraphSelected(attr_value, 'target', attr_id, true, false);
+                      }
+                      else {
+                        console.log('checkbox : unchecked, id : ' + attr_id + ', value : ' + attr_value);
+
+                        newman_graph_email.setGraphSelected(attr_value, 'target', attr_id, false, false);
+                      }
+
+                      if (newman_graph_email.sizeOfAllSourceNodeSelected() > 0 && newman_graph_email.sizeOfAllTargetNodeSelected() > 0) {
+                        //console.log('enable query-buttons');
+
+                        $('#query_prev_email').removeClass( 'clickable-disabled' ).click(function() {
+                          console.log("clicked query_prev_email");
+
+                          newman_service_email_by_address_set.requestService( 'prev', datetime_selected );
+                        });
+
+                        $('#query_next_email').removeClass( 'clickable-disabled' ).click(function() {
+                          console.log("clicked query_next_email");
+
+                          newman_service_email_by_address_set.requestService( 'next', datetime_selected );
+                        });
+
+                      }
+                      else {
+                        //console.log('disable query-buttons');
+
+                        $('#query_prev_email').addClass( 'clickable-disabled' );
+                        $('#query_next_email').addClass( 'clickable-disabled' );
+
+                      }
+
+                    });
+
+                    span.append(checkbox);
+                  }
+
                   span.on('mouseover', hover.highlight);
                   span.on('mouseout', hover.unhighlight);
                   return span;
@@ -965,7 +1055,7 @@ function loadSearchResult( url_path ) {
 function drawGraph(graph){
 
   svg.remove();
-  svg = d3.select("#node_graph").append("svg")
+  svg = d3.select("#graph_email").append("svg")
     .attr("height", "100%")
     .attr("width", "100%")
   //  .attr("viewBox", "0 0 " + width + " " + height )
@@ -1061,6 +1151,7 @@ function drawGraph(graph){
     var timer = null, clicks=0, last="";
     return function(n){
       clicks++;
+
       var fn = function(){
 
         if (clicks > 1){
@@ -1068,12 +1159,14 @@ function drawGraph(graph){
         }
         clicks=0;
       };
+
       if (clicks == 1) {
         console.log('clicked\n' + JSON.stringify(n, null, 2));
 
         //$('#txt_search').val(n.name);
         var t = Math.floor($('#radial-wrap').height() / 2);
         var l = Math.floor($('#radial-wrap').width() / 2);
+
         $('#radial-wrap')
           .css('top', (30 + d3.event.clientY - t) + "px")
           .css('left', (d3.event.clientX - l) + "px");
@@ -1089,11 +1182,17 @@ function drawGraph(graph){
         });
 
         //$('#radial').find('.email').first().unbind('click')
-        $('#popup_search_email_address')
-          .on("click", function(){
+        $('#radial-wrap')
+          .find('#popup_search_email_address')
+          .off()
+          .on("click", function(e) {
+
             console.log( 'node-clicked search-by-email' );
-            requestSearch("email", n.name, true);
-          }).find("span").first().css("color", getEmailDomainColor(n.name));
+            //requestSearch("email", n.name, true);
+
+            e.preventDefault();
+          })
+          .find("span").first().css("color", getEmailDomainColor(n.name));
 
         $('#radial').find(".community").first()
           .unbind('click')
@@ -1103,9 +1202,9 @@ function drawGraph(graph){
         }).find("span").first()
           .css("color", newman_community_email.getCommunityColor( n.community ));
 
-        _.delay(function(){  $("#alink").focus(); }, 300);
+        _.delay(function(){  $("#alink").focus(); }, 150);
 
-        _.delay(fn, 300, n.name);
+        _.delay(fn, 150, n.name);
       }
     };
   }();
@@ -1213,7 +1312,7 @@ function toggle_labels() {
 function all_node_label_off() {
   node_label_enabled = false;
 
-  d3.selectAll("#node_graph svg text")
+  d3.selectAll("#graph_email svg text")
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'central')
     .attr('font-family', 'FontAwesome')
@@ -1263,7 +1362,7 @@ function node_label_off( node ) {
 function all_node_label_on() {
   node_label_enabled = true;
 
-  d3.selectAll("#node_graph svg text")
+  d3.selectAll("#graph_email svg text")
     .attr('text-anchor', 'end')
     .attr('dominant-baseline', 'central')
     .text(function(d) {
@@ -1512,15 +1611,21 @@ function draw_attachments_table(email_address){
 
     //console.log( 'attachment under : ' + email_addr + '\n' + JSON.stringify(email_attach_list, null, 2) );
 
-    $('#attach-sender').html(response.sender);
+    //$('#attach-sender').html(response.sender);
+
     $('#attach-table').empty();
     $('#attach-table').append($('<thead>')).append($('<tbody>'));
 
     var lastSort = "";
-    var thead = d3.select("#attach-table").select("thead").append("tr").selectAll("tr").data(['Date', 'Subject', 'Attachments', 'Type','Email']).enter().append("th")
-      .text(function(d){
+    var thead = d3.select("#attach-table").select("thead").append("tr").selectAll("tr")
+      //.data(['Date', 'Subject', 'Attachments', 'Type','Email'])
+      .data(['Date', 'Subject', 'Attachments', 'Type'])
+      .enter()
+      .append("th")
+      .text( function(d) {
         return d;
-      }).attr('class', 'clickable').on("click", function(k, i){
+      })
+      .attr('class', 'clickable').on("click", function(k, i){
         var direction = (lastSort == k) ? -1 : 1;
         lastSort = (direction == -1) ? "" : k; //toggle
         d3.select("#attach-table").select("tbody").selectAll("tr").sort(function(a,b){
@@ -1542,24 +1647,41 @@ function draw_attachments_table(email_address){
 
     var popover = image_preview_popover();
 
-    tr.selectAll("td").data(function(d){
-      return [d.datetime, d.subject, [d.attach_id, d.attach], [d.attach_id, d.attach], d.email_id]
-    }).enter()
+    tr.selectAll("td")
+      .data(function(d) {
+        //return [d.datetime, d.subject, [d.attach_id, d.attach], [d.attach_id, d.attach], d.email_id]
+        return [[d.datetime, d.email_id], [d.subject, d.email_id], [d.attach_id, d.attach, d.email_id], [d.attach_id, d.attach, d.email_id]]
+      })
+      .enter()
       .append("td")
-      .on("click", function(d, i){
-        if (i != 4) return;
-        console.log('clicked d : ' + JSON.stringify(d, null, 2));
-        $.get("email/email/" + encodeURIComponent(d)).then(
-          function(resp) {
-            setEmailVisible(d);
-            $('#tab-list li:eq(2) a').tab('show');
-            if(resp.email.length > 0){
-              $("#email-body").empty();
-              $("#email-body").append(produceHTMLView(resp));
-            }
-          });
+      .on("click", function(d, index) {
+
+        //if (index != 4) return;
+
+        console.log('clicked d : ' + d);
+
+
+        showEmailView( d[(d.length-1)] );
+
+        /*
+         $.get("email/email/" + encodeURIComponent(email_id)).then(
+         function(resp) {
+         setEmailVisible(email_id);
+         $('#tab-list li:eq(2) a').tab('show');
+         if(resp.email.length > 0){
+         $("#email-body").empty();
+         $("#email-body").append(produceHTMLView(resp));
+         }
+         });
+         */
       })
       .html(function(d, i){
+
+        if (i == 0 || i == 1) {
+          var el = $('<div>').append(d[0]);
+          return el.html();
+        }
+
         if (i == 2){ // attachment link
           //console.log( 'attachment under : ' + email_addr + '\n' + JSON.stringify(d, null, 2) );
           var attach_url = 'email/attachment/' + encodeURIComponent(d[0]);
@@ -1567,6 +1689,7 @@ function draw_attachments_table(email_address){
           var el = $('<div>').append($('<a>', { "target": "_blank" ,"href" : attach_url }).html(d[1]));
           return el.html();
         }
+
         if (i == 3){
           var ext = (function(){
             var i = d[1].toLowerCase().lastIndexOf(".");
@@ -1578,12 +1701,12 @@ function draw_attachments_table(email_address){
             var attach_image_url = 'email/attachment/' + encodeURIComponent(d[0]) + '/' + encodeURIComponent(d[1]);
             attach_image_url = newman_data_source.appendDataSource( attach_image_url );
             switch (document_type(ext)){
-            case "image" : return img.attr('src', attach_image_url );
-            case "pdf" : return img.attr('src', 'imgs/document-icons/pdf-2.png');
-            case "powerpoint" : return img.attr('src', 'imgs/document-icons/powerpoint-2.png');
-            case "word" : return img.attr('src', 'imgs/document-icons/word-2.png');
-            case "excel" : return img.attr('src', 'imgs/document-icons/excel-2.png');
-            default : return img.attr('src', 'imgs/document-icons/text-2.png');
+              case "image" : return img.attr('src', attach_image_url );
+              case "pdf" : return img.attr('src', 'imgs/document-icons/pdf-2.png');
+              case "powerpoint" : return img.attr('src', 'imgs/document-icons/powerpoint-2.png');
+              case "word" : return img.attr('src', 'imgs/document-icons/word-2.png');
+              case "excel" : return img.attr('src', 'imgs/document-icons/excel-2.png');
+              default : return img.attr('src', 'imgs/document-icons/text-2.png');
             }
 
           }());
@@ -1591,10 +1714,13 @@ function draw_attachments_table(email_address){
           var el = $('<div>').append(img);
           return el.html();
         }
+        /*
         if (i == 4){
           var el = $('<div>').append($('<span>').addClass("glyphicon").addClass("glyphicon-share-alt").addClass('clickable'));
           return el.html();
         }
+        */
+
         return d;
       });
 

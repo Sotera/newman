@@ -210,7 +210,7 @@ function populateDataTable( data_rows ) {
   if (data_table_rows) {
     data_table_ui = $('#result_table').DataTable({
       destroy: true,
-      "lengthMenu": [[10, 20, 40, -1],[10, 20, 40, "All"]],
+      "lengthMenu": [[20, 30, 40, -1],[20, 30, 40, "All"]],
       "autoWidth": true,
       /*fixedHeader: {
         header: true,
@@ -226,7 +226,7 @@ function populateDataTable( data_rows ) {
         {title: "<i class=\"fa fa-paperclip\" rel=\"tooltip\" data-placement=\"bottom\" title=\"Attachment(s)\"></i>", "width": "6%"},
         {title: "Subject", "width": "37%"},
         {title: "<i class=\"fa fa-star-o\" rel=\"tooltip\" data-placement=\"bottom\" title=\"Exportable(s)\"></i>", "width": "5%"},
-        {title: "ID", "width": "0%"}
+        {title: "ID", "visible": false}
       ],
       "order": [[ 0, "desc" ]]
       //bug in dataTables lib
@@ -280,6 +280,8 @@ function populateDataTable( data_rows ) {
 }
 
 function showEmailView(email_id){
+  newman_graph_email.clearAllNodeSelected();
+
   if (!bottom_panel.isOpen()){
     //resize bottom_panel
     bottom_panel.open();

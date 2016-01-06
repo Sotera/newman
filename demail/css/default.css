@@ -37,6 +37,11 @@ ul {
     cursor: pointer;
 }
 
+.clickable-disabled {
+    background: rgba(253, 253, 253, 0.5);
+    color: rgb(214, 214, 214);
+}
+
 .mitie {
     cursor: pointer;
 }
@@ -270,7 +275,7 @@ ul {
 }
 
 .tab-content div {
-    margin-top: 3px;
+    margin-top: 2px;
 }
 
 

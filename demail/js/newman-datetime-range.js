@@ -45,15 +45,22 @@ var newman_datetime_range = (function () {
     return _datetime_max_selected;
   };
 
-  function appendDatetimeRange( url_path ) {
+  function appendDatetimeRange( url_path, start_datetime_override, end_datetime_override ) {
 
     if (url_path) {
       if (url_path.endsWith('/')) {
         url_path = url_path.substring(0, url_path.length - 1);
       }
 
-      var range_min = getDatetimeMinSelected();
-      var range_max = getDatetimeMaxSelected();
+      var range_min = encodeURIComponent( getDatetimeMinSelected() );
+      var range_max = encodeURIComponent( getDatetimeMaxSelected() );
+
+      if (start_datetime_override) {
+        range_min = encodeURIComponent(start_datetime_override);
+      }
+      if (end_datetime_override) {
+        range_max = encodeURIComponent(end_datetime_override);
+      }
 
       if (range_min && range_max) {
         if (url_path.indexOf('?') > 0) {
