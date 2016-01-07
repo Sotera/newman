@@ -170,6 +170,19 @@ def get_rows_for_email_address(data_set_id, sender, recipients, start_datetime, 
 
 
 
+# Get all rows for a community, sorted by time asc
+def get_rows_for_community(data_set_id, community, email_addrs, start_datetime, end_datetime, size):
+    tangelo.log("es_search.get_rows_for_community(community=%s, email_addrs=%s)" % (str(community), str(email_addrs)))
+
+    query  = _build_email_query(email_addrs=email_addrs, query_terms='', date_bounds=(start_datetime, end_datetime), communities=[community])
+    tangelo.log("es_search.get_rows_for_community(query: %s)" % (query))
+
+    results = _query_emails(data_set_id, size, query)
+
+    return _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+
+
+
 # GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
 # build a graph for a specific email address.
 # args should be a list of terms to search for in any document field

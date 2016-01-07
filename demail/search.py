@@ -1,9 +1,9 @@
 import tangelo
 import cherrypy
 
-from es_search import get_graph_for_email_address, get_rows_for_email_address, get_top_email_hits_for_text_query, _build_graph_for_emails, _query_emails
+from es_search import get_graph_for_email_address, get_rows_for_email_address, get_top_email_hits_for_text_query, get_rows_for_community, _build_graph_for_emails, _query_emails
 from newman.newman_config import getDefaultDataSetID, default_min_timeline_bound, default_max_timeline_bound
-from param_utils import parseParamDatetime, parseParamEmailAddress, parseParam_sender_recipient, parseParamEntity, parseParamEmailSender, parseParamEmailRecipient
+from param_utils import parseParamDatetime, parseParamEmailAddress, parseParam_sender_recipient, parseParamEntity, parseParamEmailSender, parseParamEmailRecipient, parseParam_email_addr
 from es_queries import _build_email_query
 import urllib
 from newman.utils.functions import nth
@@ -73,6 +73,32 @@ def search_email_by_address_set(*path_args, **param_args):
     #TODO: Need to pass the entire sender and recipient lists of address to ES
     return get_rows_for_email_address(data_set_id, sender_address, recipient_address, start_datetime, end_datetime, size, order)
 
+
+#GET /community_email_addrs/<community_name>/?data_set_id=<data_set>&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
+def search_email_by_community(*args, **param_args):
+    tangelo.content_type("application/json")
+    tangelo.log("search_email_by_community(args: %s kwargs: %s)" % (str(args), str(param_args)))
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
+    community=nth(args, 0, '')
+
+    # TODO: set from UI
+    size = param_args.get('size', 2500)
+
+    if not data_set_id:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing data_set_id")
+    if not community:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing sender")
+
+    email_addrs = parseParam_email_addr(**param_args)
+
+
+    # TODO: set from UI
+    query_terms=''
+
+    return get_rows_for_community(data_set_id, community, email_addrs, start_datetime, end_datetime, size)
+
+
 #GET /search/entity?entities.entity_person=mike,joe&entities.entity_location=paris,los angeles
 def get_graph_for_entity(*args, **kwargs):
     tangelo.content_type("application/json")
@@ -97,7 +123,8 @@ actions = {
     "search_user": get_graph_for_email_address,
     "search_email_by_address_set": search_email_by_address_set,
     "search_text": get_top_email_hits_for_text_query,
-    "search_entity" : get_graph_for_entity
+    "search_entity" : get_graph_for_entity,
+    "search_community": search_email_by_community
 }
 
 def unknown(*args):

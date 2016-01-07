@@ -65,7 +65,6 @@ def getCommunities(*args, **kwargs):
 
     return {"communities" : get_top_communities(data_set_id, date_bounds=(start_datetime, end_datetime), num_communities=top_count)[:top_count]}
 
-
 #GET /attachments/<sender>
 def getAllAttachmentBySender(*args, **kwargs):
     tangelo.log("getAttachmentsSender(args: %s kwargs: %s)" % (str(args), str(kwargs)))
