@@ -42,7 +42,11 @@ def _map_emails(fields):
     row["fromcolor"] =  "1950"
     row["attach"] =  str(len(fields.get("attachments.guid",[])))
     row["bodysize"] = len(fields.get("body",[""])[0])
-    row["directory"] = "deprecated"
+    # row["directory"] = "deprecated",
+    for name, val in fields.items():
+        if name.startswith("topic"):
+            row["topic_idx"] = name.split(".")[1]
+            row["topic_score"] = val[0]
     return row
 
 def _map_emails_to_row(row):
@@ -93,22 +97,10 @@ def _search_ranked_email_addrs(index, start, end, size):
     # tangelo.log("getRankedEmails(resp: %s)" % (resp))
     return resp
 
-# get top score docs for a cluster_idx as per the lda-clustering index type
 # returns {"total":n "hits":[]}
-def _query_emails_for_cluster(index, cluster_idx=0,  score=0.5, size=100):
+def _query_emails(index, size, emails_query, additional_fields=[]):
     es = Elasticsearch(elasticsearch_hosts())
-    query = _build_email_query(topic_score=(cluster_idx, score))
-    # print query
-    sort=["topic_scores.idx_"+str(cluster_idx)+":desc"]
-    emails_resp = es.search(index=index, doc_type='emails', fields=get_graph_row_fields(), sort=sort, size=size, body=query)
-
-    tangelo.log("es_search._query_emails(total document hits = %s)" % emails_resp["hits"]["total"])
-    return {"total":emails_resp["hits"]["total"], "hits":[_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]}
-
-# returns {"total":n "hits":[]}
-def _query_emails(index, size, emails_query):
-    es = Elasticsearch(elasticsearch_hosts())
-    emails_resp = es.search(index=index, doc_type="emails", size=size, fields=get_graph_row_fields(), body=emails_query)
+    emails_resp = es.search(index=index, doc_type="emails", size=size, fields=get_graph_row_fields() + additional_fields, body=emails_query)
     tangelo.log("es_search._query_emails(total document hits = %s)" % emails_resp["hits"]["total"])
 
     return {"total":emails_resp["hits"]["total"], "hits":[_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]}
@@ -181,6 +173,17 @@ def get_rows_for_community(data_set_id, community, email_addrs, start_datetime, 
 
     return _build_graph_for_emails(data_set_id, results["hits"], results["total"])
 
+
+# Get all rows for a community, sorted by time asc
+def get_rows_for_topic(data_set_id, topic, email_addrs, start_datetime, end_datetime, size):
+    tangelo.log("es_search.get_rows_for_topic(email_addrs=%s, topic=%s)" % ( str(email_addrs), str(topic)))
+
+    query  = _build_email_query(email_addrs=email_addrs, query_terms='', topic=topic, sort_mode="topic", sort_order="desc", date_bounds=(start_datetime, end_datetime))
+    tangelo.log("es_search.get_rows_for_topic(query: %s)" % (query))
+
+    results = _query_emails(data_set_id, size, query, additional_fields=["topic_scores.idx_"+str(topic["idx"])])
+
+    return _build_graph_for_emails(data_set_id, results["hits"], results["total"])
 
 
 # GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>

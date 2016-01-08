@@ -4,7 +4,6 @@ import cherrypy
 from newman.utils.functions import nth
 from urllib import unquote
 from es_topic import get_categories, get_dynamic_clusters
-from es_search import _query_emails_for_cluster, _build_graph_for_emails
 from param_utils import parseParamDatetime, parseParamEmailAddress
 
 # GET /topic/<querystr>?data_set_id=<>&start_datetime=<>&end_datetime=<>&size=<>&algorithm=<>&analysis_field=<list of fields from ES>
@@ -38,19 +37,6 @@ def topic_list(*args, **kwargs):
     tangelo.content_type("application/json")
     return get_categories(data_set_id)
 
-#GET /graph/
-def topic_email_graph(*args, **kwargs):
-    tangelo.content_type("application/json")
-    category=nth(args, 0, 'all')
-    topic_index=nth(args, 1, 0)
-    score=nth(args, 2, 0.5)
-
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
-
-    emails = _query_emails_for_cluster(data_set_id, cluster_idx=topic_index, score=score, size=100)
-
-    return _build_graph_for_emails(data_set_id, emails["hits"], emails["total"])
-
 # TODO DEPRECATED REMOVE!
 #GET /email/<email_id>/<category>
 def email_scores(*args):
@@ -64,8 +50,7 @@ def email_scores(*args):
 actions = {
     "category": topic_list,
     "topic": get_topics_by_query,
-    "email" : email_scores,
-    "graph" : topic_email_graph
+    "email" : email_scores
 }
 
 def unknown(*args):

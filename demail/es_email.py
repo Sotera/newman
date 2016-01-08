@@ -48,7 +48,6 @@ def filtered_agg_query(email_addrs=[], query_terms='', topic_score=None, entity=
         "size":0
     }
 
-
 # GET communities for email_address index
 def get_top_communities(index, query_terms='', topic_score=None, entity={}, date_bounds=None, num_communities=20):
     # TODO fix -hack until we can do date filtering on the email_address
@@ -107,7 +106,7 @@ def get_ranked_email_address(data_set_id, query_terms='', topic_score=None, enti
     body = {
         "aggs" : {
             "filtered_addrs_agg" : {
-                "filter" : _build_filter(query_terms=query_terms, topic_score=topic_score, entity_dict=entity, date_bounds=date_bounds),
+                "filter" : _build_filter(query_terms=query_terms, topic=topic_score, entity_dict=entity, date_bounds=date_bounds),
                 "aggs": {
                     "top_addrs_agg" : {
                         "terms" : {"field" : "addrs", "size": num_top_hits}
