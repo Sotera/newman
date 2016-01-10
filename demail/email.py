@@ -8,7 +8,7 @@ from newman.settings import getOpt
 from es_email import get_ranked_email_address_from_email_addrs_index, get_attachment_by_id, get_attachments_by_sender, get_email, get_top_domains, get_top_communities
 from es_export import export_emails_archive
 from newman.newman_config import getDefaultDataSetID
-from param_utils import parseParamDatetime
+from param_utils import parseParamDatetime, parseParamEmailIds
 
 
 #GET /email/<id>
@@ -91,10 +91,10 @@ def setExportable(data):
     tangelo.content_type("application/json")
     return { "email" : {} }
 
-# DEPRECATED TODO remove me
-#POST /exportmany
+# POST email/exportmany/?data_set_id=<data_set>?email_ids=<id0,id1,...,idn>
 def setExportMany(*args, **kwargs):
-    return export_emails_archive("sample")
+    email_ids = parseParamEmailIds(**kwargs)
+    return export_emails_archive("sample", email_ids)
 
 # DEPRECATED TODO remove me
 #POST /download

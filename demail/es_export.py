@@ -1,3 +1,4 @@
+import inspect, os
 import base64
 import cStringIO
 import tarfile
@@ -9,7 +10,8 @@ import tangelo
 import cherrypy
 from elasticsearch import Elasticsearch
 from newman.newman_config import elasticsearch_hosts
-
+from bs4 import BeautifulSoup
+from es_topic import get_categories
 
 def attch_ext_query(extension):
     return {
@@ -192,19 +194,122 @@ def export_attachments(data_set_id, sender='', attachment_extension='jpg', date_
 
     tar.close()
 
+def prettyprint_email_as_text(email_json):
+    buffer = cStringIO.StringIO()
+    buffer.write("From: {0}\n".format(email_json["senders_line"][0]))
+    buffer.write("To: {0}\n".format(email_json["tos_line"][0]))
+    if email_json["ccs_line"]:
+        buffer.write("Cc: {0}\n".format(email_json["ccs_line"][0]))
+    buffer.write("Sent: {0}\n".format(email_json["datetime"]))
+    buffer.write("Subject: {0}\n".format(email_json["subject"]))
 
-# GET email/attachment/<attachment-GUID>?data_set_id=<data_set>
+    buffer.write(email_json["body"])
+    return buffer.getvalue()
+
+def prettyprint_email_as_html_template(email_json, topics):
+
+    myfile = inspect.getfile(inspect.currentframe())
+    mypath = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+
+    with open(mypath+'/template.html', 'r') as template_html:
+        soup = BeautifulSoup(template_html.read())
+        soup.find(text="##ID1##").replace_with(email_json["id"])
+        soup.find(text="##ID2##").replace_with(email_json["id"])
+        soup.find(text="##ID3##").replace_with(email_json["id"])
+
+        soup.find(text="##FROM##").replace_with(email_json["senders_line"][0])
+        if email_json["ccs_line"]:
+            soup.find(text="##TO##").replace_with(email_json["tos_line"][0])
+        else:
+            soup.find(text="##TO##").replace_with('')
+        if email_json["ccs_line"]:
+            soup.find(text="##CC##").replace_with(email_json["ccs_line"][0])
+        else:
+            soup.find(text="##CC##").replace_with('')
+
+        soup.find(text="##DATE##").replace_with(email_json["datetime"])
+        soup.find(text="##SUBJECT##").replace_with(email_json["subject"])
+
+        pre = soup.new_tag('pre')
+        pre.append(email_json["body"])
+        soup.find(text="##BODY##").replace_with(pre)
+
+        attachments = soup.find(id="##ATTACHMENTS##")
+        for attch in email_json["attachments"]:
+            href = soup.new_tag('a')
+            href['href'] = "./"+attch["filename"]
+            href.string = attch["filename"]
+            attachments.append(href)
+            attachments.append(',')
+
+        # Enitity Highlighting
+        # TODO
+
+        # Topics
+        table = soup.find(id="##TOPICS##")
+        for topic in topics["categories"]:
+            label = soup.new_tag('td')
+            label.string = topic[1]
+            score = soup.new_tag('td')
+            score.string = str(email_json["topic_scores"]["idx_"+str(topic[0])])
+            tr = soup.new_tag('tr')
+            tr.append(label)
+            tr.append(score)
+            table.append(tr)
+
+        return soup.prettify()
+
+def prettyprint_email_as_html(email_json):
+
+    soup = BeautifulSoup()
+    html = soup.new_tag('html')
+    head = soup.new_tag('head')
+    title = soup.new_tag('title')
+    html.append(head)
+    head.append(title)
+    title.append(email_json["id"])
+
+    body = soup.new_tag('body')
+    html.append(body)
+
+    body = soup.new_tag('body')
+    soup.insert(0, body)
+
+    body.append("ID: {0}".format(email_json["id"]))
+    body.append("From: {0}".format(email_json["senders_line"][0]))
+    body.append(soup.new_tag('br'))
+
+    body.append("From: {0}".format(email_json["senders_line"][0]))
+    body.append(soup.new_tag('br'))
+    body.append("To: {0}".format(email_json["tos_line"][0]))
+    body.append(soup.new_tag('br'))
+    if email_json["ccs_line"]:
+        body.append("Cc: {0}".format(email_json["ccs_line"][0]))
+        body.append(soup.new_tag('br'))
+
+    body.append("Sent: {0}".format(email_json["datetime"]))
+    body.append(soup.new_tag('br'))
+
+    body.append("Subject: {0}".format(email_json["subject"]))
+    body.append(soup.new_tag('br'))
+
+    pre = soup.new_tag('pre')
+    pre.append(email_json["body"])
+    body.append(pre)
+
+    return soup.prettify()
+
+
 # Build a tar.gz file in memory with all emails and attachment binary and export
-def export_emails_archive(data_set_id, email_ids=["f9c9c59a-7fe8-11e5-bb05-08002705cb99"]):
+def export_emails_archive(data_set_id, email_ids=[]):
     cherrypy.log("email.get_attachments_sender(index=%s, attachment_id=%s)" % (data_set_id, email_ids))
     if not data_set_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing index")
-    # if not email:
-    #     return tangelo.HTTPStatusCode(400, "invalid service call - missing attachment_id")
 
     es = Elasticsearch(elasticsearch_hosts())
     # TODO can implement with multiple doc_types and combine attachments in
     emails = es.mget(index=data_set_id, doc_type="emails", body={"docs":[{"_id":id} for id in email_ids]})
+    topics = get_categories(data_set_id)
 
 
     # TODO filename
@@ -226,9 +331,32 @@ def export_emails_archive(data_set_id, email_ids=["f9c9c59a-7fe8-11e5-bb05-08002
         tarinfo_parent.mtime = time.time()
         tar.addfile(tarinfo_parent)
 
+        # Add raw document
         tarinfo = tarfile.TarInfo(email["id"]+"/"+email["id"]+".json")
-        # TODO -- email transformation
         data_string = json.dumps(email)
+        fobj = cStringIO.StringIO(data_string)
+
+        tarinfo.size = len(data_string)
+        tarinfo.mode = 0644
+        tarinfo.mtime = time.time()
+        tar.addfile(tarinfo, fobj)
+
+        # Add txt document
+        tarinfo = tarfile.TarInfo(email["id"]+"/"+email["id"]+".txt")
+
+        data_string = prettyprint_email_as_text(email)
+        fobj = cStringIO.StringIO(data_string)
+
+        tarinfo.size = len(data_string)
+        tarinfo.mode = 0644
+        tarinfo.mtime = time.time()
+        tar.addfile(tarinfo, fobj)
+
+
+        # Add html document
+        tarinfo = tarfile.TarInfo(email["id"]+"/"+email["id"]+".html")
+
+        data_string = prettyprint_email_as_html_template(email, topics)
         fobj = cStringIO.StringIO(data_string)
 
         tarinfo.size = len(data_string)
@@ -254,7 +382,20 @@ def export_emails_archive(data_set_id, email_ids=["f9c9c59a-7fe8-11e5-bb05-08002
     return string_buffer.getvalue()
 
 if __name__ == "__main__":
+    # TODO move into method
+    topics = get_categories("sample")
+
+    email_ids = ["f326dd04-7fe8-11e5-bb05-08002705cb99"]
+
+    es = Elasticsearch(elasticsearch_hosts())
+    # TODO can implement with multiple doc_types and combine attachments in
+    emails = es.mget(index="sample", doc_type="emails", body={"docs":[{"_id":id} for id in email_ids]})
+
+    data_string = prettyprint_email_as_html_template(emails["docs"][0]["_source"], topics)
+    with open("/tmp/output.html", "w") as text_file:
+        text_file.write(data_string)
+
     email_id = "f9c9c59a-7fe8-11e5-bb05-08002705cb99"
     # export_emails_archive("sample", [email_id])
-    export_attachments("sample", 'jeb@jeb.org', 'jpg', ("2001-08-01", "2001-08-30"))
+    # export_attachments("sample", 'jeb@jeb.org', 'jpg', ("2001-08-01", "2001-08-30"))
     print "export done"

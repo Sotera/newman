@@ -67,6 +67,13 @@ def parseParamEmailRecipient( **kwargs ):
     return [x for x in recipient_list if (x is not '' and x is not None)]
 
 
+def parseParamEmailIds( **kwargs ):
+    tangelo.log("parseParamEmailIds(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    value = kwargs.get('email_ids')
+    email_ids = value.split(",")
+
+    return [x for x in email_ids if (x is not '' and x is not None)]
+
 # Parse topic params topic_idx and topic_threshold returns as dict
 # {"idx", "threshold"}
 def parseParamTopic( **kwargs ):
