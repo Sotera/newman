@@ -230,9 +230,7 @@ def prettyprint_email_as_html_template(email_json, topics):
         soup.find(text="##DATE##").replace_with(email_json["datetime"])
         soup.find(text="##SUBJECT##").replace_with(email_json["subject"])
 
-        pre = soup.new_tag('pre')
-        pre.append(email_json["body"])
-        soup.find(text="##BODY##").replace_with(pre)
+
 
         attachments = soup.find(id="##ATTACHMENTS##")
         for attch in email_json["attachments"]:
@@ -242,8 +240,20 @@ def prettyprint_email_as_html_template(email_json, topics):
             attachments.append(href)
             attachments.append(',')
 
+# <span class="mitie mitie-organization" mitie-id="0d41f087333c639f72dbbd431d922810_entity_6" mitie-type="organization" mitie-value="CSOP">CSOP</span>
         # Enitity Highlighting
-        # TODO
+        # raw_body = email_json["body"]
+        # org = 'Edison chief executive'
+        # markup = '<span class="mitie mitie-organization" mitie-id="0d41f087333c639f72dbbd431d922810_entity_6" mitie-type="organization" mitie-value="'+org+'">'+org+'</span>'
+        # raw_body = raw_body.replace(org, markup)
+
+        # pre = soup.new_tag('pre')
+        # code = soup.new_tag('code')
+        #
+        # pre.append(code)
+        # code.append(email_json["body"])
+        # # pre.find(text=org).replace_with(markup)
+        # soup.find(text="##BODY##").replace_with(pre)
 
         # Topics
         table = soup.find(id="##TOPICS##")
@@ -257,7 +267,24 @@ def prettyprint_email_as_html_template(email_json, topics):
             tr.append(score)
             table.append(tr)
 
-        return soup.prettify()
+        # Entity highlighting applied on text rather than in template
+        # TODO this is a bit of a hack
+        raw_body = email_json["body"]
+        for org in email_json["entities"]["entity_organization"]:
+            # markup = '<span class="mitie mitie-organization" id="TODO_id" mitie-type="organization" mitie-value="'+org+'">'+org+'</span>'
+            markup = '<em style="background-color: #ffcc33;">'+org+'</em>'
+            raw_body = raw_body.replace(org, markup)
+        for location in email_json["entities"]["entity_location"]:
+            markup = '<em style="background-color: #00ff00;">'+location+'</em>'
+            raw_body = raw_body.replace(location, markup)
+        for person in email_json["entities"]["entity_person"]:
+            markup = '<em style="background-color: #00ccff;">'+person+'</em>'
+            raw_body = raw_body.replace(person, markup)
+        for misc in email_json["entities"]["entity_misc"]:
+            markup = '<em style="background-color: #c0c0c0;">'+misc+'</em>'
+            raw_body = raw_body.replace(misc, markup)
+
+        return  soup.prettify().replace("##BODY##", raw_body)
 
 def prettyprint_email_as_html(email_json):
 
@@ -384,8 +411,8 @@ def export_emails_archive(data_set_id, email_ids=[]):
 if __name__ == "__main__":
     # TODO move into method
     topics = get_categories("sample")
-
-    email_ids = ["f326dd04-7fe8-11e5-bb05-08002705cb99"]
+    email_ids = ["e65c3704-7fe8-11e5-bb05-08002705cb99"]
+    # email_ids = ["f326dd04-7fe8-11e5-bb05-08002705cb99"]
 
     es = Elasticsearch(elasticsearch_hosts())
     # TODO can implement with multiple doc_types and combine attachments in
