@@ -110,7 +110,7 @@ get_actions = {
     "exportable" : getExportable,
     "download" : buildExportable,
     "attachment" : get_attachment_by_id,
-    "attachments" : getAllAttachmentBySender,
+    "search_all_attach_by_sender" : getAllAttachmentBySender,
     "exportmany" : setExportMany
 }
 

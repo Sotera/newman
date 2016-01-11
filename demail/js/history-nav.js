@@ -41,6 +41,9 @@ var history_nav = (function () {
       else if (data_field === 'entity') {
         icon_class = 'fa fa-sitemap';
       }
+      else if (data_field === 'attachment') {
+        icon_class = 'fa fa-paperclip';
+      }
     }
 
     var new_data_view = data_view(uid, label, icon_class, data_url, data_field);

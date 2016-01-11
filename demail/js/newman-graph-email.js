@@ -23,7 +23,7 @@ var node_context_menu = [
       console.log('node-clicked search-emails-under "' + d.name + '"');
       //console.log('element:\n' + JSON.stringify(d, null, 2));
 
-      newman_graph_email_request_doc_by_address.requestService(d.name);
+      newman_graph_email_request_by_address.requestService(d.name);
     }
   },
   {
@@ -34,6 +34,8 @@ var node_context_menu = [
 
       console.log('node-clicked search-email-attachments-under "' + d.name + '"');
       //console.log('element:\n' + JSON.stringify(d, null, 2));
+
+      newman_email_attach_request_all_by_sender.requestService(d.name);
     }
   },
   {
@@ -45,7 +47,7 @@ var node_context_menu = [
       console.log('node-clicked search-community-under "' + d.name + '" community : "' + d.community + '"');
       //console.log('element:\n' + JSON.stringify(d, null, 2));
 
-      newman_graph_email_request_doc_by_community.requestService(d.community);
+      newman_graph_email_request_by_community.requestService(d.community);
     }
   }
 
@@ -355,7 +357,7 @@ var newman_graph_email = (function () {
  * service container email-documents-search-by-address
  * @type {{requestService, getResponse}}
  */
-var newman_graph_email_request_doc_by_address = (function () {
+var newman_graph_email_request_by_address = (function () {
 
   var _service_url = 'search/search/email';
   //var _service_url = 'search/search_by_address';
@@ -464,7 +466,7 @@ var newman_graph_email_request_doc_by_address = (function () {
  * service container email-documents-search-by-address-set
  * @type {{requestService, getResponse}}
  */
-var newman_graph_email_request_doc_by_address_set = (function () {
+var newman_graph_email_request_by_address_set = (function () {
 
   var _service_url = 'search/search_by_address_set';
   var _response;
@@ -517,7 +519,7 @@ var newman_graph_email_request_doc_by_address_set = (function () {
 
   function requestService(order, datetime_selected) {
 
-    console.log('newman_graph_email_request_doc_by_address_set.requestService()');
+    console.log('newman_graph_email_request_by_address_set.requestService()');
     var service_url = getServiceURL(order, datetime_selected);
     $.get( service_url ).then(function (response) {
       setResponse( response );
@@ -596,7 +598,7 @@ var newman_graph_email_request_doc_by_address_set = (function () {
  * service container email-documents-search-by-community
  * @type {{requestService, getResponse}}
  */
-var newman_graph_email_request_doc_by_community = (function () {
+var newman_graph_email_request_by_community = (function () {
 
   var _service_url = 'search/search_by_community';
   var _response;
@@ -606,7 +608,7 @@ var newman_graph_email_request_doc_by_community = (function () {
   }
 
   function getServiceURL(community_key) {
-    console.log('newman_graph_email_request_doc_by_community.getServiceURL(' + community_key + ')');
+    console.log('newman_graph_email_request_by_community.getServiceURL(' + community_key + ')');
 
     if (community_key) {
 
@@ -623,7 +625,7 @@ var newman_graph_email_request_doc_by_community = (function () {
 
   function requestService(email_address) {
 
-    console.log('newman_graph_email_request_doc_by_community.requestService()');
+    console.log('newman_graph_email_request_by_community.requestService()');
     var service_url = getServiceURL(email_address);
     $.get( service_url ).then(function (response) {
       setResponse( response );

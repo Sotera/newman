@@ -434,13 +434,13 @@ function produceHTMLView(email_obj) {
                         $('#query_prev_email').removeClass( 'clickable-disabled' ).click(function() {
                           console.log("clicked query_prev_email");
 
-                          newman_graph_email_request_doc_by_address_set.requestService( 'prev', datetime_selected );
+                          newman_graph_email_request_by_address_set.requestService( 'prev', datetime_selected );
                         });
 
                         $('#query_next_email').removeClass( 'clickable-disabled' ).click(function() {
                           console.log("clicked query_next_email");
 
-                          newman_graph_email_request_doc_by_address_set.requestService( 'next', datetime_selected );
+                          newman_graph_email_request_by_address_set.requestService( 'next', datetime_selected );
                         });
 
                       }
@@ -476,9 +476,10 @@ function produceHTMLView(email_obj) {
   var attach_field = d.attach;
   if (attach_field) {
     _.each(attach_field, function (attach) {
-      //console.log('email-body-attachments : \n' + JSON.stringify(attach, null, 2));
+      //console.log('email-body-attachment : \n' + JSON.stringify(attach, null, 2));
       var attach_url = 'email/attachment/' + attach[0];
       attach_url = newman_data_source.appendDataSource(attach_url);
+
       attachments.append($('<a>', {'class': 'clickable', "target": "_blank", "href": attach_url}).html(attach[1]));
       attachments.append($('<span>').html('&nbsp'));
     });
@@ -1634,8 +1635,9 @@ function document_type(ext){
 
 function draw_attachments_table(email_address){
   var deferred = $.Deferred();
-  var attachment_url = 'email/attachments/' + email_address;
+  var attachment_url = 'email/search_all_attach_by_sender/' + email_address;
   attachment_url = newman_data_source.appendDataSource( attachment_url );
+  attachment_url = newman_datetime_range.appendDatetimeRange( attachment_url );
 
   $.ajax(attachment_url).done(function(response){
     var email_attach_list = _.mapcat(response.email_attachments, function(r){
@@ -1724,6 +1726,7 @@ function draw_attachments_table(email_address){
           //console.log( 'attachment under : ' + email_addr + '\n' + JSON.stringify(d, null, 2) );
           var attach_url = 'email/attachment/' + encodeURIComponent(d[0]);
           attach_url = newman_data_source.appendDataSource( attach_url );
+
           var el = $('<div>').append($('<a>', { "target": "_blank" ,"href" : attach_url }).html(d[1]));
           return el.html();
         }
@@ -1738,6 +1741,7 @@ function draw_attachments_table(email_address){
             var img = $('<img>').css('max-height', '50px').css('width','50px');
             var attach_image_url = 'email/attachment/' + encodeURIComponent(d[0]) + '/' + encodeURIComponent(d[1]);
             attach_image_url = newman_data_source.appendDataSource( attach_image_url );
+
             switch (document_type(ext)){
               case "image" : return img.attr('src', attach_image_url );
               case "pdf" : return img.attr('src', 'imgs/document-icons/pdf-2.png');
