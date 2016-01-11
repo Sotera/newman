@@ -11,6 +11,7 @@ from newman.utils.functions import nth
 
 #GET /search/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
 def search(*path_args, **param_args):
+    tangelo.content_type("application/json")
     tangelo.log("search.search(path_args[%s] %s)" % (len(path_args), str(path_args)))
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
@@ -33,7 +34,7 @@ def search(*path_args, **param_args):
         elif len(path_args) >= 2:
             return get_graph_for_email_address(data_set_id, email_address, start_datetime, end_datetime, size )
     elif path_args[0] == "entity":
-        return get_graph_for_entity(*path_args, **param_args)
+        return get_graph_by_entity(*path_args, **param_args)
     elif path_args[0] == "topic":
         if len(path_args) == 1:
             return {"graph":{"nodes":[], "links":[]}, "rows":[]}
@@ -124,7 +125,7 @@ def search_email_by_topic(*args, **param_args):
 
 
 #GET /search/entity?entities.entity_person=mike,joe&entities.entity_location=paris,los angeles
-def get_graph_for_entity(*args, **kwargs):
+def get_graph_by_entity(*args, **kwargs):
     tangelo.content_type("application/json")
     tangelo.log("entity.get_graph_for_entity(args: %s kwargs: %s)" % (str(args), str(kwargs)))
 
@@ -144,12 +145,12 @@ def get_graph_for_entity(*args, **kwargs):
 
 actions = {
     "search": search,
-    "search_user": get_graph_for_email_address,
-    "search_email_by_address_set": search_email_by_address_set,
-    "search_text": get_top_email_hits_for_text_query,
-    "search_entity" : get_graph_for_entity,
-    "search_community": search_email_by_community,
-    "search_topic": search_email_by_topic
+    "search_by_address": get_graph_for_email_address,
+    "search_by_address_set": search_email_by_address_set,
+    "search_by_text": get_top_email_hits_for_text_query,
+    "search_by_entity" : get_graph_by_entity,
+    "search_by_community": search_email_by_community,
+    "search_by_topic": search_email_by_topic
 }
 
 def unknown(*args):

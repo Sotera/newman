@@ -419,10 +419,13 @@ function produceHTMLView(email_obj) {
 
                         newman_graph_email.setGraphSelected(attr_value, 'target', attr_id, true, false);
                       }
-                      else {
+                      else { //unchecked
                         console.log('checkbox : unchecked, id : ' + attr_id + ', value : ' + attr_value);
 
                         newman_graph_email.setGraphSelected(attr_value, 'target', attr_id, false, false);
+
+                        // for now, only allow one email recipient
+                        newman_graph_email.clearAllTargetNodeSelected();
                       }
 
                       if (newman_graph_email.sizeOfAllSourceNodeSelected() > 0 && newman_graph_email.sizeOfAllTargetNodeSelected() > 0) {
@@ -431,13 +434,13 @@ function produceHTMLView(email_obj) {
                         $('#query_prev_email').removeClass( 'clickable-disabled' ).click(function() {
                           console.log("clicked query_prev_email");
 
-                          newman_service_email_by_address_set.requestService( 'prev', datetime_selected );
+                          newman_graph_email_request_doc_by_address_set.requestService( 'prev', datetime_selected );
                         });
 
                         $('#query_next_email').removeClass( 'clickable-disabled' ).click(function() {
                           console.log("clicked query_next_email");
 
-                          newman_service_email_by_address_set.requestService( 'next', datetime_selected );
+                          newman_graph_email_request_doc_by_address_set.requestService( 'next', datetime_selected );
                         });
 
                       }
@@ -1173,36 +1176,46 @@ function drawGraph(graph){
 
         $('#radial-wrap').find(".email_addr a span").first().text(n.name);
 
-        $('#radial').find(".attach").first().unbind("click")
-        .on("click", function(){
-          draw_attachments_table(n.name).done(function(){
-            // TODO: needs rework, no longer working
-            $('#tab-list li:eq(4) a').tab('show');
+        //$('#radial').find(".attach").first().unbind("click")
+        $('#radial')
+          .find('#popup_show_attachment').first().off()
+          .on("click", function(e) {
+            console.log('node-clicked show-email-attachments');
+
+            /*
+            draw_attachments_table(n.name).done(function () {
+              // TODO: needs rework, no longer working
+              $('#tab-list li:eq(4) a').tab('show');
+            });
+            */
+            e.preventDefault();
           });
-        });
+
 
         //$('#radial').find('.email').first().unbind('click')
-        $('#radial-wrap')
-          .find('#popup_search_email_address')
-          .off()
+        $('#radial')
+          .find('#popup_search_email_address').first().off()
           .on("click", function(e) {
-
             console.log( 'node-clicked search-by-email' );
+
             //requestSearch("email", n.name, true);
 
             e.preventDefault();
           })
           .find("span").first().css("color", getEmailDomainColor(n.name));
 
-        $('#radial').find(".community").first()
-          .unbind('click')
-          .on("click", function(){
+        //$('#radial').find(".community").first().unbind('click')
+        $('#radial')
+          .find("#popup_search_community").first().off()
+          .on("click", function(e){
             console.log( 'node-clicked search-by-community' );
-            requestSearch("community", n.community, true);
-        }).find("span").first()
-          .css("color", newman_community_email.getCommunityColor( n.community ));
 
-        _.delay(function(){  $("#alink").focus(); }, 150);
+            //requestSearch("community", n.community, true);
+
+            e.preventDefault();
+            }).find("span").first().css("color", newman_community_email.getCommunityColor( n.community ));
+
+        _.delay(function() {  $("#alink").focus(); }, 150);
 
         _.delay(fn, 150, n.name);
       }
@@ -1211,8 +1224,33 @@ function drawGraph(graph){
 
   node.on("click", function(n){
     setSearchType('email');
-    click_node(n);
+    //click_node(n);
   });
+
+  node.on('contextmenu', d3.contextMenu(node_context_menu, {
+    onOpen: function(n) {
+      //console.log('context_menu_opened!');
+      $('.d3-context-menu li:first')
+        .addClass('context-menu-title');
+
+      $('.d3-context-menu')
+        .find(".fa-envelope").first()
+        .css("color", getEmailDomainColor(n.name))
+        .css("padding", "4px 0px 0px 8px");
+
+      $('.d3-context-menu')
+        .find(".fa-paperclip").first()
+        .css("padding", "4px 0px 0px 8px");
+
+      $('.d3-context-menu')
+        .find(".fa-users").first()
+        .css("color", newman_community_email.getCommunityColor( n.community ))
+        .css("padding", "4px 0px 0px 8px");
+    },
+    onClose: function() {
+      //console.log('context_menu_closed!');
+    }
+  }));
 
   node.on("mouseover", function(n) {
 
