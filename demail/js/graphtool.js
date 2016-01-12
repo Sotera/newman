@@ -725,6 +725,8 @@ function searchByField( field ) {
   search_result.clearAll();
 
   var text_input = $("#txt_search").val();
+  //text_input = encodeURIComponent(text_input.replace(/"/g, '\\"'));
+  text_input = encodeURIComponent(text_input);
   requestSearch( field, text_input, false );
 
   /*
