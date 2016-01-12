@@ -33,13 +33,16 @@ var history_nav = (function () {
         icon_class = 'fa fa-user';
       }
       else if (data_field === 'community') {
-        icon_class = 'fa fa-connectdevelop';
+        icon_class = 'fa fa-users';
       }
       else if (data_field === 'topic') {
         icon_class = 'fa fa-list-ul';
       }
       else if (data_field === 'entity') {
         icon_class = 'fa fa-sitemap';
+      }
+      else if (data_field === 'attachment') {
+        icon_class = 'fa fa-paperclip';
       }
     }
 

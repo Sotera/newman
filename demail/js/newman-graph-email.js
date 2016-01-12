@@ -2,6 +2,57 @@
  * Created by jlee on 1/4/16.
  */
 
+// context menu
+var node_context_menu = [
+
+  {
+    title: function(element, d, i) {
+      return element.name;
+    },
+    action: function(element, d, i) {
+      //console.log('node-clicked search-by-email');
+      //console.log('element:\n' + JSON.stringify(element, null, 2));
+    }
+  },
+  {
+    title: function(element, d, i) {
+      return '<i class="fa fa-envelope"></i> Search Emails';
+    },
+    action: function(element, d, i) {
+
+      console.log('node-clicked search-emails-under "' + d.name + '"');
+      //console.log('element:\n' + JSON.stringify(d, null, 2));
+
+      newman_graph_email_request_by_address.requestService(d.name);
+    }
+  },
+  {
+    title: function(element, d, i) {
+      return '<i class="fa fa-paperclip"></i> Search Attachments';
+    },
+    action: function(element, d, i) {
+
+      console.log('node-clicked search-email-attachments-under "' + d.name + '"');
+      //console.log('element:\n' + JSON.stringify(d, null, 2));
+
+      newman_email_attach_request_all_by_sender.requestService(d.name);
+    }
+  },
+  {
+    title: function(element, d, i) {
+      return '<i class="fa fa-users"></i> Search Community';
+    },
+    action: function(element, d, i) {
+
+      console.log('node-clicked search-community-under "' + d.name + '" community : "' + d.community + '"');
+      //console.log('element:\n' + JSON.stringify(d, null, 2));
+
+      newman_graph_email_request_by_community.requestService(d.community);
+    }
+  }
+
+];
+
 /**
  * email-graph related container
  */
@@ -303,13 +354,121 @@ var newman_graph_email = (function () {
 
 
 /**
- * service response container email-documents-search-by-address-set
+ * service container email-documents-search-by-address
  * @type {{requestService, getResponse}}
  */
-var newman_service_email_by_address_set = (function () {
+var newman_graph_email_request_by_address = (function () {
 
-  //var _service_url = 'search/search/email';
-  var _service_url = 'search/search_email_by_address_set';
+  var _service_url = 'search/search/email';
+  //var _service_url = 'search/search_by_address';
+  var _response;
+
+  function getServiceURLBase() {
+    return _service_url;
+  }
+
+  function getServiceURL(email_address) {
+    console.log('newman_service_email_by_address.getServiceURL(' + email_address + ')');
+
+    if (email_address) {
+
+      var service_url = _service_url + '/' + encodeURIComponent(email_address.trim());
+      service_url = newman_data_source.appendDataSource(service_url);
+      service_url = newman_datetime_range.appendDatetimeRange(service_url);
+
+      // add to history
+      updateHistory(service_url, 'email', decodeURIComponent(email_address));
+
+      return service_url;
+    }
+  }
+
+  function requestService(email_address) {
+
+    console.log('newman_service_email_by_address.requestService()');
+    var service_url = getServiceURL(email_address);
+    $.get( service_url ).then(function (response) {
+      setResponse( response );
+      updateUISocialGraph( response, false );
+    });
+  }
+
+  function setResponse( response ) {
+    if (response) {
+
+      _response = response;
+      //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
+    }
+  }
+
+  function getResponse() {
+    return _response;
+  }
+
+  function updateHistory(url_path, field, label) {
+
+    var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
+
+    history_nav.push(id,
+      label,
+      '',
+      url_path,
+      field);
+
+    history_nav.refreshUI();
+  }
+
+  function updateUISocialGraph(search_response, documentViewEnabled) {
+
+    //validate search-response
+    var filtered_response = validateResponseSearch( search_response );
+
+    //email_analytics_content.open();
+    //bottom_panel.unhide();
+
+    // initialize to blank
+    updateUIInboundCount();
+    updateUIOutboundCount();
+
+
+    //console.log('filtered_response:\n' + JSON.stringify(filtered_response, null, 2));
+    $('#document_count').text(filtered_response.rows.length);
+
+    // clear existing content if any
+    clear_content_view_email();
+
+    // populate data-table
+    populateDataTable( filtered_response.rows )
+
+    if (bottom_panel.isOpen()){
+      //resize bottom_panel
+      bottom_panel.close();
+
+    }
+
+    // render graph display
+    drawGraph( filtered_response.graph );
+
+  }
+
+
+  return {
+    'getServiceURLBase' : getServiceURLBase,
+    'getServiceURL' : getServiceURL,
+    'requestService' : requestService,
+    'getResponse' : getResponse,
+    'setResponse' : setResponse
+  }
+
+}());
+
+/**
+ * service container email-documents-search-by-address-set
+ * @type {{requestService, getResponse}}
+ */
+var newman_graph_email_request_by_address_set = (function () {
+
+  var _service_url = 'search/search_by_address_set';
   var _response;
 
   function getServiceURLBase() {
@@ -352,12 +511,15 @@ var newman_service_email_by_address_set = (function () {
     address_set_as_string = decodeURIComponent(address_set_as_string);
     updateHistory(service_url, 'email', address_set_as_string);
 
+    // clear all selected before the service call
+    newman_graph_email.clearAllNodeSelected();
+
     return service_url;
   }
 
   function requestService(order, datetime_selected) {
 
-    console.log('newman_service_email_by_address_set.requestService()');
+    console.log('newman_graph_email_request_by_address_set.requestService()');
     var service_url = getServiceURL(order, datetime_selected);
     $.get( service_url ).then(function (response) {
       setResponse( response );
@@ -390,7 +552,7 @@ var newman_service_email_by_address_set = (function () {
     history_nav.refreshUI();
   }
 
-  function updateUISocialGraph(search_response) {
+  function updateUISocialGraph(search_response, documentViewEnabled) {
 
     //validate search-response
     var filtered_response = validateResponseSearch( search_response );
@@ -402,6 +564,111 @@ var newman_service_email_by_address_set = (function () {
     updateUIInboundCount();
     updateUIOutboundCount();
 
+    $('#document_count').text(filtered_response.rows.length);
+
+    // clear existing content if any
+    clear_content_view_email();
+
+    // populate data-table
+    populateDataTable( filtered_response.rows )
+
+    if (bottom_panel.isOpen()){
+      //resize bottom_panel
+      bottom_panel.close();
+
+    }
+
+    // render graph display
+    drawGraph( filtered_response.graph );
+
+  }
+
+
+  return {
+    'getServiceURLBase' : getServiceURLBase,
+    'getServiceURL' : getServiceURL,
+    'requestService' : requestService,
+    'getResponse' : getResponse,
+    'setResponse' : setResponse
+  }
+
+}());
+
+/**
+ * service container email-documents-search-by-community
+ * @type {{requestService, getResponse}}
+ */
+var newman_graph_email_request_by_community = (function () {
+
+  var _service_url = 'search/search_by_community';
+  var _response;
+
+  function getServiceURLBase() {
+    return _service_url;
+  }
+
+  function getServiceURL(community_key) {
+    console.log('newman_graph_email_request_by_community.getServiceURL(' + community_key + ')');
+
+    if (community_key) {
+
+      var service_url = _service_url + '/' + encodeURIComponent(community_key.trim());
+      service_url = newman_data_source.appendDataSource(service_url);
+      service_url = newman_datetime_range.appendDatetimeRange(service_url);
+
+      // add to history
+      updateHistory(service_url, 'community', decodeURIComponent(community_key));
+
+      return service_url;
+    }
+  }
+
+  function requestService(email_address) {
+
+    console.log('newman_graph_email_request_by_community.requestService()');
+    var service_url = getServiceURL(email_address);
+    $.get( service_url ).then(function (response) {
+      setResponse( response );
+      updateUISocialGraph( response, false );
+    });
+  }
+
+  function setResponse( response ) {
+    if (response) {
+
+      _response = response;
+      //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
+    }
+  }
+
+  function getResponse() {
+    return _response;
+  }
+
+  function updateHistory(url_path, field, label) {
+
+    var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
+
+    history_nav.push(id,
+      label,
+      '',
+      url_path,
+      field);
+
+    history_nav.refreshUI();
+  }
+
+  function updateUISocialGraph(search_response, documentViewEnabled) {
+
+    //validate search-response
+    var filtered_response = validateResponseSearch( search_response );
+
+    // initialize to blank
+    updateUIInboundCount();
+    updateUIOutboundCount();
+
+
+    //console.log('filtered_response:\n' + JSON.stringify(filtered_response, null, 2));
     $('#document_count').text(filtered_response.rows.length);
 
     // clear existing content if any

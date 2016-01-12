@@ -370,7 +370,8 @@ a.ctrl, .ctrl a {
 
 a.ctrl:hover, .ctrl a:hover, a.ctrl:focus, .ctrl a:focus { opacity: 1; }
 a.ctrl:focus, .ctrl a:focus { outline: none; }
-.button {
+
+.hidden-button {
     z-index: 2;
     margin: -.625em;
     width: 1.25em; height: 1.25em;
@@ -412,7 +413,7 @@ a.ctrl:focus, .ctrl a:focus { outline: none; }
 /*     transform: rotate(75deg); */
 /* } */
 /* make the menu appear on click */
-.button:focus + .tip {
+.hidden-button:focus + .tip {
     transform: scale(1);
     opacity: 1;
 }
