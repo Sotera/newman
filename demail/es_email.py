@@ -134,7 +134,7 @@ def get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime,
     email_address = [map_email_addr(email_addr, total_docs) for email_addr in email_addrs['hits']['hits']]
     return {"emails": email_address }
 
-def get_email(index, email_id):
+def get_email(index, email_id, query_string):
 
     es = Elasticsearch(elasticsearch_hosts())
     # fields=["id","datetime","senders","senders_line","tos_line","ccs_line","bccs_line","subject","body","attachments.filename","entities.entity_organization","entities.entity_location","entities.entity_person","entities.entity_misc"]
@@ -152,7 +152,9 @@ def get_email(index, email_id):
              ["".join(source["ccs_line"]), ";".join(source["ccs"])],
              ["".join(source["bccs_line"]), ";".join(source["bccs"])],
              source["subject"],
-             source["body"].replace('\n',"<br/>"),
+             # TODO figure this out
+             # source["body"].replace('\n',"<br/>"),
+             "<pre>"+source["body"]+"</pre>",
              [[f["guid"],f["filename"]] for f in source.get("attachments", default)]
              ]
 
@@ -223,6 +225,7 @@ def get_attachments_by_sender(data_set_id, sender, start_datetime, end_datetime,
     # body={"filter":{"exists":{"field":"attachments"}}, "query":{"match":{"senders":sender}}}
 
     body = _build_email_attachment_query(sender, date_bounds=(start_datetime, end_datetime))
+    tangelo.log("get_attachments_by_sender.Query %s"%body)
 
     es = Elasticsearch(elasticsearch_hosts())
     attachments_resp = es.search(index=data_set_id, doc_type="emails", size=size, body=body)

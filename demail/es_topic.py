@@ -16,7 +16,7 @@ _lda_clusters={"query": { "match_all": {}},"sort":[{"idx":{"order": "asc" }}]}
 
 
 def _cluster_carrot2(index, type, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, cluster_fields=["_source.body"], cluster_title_fields=["_source.subject"], algorithm="lingo", max_doc_pool_size=500):
-    query = _build_email_query(email_addrs=email_addrs, query_terms=query_terms,  entity=entity, date_bounds=date_bounds)
+    query = _build_email_query(email_addrs=email_addrs, qs=query_terms,  entity=entity, date_bounds=date_bounds)
     carrot_query = {
         "search_request": {
             "query": query["query"],

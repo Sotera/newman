@@ -140,7 +140,7 @@ def _build_graph_for_emails(index, emails, query_hits):
 def get_graph_for_email_address(data_set_id, email_address, start_datetime, end_datetime, size):
     tangelo.log("es_search.get_graph_for_email_address(%s)" % (str(email_address)))
 
-    query  = _build_email_query(email_addrs=[email_address], query_terms='', date_bounds=(start_datetime, end_datetime))
+    query  = _build_email_query(email_addrs=[email_address], qs='', date_bounds=(start_datetime, end_datetime))
     tangelo.log("es_search.get_graph_for_email_address(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
@@ -151,7 +151,7 @@ def get_rows_for_email_address(data_set_id, sender, recipients, start_datetime, 
     tangelo.log("es_search.get_graph_for_email_address(senders=%s, recipients=%s)" % (str(sender),str(recipients)))
 
     # apply query with address intersection behaviour
-    query  = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, query_terms='', date_bounds=(start_datetime, end_datetime), sort_order=sort_order, date_mode_inclusive=False, address_filter_mode="conversation")
+    query  = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, qs='', date_bounds=(start_datetime, end_datetime), sort_order=sort_order, date_mode_inclusive=False, address_filter_mode="conversation")
     tangelo.log("es_search.get_graph_for_email_address(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
@@ -166,7 +166,7 @@ def get_rows_for_email_address(data_set_id, sender, recipients, start_datetime, 
 def get_rows_for_community(data_set_id, community, email_addrs, start_datetime, end_datetime, size):
     tangelo.log("es_search.get_rows_for_community(community=%s, email_addrs=%s)" % (str(community), str(email_addrs)))
 
-    query  = _build_email_query(email_addrs=email_addrs, query_terms='', date_bounds=(start_datetime, end_datetime), communities=[community])
+    query  = _build_email_query(email_addrs=email_addrs, qs='', date_bounds=(start_datetime, end_datetime), communities=[community])
     tangelo.log("es_search.get_rows_for_community(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
@@ -178,7 +178,7 @@ def get_rows_for_community(data_set_id, community, email_addrs, start_datetime, 
 def get_rows_for_topic(data_set_id, topic, email_addrs, start_datetime, end_datetime, size):
     tangelo.log("es_search.get_rows_for_topic(email_addrs=%s, topic=%s)" % ( str(email_addrs), str(topic)))
 
-    query  = _build_email_query(email_addrs=email_addrs, query_terms='', topic=topic, sort_mode="topic", sort_order="desc", date_bounds=(start_datetime, end_datetime))
+    query  = _build_email_query(email_addrs=email_addrs, qs='', topic=topic, sort_mode="topic", sort_order="desc", date_bounds=(start_datetime, end_datetime))
     tangelo.log("es_search.get_rows_for_topic(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query, additional_fields=["topic_scores.idx_"+str(topic["idx"])])
@@ -202,7 +202,7 @@ def get_top_email_hits_for_text_query(*args, **kwargs):
     if not search_terms:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing search term(s)")
 
-    query  = _build_email_query(query_terms=search_terms, date_bounds=(start_datetime, end_datetime))
+    query  = _build_email_query(qs=search_terms, date_bounds=(start_datetime, end_datetime))
     tangelo.log("es_search.get_graph_for_text_query(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)

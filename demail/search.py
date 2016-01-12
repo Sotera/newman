@@ -137,7 +137,7 @@ def get_graph_for_entity(*args, **kwargs):
     # TODO: set from UI
     query_terms=''
 
-    query = _build_email_query(email_addrs=email_address_list, query_terms=query_terms, entity=entity_dict, date_bounds=(start_datetime, end_datetime))
+    query = _build_email_query(email_addrs=email_address_list, qs=query_terms, entity=entity_dict, date_bounds=(start_datetime, end_datetime))
     tangelo.log("entity.get_graph_for_entity(query: %s)" % (query))
 
     return _build_graph_for_emails(data_set_id, _query_emails(data_set_id, size, query))

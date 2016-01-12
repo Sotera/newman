@@ -11,18 +11,22 @@ from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime, parseParamEmailIds
 
 
-#GET /email/<id>
+#GET /email/<id>?qs="<query string>"
 # deprecated slated for removal
 def getEmail(*args, **kwargs):
-    tangelo.log('getEmail(%s)' % str(args));
+    tangelo.log("getEmail(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     tangelo.content_type("application/json")
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+
+    # TODO set this for highlighting
+    qs=''
+
     email_id = args[-1]
     if not email_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing email_id")
 
-    return get_email(data_set_id, email_id)
+    return get_email(data_set_id, email_id, qs)
 
 
 #GET /rank

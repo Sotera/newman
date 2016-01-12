@@ -81,7 +81,7 @@ def _date_filter_not_equal(date_bounds=None):
 def _build_filter(email_senders=[], email_rcvrs=[], query_terms='', topic=None, entity_dict={}, date_bounds=None, communities=[], date_mode_inclusive=True, address_filter_mode="union"):
 
     # One of these addresses should apear on the email
-    address_filter = [] if (not email_senders or not email_rcvrs) else [_addrs_filter(email_senders,email_rcvrs,email_rcvrs,email_rcvrs, address_filter_mode=address_filter_mode)]
+    address_filter = [] if (not email_senders and not email_rcvrs) else [_addrs_filter(email_senders,email_rcvrs,email_rcvrs,email_rcvrs, address_filter_mode=address_filter_mode)]
     # tangelo.log("====================================(query: %s)" % (address_filter))
 
     # query_terms_filter = [] if not query_terms else _terms_filter("_all", query_terms.split(" "))
@@ -126,18 +126,33 @@ def _build_filter(email_senders=[], email_rcvrs=[], query_terms='', topic=None, 
 # send_addrs or recipient_addrs are provided they will be used instead of email_addrs for the respective parts of the query
 # address_filter_mode - see address_filter
 # sort_mode
-def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], query_terms='', topic=None, entity={}, date_bounds=None, communities=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True, address_filter_mode="union"):
+def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='', topic=None, entity={}, date_bounds=None, communities=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True, address_filter_mode="union"):
 
-    term_query = {"match_all" : {}} if not query_terms else {"match" : {"_all" : query_terms}}
+    # This checks if the query text is a simple term or a query string and sets the correct portion
+    term_query = { "match_all" : {} }
+    query_string = '*'
+    if qs.startswith('\'') and qs.endswith('\''):
+        query_string = qs.replace('\'', '')
+    elif qs:
+        term_query = { "match" : { "_all" : qs }}
 
     sender_addrs = email_addrs if not sender_addrs else sender_addrs
     recipient_addrs = email_addrs if not recipient_addrs else recipient_addrs
 
     query_email_addr =  {
         "query" : {
-            "filtered" : {
-                "query" : term_query,
-                "filter" :  _build_filter(email_senders=sender_addrs, email_rcvrs=recipient_addrs, topic=topic, entity_dict=entity, date_bounds=date_bounds, communities=communities, date_mode_inclusive=date_mode_inclusive, address_filter_mode=address_filter_mode)
+            "bool":{
+                "must":[
+                    {
+                        "query_string" : { "query" : query_string }
+                    },
+                    {
+                        "filtered" : {
+                            "query" : term_query,
+                            "filter" : _build_filter(email_senders=sender_addrs, email_rcvrs=recipient_addrs, topic=topic, entity_dict=entity, date_bounds=date_bounds, communities=communities, date_mode_inclusive=date_mode_inclusive, address_filter_mode=address_filter_mode)
+                        }
+                    }
+                ]
             }
         },
         "sort":  {}
