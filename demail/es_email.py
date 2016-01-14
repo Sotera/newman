@@ -8,7 +8,7 @@ from param_utils import parseParamDatetime
 from newman.utils.functions import nth
 from newman.newman_config import elasticsearch_hosts
 from es_search import _search_ranked_email_addrs, count, get_cached_email_addr, initialize_email_addr_cache
-from es_queries import _build_filter, _build_email_attachment_query
+from es_queries import _build_filter, _build_email_attachment_query, _build_email_query
 
 #map the email_address for the email/rank REST service
 def map_email_addr(email_addr_resp, total_emails):
@@ -224,7 +224,7 @@ def get_attachments_by_sender(data_set_id, sender, start_datetime, end_datetime,
     # fields= ["id", "datetime", "senders", "tos", "ccs", "bccs", "subject", "attachments.filename"]
     # body={"filter":{"exists":{"field":"attachments"}}, "query":{"match":{"senders":sender}}}
 
-    body = _build_email_attachment_query(sender, date_bounds=(start_datetime, end_datetime))
+    body = _build_email_query(sender_addrs=[sender], date_bounds=(start_datetime, end_datetime), attachments_only=True)
     tangelo.log("get_attachments_by_sender.Query %s"%body)
 
     es = Elasticsearch(elasticsearch_hosts())

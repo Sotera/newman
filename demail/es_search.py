@@ -105,6 +105,33 @@ def _query_emails(index, size, emails_query, additional_fields=[]):
 
     return {"total":emails_resp["hits"]["total"], "hits":[_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]}
 
+
+def _query_email_attachments(index, size, emails_query):
+    tangelo.log("_query_email_attachments.Query %s"%emails_query)
+
+    es = Elasticsearch(elasticsearch_hosts())
+    attachments_resp = es.search(index=index, doc_type="emails", size=size, body=emails_query)
+
+    email_attachments = []
+    for attachment_item in attachments_resp["hits"]["hits"]:
+        _source = attachment_item["_source"]
+        attachment_entry = [_source["id"],
+                             "PLACEHOLDER",
+                             _source["datetime"],
+                             _source.get("senders",""),
+                             ';'.join(_source.get("tos","")),
+                             ';'.join(_source.get("ccs","")),
+                             ';'.join(_source.get("bccs","")),
+                             _source.get("subject","")]
+        for attachment in _source["attachments"]:
+            l = list(attachment_entry)
+            l[1] = attachment["guid"]
+            l.append(attachment["filename"])
+            l.append(0)
+            email_attachments.append(l)
+    return email_attachments
+
+
 # This will generate the graph structure for a specific email address.  Will aply date filter and term query.
 def _build_graph_for_emails(index, emails, query_hits):
     nodes = []
@@ -144,7 +171,14 @@ def get_graph_for_email_address(data_set_id, email_address, start_datetime, end_
     tangelo.log("es_search.get_graph_for_email_address(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
-    return _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+
+    # Get attachments for community
+    query = _build_email_query(email_addrs=[email_address], qs='', date_bounds=(start_datetime, end_datetime), attachments_only=True)
+    tangelo.log("search.get_graph_by_entity(attachment-query: %s)" % (query))
+    attachments = _query_email_attachments(data_set_id, size, query)
+    graph["attachments"] = attachments
+    return graph
 
 # Get all rows for a email address results will be sorted by time asc
 def get_rows_for_email_address(data_set_id, sender, recipients, start_datetime, end_datetime, size, sort_order="asc"):
@@ -166,13 +200,20 @@ def get_rows_for_email_address(data_set_id, sender, recipients, start_datetime, 
 def get_rows_for_community(data_set_id, community, email_addrs, start_datetime, end_datetime, size):
     tangelo.log("es_search.get_rows_for_community(community=%s, email_addrs=%s)" % (str(community), str(email_addrs)))
 
-    query  = _build_email_query(email_addrs=email_addrs, qs='', date_bounds=(start_datetime, end_datetime), communities=[community])
+    query = _build_email_query(email_addrs=email_addrs, qs='', date_bounds=(start_datetime, end_datetime), communities=[community])
     tangelo.log("es_search.get_rows_for_community(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
 
-    return _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
 
+    # Get attachments for community
+    query = _build_email_query(email_addrs=email_addrs, qs='', date_bounds=(start_datetime, end_datetime), communities=[community], attachments_only=True)
+    tangelo.log("es_search.get_rows_for_community(attachment-query: %s)" % (query))
+    attachments = _query_email_attachments(data_set_id, size, query)
+    graph["attachments"] = attachments
+
+    return graph
 
 # Get all rows for a community, sorted by time asc
 def get_rows_for_topic(data_set_id, topic, email_addrs, start_datetime, end_datetime, size):
@@ -181,9 +222,16 @@ def get_rows_for_topic(data_set_id, topic, email_addrs, start_datetime, end_date
     query  = _build_email_query(email_addrs=email_addrs, qs='', topic=topic, sort_mode="topic", sort_order="desc", date_bounds=(start_datetime, end_datetime))
     tangelo.log("es_search.get_rows_for_topic(query: %s)" % (query))
 
-    results = _query_emails(data_set_id, size, query, additional_fields=["topic_scores.idx_"+str(topic["idx"])])
+    # Get emails graph for topics
+    emails = _query_emails(data_set_id, size, query, additional_fields=["topic_scores.idx_"+str(topic["idx"])])
+    graph = _build_graph_for_emails(data_set_id, emails["hits"], emails["total"])
 
-    return _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+    # Get attachments for top score topic
+    query  = _build_email_query(email_addrs=email_addrs, qs='', topic=topic, sort_mode="topic", sort_order="desc", date_bounds=(start_datetime, end_datetime), attachments_only=True)
+    tangelo.log("es_search.get_rows_for_topic(attachment-query: %s)" % (query))
+    attachments = _query_email_attachments(data_set_id, size, query)
+    graph["attachments"] = attachments
+    return graph
 
 
 # GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
@@ -206,12 +254,15 @@ def get_top_email_hits_for_text_query(*args, **kwargs):
     tangelo.log("es_search.get_graph_for_text_query(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
-    return _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
 
-    # TODO Neither of these are correct -- need to figure out this calling convention
-    # return {"graph":{"nodes":[], "links":[]}, "rows":emails}
-    # return {"emails": [[row["subject"],row["from"],row["num"],0,0,0,0,0] for row in emails]}
+    # Get attachments for community
+    query = _build_email_query(qs=search_terms, date_bounds=(start_datetime, end_datetime), attachments_only=True)
+    tangelo.log("es_search.get_top_email_hits_for_text_query(attachment-query: %s)" % (query))
+    attachments = _query_email_attachments(data_set_id, size, query)
+    graph["attachments"] = attachments
 
+    return graph
 
 def initialize_email_addr_cache(index):
     tangelo.log("INITIALIZING CACHE")

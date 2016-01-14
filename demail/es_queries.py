@@ -126,7 +126,8 @@ def _build_filter(email_senders=[], email_rcvrs=[], query_terms='', topic=None, 
 # send_addrs or recipient_addrs are provided they will be used instead of email_addrs for the respective parts of the query
 # address_filter_mode - see address_filter
 # sort_mode
-def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='', topic=None, entity={}, date_bounds=None, communities=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True, address_filter_mode="union"):
+# attachments_only - set to true will only return emails with attachments
+def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='', topic=None, entity={}, date_bounds=None, communities=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True, address_filter_mode="union", attachments_only=False):
 
     # This checks if the query text is a simple term or a query string and sets the correct portion
     term_query = { "match_all" : {} }
@@ -163,13 +164,18 @@ def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='
         # ]
     }
 
+    if attachments_only:
+        query_email_addr ["filter"] = {"exists":{"field":"attachments"}}
+
     if sort_mode == 'default' and not term_query:
         query_email_addr["sort"] = { "datetime": { "order": sort_order }}
     elif sort_mode == "topic":
         query_email_addr["sort"] = {"topic_scores.idx_"+topic["idx"]:{"order": sort_order }}
     return query_email_addr
 
+# TODO REMOVE and combine with email_query
 # Build a query for sender email attachments
+# Deprecated
 def _build_email_attachment_query(sender_address, query_terms='', topic=None, entity={}, date_bounds=None, communities=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True):
 
     term_query = {"match_all" : {}} if not query_terms else {"match" : {"_all" : query_terms}}

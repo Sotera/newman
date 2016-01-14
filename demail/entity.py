@@ -5,7 +5,7 @@ from param_utils import parseParamDatetime, parseParamEmailAddress, parseParamEn
 import tangelo
 import urllib
 from es_queries import _build_email_query
-from es_search import _build_graph_for_emails, _query_emails
+from es_search import _build_graph_for_emails, _query_email_attachments, _query_emails
 
 #TODO deprecated - remove at some point
 #GET /top/<amt>
@@ -35,7 +35,16 @@ def get_graph_for_entity(*args, **kwargs):
     tangelo.log("entity.get_graph_for_entity(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
-    return _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+
+    # Get attachments for community
+    query = _build_email_query(email_addrs=email_address_list, qs=query_terms, entity=entity_dict, date_bounds=(start_datetime, end_datetime), attachments_only=True)
+    tangelo.log("entity.get_graph_by_entity(attachment-query: %s)" % (query))
+    attachments = _query_email_attachments(data_set_id, size, query)
+    graph["attachments"] = attachments
+
+    return graph
+
 
 #GET /top/<count>
 def get_top_entities(*args, **kwargs):

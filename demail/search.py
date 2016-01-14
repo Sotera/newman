@@ -1,7 +1,7 @@
 import tangelo
 import cherrypy
 
-from es_search import get_graph_for_email_address, get_rows_for_email_address, get_top_email_hits_for_text_query, get_rows_for_community, get_rows_for_topic, _build_graph_for_emails, _query_emails
+from es_search import get_graph_for_email_address, get_rows_for_email_address, get_top_email_hits_for_text_query, _query_email_attachments, get_rows_for_community, get_rows_for_topic, _build_graph_for_emails, _query_emails
 from newman.newman_config import getDefaultDataSetID, default_min_timeline_bound, default_max_timeline_bound
 from param_utils import parseParamDatetime, parseParamEmailAddress, parseParam_sender_recipient, parseParamEntity, parseParamEmailSender, parseParamEmailRecipient, parseParam_email_addr, parseParamTopic
 from es_queries import _build_email_query
@@ -99,7 +99,7 @@ def search_email_by_community(*args, **param_args):
 
     return get_rows_for_community(data_set_id, community, email_addrs, start_datetime, end_datetime, size)
 
-#GET /search_topic/?data_set_id=<data_set>&topic_idx=1&topic_threshold=0.5&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
+#GET /search_by_topic/?data_set_id=<data_set>&topic_idx=1&topic_threshold=0.5&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 def search_email_by_topic(*args, **param_args):
     tangelo.content_type("application/json")
     tangelo.log("search_email_by_community(args: %s kwargs: %s)" % (str(args), str(param_args)))
@@ -125,9 +125,12 @@ def search_email_by_topic(*args, **param_args):
 
 
 #GET /search/entity?entities.entity_person=mike,joe&entities.entity_location=paris,los angeles
+# DEPRECATED - moved to entity.py
+# TODO
+# TODO remove
 def get_graph_by_entity(*args, **kwargs):
     tangelo.content_type("application/json")
-    tangelo.log("entity.get_graph_for_entity(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.log("search.get_graph_for_entity(args: %s kwargs: %s)" % (str(args), str(kwargs)))
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
     email_address_list = parseParamEmailAddress(**kwargs);
@@ -141,14 +144,22 @@ def get_graph_by_entity(*args, **kwargs):
     query = _build_email_query(email_addrs=email_address_list, qs=query_terms, entity=entity_dict, date_bounds=(start_datetime, end_datetime))
     tangelo.log("entity.get_graph_for_entity(query: %s)" % (query))
 
-    return _build_graph_for_emails(data_set_id, _query_emails(data_set_id, size, query))
+    graph = _build_graph_for_emails(data_set_id, _query_emails(data_set_id, size, query))
+
+    # Get attachments for community
+    query = _build_email_query(email_addrs=email_address_list, qs=query_terms, entity=entity_dict, date_bounds=(start_datetime, end_datetime), attachments_only=True)
+    tangelo.log("search.get_graph_by_entity(attachment-query: %s)" % (query))
+    attachments = _query_email_attachments(data_set_id, size, query)
+    graph["attachments"] = attachments
+
+    return graph
 
 actions = {
     "search": search,
     "search_by_address": get_graph_for_email_address,
     "search_by_address_set": search_email_by_address_set,
     "search_by_text": get_top_email_hits_for_text_query,
-    "search_by_entity" : get_graph_by_entity,
+    # "search_by_entity" : get_graph_by_entity,
     "search_by_community": search_email_by_community,
     "search_by_topic": search_email_by_topic
 }
