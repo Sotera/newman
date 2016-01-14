@@ -9,6 +9,8 @@ from es_email import get_ranked_email_address_from_email_addrs_index, get_attach
 from es_export import export_emails_archive
 from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarred
+from es_queries import _build_email_query
+from es_search import _build_graph_for_emails, _query_email_attachments, _query_emails
 
 
 #GET /email/<id>?qs="<query string>"
@@ -43,6 +45,34 @@ def setStarred(*args, **kwargs):
     starred = parseParamStarred(**kwargs)
 
     return set_starred(data_set_id, [email_id], starred)
+
+# /emails/view_starred
+# common URL params apply, date, size, etc
+def viewStarred(*args, **kwargs):
+    tangelo.log("email.viewStarred(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.content_type("application/json")
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+
+    size = size if size >500 else 2500
+
+    # TODO set from UI
+    query_terms=''
+    email_address_list = []
+
+    query = _build_email_query(email_addrs=email_address_list, qs=query_terms, date_bounds=(start_datetime, end_datetime), starred=True)
+    tangelo.log("email.viewStarred(query: %s)" % (query))
+
+    results = _query_emails(data_set_id, size, query)
+    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+
+    # Get attachments for community
+    query = _build_email_query(email_addrs=email_address_list, qs=query_terms, date_bounds=(start_datetime, end_datetime), attachments_only=True, starred=True)
+    tangelo.log("email.viewStarred(attachment-query: %s)" % (query))
+    attachments = _query_email_attachments(data_set_id, size, query)
+    graph["attachments"] = attachments
+
+    return graph
 
 #GET /rank
 def getRankedEmails(*args, **kwargs):
@@ -131,7 +161,8 @@ get_actions = {
     "attachment" : get_attachment_by_id,
     "search_all_attach_by_sender" : getAllAttachmentBySender,
     "exportmany" : setExportMany,
-    "set_starred" : setStarred
+    "set_starred" : setStarred,
+    "view_starred" : viewStarred
 }
 
 post_actions = {

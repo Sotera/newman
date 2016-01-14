@@ -3,6 +3,10 @@ import itertools
 def _terms_filter(field='', values=[]):
     return [] if (not field or not values) else [{"terms" : { field : values}}]
 
+def _term_filter(field='', values=[]):
+    return [] if (not field or not values) else [{"term" : { field : values}}]
+
+
 # address_filter_mode = "union"|"intersect"|"conversation" ,
 #   union will match any emails with any of the addresses,
 #   intersect will match the sender AND any rcvr addresses
@@ -78,7 +82,7 @@ def _date_filter_not_equal(date_bounds=None):
 
 # TODO how do we apply the query_terms as a filter?  Seems that it makes sense to do this as a query only but
 # TODO it is possible we will want to use a term filter on "_all"
-def _build_filter(email_senders=[], email_rcvrs=[], query_terms='', topic=None, entity_dict={}, date_bounds=None, communities=[], date_mode_inclusive=True, address_filter_mode="union"):
+def _build_filter(email_senders=[], email_rcvrs=[], query_terms='', topic=None, entity_dict={}, date_bounds=None, communities=[], date_mode_inclusive=True, address_filter_mode="union", starred=None):
 
     # One of these addresses should apear on the email
     address_filter = [] if (not email_senders and not email_rcvrs) else [_addrs_filter(email_senders,email_rcvrs,email_rcvrs,email_rcvrs, address_filter_mode=address_filter_mode)]
@@ -93,6 +97,8 @@ def _build_filter(email_senders=[], email_rcvrs=[], query_terms='', topic=None, 
     entity_filter = [] if (not entity_dict) else _entity_filter(entity_dict)
 
     community_filter = [] if not communities else _terms_filter("communities.community", communities)
+
+    starred_filter = [] if not starred else _term_filter("starred", starred)
 
     filter =  {
         "bool":{
@@ -109,6 +115,7 @@ def _build_filter(email_senders=[], email_rcvrs=[], query_terms='', topic=None, 
     bool_filter["must"] += topic_range
     bool_filter["must"] += entity_filter
     bool_filter["must"] += community_filter
+    bool_filter["must"] += starred_filter
 
     # tangelo.log("====================================2(query: %s)" % (bool_filter))
 
@@ -127,7 +134,7 @@ def _build_filter(email_senders=[], email_rcvrs=[], query_terms='', topic=None, 
 # address_filter_mode - see address_filter
 # sort_mode
 # attachments_only - set to true will only return emails with attachments
-def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='', topic=None, entity={}, date_bounds=None, communities=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True, address_filter_mode="union", attachments_only=False):
+def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='', topic=None, entity={}, date_bounds=None, communities=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True, address_filter_mode="union", attachments_only=False, starred=None):
 
     # This checks if the query text is a simple term or a query string and sets the correct portion
     term_query = { "match_all" : {} }
@@ -150,7 +157,7 @@ def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='
                     {
                         "filtered" : {
                             "query" : term_query,
-                            "filter" : _build_filter(email_senders=sender_addrs, email_rcvrs=recipient_addrs, topic=topic, entity_dict=entity, date_bounds=date_bounds, communities=communities, date_mode_inclusive=date_mode_inclusive, address_filter_mode=address_filter_mode)
+                            "filter" : _build_filter(email_senders=sender_addrs, email_rcvrs=recipient_addrs, topic=topic, entity_dict=entity, date_bounds=date_bounds, communities=communities, date_mode_inclusive=date_mode_inclusive, address_filter_mode=address_filter_mode, starred=starred)
                         }
                     }
                 ]

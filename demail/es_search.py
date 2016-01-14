@@ -18,7 +18,7 @@ _sort_email_addrs_by_total={ "_script": { "script_file": "email_addr-sent-rcvd-s
 _query_all = {"bool":{"must":[{"match_all":{}}]}}
 
 def get_graph_row_fields():
-    return ["id","tos","senders","ccs","bccs","datetime","subject","body","attachments.guid"]
+    return ["id","tos","senders","ccs","bccs","datetime","subject","body","attachments.guid", "starred"]
 
 def count(index, type="emails", start="2000-01-01", end="now"):
     es = Elasticsearch(elasticsearch_hosts())
