@@ -194,12 +194,13 @@ function populateDataTable( data_rows ) {
       pertinence_icon = newman_service_email_pertinence.getPertinentHTML();
     }
 
-    var date_text = row.datetime.substring(0, 10);
+    //var date_text = row.datetime.substring(0, 10);
+    var date_text = row.datetime;
     return [ date_text, row.from, recipient_count, row.bodysize, attach_count, row.subject, exportable_icon, row.num ];
 
   });
 
-  //console.log( 'data_set: ' + JSON.stringify( data_table_rows, null, 2) );
+  //console.log( '\tdata_table_rows: ' + JSON.stringify( data_table_rows, null, 2) );
 
 
 
@@ -220,13 +221,13 @@ function populateDataTable( data_rows ) {
       //rowId: 'ID',
       data: data_table_rows,
       columns: [
-        {title: "Date", "width": "10%"},
+        {title: "Date", "width": "16%"},
         {title: "From", "width": "20%"},
-        {title: "<i class=\"fa fa-inbox\" rel=\"tooltip\" data-placement=\"bottom\" title=\"Recipient(s)\"></i>", "width": "6%"},
+        {title: "<i class=\"fa fa-inbox\" rel=\"tooltip\" data-placement=\"bottom\" title=\"Recipient(s)\"></i>", "width": "5%"},
         {title: "Size", "width": "6%"},
-        {title: "<i class=\"fa fa-paperclip\" rel=\"tooltip\" data-placement=\"bottom\" title=\"Attachment(s)\"></i>", "width": "6%"},
-        {title: "Subject", "width": "37%"},
-        {title: "<i class=\"fa fa-star-o\" rel=\"tooltip\" data-placement=\"bottom\" title=\"Exportable(s)\"></i>", "width": "5%"},
+        {title: "<i class=\"fa fa-paperclip\" rel=\"tooltip\" data-placement=\"bottom\" title=\"Attachment(s)\"></i>", "width": "5%"},
+        {title: "Subject", "width": "34%"},
+        {title: "<i class=\"fa fa-star-o\" rel=\"tooltip\" data-placement=\"bottom\" title=\"Exportable(s)\"></i>", "width": "4%"},
         {title: "ID", "visible": false}
       ],
       //"order": [[ 0, "desc" ]] //by default, use the order of documents returned

@@ -141,7 +141,7 @@ var search_result = (function () {
       rank = 0.0;
     }
 
-    var key = label.replace(' ', '_');
+    var key = encodeURIComponent( label );
     var parent_index = 1;
 
     if (url.endsWith(newman_service_email_search_all.getServiceURL()) ||
