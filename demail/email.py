@@ -140,10 +140,28 @@ def setExportable(data):
     tangelo.content_type("application/json")
     return { "email" : {} }
 
-# POST email/exportmany/?data_set_id=<data_set>?email_ids=<id0,id1,...,idn>
-def setExportMany(*args, **kwargs):
+# POST email/exportmany/?data_set_id=<data_set>&email_ids=<id0,id1,...,idn>
+def exportMany(*args, **kwargs):
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
     email_ids = parseParamEmailIds(**kwargs)
-    return export_emails_archive("sample", email_ids)
+    return export_emails_archive(data_set_id, email_ids)
+
+
+# POST email/exportmany/?data_set_id=<data_set>
+# TODO set all params
+def exportStarred(*args, **kwargs):
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    # TODO set from UI
+    query_terms=''
+    email_address_list = []
+
+    query = _build_email_query(email_addrs=email_address_list, qs=query_terms, date_bounds=(start_datetime, end_datetime), starred=True)
+    tangelo.log("email.exportStarred(query: %s)" % (query))
+
+    results = _query_emails(data_set_id, size, query)
+    email_ids = [hit["num"] for hit in results["hits"]]
+    return export_emails_archive(data_set_id, email_ids)
+
 
 # DEPRECATED TODO remove me
 #POST /download
@@ -160,7 +178,8 @@ get_actions = {
     "download" : buildExportable,
     "attachment" : get_attachment_by_id,
     "search_all_attach_by_sender" : getAllAttachmentBySender,
-    "exportmany" : setExportMany,
+    "export_many" : exportMany,
+    "export_starred" : exportStarred,
     "set_starred" : setStarred,
     "view_starred" : viewStarred
 }
