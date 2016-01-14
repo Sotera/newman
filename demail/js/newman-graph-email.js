@@ -23,7 +23,14 @@ var node_context_menu = [
       console.log('node-clicked search-emails-under "' + d.name + '"');
       //console.log('element:\n' + JSON.stringify(d, null, 2));
 
+      // query email documents
       newman_graph_email_request_by_address.requestService(d.name);
+
+      // display email-tab
+      newman_graph_email.displayUITab();
+
+      // query attachments under the hidden tab
+      newman_email_attach_request_all_by_sender.requestService(d.name);
     }
   },
   {
@@ -35,7 +42,14 @@ var node_context_menu = [
       console.log('node-clicked search-email-attachments-under "' + d.name + '"');
       //console.log('element:\n' + JSON.stringify(d, null, 2));
 
+      // query attachments
       newman_email_attach_request_all_by_sender.requestService(d.name);
+
+      // display attachment-tab
+      newman_email_attach.displayUITab();
+
+      // query email documents under the hidden tab
+      newman_graph_email_request_by_address.requestService(d.name);
     }
   },
   {
@@ -47,7 +61,11 @@ var node_context_menu = [
       console.log('node-clicked search-community-under "' + d.name + '" community : "' + d.community + '"');
       //console.log('element:\n' + JSON.stringify(d, null, 2));
 
+      // query email documents by community
       newman_graph_email_request_by_community.requestService(d.community);
+
+      // display email-tab
+      newman_graph_email.displayUITab();
     }
   }
 
@@ -327,6 +345,58 @@ var newman_graph_email = (function () {
 
   }
 
+  function displayUITab() {
+
+    $('#tab-list li:eq(0) a').tab('show');
+
+  }
+
+  function updateUISocialGraph( search_response, auto_display_enabled ) {
+
+    //validate search-response
+    var filtered_response = validateResponseSearch( search_response );
+    //console.log('filtered_response:\n' + JSON.stringify(filtered_response, null, 2));
+
+    // initialize to blank
+    updateUIInboundCount();
+    updateUIOutboundCount();
+
+    $('#document_count').text(filtered_response.rows.length);
+
+    // clear existing content if any
+    clear_content_view_email();
+
+    // populate data-table
+    populateDataTable( filtered_response.rows )
+
+    // automatically displays the first document
+    if (auto_display_enabled) {
+      console.log( 'auto_display_enabled' );
+      updateUIDocumentView( filtered_response.rows );
+    }
+    else {
+      bottom_panel.close();
+    }
+
+    // render graph display
+    drawGraph( filtered_response.graph );
+
+  }
+
+  function updateUIDocumentView( document_array ) {
+
+    if (document_array) {
+      console.log( 'document_array :\n' + JSON.stringify(document_array, null, 2) );
+
+      var doc_key = document_array[0]["num"];
+      console.log( 'updateUIDocumentView( ' + doc_key + ' )' );
+      if (doc_key) {
+        showEmailView( doc_key );
+
+      }
+    }
+  }
+
 
   return {
     'initUI' : initUI,
@@ -346,7 +416,10 @@ var newman_graph_email = (function () {
     'sizeOfAllTargetNodeSelected' : sizeOfAllTargetNodeSelected,
     'getAllTargetNodeSelected' : getAllTargetNodeSelected,
     'getAllTargetNodeSelectedAsString' : getAllTargetNodeSelectedAsString,
-    'appendAllTargetNodeSelected' : appendAllTargetNodeSelected
+    'appendAllTargetNodeSelected' : appendAllTargetNodeSelected,
+    'displayUITab' : displayUITab,
+    'updateUISocialGraph' : updateUISocialGraph,
+    'updateUIDocumentView' : updateUIDocumentView
   }
 
 }());
@@ -389,7 +462,7 @@ var newman_graph_email_request_by_address = (function () {
     var service_url = getServiceURL(email_address);
     $.get( service_url ).then(function (response) {
       setResponse( response );
-      updateUISocialGraph( response, false );
+      newman_graph_email.updateUISocialGraph( response, false );
     });
   }
 
@@ -417,40 +490,6 @@ var newman_graph_email_request_by_address = (function () {
 
     history_nav.refreshUI();
   }
-
-  function updateUISocialGraph(search_response, documentViewEnabled) {
-
-    //validate search-response
-    var filtered_response = validateResponseSearch( search_response );
-
-    //email_analytics_content.open();
-    //bottom_panel.unhide();
-
-    // initialize to blank
-    updateUIInboundCount();
-    updateUIOutboundCount();
-
-
-    //console.log('filtered_response:\n' + JSON.stringify(filtered_response, null, 2));
-    $('#document_count').text(filtered_response.rows.length);
-
-    // clear existing content if any
-    clear_content_view_email();
-
-    // populate data-table
-    populateDataTable( filtered_response.rows )
-
-    if (bottom_panel.isOpen()){
-      //resize bottom_panel
-      bottom_panel.close();
-
-    }
-
-    // render graph display
-    drawGraph( filtered_response.graph );
-
-  }
-
 
   return {
     'getServiceURLBase' : getServiceURLBase,
@@ -517,13 +556,13 @@ var newman_graph_email_request_by_address_set = (function () {
     return service_url;
   }
 
-  function requestService(order, datetime_selected) {
+  function requestService(order, datetime_selected, auto_display_enabled) {
 
     console.log('newman_graph_email_request_by_address_set.requestService()');
     var service_url = getServiceURL(order, datetime_selected);
     $.get( service_url ).then(function (response) {
       setResponse( response );
-      updateUISocialGraph( response );
+      newman_graph_email.updateUISocialGraph( response, auto_display_enabled );
     });
   }
 
@@ -550,37 +589,6 @@ var newman_graph_email_request_by_address_set = (function () {
       field);
 
     history_nav.refreshUI();
-  }
-
-  function updateUISocialGraph(search_response, documentViewEnabled) {
-
-    //validate search-response
-    var filtered_response = validateResponseSearch( search_response );
-
-    email_analytics_content.open();
-    bottom_panel.unhide();
-
-    // initialize to blank
-    updateUIInboundCount();
-    updateUIOutboundCount();
-
-    $('#document_count').text(filtered_response.rows.length);
-
-    // clear existing content if any
-    clear_content_view_email();
-
-    // populate data-table
-    populateDataTable( filtered_response.rows )
-
-    if (bottom_panel.isOpen()){
-      //resize bottom_panel
-      bottom_panel.close();
-
-    }
-
-    // render graph display
-    drawGraph( filtered_response.graph );
-
   }
 
 
@@ -629,7 +637,7 @@ var newman_graph_email_request_by_community = (function () {
     var service_url = getServiceURL(email_address);
     $.get( service_url ).then(function (response) {
       setResponse( response );
-      updateUISocialGraph( response, false );
+      newman_graph_email.updateUISocialGraph( response, false );
     });
   }
 
@@ -657,37 +665,6 @@ var newman_graph_email_request_by_community = (function () {
 
     history_nav.refreshUI();
   }
-
-  function updateUISocialGraph(search_response, documentViewEnabled) {
-
-    //validate search-response
-    var filtered_response = validateResponseSearch( search_response );
-
-    // initialize to blank
-    updateUIInboundCount();
-    updateUIOutboundCount();
-
-
-    //console.log('filtered_response:\n' + JSON.stringify(filtered_response, null, 2));
-    $('#document_count').text(filtered_response.rows.length);
-
-    // clear existing content if any
-    clear_content_view_email();
-
-    // populate data-table
-    populateDataTable( filtered_response.rows )
-
-    if (bottom_panel.isOpen()){
-      //resize bottom_panel
-      bottom_panel.close();
-
-    }
-
-    // render graph display
-    drawGraph( filtered_response.graph );
-
-  }
-
 
   return {
     'getServiceURLBase' : getServiceURLBase,

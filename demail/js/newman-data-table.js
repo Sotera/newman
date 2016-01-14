@@ -172,15 +172,16 @@ function getAllDataTableColumn( column_index ) {
 
 function populateDataTable( data_rows ) {
   console.log( 'populateDataTable( ' + data_rows.length + ' )' );
+  //console.log( '\tdata_rows :\n' + JSON.stringify(data_rows, null, 2));
 
   data_row_is_read_map = {};
   data_row_is_exportable_map = {};
   data_table_rows = _.map( data_rows, function( row ) {
 
     var recipient_count = recipientCount( row.to, row.cc, row.bcc );
-    var attach_count = splitAttachCount( row.attach );
+    var attach_count = parseInt( row.attach );
     if (attach_count == 0) {
-      attach_count = '';
+      attach_count = ''
     }
 
     var exportable_icon = newman_service_email_exportable.getNotExportableHTML();
@@ -228,7 +229,7 @@ function populateDataTable( data_rows ) {
         {title: "<i class=\"fa fa-star-o\" rel=\"tooltip\" data-placement=\"bottom\" title=\"Exportable(s)\"></i>", "width": "5%"},
         {title: "ID", "visible": false}
       ],
-      "order": [[ 0, "desc" ]]
+      //"order": [[ 0, "desc" ]] //by default, use the order of documents returned
       //bug in dataTables lib
       /*
       "columnDefs": [

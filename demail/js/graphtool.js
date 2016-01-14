@@ -434,13 +434,21 @@ function produceHTMLView(email_obj) {
                         $('#query_prev_email').removeClass( 'clickable-disabled' ).click(function() {
                           console.log("clicked query_prev_email");
 
-                          newman_graph_email_request_by_address_set.requestService( 'prev', datetime_selected );
+                          //query all email documents between the addresses
+                          newman_graph_email_request_by_address_set.requestService( 'prev', datetime_selected, true );
+
+                          // display email-tab
+                          newman_graph_email.displayUITab();
                         });
 
                         $('#query_next_email').removeClass( 'clickable-disabled' ).click(function() {
                           console.log("clicked query_next_email");
 
-                          newman_graph_email_request_by_address_set.requestService( 'next', datetime_selected );
+                          //query all email documents between the addresses
+                          newman_graph_email_request_by_address_set.requestService( 'next', datetime_selected, true );
+
+                          // display email-tab
+                          newman_graph_email.displayUITab();
                         });
 
                       }

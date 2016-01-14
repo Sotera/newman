@@ -134,9 +134,16 @@ var newman_email_attach = (function () {
 
   }
 
+  function displayUITab() {
+
+    $('#tab-list li:eq(1) a').tab('show');
+
+  }
+
   return {
     'initUI' : initUI,
-    'updateUIAttachmentTable' : updateUIAttachmentTable
+    'updateUIAttachmentTable' : updateUIAttachmentTable,
+    'displayUITab' : displayUITab
   }
 
 }());
