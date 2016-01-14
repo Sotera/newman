@@ -15,14 +15,15 @@ def map_email_addr(email_addr_resp, total_emails):
 
     fields = email_addr_resp["fields"]
 
-    return  [fields["addr"][0],
+    return [fields["addr"][0],
              fields["community"][0],
              str(fields["community_id"][0]),
              str(fields["community_id"][0]),
              (fields["sent_count"][0] + fields["received_count"][0]) / float(total_emails),
              str(fields["received_count"][0]),
              str(fields["sent_count"][0]),
-             str(fields["attachments_count"][0])
+             str(fields["attachments_count"][0]),
+             fields.get("starred",[False])[0]
              ]
 
 def map_email_filtered(fields, emailer_filtered, filtered_total):
@@ -34,7 +35,8 @@ def map_email_filtered(fields, emailer_filtered, filtered_total):
             str(fields["received_count"][0]),
             str(fields["sent_count"][0]),
             str(fields["attachments_count"][0]),
-            emailer_filtered
+            emailer_filtered,
+            fields.get("starred",[False])[0]
             ]
 
 def filtered_agg_query(email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, aggs={}, name=""):
@@ -144,6 +146,7 @@ def get_email(index, email_id, query_string):
     default=[""]
     source = email["_source"]
     email = [source["id"],
+             # TODO REMOVE unused fields
              "DEPRECATED",
              source.get("datetime",""),
              "false",
@@ -155,7 +158,8 @@ def get_email(index, email_id, query_string):
              # TODO figure this out
              # source["body"].replace('\n',"<br/>"),
              "<pre>"+source["body"]+"</pre>",
-             [[f["guid"],f["filename"]] for f in source.get("attachments", default)]
+             [[f["guid"],f["filename"]] for f in source.get("attachments", default)],
+             source.get("starred", False)
              ]
 
     entities = []
@@ -164,6 +168,13 @@ def get_email(index, email_id, query_string):
             entities += [ [source["id"][0]+"_entity_"+str(i), type ,i, val] for i,val in enumerate(source["entities"].get("entity_"+type, default), len(entities))]
 
     return { "email" : email, "entities": entities}
+
+def set_starred(index, ids=[], starred=True):
+    es = Elasticsearch(elasticsearch_hosts())
+    body = { "doc" : { "starred" : starred }}
+    for id in ids:
+        response = es.update(index, doc_type="emails", id=id, body=body)
+
 
 def header(h, t=None):
     r = cherrypy.response.headers.get(h)
@@ -234,13 +245,13 @@ def get_attachments_by_sender(data_set_id, sender, start_datetime, end_datetime,
     for attachment_item in attachments_resp["hits"]["hits"]:
         _source = attachment_item["_source"]
         attachment_entry = [_source["id"],
-                             "PLACEHOLDER",
-                             _source["datetime"],
-                             _source.get("senders","")[0],
-                             ';'.join(_source.get("tos","")),
-                             ';'.join(_source.get("ccs","")),
-                             ';'.join(_source.get("bccs","")),
-                             _source.get("subject","")]
+                            "PLACEHOLDER",
+                            _source["datetime"],
+                            _source.get("senders","")[0],
+                            ';'.join(_source.get("tos","")),
+                            ';'.join(_source.get("ccs","")),
+                            ';'.join(_source.get("bccs","")),
+                            _source.get("subject","")]
         for attachment in _source["attachments"]:
             l = list(attachment_entry)
             l[1] = attachment["guid"]

@@ -5,10 +5,10 @@ import urllib
 
 from newman.utils.functions import nth
 from newman.settings import getOpt
-from es_email import get_ranked_email_address_from_email_addrs_index, get_attachment_by_id, get_attachments_by_sender, get_email, get_top_domains, get_top_communities
+from es_email import get_ranked_email_address_from_email_addrs_index, get_attachment_by_id, get_attachments_by_sender, get_email, get_top_domains, get_top_communities, set_starred
 from es_export import export_emails_archive
 from newman.newman_config import getDefaultDataSetID
-from param_utils import parseParamDatetime, parseParamEmailIds
+from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarred
 
 
 #GET /email/<id>?qs="<query string>"
@@ -28,6 +28,21 @@ def getEmail(*args, **kwargs):
 
     return get_email(data_set_id, email_id, qs)
 
+# /email/set_starred/<email_id>?starred=<True|False>
+# Defaults to True
+def setStarred(*args, **kwargs):
+    tangelo.log("setStarred(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.content_type("application/json")
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+
+    email_id = args[-1]
+    if not email_id:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing email_id")
+
+    starred = parseParamStarred(**kwargs)
+
+    return set_starred(data_set_id, [email_id], starred)
 
 #GET /rank
 def getRankedEmails(*args, **kwargs):
@@ -115,7 +130,8 @@ get_actions = {
     "download" : buildExportable,
     "attachment" : get_attachment_by_id,
     "search_all_attach_by_sender" : getAllAttachmentBySender,
-    "exportmany" : setExportMany
+    "exportmany" : setExportMany,
+    "set_starred" : setStarred
 }
 
 post_actions = {

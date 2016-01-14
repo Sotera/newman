@@ -11,7 +11,7 @@ from es_queries import _build_email_query
 # contains a cache of all email_address.addr, email_address
 _EMAIL_ADDR_CACHE = None
 
-_graph_fields = ["community", "community_id", "addr", "attachments_count", "received_count", "sent_count", "recepient.email_id", "sender.email_id"]
+_graph_fields = ["community", "community_id", "addr", "attachments_count", "received_count", "sent_count", "recepient.email_id", "sender.email_id", "starred"]
 
 # Sort which will add sent + rcvd and sort most to top
 _sort_email_addrs_by_total={ "_script": { "script_file": "email_addr-sent-rcvd-sum", "lang": "groovy", "type": "number","order": "desc" }}
@@ -32,13 +32,13 @@ def count(index, type="emails", start="2000-01-01", end="now"):
 def _map_emails(fields):
     row = {}
     row["num"] =  fields["id"][0]
-
     row["from"] = fields.get("senders",[""])[0]
     row["to"] = fields.get("tos", [])
     row["cc"] = fields.get("ccs", [])
     row["bcc"] = fields.get("bccs", [])
     row["datetime"] = fields.get("datetime",[""])[0]
     row["subject"] =  fields.get("subject",[""])[0]
+    row["starred"] = fields.get("starred", [False])[0]
     row["fromcolor"] =  "1950"
     row["attach"] =  str(len(fields.get("attachments.guid",[])))
     row["bodysize"] = len(fields.get("body",[""])[0])

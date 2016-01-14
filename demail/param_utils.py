@@ -82,3 +82,6 @@ def parseParamTopic( **kwargs ):
     topic_threshold = float(kwargs.get('topic_threshold',0.5))
     return {"idx":topic_idx, "threshold": topic_threshold}
 
+def parseParamStarred( **kwargs ):
+    tangelo.log("parseParamStarred(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    return kwargs.get('starred', True)
