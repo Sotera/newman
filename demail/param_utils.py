@@ -85,3 +85,7 @@ def parseParamTopic( **kwargs ):
 def parseParamStarred( **kwargs ):
     tangelo.log("parseParamStarred(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     return kwargs.get('starred', True)
+
+def parseParamTextQuery( **kwargs ):
+    tangelo.log("parseParamTextQuery(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    return kwargs.get('qs', '')

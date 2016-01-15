@@ -6,7 +6,6 @@ def _terms_filter(field='', values=[]):
 def _term_filter(field='', values=[]):
     return [] if (not field or not values) else [{"term" : { field : values}}]
 
-
 # address_filter_mode = "union"|"intersect"|"conversation" ,
 #   union will match any emails with any of the addresses,
 #   intersect will match the sender AND any rcvr addresses
@@ -139,10 +138,14 @@ def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='
     # This checks if the query text is a simple term or a query string and sets the correct portion
     term_query = { "match_all" : {} }
     query_string = '*'
-    if qs.startswith('\'') and qs.endswith('\''):
-        query_string = qs.replace('\'', '')
-    elif qs:
-        term_query = { "match" : { "_all" : qs }}
+    # if qs.startswith('\'') and qs.endswith('\''):
+    #         query_string = qs.replace('\'', '')
+
+    if qs:
+        query_string = qs
+    # TODO remove once unified query works
+    # elif qs:
+    #     term_query = { "match" : { "_all" : qs }}
 
     sender_addrs = email_addrs if not sender_addrs else sender_addrs
     recipient_addrs = email_addrs if not recipient_addrs else recipient_addrs
@@ -207,3 +210,33 @@ def _build_email_attachment_query(sender_address, query_terms='', topic=None, en
     elif sort_mode == "topic":
         query_email_addr["sort"] = {"topic_scores.idx_"+topic["idx"]:{"order": "asc" }}
     return query_email_addr
+
+# id - id of email
+# highlight_query_string - query string used for highlighting
+# When num fragments is 0 then fragment_size is ignored and whole fields are returned
+def email_highlighting_query(id, highlight_query_string='', fragment_size=200, num_fragments=0):
+    return {
+        "highlight":{
+            "fields": {"*" : {}},
+            "require_field_match" : False,
+            "fragment_size" : fragment_size,
+            "number_of_fragments" : num_fragments,
+            "pre_tags" : ["<mark>"],
+            "post_tags" : ["</mark>"],
+            "highlight_query": {
+                "query": {
+                    "query_string" : { "query" : highlight_query_string}
+                }
+            }
+        },
+        "filter": {
+            "bool": {
+                "should": [{
+                    "ids" : {
+                        "type" : "emails",
+                        "values" : [id]
+                    }
+                }]
+            }
+        }
+    }

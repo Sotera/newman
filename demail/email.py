@@ -8,7 +8,7 @@ from newman.settings import getOpt
 from es_email import get_ranked_email_address_from_email_addrs_index, get_attachment_by_id, get_attachments_by_sender, get_email, get_top_domains, get_top_communities, set_starred
 from es_export import export_emails_archive
 from newman.newman_config import getDefaultDataSetID
-from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarred
+from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarred, parseParamTextQuery
 from es_queries import _build_email_query
 from es_search import _build_graph_for_emails, _query_email_attachments, _query_emails
 
@@ -21,8 +21,7 @@ def getEmail(*args, **kwargs):
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
-    # TODO set this for highlighting
-    qs=''
+    qs = parseParamTextQuery(**kwargs)
 
     email_id = args[-1]
     if not email_id:

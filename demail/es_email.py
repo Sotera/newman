@@ -8,7 +8,7 @@ from param_utils import parseParamDatetime
 from newman.utils.functions import nth
 from newman.newman_config import elasticsearch_hosts
 from es_search import _search_ranked_email_addrs, count, get_cached_email_addr, initialize_email_addr_cache
-from es_queries import _build_filter, _build_email_attachment_query, _build_email_query
+from es_queries import _build_filter, email_highlighting_query, _build_email_query
 
 #map the email_address for the email/rank REST service
 def map_email_addr(email_addr_resp, total_emails):
@@ -136,15 +136,31 @@ def get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime,
     email_address = [map_email_addr(email_addr, total_docs) for email_addr in email_addrs['hits']['hits']]
     return {"emails": email_address }
 
-def get_email(index, email_id, query_string):
+
+def get_email(index, email_id, qs=None):
 
     es = Elasticsearch(elasticsearch_hosts())
     # fields=["id","datetime","senders","senders_line","tos_line","ccs_line","bccs_line","subject","body","attachments.filename","entities.entity_organization","entities.entity_location","entities.entity_person","entities.entity_misc"]
     # email = es.get(index, doc_type="emails", id=email_id, fields=fields)
-    email = es.get(index, doc_type="emails", id=email_id)
+
+    source = ''
+    body='DEFAULT'
+    subject='DEFAULT'
+    if not qs:
+        email = es.get(index, doc_type="emails", id=email_id)
+        source = email["_source"]
+        body = source["body"]
+    else:
+        query = email_highlighting_query(email_id, highlight_query_string=qs)
+        tangelo.log("es_email.get_email(highlighting-query: %s )" % (query))
+
+        email = es.search(index=index, doc_type='emails', body=query)
+        source = email["hits"]["hits"][0]["_source"]
+        highlight = email["hits"]["hits"][0].get("highlight", {})
+        body = highlight.get('body', [source['body']])[0]
+        subject = highlight.get('subject', [source['subject']])[0]
 
     default=[""]
-    source = email["_source"]
     email = [source["id"],
              # TODO REMOVE unused fields
              "DEPRECATED",
@@ -154,10 +170,10 @@ def get_email(index, email_id, query_string):
              ["".join(source["tos_line"]), ";".join(source["tos"])],
              ["".join(source["ccs_line"]), ";".join(source["ccs"])],
              ["".join(source["bccs_line"]), ";".join(source["bccs"])],
-             source["subject"],
+             subject,
              # TODO figure this out
              # source["body"].replace('\n',"<br/>"),
-             "<pre>"+source["body"]+"</pre>",
+             "<pre>"+body+"</pre>",
              [[f["guid"],f["filename"]] for f in source.get("attachments", default)],
              source.get("starred", False)
              ]
@@ -267,9 +283,9 @@ def dump(bytes, name):
     text_file.close()
 
 if __name__ == "__main__":
-    val = get_ranked_email_address_from_email_addrs_index("sample", "1970","now", 20)
+    # val = get_ranked_email_address_from_email_addrs_index("sample", "1970","now", 20)
 
-    res=get_email("sample","ea57b82e-7fe8-11e5-bb05-08002705cb99")
+    res=get_email("sample","ea57b82e-7fe8-11e5-bb05-08002705cb99", qs='"press conference"')
     # email= "katie.baur@myflorida.com"
     email="arlene.dibenigno@myflorida.com"
     initialize_email_addr_cache("sample")

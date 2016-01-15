@@ -1,6 +1,6 @@
 from newman.utils.functions import nth
 from series import get_entity_histogram
-from param_utils import parseParamDatetime, parseParamEmailAddress, parseParamEntity
+from param_utils import parseParamDatetime, parseParamEmailAddress, parseParamEntity, parseParamTextQuery
 
 import tangelo
 import urllib
@@ -29,16 +29,16 @@ def get_graph_for_entity(*args, **kwargs):
     size = size if size >500 else 2500
 
     # TODO set from UI
-    query_terms=''
+    qs = parseParamTextQuery(**kwargs)
 
-    query = _build_email_query(email_addrs=email_address_list, qs=query_terms, entity=entity_dict, date_bounds=(start_datetime, end_datetime))
+    query = _build_email_query(email_addrs=email_address_list, qs=qs, entity=entity_dict, date_bounds=(start_datetime, end_datetime))
     tangelo.log("entity.get_graph_for_entity(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
     graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
 
     # Get attachments for community
-    query = _build_email_query(email_addrs=email_address_list, qs=query_terms, entity=entity_dict, date_bounds=(start_datetime, end_datetime), attachments_only=True)
+    query = _build_email_query(email_addrs=email_address_list, qs=qs, entity=entity_dict, date_bounds=(start_datetime, end_datetime), attachments_only=True)
     tangelo.log("entity.get_graph_by_entity(attachment-query: %s)" % (query))
     attachments = _query_email_attachments(data_set_id, size, query)
     graph["attachments"] = attachments
