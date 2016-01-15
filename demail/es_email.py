@@ -16,15 +16,15 @@ def map_email_addr(email_addr_resp, total_emails):
     fields = email_addr_resp["fields"]
 
     return [fields["addr"][0],
-             fields["community"][0],
-             str(fields["community_id"][0]),
-             str(fields["community_id"][0]),
-             (fields["sent_count"][0] + fields["received_count"][0]) / float(total_emails),
-             str(fields["received_count"][0]),
-             str(fields["sent_count"][0]),
-             str(fields["attachments_count"][0]),
-             fields.get("starred",[False])[0]
-             ]
+            fields["community"][0],
+            str(fields["community_id"][0]),
+            str(fields["community_id"][0]),
+            (fields["sent_count"][0] + fields["received_count"][0]) / float(total_emails),
+            str(fields["received_count"][0]),
+            str(fields["sent_count"][0]),
+            str(fields["attachments_count"][0]),
+            fields.get("starred",[False])[0]
+            ]
 
 def map_email_filtered(fields, emailer_filtered, filtered_total):
     return [fields["addr"][0],
@@ -144,12 +144,13 @@ def get_email(index, email_id, qs=None):
     # email = es.get(index, doc_type="emails", id=email_id, fields=fields)
 
     source = ''
-    body='DEFAULT'
-    subject='DEFAULT'
+    body='_DEFAULT_'
+    subject='_DEFAULT_'
     if not qs:
         email = es.get(index, doc_type="emails", id=email_id)
         source = email["_source"]
         body = source["body"]
+        subject = source["subject"]
     else:
         query = email_highlighting_query(email_id, highlight_query_string=qs)
         tangelo.log("es_email.get_email(highlighting-query: %s )" % (query))
