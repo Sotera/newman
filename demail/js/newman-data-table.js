@@ -333,6 +333,19 @@ function showEmailView(email_id){
   var email_url = 'email/email/' + encodeURIComponent(email_id);
   email_url = newman_data_source.appendDataSource(email_url);
 
+  // append query-string
+  var search_text = $("#txt_search").val();
+  if (search_text) {
+    var query_string = encodeURIComponent(search_text);
+    if (email_url.indexOf('?') > 0) {
+      email_url += '&qs=' + query_string;
+    }
+    else {
+      email_url += '?qs=' + query_string;
+    }
+  }
+
+
   $.get(email_url).then(
     function(response) {
       setEmailVisible(email_id);
