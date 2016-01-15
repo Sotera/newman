@@ -344,15 +344,15 @@ function showEmailView(email_id){
 };
 
 
-function table_mark_exportable(is_marked, id_list_selected){
+function table_mark_exportable(is_marked, email_doc_id_list){
 
   var value_map = {};
-  if (!id_list_selected) {
-    id_list_selected = getAllDataTableColumn( data_column_key_index );
+  if (!email_doc_id_list) {
+    email_doc_id_list = getAllDataTableColumn( data_column_key_index );
   }
 
   //console.log('is_marked ' + is_marked + ' id_set: ' + JSON.stringify(id_list_selected, null, 2));
-  _.each(id_list_selected, function (value) {
+  _.each(email_doc_id_list, function (value) {
     value_map[value] = String(is_marked);
   });
 
@@ -368,6 +368,24 @@ function table_mark_exportable(is_marked, id_list_selected){
   updateDataTableColumn(data_column_export_index, value_map);
 
 }
+
+function mark_all_email_as_starred( email_doc_id_list ) {
+
+  var value_map = {};
+  if (!email_doc_id_list) {
+    email_doc_id_list = getAllDataTableColumn( data_column_key_index );
+  }
+
+  //console.log('is_marked ' + is_marked + ' id_set: ' + JSON.stringify(id_list_selected, null, 2));
+  _.each(email_doc_id_list, function (value) {
+    value_map[value] = 'true';
+  });
+
+  //console.log('value_map: ' + JSON.stringify(value_map, null, 2));
+  updateDataTableColumn(data_column_export_index, value_map);
+
+}
+
 
 function add_view_to_export(){
 
@@ -415,6 +433,22 @@ function remove_view_from_export(){
 
 function initDataTableEvents() {
 
+  $('#email_view_all_starred').click(function() {
+    console.log("clicked #email_view_all_starred");
+
+    // query email documents
+    newman_email_starred_request_all.requestService();
+
+    // display email-tab
+    newman_graph_email.displayUITab();
+
+    // query attachments under the hidden tab
+    // TODO: no longer need to make a separate call
+    //newman_email_attach_request_all_by_sender.requestService(d.name);
+
+
+  });
+
   $("#toggle_mark_for_export").click(function() {
     console.log("clicked toggle_mark_for_export");
     if (!current_email) {
@@ -424,7 +458,13 @@ function initDataTableEvents() {
     }
     var id = current_email;
 
-    var exportableToggle = function(id, exportable){
+    var requestUpdate = function(id, exportable){
+
+      newman_email_starred_request_toggle.requestService( id, exportable );
+
+      newman_email_starred.displayUITab();
+
+      /*
       $.ajax({
         url: 'email/exportable',
         type: "POST",
@@ -444,9 +484,16 @@ function initDataTableEvents() {
           alert('fail');
           console.log("fail");
         });
+      */
+
     };
 
-    exportableToggle(id, $("#toggle_mark_for_export").hasClass('marked'));
+    $("#toggle_mark_for_export").toggleClass('marked');
+    var is_marked = $("#toggle_mark_for_export").hasClass('marked');
+    var id_set = [id];
+    table_mark_exportable( is_marked, id_set );
+
+    requestUpdate(id, is_marked);
 
 
   });

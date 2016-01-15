@@ -88,7 +88,7 @@
 
   <!-- modal email download/export -->
   <!--
-  <div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-labelledby="exportModal" aria-hidden="true">
+  <div class="modal fade" id="export_modal" tabindex="-1" role="dialog" aria-labelledby="export_modal" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -185,7 +185,7 @@
 
             <div class="col-xs-10 col-sm-1" style="padding: 0px 10px 0px 10px; text-align: right;">
 
-              <button id="view_export_list" type="button" class="btn navbar-btn button-dropdown-menu" data-toggle="modal" data-target="#exportModal"
+              <button id="export_starred_set" type="button" class="btn navbar-btn button-dropdown-menu" data-toggle="modal" data-target="#export_modal"
                       style="font-size: 12px; padding: 0px 2px 0px 2px; margin: 0;">
                 <span class="fa fa-download fa-inverse"> Export</span>
               </button>
@@ -211,7 +211,7 @@
                     </li>
 
                     <li class="hidden-xs">
-                      <a id="view_export_list" type="button" class="btn btn-inverse" data-toggle="modal" data-target="#exportModal"
+                      <a id="export_starred_set" type="button" class="btn btn-inverse" data-toggle="modal" data-target="#export_modal"
                          style="font-size: 14px; font-weight:normal; color: #E1E1E1;">Export
                         <span class="glyphicon glyphicon-list-alt"></span>
                       </a>
@@ -938,7 +938,7 @@
                         <span>Documents </span> <span id="document_count"></span>
                       </div>
                       <div style="float: right; margin: 0; padding: 0px 10px 0px 0px;">
-                        <a class="clickable" id="email_view_marked">
+                        <a class="clickable" id="email_view_all_starred">
                           <span> View Starred </span>
                         </a>
                         |
@@ -1166,6 +1166,7 @@
     <script src="js/newman-domain-email.js"></script>
     <script src="js/newman-community-email.js"></script>
     <script src="js/newman-email-attach.js"></script>
+    <script src="js/newman-email-starred.js"></script>
     <script src="js/newman-file-type-attach.js"></script>
     <script src="js/newman-data-source.js"></script>
     <script src="js/newman-service.js"></script>

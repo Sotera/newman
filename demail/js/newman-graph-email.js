@@ -351,7 +351,7 @@ var newman_graph_email = (function () {
 
   }
 
-  function updateUISocialGraph( search_response, auto_display_enabled ) {
+  function updateUISocialGraph( search_response, auto_display_enabled, starred_email_doc_list ) {
 
     //validate search-response
     var filtered_response = validateResponseSearch( search_response );
@@ -368,6 +368,9 @@ var newman_graph_email = (function () {
 
     // populate data-table
     populateDataTable( filtered_response.rows )
+    if (starred_email_doc_list ) {
+      mark_all_email_as_starred( starred_email_doc_list );
+    }
 
     // automatically displays the first document
     if (auto_display_enabled) {
@@ -518,6 +521,8 @@ var newman_graph_email_request_by_address_set = (function () {
     var start_datetime_override = undefined;
     var end_datetime_override = undefined;
 
+    var service_url = newman_data_source.appendDataSource(_service_url);
+
     if (!order) {
       order = 'next';
     }
@@ -529,17 +534,17 @@ var newman_graph_email_request_by_address_set = (function () {
       start_datetime_override = current_datetime;
     }
 
-    var service_url = newman_data_source.appendDataSource(_service_url);
-    service_url = newman_datetime_range.appendDatetimeRange(service_url, start_datetime_override, end_datetime_override);
-    service_url = newman_graph_email.appendAllSourceNodeSelected(service_url);
-    service_url = newman_graph_email.appendAllTargetNodeSelected(service_url);
-
     if (service_url.indexOf('?') > 0) {
       service_url += '&order=' + order;
     }
     else {
       service_url += '?order=' + order;
     }
+
+    service_url = newman_datetime_range.appendDatetimeRange(service_url, start_datetime_override, end_datetime_override);
+    service_url = newman_graph_email.appendAllSourceNodeSelected(service_url);
+    service_url = newman_graph_email.appendAllTargetNodeSelected(service_url);
+
 
     // add to history
     var address_set_as_string = newman_graph_email.getAllSourceNodeSelectedAsString() + ' ' + newman_graph_email.getAllTargetNodeSelectedAsString();

@@ -48,8 +48,8 @@ def setStarred(*args, **kwargs):
 
 # /emails/view_starred
 # common URL params apply, date, size, etc
-def viewStarred(*args, **kwargs):
-    tangelo.log("email.viewStarred(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+def searchStarred(*args, **kwargs):
+    tangelo.log("email.searchStarred(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     tangelo.content_type("application/json")
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
@@ -61,14 +61,14 @@ def viewStarred(*args, **kwargs):
     email_address_list = []
 
     query = _build_email_query(email_addrs=email_address_list, qs=query_terms, date_bounds=(start_datetime, end_datetime), starred=True)
-    tangelo.log("email.viewStarred(query: %s)" % (query))
+    tangelo.log("email.searchStarred(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
     graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
 
     # Get attachments for community
     query = _build_email_query(email_addrs=email_address_list, qs=query_terms, date_bounds=(start_datetime, end_datetime), attachments_only=True, starred=True)
-    tangelo.log("email.viewStarred(attachment-query: %s)" % (query))
+    tangelo.log("email.searchStarred(attachment-query: %s)" % (query))
     attachments = _query_email_attachments(data_set_id, size, query)
     graph["attachments"] = attachments
 
@@ -179,9 +179,9 @@ get_actions = {
     "attachment" : get_attachment_by_id,
     "search_all_attach_by_sender" : getAllAttachmentBySender,
     "export_many" : exportMany,
-    "export_starred" : exportStarred,
-    "set_starred" : setStarred,
-    "view_starred" : viewStarred
+    "export_all_starred" : exportStarred,
+    "set_email_starred" : setStarred,
+    "search_all_starred" : searchStarred
 }
 
 post_actions = {
