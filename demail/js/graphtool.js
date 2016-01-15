@@ -2365,26 +2365,30 @@ $(function () {
     });
 
     //on modal close event
-    $('#exportModal').on('hidden.bs.modal', function () {
+    $('#export_modal').on('hidden.bs.modal', function () {
       $('#export_link_spin').show();
       $('#export_download_link').hide();
     });
 
-    $('#email_view_marked').click(function () {
+    /*
+    $('#email_view_all_starred').click(function () {
       do_search(true, 'exportable');
     });
+    */
 
     // initialize data-table events
     initDataTableEvents();
 
-    $("#view_export_list").click(function () {
+    /*
+    $("#export_starred_set").click(function () {
       $.ajax({
         url: 'email/download',
         type: "GET",
         contentType: "application/json; charset=utf-8",
         dataType: "json"
       }).done(function (response) {
-        console.log(response);
+        //console.log(JSON.stringify(response, null, 2));
+
         $('#export_download_link a').attr('href', response.file);
         $('#export_link_spin').hide();
         $('#export_download_link').show();
@@ -2392,8 +2396,12 @@ $(function () {
         alert('fail');
 
         console.log("fail");
-        $('#exportModal').modal('hide');
+        $('#export_modal').modal('hide');
       });
+    });
+    */
+    $("#export_starred_set").click(function () {
+      newman_email_starred_request_export.requestService();
     });
 
     $("#color_by_community").click(function () {

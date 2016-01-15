@@ -194,6 +194,16 @@ var history_nav = (function () {
     }
   }
 
+  function appendUI(url_path, field, label) {
+
+    var key = encodeURIComponent(url_path);
+
+    push(key, label, '', url_path, field);
+
+    //TODO: need to handle max count
+
+    refreshUI();
+  }
 
   return {
     "push": push,
@@ -203,6 +213,7 @@ var history_nav = (function () {
     "getHistByID": getHistByID,
     "getHistByDataURL": getHistByDataURL,
     "refreshUI": refreshUI,
+    'appendUI': appendUI,
     "initialize": initialize
   }
 
