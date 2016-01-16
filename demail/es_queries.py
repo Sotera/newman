@@ -221,8 +221,12 @@ def email_highlighting_query(id, highlight_query_string='', fragment_size=200, n
             "require_field_match" : False,
             "fragment_size" : fragment_size,
             "number_of_fragments" : num_fragments,
-            "pre_tags" : ["<mark>"],
-            "post_tags" : ["</mark>"],
+            # TODO These are highlight but they look really bad on pre background
+            # "pre_tags" : ["<mark>"],
+            # "post_tags" : ["</mark>"],
+            "pre_tags" : ['<em style="background-color: #ff0000;">'],
+            "post_tags" : ["</em>"],
+
             "highlight_query": {
                 "query": {
                     "query_string" : { "query" : highlight_query_string}
