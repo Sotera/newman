@@ -357,6 +357,9 @@ var newman_graph_email = (function () {
     var filtered_response = validateResponseSearch( search_response );
     //console.log('filtered_response:\n' + JSON.stringify(filtered_response, null, 2));
 
+    // open analytics content view
+    email_analytics_content.open();
+
     // initialize to blank
     updateUIInboundCount();
     updateUIOutboundCount();
@@ -452,9 +455,6 @@ var newman_graph_email_request_by_address = (function () {
       service_url = newman_data_source.appendDataSource(service_url);
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
 
-      // add to history
-      updateHistory(service_url, 'email', decodeURIComponent(email_address));
-
       return service_url;
     }
   }
@@ -466,6 +466,9 @@ var newman_graph_email_request_by_address = (function () {
     $.get( service_url ).then(function (response) {
       setResponse( response );
       newman_graph_email.updateUISocialGraph( response, false );
+
+      // add to work-flow-history
+      history_nav.appendUI(service_url, 'email', email_address);
     });
   }
 
@@ -479,19 +482,6 @@ var newman_graph_email_request_by_address = (function () {
 
   function getResponse() {
     return _response;
-  }
-
-  function updateHistory(url_path, field, label) {
-
-    var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
-
-    history_nav.push(id,
-      label,
-      '',
-      url_path,
-      field);
-
-    history_nav.refreshUI();
   }
 
   return {
@@ -546,15 +536,6 @@ var newman_graph_email_request_by_address_set = (function () {
     service_url = newman_graph_email.appendAllTargetNodeSelected(service_url);
 
 
-    // add to history
-    var address_set_as_string = newman_graph_email.getAllSourceNodeSelectedAsString() + ' ' + newman_graph_email.getAllTargetNodeSelectedAsString();
-    address_set_as_string = address_set_as_string.trim().replace(' ', ',');
-    if (address_set_as_string.length > 30) {
-      address_set_as_string = address_set_as_string.substring(0, 30);
-    }
-    address_set_as_string = decodeURIComponent(address_set_as_string);
-    updateHistory(service_url, 'email', address_set_as_string);
-
     // clear all selected before the service call
     newman_graph_email.clearAllNodeSelected();
 
@@ -568,6 +549,14 @@ var newman_graph_email_request_by_address_set = (function () {
     $.get( service_url ).then(function (response) {
       setResponse( response );
       newman_graph_email.updateUISocialGraph( response, auto_display_enabled );
+
+      // add to work-flow-history
+      var address_set_as_string = newman_graph_email.getAllSourceNodeSelectedAsString() + ' ' + newman_graph_email.getAllTargetNodeSelectedAsString();
+      address_set_as_string = address_set_as_string.trim().replace(' ', ',');
+      if (address_set_as_string.length > 30) {
+        address_set_as_string = address_set_as_string.substring(0, 30);
+      }
+      history_nav.appendUI(service_url, 'email', address_set_as_string);
     });
   }
 
@@ -581,19 +570,6 @@ var newman_graph_email_request_by_address_set = (function () {
 
   function getResponse() {
     return _response;
-  }
-
-  function updateHistory(url_path, field, label) {
-
-    var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
-
-    history_nav.push(id,
-      label,
-      '',
-      url_path,
-      field);
-
-    history_nav.refreshUI();
   }
 
 
@@ -629,9 +605,6 @@ var newman_graph_email_request_by_community = (function () {
       service_url = newman_data_source.appendDataSource(service_url);
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
 
-      // add to history
-      updateHistory(service_url, 'community', decodeURIComponent(community_key));
-
       return service_url;
     }
   }
@@ -643,6 +616,9 @@ var newman_graph_email_request_by_community = (function () {
     $.get( service_url ).then(function (response) {
       setResponse( response );
       newman_graph_email.updateUISocialGraph( response, false );
+
+      // add to work-flow-history
+      history_nav.appendUI(service_url, 'community', email_address);
     });
   }
 
@@ -658,18 +634,68 @@ var newman_graph_email_request_by_community = (function () {
     return _response;
   }
 
-  function updateHistory(url_path, field, label) {
-
-    var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
-
-    history_nav.push(id,
-      label,
-      '',
-      url_path,
-      field);
-
-    history_nav.refreshUI();
+  return {
+    'getServiceURLBase' : getServiceURLBase,
+    'getServiceURL' : getServiceURL,
+    'requestService' : requestService,
+    'getResponse' : getResponse,
+    'setResponse' : setResponse
   }
+
+}());
+
+/**
+ * service response container email-documents-search-by-topic
+ * @type {{requestService, getResponse}}
+ */
+var newman_graph_email_request_by_topic = (function () {
+
+  var _service_url = 'search/search_by_topic';
+  var _response;
+
+  function getServiceURLBase() {
+    return _service_url;
+  }
+
+  function getServiceURL() {
+
+    var service_url = newman_data_source.appendDataSource(_service_url);
+    service_url = newman_datetime_range.appendDatetimeRange(service_url);
+    service_url = newman_topic_email.appendTopic(service_url);
+    service_url = newman_search_filter.appendURLQuery(service_url);
+
+    return service_url;
+  }
+
+  function requestService() {
+
+    console.log('newman_service_topic_search.requestService()');
+    var service_url = getServiceURL();
+    $.get( service_url ).then(function (response) {
+      setResponse( response );
+      newman_graph_email.updateUISocialGraph( response, false );
+
+      // add to work-flow-history
+      var topic_set_as_string = newman_topic_email.getAllTopicSelectedAsString();
+      if (topic_set_as_string.length > 30) {
+        topic_set_as_string = topic_set_as_string.substring(0, 30);
+      }
+      history_nav.appendUI(service_url, 'topic', topic_set_as_string);
+    });
+  }
+
+  function setResponse( response ) {
+    if (response) {
+
+      _response = response;
+      //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
+    }
+  }
+
+  function getResponse() {
+    return _response;
+  }
+
 
   return {
     'getServiceURLBase' : getServiceURLBase,

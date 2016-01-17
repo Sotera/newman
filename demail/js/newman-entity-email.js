@@ -113,7 +113,13 @@ var newman_entity_email = (function () {
           })
           .attr("height", height_bar - 1)
           .attr("class", function (d) {
-            return d[1];
+            return d[1] + ' label clickable';
+          })
+          .on("click", function (d) {
+            //console.log('entity-text clicked\n' + JSON.stringify(d, null, 2));
+
+            onEntityClicked( d[2], d[1] );
+
           })
           .append('title').text(function (d) {
             return d[2];
@@ -140,9 +146,6 @@ var newman_entity_email = (function () {
 
             onEntityClicked( d[2], d[1] );
 
-            //clearAllEntitySelected();
-            //setEntitySelected(d[2], d[1], true, false);
-            //newman_service_entity_search.requestService();
           })
           .text(function (d) {
 
@@ -428,7 +431,11 @@ var newman_entity_email = (function () {
 
     setEntitySelected(key, type, true, false);
 
+    // query email documents by entity
     newman_service_entity_search.requestService();
+
+    // display email-tab
+    newman_graph_email.displayUITab();
   }
 
 
@@ -529,13 +536,6 @@ var newman_service_entity_search = (function () {
     service_url = newman_datetime_range.appendDatetimeRange(service_url);
     service_url = newman_entity_email.appendEntity(service_url);
 
-    // add to history
-    var entity_list_as_string = newman_entity_email.getAllEntityAsString();
-    if (entity_list_as_string.length > 30) {
-      entity_list_as_string = entity_list_as_string.substring(0, 30);
-    }
-    entity_list_as_string = decodeURIComponent(entity_list_as_string);
-    updateHistory(service_url, 'entity', entity_list_as_string);
 
     return service_url;
   }
@@ -546,7 +546,14 @@ var newman_service_entity_search = (function () {
     var service_url = getServiceURL();
     $.get( service_url ).then(function (response) {
       setResponse( response );
-      updateUISocialGraph( response );
+      newman_graph_email.updateUISocialGraph( response, false );
+
+      // add to work-flow-history
+      var entity_set_as_string = newman_entity_email.getAllEntityAsString();
+      if (entity_set_as_string.length > 30) {
+        entity_set_as_string = entity_set_as_string.substring(0, 30);
+      }
+      history_nav.appendUI(service_url, 'entity', entity_set_as_string);
     });
   }
 
@@ -560,19 +567,6 @@ var newman_service_entity_search = (function () {
 
   function getResponse() {
     return _response;
-  }
-
-  function updateHistory(url_path, field, label) {
-
-    var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
-
-    history_nav.push(id,
-      label,
-      '',
-      url_path,
-      field);
-
-    history_nav.refreshUI();
   }
 
   function updateUISocialGraph(search_response) {

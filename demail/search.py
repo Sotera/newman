@@ -97,7 +97,7 @@ def search_email_by_community(*args, **param_args):
 
     return get_rows_for_community(data_set_id, community, email_addrs, start_datetime, end_datetime, size, qs=qs)
 
-#GET /search_by_topic/?data_set_id=<data_set>&topic_idx=1&topic_threshold=0.5&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
+#GET /search_by_topic/?data_set_id=<data_set>&topic_index=1&topic_threshold=0.5&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 def search_email_by_topic(*args, **param_args):
     tangelo.content_type("application/json")
     tangelo.log("search_email_by_community(args: %s kwargs: %s)" % (str(args), str(param_args)))
@@ -110,8 +110,8 @@ def search_email_by_topic(*args, **param_args):
     if not data_set_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing data_set_id")
 
-    if not param_args.get("topic_idx"):
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing topic_idx")
+    if not param_args.get("topic_index"):
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing topic_index")
     topic = parseParamTopic(**param_args)
 
     email_addrs = parseParam_email_addr(**param_args)

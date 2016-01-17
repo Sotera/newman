@@ -844,20 +844,14 @@ function requestSearch(field, search_text, load_on_response) {
 
         email_analytics_content.open();
 
+        //showSearchPopup( field, decodeURIComponent(search_text) );
+        loadSearchResult(url_path);
+
         var label = ' all';
         if (search_text) {
           label = ' ' + decodeURIComponent(search_text);
         }
-        var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
-
-        history_nav.push(id,
-          label,
-          '',
-          url_path,
-          field);
-
-        //showSearchPopup( field, decodeURIComponent(search_text) );
-        loadSearchResult(url_path);
+        history_nav.appendUI(url_path, field, label);
 
       }
       else {

@@ -334,6 +334,8 @@ function showEmailView(email_id){
   email_url = newman_data_source.appendDataSource(email_url);
 
   // append query-string
+  email_url = newman_search_filter.appendURLQuery(email_url);
+  /*
   var search_text = $("#txt_search").val();
   if (search_text) {
     var query_string = encodeURIComponent(search_text);
@@ -344,6 +346,7 @@ function showEmailView(email_id){
       email_url += '?qs=' + query_string;
     }
   }
+  */
 
 
   $.get(email_url).then(

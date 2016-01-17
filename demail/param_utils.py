@@ -74,13 +74,13 @@ def parseParamEmailIds( **kwargs ):
 
     return [x for x in email_ids if (x is not '' and x is not None)]
 
-# Parse topic params topic_idx and topic_threshold returns as dict
-# {"idx", "threshold"}
+# Parse topic params topic_index and topic_threshold returns as dict
+# {"index", "threshold"}
 def parseParamTopic( **kwargs ):
     tangelo.log("parseParamTopic(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
-    topic_idx = kwargs.get('topic_idx','1')
+    topic_index = kwargs.get('topic_index','1')
     topic_threshold = float(kwargs.get('topic_threshold',0.5))
-    return {"idx":topic_idx, "threshold": topic_threshold}
+    return {"idx":topic_index, "threshold": topic_threshold}
 
 def parseParamStarred( **kwargs ):
     tangelo.log("parseParamStarred(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))

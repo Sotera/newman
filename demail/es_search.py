@@ -216,7 +216,7 @@ def get_rows_for_community(data_set_id, community, email_addrs, start_datetime, 
     return graph
 
 # Get all rows for a community, sorted by time asc
-def get_rows_for_topic(data_set_id, topic, email_addrs, start_datetime, end_datetime, size):
+def get_rows_for_topic(data_set_id, topic, email_addrs, qs, start_datetime, end_datetime, size):
     tangelo.log("es_search.get_rows_for_topic(email_addrs=%s, topic=%s)" % ( str(email_addrs), str(topic)))
 
     query  = _build_email_query(email_addrs=email_addrs, qs='', topic=topic, sort_mode="topic", sort_order="desc", date_bounds=(start_datetime, end_datetime))

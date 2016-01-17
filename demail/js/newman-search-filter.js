@@ -271,6 +271,36 @@ var newman_search_filter = (function () {
     return _search_filter_selected_default_label;
   }
 
+  function appendURL(url_path, param_key) {
+
+    if (url_path) {
+
+      if (url_path.endsWith('/')) {
+        url_path = url_path.substring(0, url_path.length - 1);
+      }
+
+      if (!param_key) {
+        param_key = 'qs';
+      }
+
+      var search_text = $("#txt_search").val();
+      var query_string = encodeURIComponent(search_text);
+      if (url_path.indexOf('?') > 0) {
+        url_path += '&' + param_key + '=' + query_string;
+      }
+      else {
+        url_path += '?' + param_key + '=' + query_string;
+      }
+
+    }
+
+    return url_path;
+  }
+
+  function appendURLQuery(url_path) {
+    return appendURL(url_path, 'qs');
+  }
+
   return {
     "pushFilter": pushFilter,
     "popFilter": popFilter,
@@ -285,7 +315,9 @@ var newman_search_filter = (function () {
     "initFilter" : initFilter,
     "parseFilter" : parseFilter,
     "parseFilterIconClass" : parseFilterIconClass,
-    "isValidFilter" : isValidFilter
+    "isValidFilter" : isValidFilter,
+    'appendURL' : appendURL,
+    'appendURLQuery' : appendURLQuery
   }
 
 }());

@@ -3,7 +3,9 @@
  */
 
 var history_nav = (function () {
-  var hist_max = 20;
+  var debug_enabled = false;
+
+  var hist_max = 10;
   var hist_list = [];
 
   var data_view = function( uid, label, icon_class, data_url, data_field ) {
@@ -19,7 +21,9 @@ var history_nav = (function () {
 
 
   var push = function ( uid, label, icon_class, data_url, data_field) {
-    console.log('push( ' + uid + ', ' + label + ', ' + data_url + ' )');
+    if (debug_enabled) {
+      console.log('push( ' + uid + ', ' + label + ', ' + data_url + ' )');
+    }
 
     if(!icon_class) {
       icon_class = 'fa fa-asterisk';
@@ -50,7 +54,7 @@ var history_nav = (function () {
 
     if (!contains(new_data_view)) {
       if (hist_list.length == hist_max) {
-        hist_list.splice(hist_list.length - 1, 1);
+        hist_list.splice(1, 1);
       }
       hist_list.push(new_data_view);
     }
@@ -73,7 +77,9 @@ var history_nav = (function () {
 
     });
 
-    console.log('contains( ' + data_view.uid + ' ) ' + found);
+    if (debug_enabled) {
+      console.log('contains( ' + data_view.uid + ' ) ' + found);
+    }
 
     return found;
   };
@@ -138,13 +144,16 @@ var history_nav = (function () {
 
   var refreshUI = function() {
 
-
-    console.log( 'user_hist[' + hist_list.length + ']' );
+    if (debug_enabled) {
+      console.log('user_hist[' + hist_list.length + ']');
+    }
 
     clearUI();
 
     _.each(hist_list, function( element ) {
-      console.log( '\t' + element.label + ', ' + element.uid + ', ' + element.icon_class + ', ' + element.data_url );
+      if (debug_enabled) {
+        console.log('\t' + element.label + ', ' + element.uid + ', ' + element.icon_class + ', ' + element.data_url);
+      }
 
       var button = $('<button />', {
         type: 'button',
@@ -195,14 +204,27 @@ var history_nav = (function () {
   }
 
   function appendUI(url_path, field, label) {
+    if (url_path && field && label) {
+      //var key = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
+      var key = encodeURIComponent(url_path);
 
-    var key = encodeURIComponent(url_path);
+      try {
+        label = decodeURIComponent(label);
+      }
+      catch (error) {
+        // catch non-uri/utf8-encoded character; do nothing
+      }
 
-    push(key, label, '', url_path, field);
+      if (label.indexOf(' ') >= 0) {
+        label = '"' + label + '"';
+      }
 
-    //TODO: need to handle max count
+      push(key, label, '', url_path, field);
 
-    refreshUI();
+      //TODO: need to handle max count
+
+      refreshUI();
+    }
   }
 
   return {

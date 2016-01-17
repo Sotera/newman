@@ -31,7 +31,7 @@ var newman_topic_email = (function () {
         _top_count = _top_count_max;
       }
 
-      newman_service_topic_email.requestService( _top_count_max );
+      newman_topic_email_request_category.requestService( _top_count_max );
     }
   }
 
@@ -79,8 +79,10 @@ var newman_topic_email = (function () {
         .attr("height", height_bar - 1)
         .attr("class", "label highlight clickable")
         .on("click", function (d) {
-          console.log( 'clicked on \'' + d.topics + '\'');
-          do_search(true, 'topic', d.index, '0.5');
+          //console.log('topic-text clicked\n' + JSON.stringify(d, null, 2));
+
+          onTopicClicked( d.topics, d.score, d.index );
+
         })
         .style("fill", function (d, i) {
           return colors(i);
@@ -108,8 +110,10 @@ var newman_topic_email = (function () {
         .attr("y", height_bar / 2)
         .attr("class", "label clickable")
         .on("click", function (d) {
-          console.log( 'clicked on \'' + d.topics + '\'');
-          do_search(true, 'topic', d.index, '0.5');
+          //console.log('topic-text clicked\n' + JSON.stringify(d, null, 2));
+
+          onTopicClicked( d.topics, d.score, d.index );
+
         })
         .text(function (d) {
           var max_length = 30;
@@ -178,6 +182,7 @@ var newman_topic_email = (function () {
     _top_count;
   }
 
+
   function appendTopic(url_path) {
 
     if (url_path) {
@@ -186,23 +191,36 @@ var newman_topic_email = (function () {
         url_path = url_path.substring(0, url_path.length - 1);
       }
 
-      var topic_set_as_string = '';
-      var keys = _.keys(_topic_selected);
-      if (keys) {
-        _.each(keys, function(key) {
-          topic_set_as_string += key + ' ';
+      var topic_indices_as_string = '';
+      var value_list = _.values(_topic_selected);
+      if (value_list) {
+        _.each(value_list, function(value) {
+          topic_indices_as_string += value.index + ' ';
         });
       }
 
-      if(topic_set_as_string) {
-        topic_set_as_string = topic_set_as_string.trim().replace(' ', ',');
-        var key = 'topic'
-        if (url_path.indexOf('?') > 0) {
-          url_path += '&' + key + '=' + topic_set_as_string;
-        }
-        else {
-          url_path += '?' + key + '=' + topic_set_as_string;
-        }
+      if(topic_indices_as_string) {
+        topic_indices_as_string = topic_indices_as_string.trim().replace(' ', ',');
+      }
+      else {
+        topic_indices_as_string = '0';
+      }
+
+      var key = 'topic_index'
+      if (url_path.indexOf('?') > 0) {
+        url_path += '&' + key + '=' + topic_indices_as_string;
+      }
+      else {
+        url_path += '?' + key + '=' + topic_indices_as_string;
+      }
+
+      var threshold_key = 'topic_threshold';
+      var threshold_value = encodeURIComponent('0.5');
+      if (url_path.indexOf('?') > 0) {
+        url_path += '&' + threshold_key + '=' + threshold_value;
+      }
+      else {
+        url_path += '?' + threshold_key + '=' + threshold_value;
       }
 
     }
@@ -211,11 +229,9 @@ var newman_topic_email = (function () {
 
   }
 
-  function _putTopic(key, value) {
-    if (key && value) {
+  function _putTopic(key, value, index) {
+    if (key && value && index) {
       key = encodeURIComponent(key);
-
-      var index = _.size(_topic_selected);
       var object = {"key": key, "index": index, "value": value}
       _topic_selected[key] = object;
     }
@@ -223,15 +239,16 @@ var newman_topic_email = (function () {
 
   function _removeTopic(key) {
     if (key) {
+      key = encodeURIComponent(key);
       delete _topic_selected[key];
     }
   }
 
-  function setTopicSelected(key, type, is_selected, refresh_ui) {
-    if (key && type) {
+  function setTopicSelected(key, value, index, is_selected, refresh_ui) {
+    if (key && value && index) {
 
       if (is_selected) {
-        _putTopic(key, type);
+        _putTopic(key, value, index);
       }
       else {
         _removeTopic(key)
@@ -246,11 +263,51 @@ var newman_topic_email = (function () {
     }
   }
 
+  function getAllTopicSelected() {
+
+    var copy = {};
+    if (_topic_selected) {
+      copy = clone( _topic_selected );
+    }
+
+    return copy;
+  }
+
+  function getAllTopicSelectedAsString() {
+
+    var topic_keys_as_string = '';
+    var key_list = _.keys(_topic_selected);
+    if (key_list) {
+      _.each(key_list, function(key) {
+        topic_keys_as_string += decodeURIComponent(key) + ' ';
+      });
+    }
+
+    if(topic_keys_as_string) {
+      topic_keys_as_string = topic_keys_as_string.trim();
+    }
+
+    return topic_keys_as_string;
+  }
+
+
   function clearAllTopicSelected() {
     _topic_selected = {};
   }
 
+  function onTopicClicked(key, value, index) {
+    console.log( 'onTopicClicked( ' + key + ', ' + value + ', ' + index + ' )' );
 
+    clearAllTopicSelected();
+
+    setTopicSelected(key, value, index, true, true);
+
+    // query email documents by topic
+    newman_graph_email_request_by_topic.requestService();
+
+    // display email-tab
+    newman_graph_email.displayUITab();
+  }
 
   return {
     'initUI' : initUI,
@@ -260,7 +317,11 @@ var newman_topic_email = (function () {
     'revalidateUITopicEmail' : revalidateUITopicEmail,
     'getTopCount' : getTopCount,
     'appendTopic' : appendTopic,
-    'setTopicSelected' : setTopicSelected
+    'setTopicSelected' : setTopicSelected,
+    'onTopicClicked' : onTopicClicked,
+    'getAllTopicSelected' : getAllTopicSelected,
+    'getAllTopicSelectedAsString' : getAllTopicSelectedAsString,
+    'clearAllTopicSelected' : clearAllTopicSelected
   }
 
 }());
@@ -269,7 +330,7 @@ var newman_topic_email = (function () {
  * email-topics-related service response container
  * @type {{requestService, getResponse}}
  */
-var newman_service_topic_email = (function () {
+var newman_topic_email_request_category = (function () {
 
   var _service_url = 'topic/category/all';
   var _response;
@@ -317,99 +378,6 @@ var newman_service_topic_email = (function () {
   function getResponse() {
     return _response;
   }
-
-  return {
-    'getServiceURLBase' : getServiceURLBase,
-    'getServiceURL' : getServiceURL,
-    'requestService' : requestService,
-    'getResponse' : getResponse,
-    'setResponse' : setResponse
-  }
-
-}());
-
-/**
- * topic-based-email-search service response container
- * @type {{requestService, getResponse}}
- */
-var newman_service_topic_search = (function () {
-
-  var _service_url = 'topic/graph/all';
-  var _response;
-
-  function getServiceURLBase() {
-    return _service_url;
-  }
-
-  function getServiceURL() {
-
-    var service_url = newman_data_source.appendDataSource(_service_url);
-    service_url = newman_datetime_range.appendDatetimeRange(service_url);
-    service_url = newman_topic_email.appendTopic(service_url);
-    return service_url;
-  }
-
-  function requestService() {
-
-    console.log('newman_service_topic_search.requestService()');
-    var service_url = getServiceURL();
-    $.get( service_url ).then(function (response) {
-      setResponse( response );
-      updateUISocialGraph( response );
-    });
-  }
-
-  function setResponse( response ) {
-    if (response) {
-
-      _response = response;
-      //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
-    }
-  }
-
-  function getResponse() {
-    return _response;
-  }
-
-  function updateHistory(url_path, field, label) {
-
-    var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
-
-    history_nav.push(id,
-      label,
-      '',
-      url_path,
-      field);
-
-    history_nav.refreshUI();
-  }
-
-  function updateUISocialGraph(search_response) {
-
-    //validate search-response
-    var filtered_response = validateResponseSearch( search_response );
-
-    email_analytics_content.open();
-    bottom_panel.unhide();
-
-    // initialize to blank
-    updateUIInboundCount();
-    updateUIOutboundCount();
-
-    $('#document_count').text(filtered_response.rows.length);
-
-    // populate data-table
-    populateDataTable( filtered_response.rows )
-
-    if (bottom_panel.isOpen()){
-      //resize bottom_panel
-      bottom_panel.open();
-    }
-
-    // render graph display
-    drawGraph( filtered_response.graph );
-  }
-
 
   return {
     'getServiceURLBase' : getServiceURLBase,
