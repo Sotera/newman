@@ -253,3 +253,18 @@ text.label.highlight:hover {
     background: rgba(40, 70, 165, 0.75);
     border: solid 1px #FFFFFF;
 }
+
+/***********************
+  pop-over
+************************/
+.popover-title {
+    font-size: 11px !important;
+    margin: 0;
+    padding: 0px 2px 0px 2px;
+}
+.popover-content {
+    font-size: 10px !important;
+    margin: 0;
+    padding: 0px 2px 0px 2px;
+}
+

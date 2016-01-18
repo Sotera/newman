@@ -1026,44 +1026,50 @@
 
         <!--<div style="height: 600px; background-color:#d3d3d3;">-->
           <div class="col-sm-12" style="display: table; height: 100%; margin: 0; padding: 0; height: 600px; background-color:#d3d3d3;">
-            <!--
-            <div style="background-color: #f0f0f0; padding: 5px; margin-left: 20px; float: left; display: inline-block;" id="topic_mini_chart"></div>
-            -->
 
-            <div class="row col-sm-12" style="height: 35px; margin: 0; padding: 0;">
-              <div class="col-sm-10" style="margin: 0; padding: 0;">
-              <!--Start Data-Panel-Tab-Content-Email-Star(Like)-Button -->
-              <div style="display: inline-block; float: left; margin: 5px 0px 0px 10px;" class="active">
-                <a id="toggle_mark_for_export" class="btn btn-xs btn-default">
-                  <span><i class="fa fa-star-o fa-lg"></i></span>
-                </a>
-              </div>
-              <!--End Data-Panel-Tab-Content-Email-Star(Like)-Button -->
-
-              <!--Start Data-Panel-Tab-Content-Email-Mark-Read-Toggle -->
-              <div style="display: inline-block; float: left; margin: 5px 0px 0px 5px;">
-                <button id="toggle_mark_as_read" class="btn btn-xs btn-default">
-                  <span><i class="fa fa-check-square-o fa-lg"></i> Mark As Read</span>
-                </button>
-              </div>
-              <!--End Data-Panel-Tab-Content-Email-Mark-Read-Toggle -->
-              </div>
-
-              <div class="col-sm-2" style="margin: 0; padding: 0;">
-              <!--Start Data-Panel-Tab-Content-Email-Prev/Next-Button -->
-                <div style="display: inline-block; float: right; margin: 5px 15px 0px 0px;">
-                  <a id="query_next_email" class="btn btn-xs btn-default clickable-disabled">
-                    <!--<span><i class="fa fa-long-arrow-right fa-lg"></i></span>-->
-                    <span><i class="fa fa-comments-o"></i>&#62;</span>
+            <div class="row col-sm-12" style="height: 52px; margin: 0; padding: 0;">
+              <div class="col-sm-3" style="margin: 0; padding: 0;">
+                <div class="row" style="height: 25px; margin: 0; padding: 0;">
+                <!--Start Data-Panel-Tab-Content-Email-Star(Like)-Button -->
+                <div style="display: inline-block; float: left; margin: 2px 0px 0px 10px;" class="active">
+                  <a id="toggle_mark_for_export" class="btn btn-xs btn-default">
+                    <span><i class="fa fa-star-o fa-lg"></i></span>
                   </a>
                 </div>
-                <div style="display: inline-block; float: right; margin: 5px 5px 0px 0px;">
-                  <a id="query_prev_email" class="btn btn-xs btn-default clickable-disabled">
-                    <!--<span><i class="fa fa-long-arrow-left fa-lg"></i></span>-->
-                    <span>&#60;<i class="fa fa-comments-o"></i></span>
-                  </a>
+                <!--End Data-Panel-Tab-Content-Email-Star(Like)-Button -->
+
+                <!--Start Data-Panel-Tab-Content-Email-Mark-Read-Toggle -->
+                <div style="display: inline-block; float: left; margin: 2px 5px 0px 5px;">
+                  <button id="toggle_mark_as_read" class="btn btn-xs btn-default">
+                    <span><i class="fa fa-square-o fa-lg"></i> Read</span>
+                  </button>
                 </div>
-              <!--End Data-Panel-Tab-Content-Email-Prev/Next-Button -->
+                <!--End Data-Panel-Tab-Content-Email-Mark-Read-Toggle -->
+                </div>
+                <div class="row" style="height: 25px; margin: 0; padding: 0;">
+                  <!--Start Data-Panel-Tab-Content-Email-Prev/Next-Button -->
+                  <div style="display: inline-block; float: left; margin: 0px 0px 2px 10px;">
+                    <a id="query_prev_email" class="btn btn-xs btn-default clickable-disabled">
+                      <!--<span><i class="fa fa-long-arrow-left fa-lg"></i></span>-->
+                      <span>&#60;<i class="fa fa-comments-o"></i></span>
+                    </a>
+                  </div>
+                  <div style="display: inline-block; float: left; margin: 0px 10px 2px 5px;">
+                    <a id="query_next_email" class="btn btn-xs btn-default clickable-disabled">
+                      <!--<span><i class="fa fa-long-arrow-right fa-lg"></i></span>-->
+                      <span><i class="fa fa-comments-o"></i>&#62;</span>
+                    </a>
+                  </div>
+                  <!--End Data-Panel-Tab-Content-Email-Prev/Next-Button -->
+                </div>
+              </div>
+              <div class="col-sm-9" style="margin: 0; padding: 0;">
+                <!--Start Data-Panel-Tab-Content-Email-Mini-Topics-Chart -->
+                <div style="border: 1px solid whitesmoke; border-radius: 3px; padding: 0; margin: 0; float: left; display: inline-block;"
+                     id="topic_mini_chart">
+
+                </div>
+                <!--End Data-Panel-Tab-Content-Email-Mini-Topics-Chart -->
               </div>
 
               <!--Start Data-Panel-Tab-Content-Email-Pertinence-Select -->
@@ -1106,7 +1112,9 @@
             </div>
 
             <div class="row col-sm-12" style="height: calc(100% - 35px); margin: 0; padding: 0; max-height: 565px; max-width: 545px; overflow: scroll;">
-              <div class="col-sm-12" style="margin: 0; padding: 0px 5px 5px 10px; font-size: 13px; height: 100%; width: 100%;" id="email-body">  Please select an email to view ...</div>
+              <div class="col-sm-12" style="margin: 0; padding: 0px 5px 5px 10px; font-size: 13px; height: 100%; width: 100%;" id="email-body">
+                Please select an email to view ...
+              </div>
             </div>
 
 

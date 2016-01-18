@@ -455,6 +455,9 @@ var newman_graph_email_request_by_address = (function () {
       service_url = newman_data_source.appendDataSource(service_url);
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
 
+      // append query-string
+      service_url = newman_search_filter.appendURLQuery(service_url);
+
       return service_url;
     }
   }
@@ -535,6 +538,8 @@ var newman_graph_email_request_by_address_set = (function () {
     service_url = newman_graph_email.appendAllSourceNodeSelected(service_url);
     service_url = newman_graph_email.appendAllTargetNodeSelected(service_url);
 
+    // append query-string
+    service_url = newman_search_filter.appendURLQuery(service_url);
 
     // clear all selected before the service call
     newman_graph_email.clearAllNodeSelected();
@@ -605,6 +610,9 @@ var newman_graph_email_request_by_community = (function () {
       service_url = newman_data_source.appendDataSource(service_url);
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
 
+      // append query-string
+      service_url = newman_search_filter.appendURLQuery(service_url);
+
       return service_url;
     }
   }
@@ -662,6 +670,8 @@ var newman_graph_email_request_by_topic = (function () {
     var service_url = newman_data_source.appendDataSource(_service_url);
     service_url = newman_datetime_range.appendDatetimeRange(service_url);
     service_url = newman_topic_email.appendTopic(service_url);
+
+    // append query-string
     service_url = newman_search_filter.appendURLQuery(service_url);
 
     return service_url;

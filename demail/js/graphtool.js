@@ -328,7 +328,12 @@ function produceHTMLView(email_obj) {
   //console.log('produceHTMLView()\n' + JSON.stringify(d, null, 2));
   var datetime_selected = d.datetime;
 
-  draw_mini_topic_chart(d.email_id);
+  //draw_mini_topic_chart(d.email_id);
+  // render mini-topic-chart
+  if (email_obj.lda_topic_scores) {
+    newman_data_table_document_view.render_mini_topic_chart(email_obj.lda_topic_scores);
+  }
+
   var el = $('<div>').addClass('body-view');
   //html += "<b>ID: </b>" + d.email_id + "<BR>";
 

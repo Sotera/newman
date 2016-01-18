@@ -319,14 +319,14 @@ function showEmailView(email_id){
     var toggle_ui = $("#toggle_mark_as_read");
     if (toggle_ui) {
       toggle_ui.empty();
-      toggle_ui.append( '<span><i class=\"fa fa-square-o fa-lg\"></i> Mark As Unread</span>' );
+      toggle_ui.append( '<span><i class=\"fa fa-check-square-o fa-lg\"></i> Unread</span>' );
     }
   }
   else {
     var toggle_ui = $("#toggle_mark_as_read");
     if (toggle_ui) {
       toggle_ui.empty();
-      toggle_ui.append( '<span><i class=\"fa fa-check-square-o fa-lg\"></i> Mark As Read</span>' );
+      toggle_ui.append( '<span><i class=\"fa fa-square-o fa-lg\"></i> Read</span>' );
     }
   }
 
@@ -335,23 +335,12 @@ function showEmailView(email_id){
 
   // append query-string
   email_url = newman_search_filter.appendURLQuery(email_url);
-  /*
-  var search_text = $("#txt_search").val();
-  if (search_text) {
-    var query_string = encodeURIComponent(search_text);
-    if (email_url.indexOf('?') > 0) {
-      email_url += '&qs=' + query_string;
-    }
-    else {
-      email_url += '?qs=' + query_string;
-    }
-  }
-  */
 
 
   $.get(email_url).then(
     function(response) {
       setEmailVisible(email_id);
+
       if(response.email.length > 0){
         $("#email-body").empty();
         $("#email-body").append(produceHTMLView(response));
@@ -528,7 +517,7 @@ function initDataTableEvents() {
         var toggle_ui = $("#toggle_mark_as_read");
         if (toggle_ui) {
           toggle_ui.empty();
-          toggle_ui.append( '<span><i class=\"fa fa-check-square-o fa-lg\"></i> Mark As Read</span>' );
+          toggle_ui.append( '<span><i class=\"fa fa-square-o fa-lg\"></i> Read</span>' );
         }
       }
       else {
@@ -538,7 +527,7 @@ function initDataTableEvents() {
         var toggle_ui = $("#toggle_mark_as_read");
         if (toggle_ui) {
           toggle_ui.empty();
-          toggle_ui.append( '<span><i class=\"fa fa-square-o fa-lg\"></i> Mark As Unread</span>' );
+          toggle_ui.append( '<span><i class=\"fa fa-check-square-o fa-lg\"></i> Unread</span>' );
         }
       }
     }
@@ -551,3 +540,119 @@ function initDataTableEvents() {
 
 
 }
+
+var newman_data_table_document_view = (function() {
+  var debug_enabled = true;
+
+  var pop_over = (function(){
+    //init
+    $('#topic_mini_chart').popover({ placement: 'right', trigger: 'manual', content: '', html: true});
+    var pop = $('#topic_mini_chart').data('bs.popover');
+    var timer = null;
+
+    var show = function(content){
+      if (timer){ clearTimeout(timer); }
+      pop.options.content = content;
+      pop.show();
+    };
+
+    var hide = function(){
+      if (timer){ clearTimeout(timer); }
+      var fn = function(){ pop.hide();};
+      timer = _.delay(fn, 150);
+    };
+
+    return { show: show, hide: hide };
+
+  })();
+
+  function render_mini_topic_chart( topic_score_array ) {
+
+    if (debug_enabled) {
+      console.log('render_mini_topic_chart\n' + JSON.stringify(topic_score_array, null, 2));
+    }
+
+    $('#topic_mini_chart').empty();
+
+    if (topic_score_array && topic_score_array.length > 0) {
+
+      $('#topic_mini_chart').empty();
+
+      //var width = 200, height = 40, barHeight = 10;
+      var width = 308, height = 44, barHeight = 10;
+
+      var margin = {top: 2, right: 0, bottom: 0, left: 0};
+      width = width - margin.left - margin.right;
+
+      var y = d3.scale.linear().range([height, 0]);
+
+      var chart = d3.select("#topic_mini_chart").append('svg')
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
+
+      chart.append("text")
+        .attr("x", (width / 2))
+        //.attr("y", (margin.top / 2))
+        .attr("y", 10)
+        //.attr("text-anchor", "middle")
+        .text("Topic Scores")
+        .style("text-anchor", "middle")
+        .style("font-size", "9px")
+        .style("color", "whitesmoke")
+        .style("line-height", "10px");
+
+      y.domain([0, 100]);
+
+      var barWidth = width / topic_score_array.length;
+
+      var bar = chart.selectAll("g")
+        .data(topic_score_array)
+        .enter().append("g")
+        .attr("transform", function (d, i) {
+          return "translate(" + i * barWidth + ",0)";
+        });
+
+      bar.append("rect")
+        .attr("y", function (d) {
+          return margin.top + y(+d[2] * 100);
+        })
+        .attr("height", function (d) {
+          return height - y(+d[2] * 100);
+        })
+        .attr("width", barWidth - 1)
+        .style("fill", function (d, i) {
+
+          return newman_topic_email.getTopicColor(i);
+
+        })
+        .attr('class', 'clickable')
+        .on("click", function (d, i) {
+          if (debug_enabled) {
+            console.log('clicked mini-topic-chart\n' + JSON.stringify(d, null, 2));
+          }
+
+          newman_topic_email.onTopicClicked( d[1], d[2], d[0] );
+        })
+        .on("mouseover", function (d, i) {
+          //var str = "topic: " + i + "<br/>" + Math.floor(100 * d[2]) + '%';
+          var str = "<ul><li>" + _.take(d[1].split(' '), 10).join('</li><li>') + "</li></ul>";
+          pop_over.show(str);
+        })
+        .on("mouseout", function (d, i) {
+          pop_over.hide();
+        });
+
+      // bar.append("text")
+      //   .attr("x", barWidth / 2)
+      //   .attr("y", function(d) { return y(+d*100) + 3;})
+      //   .attr("dy", ".75em")
+      //   .text(function(d, i) { return topics[i]; });
+
+    } //end of if (topic_score_array && topic_score_array.length > 0)
+
+  }
+
+  return {
+    'render_mini_topic_chart' : render_mini_topic_chart
+  }
+}());

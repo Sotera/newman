@@ -18,6 +18,16 @@ var newman_topic_email = (function () {
   var _top_count, _top_count_max = 20;
   var _topic_selected = {};
 
+  var _topic_colors = d3.scale.category20b();
+
+  function getTopicColor(index) {
+    return _topic_colors(index);
+  }
+
+  function getTopicColorRange() {
+    return _topic_colors.range();
+  }
+
   /**
    * request and display the top attachment-file-type-related charts
    * @param count
@@ -85,7 +95,8 @@ var newman_topic_email = (function () {
 
         })
         .style("fill", function (d, i) {
-          return colors(i);
+          //return colors(i);
+          return getTopicColor(i);
         })
         .append('title').text(function (d) {
         return d.score;
@@ -151,7 +162,8 @@ var newman_topic_email = (function () {
 
       _donut_chart_topic_email = Morris.Donut({
         element: chart_donut_ui_id,
-        colors: colors.range(),
+        //colors: colors.range(),
+        colors: getTopicColorRange(),
         data: top_donut_chart_data,
         formatter: function (x, data) { return data.formatted; }
       });
@@ -321,7 +333,9 @@ var newman_topic_email = (function () {
     'onTopicClicked' : onTopicClicked,
     'getAllTopicSelected' : getAllTopicSelected,
     'getAllTopicSelectedAsString' : getAllTopicSelectedAsString,
-    'clearAllTopicSelected' : clearAllTopicSelected
+    'clearAllTopicSelected' : clearAllTopicSelected,
+    'getTopicColor' : getTopicColor,
+    'getTopicColorRange' : getTopicColorRange
   }
 
 }());
@@ -345,6 +359,10 @@ var newman_topic_email_request_category = (function () {
       var service_url = newman_data_source.appendDataSource(_service_url + '/' + encodeURIComponent(count));
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
       service_url = newman_aggregate_filter.appendAggregateFilter(service_url);
+
+      // append query-string
+      service_url = newman_search_filter.appendURLQuery(service_url);
+
       return service_url;
     }
   }

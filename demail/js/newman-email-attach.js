@@ -171,8 +171,8 @@ var newman_email_attach_request_all_by_sender = (function () {
       service_url = newman_data_source.appendDataSource(service_url);
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
 
-      // add to history
-      //updateHistory(service_url, 'attachment', decodeURIComponent(sender_address));
+      // append query-string
+      service_url = newman_search_filter.appendURLQuery(service_url);
 
       return service_url;
     }
@@ -185,6 +185,9 @@ var newman_email_attach_request_all_by_sender = (function () {
     $.get( service_url ).then(function (response) {
       setResponse( response );
       newman_email_attach.updateUIAttachmentTable( response, false );
+
+      // add to work-flow-history
+      history_nav.appendUI(service_url, 'attachment', email_address);
     });
   }
 

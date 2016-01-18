@@ -473,6 +473,10 @@ var newman_service_entity_email = (function () {
       var service_url = newman_data_source.appendDataSource(_service_url + '/' + encodeURIComponent(count));
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
       service_url = newman_aggregate_filter.appendAggregateFilter(service_url);
+
+      // append query-string
+      service_url = newman_search_filter.appendURLQuery(service_url);
+
       return service_url;
     }
   }
@@ -536,6 +540,8 @@ var newman_service_entity_search = (function () {
     service_url = newman_datetime_range.appendDatetimeRange(service_url);
     service_url = newman_entity_email.appendEntity(service_url);
 
+    // append query-string
+    service_url = newman_search_filter.appendURLQuery(service_url);
 
     return service_url;
   }
