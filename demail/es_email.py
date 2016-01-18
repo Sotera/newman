@@ -9,6 +9,7 @@ from newman.utils.functions import nth
 from newman.newman_config import elasticsearch_hosts
 from es_search import _search_ranked_email_addrs, count, get_cached_email_addr, initialize_email_addr_cache
 from es_queries import _build_filter, email_highlighting_query, _build_email_query
+from es_topic import get_categories
 
 #map the email_address for the email/rank REST service
 def map_email_addr(email_addr_resp, total_emails):
@@ -143,6 +144,7 @@ def get_email(index, email_id, qs=None):
     # fields=["id","datetime","senders","senders_line","tos_line","ccs_line","bccs_line","subject","body","attachments.filename","entities.entity_organization","entities.entity_location","entities.entity_person","entities.entity_misc"]
     # email = es.get(index, doc_type="emails", id=email_id, fields=fields)
 
+
     source = ''
     body='_DEFAULT_'
     subject='_DEFAULT_'
@@ -160,6 +162,9 @@ def get_email(index, email_id, qs=None):
         highlight = email["hits"]["hits"][0].get("highlight", {})
         body = highlight.get('body', [source['body']])[0]
         subject = highlight.get('subject', [source['subject']])[0]
+
+    topic_scores = [ [topic[0], topic[1], str(source["topic_scores"]["idx_"+str(topic[0])])] for topic in get_categories(index)["categories"]]
+
 
     default=[""]
     email = [source["id"],
@@ -184,7 +189,7 @@ def get_email(index, email_id, qs=None):
         if ("entity_"+type) in source["entities"]:
             entities += [ [source["id"][0]+"_entity_"+str(i), type ,i, val] for i,val in enumerate(source["entities"].get("entity_"+type, default), len(entities))]
 
-    return { "email" : email, "entities": entities}
+    return { "email" : email, "entities": entities, "lda_topic_scores":topic_scores}
 
 def set_starred(index, ids=[], starred=True):
     es = Elasticsearch(elasticsearch_hosts())
