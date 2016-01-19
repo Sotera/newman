@@ -267,9 +267,11 @@ def prettyprint_email_as_html_template(email_json, topics):
             tr.append(score)
             table.append(tr)
 
+        # Escape &, <, >
         # Entity highlighting applied on text rather than in template
         # TODO this is a bit of a hack
-        raw_body = email_json["body"]
+        raw_body = email_json.get("body",'').replace('&','&amp;').replace('<','&lt;').replace('<','&gt;')
+
         for org in email_json["entities"]["entity_organization"]:
             # markup = '<span class="mitie mitie-organization" id="TODO_id" mitie-type="organization" mitie-value="'+org+'">'+org+'</span>'
             markup = '<em style="background-color: #ffcc33;">'+org+'</em>'

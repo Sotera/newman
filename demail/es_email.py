@@ -138,6 +138,14 @@ def get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime,
     return {"emails": email_address }
 
 
+# escape the html characters &, <, >
+# Now replace the hacky delimeter tags with HTML
+def _format_html(text):
+    # escape the html characters &, <, >
+    ret = text.replace('&','&amp;').replace('<','&lt;').replace('<','&gt;')
+    # Now replace the hacky delimeter tags with HTML
+    return ret.replace('#_#HIGHLIGHT_START#_#','<em style="background-color: #ffff99;">').replace('#_#HIGHLIGHT_END#_#','</em>')
+
 def get_email(index, email_id, qs=None):
 
     es = Elasticsearch(elasticsearch_hosts())
@@ -160,11 +168,15 @@ def get_email(index, email_id, qs=None):
         email = es.search(index=index, doc_type='emails', body=query)
         source = email["hits"]["hits"][0]["_source"]
         highlight = email["hits"]["hits"][0].get("highlight", {})
-        body = highlight.get('body', [source['body']])[0]
+        body = highlight.get('body', [source.get('body','')])[0]
         subject = highlight.get('subject', [source['subject']])[0]
 
-    topic_scores = [ [topic[0], topic[1], str(source["topic_scores"]["idx_"+str(topic[0])])] for topic in get_categories(index)["categories"]]
+    body = _format_html(body)
+    subject = _format_html(subject)
 
+    topic_scores=[]
+    if source["topic_scores"]:
+        topic_scores = [ [topic[0], topic[1], str(source["topic_scores"]["idx_"+str(topic[0])])] for topic in get_categories(index)["categories"]]
 
     default=[""]
     email = [source["id"],
@@ -177,8 +189,7 @@ def get_email(index, email_id, qs=None):
              ["".join(source["ccs_line"]), ";".join(source["ccs"])],
              ["".join(source["bccs_line"]), ";".join(source["bccs"])],
              subject,
-             # TODO figure this out
-             # source["body"].replace('\n',"<br/>"),
+             # Wrap in <pre>
              "<pre>"+body+"</pre>",
              [[f["guid"],f["filename"]] for f in source.get("attachments", default)],
              source.get("starred", False)

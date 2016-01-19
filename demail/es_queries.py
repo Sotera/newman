@@ -224,8 +224,10 @@ def email_highlighting_query(id, highlight_query_string='', fragment_size=200, n
             # TODO These are highlight but they look really bad on pre background
             # "pre_tags" : ["<mark>"],
             # "post_tags" : ["</mark>"],
-            "pre_tags" : ['<em style="background-color: #ff0000;">'],
-            "post_tags" : ["</em>"],
+            # These silly delimter tags get replaced later in the parsing.  Because '<' occur in the text and html viewer
+            # will not play nicely we need several sets of escape tokens
+            "pre_tags" : ['#_#HIGHLIGHT_START#_#'],
+            "post_tags" : ['#_#HIGHLIGHT_END#_#'],
 
             "highlight_query": {
                 "query": {
