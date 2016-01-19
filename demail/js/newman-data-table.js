@@ -282,6 +282,7 @@ function populateDataTable( data_rows ) {
 }
 
 function showEmailView(email_id){
+  console.log('showEmailView( ' + email_id + ' )' );
   newman_graph_email.clearAllNodeSelected();
 
   if (!bottom_panel.isOpen()){

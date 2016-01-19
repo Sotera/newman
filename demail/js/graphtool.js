@@ -322,16 +322,17 @@ function clear_content_view_email() {
   resetEmailVisible();
 }
 
-function produceHTMLView(email_obj) {
+function produceHTMLView(email_response) {
+  console.log( 'produceHTMLView( email_response )' );
 
-  var d = _.object(['email_id', 'attach_id','datetime', 'exportable', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], email_obj.email);
+  var d = _.object(['email_id', 'attach_id','datetime', 'exportable', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], email_response.email);
   //console.log('produceHTMLView()\n' + JSON.stringify(d, null, 2));
   var datetime_selected = d.datetime;
 
   //draw_mini_topic_chart(d.email_id);
   // render mini-topic-chart
-  if (email_obj.lda_topic_scores) {
-    newman_data_table_document_view.render_mini_topic_chart(email_obj.lda_topic_scores);
+  if (email_response.lda_topic_scores) {
+    newman_data_table_document_view.render_mini_topic_chart(email_response.lda_topic_scores);
   }
 
   var el = $('<div>').addClass('body-view');
@@ -364,7 +365,7 @@ function produceHTMLView(email_obj) {
     'style': 'margin: 2px 2px 2px 2px;'
   });
   console.log('sender_checkbox : checked,  id : ' + sender_checkbox.prop('id') + ', value : ' + sender_checkbox.prop('value'));
-  newman_graph_email.setGraphSelected(sender_checkbox.prop('value'), 'source', sender_checkbox.prop('id'), true, false);
+  newman_graph_email.setNodeSelected(sender_checkbox.prop('value'), 'source', sender_checkbox.prop('id'), true, false);
   anchor_sender.append( sender_checkbox );
 
 
@@ -422,12 +423,12 @@ function produceHTMLView(email_obj) {
                           newman_graph_email.clearAllTargetNodeSelected();
                         }
 
-                        newman_graph_email.setGraphSelected(attr_value, 'target', attr_id, true, false);
+                        newman_graph_email.setNodeSelected(attr_value, 'target', attr_id, true, false);
                       }
                       else { //unchecked
                         console.log('checkbox : unchecked, id : ' + attr_id + ', value : ' + attr_value);
 
-                        newman_graph_email.setGraphSelected(attr_value, 'target', attr_id, false, false);
+                        newman_graph_email.setNodeSelected(attr_value, 'target', attr_id, false, false);
 
                         // for now, only allow one email recipient
                         newman_graph_email.clearAllTargetNodeSelected();
@@ -502,9 +503,9 @@ function produceHTMLView(email_obj) {
 
   //console.log('email-body : \n' + JSON.stringify(d.body, null, 2));
 
-  if (email_obj.entities && email_obj.entities.length > 0) {
+  if (email_response.entities && email_response.entities.length > 0) {
     //sort by index
-    var entity_matched_list = _.sortBy(email_obj.entities, function (o) {
+    var entity_matched_list = _.sortBy(email_response.entities, function (o) {
       return o[2]
     });
     //console.log('entity_matched_list :\n' + JSON.stringify(entity_matched_list, null, 2));

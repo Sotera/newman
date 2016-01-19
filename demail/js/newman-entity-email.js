@@ -552,7 +552,7 @@ var newman_service_entity_search = (function () {
     var service_url = getServiceURL();
     $.get( service_url ).then(function (response) {
       setResponse( response );
-      newman_graph_email.updateUISocialGraph( response, false );
+      newman_graph_email.updateUIGraphView( response, false );
 
       // add to work-flow-history
       var entity_set_as_string = newman_entity_email.getAllEntityAsString();
@@ -574,38 +574,6 @@ var newman_service_entity_search = (function () {
   function getResponse() {
     return _response;
   }
-
-  function updateUISocialGraph(search_response) {
-
-    //validate search-response
-    var filtered_response = validateResponseSearch( search_response );
-
-    email_analytics_content.open();
-    bottom_panel.unhide();
-
-    // initialize to blank
-    updateUIInboundCount();
-    updateUIOutboundCount();
-
-    $('#document_count').text(filtered_response.rows.length);
-
-    // clear existing content if any
-    clear_content_view_email();
-
-    // populate data-table
-    populateDataTable( filtered_response.rows )
-
-    if (bottom_panel.isOpen()){
-      //resize bottom_panel
-      bottom_panel.close();
-
-    }
-
-    // render graph display
-    drawGraph( filtered_response.graph );
-
-  }
-
 
   return {
     'getServiceURLBase' : getServiceURLBase,
