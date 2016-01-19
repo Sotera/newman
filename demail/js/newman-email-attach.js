@@ -8,6 +8,7 @@
  */
 var newman_email_attach = (function () {
 
+  var debug_enabled = false;
   var ui_id = '#attach-table';
   
 
@@ -26,9 +27,12 @@ var newman_email_attach = (function () {
    * update from service the UI for attachment response
    * @param response
    */
-  function updateUIAttachmentTable(response, documentViewEnabled) {
+  function updateUIAttachmentTable( response_attachment_list ) {
+    if (debug_enabled) {
+      console.log( 'email_attach_list :\n' + JSON.stringify(response_attachment_list, null, 2));
+    }
 
-    var email_attach_list = _.mapcat(response.email_attachments, function(response){
+    var email_attach_list = _.mapcat(response_attachment_list, function(response){
       var o = _.object(["email_id", "attach_id", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"], response);
       var copy = _.omit(o, "attach");
       var attachments = _.map(o.attach.split(';'), function(attach){
@@ -36,6 +40,10 @@ var newman_email_attach = (function () {
       });
       return attachments;
     });
+
+    if (debug_enabled) {
+      console.log( 'email_attach_list :\n' + JSON.stringify(email_attach_list, null, 2));
+    }
 
     $('#attach-table').empty();
     $('#attach-table').append($('<thead>')).append($('<tbody>'));
@@ -67,7 +75,7 @@ var newman_email_attach = (function () {
         });
       });
 
-    console.log( 'email_attach_list :\n' + JSON.stringify(email_attach_list, null, 2));
+
     var tr = d3.select("#attach-table").select("tbody").selectAll("tr").data(email_attach_list).enter().append("tr");
 
     var popover = image_preview_popover();
@@ -184,10 +192,13 @@ var newman_email_attach_request_all_by_sender = (function () {
     var service_url = getServiceURL(email_address);
     $.get( service_url ).then(function (response) {
       setResponse( response );
-      newman_email_attach.updateUIAttachmentTable( response, false );
+      var attachment_list = response.email_attachments;
+      if (attachment_list && attachment_list.length > 0) {
+        newman_email_attach.updateUIAttachmentTable( attachment_list );
 
-      // add to work-flow-history
-      history_nav.appendUI(service_url, 'attachment', email_address);
+        // add to work-flow-history
+        history_nav.appendUI(service_url, 'attachment', email_address);
+      }
     });
   }
 

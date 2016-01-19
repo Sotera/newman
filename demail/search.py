@@ -1,7 +1,7 @@
 import tangelo
 import cherrypy
 
-from es_search import get_graph_for_email_address, get_rows_for_email_address, get_top_email_hits_for_text_query, get_rows_for_community, get_rows_for_topic
+from es_search import es_get_all_email_by_address, es_get_all_email_by_address_set, get_top_email_by_text_query, es_get_all_email_by_community, es_get_all_email_by_topic
 from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime, parseParam_sender_recipient, parseParamEmailSender, parseParamEmailRecipient, parseParam_email_addr, parseParamTopic, parseParamTextQuery
 import urllib
@@ -25,12 +25,12 @@ def search(*path_args, **param_args):
         if len(path_args) == 1:
             return {"graph":{"nodes":[], "links":[]}, "rows":[]}
         elif len(path_args) >= 2:
-            return get_top_email_hits_for_text_query(*path_args, **param_args)
+            return get_top_email_by_text_query(*path_args, **param_args)
     elif path_args[0] == "email":
         if len(path_args) == 1:
             return {"graph":{"nodes":[], "links":[]}, "rows":[]}
         elif len(path_args) >= 2:
-            return get_graph_for_email_address(data_set_id, email_address, start_datetime, end_datetime, size )
+            return es_get_all_email_by_address(data_set_id, email_address, start_datetime, end_datetime, size )
     # TODO REMOVEV this call
     # elif path_args[0] == "entity":
     #     return get_graph_by_entity(*path_args, **param_args)
@@ -72,10 +72,10 @@ def search_email_by_address_set(*path_args, **param_args):
     sender_address, recipient_address=parseParam_sender_recipient(**param_args)
 
     #TODO: Need to pass the entire sender and recipient lists of address to ES
-    return get_rows_for_email_address(data_set_id, sender_address, recipient_address, start_datetime, end_datetime, size, order)
+    return es_get_all_email_by_address_set(data_set_id, sender_address, recipient_address, start_datetime, end_datetime, size, order)
 
 
-#GET /community_email_addrs/<community_name>/?data_set_id=<data_set>&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
+#GET /search_by_community/<community_name>?data_set_id=<data_set>&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 def search_email_by_community(*args, **param_args):
     tangelo.content_type("application/json")
     tangelo.log("search_email_by_community(args: %s kwargs: %s)" % (str(args), str(param_args)))
@@ -95,12 +95,12 @@ def search_email_by_community(*args, **param_args):
 
     qs = parseParamTextQuery(**param_args)
 
-    return get_rows_for_community(data_set_id, community, email_addrs, start_datetime, end_datetime, size, qs=qs)
+    return es_get_all_email_by_community(data_set_id, community, email_addrs, qs, start_datetime, end_datetime, size)
 
 #GET /search_by_topic/?data_set_id=<data_set>&topic_index=1&topic_threshold=0.5&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 def search_email_by_topic(*args, **param_args):
     tangelo.content_type("application/json")
-    tangelo.log("search_email_by_community(args: %s kwargs: %s)" % (str(args), str(param_args)))
+    tangelo.log("search_email_by_topic(args: %s kwargs: %s)" % (str(args), str(param_args)))
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
 
@@ -118,13 +118,13 @@ def search_email_by_topic(*args, **param_args):
 
     qs = parseParamTextQuery(**param_args)
 
-    return get_rows_for_topic(data_set_id, topic=topic, email_addrs=email_addrs, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, size=size)
+    return es_get_all_email_by_topic(data_set_id, topic=topic, email_addrs=email_addrs, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, size=size)
 
 actions = {
     "search": search,
-    "search_by_address": get_graph_for_email_address,
+    "search_by_address": es_get_all_email_by_address,
     "search_by_address_set": search_email_by_address_set,
-    "search_by_text": get_top_email_hits_for_text_query,
+    "search_by_text": get_top_email_by_text_query,
     "search_by_community": search_email_by_community,
     "search_by_topic": search_email_by_topic
 }

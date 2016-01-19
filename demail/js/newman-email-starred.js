@@ -37,7 +37,7 @@ var newman_email_starred = (function () {
       });
 
       if (id_array.length > 0) {
-        newman_graph_email.updateUISocialGraph(search_response, documentViewEnabled, id_array);
+        newman_graph_email.updateUIGraphView(search_response, documentViewEnabled, id_array);
 
       }
       else {

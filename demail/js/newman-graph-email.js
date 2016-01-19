@@ -23,14 +23,11 @@ var node_context_menu = [
       console.log('node-clicked search-emails-under "' + d.name + '"');
       //console.log('element:\n' + JSON.stringify(d, null, 2));
 
-      // query email documents
+      // query email documents by email-address
       newman_graph_email_request_by_address.requestService(d.name);
 
       // display email-tab
       newman_graph_email.displayUITab();
-
-      // query attachments under the hidden tab
-      newman_email_attach_request_all_by_sender.requestService(d.name);
     }
   },
   {
@@ -42,14 +39,12 @@ var node_context_menu = [
       console.log('node-clicked search-email-attachments-under "' + d.name + '"');
       //console.log('element:\n' + JSON.stringify(d, null, 2));
 
-      // query attachments
-      newman_email_attach_request_all_by_sender.requestService(d.name);
+      // query email documents by email-address
+      newman_graph_email_request_by_address.requestService(d.name);
 
       // display attachment-tab
       newman_email_attach.displayUITab();
 
-      // query email documents under the hidden tab
-      newman_graph_email_request_by_address.requestService(d.name);
     }
   },
   {
@@ -86,51 +81,14 @@ var newman_graph_email = (function () {
   var _all_target_node_selected = {};
 
 
-  /**
-   * request and display the top attachment-file-type-related charts
-   * @param count
-   */
-  function displayUIGraphEmail( count ) {
-
-
-
-      _top_count = count;
-      if (!_top_count || _top_count < 0 || _top_count > _top_count_max) {
-        _top_count = _top_count_max;
-      }
-
-
-
-  }
-
-  /**
-   * update from service the top email-entities-related charts
-   * @param response
-   */
-  function updateUIGraphEmail( response ) {
-
-    if (response) {
-      initUI();
-
-
-
-
-    }
-  }
-
   function initUI() {
 
     if (graph_ui_id) {
       $(graph_ui_id).empty();
     }
 
-
   }
 
-  function revalidateUIGraphEmail() {
-
-
-  }
 
   function getTopCount() {
     _top_count;
@@ -338,8 +296,8 @@ var newman_graph_email = (function () {
     $('#query_next_email').addClass( 'clickable-disabled' );
   }
 
-  function onGraphClicked(key, value) {
-    console.log( 'onGraphClicked( ' + key + ', ' + value + ' )' );
+  function onNodeClicked(key, value) {
+    console.log( 'onNodeClicked( ' + key + ', ' + value + ' )' );
 
 
 
@@ -351,7 +309,7 @@ var newman_graph_email = (function () {
 
   }
 
-  function updateUISocialGraph( search_response, auto_display_enabled, starred_email_doc_list ) {
+  function updateUIGraphView( search_response, auto_display_enabled, starred_email_doc_list ) {
 
     //validate search-response
     var filtered_response = validateResponseSearch( search_response );
@@ -372,8 +330,11 @@ var newman_graph_email = (function () {
     // populate data-table
     populateDataTable( filtered_response.rows )
     if (starred_email_doc_list ) {
-      mark_all_email_as_starred( starred_email_doc_list );
+      mark_all_email_as_starred(starred_email_doc_list);
     }
+
+    // populate attachment-table
+    newman_email_attach.updateUIAttachmentTable( filtered_response.attachments );
 
     // automatically displays the first document
     if (auto_display_enabled) {
@@ -406,12 +367,10 @@ var newman_graph_email = (function () {
 
   return {
     'initUI' : initUI,
-    'displayUIGraphEmail' : displayUIGraphEmail,
-    'updateUIGraphEmail' : updateUIGraphEmail,
-    'revalidateUIGraphEmail' : revalidateUIGraphEmail,
+    'updateUIGraphView' : updateUIGraphView,
     'getTopCount' : getTopCount,
-    'setGraphSelected' : setNodeSelected,
-    'onGraphClicked' : onGraphClicked,
+    'setNodeSelected' : setNodeSelected,
+    'onNodeClicked' : onNodeClicked,
     'clearAllSourceNodeSelected' : clearAllSourceNodeSelected,
     'clearAllTargetNodeSelected' : clearAllTargetNodeSelected,
     'clearAllNodeSelected' : clearAllNodeSelected,
@@ -424,7 +383,6 @@ var newman_graph_email = (function () {
     'getAllTargetNodeSelectedAsString' : getAllTargetNodeSelectedAsString,
     'appendAllTargetNodeSelected' : appendAllTargetNodeSelected,
     'displayUITab' : displayUITab,
-    'updateUISocialGraph' : updateUISocialGraph,
     'updateUIDocumentView' : updateUIDocumentView
   }
 
@@ -468,7 +426,7 @@ var newman_graph_email_request_by_address = (function () {
     var service_url = getServiceURL(email_address);
     $.get( service_url ).then(function (response) {
       setResponse( response );
-      newman_graph_email.updateUISocialGraph( response, false );
+      newman_graph_email.updateUIGraphView( response, false );
 
       // add to work-flow-history
       history_nav.appendUI(service_url, 'email', email_address);
@@ -553,7 +511,7 @@ var newman_graph_email_request_by_address_set = (function () {
     var service_url = getServiceURL(order, datetime_selected);
     $.get( service_url ).then(function (response) {
       setResponse( response );
-      newman_graph_email.updateUISocialGraph( response, auto_display_enabled );
+      newman_graph_email.updateUIGraphView( response, auto_display_enabled );
 
       // add to work-flow-history
       var address_set_as_string = newman_graph_email.getAllSourceNodeSelectedAsString() + ' ' + newman_graph_email.getAllTargetNodeSelectedAsString();
@@ -623,7 +581,7 @@ var newman_graph_email_request_by_community = (function () {
     var service_url = getServiceURL(email_address);
     $.get( service_url ).then(function (response) {
       setResponse( response );
-      newman_graph_email.updateUISocialGraph( response, false );
+      newman_graph_email.updateUIGraphView( response, false );
 
       // add to work-flow-history
       history_nav.appendUI(service_url, 'community', email_address);
@@ -683,7 +641,7 @@ var newman_graph_email_request_by_topic = (function () {
     var service_url = getServiceURL();
     $.get( service_url ).then(function (response) {
       setResponse( response );
-      newman_graph_email.updateUISocialGraph( response, false );
+      newman_graph_email.updateUIGraphView( response, false );
 
       // add to work-flow-history
       var topic_set_as_string = newman_topic_email.getAllTopicSelectedAsString();
