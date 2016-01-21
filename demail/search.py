@@ -18,6 +18,9 @@ def search(*path_args, **param_args):
     # TODO this needs to come from UI
     size = size if size >500 else 2500
 
+    # TODO make sure that the qs param is put on the query
+    qs = parseParamTextQuery(**param_args)
+
     email_address=urllib.unquote(nth(path_args, 1, ''))
 
     #re-direct based on field
@@ -30,7 +33,7 @@ def search(*path_args, **param_args):
         if len(path_args) == 1:
             return {"graph":{"nodes":[], "links":[]}, "rows":[]}
         elif len(path_args) >= 2:
-            return es_get_all_email_by_address(data_set_id, email_address, start_datetime, end_datetime, size )
+            return es_get_all_email_by_address(data_set_id, email_address, qs, start_datetime, end_datetime, size )
     # TODO REMOVEV this call
     # elif path_args[0] == "entity":
     #     return get_graph_by_entity(*path_args, **param_args)

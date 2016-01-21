@@ -167,17 +167,17 @@ def _build_graph_for_emails(index, emails, query_hits):
     return {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in emails], "query_hits" : query_hits}
 
 # Build a graph with rows for a specific email address.
-def es_get_all_email_by_address(data_set_id, email_address, start_datetime, end_datetime, size):
+def es_get_all_email_by_address(data_set_id, email_address, qs, start_datetime, end_datetime, size):
     tangelo.log("es_search.get_graph_for_email_address(%s)" % (str(email_address)))
 
-    query  = _build_email_query(email_addrs=[email_address], qs='', date_bounds=(start_datetime, end_datetime))
+    query  = _build_email_query(email_addrs=[email_address], qs=qs, date_bounds=(start_datetime, end_datetime))
     tangelo.log("es_search.get_graph_for_email_address(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
     graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
 
     # Get attachments for community
-    query = _build_email_query(email_addrs=[email_address], qs='', date_bounds=(start_datetime, end_datetime), attachments_only=True)
+    query = _build_email_query(email_addrs=[email_address], qs=qs, date_bounds=(start_datetime, end_datetime), attachments_only=True)
     tangelo.log("search.get_graph_by_entity(attachment-query: %s)" % (query))
     attachments = _query_email_attachments(data_set_id, size, query)
     graph["attachments"] = attachments
