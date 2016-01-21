@@ -195,8 +195,14 @@ def es_get_all_email_by_address_set(data_set_id, sender, recipients, start_datet
     # If you do not want to generate a graph each time this is called use this code
     # return {"graph":{"nodes":[], "links":[]}, "rows": [_map_emails_to_row(email) for email in results["hits"]], "query_hits" : results["total"]}
 
-    return _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
 
+    # Get attachments for community
+    query = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, qs='', date_bounds=(start_datetime, end_datetime), sort_order=sort_order, date_mode_inclusive=False, address_filter_mode="conversation", attachments_only=True)
+    tangelo.log("search.get_graph_get_graph_for_email_addressby_entity(attachment-query: %s)" % (query))
+    attachments = _query_email_attachments(data_set_id, size, query)
+    graph["attachments"] = attachments
+    return graph
 
 
 # Get all rows for a community, sorted by time asc
