@@ -2,6 +2,8 @@ import tangelo
 import urllib
 import json
 
+from threading import Lock
+
 from elasticsearch import Elasticsearch
 from newman.newman_config import elasticsearch_hosts
 from newman.utils.functions import nth
@@ -9,7 +11,8 @@ from param_utils import parseParamDatetime
 from es_queries import _build_email_query
 
 # contains a cache of all email_address.addr, email_address
-_EMAIL_ADDR_CACHE = None
+_EMAIL_ADDR_CACHE = {}
+_EMAIL_ADDR_CACHE_LOCK = Lock()
 
 _graph_fields = ["community", "community_id", "addr", "attachments_count", "received_count", "sent_count", "recepient.email_id", "sender.email_id", "starred"]
 
@@ -143,16 +146,16 @@ def _build_graph_for_emails(index, emails, query_hits):
 
     for email in emails:
         from_addr = email["from"]
-        if from_addr not in _EMAIL_ADDR_CACHE:
+        if from_addr not in _EMAIL_ADDR_CACHE[index]:
             tangelo.log("WARNING: From email address not found in cache <%s>" % email)
             continue;
 
         if from_addr not in addr_index:
-            nodes.append(_map_node(_EMAIL_ADDR_CACHE[from_addr],total))
+            nodes.append(_map_node(_EMAIL_ADDR_CACHE[index][from_addr],total))
             addr_index[from_addr] = len(nodes)-1
         for rcvr_addr in email["to"]+email["cc"]+email["bcc"]:
             if rcvr_addr not in addr_index:
-                nodes.append(_map_node(_EMAIL_ADDR_CACHE[rcvr_addr], total))
+                nodes.append(_map_node(_EMAIL_ADDR_CACHE[index][rcvr_addr], total))
                 addr_index[rcvr_addr] = len(nodes)-1
             #TODO reduce by key instead of mapping?  src->target and sum on value
             edge_key = from_addr+"#"+rcvr_addr
@@ -264,24 +267,36 @@ def get_top_email_by_text_query(*args, **kwargs):
 
     return graph
 
-def initialize_email_addr_cache(index):
-    tangelo.log("INITIALIZING CACHE")
-    global _EMAIL_ADDR_CACHE
-    _email_addr_cache_fields= ["community", "community_id", "addr", "received_count", "sent_count", "attachments_count"]
+def initialize_email_addr_cache(index, update=False):
 
-    es = Elasticsearch(elasticsearch_hosts())
+    if index in _EMAIL_ADDR_CACHE and not update:
+        tangelo.log("APPLICATION CACHE -- index=%s"% index)
+        return
 
-    body={"query" : {"match_all" : {}}}
+    _EMAIL_ADDR_CACHE_LOCK.acquire()
+    try:
+        tangelo.log("INITIALIZING CACHE -- index=%s"% index)
+        global _EMAIL_ADDR_CACHE
+        _email_addr_cache_fields= ["community", "community_id", "addr", "received_count", "sent_count", "attachments_count"]
 
-    num = count(index,"email_address")
-    print num
-    addrs = es.search(index=index, doc_type="email_address", size=num, fields=_email_addr_cache_fields, body=body)
-    _EMAIL_ADDR_CACHE = {f["addr"][0] : f for f in [hit["fields"] for hit in addrs["hits"]["hits"]]}
-    tangelo.log("done: %s"% num)
+        es = Elasticsearch(elasticsearch_hosts())
+
+        body={"query" : {"match_all" : {}}}
+
+        num = count(index,"email_address")
+        print num
+        addrs = es.search(index=index, doc_type="email_address", size=num, fields=_email_addr_cache_fields, body=body)
+        addr_index = {f["addr"][0] : f for f in [hit["fields"] for hit in addrs["hits"]["hits"]]}
+        _EMAIL_ADDR_CACHE[index] = addr_index
+        tangelo.log("done: %s"% num)
+    finally:
+        _EMAIL_ADDR_CACHE_LOCK.release()
+        tangelo.log("INITIALIZING CACHE COMPLETE! -- index=%s"% index)
+
     return {"acknowledge" : "ok"}
 
-def get_cached_email_addr(addr):
-    return _EMAIL_ADDR_CACHE[addr]
+def get_cached_email_addr(index, addr):
+    return _EMAIL_ADDR_CACHE[index][addr]
 
 
 import operator

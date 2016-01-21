@@ -124,7 +124,7 @@ def get_ranked_email_address(data_set_id, query_terms='', topic_score=None, enti
     resp = es.search(index=data_set_id, doc_type="emails", body=body)
 
     total_docs =resp["aggregations"]["filtered_addrs_agg"]["doc_count"]
-    email_addrs = [map_email_filtered(get_cached_email_addr(email_addr["key"]), email_addr["doc_count"],total_docs) for email_addr in resp["aggregations"]["filtered_addrs_agg"]["top_addrs_agg"]["buckets"]]
+    email_addrs = [map_email_filtered(get_cached_email_addr(data_set_id, email_addr["key"]), email_addr["doc_count"],total_docs) for email_addr in resp["aggregations"]["filtered_addrs_agg"]["top_addrs_agg"]["buckets"]]
     return {"emails": email_addrs }
 
 # TODO This calculation is based on the email_address type which can not easily be filtered over time / entity/ topic / etc
