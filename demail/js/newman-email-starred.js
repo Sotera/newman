@@ -80,7 +80,7 @@ var newman_email_starred_request_toggle = (function () {
   function getServiceURL(email_id, enabled) {
     console.log('newman_email_starred_request_toggle.getServiceURL(' + email_id + ', ' + enabled + ')');
 
-    var service_url = _service_url + '/' + encodeURIComponent(email_id.trim());
+    var service_url = _service_url + '/' + encodeURIComponent(email_id);
     var is_starred = 'true';
     if (enabled === true) {
       is_starred = 'true';
@@ -223,13 +223,19 @@ var newman_email_starred_request_all = (function () {
       return service_url;
   }
 
-  function requestService() {
+  function requestService( response_callback ) {
 
     console.log('newman_email_starred_request_all.requestService()');
     var service_url = getServiceURL();
     $.get( service_url ).then(function (response) {
       setResponse( response );
-      newman_email_starred.updateUIEmailTable( response, false );
+
+      if (response_callback ) {
+        response_callback.receiveAllEmailDocumentStarred( response );
+      }
+      else {
+        newman_email_starred.updateUIEmailTable(response, false);
+      }
     });
   }
 

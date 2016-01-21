@@ -317,13 +317,6 @@ div.bootstrap-growl >span.close {
 #email-body { width: 100%; height: 100%; }
 .body-view { width: 100%; height: 100%; }
 
-.marked {
-    color: #4888f3;
-}
-.marked:hover {
-    color: #4888f3;
-}
-
 
 /* circular menu */
 /**

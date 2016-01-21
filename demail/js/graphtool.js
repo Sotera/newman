@@ -319,7 +319,7 @@ function searchByEntity(entityid, type, value){
 }
 
 function clear_content_view_email() {
-  resetEmailVisible();
+  newman_datatable_email.clearCurrentEmailDocument();
 }
 
 function produceHTMLView(email_response) {
@@ -332,7 +332,7 @@ function produceHTMLView(email_response) {
   //draw_mini_topic_chart(d.email_id);
   // render mini-topic-chart
   if (email_response.lda_topic_scores) {
-    newman_data_table_document_view.render_mini_topic_chart(email_response.lda_topic_scores);
+    newman_datatable_document_view.renderMiniTopicChart(email_response.lda_topic_scores);
   }
 
   var el = $('<div>').addClass('body-view');
@@ -1022,11 +1022,13 @@ function getTopRankedEmailAccountList(email_doc_rows, top_count ) {
  */
 function loadSearchResult( url_path ) {
 
+
+
   updateUIInboundCount(); // initialize to blank
   updateUIOutboundCount(); // initialize to blank
 
-  $.get("email/exportable").then(function(response_exportable) {
-    newman_service_email_exportable.setResponse(response_exportable);
+  //$.get("email/exportable").then(function(response_exportable) {
+  //  newman_service_email_exportable.setResponse(response_exportable);
 
     $.getJSON( url_path , function (search_response) {
 
@@ -1034,35 +1036,33 @@ function loadSearchResult( url_path ) {
       var filtered_response = validateResponseSearch( search_response );
 
       console.log( '.getJSON(' + url_path + ')' );
+      newman_graph_email.updateUIGraphView( filtered_response, false );
 
-
+      /*
       //var exported = _.indexBy(response_exportable.emails, _.identity);
       var exported = _.object(response_exportable.emails);
-
 
       $('#search_status').empty();
       //d3.select("#search_status").text("");
 
       $('#document_count').text(filtered_response.rows.length);
 
-      /*
-      var data = _.map(filtered_response.rows, function(o){
-        return _.extend(o, {'exported': (o.num in exported)})
-      });
-      */
-
       // populate data-table
-      populateDataTable( filtered_response.rows )
+      newman_datatable_email.populateDataTable( filtered_response.rows )
 
       // render graph display
       drawGraph( filtered_response.graph );
+      */
+
     });
 
-  });
+  //});
 
-  hasher.setHash( url_path );
-  email_analytics_content.open();
+  //hasher.setHash( url_path );
+  //email_analytics_content.open();
+
   history_nav.refreshUI();
+
 }
 
 // Draw a graph for a component
@@ -1642,7 +1642,8 @@ function document_type(ext){
   return "other";
 }
 
-
+//deprecated
+/*
 function draw_attachments_table(email_address){
   var deferred = $.Deferred();
   var attachment_url = 'email/search_all_attach_by_sender/' + email_address;
@@ -1710,20 +1711,8 @@ function draw_attachments_table(email_address){
 
         console.log('clicked d : ' + d);
 
+        newman_datatable_email.showEmailDocumentView( d[(d.length-1)] );
 
-        showEmailView( d[(d.length-1)] );
-
-        /*
-         $.get("email/email/" + encodeURIComponent(email_id)).then(
-         function(resp) {
-         setEmailVisible(email_id);
-         $('#tab-list li:eq(2) a').tab('show');
-         if(resp.email.length > 0){
-         $("#email-body").empty();
-         $("#email-body").append(produceHTMLView(resp));
-         }
-         });
-         */
       })
       .html(function(d, i){
 
@@ -1766,12 +1755,6 @@ function draw_attachments_table(email_address){
           var el = $('<div>').append(img);
           return el.html();
         }
-        /*
-        if (i == 4){
-          var el = $('<div>').append($('<span>').addClass("glyphicon").addClass("glyphicon-share-alt").addClass('clickable'));
-          return el.html();
-        }
-        */
 
         return d;
       });
@@ -1780,6 +1763,7 @@ function draw_attachments_table(email_address){
   });
   return deferred.promise();
 }
+*/
 
 /*
 function draw_topic_tab(){
@@ -2276,8 +2260,8 @@ $(function () {
     $('#target_email').on('mouseout', highlight_target.unhighlight);
 
     $('#email_group_conversation').on('click', group_email_conversation);
-    $('#email_view_export_all').on('click', add_view_to_export);
-    $('#email_view_export_all_remove').on('click', remove_view_from_export);
+    //$('#email_view_export_all').on('click', add_view_to_export);
+    //$('#email_view_export_all_remove').on('click', remove_view_from_export);
 
     $('#top-entities').append(waiting_bar);
 
@@ -2302,6 +2286,10 @@ $(function () {
       $('#txt_search').val('');
     });
 
+    /**
+     *    CMU Active-Search deprecated and disabled
+     */
+    /*
     $("#submit_activesearch_like").click(function () {
       if (current_email == null) {
         alert('please select an email to seed');
@@ -2311,7 +2299,7 @@ $(function () {
       $("#email-body").append(waiting_bar);
       $.get("activesearch/like").then(
         function (resp) {
-          setEmailVisible(resp);
+          newman_datatable_email.setCurrentEmailDocument(resp);
           $.get("email/email/" + encodeURIComponent(resp)).then(
             function (resp) {
               if (resp.email.length > 0) {
@@ -2331,7 +2319,7 @@ $(function () {
       $("#email-body").append(waiting_bar);
       $.get("activesearch/dislike").then(
         function (resp) {
-          setEmailVisible(resp);
+          newman_datatable_email.setCurrentEmailDocument(resp);
           $.get("email/email/" + encodeURIComponent(resp)).then(
             function (resp) {
               if (resp.email.length > 0) {
@@ -2353,7 +2341,7 @@ $(function () {
       $("#email-body").append(waiting_bar);
       $.get("activesearch/seed/" + encodeURIComponent(id)).then(
         function (resp) {
-          setEmailVisible(resp);
+          newman_datatable_email.setCurrentEmailDocument(resp);
           $.get("email/email/" + encodeURIComponent(resp)).then(
             function (resp) {
               if (resp.email.length > 0) {
@@ -2363,6 +2351,7 @@ $(function () {
             });
         });
     });
+    */
 
     //on modal close event
     $('#export_modal').on('hidden.bs.modal', function () {
@@ -2377,7 +2366,7 @@ $(function () {
     */
 
     // initialize data-table events
-    initDataTableEvents();
+    //newman_datatable_email.initDataTableEvents();
 
     /*
     $("#export_starred_set").click(function () {
@@ -2452,7 +2441,7 @@ $(function () {
 
     crossroads.addRoute("/email/{id}", function (id) {
       requestSearch('email', id, false);
-      showEmailView(id);
+      newman_datatable_email.showEmailDocumentView( id );
     });
 
     crossroads.routed.add(function (request, data) {

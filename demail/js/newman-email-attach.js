@@ -92,7 +92,7 @@ var newman_email_attach = (function () {
 
         console.log('clicked d : ' + d);
 
-        showEmailView( d[(d.length-1)] );
+        newman_datatable_email.showEmailDocumentView( d[(d.length-1)] );
 
       })
       .html(function(d, i){

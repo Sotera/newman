@@ -38,3 +38,19 @@
 .dataTables_paginate {
     font-size: 12px;
 }
+
+.datatable_row_marked {
+    color: #4888f3;
+}
+
+.datatable_row_marked:hover {
+    color: #4888f3;
+}
+
+.datatable_row_unmarked {
+    color: #000000;
+}
+
+.datatable_row_unmarked:hover {
+    color: #000000;
+}

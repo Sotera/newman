@@ -318,6 +318,9 @@ var newman_graph_email = (function () {
     // open analytics content view
     email_analytics_content.open();
 
+    // make email-document-content-view visible, but closed
+    bottom_panel.close();
+
     // initialize to blank
     updateUIInboundCount();
     updateUIOutboundCount();
@@ -328,9 +331,9 @@ var newman_graph_email = (function () {
     clear_content_view_email();
 
     // populate data-table
-    populateDataTable( filtered_response.rows )
+    newman_datatable_email.populateDataTable( filtered_response.rows )
     if (starred_email_doc_list ) {
-      mark_all_email_as_starred(starred_email_doc_list);
+      newman_datatable_email.setAllEmailDocumentStarred(starred_email_doc_list);
     }
 
     // populate attachment-table
@@ -340,9 +343,6 @@ var newman_graph_email = (function () {
     if (auto_display_enabled) {
       console.log( 'auto_display_enabled' );
       updateUIDocumentView( filtered_response.rows );
-    }
-    else {
-      bottom_panel.close();
     }
 
     // render graph display
@@ -358,7 +358,7 @@ var newman_graph_email = (function () {
       var doc_key = document_array[0]["num"];
       console.log( 'updateUIDocumentView( ' + doc_key + ' )' );
       if (doc_key) {
-        showEmailView( doc_key );
+        newman_datatable_email.showEmailDocumentView( doc_key );
 
       }
     }
