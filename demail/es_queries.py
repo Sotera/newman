@@ -177,7 +177,7 @@ def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='
     if attachments_only:
         query_email_addr ["filter"] = {"exists":{"field":"attachments"}}
 
-    if sort_mode == 'default' and not term_query:
+    if sort_mode == 'default' and not qs:
         query_email_addr["sort"] = { "datetime": { "order": sort_order }}
     elif sort_mode == "topic":
         query_email_addr["sort"] = {"topic_scores.idx_"+topic["idx"]:{"order": sort_order }}
@@ -186,9 +186,9 @@ def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='
 # TODO REMOVE and combine with email_query
 # Build a query for sender email attachments
 # Deprecated
-def _build_email_attachment_query(sender_address, query_terms='', topic=None, entity={}, date_bounds=None, communities=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True):
+def _build_email_attachment_query(sender_address, qs='', topic=None, entity={}, date_bounds=None, communities=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True):
 
-    term_query = {"match_all" : {}} if not query_terms else {"match" : {"_all" : query_terms}}
+    term_query = {"match_all" : {}} if not qs else {"match" : {"_all" : qs}}
 
     query_email_addr =  {
         "filter":{"exists":{"field":"attachments"}},
@@ -205,7 +205,7 @@ def _build_email_attachment_query(sender_address, query_terms='', topic=None, en
         #     { "datetime": { "order": "desc" }}
         # ]
     }
-    if sort_mode == 'default' and not term_query:
+    if sort_mode == 'default' and not qs:
         query_email_addr["sort"] = { "datetime": { "order": sort_order }}
     elif sort_mode == "topic":
         query_email_addr["sort"] = {"topic_scores.idx_"+topic["idx"]:{"order": "asc" }}
