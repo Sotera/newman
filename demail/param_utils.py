@@ -36,8 +36,8 @@ def parseParam_email_addr( **kwargs ):
 
     return [x for x in email_addrs if (x is not '' and x is not None)]
 
-def parseParam_sender_recipient( **kwargs ):
-    tangelo.log("parseParam_sender_recipient(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+def parseParamAllSenderAllRecipient( **kwargs ):
+    tangelo.log("parseParamAllSenderAllRecipient(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     sender = kwargs.get('sender','').split(",")[0]
     recipient = kwargs.get('recipient','').split(",")
 
@@ -87,3 +87,11 @@ def parseParamStarred( **kwargs ):
 def parseParamTextQuery( **kwargs ):
     tangelo.log("parseParamTextQuery(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     return kwargs.get('qs', '')
+
+def parseParamDocumentUID( **kwargs ):
+    #tangelo.log("parseParamDocumentUID(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    return kwargs.get('document_uid', '')
+
+def parseParamDocumentDatetime( **kwargs ):
+    #tangelo.log("parseParamDocumentUID(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    return kwargs.get('document_datetime', '')

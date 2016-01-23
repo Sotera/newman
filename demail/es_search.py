@@ -209,16 +209,17 @@ def es_get_all_email_by_address_set(data_set_id, sender, recipients, start_datet
 # Get all rows , graph, attachments for two or more email addresses attempt to center around the start_date
 # Return:  current_index will indicate the offset in rows where the current date is located
 #   offset in attachments should be found using the email id if applicable --i.e. email may not have attachments
-def es_get_converstation(data_set_id, sender, recipients, current_datetime, end_datetime, size):
-    tangelo.log("es_search.es_get_converstation(senders=%s, recipients=%s)" % (str(sender),str(recipients)))
-    start_datetime = default_min_timeline_bound()
-    # apply query with address intersection behaviour
+def es_get_conversation(data_set_id, sender, recipients, start_datetime, end_datetime, size, document_uid, current_datetime):
+    tangelo.log("es_search.es_get_conversation(senders=%s, recipients=%s)" % (str(sender),str(recipients)))
+    #start_datetime = default_min_timeline_bound()
+    
+    # apply query with address intersection behavior
     query  = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, qs='', date_bounds=(current_datetime, end_datetime), sort_order='acs', date_mode_inclusive=True, address_filter_mode="conversation")
-    tangelo.log("es_search.es_get_converstation(query-after: %s)" % (query))
+    tangelo.log("es_search.es_get_conversation(query-after: %s)" % (query))
     emails_asc = _query_emails(data_set_id, size, query)
 
     query  = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, qs='', date_bounds=(start_datetime, current_datetime), sort_order='desc', date_mode_inclusive=False, address_filter_mode="conversation")
-    tangelo.log("es_search.es_get_converstation(query-before: %s)" % (query))
+    tangelo.log("es_search.es_get_conversation(query-before: %s)" % (query))
     emails_desc = _query_emails(data_set_id, size, query)
     total = emails_asc["total"] + emails_desc["total"]
 

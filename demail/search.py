@@ -1,9 +1,10 @@
 import tangelo
 import cherrypy
 
-from es_search import es_get_all_email_by_address, es_get_all_email_by_address_set, get_top_email_by_text_query, es_get_all_email_by_community, es_get_all_email_by_topic, es_get_converstation
+from es_search import es_get_all_email_by_address, es_get_all_email_by_address_set, get_top_email_by_text_query, es_get_all_email_by_community, es_get_all_email_by_topic, es_get_conversation
 from newman.newman_config import getDefaultDataSetID
-from param_utils import parseParamDatetime, parseParam_sender_recipient, parseParamEmailSender, parseParamEmailRecipient, parseParam_email_addr, parseParamTopic, parseParamTextQuery
+from param_utils import parseParamDatetime, parseParamAllSenderAllRecipient, parseParamEmailSender, parseParamEmailRecipient, parseParam_email_addr, parseParamTopic, parseParamTextQuery,\
+    parseParamDocumentUID, parseParamDocumentDatetime
 import urllib
 from newman.utils.functions import nth
 
@@ -65,19 +66,18 @@ def search_email_by_address_set(*path_args, **param_args):
     order = param_args.get('order', 'next')
     order = 'desc' if order=='prev' else 'asc'
     
-    # parse the sender address and the recipient address
-    sender_list = parseParamEmailSender(**param_args)
-    cherrypy.log("\tsender_list: %s)" % str(sender_list))
-    
-    recipient_list = parseParamEmailRecipient(**param_args)
-    cherrypy.log("\trecipient_list: %s)" % str(recipient_list))
-    
-    sender_address, recipient_address=parseParam_sender_recipient(**param_args)
+    # parse the sender address and the recipient address    
+    sender_address_list, recipient_address_list=parseParamAllSenderAllRecipient(**param_args)
 
-    #TODO: Need to pass the entire sender and recipient lists of address to ES
-    return es_get_all_email_by_address_set(data_set_id, sender_address, recipient_address, start_datetime, end_datetime, size, order)
+    return es_get_all_email_by_address_set(data_set_id,
+                                           sender_address_list,
+                                           recipient_address_list,
+                                           start_datetime,
+                                           end_datetime,
+                                           size,
+                                           order)
 
-#GET /search/converation/?data_set_id=<id>&start_datetime=<datetime>&sender=<s1,s2...>&recipient=<r1,r2..>
+#GET /search/conversation/?data_set_id=<id>&start_datetime=<datetime>&sender=<s1,s2...>&recipient=<r1,r2..>
 def search_email_by_conversation(*path_args, **param_args):
     tangelo.content_type("application/json")
     tangelo.log("search.search_email_by_conversation(path_args[%s] %s)" % (len(path_args), str(path_args)))
@@ -92,11 +92,23 @@ def search_email_by_conversation(*path_args, **param_args):
 
     recipient_list = parseParamEmailRecipient(**param_args)
     cherrypy.log("\trecipient_list: %s)" % str(recipient_list))
+    
+    document_uid = parseParamDocumentUID(**param_args)
+    cherrypy.log("\tdocument_uid: %s)" % str(document_uid))
+    
+    document_datetime = parseParamDocumentDatetime(**param_args)
+    cherrypy.log("\tdocument_datetime: %s)" % str(document_datetime))
 
-    sender_address, recipient_address=parseParam_sender_recipient(**param_args)
+    sender_address, recipient_address=parseParamAllSenderAllRecipient(**param_args)
 
-    #TODO: Need to pass the entire sender and recipient lists of address to ES
-    return es_get_converstation(data_set_id, sender_address, recipient_address, start_datetime, end_datetime, size/2)
+    return es_get_conversation(data_set_id,
+                               sender_address,
+                               recipient_address,
+                               start_datetime,
+                               end_datetime,
+                               size/2,
+                               document_uid,
+                               document_datetime)
 
 
 #GET /search_by_community/<community_name>?data_set_id=<data_set>&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
