@@ -1,7 +1,7 @@
 import tangelo
 import cherrypy
 
-from es_search import es_get_all_email_by_address, es_get_all_email_by_address_set, get_top_email_by_text_query, es_get_all_email_by_community, es_get_all_email_by_topic
+from es_search import es_get_all_email_by_address, es_get_all_email_by_address_set, get_top_email_by_text_query, es_get_all_email_by_community, es_get_all_email_by_topic, es_get_converstation
 from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime, parseParam_sender_recipient, parseParamEmailSender, parseParamEmailRecipient, parseParam_email_addr, parseParamTopic, parseParamTextQuery
 import urllib
@@ -56,7 +56,7 @@ def search(*path_args, **param_args):
 # 'order' param controls if we are paging the next or previous sets of data and can be next or prev, default is next
 def search_email_by_address_set(*path_args, **param_args):
     tangelo.content_type("application/json")
-    tangelo.log("search.get_graphrows(path_args[%s] %s)" % (len(path_args), str(path_args)))
+    tangelo.log("search.search_email_by_address_set(path_args[%s] %s)" % (len(path_args), str(path_args)))
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
     # TODO: set from UI
@@ -76,6 +76,27 @@ def search_email_by_address_set(*path_args, **param_args):
 
     #TODO: Need to pass the entire sender and recipient lists of address to ES
     return es_get_all_email_by_address_set(data_set_id, sender_address, recipient_address, start_datetime, end_datetime, size, order)
+
+#GET /search/converation/?data_set_id=<id>&start_datetime=<datetime>&sender=<s1,s2...>&recipient=<r1,r2..>
+def search_email_by_conversation(*path_args, **param_args):
+    tangelo.content_type("application/json")
+    tangelo.log("search.search_email_by_conversation(path_args[%s] %s)" % (len(path_args), str(path_args)))
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
+    # TODO: set from UI
+    size = param_args.get('size', 2500)
+
+    # parse the sender address and the recipient address
+    sender_list = parseParamEmailSender(**param_args)
+    cherrypy.log("\tsender_list: %s)" % str(sender_list))
+
+    recipient_list = parseParamEmailRecipient(**param_args)
+    cherrypy.log("\trecipient_list: %s)" % str(recipient_list))
+
+    sender_address, recipient_address=parseParam_sender_recipient(**param_args)
+
+    #TODO: Need to pass the entire sender and recipient lists of address to ES
+    return es_get_converstation(data_set_id, sender_address, recipient_address, start_datetime, end_datetime, size/2)
 
 
 #GET /search_by_community/<community_name>?data_set_id=<data_set>&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
@@ -126,6 +147,7 @@ def search_email_by_topic(*args, **param_args):
 actions = {
     "search": search,
     "search_by_address": es_get_all_email_by_address,
+    "search_by_conversation": search_email_by_conversation,
     "search_by_address_set": search_email_by_address_set,
     "search_by_text": get_top_email_by_text_query,
     "search_by_community": search_email_by_community,
