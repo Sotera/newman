@@ -100,6 +100,58 @@ var newman_datatable_email = (function () {
     }
   }
 
+  function highlightDataTableRow(document_id) {
+    console.log( 'highlightDataTableRow(' + document_id + ')' );
+    if (document_id) {
+      var table = $('#result_table').DataTable();
+      if (table) {
+        //var row_count_total = table.data().length;
+        var row_count_per_page = table.page.len();
+        var page_info = table.page.info();
+        var current_page_index = page_info.page; // 0-indexed
+        //console.log('\trow_count_total : ' + row_count_total + '; current_page_index : ' + current_page_index );
+
+        table.rows()
+          .every(function (index, tableLoop, rowLoop) {
+            var row_data = this.data();
+            var key = row_data[data_column_key_index];
+            var jquery_row = $(this.node());
+            //console.log( 'row_data: ' + JSON.stringify(row_data, null, 2) );
+
+            if (key == document_id) {
+
+              if (jquery_row.hasClass('datatable_highlight')) {
+                //already highlighted
+              }
+              else {
+                jquery_row.addClass('datatable_highlight');
+
+                //must be on the relevant page
+                var new_row_index = this.index();
+                var row_position = this.table().rows()[0].indexOf( new_row_index );
+                var new_page_index = Math.floor(row_position / row_count_per_page);
+                console.log('\tnew_page_index at ' + new_page_index + '; [' + row_position + '/' + row_count_per_page + ']');
+
+                //if (row_position >= page_info.start && row_position < page_info.end) {
+                if (new_page_index == current_page_index) {
+                  //already on the correct page
+                }
+                else {
+
+                  table.page( new_page_index ).draw( false );
+                }
+              }
+            }
+            else {
+              jquery_row.removeClass('datatable_highlight');
+            }
+
+          });
+
+      }// end if (table)
+    }
+  }
+
   function markDataTableRowAsRead(value_map) {
     if (value_map) {
       var table = $('#result_table').DataTable();
@@ -286,8 +338,10 @@ var newman_datatable_email = (function () {
         var row_selected = data_table_ui.row(this).data();
         console.log('data_table_row ID \'' + row_selected[data_column_key_index] + '\' selected');
         //console.log( 'data_table_row: ' + JSON.stringify(row_selected, null, 2));
+        var row_data_key = row_selected[data_column_key_index];
 
-        showEmailDocumentView(row_selected[data_column_key_index]);
+        showEmailDocumentView(row_data_key);
+        highlightDataTableRow(row_data_key);
 
         //var visible_cell_text_1 = $("td:eq(0)", this).text();
         //var visible_cell_text_4 = $("td:eq(3)", this).text();
@@ -631,7 +685,7 @@ var newman_datatable_email = (function () {
  * email-document-view related container
  */
 var newman_datatable_document_view = (function () {
-  var debug_enabled = true;
+  var debug_enabled = false;
 
   var pop_over = (function () {
     //init

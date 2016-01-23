@@ -23,6 +23,7 @@
     font-size: 12px;
 }
 
+/*
 .datatable th div.dataTables_sizing {
     font-size: 12px;
 }
@@ -37,6 +38,14 @@
 
 .dataTables_paginate {
     font-size: 12px;
+}
+*/
+
+.data-table-row-read {
+    font-weight: normal;
+    background: rgba(253, 253, 253, 0.5);
+    /*color: rgb(214, 214, 214);*/
+    color: #c3c1cd;
 }
 
 .datatable_row_marked {
@@ -53,4 +62,8 @@
 
 .datatable_row_unmarked:hover {
     color: #000000;
+}
+
+.datatable_highlight {
+    background-color: #ffec00 !important;
 }

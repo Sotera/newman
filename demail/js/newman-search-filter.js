@@ -18,11 +18,11 @@ var newman_search_filter = (function () {
 
   var initFilter = function() {
     pushFilter('search_filter_all', 'all', 'fa fa-asterisk');
-    pushFilter('search_filter_email', 'email', 'fa fa-user');
     pushFilter('search_filter_text', 'text', 'fa fa-file-text-o');
-    pushFilter('search_filter_attach', 'attach', 'fa fa-paperclip');
-    pushFilter('search_filter_entity', 'entity', 'fa fa-sitemap');
-    pushFilter('search_filter_topic', 'topic', 'fa fa-list-ul');
+    pushFilter('search_filter_email', 'email', 'fa fa-user');
+    //pushFilter('search_filter_attach', 'attach', 'fa fa-paperclip');
+    //pushFilter('search_filter_entity', 'entity', 'fa fa-sitemap');
+    //pushFilter('search_filter_topic', 'topic', 'fa fa-list-ul');
 
     refreshUIFilter();
     setSelectedFilter( 'all', true );
