@@ -728,14 +728,14 @@ ul.DTTT_dropdown.dropdown-menu > li:hover > a {
   height: 16px;
   line-height: 16px;
   color: #BBBBBB;
-  border-radius: 6px;
+  border-radius: 4px;
   border: 0px solid #BBBBBB;
   vertical-align: middle;
 }
 .breadcrumb-button:hover {
   /*color: #006588;*/
   color: #BBBBBB;
-  border-radius: 6px;
+  border-radius: 4px;
   border: 1px solid #BBBBBB;
 }
 .bs-callout {

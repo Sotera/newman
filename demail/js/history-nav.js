@@ -5,7 +5,7 @@
 var history_nav = (function () {
   var debug_enabled = false;
 
-  var hist_max = 10;
+  var hist_max = 8;
   var hist_list = [];
 
   var data_view = function( uid, label, icon_class, data_url, data_field ) {
@@ -224,7 +224,6 @@ var history_nav = (function () {
 
       push(key, label, '', url_path, field);
 
-      //TODO: need to handle max count
 
       refreshUI();
     }
