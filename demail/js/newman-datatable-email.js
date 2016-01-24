@@ -8,7 +8,9 @@
 var newman_datatable_email = (function () {
 
 
-  var current_email = null;
+  var _current_email_doc_id = null;
+  var _current_email_doc_datetime = null;
+
   var current_export = null;
   var data_column_key_index = 7;
   var data_column_export_index = 6;
@@ -32,12 +34,18 @@ var newman_datatable_email = (function () {
 
   function clearCurrentEmailDocument() {
     $("#email-body").empty();
-    current_email = undefined;
+    _current_email_doc_id = undefined;
+    _current_email_doc_datetime = undefined;
   }
 
-  function setCurrentEmailDocument(email_id) {
-    console.log("setCurrentEmailDocument(" + email_id + ")");
-    current_email = email_id;
+  function setCurrentEmailDocument(email_id, email_datetime) {
+    console.log("setCurrentEmailDocument(" + email_id + ', ' + email_datetime + ")");
+    _current_email_doc_id = email_id;
+    _current_email_doc_datetime = email_datetime;
+  }
+
+  function getCurrentEmailDocument() {
+    return _current_email_doc_id, _current_email_doc_datetime;
   }
 
   function recipientCount(to, cc, bcc) {
@@ -559,12 +567,12 @@ var newman_datatable_email = (function () {
 
     $("#toggle_mark_for_export").off().click(function () {
       console.log("clicked toggle_mark_for_export");
-      if (!current_email) {
+      if (!_current_email_doc_id) {
         //alert("please select an email first");
         console.log("current_email_document undefined!");
         return;
       }
-      var email_id = current_email;
+      var email_id = _current_email_doc_id;
 
       var requestUpdate = function (id, exportable) {
 
@@ -631,8 +639,8 @@ var newman_datatable_email = (function () {
 
     $("#toggle_mark_as_read").off().click(function () {
       console.log("clicked toggle_mark_as_read");
-      if (current_email) {
-        var id = current_email;
+      if (_current_email_doc_id) {
+        var id = _current_email_doc_id;
         var id_set = [id];
         var mark_read = data_row_is_read_map[id];
         if (mark_read) {
@@ -664,6 +672,20 @@ var newman_datatable_email = (function () {
 
     });
 
+    $('#query_conversation_email').off().click(function() {
+      var sendser_count = newman_graph_email.sizeOfAllSourceNodeSelected();
+      var receipient_count = newman_graph_email.sizeOfAllTargetNodeSelected();
+      console.log("clicked query_conversation_email: senders[" + sendser_count + '] receipient_count[' + receipient_count + ']' );
+
+        if (_current_email_doc_id && _current_email_doc_datetime) {
+          //query all email documents between the addresses
+          newman_graph_email_request_by_conversation.requestService(_current_email_doc_id, _current_email_doc_datetime, true);
+
+          // display email-tab
+          newman_graph_email.displayUITab();
+        }
+
+    });
 
   }
 
@@ -673,7 +695,9 @@ var newman_datatable_email = (function () {
     'receiveAllEmailDocumentStarred' : receiveAllEmailDocumentStarred,
     'setEmailDocumentStarred' : setEmailDocumentStarred,
     'showEmailDocumentView' : showEmailDocumentView,
+    'highlightDataTableRow' : highlightDataTableRow,
     'setCurrentEmailDocument' : setCurrentEmailDocument,
+    'getCurrentEmailDocument' : getCurrentEmailDocument,
     'clearCurrentEmailDocument' : clearCurrentEmailDocument,
     'populateDataTable' : populateDataTable,
     'updateDataTableColumn' : updateDataTableColumn

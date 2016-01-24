@@ -327,7 +327,8 @@ function produceHTMLView(email_response) {
 
   var d = _.object(['email_id', 'attach_id','datetime', 'exportable', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], email_response.email);
   //console.log('produceHTMLView()\n' + JSON.stringify(d, null, 2));
-  var datetime_selected = d.datetime;
+  var _email_document_uid_selected = d.email_id;
+  var _email_document_datetime_selected = d.datetime;
 
   //draw_mini_topic_chart(d.email_id);
   // render mini-topic-chart
@@ -437,33 +438,16 @@ function produceHTMLView(email_response) {
                       if (newman_graph_email.sizeOfAllSourceNodeSelected() > 0 && newman_graph_email.sizeOfAllTargetNodeSelected() > 0) {
                         //console.log('enable query-buttons');
 
-                        $('#query_prev_email').removeClass( 'clickable-disabled' ).click(function() {
-                          console.log("clicked query_prev_email");
+                        $('#query_conversation_email').removeClass( 'clickable-disabled' );
+                        console.log("enabled-query_conversation_email");
 
-                          //query all email documents between the addresses
-                          newman_graph_email_request_by_address_set.requestService( 'prev', datetime_selected, true );
-
-                          // display email-tab
-                          newman_graph_email.displayUITab();
-                        });
-
-                        $('#query_next_email').removeClass( 'clickable-disabled' ).click(function() {
-                          console.log("clicked query_next_email");
-
-                          //query all email documents between the addresses
-                          newman_graph_email_request_by_address_set.requestService( 'next', datetime_selected, true );
-
-                          // display email-tab
-                          newman_graph_email.displayUITab();
-                        });
-
+                        //set current email-document uid and datetime
+                        newman_datatable_email.setCurrentEmailDocument(_email_document_uid_selected, _email_document_datetime_selected);
                       }
                       else {
                         //console.log('disable query-buttons');
-
-                        $('#query_prev_email').addClass( 'clickable-disabled' );
-                        $('#query_next_email').addClass( 'clickable-disabled' );
-
+                        $('#query_conversation_email').addClass( 'clickable-disabled' );
+                        console.log("disabled-query_conversation_email");
                       }
 
                     });

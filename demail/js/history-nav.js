@@ -48,6 +48,9 @@ var history_nav = (function () {
       else if (data_field === 'attachment') {
         icon_class = 'fa fa-paperclip';
       }
+      else if (data_field === 'conversation') {
+        icon_class = 'fa fa-comments-o';
+      }
     }
 
     var new_data_view = data_view(uid, label, icon_class, data_url, data_field);

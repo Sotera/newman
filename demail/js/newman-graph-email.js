@@ -309,7 +309,7 @@ var newman_graph_email = (function () {
 
   }
 
-  function updateUIGraphView( search_response, auto_display_enabled, starred_email_doc_list ) {
+  function updateUIGraphView( search_response, auto_display_doc_uid, starred_email_doc_list ) {
 
     //validate search-response
     var filtered_response = validateResponseSearch( search_response );
@@ -318,19 +318,8 @@ var newman_graph_email = (function () {
     // open analytics content view
     email_analytics_content.open();
 
-    // make email-document-content-view visible, but closed
-    bottom_panel.close();
-
-    // initialize to blank
-    updateUIInboundCount();
-    updateUIOutboundCount();
-
-    $('#document_count').text(filtered_response.rows.length);
-
-    // clear existing content if any
-    clear_content_view_email();
-
     // populate data-table
+    $('#document_count').text(filtered_response.rows.length);
     newman_datatable_email.populateDataTable( filtered_response.rows )
     if (starred_email_doc_list ) {
       newman_datatable_email.setAllEmailDocumentStarred(starred_email_doc_list);
@@ -339,28 +328,27 @@ var newman_graph_email = (function () {
     // populate attachment-table
     newman_email_attach.updateUIAttachmentTable( filtered_response.attachments );
 
-    // automatically displays the first document
-    if (auto_display_enabled) {
-      console.log( 'auto_display_enabled' );
-      updateUIDocumentView( filtered_response.rows );
-    }
+    // initialize to blank
+    updateUIInboundCount();
+    updateUIOutboundCount();
 
     // render graph display
     drawGraph( filtered_response.graph );
 
-  }
+    // automatically highlight a document if applicable
+    if (auto_display_doc_uid) {
+      console.log( 'auto_display-document : ' + auto_display_doc_uid );
+      // make email-document-content-view visible and open
+      bottom_panel.open();
 
-  function updateUIDocumentView( document_array ) {
+      newman_datatable_email.highlightDataTableRow( auto_display_doc_uid );
+    }
+    else {
+      // make email-document-content-view visible but closed
+      bottom_panel.close();
 
-    if (document_array) {
-      console.log( 'document_array :\n' + JSON.stringify(document_array, null, 2) );
-
-      var doc_key = document_array[0]["num"];
-      console.log( 'updateUIDocumentView( ' + doc_key + ' )' );
-      if (doc_key) {
-        newman_datatable_email.showEmailDocumentView( doc_key );
-
-      }
+      // clear existing content if any
+      clear_content_view_email();
     }
   }
 
@@ -382,8 +370,7 @@ var newman_graph_email = (function () {
     'getAllTargetNodeSelected' : getAllTargetNodeSelected,
     'getAllTargetNodeSelectedAsString' : getAllTargetNodeSelectedAsString,
     'appendAllTargetNodeSelected' : appendAllTargetNodeSelected,
-    'displayUITab' : displayUITab,
-    'updateUIDocumentView' : updateUIDocumentView
+    'displayUITab' : displayUITab
   }
 
 }());
@@ -499,19 +486,22 @@ var newman_graph_email_request_by_address_set = (function () {
     // append query-string
     service_url = newman_search_filter.appendURLQuery(service_url);
 
-    // clear all selected before the service call
-    newman_graph_email.clearAllNodeSelected();
-
     return service_url;
   }
 
-  function requestService(order, datetime_selected, auto_display_enabled) {
-
+  function requestService(order, document_uid, document_datetime, auto_display_enabled) {
     console.log('newman_graph_email_request_by_address_set.requestService()');
-    var service_url = getServiceURL(order, datetime_selected);
+
+    var service_url = getServiceURL(order, document_datetime);
     $.get( service_url ).then(function (response) {
       setResponse( response );
-      newman_graph_email.updateUIGraphView( response, auto_display_enabled );
+      setResponse( response );
+      if (auto_display_enabled === true) {
+        newman_graph_email.updateUIGraphView(response, document_uid);
+      }
+      else {
+        newman_graph_email.updateUIGraphView(response);
+      }
 
       // add to work-flow-history
       var address_set_as_string = newman_graph_email.getAllSourceNodeSelectedAsString() + ' ' + newman_graph_email.getAllTargetNodeSelectedAsString();
@@ -649,6 +639,103 @@ var newman_graph_email_request_by_topic = (function () {
         topic_set_as_string = topic_set_as_string.substring(0, 30);
       }
       history_nav.appendUI(service_url, 'topic', topic_set_as_string);
+    });
+  }
+
+  function setResponse( response ) {
+    if (response) {
+
+      _response = response;
+      //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
+    }
+  }
+
+  function getResponse() {
+    return _response;
+  }
+
+
+  return {
+    'getServiceURLBase' : getServiceURLBase,
+    'getServiceURL' : getServiceURL,
+    'requestService' : requestService,
+    'getResponse' : getResponse,
+    'setResponse' : setResponse
+  }
+
+}());
+
+/**
+ * service container email-documents-search-by-conversation
+ * @type {{requestService, getResponse}}
+ */
+var newman_graph_email_request_by_conversation = (function () {
+
+  var _service_url = 'search/search_by_conversation';
+  var _response;
+
+  function getServiceURLBase() {
+    return _service_url;
+  }
+
+  function getServiceURL(document_uid, document_datetime) {
+
+
+    var service_url = newman_data_source.appendDataSource(_service_url);
+
+    // append date-time (start-datetime, end-datetime)
+    service_url = newman_datetime_range.appendDatetimeRange(service_url);
+
+    // append sender-addresses
+    service_url = newman_graph_email.appendAllSourceNodeSelected(service_url);
+
+    // append recipient-addresses
+    service_url = newman_graph_email.appendAllTargetNodeSelected(service_url);
+
+    // append query-string
+    service_url = newman_search_filter.appendURLQuery(service_url);
+
+    if (document_uid) {
+      if (service_url.indexOf('?') > 0) {
+        service_url += '&document_uid=' + document_uid;
+      }
+      else {
+        service_url += '?document_uid=' + document_uid;
+      }
+    }
+
+    if (document_datetime) {
+      if (service_url.indexOf('?') > 0) {
+        service_url += '&document_datetime=' + document_datetime;
+      }
+      else {
+        service_url += '?document_datetime=' + document_datetime;
+      }
+    }
+
+    return service_url;
+  }
+
+  function requestService(document_uid, document_datetime, auto_display_enabled) {
+
+    console.log('newman_graph_email_request_by_conversation.requestService()');
+    var service_url = getServiceURL(document_uid, document_datetime);
+    $.get( service_url ).then(function (response) {
+      setResponse( response );
+      if (auto_display_enabled === true) {
+        newman_graph_email.updateUIGraphView(response, document_uid);
+      }
+      else {
+        newman_graph_email.updateUIGraphView(response);
+      }
+
+      // add to work-flow-history
+      var address_set_as_string = newman_graph_email.getAllSourceNodeSelectedAsString() + ' ' + newman_graph_email.getAllTargetNodeSelectedAsString();
+      address_set_as_string = address_set_as_string.trim().replace(' ', ',');
+      if (address_set_as_string.length > 30) {
+        address_set_as_string = address_set_as_string.substring(0, 30);
+      }
+      history_nav.appendUI(service_url, 'conversation', address_set_as_string);
     });
   }
 
