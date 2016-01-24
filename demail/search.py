@@ -98,6 +98,8 @@ def search_email_by_conversation(*path_args, **param_args):
     
     document_datetime = parseParamDocumentDatetime(**param_args)
     cherrypy.log("\tdocument_datetime: %s)" % str(document_datetime))
+    if not document_datetime:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing mandatory param 'document_datetime'")
 
     sender_address, recipient_address=parseParamAllSenderAllRecipient(**param_args)
 

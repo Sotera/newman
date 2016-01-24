@@ -9,8 +9,6 @@ from newman.newman_config import elasticsearch_hosts
 from newman.utils.functions import nth
 from param_utils import parseParamDatetime
 from es_queries import _build_email_query
-from newman.newman_config import getDefaultDataSetID, default_min_timeline_bound, default_max_timeline_bound
-
 
 # contains a cache of all email_address.addr, email_address
 _EMAIL_ADDR_CACHE = {}
@@ -242,7 +240,12 @@ def es_get_conversation(data_set_id, sender, recipients, start_datetime, end_dat
     attachments_desc = _query_email_attachments(data_set_id, size, query)
     attachments_desc.reverse()
 
+    # Find the first index in the attachment array where the current emails attachments start or -1
     graph["attachments"] = attachments_desc+attachments_asc
+    try:
+        graph["attachments_index"] = [attach[0] for attach in graph["attachments"]].index(document_uid)
+    except ValueError:
+        graph["attachments_index"] = -1
 
     return graph
 
