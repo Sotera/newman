@@ -422,6 +422,9 @@ var newman_datatable_email = (function () {
       }
     }
 
+    //set conversation button
+    $('#query_conversation_email').addClass( 'clickable-disabled' );
+
     var email_url = 'email/email/' + encodeURIComponent(email_id);
     email_url = newman_data_source.appendDataSource(email_url);
 
@@ -677,6 +680,7 @@ var newman_datatable_email = (function () {
       var receipient_count = newman_graph_email.sizeOfAllTargetNodeSelected();
       console.log("clicked query_conversation_email: senders[" + sendser_count + '] receipient_count[' + receipient_count + ']' );
 
+      if (sendser_count > 0 && receipient_count > 0) {
         if (_current_email_doc_id && _current_email_doc_datetime) {
           //query all email documents between the addresses
           newman_graph_email_request_by_conversation.requestService(_current_email_doc_id, _current_email_doc_datetime, true);
@@ -684,7 +688,7 @@ var newman_datatable_email = (function () {
           // display email-tab
           newman_graph_email.displayUITab();
         }
-
+      }
     });
 
   }

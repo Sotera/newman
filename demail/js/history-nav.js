@@ -5,7 +5,7 @@
 var history_nav = (function () {
   var debug_enabled = false;
 
-  var hist_max = 8;
+  var hist_max = 11; //dashboard_home(1) + max(10)
   var hist_list = [];
 
   var data_view = function( uid, label, icon_class, data_url, data_field ) {
@@ -216,6 +216,10 @@ var history_nav = (function () {
       }
       catch (error) {
         // catch non-uri/utf8-encoded character; do nothing
+      }
+
+      if (label.length > 20) {
+        label = label.substring(0, 18) + '..';
       }
 
       if (label.indexOf(' ') >= 0) {

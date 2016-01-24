@@ -506,9 +506,6 @@ var newman_graph_email_request_by_address_set = (function () {
       // add to work-flow-history
       var address_set_as_string = newman_graph_email.getAllSourceNodeSelectedAsString() + ' ' + newman_graph_email.getAllTargetNodeSelectedAsString();
       address_set_as_string = address_set_as_string.trim().replace(' ', ',');
-      if (address_set_as_string.length > 30) {
-        address_set_as_string = address_set_as_string.substring(0, 30);
-      }
       history_nav.appendUI(service_url, 'email', address_set_as_string);
     });
   }
@@ -635,9 +632,6 @@ var newman_graph_email_request_by_topic = (function () {
 
       // add to work-flow-history
       var topic_set_as_string = newman_topic_email.getAllTopicSelectedAsString();
-      if (topic_set_as_string.length > 30) {
-        topic_set_as_string = topic_set_as_string.substring(0, 30);
-      }
       history_nav.appendUI(service_url, 'topic', topic_set_as_string);
     });
   }
@@ -732,9 +726,6 @@ var newman_graph_email_request_by_conversation = (function () {
       // add to work-flow-history
       var address_set_as_string = newman_graph_email.getAllSourceNodeSelectedAsString() + ' ' + newman_graph_email.getAllTargetNodeSelectedAsString();
       address_set_as_string = address_set_as_string.trim().replace(' ', ',');
-      if (address_set_as_string.length > 30) {
-        address_set_as_string = address_set_as_string.substring(0, 30);
-      }
       history_nav.appendUI(service_url, 'conversation', address_set_as_string);
     });
   }
@@ -759,5 +750,48 @@ var newman_graph_email_request_by_conversation = (function () {
     'getResponse' : getResponse,
     'setResponse' : setResponse
   }
+
+}());
+
+var newman_graph_email_visual_filter = (function () {
+
+  var ui_container = $('#graph-visual-filter-email');
+
+  var open = function () {
+    if (isHidden()) {
+      ui_container.fadeToggle('fast');
+    }
+  };
+
+  var show = function () {
+    ui_container.css("display", "block");
+  };
+
+  var close = function () {
+    if (isVisible()) {
+      ui_container.fadeToggle('fast');
+    }
+  };
+
+  var hide = function () {
+    ui_container.css("display", "none");
+  };
+
+  var isVisible = function () {
+    return (ui_container && (ui_container.is(':visible') || (ui_container.css('display') != 'none')));
+  };
+
+  var isHidden = function () {
+    return (ui_container && ( ui_container.is(':hidden') || (ui_container.css('display') == 'none')));
+  };
+
+  return {
+    'open': open,
+    'show': show,
+    'close': close,
+    'hide': hide,
+    'isVisible': isVisible,
+    'isHidden': isHidden
+  };
 
 }());

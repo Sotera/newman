@@ -33,22 +33,29 @@ var bottom_panel= (function(){
 
   var open = function(){
 
-    unhide();
+    show();
 
     toggle_button.find("span").first().switchClass(icon_class_open, icon_class_close);
     container.css("bottom", "0px");
+
+    // hide graph-visual-filter-panel
+    newman_graph_email_visual_filter.hide();
+
   };
   var close = function(){
 
     toggle_button.find("span").first().switchClass(icon_class_close, icon_class_open);
     container.css("bottom", "-600px");
-  };
-  var hide = function(){
 
+    // display graph-visual-filter-panel
+    newman_graph_email_visual_filter.show();
+  };
+
+  var hide = function(){
     container.css("display", "none");
   };
-  var unhide = function(){
 
+  var show = function(){
     container.css("display", "block");
   };
 
@@ -67,12 +74,12 @@ var bottom_panel= (function(){
   toggle_button.on('click', toggle);
 
   return {
-    open: open,
-    close: close,
-    toggle: toggle,
-    isOpen: isOpen,
-    hide: hide,
-    unhide: unhide
+    'open': open,
+    'close': close,
+    'toggle': toggle,
+    'isOpen': isOpen,
+    'hide': hide,
+    'show': show
   };
 }());
 
@@ -2037,7 +2044,7 @@ var email_analytics_content = (function () {
         dashboard_content.close();
       }
 
-      //bottom_panel.unhide();
+      //bottom_panel.show();
 
       email_container.fadeToggle('fast');
       //container.show();
