@@ -443,12 +443,12 @@ var newman_graph_email_request_by_address = (function () {
 }());
 
 /**
- * service container email-documents-search-by-address-set
+ * service container email-documents-search-by-conversation-forward-or-backward
  * @type {{requestService, getResponse}}
  */
-var newman_graph_email_request_by_address_set = (function () {
+var newman_graph_email_request_by_conversation_forward_backward = (function () {
 
-  var _service_url = 'search/search_by_address_set';
+  var _service_url = 'search/search_by_conversation_forward_backward';
   var _response;
 
   function getServiceURLBase() {
@@ -490,7 +490,7 @@ var newman_graph_email_request_by_address_set = (function () {
   }
 
   function requestService(order, document_uid, document_datetime, auto_display_enabled) {
-    console.log('newman_graph_email_request_by_address_set.requestService()');
+    console.log('newman_graph_email_request_by_conversation_forward_backward.requestService()');
 
     var service_url = getServiceURL(order, document_datetime);
     $.get( service_url ).then(function (response) {

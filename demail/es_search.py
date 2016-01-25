@@ -184,12 +184,12 @@ def es_get_all_email_by_address(data_set_id, email_address, qs, start_datetime, 
     return graph
 
 # Get all rows for two or more email addresses, results will be sorted by time asc
-def es_get_all_email_by_address_set(data_set_id, sender, recipients, start_datetime, end_datetime, size, sort_order="asc"):
-    tangelo.log("es_search.es_get_all_email_by_address_set(senders=%s, recipients=%s)" % (str(sender),str(recipients)))
+def es_get_all_email_by_conversation_forward_backward(data_set_id, sender, recipients, start_datetime, end_datetime, size, sort_order="asc"):
+    tangelo.log("es_search.es_get_all_email_by_conversation_forward_backward(sender=%s, recipients=%s)" % (str(sender),str(recipients)))
 
     # apply query with address intersection behaviour
     query  = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, qs='', date_bounds=(start_datetime, end_datetime), sort_order=sort_order, date_mode_inclusive=False, address_filter_mode="conversation")
-    tangelo.log("es_search.es_get_all_email_by_address_set(query: %s)" % (query))
+    tangelo.log("es_search.es_get_all_email_by_conversation_forward_backward(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
     # If you do not want to generate a graph each time this is called use this code
@@ -199,9 +199,24 @@ def es_get_all_email_by_address_set(data_set_id, sender, recipients, start_datet
 
     # Get attachments for community
     query = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, qs='', date_bounds=(start_datetime, end_datetime), sort_order=sort_order, date_mode_inclusive=False, address_filter_mode="conversation", attachments_only=True)
-    tangelo.log("search.es_get_all_email_by_address_set(attachment-query: %s)" % (query))
+    tangelo.log("es_search.es_get_all_email_by_conversation_forward_backward(attachment-query: %s)" % (query))
     attachments = _query_email_attachments(data_set_id, size, query)
     graph["attachments"] = attachments
+    return graph
+
+# Get graph for multiple email addresses
+def es_get_all_email_by_address_set(data_set_id, senders, recipients, start_datetime, end_datetime, size):
+    tangelo.log("es_search.es_get_all_email_by_address_set(senders=%s, recipients=%s)" % (str(senders),str(recipients)))
+
+    #TODO: implement build graph from selected addresses
+    graph = {
+             "graph":{},
+             "rows": [],
+             "attachments": [],
+             "query_hits": 0
+            }
+
+
     return graph
 
 # Get all rows , graph, attachments for two or more email addresses attempt to center around the start_date
@@ -232,11 +247,11 @@ def es_get_conversation(data_set_id, sender, recipients, start_datetime, end_dat
 
     # Get attachments for community
     query = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, qs='', date_bounds=(current_datetime, end_datetime), sort_order='asc', date_mode_inclusive=True, address_filter_mode="conversation", attachments_only=True)
-    tangelo.log("search.es_get_all_email_by_address_set(attachment-query-after: %s)" % (query))
+    tangelo.log("es_search.es_get_conversation(attachment-query-after: %s)" % (query))
     attachments_asc = _query_email_attachments(data_set_id, size, query)
 
     query = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, qs='', date_bounds=(start_datetime, current_datetime), sort_order='desc', date_mode_inclusive=False, address_filter_mode="conversation", attachments_only=True)
-    tangelo.log("search.es_get_all_email_by_address_set(attachment-query-after: %s)" % (query))
+    tangelo.log("es_search.es_get_conversation(attachment-query-after: %s)" % (query))
     attachments_desc = _query_email_attachments(data_set_id, size, query)
     attachments_desc.reverse()
 
