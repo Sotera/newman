@@ -12,14 +12,11 @@ var newman_email_attach = (function () {
   var ui_id = '#attach-table';
   
 
-
-
   function initUI() {
 
     if (ui_id) {
       $(ui_id).empty();
     }
-
 
   }
 
@@ -35,7 +32,7 @@ var newman_email_attach = (function () {
     var email_attach_list = _.mapcat(response_attachment_list, function(response){
       var o = _.object(["email_id", "attach_id", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"], response);
       var copy = _.omit(o, "attach");
-      var attachments = _.map(o.attach.split(';'), function(attach){
+      var attachments = _.map(o.attach.split(';'), function(attach) {
         return _.extend(_.clone(copy), {'attach': attach });
       });
       return attachments;

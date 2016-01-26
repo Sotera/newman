@@ -177,10 +177,10 @@ a.show-sidebar:hover {
 }
 
 .container-body {
-  max-height: 700px;
-  max-width: 1310px;
-  height: 700px;
-  width: 1310px;
+  max-height: 100%;
+  max-width: 100%;
+  height: 100%;
+  width: 100%;
   margin: 0;
   padding: 0;
 }

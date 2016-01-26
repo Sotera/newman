@@ -36,16 +36,16 @@ var bottom_panel= (function(){
     show();
 
     toggle_button.find("span").first().switchClass(icon_class_open, icon_class_close);
-    container.css("bottom", "0px");
+    container.css("height", "calc(100% - 70px)").css("bottom", "0px"); // height : 100% - 70px(top-menu)
 
     // hide graph-visual-filter-panel
     newman_graph_email_visual_filter.hide();
-
   };
+
   var close = function(){
 
     toggle_button.find("span").first().switchClass(icon_class_close, icon_class_open);
-    container.css("bottom", "-600px");
+    container.css("bottom", "calc(90px - 100%)"); // offset : 70px(top-menu) + 20px(toggle-button)
 
     // display graph-visual-filter-panel
     newman_graph_email_visual_filter.show();
@@ -528,7 +528,7 @@ function produceHTMLView(email_response) {
     console.log('No entity set provided!');
   }
 
-  el.append($('<div>').addClass("email-body-view").append(d.body));
+  el.append($('<div>').append(d.body));
 
   el.find(".mitie").each(function(i,el){
     var jqel = $(el);

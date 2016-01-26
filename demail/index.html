@@ -277,7 +277,7 @@
   <!-- End Breadcrumb-Container -->
 
   <!--Start Main-Container-->
-    <div class="container-fluid" style="position: fixed; top: 70px; height: 100%; overflow: scroll;">
+    <div class="container-fluid" style="position: fixed; top: 70px; width: 100%; height: 100%; margin: 0; padding: 0; overflow-y: scroll;">
 
 
       <!--Start Main-Container-Row-->
@@ -288,49 +288,6 @@
         <!--
         <div style="position: fixed; width: 18%;" >
           <ul class="nav main-menu">
-            <li>
-              <a href="ajax/dashboard.html" class="active ajax-link">
-                <i class="fa fa-dashboard"></i>
-                <span class="hidden-xs">Dashboard</span>
-              </a>
-            </li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle">
-                <i class="fa fa-bar-chart-o"></i>
-                <span class="hidden-xs">Charts</span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="ajax-link" href="ajax/charts_xcharts.html">xCharts</a></li>
-                <li><a class="ajax-link" href="ajax/charts_flot.html">Flot Charts</a></li>
-                <li><a class="ajax-link" href="ajax/charts_google.html">Google Charts</a></li>
-                <li><a class="ajax-link" href="ajax/charts_morris.html">Morris Charts</a></li>
-                <li><a class="ajax-link" href="ajax/charts_amcharts.html">AmCharts</a></li>
-                <li><a class="ajax-link" href="ajax/charts_chartist.html">Chartist</a></li>
-                <li><a class="ajax-link" href="ajax/charts_coindesk.html">CoinDesk realtime</a></li>
-              </ul>
-            </li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle">
-                <i class="fa fa-table"></i>
-                <span class="hidden-xs">Tables</span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="ajax-link" href="ajax/tables_simple.html">Simple Tables</a></li>
-                <li><a class="ajax-link" href="ajax/tables_datatables.html">Data Tables</a></li>
-                <li><a class="ajax-link" href="ajax/tables_beauty.html">Beauty Tables</a></li>
-              </ul>
-            </li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle">
-                <i class="fa fa-pencil-square-o"></i>
-                <span class="hidden-xs">Forms</span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="ajax-link" href="ajax/forms_elements.html">Elements</a></li>
-                <li><a class="ajax-link" href="ajax/forms_layouts.html">Layouts</a></li>
-                <li><a class="ajax-link" href="ajax/forms_file_uploader.html">File Uploader</a></li>
-              </ul>
-            </li>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle">
                 <i class="fa fa-desktop"></i>
@@ -346,26 +303,6 @@
             </li>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle">
-                <i class="fa fa-list"></i>
-                <span class="hidden-xs">Pages</span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a href="ajax/page_login.html">Login</a></li>
-                <li><a href="ajax/page_register.html">Register</a></li>
-                <li><a id="locked-screen" class="submenu" href="ajax/page_locked.html">Locked Screen</a></li>
-                <li><a class="ajax-link" href="ajax/page_contacts.html">Contacts</a></li>
-                <li><a class="ajax-link" href="ajax/page_feed.html">Feed</a></li>
-                <li><a class="ajax-link add-full" href="ajax/page_messages.html">Messages</a></li>
-                <li><a class="ajax-link" href="ajax/page_pricing.html">Pricing</a></li>
-                <li><a class="ajax-link" href="ajax/page_product.html">Product</a></li>
-                <li><a class="ajax-link" href="ajax/page_invoice.html">Invoice</a></li>
-                <li><a class="ajax-link" href="ajax/page_search.html">Search Results</a></li>
-                <li><a class="ajax-link" href="ajax/page_404.html">Error 404</a></li>
-                <li><a href="ajax/page_500.html">Error 500</a></li>
-              </ul>
-            </li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle">
                 <i class="fa fa-map-marker"></i>
                 <span class="hidden-xs">Maps</span>
               </a>
@@ -373,89 +310,6 @@
                 <li><a class="ajax-link" href="ajax/maps.html">OpenStreetMap</a></li>
                 <li><a class="ajax-link" href="ajax/map_fullscreen.html">Fullscreen map</a></li>
                 <li><a class="ajax-link" href="ajax/map_leaflet.html">Leaflet</a></li>
-              </ul>
-            </li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle">
-                <i class="fa fa-picture-o"></i>
-                <span class="hidden-xs">Gallery</span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="ajax-link" href="ajax/gallery_simple.html">Simple Gallery</a></li>
-                <li><a class="ajax-link" href="ajax/gallery_flickr.html">Flickr Gallery</a></li>
-              </ul>
-            </li>
-            <li>
-              <a class="ajax-link" href="ajax/typography.html">
-                <i class="fa fa-font"></i>
-                <span class="hidden-xs">Typography</span>
-              </a>
-            </li>
-            <li>
-              <a class="ajax-link" href="ajax/calendar.html">
-                <i class="fa fa-calendar"></i>
-                <span class="hidden-xs">Calendar</span>
-              </a>
-            </li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle">
-                <i class="fa fa-picture-o"></i>
-                <span class="hidden-xs">Multilevel menu</span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a href="#">First level menu</a></li>
-                <li><a href="#">First level menu</a></li>
-                <li class="dropdown">
-                  <a href="#" class="dropdown-toggle">
-                    <i class="fa fa-plus-square"></i>
-                    <span class="hidden-xs">Second level menu group</span>
-                  </a>
-                  <ul class="dropdown-menu">
-                    <li><a href="#">Second level menu</a></li>
-                    <li><a href="#">Second level menu</a></li>
-                    <li class="dropdown">
-                      <a href="#" class="dropdown-toggle">
-                        <i class="fa fa-plus-square"></i>
-                        <span class="hidden-xs">Three level menu group</span>
-                      </a>
-                      <ul class="dropdown-menu">
-                        <li><a href="#">Three level menu</a></li>
-                        <li><a href="#">Three level menu</a></li>
-                        <li class="dropdown">
-                          <a href="#" class="dropdown-toggle">
-                            <i class="fa fa-plus-square"></i>
-                            <span class="hidden-xs">Four level menu group</span>
-                          </a>
-                          <ul class="dropdown-menu">
-                            <li><a href="#">Four level menu</a></li>
-                            <li><a href="#">Four level menu</a></li>
-                            <li class="dropdown">
-                              <a href="#" class="dropdown-toggle">
-                                <i class="fa fa-plus-square"></i>
-                                <span class="hidden-xs">Five level menu group</span>
-                              </a>
-                              <ul class="dropdown-menu">
-                                <li><a href="#">Five level menu</a></li>
-                                <li><a href="#">Five level menu</a></li>
-                                <li class="dropdown">
-                                  <a href="#" class="dropdown-toggle">
-                                    <i class="fa fa-plus-square"></i>
-                                    <span class="hidden-xs">Six level menu group</span>
-                                  </a>
-                                  <ul class="dropdown-menu">
-                                    <li><a href="#">Six level menu</a></li>
-                                    <li><a href="#">Six level menu</a></li>
-                                  </ul>
-                                </li>
-                              </ul>
-                            </li>
-                          </ul>
-                        </li>
-                        <li><a href="#">Three level menu</a></li>
-                      </ul>
-                    </li>
-                  </ul>
-                </li>
               </ul>
             </li>
           </ul>
@@ -469,7 +323,7 @@
         <div id="content-dashboard-home" class="container-fluid analytics-content">
 
           <!--Start Search-Result-Dashboard-Left-->
-          <div class="col-sm-5"  style= "height: 100%; padding: 0px;">
+          <div class="col-sm-5"  style= "height: 100%; padding: 0px 0px 0px 10px;">
 
             <!--Start Search-Result-Category-Left-->
             <!--
@@ -662,7 +516,7 @@
           <!--End Search-Research-Dashboard-Left-->
 
           <!--Start Dashboard-Right-->
-          <div class="col-sm-7" style= "height: 100%; padding: 0px 15px 0px 0px;">
+          <div class="col-sm-7" style= "height: 100%; padding: 0;">
             <div style= "height: 100%;">
 
               <!-- Start Dashboard-Right-Row-1 -->
@@ -688,7 +542,7 @@
                 <!--End Dashboard-Right-Row-1-Panel-Nav-Tabs-->
 
                 <!--Start Dashboard-Right-Row-1-Panel-Tab-Content-->
-                <div class="tab-content" style= "height: 100%;">
+                <div class="tab-content">
                   <div class="tab-pane active" id="dashboard_tab_content_outbound_activities">
                     <div class="box-content" style="padding: 0px; width: 100%; height: 164px;">
                       <div id="chart_line_outbound_activities" style="width: 100%; height: 100%;"></div>
@@ -723,29 +577,29 @@
                 <!--End Dashboard-Right-Row-2-Panel-Nav-Tabs-->
 
                 <!--Start Dashboard-Right-Row-2-Panel-Tab-Content-->
-                <div class="tab-content" style= "height: 100%;">
+                <div class="tab-content">
                   <div class="tab-pane active" id="dashboard_tab_content_entities">
-                    <div class="box-content" style="padding: 0px; height: 164px;">
-                      <div class="row">
-                        <div class="col-xs-3" style="padding: 0px;">
+                    <div class="box-content">
+                      <div class="row" style="margin: 0; padding: 0;">
+                        <div class="col-xs-3" style="margin: 0; padding: 0;">
                           <div id="chart_donut_entities" style="width: 160px; height: 160px; position: relative;"></div>
                         </div>
-                        <div class="col-xs-7" style="padding: 0px;">
+                        <div class="col-xs-7" style="margin: 0; padding: 0;">
                           <div id="chart_horizontal_bar_entities" style="width: 100%; height: 100%; position: relative;"></div>
                         </div>
-                        <div class="col-xs-2" style="padding: 0px;">
+                        <div class="col-xs-2" style="margin: 0; padding: 0;">
                           <div id="chart_legend_entities" style="width: 100%; height: 100%; position: relative;"></div>
                         </div>
                       </div>
                     </div>
                   </div>
                   <div class="tab-pane" id="dashboard_tab_content_topics">
-                    <div class="box-content" style="height: 164px;">
-                      <div class="row box">
-                        <div class="col-xs-3">
+                    <div class="box-content">
+                      <div class="row" style="margin: 0; padding: 0;">
+                        <div class="col-xs-3" style="margin: 0; padding: 0;">
                           <div id="chart_donut_topics" style="width: 160px; height: 160px;"></div>
                         </div>
-                        <div class="col-xs-9" style="padding: 0px;">
+                        <div class="col-xs-9" style="margin: 0; padding: 0;">
                           <div id="chart_horizontal_bar_topics" style="width: 100%; height: 100%; position: relative"></div>
                         </div>
                       </div>
@@ -776,15 +630,15 @@
                 <!--End Dashboard-Right-Row-3-Panel-Nav-Tabs-->
 
                 <!--Start Dashboard-Right-Row-3-Panel-Tab-Content-->
-                <div class="tab-content" style= "height: 100%;">
+                <div class="tab-content">
 
                   <div class="tab-pane active" id="dashboard_tab_content_ranks">
-                    <div class="box-content" style="padding: 0px; height: 164px;">
-                      <div class="row">
-                        <div class="col-xs-3">
+                    <div class="box-content">
+                      <div class="row" style="margin: 0; padding: 0;">
+                        <div class="col-xs-3" style="margin: 0; padding: 0;">
                           <div id="chart_donut_ranks" style="width: 160px; height: 160px;"></div>
                         </div>
-                        <div class="col-xs-9" style="padding: 0px;">
+                        <div class="col-xs-9" style="margin: 0; padding: 0;">
                           <div id="chart_horizontal_bar_ranks" style="width: 100%; height: 100%; position: relative"></div>
                         </div>
                       </div>
@@ -792,12 +646,12 @@
                   </div>
 
                   <div class="tab-pane" id="dashboard_tab_content_domains">
-                    <div class="row box">
-                      <div class="box-content" style="height: 164px;">
-                        <div class="col-xs-3" style="padding: 0px;">
+                    <div class="box-content">
+                      <div class="row box" style="margin: 0; padding: 0;">
+                        <div class="col-xs-3" style="margin: 0; padding: 0;">
                           <div id="chart_donut_domains" style="width: 160px; height: 160px;"></div>
                         </div>
-                        <div class="col-xs-9" style="padding: 0px;">
+                        <div class="col-xs-9" style="margin: 0; padding: 0;">
                           <div id="chart_horizontal_bar_domains" style="width: 100%; height: 100%; position: relative"></div>
                         </div>
                       </div>
@@ -805,12 +659,12 @@
                   </div>
 
                   <div class="tab-pane" id="dashboard_tab_content_communities">
-                    <div class="box-content" style="padding: 0px; height: 164px;">
-                      <div class="row">
-                        <div class="col-xs-3">
+                    <div class="box-content">
+                      <div class="row" style="margin: 0; padding: 0;">
+                        <div class="col-xs-3" style="margin: 0; padding: 0;">
                           <div id="chart_donut_communities" style="width: 160px; height: 160px;"></div>
                         </div>
-                        <div class="col-xs-9" style="padding: 0px;">
+                        <div class="col-xs-9" style="margin: 0; padding: 0;">
                           <div id="chart_horizontal_bar_communities" style="width: 100%; height: 100%; position: relative"></div>
                         </div>
                       </div>
@@ -818,12 +672,12 @@
                   </div>
 
                   <div class="tab-pane" id="dashboard_tab_content_attach_types">
-                    <div class="box-content" style="padding: 0px; height: 164px;">
-                      <div class="row">
-                        <div class="col-xs-3">
+                    <div class="box-content">
+                      <div class="row" style="margin: 0; padding: 0;">
+                        <div class="col-xs-3" style="margin: 0; padding: 0;">
                           <div id="chart_donut_attach_types" style="width: 160px; height: 160px;"></div>
                         </div>
-                        <div class="col-xs-9" style="padding: 0px;">
+                        <div class="col-xs-9" style="margin: 0; padding: 0;">
                           <div id="chart_horizontal_bar_attach_types" style="width: 100%; height: 100%; position: relative"></div>
                         </div>
                       </div>
@@ -846,7 +700,7 @@
 
           <!--Start Visual-Filter-->
           <div id="graph-visual-filter-email" style="position: fixed; left: 1%; background-color: rgba(210, 210, 210, 0.6); z-index: 999; font-size: 11px;
-             border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; width: 30%;">
+             border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; width: 30%; display: none;">
 
             <div class="row" style="margin: 0;">
               <div class="col-sm-2">
@@ -905,26 +759,30 @@
           <!--End Visual-Filter-->
 
           <!--Start Data-Visual-Left-->
-          <div class="col-sm-5"  style= "height: 100%; padding: 0;">
-            <div id="graph_email"  style= "height: 580px;"> </div>
+          <div class="col-sm-5"  style= "height: 100%; margin: 0; padding: 0;">
+            <div id="graph_email"  style= "height: 100%;"> </div>
           </div>
           <!--End Data-Visual-Left-->
 
           <!--Start Data-Panel-Right-->
-          <div class="col-sm-7" style= "height: 100%; padding: 0;">
-            <div class="row col-sm-12" style= "height: 100%; margin: 0;">
+          <div class="col-sm-7" style= "height: 100%; margin: 0; padding: 0;">
+            <div class="row col-sm-12" style= "height: 100%; margin: 0; padding: 0;">
               <!--Start Data-Panel-Nav-Tabs-->
-              <div class="row" style="height: 35px;">
-                <ul class="col-sm-12 nav nav-tabs" role="tablist" id="tab-list" style= "height: 30px; padding: 0px; font-size: 13px;">
-                  <li class="active" style= "height: 30px;"><a style= "height: 30px;" href="#email-table-tab" role="tab" data-toggle="tab"><i class="fa fa-envelope-o"></i> Email</a></li>
-                  <li style= "height: 30px;"><a style= "height: 30px;" href="#attachment-table-tab" role="tab" data-toggle="tab"><i class="fa fa-paperclip"></i> Attachments</a></li>
+              <div class="row" style="height: 30px; margin: 0; padding: 0;">
+                <ul class="col-sm-12 nav nav-tabs" role="tablist" id="tab-list" style= "margin: 0; padding: 0; font-size: 13px;">
+                  <li class="active" style= "height: 30px;">
+                    <a style= "height: 30px;" href="#email-table-tab" role="tab" data-toggle="tab"><i class="fa fa-envelope-o"></i> Email</a>
+                  </li>
+                  <li style= "height: 30px;">
+                    <a style= "height: 30px;" href="#attachment-table-tab" role="tab" data-toggle="tab"><i class="fa fa-paperclip"></i> Attachments</a>
+                  </li>
                 </ul>
               </div>
               <!--End Data-Panel-Nav-Tabs-->
 
               <!--Start Data-Panel-Tab-Content-->
-              <div class="row" style="height: calc(100% - 35px);">
-                <div class="col-sm-12 tab-content" style= "width: 100%; height: 92%;">
+              <div class="row box" style="height: calc(100% - 35px); margin: 2px 0px 0px 0px; padding: 0;">
+                <div class="col-sm-12 tab-content" style= "width: 100%; height: 90%; margin: 0; padding: 0px 0px 0px 15px;">
 
 
                   <!--Start Data-Panel-Tab-Content-Email-->
@@ -1015,21 +873,21 @@
     <!--End Main-Container-->
 
   <!-- Start Data-Table-Container -->
-  <div class="container-fluid col-sm-5" id="container-bottom-left" style="position: fixed; bottom: 0px; margin: 0; padding: 0; display: none;">
-    <div class="row col-sm-12" style="margin: 0; padding: 0;" id="bottom-panel-toggle">
-      <div class="col-sm-12" style="margin: 0; padding: 0px 0px 0px 10px;">
+  <div class="container-fluid col-sm-5" id="container-bottom-left"
+       style="position: fixed; bottom: 0px; height: calc(100% - 70px); margin: 0; padding: 0px 10px 0px 0px; display: none;">
+    <div class="row" style="height: 100%; margin: 0; padding: 0;" id="bottom-panel-toggle">
+      <div class="col-sm-12" style="height: 100%; margin: 0; padding: 0px 0px 0px 0px;">
         <!-- Start Data-Table-Toggle -->
         <div class="col-sm-offset-10 toggle-button" id="button-toggle-container-bottom-left">
           <a><i class="fa fa-files-o"></i> <span class="glyphicon glyphicon-chevron-up"></span></a>
         </div>
         <!-- End Data-Table-Toggle -->
 
-        <!--<div style="height: 600px; background-color:#d3d3d3;">-->
-          <div class="col-sm-12" style="display: table; height: 100%; margin: 0; padding: 0; height: 600px; background-color:#d3d3d3;">
+        <div style="display: block; width: 100%; height: 100%; margin: 0; padding: 0; background-color:#d3d3d3;">
 
-            <div class="row col-sm-12" style="height: 52px; margin: 0; padding: 0;">
-              <div class="col-sm-3" style="margin: 0; padding: 0;">
-                <div class="row" style="height: 25px; margin: 0; padding: 0;">
+          <div class="row" style="width: 100%; height: 52px; margin: 0; padding: 0;">
+            <div class="col-sm-3" style="margin: 0; padding: 0;">
+              <div class="row" style="height: 25px; margin: 0; padding: 0;">
                 <!--Start Data-Panel-Tab-Content-Email-Star(Like)-Button -->
                 <div style="display: inline-block; float: left; margin: 2px 0px 0px 10px;" class="active">
                   <a id="toggle_mark_for_export" class="btn btn-xs btn-default">
@@ -1045,89 +903,90 @@
                   </button>
                 </div>
                 <!--End Data-Panel-Tab-Content-Email-Mark-Read-Toggle -->
-                </div>
-                <div class="row" style="height: 25px; margin: 0; padding: 0;">
-                  <!--Start Data-Panel-Tab-Content-Email-Conversation-Button -->
-                  <div style="display: inline-block; float: left; margin: 0px 0px 2px 10px;">
-                    <a id="query_conversation_email" class="btn btn-xs btn-default clickable-disabled">
-                      <span><i class="fa fa-comments-o"></i> Conversation</span>
-                    </a>
-                  </div>
-                  <!--
-                  <div style="display: inline-block; float: left; margin: 0px 0px 2px 10px;">
-                    <a id="query_prev_email" class="btn btn-xs btn-default clickable-disabled">
-                      <span>&#60;<i class="fa fa-comments-o"></i></span>
-                    </a>
-                  </div>
-                  <div style="display: inline-block; float: left; margin: 0px 10px 2px 5px;">
-                    <a id="query_next_email" class="btn btn-xs btn-default clickable-disabled">
-                      <span><i class="fa fa-comments-o"></i>&#62;</span>
-                    </a>
-                  </div>
-                  -->
-                  <!--End Data-Panel-Tab-Content-Email-Conversation-Button -->
-                </div>
               </div>
-              <div class="col-sm-9" style="margin: 0; padding: 0;">
-                <!--Start Data-Panel-Tab-Content-Email-Mini-Topics-Chart -->
-                <div style="border: 1px solid #1e1e5f; border-radius: 3px; padding: 0; margin: 0; float: left; display: inline-block;"
-                     id="topic_mini_chart">
-
-                </div>
-                <!--End Data-Panel-Tab-Content-Email-Mini-Topics-Chart -->
-              </div>
-
-              <!--Start Data-Panel-Tab-Content-Email-Pertinence-Select -->
-              <!--
-              <div style="display: inline-block; float:left; margin: 5px 0px 5px 15px;">
-                <div class="btn-group" style="margin: 0px; font-size: 12px; font-weight: normal;">
-                  <a class="btn btn-xs btn-default" href="#level_pertinence_not" data-toggle="dropdown" style="color: #bbbbbb">
-                    <i class="fa fa-flag fa-lg"></i> Not Pertinent
+              <div class="row" style="height: 25px; margin: 0; padding: 0;">
+                <!--Start Data-Panel-Tab-Content-Email-Conversation-Button -->
+                <div style="display: inline-block; float: left; margin: 0px 0px 2px 10px;">
+                  <a id="query_conversation_email" class="btn btn-xs btn-default clickable-disabled">
+                    <span><i class="fa fa-comments-o"></i> Conversation</span>
                   </a>
-                  <a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#level_pertinence_not">
-                    <span class="fa fa-caret-down"></span>
-                  </a>
-                  <ul class="dropdown-menu" role="menu" >
-                    <li>
-                      <a href="#level_pertinence_very" role="menuitem" data-toggle="dropdown" style="color: #ff3200">
-                        <i class="fa fa-flag fa-lg"></i> Very Pertinent
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#level_pertinence_pertinent" role="menuitem" data-toggle="dropdown" style="color: #00ff64">
-                        <i class="fa fa-flag fa-lg"></i> Pertinent
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#level_pertinence_not" role="menuitem" data-toggle="dropdown" style="color: #bbbbbb">
-                        <i class="fa fa-flag fa-lg"></i> Not Pertinent
-                      </a>
-                    </li>
-                    <li class="divider"></li>
-                    <li>
-                      <a href="#level_pertinence_irrelevant" role="menuitem" data-toggle="dropdown" style="color: rgb(175, 173, 185)">
-                        <i class="fa fa-square-o fa-lg"></i> Clear Flag
-                      </a>
-                    </li>
-                  </ul>
                 </div>
-              </div>
-              -->
-              <!--End Data-Panel-Tab-Content-Email-Pertinence-Select -->
-            </div>
-
-            <div class="row col-sm-12" style="height: calc(100% - 35px); margin: 0; padding: 0; max-height: 565px; max-width: 545px; overflow: scroll;">
-              <div class="col-sm-12" style="margin: 0; padding: 0px 5px 5px 10px; font-size: 13px; height: 100%; width: 100%;" id="email-body">
-                Please select an email to view ...
+                <!--
+                <div style="display: inline-block; float: left; margin: 0px 0px 2px 10px;">
+                  <a id="query_prev_email" class="btn btn-xs btn-default clickable-disabled">
+                    <span>&#60;<i class="fa fa-comments-o"></i></span>
+                  </a>
+                </div>
+                <div style="display: inline-block; float: left; margin: 0px 10px 2px 5px;">
+                  <a id="query_next_email" class="btn btn-xs btn-default clickable-disabled">
+                    <span><i class="fa fa-comments-o"></i>&#62;</span>
+                  </a>
+                </div>
+                -->
+                <!--End Data-Panel-Tab-Content-Email-Conversation-Button -->
               </div>
             </div>
+            <div class="col-sm-9" style="margin: 0; padding: 0;">
+              <!--Start Data-Panel-Tab-Content-Email-Mini-Topics-Chart -->
+              <div style="border: 1px solid #1e1e5f; border-radius: 3px; padding: 0; margin: 0; float: left; display: inline-block;"
+                   id="topic_mini_chart">
+
+              </div>
+              <!--End Data-Panel-Tab-Content-Email-Mini-Topics-Chart -->
+            </div>
+
+            <!--Start Data-Panel-Tab-Content-Email-Pertinence-Select -->
+            <!--
+            <div style="display: inline-block; float:left; margin: 5px 0px 5px 15px;">
+              <div class="btn-group" style="margin: 0px; font-size: 12px; font-weight: normal;">
+                <a class="btn btn-xs btn-default" href="#level_pertinence_not" data-toggle="dropdown" style="color: #bbbbbb">
+                  <i class="fa fa-flag fa-lg"></i> Not Pertinent
+                </a>
+                <a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#level_pertinence_not">
+                  <span class="fa fa-caret-down"></span>
+                </a>
+                <ul class="dropdown-menu" role="menu" >
+                  <li>
+                    <a href="#level_pertinence_very" role="menuitem" data-toggle="dropdown" style="color: #ff3200">
+                      <i class="fa fa-flag fa-lg"></i> Very Pertinent
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#level_pertinence_pertinent" role="menuitem" data-toggle="dropdown" style="color: #00ff64">
+                      <i class="fa fa-flag fa-lg"></i> Pertinent
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#level_pertinence_not" role="menuitem" data-toggle="dropdown" style="color: #bbbbbb">
+                      <i class="fa fa-flag fa-lg"></i> Not Pertinent
+                    </a>
+                  </li>
+                  <li class="divider"></li>
+                  <li>
+                    <a href="#level_pertinence_irrelevant" role="menuitem" data-toggle="dropdown" style="color: rgb(175, 173, 185)">
+                      <i class="fa fa-square-o fa-lg"></i> Clear Flag
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            -->
+            <!--End Data-Panel-Tab-Content-Email-Pertinence-Select -->
+          </div>
+
+          <div class="row" style="width: 100%; height: 90%; margin: 0; padding: 0; overflow: scroll;">
+            <div class="col-sm-12" style="margin: 0; padding: 0px 5px 5px 10px; font-size: 13px;" id="email-body">
+              Please select an email to view ...
+            </div>
+          </div>
 
 
         </div>
 
+      </div>
     </div>
   </div>
-  <!-- End Data-Table-Container -->
+    <!-- End Data-Table-Container -->
 
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
