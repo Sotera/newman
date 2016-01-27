@@ -20,6 +20,9 @@ def elasticsearch_hosts():
 def data_set_defaults():
     return application_properties()["data_set_defaults"]
 
+def data_set_names():
+    return application_properties()["data_set_defaults"].keys()
+
 def default_min_timeline_bound():
     return str(application_properties()["default_min_timeline_bound"])
 

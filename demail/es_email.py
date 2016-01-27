@@ -138,6 +138,26 @@ def get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime,
     return {"emails": email_address }
 
 
+# hackish way to find if a is highlighted
+# return the names of highlighted
+# TODO also return the highlighted content so the attachment extracted text highlighting can be viewed
+def _find_attachment_highlighting(highlight, attachments):
+    if not attachments or not highlight or not "attachments.content" in highlight:
+        return {}
+
+    if len(highlight["attachments.content"]) == 1 and len(attachments) == 1:
+        return { attachments[0]["filename"] : True }
+
+    # find the attachments which are highlighted and add them to the map
+    attachment_highlight={}
+    for highlighted in highlight["attachments.content"]:
+        # Just check the prefix
+        highlighted = highlighted.replace('#_#HIGHLIGHT_START#_#','').replace('#_#HIGHLIGHT_END#_#','')[:100]
+        for attachment in attachments:
+            if attachment["content"] and attachment["content"].startswith(highlighted):
+                attachment_highlight[attachment["filename"]] = True
+    return attachment_highlight
+
 # escape the html characters &, <, >
 # Now replace the hacky delimeter tags with HTML
 def _format_html(text):
@@ -152,10 +172,11 @@ def get_email(index, email_id, qs=None):
     # fields=["id","datetime","senders","senders_line","tos_line","ccs_line","bccs_line","subject","body","attachments.filename","entities.entity_organization","entities.entity_location","entities.entity_person","entities.entity_misc"]
     # email = es.get(index, doc_type="emails", id=email_id, fields=fields)
 
-
     source = ''
     body='_DEFAULT_'
     subject='_DEFAULT_'
+    highlighted_attachments = {}
+
     if not qs:
         email = es.get(index, doc_type="emails", id=email_id)
         source = email["_source"]
@@ -170,6 +191,8 @@ def get_email(index, email_id, qs=None):
         highlight = email["hits"]["hits"][0].get("highlight", {})
         body = highlight.get('body', [source.get('body','')])[0]
         subject = highlight.get('subject', [source['subject']])[0]
+        # TODO highlighting attachments need to return content and further test this method
+        highlighted_attachments = _find_attachment_highlighting(highlight, source.get("attachments", [""]))
 
     body = _format_html(body)
     subject = _format_html(subject)
@@ -178,7 +201,6 @@ def get_email(index, email_id, qs=None):
     if source["topic_scores"]:
         topic_scores = [ [topic[0], topic[1], str(source["topic_scores"]["idx_"+str(topic[0])])] for topic in get_categories(index)["categories"]]
 
-    default=[""]
     email = [source["id"],
              # TODO REMOVE unused fields
              "DEPRECATED",
@@ -191,14 +213,15 @@ def get_email(index, email_id, qs=None):
              subject,
              # Wrap in <pre>
              "<pre>"+body+"</pre>",
-             [[f["guid"],f["filename"]] for f in source.get("attachments", default)],
-             source.get("starred", False)
+             [[f["guid"],f["filename"]] for f in source.get("attachments", [""])],
+             source.get("starred", False),
+             highlighted_attachments
              ]
 
     entities = []
     for type in ["person","location","organization","misc"]:
         if ("entity_"+type) in source["entities"]:
-            entities += [ [source["id"][0]+"_entity_"+str(i), type ,i, val] for i,val in enumerate(source["entities"].get("entity_"+type, default), len(entities))]
+            entities += [ [source["id"][0]+"_entity_"+str(i), type ,i, val] for i,val in enumerate(source["entities"].get("entity_"+type, [""]), len(entities))]
 
     return { "email" : email, "entities": entities, "lda_topic_scores":topic_scores}
 

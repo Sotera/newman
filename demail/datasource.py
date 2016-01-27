@@ -3,7 +3,7 @@ from elasticsearch.client import IndicesClient
 from newman.newman_config import elasticsearch_hosts
 
 from newman.utils.functions import nth
-from newman.newman_config import getDefaultDataSetID, default_min_timeline_bound, default_max_timeline_bound
+from newman.newman_config import getDefaultDataSetID, data_set_names
 from es_search import initialize_email_addr_cache
 from es_email import get_ranked_email_address_from_email_addrs_index
 from series import get_datetime_bounds
@@ -14,6 +14,8 @@ from param_utils import parseParamDatetime
 _current_data_set_selected = getDefaultDataSetID()
 
 def _index_record(index):
+    tangelo.log("datasource._index_record(index: %s)" % (str(index)))
+
     es = Elasticsearch(elasticsearch_hosts())
     email_docs_count = es.count(index=index, doc_type="emails", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
     emails_addrs_count = es.count(index=index, doc_type="email_address", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
@@ -38,7 +40,10 @@ def listAllDataSet():
     es = Elasticsearch(elasticsearch_hosts())
     ic = IndicesClient(es)
     stats = ic.stats(index="_all")
-    indexes = [_index_record(index) for index in stats["indices"]]
+
+    tangelo.log("datasource.listAllDataSet()")
+    # Ignore index keys in ES that are not in the newman_app.conf
+    indexes = [_index_record(index) for index in stats["indices"] if index in data_set_names()]
 
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**{})
