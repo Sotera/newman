@@ -261,7 +261,8 @@ def prettyprint_email_as_html_template(email_json, topics):
             label = soup.new_tag('td')
             label.string = topic[1]
             score = soup.new_tag('td')
-            score.string = str(email_json["topic_scores"]["idx_"+str(topic[0])])
+
+            score.string = "0.0" if not email_json["topic_scores"] else str(email_json["topic_scores"]["idx_"+str(topic[0])])
             tr = soup.new_tag('tr')
             tr.append(label)
             tr.append(score)
