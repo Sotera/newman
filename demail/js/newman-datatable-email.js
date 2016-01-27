@@ -291,7 +291,7 @@ var newman_datatable_email = (function () {
     if (data_table_rows) {
       data_table_ui = $('#result_table').DataTable({
         destroy: true,
-        "lengthMenu": [[20, 30, 40, -1], [20, 30, 40, "All"]],
+        "lengthMenu": [[22, 44, 88, -1], [22, 44, 88, "All"]],
         "autoWidth": true,
         /*fixedHeader: {
          header: true,
