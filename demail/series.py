@@ -54,32 +54,47 @@ def _map_activity(index, account_id, sent_rcvd):
             "interval_inbound_count" : sent_rcvd[1]["doc_count"]
             }
 
-def entity_histogram_query(email_addrs=[], query_terms='', topic_score=None, date_bounds=None, entity_agg_size=10):
-    return {"aggs" : {
-        "filtered_entity_agg" : {
-            "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, query_terms=query_terms, date_bounds=date_bounds),
-            "aggs": {
-                "person" : {
-                    "terms" : {"field" : "entities.entity_person", "size": entity_agg_size}
-                },
-                "organization" : {
-                    "terms" : {"field" : "entities.entity_organization", "size": entity_agg_size}
-                },
-                "location" : {
-                    "terms" : {"field" : "entities.entity_location", "size": entity_agg_size}
-                },
-                "misc" : {
-                    "terms" : {"field" : "entities.mics", "size": entity_agg_size}
-                }
+def entity_histogram_query(email_addrs=[], qs='', topic_score=None, date_bounds=None, entity_agg_size=10):
+    qs = '*' if not qs else qs
 
+    return {
+        "query" : {
+            "bool":{
+                "must":[
+                    {
+                        "query_string" : { "query" : qs }
+                    }
+                ]
             }
-        }}, "size":0}
+        },
+        "aggs" : {
+            "filtered_entity_agg" : {
+                "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, date_bounds=date_bounds),
+                "aggs": {
+                    "person" : {
+                        "terms" : {"field" : "entities.entity_person", "size": entity_agg_size}
+                    },
+                    "organization" : {
+                        "terms" : {"field" : "entities.entity_organization", "size": entity_agg_size}
+                    },
+                    "location" : {
+                        "terms" : {"field" : "entities.entity_location", "size": entity_agg_size}
+                    },
+                    "misc" : {
+                        "terms" : {"field" : "entities.mics", "size": entity_agg_size}
+                    }
+
+                }
+            }
+        },
+        "size" : 0
+    }
 
 
-def get_entity_histogram(index, type, email_addrs=[], query_terms='', topic_score=None, date_bounds=None, entity_agg_size=10):
+def get_entity_histogram(index, type, email_addrs=[], qs='', topic_score=None, date_bounds=None, entity_agg_size=10):
     tangelo.log("===================================================")
     es = Elasticsearch(elasticsearch_hosts())
-    body = entity_histogram_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity_agg_size=entity_agg_size)
+    body = entity_histogram_query(email_addrs=email_addrs, qs=qs, topic_score=topic_score, date_bounds=date_bounds, entity_agg_size=entity_agg_size)
 
     tangelo.log("get_entity_histogram: query = %s"%body)
 
@@ -193,20 +208,20 @@ def actor_histogram(email_addrs, date_bound=None, interval="week"):
     tangelo.log('actor_histogram(%s, %s, %s)' %(email_addrs, date_bound, interval))
     def hist():
         return {
-                    "emails_over_time" : {
-                        "date_histogram" : {
-                            "field" : "datetime",
-                            "interval" : interval,
-                            "format" : "yyyy-MM-dd",
-                            "min_doc_count" : 0,
-                            "extended_bounds":{
-                                "min": date_bound[0],
-                                # "max" doesnt really work unless it's set to "now"
-                                "max": date_bound[1]
-                            }
-                        }
+            "emails_over_time" : {
+                "date_histogram" : {
+                    "field" : "datetime",
+                    "interval" : interval,
+                    "format" : "yyyy-MM-dd",
+                    "min_doc_count" : 0,
+                    "extended_bounds":{
+                        "min": date_bound[0],
+                        # "max" doesnt really work unless it's set to "now"
+                        "max": date_bound[1]
                     }
                 }
+            }
+        }
 
     return {
         "size":0,
@@ -248,7 +263,7 @@ def get_email_activity(index, data_set_id, account_id=None, date_bounds=None, in
     resp = es.search(index=index, doc_type="emails", request_cache="false", body=body)
     id = data_set_id if not account_id else account_id
     return [_map_activity(index, id, sent_rcvd) for sent_rcvd in zip(resp["aggregations"]["sent_agg"]["emails_over_time"]["buckets"],
-                                                                             resp["aggregations"]["rcvr_agg"]["emails_over_time"]["buckets"])]
+                                                                     resp["aggregations"]["rcvr_agg"]["emails_over_time"]["buckets"])]
 
 def get_email_activity_csv(scv_file, index, data_set_id, account_id=None, date_bounds=None, interval="week"):
     rows = get_email_activity(index, data_set_id, account_id, date_bounds, interval)

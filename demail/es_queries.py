@@ -81,7 +81,7 @@ def _date_filter_not_equal(date_bounds=None):
 
 # TODO how do we apply the query_terms as a filter?  Seems that it makes sense to do this as a query only but
 # TODO it is possible we will want to use a term filter on "_all"
-def _build_filter(email_senders=[], email_rcvrs=[], query_terms='', topic=None, entity_dict={}, date_bounds=None, communities=[], date_mode_inclusive=True, address_filter_mode="union", starred=None):
+def _build_filter(email_senders=[], email_rcvrs=[], qs='', topic=None, entity_dict={}, date_bounds=None, communities=[], date_mode_inclusive=True, address_filter_mode="union", starred=None):
 
     # One of these addresses should apear on the email
     address_filter = [] if (not email_senders and not email_rcvrs) else [_addrs_filter(email_senders,email_rcvrs,email_rcvrs,email_rcvrs, address_filter_mode=address_filter_mode)]
@@ -137,15 +137,7 @@ def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='
 
     # This checks if the query text is a simple term or a query string and sets the correct portion
     term_query = { "match_all" : {} }
-    query_string = '*'
-    # if qs.startswith('\'') and qs.endswith('\''):
-    #         query_string = qs.replace('\'', '')
-
-    if qs:
-        query_string = qs
-    # TODO remove once unified query works
-    # elif qs:
-    #     term_query = { "match" : { "_all" : qs }}
+    query_string = '*' if not qs else qs
 
     sender_addrs = email_addrs if not sender_addrs else sender_addrs
     recipient_addrs = email_addrs if not recipient_addrs else recipient_addrs

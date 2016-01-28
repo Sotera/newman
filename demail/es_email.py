@@ -44,7 +44,7 @@ def filtered_agg_query(email_addrs=[], query_terms='', topic_score=None, entity=
     return {"aggs" :
         {
             name+"_filtered_agg" : {
-                "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, query_terms=query_terms, date_bounds=date_bounds),
+                "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, qs=query_terms, date_bounds=date_bounds),
                 "aggs": aggs
             }
         },
@@ -109,7 +109,7 @@ def get_ranked_email_address(data_set_id, query_terms='', topic_score=None, enti
     body = {
         "aggs" : {
             "filtered_addrs_agg" : {
-                "filter" : _build_filter(query_terms=query_terms, topic=topic_score, entity_dict=entity, date_bounds=date_bounds),
+                "filter" : _build_filter(qs=query_terms, topic=topic_score, entity_dict=entity, date_bounds=date_bounds),
                 "aggs": {
                     "top_addrs_agg" : {
                         "terms" : {"field" : "addrs", "size": num_top_hits}

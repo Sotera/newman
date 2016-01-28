@@ -48,7 +48,7 @@ def _cluster_lda(num_clusters, email_addrs=[], query_terms='', entity_dict={}, t
         "size":0,
         "aggs" : {
             "idx_{0}_agg".format(idx) : {
-                "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, query_terms=query_terms, topic={"idx":idx, "threshold":topic_score}, entity_dict=entity_dict, date_bounds=date_bounds),
+                "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, qs=query_terms, topic={"idx":idx, "threshold":topic_score}, entity_dict=entity_dict, date_bounds=date_bounds),
                 "aggs" : {
                     "idx_{0}_ranges".format(idx) : {
                         "range" : {

@@ -28,7 +28,6 @@ def get_graph_for_entity(*args, **kwargs):
     # TODO set from UI
     size = size if size >500 else 2500
 
-    # TODO set from UI
     qs = parseParamTextQuery(**kwargs)
 
     query = _build_email_query(email_addrs=email_address_list, qs=qs, entity=entity_dict, date_bounds=(start_datetime, end_datetime))
@@ -56,10 +55,11 @@ def get_top_entities(*args, **kwargs):
     email_address_list = parseParamEmailAddress(**kwargs);
 
     # TODO set from UI
-    query_terms=''
+    qs = parseParamTextQuery(**kwargs)
 
     if not email_address_list :
-        entities = get_entity_histogram(data_set_id, "emails", query_terms=query_terms, date_bounds=(start_datetime, end_datetime))[:top_count]
+        # TODO qs not being evaluated in inner filter called by this method
+        entities = get_entity_histogram(data_set_id, "emails", qs=qs, date_bounds=(start_datetime, end_datetime))[:top_count]
         result = {"entities" :
                   [
                    [
@@ -72,7 +72,8 @@ def get_top_entities(*args, **kwargs):
                  }
         
     else:
-        entities = get_entity_histogram(data_set_id, "emails", email_address_list, query_terms=query_terms, date_bounds=(start_datetime, end_datetime))[:top_count]
+        # TODO qs not being evaluated in inner filter called by this method
+        entities = get_entity_histogram(data_set_id, "emails", email_address_list, qs=qs, date_bounds=(start_datetime, end_datetime))[:top_count]
         result = {"entities" :
                   [
                    [
