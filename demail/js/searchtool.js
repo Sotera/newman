@@ -828,7 +828,8 @@ function reloadDashboardFileTypeAttachment() {
 function initDashboardCharts() {
 
   // initialize dashboard components and widgets
-  initDashboardActivityTimeline();
+  //initDashboardActivityTimeline();
+  reloadDashboardActivityTimeline();
   reloadDashboardEntityEmail();
   reloadDashboardTopicEmail()
   reloadDashboardDomain();
