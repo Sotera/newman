@@ -7,13 +7,13 @@
  */
 var newman_aggregate_filter = (function () {
 
-  var _max_count_default = 2500;
   var _max_selected = newman_config_aggregate_filter.getMaxSelectable();
   var _key_prefix = 'checkbox_';
-  var _aggregate_filter_set = {};
+  var _aggregate_filter_list = [];
 
   function generateKey(id) {
     if (id) {
+      id = decodeURIComponent( id );
       if (id.startsWith(_key_prefix)) {
         return id.substring(_key_prefix.length);
       }
@@ -22,29 +22,24 @@ var newman_aggregate_filter = (function () {
   }
 
   function initAggregateFilterSelected(id) {
-    if (_.size(_aggregate_filter_set) < _max_selected) {
-      setAggregateFilterSelected(id, true);
+    if (getCountSelected() < _max_selected) {
+      setAggregateFilterSelected(id, true, false);
     }
   }
 
   function setAggregateFilterSelected(id, is_selected, refresh_ui) {
     if (id) {
-      var key = generateKey(id);
+      var key = generateKey( id );
       if (is_selected) {
-        var size = getCountSelected();
-        if (size == _max_selected) {
-
-        }
-        _putAggregateFilter(key, _max_count_default);
+        _appendAggregateFilter(key);
       }
       else {
         _removeAggregateFilter(key)
       }
 
-      var aggregate_list = getAggregateFilterKeySet();
-      console.log('\tselected-aggregates : ' + JSON.stringify(aggregate_list, null, 2));
+      console.log('\tselected-aggregates : ' + JSON.stringify(_aggregate_filter_list, null, 2));
 
-      if (refresh_ui) {
+      if (refresh_ui === true) {
         //trigger activities-overtime refresh
         reloadDashboardActivityTimeline();
 
@@ -57,49 +52,64 @@ var newman_aggregate_filter = (function () {
     }
   }
 
-  function _putAggregateFilter(key, value) {
-    var index = _.size(_aggregate_filter_set);
-    var object = {"key" : key, "index" : index, "query_max" : value}
-    _aggregate_filter_set[key] = object;
+  function _appendAggregateFilter( key ) {
+    console.log('_appendAggregateFilter(' + key + ')')
+    if (key) {
+      if (_aggregate_filter_list.length == _max_selected) {
+        _aggregate_filter_list.splice(1, 1);
+      }
+      _aggregate_filter_list.push( key );
+    }
   }
 
   function getAggregateFilter(id) {
     if (id) {
       var key = generateKey(id);
-      return _aggregate_filter_set[key];
+      var index = _aggregate_filter_list.indexOf( key );
+      if (index >= 0) {
+        return _aggregate_filter_list[index];
+      }
     }
+    return undefined;
   }
 
   function containsAggregateFilter(id) {
+    console.log('containsAggregateFilter(' + id + ')')
     if (id) {
-      var key = generateKey(id);
-      var value = getAggregateFilter(key);
-      if (value) {
-        return true;
-      }
+
+      var key = generateKey( id );
+      var index = _aggregate_filter_list.indexOf( key );
+      console.log('key : ' + key + ', index : ' + index +
+                  ',\n_aggregate_filter_list:\n' + JSON.stringify(_aggregate_filter_list, null, 2));
+
+      return (index >= 0 );
     }
     return false;
   }
 
-  function getAggregateFilterKeySet() {
-    console.log( '\taggregates[' + _.size(_aggregate_filter_set) + ']');
-    return  _.keys(_aggregate_filter_set);
-  }
 
   function _removeAggregateFilter(key) {
+    console.log('_removeAggregateFilter(' + key + ')')
     if (key) {
-      delete _aggregate_filter_set[key];
+      var index = _aggregate_filter_list.indexOf( key );
+      if (index >= 0) {
+        _aggregate_filter_list.splice(index, 1);
+      }
     }
   }
 
   function clearAllAggregateFilter() {
-    _aggregate_filter_set = {};
+    _aggregate_filter_list = [];
+  }
+
+  function getAllAggregateFilter() {
+    return clone(_aggregate_filter_list);
   }
 
   function appendAggregateFilter( url_path ) {
 
     if (url_path) {
-      if (_.size(_aggregate_filter_set) == 0) {
+      if (_aggregate_filter_list.length == 0) {
         return url_path;
       }
 
@@ -107,21 +117,16 @@ var newman_aggregate_filter = (function () {
         url_path = url_path.substring(0, url_path.length - 1);
       }
 
-      var keys = _.keys(_aggregate_filter_set);
-      if (keys) {
-        _.each(keys, function(key) {
-          var value = _aggregate_filter_set[key];
-          if(value) {
+      _.each(_aggregate_filter_list, function(element, index) {
+        var key = generateKey( element );
 
-            if (url_path.indexOf('?') > 0) {
-              url_path += '&' + key + '=' + value.index;
-            }
-            else {
-              url_path += '?' + key + '=' + value.index;
-            }
-          }
-        });
-      }
+        if (url_path.indexOf('?') > 0) {
+          url_path += '&' + key + '=' + index;
+        }
+        else {
+          url_path += '?' + key + '=' + index;
+        }
+      });
 
     }
 
@@ -130,20 +135,20 @@ var newman_aggregate_filter = (function () {
 
 
   function initAggregateFilter() {
-    console.log('initAggregateFilter()');
+    //console.log('initAggregateFilter()');
     clearAllAggregateFilter();
   }
 
   function getCountSelected() {
-    return _.size(_aggregate_filter_set);
+    return _aggregate_filter_list.length;
   }
 
   return {
-//    'initAggregateFilterSelected' : initAggregateFilterSelected,
+    'initAggregateFilterSelected' : initAggregateFilterSelected,
     'setAggregateFilterSelected' : setAggregateFilterSelected,
     'getAggregateFilter' : getAggregateFilter,
     'containsAggregateFilter' : containsAggregateFilter,
-    'getAggregateFilterKeySet' : getAggregateFilterKeySet,
+    'getAllAggregateFilter' : getAllAggregateFilter,
     'clearAllAggregateFilter' : clearAllAggregateFilter,
     'appendAggregateFilter' : appendAggregateFilter,
     'initAggregateFilter' : initAggregateFilter,

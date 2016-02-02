@@ -391,19 +391,23 @@ var newman_service_data_source = (function () {
       _data_set_map = _.object(_.map( response.data_sets, function (element) {
 
 
-        newman_data_source.push( element.data_set_id,
-          element.data_set_label,
-          element.data_set_datetime_min,
-          element.data_set_datetime_max,
-          element.data_set_document_count,
-          element.data_set_node_count,
-          element.data_set_attachment_count,
-          element.start_datetime_selected,
-          element.end_datetime_selected,
-          response.top_hits );
+        newman_data_source.push(element.data_set_id,
+                                element.data_set_label,
+                                element.data_set_datetime_min,
+                                element.data_set_datetime_max,
+                                element.data_set_document_count,
+                                element.data_set_node_count,
+                                element.data_set_attachment_count,
+                                element.start_datetime_selected,
+                                element.end_datetime_selected,
+                                response.top_hits);
 
-        return [element['data_set_id'], element]
+        return [element['data_set_id'], element];
       }));
+
+      // to be enabled to retrofit
+      //newman_search_result_collection.onDataSourceResponse( _data_set_map );
+
       newman_data_source.refreshUI();
       //console.log('_response_map: ' + JSON.stringify(_response_map, null, 2));
 
@@ -446,9 +450,9 @@ var newman_service_data_source = (function () {
 
   function getResponseMapKeys() {
     if (_data_set_map) {
-      var key = _.keys( _data_set_map );
+      var key_list = _.keys( _data_set_map );
       //create a deep-copy, return the copy
-      return clone( key )
+      return clone( key_list )
     }
     return _data_set_map;
   }

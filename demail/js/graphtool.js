@@ -817,8 +817,6 @@ function requestSearch(field, search_text, load_on_response) {
       url_path = newman_datetime_range.appendDatetimeRange(url_path);
     }
 
-    var current_data_set_url = newman_service_email_search_all.getServiceURL();
-
     console.log('\turl : \'' + url_path + '\'');
     //console.log( '\tservice_response_email_search_all.getServiceURL(): \'' + current_data_set_url +'\'' );
 
@@ -826,7 +824,7 @@ function requestSearch(field, search_text, load_on_response) {
 
 
       console.log('.getJSON(' + url_path + ')');
-
+      var current_data_set_url = newman_service_email_search_all.getServiceURL();
       var filtered_response = validateResponseSearch(search_response);
 
       if (url_path.endsWith(current_data_set_url)) {
@@ -854,9 +852,11 @@ function requestSearch(field, search_text, load_on_response) {
       else {
 
         dashboard_content.open();
-        //newman_aggregate_filter.clearAllAggregateFilter();
+
         var data_set_selected = newman_data_source.getSelected();
 
+        // clear previously selected aggregate-filter if any
+        newman_aggregate_filter.clearAllAggregateFilter();
 
         if (url_path.endsWith(current_data_set_url)) {
           // result from search-all under the current data-set
@@ -912,6 +912,10 @@ function requestSearch(field, search_text, load_on_response) {
         else {
           // result from search-field-keywords under the current data-set
 
+
+          // new implementation to be retrofitted
+          //newman_search_result_collection.onSearchResponse(field, search_text, load_on_response, url_path, search_response);
+
           var doc_count = 0;
           if (filtered_response.query_hits) {
             doc_count = filtered_response.query_hits;
@@ -965,8 +969,8 @@ function requestSearch(field, search_text, load_on_response) {
 }
 
 function  propagateSearch( search_text, email_doc_rows ) {
-  var ranked_email_accounts = getTopRankedEmailAccountList(email_doc_rows, 10);
-  console.log('ranked_emails[' + ranked_email_accounts.length + '] : ' + JSON.stringify(ranked_email_accounts, null, 2));
+  var ranked_email_accounts = getTopRankedEmailAccountList(email_doc_rows, 20);
+  //console.log('ranked_emails[' + ranked_email_accounts.length + '] : ' + JSON.stringify(ranked_email_accounts, null, 2));
   _.each(ranked_email_accounts, function (element) {
     var email_account = element;
     if (email_account != search_text) {
@@ -975,6 +979,9 @@ function  propagateSearch( search_text, email_doc_rows ) {
   });
   newman_search_filter.setSelectedFilter();
 
+  // update widgets based on new search-query
+  reloadDashboardEntityEmail();
+  reloadDashboardTopicEmail();
 }
 
 function getTopRankedEmailAccountList(email_doc_rows, top_count ) {

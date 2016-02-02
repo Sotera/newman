@@ -58,19 +58,11 @@ var newman_service_email_search_all = (function () {
       else {
         _response = response;
       }
-      console.log('received service_response_email_search_all.graph.nodes[' + response.graph.nodes.length + ']');
-      console.log('received service_response_email_search_all.graph.links[' + response.graph.links.length + ']');
-      console.log('received service_response_email_search_all.rows[' + response.rows.length + ']');
+      //console.log('received service_response_email_search_all.graph.nodes[' + response.graph.nodes.length + ']');
+      //console.log('received service_response_email_search_all.graph.links[' + response.graph.links.length + ']');
+      //console.log('received service_response_email_search_all.rows[' + response.rows.length + ']');
       //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
 
-
-      //initialize domain and community color if not already registered
-      /*
-      _.each(response.graph.nodes, function(object, index) {
-        newman_domain_email.addDomain(getEmailDomain(object.name), 0, 0.0);
-        newman_community_email.addCommunity(object.community, 0, 0.0);
-      });
-      */
 
       mapResponseEmailDocs(_response.rows);
     }

@@ -229,21 +229,21 @@ var search_result = (function () {
     console.log('setRoot( ' + label + ', ' + data_source_id + ', ' + search_field + ', ' + url + ' )');
 
     _current_list_root = result(
-      decodeURIComponent(label),
-      decodeURIComponent(search_text),
-      search_field,
-      description,
-      url,
-      data_source_id,
-      data_source_category,
-      document_count,
-      0,
-      0,
-      associate_count,
-      attach_count,
-      0.0,
-      icon_class
-    );
+                                decodeURIComponent(label),
+                                decodeURIComponent(search_text),
+                                search_field,
+                                description,
+                                url,
+                                data_source_id,
+                                data_source_category,
+                                document_count,
+                                0,
+                                0,
+                                associate_count,
+                                attach_count,
+                                0.0,
+                                icon_class
+                              );
 
 
     return clone(_current_list_root);
@@ -343,27 +343,16 @@ var search_result = (function () {
   }
 
 
-  /*
-  var onTreeTableRowEvent = function( element ) {
 
-    var label = ' all';
-    if (element.search_text) {
-      label = ' ' + decodeURIComponent(element.search_text);
+  var onTreeTableRowClicked = function( element ) {
+
+    if (element) {
+      history_nav.appendUI(element.url, element.search_field, element.label);
+
+      loadSearchResult(element.url);
     }
-    var id = decodeURIComponent(element.url).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
-
-    history_nav.push(
-      id,
-      label,
-      '',
-      element.url,
-      element.search_field
-    );
-
-    loadSearchResult( element.url );
-
   }
-  */
+
 
   var populateTreeTableRow = function( ui_appendable, data_list ) {
 
@@ -447,31 +436,12 @@ var search_result = (function () {
             if (attr_id) {
               console.log('\tid : ' + attr_id);
 
-              var item = getByKey(attr_id);
-              if(!item) {
-                item = element;
+              var row_element = getByKey(attr_id);
+              if (row_element) {
+                //console.log('\element : ' + JSON.stringify(item, null, 2));
+
+                onTreeTableRowClicked(row_element);
               }
-              //console.log('\element : ' + JSON.stringify(item, null, 2));
-
-              //onTreeTableRowEvent(item);
-
-
-              var label = ' ' + attr_id.replace('_', ' ');
-              if (item.label) {
-                label = ' ' + item.label;
-              }
-              var id = decodeURIComponent(item.url).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
-
-              history_nav.push(
-                id,
-                item.label,
-                '',
-                item.url,
-                item.search_field
-              );
-
-              loadSearchResult( item.url );
-
             }
 
 
@@ -491,7 +461,7 @@ var search_result = (function () {
               "<td></td>" +
               "<td>" + element.document_count + "</td>" +
               "<td>" + element.associate_count + "</td>" +
-              "<td>" + checkbox_html + "</td>"
+              "<td></td>"
             );
           }
           else if (parent_index == 1) {

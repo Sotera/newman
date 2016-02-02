@@ -67,7 +67,8 @@ var newman_search_filter = (function () {
     if (search_filter === 'text' || search_filter === 'all' ||
         search_filter === 'email' || search_filter === 'attach' ||
         search_filter === 'entity' || search_filter === 'topic' ||
-        search_filter === 'exportable' || search_filter === 'community') {
+        search_filter === 'exportable' || search_filter === 'community' ||
+        search_filter === 'subject') {
       return true;
     }
 
@@ -279,17 +280,21 @@ var newman_search_filter = (function () {
         url_path = url_path.substring(0, url_path.length - 1);
       }
 
-      if (!param_key) {
-        param_key = 'qs';
-      }
-
       var search_text = $("#txt_search").val();
-      var query_string = encodeURIComponent(search_text);
-      if (url_path.indexOf('?') > 0) {
-        url_path += '&' + param_key + '=' + query_string;
-      }
-      else {
-        url_path += '?' + param_key + '=' + query_string;
+
+      if (search_text) {
+
+        if (!param_key) {
+          param_key = 'qs';
+        }
+
+        var query_string = encodeURIComponent(search_text);
+        if (url_path.indexOf('?') > 0) {
+          url_path += '&' + param_key + '=' + query_string;
+        }
+        else {
+          url_path += '?' + param_key + '=' + query_string;
+        }
       }
 
     }
