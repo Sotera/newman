@@ -15,7 +15,7 @@ def _addrs_filter(senders=[], tos=[], ccs=[], bccs=[], address_filter_mode="unio
         addrs = _terms_filter("senders", senders) + _terms_filter("tos", tos) + _terms_filter("ccs", ccs) + _terms_filter("bccs", bccs)
         return {
             "bool":{
-                "should":[addrs],
+                "should":addrs,
                 "must":[],
                 "must_not":[]
             }
@@ -24,7 +24,7 @@ def _addrs_filter(senders=[], tos=[], ccs=[], bccs=[], address_filter_mode="unio
         addrs = _terms_filter("tos", tos) + _terms_filter("ccs", ccs) + _terms_filter("bccs", bccs)
         return {
             "bool":{
-                "should":[addrs],
+                "should":addrs,
                 "must":[_terms_filter("senders", senders)],
                 "must_not":[]
             }
