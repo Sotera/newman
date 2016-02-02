@@ -154,7 +154,7 @@ def _find_attachment_highlighting(highlight, attachments):
         # Just check the prefix
         highlighted = highlighted.replace('#_#HIGHLIGHT_START#_#','').replace('#_#HIGHLIGHT_END#_#','')[:100]
         for attachment in attachments:
-            if attachment["content"] and attachment["content"].startswith(highlighted):
+            if "content" in attachment and attachment["content"] and attachment["content"].startswith(highlighted):
                 attachment_highlight[attachment["filename"]] = True
     return attachment_highlight
 
