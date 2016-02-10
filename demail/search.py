@@ -29,7 +29,7 @@ def search(*path_args, **param_args):
         if len(path_args) == 1:
             return {"graph":{"nodes":[], "links":[]}, "rows":[]}
         elif len(path_args) >= 2:
-            return get_top_email_by_text_query(*path_args, **param_args)
+            return get_top_email_by_text_query(data_set_id, qs, start_datetime, end_datetime, size)
     elif path_args[0] == "email":
         if len(path_args) == 1:
             return {"graph":{"nodes":[], "links":[]}, "rows":[]}

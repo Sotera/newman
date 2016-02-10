@@ -10,8 +10,7 @@ from es_export import export_emails_archive
 from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarred, parseParamTextQuery
 from es_queries import _build_email_query
-from es_search import _build_graph_for_emails, _query_email_attachments, _query_emails
-
+from es_search import _build_graph_for_emails, _query_email_attachments, _query_emails, es_get_all_email_by_address, get_top_email_by_text_query
 
 #GET /email/<id>?qs="<query string>"
 # deprecated slated for removal
@@ -80,6 +79,94 @@ def getRankedEmails(*args, **kwargs):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
 
     return get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size)
+
+
+# TODO this needs to be reworked so that the ranked emails are the top ranked emails for the query.  Right now they are
+# The overall top 20.
+# TODO merge with getRankedAddresses function
+# Returnedd:  The graph structure returned will contain the search results for the query per user
+#GET /rank
+def getRankedAddressesWithTextSearch(*args, **kwargs):
+    tangelo.content_type("application/json")
+    tangelo.log("getRankedAddresses(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    qs = parseParamTextQuery(**kwargs)
+
+    # TODO this needs to come from UI
+    size = size if size >500 else 2500
+
+    text_search_graph = get_top_email_by_text_query(data_set_id, qs, start_datetime, end_datetime, size)
+
+    text_search = {
+        "text_search_url_path": qs,
+        "parameter": kwargs,
+        "search_result": {
+            "mail_sent_count": "N/A",
+            "mail_received_count": "N/A",
+            "mail_attachment_count": len(text_search_graph["attachments"]),
+            "query_matched_count" : text_search_graph["query_hits"],
+            "associated_count" : len(text_search_graph["graph"]["nodes"])
+        },
+        "TEMPORARY_GRAPH" : text_search_graph
+    }
+
+    ranked_addresses = get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size)
+    text_search["top_address_list"] = []
+    for i, email_address in enumerate(ranked_addresses["emails"]):
+        graph = es_get_all_email_by_address(data_set_id, email_address[0], qs, start_datetime, end_datetime, size )
+
+        text_search["top_address_list"].append({
+            "address_search_url_path" : email_address[0],
+            "parameters" : kwargs,
+            "search_results" : {
+                "mail_sent_count" : email_address[6],
+                "mail_received_count" : email_address[5],
+                "mail_attachment_count" : email_address[7],
+                "query_matched_count" : graph["query_hits"],
+                "associated_count" : len(graph["graph"]["nodes"])
+            },
+            "TEMPORARY_GRAPH" : graph
+        })
+
+
+    return {"text_search_list" : text_search}
+
+# TODO this needs to be reworked so that the ranked emails are the top ranked emails for the query.  Right now they are
+# The overall top 20.
+# TODO merge with getRankedAddresses function
+# Returnedd:  The graph structure returned will contain the search results for the query per user
+#GET /rank
+def getRankedAddresses(*args, **kwargs):
+    tangelo.content_type("application/json")
+    tangelo.log("getRankedAddresses(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    # TODO - reminder no 'qs' here set to ''
+    # qs = parseParamTextQuery(**kwargs)
+    qs=''
+
+    # TODO this needs to come from UI
+    size = size if size >500 else 2500
+
+    ranked_addresses = get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size)
+    top_address_list = []
+    for i, email_address in enumerate(ranked_addresses["emails"]):
+        graph = es_get_all_email_by_address(data_set_id, email_address[0], qs, start_datetime, end_datetime, size )
+
+        top_address_list.append({
+            "address_search_url_path" : email_address[0],
+            "parameters" : kwargs,
+            "search_results" : {
+                "mail_sent_count" : email_address[6],
+                "mail_received_count" : email_address[5],
+                "mail_attachment_count" : email_address[7],
+                "query_matched_count" : graph["query_hits"],
+                "associated_count" : len(graph["graph"]["nodes"])
+            },
+            "TEMPORARY_GRAPH" : graph
+        })
+
+
+    return {"top_address_list" : top_address_list}
 
 # DEPRECATED  TODO remove
 #GET /target
@@ -173,6 +260,8 @@ get_actions = {
     "domains" : getDomains,
     "communities": getCommunities,
     "rank" : getRankedEmails,
+    "ranked_addresses" : getRankedAddresses,
+    "ranked_addresses_search" : getRankedAddressesWithTextSearch,
     "exportable" : getExportable,
     "download" : buildExportable,
     "attachment" : get_attachment_by_id,

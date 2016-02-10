@@ -306,27 +306,19 @@ def es_get_all_email_by_topic(data_set_id, topic, email_addrs, qs, start_datetim
 # GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
 # build a graph for a specific email address.
 # args should be a list of terms to search for in any document field
-def get_top_email_by_text_query(*args, **kwargs):
-    tangelo.log("es_search.get_top_email_by_text_query(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+def get_top_email_by_text_query(data_set_id, qs, start_datetime, end_datetime, size):
 
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
-
-    # TODO this needs to come fromm UI
-    size = size if size >500 else 2500
-
-    search_terms=urllib.unquote(nth(args, 1, ''))
-
-    if not search_terms:
+    if not qs:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing search term(s)")
 
-    query  = _build_email_query(qs=search_terms, date_bounds=(start_datetime, end_datetime))
+    query  = _build_email_query(qs=qs, date_bounds=(start_datetime, end_datetime))
     tangelo.log("es_search.get_graph_for_text_query(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
     graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
 
     # Get attachments for community
-    query = _build_email_query(qs=search_terms, date_bounds=(start_datetime, end_datetime), attachments_only=True)
+    query = _build_email_query(qs=qs, date_bounds=(start_datetime, end_datetime), attachments_only=True)
     tangelo.log("es_search.get_top_email_by_text_query(attachment-query: %s)" % (query))
     attachments = _query_email_attachments(data_set_id, size, query)
     graph["attachments"] = attachments
