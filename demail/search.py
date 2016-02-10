@@ -22,18 +22,21 @@ def search(*path_args, **param_args):
     # TODO make sure that the qs param is put on the query
     qs = parseParamTextQuery(**param_args)
 
-    email_address=urllib.unquote(nth(path_args, 1, ''))
 
     #re-direct based on field
     if path_args[0] == "text" :
         if len(path_args) == 1:
             return {"graph":{"nodes":[], "links":[]}, "rows":[]}
         elif len(path_args) >= 2:
+            # TODO remove hacky path_args - should come from params
+            qs=urllib.unquote(nth(path_args, 1, ''))
             return get_top_email_by_text_query(data_set_id, qs, start_datetime, end_datetime, size)
     elif path_args[0] == "email":
         if len(path_args) == 1:
             return {"graph":{"nodes":[], "links":[]}, "rows":[]}
         elif len(path_args) >= 2:
+            # TODO remove hacky path_args - should come from params
+            email_address=urllib.unquote(nth(path_args, 1, ''))
             return es_get_all_email_by_address(data_set_id, email_address, qs, start_datetime, end_datetime, size )
     # TODO REMOVEV this call
     # elif path_args[0] == "entity":
