@@ -781,8 +781,9 @@ function do_search(load_on_response, field, value) {
  * @param field
  * @param search_text
  * @param load_on_response
+ * @param parent_search_uid
  */
-function requestSearch(field, search_text, load_on_response) {
+function requestSearch(field, search_text, load_on_response, parent_search_uid, clear_cache) {
 
   if (!field) {
     field = 'all';
@@ -792,37 +793,41 @@ function requestSearch(field, search_text, load_on_response) {
     load_on_response = false;
   }
 
+  if (!clear_cache) {
+    clear_cache = false;
+  }
+
   //console.log('requestSearch(' + JSON.stringify(arguments, null, 2)  + ')');
   console.log('\tsearch_text \'' + search_text + '\'');
 
   var url_path = "search/search";
 
   if (field === 'all' && search_text) {
-    requestSearch('text', search_text, false);
+    requestSearch('text', search_text, false, '', true);
   }
   else {
 
     newman_search_filter.setSelectedFilter(field);
     url_path = newman_search_filter.appendFilter(url_path);
-    console.log('\turl : ' + url_path);
 
     if (search_text) {
       url_path = url_path + '/' + search_text;
     }
 
     url_path = newman_data_source.appendDataSource(url_path);
+    url_path = newman_datetime_range.appendDatetimeRange(url_path);
     //url_path = newman_entity_email.appendEntity(url_path);
-
-    if (url_path.indexOf(url_search_exportable) < 0) {
-      url_path = newman_datetime_range.appendDatetimeRange(url_path);
-    }
 
     console.log('\turl : \'' + url_path + '\'');
     //console.log( '\tservice_response_email_search_all.getServiceURL(): \'' + current_data_set_url +'\'' );
 
     $.getJSON(url_path, function (search_response) {
 
+      // new implementation to be retrofitted
+      newman_search_result_collection.onSearchResponse(field, search_text, load_on_response, url_path, search_response, parent_search_uid, clear_cache);
 
+      // disable old search-result for now ...
+      /*
       console.log('.getJSON(' + url_path + ')');
       var current_data_set_url = newman_service_email_search_all.getServiceURL();
       var filtered_response = validateResponseSearch(search_response);
@@ -832,10 +837,7 @@ function requestSearch(field, search_text, load_on_response) {
         newman_service_email_search_all.setResponse(search_response);
       }
 
-      if (url_path.indexOf(url_search_exportable) >= 0) {
-        loadSearchResult(url_path);
-      }
-      else if (load_on_response) {
+      if (load_on_response) {
 
         email_analytics_content.open();
 
@@ -849,7 +851,7 @@ function requestSearch(field, search_text, load_on_response) {
         history_nav.appendUI(url_path, field, label);
 
       }
-      else {
+      else { // not load_on_response
 
         dashboard_content.open();
 
@@ -909,12 +911,7 @@ function requestSearch(field, search_text, load_on_response) {
           );
 
         }
-        else {
-          // result from search-field-keywords under the current data-set
-
-
-          // new implementation to be retrofitted
-          //newman_search_result_collection.onSearchResponse(field, search_text, load_on_response, url_path, search_response);
+        else { // result from search-field-keywords under the current data-set
 
           var doc_count = 0;
           if (filtered_response.query_hits) {
@@ -964,17 +961,21 @@ function requestSearch(field, search_text, load_on_response) {
           }
         }
       }
-    });
+
+      */
+      // end old search-result handling
+
+    }); // end getJSON(...)
   } // end of if (field === 'all')
 }
 
-function  propagateSearch( search_text, email_doc_rows ) {
+function  propagateSearch( search_text, email_doc_rows, parent_search_uid ) {
   var ranked_email_accounts = getTopRankedEmailAccountList(email_doc_rows, 20);
   //console.log('ranked_emails[' + ranked_email_accounts.length + '] : ' + JSON.stringify(ranked_email_accounts, null, 2));
   _.each(ranked_email_accounts, function (element) {
     var email_account = element;
     if (email_account != search_text) {
-      requestSearch( 'email', email_account, false );
+      requestSearch( 'email', email_account, false, parent_search_uid );
     }
   });
   newman_search_filter.setSelectedFilter();
@@ -2122,7 +2123,8 @@ $(function () {
     // initialize top-ranked email-accounts
     //newman_rank_email.displayUIRankEmail(10);
 
-    newman_service_email_exportable.requestService();
+    // TODO: need to retrofit with newer service
+    //newman_service_email_exportable.requestService();
 
     // close existing analytics displays if applicable
     email_analytics_content.close();

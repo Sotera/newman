@@ -3,6 +3,7 @@
  */
 
 var newman_data_source = (function () {
+  var debug_enabled = false;
   var _default_data_set_id = 'default_data_set';
   var _data_source_max = 20;
   var _data_source_list = [];
@@ -45,7 +46,9 @@ var newman_data_source = (function () {
                         start_datetime_selected,
                         end_datetime_selected,
                         top_hits ) {
-    console.log('push( ' + uid + ', ' + label + ' )');
+    if (debug_enabled) {
+      console.log('push( ' + uid + ', ' + label + ' )');
+    }
 
     var new_data_source = data_source(uid,
                                       label,
@@ -83,20 +86,24 @@ var newman_data_source = (function () {
 
     });
 
-    console.log('contains( ' + data_source.uid + ' ) ' + found);
+    if (debug_enabled) {
+      console.log('contains( ' + data_source.uid + ' ) ' + found);
+    }
 
     return found;
   };
 
   var getFirst = function () {
-    console.log('getFirst()');
-
+    if (debug_enabled) {
+      console.log('getFirst()');
+    }
     return _data_source_list.shift();
   };
 
   var getLast = function () {
-    console.log('getLast()');
-
+    if (debug_enabled) {
+      console.log('getLast()');
+    }
     return _data_source_list.pop();
   };
 
@@ -134,13 +141,16 @@ var newman_data_source = (function () {
 
 
   var refreshUI = function() {
-    console.log( 'data_source_list[' + _data_source_list.length + ']' );
+    if(debug_enabled) {
+      console.log('data_source_list[' + _data_source_list.length + ']');
+    }
 
     clearUI();
 
     _.each(_data_source_list, function( element ) {
-
-      console.log( '\t' + element.label + ', ' + element.uid );
+      if(debug_enabled) {
+        console.log('\tlabel "' + element.label + '", uid "' + element.uid + '"');
+      }
 
       var button = $('<button />', {
         type: 'button',
@@ -193,7 +203,9 @@ var newman_data_source = (function () {
 
     _data_source_selected = getByLabel(label);
     if (_data_source_selected) {
-      console.log('selected data-source : ' + JSON.stringify(_data_source_selected, null, 2));
+      if (debug_enabled) {
+        console.log('selected data-source : ' + JSON.stringify(_data_source_selected, null, 2));
+      }
 
       _default_data_set_id = _data_source_selected.uid;
 
@@ -345,7 +357,7 @@ var newman_data_source = (function () {
  * @type {{requestService, getResponse}}
  */
 var newman_service_data_source = (function () {
-
+  var debug_enabled = false;
   var _response = {};
   var _data_set_map = {};
 
@@ -405,8 +417,8 @@ var newman_service_data_source = (function () {
         return [element['data_set_id'], element];
       }));
 
-      // to be enabled to retrofit
-      //newman_search_result_collection.onDataSourceResponse( _data_set_map );
+      // build data-source tree-nodes
+      newman_search_result_collection.onDataSourceResponse( clone(_data_set_map) );
 
       newman_data_source.refreshUI();
       //console.log('_response_map: ' + JSON.stringify(_response_map, null, 2));
@@ -414,7 +426,9 @@ var newman_service_data_source = (function () {
       var id_selected = response.data_set_selected;
       var selected = _data_set_map[id_selected];
       if (selected) {
-        console.log('selected data-set : ' + JSON.stringify(selected, null, 2));
+        if (debug_enabled) {
+          console.log('selected data-source : ' + JSON.stringify(selected, null, 2));
+        }
 
         newman_data_source.setSelected(selected.data_set_label);
 

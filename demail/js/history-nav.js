@@ -57,7 +57,7 @@ var history_nav = (function () {
 
     if (!contains(new_data_view)) {
       if (hist_list.length == hist_max) {
-        hist_list.splice(1, 1);
+        hist_list.splice(0, 1);
       }
       hist_list.push(new_data_view);
     }
