@@ -2247,8 +2247,8 @@ $(function () {
 
     $('#top-entities').append(waiting_bar);
 
-    $("#submit_search").click(function () {
-      requestSearch(newman_search_filter.getSelectedFilter().label, $("#search_text").val(), false);
+    $("#txt_search_submit").click(function () {
+      searchByField();
     });
 
 
