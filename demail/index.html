@@ -403,25 +403,51 @@
               <!--End Search-Aggregate-Filter -->
 
               <!--Start Search-Result-Container -->
-              <div id="search_result_container" style="padding: 0; height: 550px; max-height: 550px; overflow-y: scroll;">
 
-                <table id="search_result_treetable" class="table tree-2 table-bordered table-striped table-condensed">
-                  <thead>
-                  <tr style="font-size: small;">
-                    <th width="60%"><!--<i class="fa fa-sort-amount-desc"></i>--></th>
-                    <!--<th><i class="fa fa-paper-plane-o" data-toggle="tooltip" data-placement="left" title="" data-content="total sent"></i></th>-->
-                    <th><i class="fa fa-send-o" rel="tooltip" data-placement="bottom" title="Email Sent"></i></th>
-                    <th><i class="fa fa-inbox" rel="tooltip" data-placement="bottom" title="Email Received"></i></th>
-                    <th><i class="fa fa-paperclip" rel="tooltip" data-placement="bottom" title="File Attachment(s)"></i></th>
-                    <th><i class="fa fa-envelope-o" rel="tooltip" data-placement="bottom" title="Search Matched"></i></th>
-                    <th><i class="fa fa-users" rel="tooltip" data-placement="bottom" title="Account(s) Associated"></i></th>
-                    <th><i class="fa fa-cubes" rel="tooltip" data-placement="bottom" title="Aggregate"></i></th>
+              <div id="search_result_container_copy" style="margin: 0px 15px 0px 0px; padding: 0; height: 30px;">
+                <table id="search_result_treetable_copy" class="table tree-2 table-bordered table-striped table-condensed">
+
+                  <thead style="font-size: small; display: table-header-group" id="search_result_treetable_header_copy">
+                  <tr>
+                    <th>&nbsp;</th>
+                    <th><i class="fa fa-send-o fa-fw" rel="tooltip" data-placement="bottom" title="Emails Sent"></i></th>
+                    <th><i class="fa fa-inbox fa-fw" rel="tooltip" data-placement="bottom" title="Emails Received"></i></th>
+                    <th><i class="fa fa-paperclip fa-fw" rel="tooltip" data-placement="bottom" title="File Attachments"></i></th>
+                    <th><i class="fa fa-envelope-o fa-fw" rel="tooltip" data-placement="bottom" title="Search Matched"></i></th>
+                    <th><i class="fa fa-users fa-fw" rel="tooltip" data-placement="bottom" title="Accounts Associated"></i></th>
+                    <th><i class="fa fa-cubes fa-fw" rel="tooltip" data-placement="bottom" title="Aggregate"></i></th>
                   </tr>
                   </thead>
 
-                  <tbody style="font-size: 11px;" id="search_result_treetable_body">
+                  <tbody style="font-size: 11px; visibility: hidden; display: table-footer-group" id="search_result_treetable_body_copy">
                   </tbody>
 
+                </table>
+              </div>
+
+
+              <div id="search_result_container" style="padding: 0; height: 570px; max-height: 570px; overflow-y: scroll;">
+              <!--<div class="table-scrollable-container" id="search_result_container" style="margin: 0; padding: 0;">-->
+
+
+                <table id="search_result_treetable" class="table tree-2 table-bordered table-striped table-condensed" >
+
+                  <thead style="font-size: small; visibility: hidden; display: table-footer-group" id="search_result_treetable_header">
+                  <tr>
+                    <th>&nbsp;</th>
+                    <th><i class="fa fa-send-o fa-fw" rel="tooltip" data-placement="bottom" title="Emails Sent"></i></th>
+                    <th><i class="fa fa-inbox fa-fw" rel="tooltip" data-placement="bottom" title="Emails Received"></i></th>
+                    <th><i class="fa fa-paperclip fa-fw" rel="tooltip" data-placement="bottom" title="File Attachments"></i></th>
+                    <th><i class="fa fa-envelope-o fa-fw" rel="tooltip" data-placement="bottom" title="Search Matched"></i></th>
+                    <th><i class="fa fa-users fa-fw" rel="tooltip" data-placement="bottom" title="Accounts Associated"></i></th>
+                    <th><i class="fa fa-cubes fa-fw" rel="tooltip" data-placement="bottom" title="Aggregate"></i></th>
+                  </tr>
+                  </thead>
+
+
+
+                  <tbody style="font-size: 11px;" id="search_result_treetable_body">
+                  </tbody>
                   <!--
                   <tbody>
                   <tr class="treegrid-1">
@@ -444,7 +470,11 @@
                   </tr>
                   </tbody>
                   -->
+
+
                 </table>
+
+
               </div>
               <!--End Search-Result-Container-->
 

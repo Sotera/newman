@@ -227,13 +227,14 @@ var newman_data_source = (function () {
           // initialize search-filter
           newman_search_filter.initFilter();
 
-          newman_service_email_exportable.requestService();
+          // TODO: need to retrofit with new service
+          //newman_service_email_exportable.requestService();
 
-          // initialize dashboard components and widgets
+          // re-initialize search
+          searchByField();
+
+          // re-initialize dashboard components and widgets
           initDashboardCharts();
-
-          search_result.clearAll();
-          requestSearch('all', '', false);
 
         }, 2000);
 

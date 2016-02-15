@@ -112,17 +112,12 @@ var newman_datetime_range = (function () {
         setDatetimeMaxSelected(data.values.max.toISOString().substring(0, 10));
         //console.log("date-range {" +  getDatetimeMinText() + ', ' + getDatetimeMinText() + "}");
 
-        //re-render search-results
-        reloadDashboardSearchResult();
+        //re-initialize search
+        searchByField();
 
-        //re-render activity-time-series
-        reloadDashboardActivityTimeline();
+        // re-initialize dashboard components and widgets
+        initDashboardCharts();
 
-        //re-render entity displays
-        reloadDashboardEntityEmail();
-
-        //re-render topic displays
-        reloadDashboardTopicEmail();
       });
 
       $(ui_id).dateRangeSlider('values', default_start_date, default_end_date);

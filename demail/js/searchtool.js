@@ -769,8 +769,8 @@ function drawChartTopic( count ) {
 
 
 function reloadDashboardSearchResult() {
-  search_result.clearAll();
-  requestSearch(newman_search_filter.getSelectedFilter().label, $("#search_text").val(), false);
+  //re-initialize search
+  searchByField();
 }
 
 function initDashboardActivityTimeline() {
@@ -827,14 +827,26 @@ function reloadDashboardFileTypeAttachment() {
  */
 function initDashboardCharts() {
 
-  // initialize dashboard components and widgets
+  /**
+   *  initialize dashboard components and widgets
+   */
+
+  //re-render activity-time-series
   //initDashboardActivityTimeline();
   reloadDashboardActivityTimeline();
+
+  //re-render entity analytics
   reloadDashboardEntityEmail();
+  //re-render topic analytics
   reloadDashboardTopicEmail()
+
+  //re-render domain analytics
   reloadDashboardDomain();
+  //re-render community analytics
   reloadDashboardCommunity();
+  //re-render rank analytics
   reloadDashboardRankEmail();
+  //re-render attachment-file analytics
   reloadDashboardFileTypeAttachment();
 
 }

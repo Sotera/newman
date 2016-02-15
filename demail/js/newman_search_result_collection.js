@@ -2,7 +2,7 @@
  * search-result-list container
  */
 function EmailSearchResultList() {
-  this.debug_enabled = true;
+  this.debug_enabled = false;
   this.result_list_max = 25;
   this.result_list = [];
 }
@@ -166,11 +166,7 @@ EmailSearchResultList.prototype = {
  */
 function EmailSearchResultTreeTable() {
 
-  //this.ui_table = $('#search_result_treetable');
-  //this.ui_table_body = $('#search_result_treetable_body');
-
   this.table_row_map = {};
-
   this.data_source_list = new EmailSearchResultList();
 }
 
@@ -379,10 +375,9 @@ EmailSearchResultTreeTable.prototype = {
 var newman_search_result_collection = (function () {
   var debug_enabled = false;
   var count = 0;
-  //var ui_refresh_interval = 5;
-  //var ui_refresh_threshold = ui_refresh_interval;
-  var ui_treetable = $('#search_result_treetable');
-  var ui_treetable_body = $('#search_result_treetable_body');
+
+  var ui_treetable_id = 'search_result_treetable';
+  var ui_treetable_body_id = 'search_result_treetable_body';
 
   var search_result_table = new EmailSearchResultTreeTable();
 
@@ -396,62 +391,192 @@ var newman_search_result_collection = (function () {
   function clearAll() {
     clearAllUI();
     search_result_table.clearAll();
+    count = 0;
   }
 
   function  populateTable() {
     if (debug_enabled) {
       console.log('populateTable()');
-      console.log( 'data_source_list: ' + JSON.stringify(search_result_table.data_source_list, null, 2) );
+      console.log( 'search_result_table.data_source_list: ' + JSON.stringify(search_result_table.data_source_list, null, 2) );
     }
 
-    var ui_container = ui_treetable;
-    var ui_appendable = ui_treetable_body;
+
+
+    var ui_container = $('#'+ui_treetable_id);
+    var ui_appendable = $('#'+ui_treetable_body_id);
+
+    var ui_treetable_copy_id = 'search_result_treetable_copy';
+    var ui_treetable_body_copy_id = 'search_result_treetable_body_copy';
+
+    var ui_container_copy = $('#'+ui_treetable_copy_id);
+    var ui_appendable_copy = $('#'+ui_treetable_body_copy_id);
 
     if (ui_container && ui_appendable) {
 
-      ui_appendable.empty();
-
-      // build the html tree-table-rows
-      //if(!search_result_table.isEmpty) {
-
       var data_source_list = search_result_table.data_source_list.result_list;
 
-        _.each(data_source_list, function (data_source_element, index) {
-          if (debug_enabled) {
-            console.log('\tlabel: ' + data_source_element.label + ', url: ' + data_source_element.url + ', data_source_id: ' + data_source_element.data_source_id );
-          }
+      /**
+       *  build the html tree-table-rows
+       */
 
-          var data_source_row = buildTableRow( ui_appendable, data_source_element, 0, -1 );
+      ui_appendable.empty();
+      _.each(data_source_list, function (data_source_element, index) {
+        if (debug_enabled) {
+          console.log('\tlabel: ' + data_source_element.label + ', url: ' + data_source_element.url + ', data_source_id: ' + data_source_element.data_source_id );
+        }
 
-          ui_appendable.append( data_source_row );
+        var _array = populateTableRow( ui_treetable_id, ui_appendable, data_source_element, 1, 0, (index+1) );
+        var data_source_node_index = _array[0];
+        var data_source_html_row = _array[1];
+        ui_appendable.append( data_source_html_row );
 
-          if (data_source_element.hasChild()) {
-            var text_search_list = data_source_element.getChildrenAsList();
-            _.each(text_search_list, function (text_search_element, index) {
-              var text_search_row = buildTableRow( ui_appendable, text_search_element, 1, 0 );
-              ui_appendable.append( text_search_row );
 
-              if (text_search_element.hasChild()) {
-                var address_search_list = text_search_element.getChildrenAsList();
-                _.each(address_search_list, function (address_search_element, index) {
-                  var address_search_row = buildTableRow( ui_appendable, address_search_element, 2, 1 );
-                  ui_appendable.append( address_search_row );
+        if (data_source_element.hasChild()) {
+          var text_search_list = data_source_element.getChildrenAsList();
+          _.each(text_search_list, function (text_search_element, index) {
 
-                });
-              } // end if (text_search_element.hasChild())
+            var _array = populateTableRow( ui_treetable_id, ui_appendable, text_search_element, 2, data_source_node_index, (index+1) );
+            var text_search_node_index = _array[0];
+            var text_search_html_row = _array[1];
+            ui_appendable.append( text_search_html_row );
 
-            });
-          }// end if (data_source_element.hasChild())
+            if (text_search_element.hasChild()) {
+              var address_search_list = text_search_element.getChildrenAsList();
+              _.each(address_search_list, function (address_search_element, index) {
 
-        });
+                var _array = populateTableRow( ui_treetable_id, ui_appendable, address_search_element, 3, text_search_node_index, (index+1) );
+                var address_search_node_index = _array[0];
+                var address_search_html_row = _array[1];
+                ui_appendable.append( address_search_html_row );
 
-      //}
+              });
+            } // end if (text_search_element.hasChild())
+
+          });
+        }// end if (data_source_element.hasChild())
+
+      });
+
+      /**
+       *  create a copy of the html tree-table-rows
+       */
+
+      ui_appendable_copy.empty();
+      _.each(data_source_list, function (data_source_element, index) {
+
+        var _array = populateTableRow( ui_treetable_copy_id, ui_appendable_copy, data_source_element, 1, 0, (index+1) );
+        var data_source_node_index = _array[0];
+        var data_source_html_row = _array[1];
+        ui_appendable_copy.append( data_source_html_row );
+
+
+        if (data_source_element.hasChild()) {
+          var text_search_list = data_source_element.getChildrenAsList();
+          _.each(text_search_list, function (text_search_element, index) {
+
+            var _array = populateTableRow( ui_treetable_copy_id, ui_appendable_copy, text_search_element, 2, data_source_node_index, (index+1) );
+            var text_search_node_index = _array[0];
+            var text_search_html_row = _array[1];
+            ui_appendable_copy.append( text_search_html_row );
+
+            if (text_search_element.hasChild()) {
+              var address_search_list = text_search_element.getChildrenAsList();
+              _.each(address_search_list, function (address_search_element, index) {
+
+                var _array = populateTableRow( ui_treetable_copy_id, ui_appendable_copy, address_search_element, 3, text_search_node_index, (index+1) );
+                var address_search_node_index = _array[0];
+                var address_search_html_row = _array[1];
+                ui_appendable_copy.append( address_search_html_row );
+
+              });
+            } // end if (text_search_element.hasChild())
+
+          });
+        }// end if (data_source_element.hasChild())
+
+      });
+
 
       ui_container.treegrid({
-        initialState: 'expanded',
-        expanderExpandedClass: 'fa fa-minus-square-o',
-        expanderCollapsedClass: 'fa fa-plus-square-o'
+        treeColumn : 0,
+        initialState : 'expanded',
+        expanderExpandedClass : 'fa fa-minus-square-o',
+        expanderCollapsedClass : 'fa fa-plus-square-o',
+        onChange : function() {
+          //console.log("onChange: "+JSON.stringify(this, null, 2));
+        },
+        onCollapse : function() {
+          var row_id = $(this).attr('id');
+          if (debug_enabled) {
+            console.log('onCollapse:\n')
+            //console.log(row_id);
+          }
+
+          var tokens = row_id.split('|');
+          if (tokens) {
+            var node_index = tokens[1];
+            if (node_index) {
+              if (debug_enabled) {
+                console.log('\tnode_index: ' + node_index);
+              }
+
+              ui_container_copy.treegrid('getAllNodes').each(function() {
+                var node_id = $(this).treegrid('getNodeId');
+                //console.log('\t\tnode_id : ' + node_id);
+                if (node_id == node_index) {
+                  //console.log('\t\ttarget_node found!');
+                  $(this).treegrid('collapse');
+                }
+              });
+            }
+          }
+
+          //ui_container_copy.treegrid('collapseAll');
+        },
+        onExpand : function() {
+          var row_id = $(this).attr('id');
+          if (debug_enabled) {
+            console.log('onExpand:\n');
+            //console.log(row_id);
+          }
+
+          var tokens = row_id.split('|');
+          if (tokens) {
+            var node_index = tokens[1];
+            if (node_index) {
+              if (debug_enabled) {
+                console.log('\tnode_index: ' + node_index);
+              }
+
+              ui_container_copy.treegrid('getAllNodes').each(function() {
+                var node_id = $(this).treegrid('getNodeId');
+                //console.log('\t\tnode_id : ' + node_id);
+                if (node_id == node_index) {
+                  if (debug_enabled) {
+                    console.log('\t\tnode_copy found!');
+                  }
+                  $(this).treegrid('expand');
+                }
+              });
+            }
+          }
+
+          //ui_container_copy.treegrid('expandAll');
+        }
       });
+
+      ui_appendable.trigger('treetable_rows_updated');
+
+
+      ui_container_copy.treegrid({
+        treeColumn : 0,
+        initialState : 'expanded',
+        expanderExpandedClass : 'fa fa-minus-square-o',
+        expanderCollapsedClass : 'fa fa-plus-square-o'
+      });
+
+      //expandDataSourceSelected(ui_container, ui_container_copy);
+
     }
     else {
       console.warn( 'Required "ui_container" or "ui_container_body" undefined!' );
@@ -459,7 +584,8 @@ var newman_search_result_collection = (function () {
 
   } // end of populateTable(...)
 
-  function buildTableRow(ui_callback, data_element, level_index, parent_level_index ) {
+  function populateTableRow( table_id, ui_callback, data_element, level_index, parent_node_index, count ) {
+    var node_index;
     var table_row;
 
     if (ui_callback && data_element) {
@@ -521,9 +647,11 @@ var newman_search_result_collection = (function () {
         event.stopImmediatePropagation();
       });
 
-      if (level_index == 0) {
-        // populate node
-        table_row = $('<tr class=\"treegrid-' + level_index + '\"/>').append(
+      if (level_index == 1) {
+        node_index = '' + level_index + count;
+        var row_id = table_id + '|' + node_index + '|' + data_element.uid;
+
+        table_row = $('<tr class=\"treegrid-' + node_index + '\" id=\"' + row_id + '\" />').append(
           "<td><i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
           "<td></td>" +
           "<td></td>" +
@@ -533,22 +661,41 @@ var newman_search_result_collection = (function () {
           "<td></td>"
         );
       }
-      else if (level_index == 1) {
-        // populate node
-        table_row = $('<tr class=\"treegrid-' + level_index + ' treegrid-parent-' + parent_level_index + '\"/>').append(
+      else if (level_index == 2) {
+
+        var email_outbound_count = data_element.document_sent;
+        if (email_outbound_count == 0) {
+          email_outbound_count = '';
+        }
+        var email_inbound_count = data_element.document_received;
+        if (email_inbound_count == 0) {
+          email_inbound_count = '';
+        }
+        var email_attach_count = data_element.attach_count;
+        if (email_attach_count == 0) {
+          email_attach_count = '';
+        }
+
+        node_index = '' + level_index + count;
+        var row_id = table_id + '|' + node_index + '|' + data_element.uid;
+
+        table_row = $('<tr class=\"treegrid-' + node_index + ' treegrid-parent-' + parent_node_index + '\" id=\"' + row_id  + '\" />').append(
           "<td><i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
-          "<td>" + data_element.document_sent + "</td>" +
-          "<td>" + data_element.document_received + "</td>" +
-          "<td>" + data_element.attach_count + "</td>" +
+          "<td>" + email_outbound_count + "</td>" +
+          "<td>" + email_inbound_count + "</td>" +
+          "<td>" + email_attach_count + "</td>" +
           "<td>" + data_element.document_count + "</td>" +
           "<td>" + data_element.associate_count + "</td>" +
           "<td>" + checkbox_html + "</td>"
         );
 
       }
-      else if (level_index == 2) {
-        // populate leaf-node
-        table_row = $('<tr class=\"treegrid-' + level_index + ' treegrid-parent-' + parent_level_index + '\"/>').append(
+      else if (level_index == 3) {
+
+        node_index = '' + level_index + count;
+        var row_id = table_id + '|' + node_index + '|' + data_element.uid;
+
+        table_row = $('<tr class=\"treegrid-' + node_index + ' treegrid-parent-' + parent_node_index + '\" id=\"' + row_id  + '\" />').append(
           "<td><i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
           "<td>" + data_element.document_sent + "</td>" +
           "<td>" + data_element.document_received + "</td>" +
@@ -561,8 +708,50 @@ var newman_search_result_collection = (function () {
 
     }
 
-    return table_row;
+    return [node_index, table_row];
   } // end of populateTableRow(...)
+
+  function expandDataSourceSelected(ui_treetable, ui_treetable_copy) {
+    console.log('expandDataSourceSelected()');
+
+    var data_set_selected = newman_data_source.getSelected();
+    console.log('\tdata_set_selected: ' + data_set_selected.uid);
+
+    ui_treetable.treegrid('getRootNodes').each(function() {
+      var row_id = $(this).attr('id');
+      var node_index = $(this).treegrid('getNodeId');
+      //console.log('\trow_id: ' + row_id + ', node_index: ' + node_index);
+
+      var tokens = row_id.split('|');
+      if (tokens) {
+        var node_uid = tokens[2];
+        if (node_uid) {
+          if (node_uid == data_set_selected.uid) {
+            //$(this).treegrid('expandRecursive');
+            //$(this).treegrid('render');
+          }
+          else {
+            console.log('\t\tunselected-node: ' + node_uid);
+
+            if ($(this).treegrid('isLeaf')) {
+              console.log('\tis-leaf node_index: ' + node_index);
+            }
+
+            //$(this).treegrid('collapseRecursive');
+          }
+        }
+      }
+
+    });
+
+    ui_treetable_copy.treegrid('getRootNodes').each(function() {
+      var row_id = $(this).attr('id');
+      var node_index = $(this).treegrid('getNodeId');
+      //console.log('\trow_id: ' + row_id + ', node_index: ' + node_index);
+
+    });
+
+  }
 
   function onTreeTableRowClicked( element ) {
 
@@ -598,7 +787,9 @@ var newman_search_result_collection = (function () {
       _.each(data_set_key_list, function (key) {
         var data_set_element = _response_map[key];
         if (data_set_element) {
-          console.log( 'data_set_element :\n' + JSON.stringify(data_set_element, null, 2) );
+          if (debug_enabled) {
+            console.log('data_set_element :\n' + JSON.stringify(data_set_element, null, 2));
+          }
 
           var label = data_set_element.data_set_label;
           var search_text = '';
@@ -635,14 +826,10 @@ var newman_search_result_collection = (function () {
         } // end of if(data_set_element)
       }); // end of _.each(...)
 
-      if (debug_enabled) {
-        console.log( 'search_result_table.data_source_list :\n' + JSON.stringify(search_result_table.data_source_list, null, 2) );
-      }
-
       // refresh UI
       populateTable();
     }
-  }
+  } // end onDataSourceResponse(...)
 
   /*
   function reloadAllDataSource() {
@@ -701,8 +888,13 @@ var newman_search_result_collection = (function () {
   */
 
   function onSearchResponse(field, search_text, load_on_response, url_path, search_response, parent_search_uid, clear_buffer) {
+    if (debug_enabled) {
+      console.log('newman_search_result_collection.onSearchResponse(' + search_text + ')');
+    }
 
-    console.log('newman_search_result_collection.onSearchResponse(' + search_text + ')');
+    // reset search-input filter to default (search-all)
+    newman_search_filter.resetSelectedFilter();
+
     var current_data_set_url = newman_service_email_search_all.getServiceURL();
     var filtered_response = validateResponseSearch(search_response);
 
@@ -737,6 +929,7 @@ var newman_search_result_collection = (function () {
           console.log('search-all-result "' + url_path + '"')
         }
 
+        // clear all previous buffered results, except for the data-sources (level-0)
         search_result_table.clearChildren();
 
         //initiate top-ranked email address searches
@@ -767,8 +960,12 @@ var newman_search_result_collection = (function () {
         var icon_class = newman_search_filter.parseFilterIconClass(url_path);
         var parent_node_uid = data_set_id;
 
-        if (field == 'text') {
+        if (field == 'all') {
 
+          // clear all previous buffered results, except for the data-sources (level-0)
+          search_result_table.clearChildren();
+
+          var icon_class = newman_search_filter.getFilterIconClass('text');
 
           var node = search_result_table.appendTextSearchList(label,
                                                               search_text,
@@ -787,6 +984,28 @@ var newman_search_result_collection = (function () {
 
           //initiate subsequent-email searches
           propagateSearch(search_text, filtered_response.rows, node.uid);
+
+        }
+        else if (field == 'text') {
+
+          // clear all previous buffered results, except for the data-sources (level-0)
+          search_result_table.clearChildren();
+
+          var node = search_result_table.appendTextSearchList(label,
+                                                              search_text,
+                                                              field,
+                                                              url_path,
+                                                              data_set_id,
+                                                              doc_count,
+                                                              outbound_count,
+                                                              inbound_count,
+                                                              associate_count,
+                                                              attach_count,
+                                                              rank,
+                                                              icon_class,
+                                                              parent_node_uid,
+                                                              clear_buffer);
+
 
         }
         else if (field == 'email') {
@@ -819,19 +1038,14 @@ var newman_search_result_collection = (function () {
         }
       }
 
-      if (debug_enabled) {
-        //console.log( 'search_result_table :\n' + JSON.stringify(search_result_table.data_source_list, null, 2) );
-      }
-
 
 
       // refresh UI
-      //count++;
-      //if (count < 6) {
+      //if (count < 2) {
         populateTable();
 
       //}
-
+      //count++;
     } // end result-tree-table
 
   } // end onSearchResponse(...)
@@ -853,8 +1067,55 @@ var newman_search_result_collection = (function () {
 
   }
 
+
+  function initTreeTableEvent() {
+
+
+    // Adjust the width of thead cells when window resizes
+    $('#search_result_treetable_body').bind('treetable_rows_updated', function(event) {
+      if (debug_enabled) {
+        console.log('event: "treetable_rows_updated"');
+
+        var max_width = $('#search_result_treetable_body').width();
+        console.log('\tmax_width: ' + max_width);
+      }
+
+
+      var td_width_list = [];
+      $('#search_result_treetable_body tr:first td').each(function(){
+        var td_obj = $(this);
+        td_width_list.push( td_obj.width() );
+      });
+
+
+      /*
+      if (td_width_list.length > 0) {
+        max_width = $('#search_result_treetable_header').width();
+        var total_new_width = 0, total_old_width = 0;
+        $('#search_result_treetable_header').find('tr').children().each(function (index, value) {
+          var new_td_width = td_width_list[index];
+          total_new_width = total_new_width + new_td_width;
+
+          var old_td_width = $(value).width();
+          total_old_width = total_old_width + old_td_width;
+          console.log('\tindex: ' + index + ', max_width: ' + max_width + ', old_td_width: ' + old_td_width + ', new_td_width: ' + new_td_width );
+
+          //$(value).width(new_td_width);
+          $(value).css('width', new_td_width + 'px');
+
+        });
+        console.log('\ttotal_old_width: ' + total_old_width + ', total: ' + total_new_width);
+      }
+      */
+
+    });
+
+  }
+
+
     return {
       'initiateTopRankedAddressSearch' : initiateTopRankedAddressSearch,
+      'initTreeTableEvent' : initTreeTableEvent,
       'clearAllUI' : clearAllUI,
       'clearAll' : clearAll,
       'deleteTableRow' : deleteTableRow,

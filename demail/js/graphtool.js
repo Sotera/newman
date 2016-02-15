@@ -685,9 +685,14 @@ function showSearchPopup( search_field, search_text ) {
 }
 
 /**
- * prepare to performs search by field
+ * initiate search by field
  */
-function searchByField( field ) {
+function searchByField( search_filter ) {
+
+  var field = newman_search_filter.getSelectedFilter().label;
+  if (search_filter && newman_search_filter.isValidFilter( search_filter )) {
+    field = search_filter;
+  }
 
   /*
   var listItems = $('#search_field_list li');
@@ -723,35 +728,15 @@ function searchByField( field ) {
    setSearchType( field );
   */
 
-  if (!newman_search_filter.isValidFilter( field )) {
-    field = newman_search_filter.getSelectedFilter().label;
-  }
+
 
   search_result.clearAll();
 
   var text_input = $("#txt_search").val();
-  //text_input = encodeURIComponent(text_input.replace(/"/g, '\\"'));
-  text_input = encodeURIComponent(text_input);
+  if (text_input) {
+    text_input = encodeURIComponent(text_input);
+  }
   requestSearch( field, text_input, false );
-
-  /*
-  if (text_input.length == 0){
-    requestSearch( field, text_input, false);
-  }
-  else {
-
-    var word_list = text_input.split(" ");
-    if (word_list.length > 1) {
-      _.each(word_list, function (word) {
-        requestSearch( field, word, false);
-      });
-    }
-    else {
-      requestSearch( field, word_list[0], false);
-    }
-    //requestSearch( field, text_input, false);
-  }
-  */
 
 }
 
@@ -803,20 +788,18 @@ function requestSearch(field, search_text, load_on_response, parent_search_uid, 
   var url_path = "search/search";
 
   if (field === 'all' && search_text) {
-    requestSearch('text', search_text, false, '', true);
+    //requestSearch('text', search_text, false, '', true);
+    clear_cache = true;
   }
-  else {
 
-    newman_search_filter.setSelectedFilter(field);
-    url_path = newman_search_filter.appendFilter(url_path);
 
-    if (search_text) {
-      url_path = url_path + '/' + search_text;
-    }
+  newman_search_filter.setSelectedFilter(field);
+  url_path = newman_search_filter.appendFilter(url_path, search_text);
+  url_path = newman_search_filter.appendURLQuery(url_path);
 
-    url_path = newman_data_source.appendDataSource(url_path);
-    url_path = newman_datetime_range.appendDatetimeRange(url_path);
-    //url_path = newman_entity_email.appendEntity(url_path);
+  url_path = newman_data_source.appendDataSource(url_path);
+  url_path = newman_datetime_range.appendDatetimeRange(url_path);
+  //url_path = newman_entity_email.appendEntity(url_path);
 
     console.log('\turl : \'' + url_path + '\'');
     //console.log( '\tservice_response_email_search_all.getServiceURL(): \'' + current_data_set_url +'\'' );
@@ -966,7 +949,7 @@ function requestSearch(field, search_text, load_on_response, parent_search_uid, 
       // end old search-result handling
 
     }); // end getJSON(...)
-  } // end of if (field === 'all')
+
 }
 
 function  propagateSearch( search_text, email_doc_rows, parent_search_uid ) {
@@ -978,7 +961,7 @@ function  propagateSearch( search_text, email_doc_rows, parent_search_uid ) {
       requestSearch( 'email', email_account, false, parent_search_uid );
     }
   });
-  newman_search_filter.setSelectedFilter();
+  newman_search_filter.resetSelectedFilter();
 
   // update widgets based on new search-query
   reloadDashboardEntityEmail();
@@ -2107,6 +2090,8 @@ var email_analytics_content = (function () {
 $(function () {
   "use strict";
 
+  newman_search_result_collection.initTreeTableEvent();
+
   initDashboardDomain();
   initDashboardCommunity();
 
@@ -2194,10 +2179,7 @@ $(function () {
     $('#txt_search').keyup(function (event) {
 
       if (event.keyCode === 13) {
-
-        var filter = newman_search_filter.getSelectedFilter().label;
-        searchByField(filter);
-
+        searchByField();
       }
       event.preventDefault();
     });
@@ -2463,6 +2445,8 @@ $(function () {
     if (hasher.getHash().length < 1) {
       hasher.setHash(newman_service_email_search_all.getServiceURLBase());
     }
+
+
 
 
   }, 6000); //end of setTimeout

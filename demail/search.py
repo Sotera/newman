@@ -24,7 +24,7 @@ def search(*path_args, **param_args):
 
 
     #re-direct based on field
-    if path_args[0] == "text" :
+    if (path_args[0] == "text") or (path_args[0] == "all") :
         if len(path_args) == 1:
             return {"graph":{"nodes":[], "links":[]}, "rows":[]}
         elif len(path_args) >= 2:
