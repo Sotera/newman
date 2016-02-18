@@ -57,7 +57,12 @@ var history_nav = (function () {
 
     if (!contains(new_data_view)) {
       if (hist_list.length == hist_max) {
-        hist_list.splice(0, 1);
+        /**
+         *  NOTE:
+         *  Keeping the previous <hist_max> items, remove the very first (index-0) item in the history,
+         *  but technically, remove the second (index-1) item since the very first item is the fixed dashboard.
+         */
+        hist_list.splice(1, 1);
       }
       hist_list.push(new_data_view);
     }
