@@ -7,7 +7,7 @@
  */
 var newman_datatable_email = (function () {
 
-
+  var debug_enabled = false;
   var _current_email_doc_id = null;
   var _current_email_doc_datetime = null;
 
@@ -90,14 +90,12 @@ var newman_datatable_email = (function () {
             if (column_index == data_column_export_index) {
               var key = table.cell(row_index, data_column_key_index).data();
               var target = value_map[key];
-              if (target) {
-                if (target === 'true') {
-                  //console.log('updateDataTableColumn[' + row_index + ', ' + column_index + '] value \'' + value + '\' key \'' + key + '\' target \'' + target + '\'');
-                  table.cell(row_index, column_index).data(getStarredHTML());
-                }
-                else {
-                  table.cell(row_index, column_index).data(getNonStarredHTML());
-                }
+              if (target === true) {
+                //console.log('updateDataTableColumn[' + row_index + ', ' + column_index + '] value \'' + value + '\' key \'' + key + '\' target \'' + target + '\'');
+                table.cell(row_index, column_index).data(getStarredHTML());
+              }
+              else {
+                table.cell(row_index, column_index).data(getNonStarredHTML());
               }
             }
 
@@ -160,7 +158,7 @@ var newman_datatable_email = (function () {
     }
   }
 
-  function markDataTableRowAsRead(value_map) {
+  function _markDataTableRowAsRead(value_map) {
     if (value_map) {
       var table = $('#result_table').DataTable();
       if (table) {
@@ -173,21 +171,20 @@ var newman_datatable_email = (function () {
 
             var key = row_data[data_column_key_index];
             var value = value_map[key];
-            if (value) {
-              console.log('matched row: ' + key + ', ' + value);
 
-              if (value === 'true') {
-                jquery_row.addClass('data-table-row-read');
-                data_row_is_read_map[key] = true;
+            if (value === true) {
+              if (debug_enabled) {
+                console.log('matched row: ' + key + ', ' + value);
               }
-              else {
-                jquery_row.removeClass('data-table-row-read');
-              }
+
+              jquery_row.addClass('data-table-row-read');
+            }
+            else {
+              jquery_row.removeClass('data-table-row-read')
             }
 
           });
 
-        //console.log('value_map: ' + JSON.stringify(value_map, null, 2));
       }
     }
   }
@@ -195,39 +192,26 @@ var newman_datatable_email = (function () {
   function markAsRead(is_marked, id_list_selected) {
 
     if (id_list_selected) {
-      console.log('markAsRead(' + is_marked + ')');
-
-      var id_map = {};
-
-      if (is_marked) {
-        _.each(id_list_selected, function (value) {
-          id_map[value] = String(true);
-        });
-
-        _.each(data_row_is_read_map, function (value, key) {
-          if (value) {
-            id_map[key] = String(true);
-          }
-        });
-      }
-      else {
-        _.each(id_list_selected, function (value) {
-          id_map[value] = String(false);
-        });
-
-        var new_data_row_is_read_map = {};
-        _.each(data_row_is_read_map, function (value, key) {
-          var row_id = id_map[key];
-          if (!row_id) {
-            new_data_row_is_read_map[key] = value;
-          }
-
-        });
-        data_row_is_read_map = new_data_row_is_read_map;
+      if (debug_enabled) {
+        console.log('markAsRead(' + is_marked + ')');
+        console.log('id_list_selected:' + JSON.stringify(id_list_selected, null, 2));
       }
 
-      //console.log('id_set: ' + JSON.stringify(value_map, null, 2));
-      markDataTableRowAsRead(id_map);
+      if (is_marked === true) {
+        _.each(id_list_selected, function (value) {
+          data_row_is_read_map[value] = true;
+        });
+      }
+      else if (is_marked === false) {
+        _.each(id_list_selected, function (value) {
+          delete data_row_is_read_map[value];
+        });
+      }
+
+      if (debug_enabled) {
+        console.log('data_row_is_read_map: ' + JSON.stringify(data_row_is_read_map, null, 2));
+      }
+      _markDataTableRowAsRead(data_row_is_read_map);
     }
   }
 
@@ -258,7 +242,12 @@ var newman_datatable_email = (function () {
     data_row_is_read_map = {};
 
     //mark starred(exportable) rows
-    newman_email_starred_request_all.requestService( newman_datatable_email );
+    var starred_doc_list = newman_email_starred.getStarredDocumentList();
+    if (starred_doc_list) {
+      _.each(starred_doc_list, function(doc_id) {
+        _email_doc_id_starred_map[ doc_id ] = true;
+      });
+    }
 
     data_table_rows = _.map(data_rows, function (row) {
 
@@ -270,7 +259,7 @@ var newman_datatable_email = (function () {
 
       var exportable_icon = _non_starred_html;
       var is_exportable = _email_doc_id_starred_map[ row.num ];
-      if (is_exportable === 'true') {
+      if (is_exportable === true) {
         exportable_icon = _starred_html;
       }
 
@@ -386,7 +375,7 @@ var newman_datatable_email = (function () {
 
     //update exportable toggle button
     var is_exportable = _email_doc_id_starred_map[email_id];
-    if (is_exportable === 'true') {
+    if (is_exportable === true) {
       //already marked as starred, mark as un-starred
       var toggle_ui = $("#toggle_mark_for_export");
       if (toggle_ui) {
@@ -445,62 +434,55 @@ var newman_datatable_email = (function () {
 
 
   function setEmailDocumentStarred(is_marked, email_doc_id_list) {
+    if (debug_enabled) {
+      console.log('setEmailDocumentStarred(' + is_marked + ', email_doc_id_list[' + email_doc_id_list.length + '])');
+    }
 
     if (email_doc_id_list && email_doc_id_list.length > 0) {
-      console.log('is_marked ' + is_marked + ' id_set: ' + JSON.stringify(email_doc_id_list, null, 2));
+      //console.log('is_marked ' + is_marked + ' id_set: ' + JSON.stringify(email_doc_id_list, null, 2));
 
       _.each(email_doc_id_list, function (doc_id) {
         if (is_marked === true) {
-          _email_doc_id_starred_map[doc_id] = 'true';
+          _email_doc_id_starred_map[doc_id] = true;
         }
-        else {
-          _email_doc_id_starred_map[doc_id] = 'false';
+        else if (is_marked === false) {
+          _email_doc_id_starred_map[doc_id] = false;
         }
       });
 
-      //TODO: rework using different service...
-      /*
-       var exportable_list = newman_service_email_exportable.getResponseMapKeys();
-       _.each(exportable_list, function (doc_id) {
-       var existing_value = _email_doc_id_starred_map[doc_id];
-       if (!existing_value) {
-       _email_doc_id_starred_map[doc_id] = 'true';
-       }
-       });
-       */
-      console.log('_email_doc_id_starred_map: ' + JSON.stringify(_email_doc_id_starred_map, null, 2));
+      if (debug_enabled) {
+        console.log('_email_doc_id_starred_map: ' + JSON.stringify(_email_doc_id_starred_map, null, 2));
+      }
 
       updateDataTableColumn(data_column_export_index, _email_doc_id_starred_map);
     }
 
   }
 
-  function receiveAllEmailDocumentStarred( service_response ) {
-    if (service_response) {
-      //validate service-response
-      var filtered_response = validateResponseSearch(service_response);
-      //console.log('filtered_response:\n' + JSON.stringify(filtered_response, null, 2));
 
-      if (filtered_response.rows && filtered_response.rows.length > 0) {
-        _email_doc_id_starred_map = {};
+  /*
+  function receiveStarredEmailDocumentList( starred_doc_list ) {
+    if (starred_doc_list && starred_doc_list.length > 0) {
+      console.log('receiveStarredEmailDocumentList(starred_doc_list[' + starred_doc_list.length + '])');
+      console.log('\tstarred_doc_list:\n' + JSON.stringify(starred_doc_list, null, 2));
 
-        _.each(filtered_response.rows, function (element) {
-          var doc_id = element.num;
-          if (doc_id) {
-            _email_doc_id_starred_map[doc_id] = 'true';
-          }
-        });
-      }
+      _email_doc_id_starred_map = {};
+
+      _.each(starred_doc_list, function (doc_id) {
+        _email_doc_id_starred_map[doc_id] = true;
+      });
     }
   }
+  */
 
-  function setAllEmailDocumentStarred(email_doc_id_list) {
 
-    if (email_doc_id_list && email_doc_id_list.length > 0) {
+  function setStarredEmailDocumentList(starred_doc_list) {
 
-      //console.log('is_marked ' + is_marked + ' id_set: ' + JSON.stringify(id_list_selected, null, 2));
-      _.each(email_doc_id_list, function (value) {
-        _email_doc_id_starred_map[value] = 'true';
+    if (starred_doc_list && starred_doc_list.length > 0) {
+      console.log('setStarredEmailDocumentList(starred_doc_list[' + starred_doc_list.length + '])');
+
+      _.each(starred_doc_list, function (doc_id) {
+        _email_doc_id_starred_map[doc_id] = true;
       });
 
       //console.log('value_map: ' + JSON.stringify(value_map, null, 2));
@@ -560,8 +542,15 @@ var newman_datatable_email = (function () {
     $('#email_view_all_starred').off().click(function () {
       console.log("clicked #email_view_all_starred");
 
+      var email_id = _current_email_doc_id;
+
       // query email documents
-      newman_email_starred_request_all.requestService();
+      if (email_id) {
+        newman_email_starred_request_all.requestService(newman_graph_email, email_id);
+      }
+      else {
+        newman_email_starred_request_all.requestService(newman_graph_email);
+      }
 
       // display email-tab
       newman_graph_email.displayUITab();
@@ -583,43 +572,9 @@ var newman_datatable_email = (function () {
 
         newman_email_starred.displayUITab();
 
-        /*
-         $.ajax({
-         url: 'email/exportable',
-         type: "POST",
-         data: JSON.stringify({"email": id, "exportable": !exportable}),
-         contentType:"application/json; charset=utf-8",
-         dataType:"json"
-         })
-         .done(function(response){
-         console.log('email_id_marked: ' + id);
-         $("#toggle_mark_for_export").toggleClass('datatable_row_marked');
-         var is_marked = $("#toggle_mark_for_export").hasClass('datatable_row_marked');
-         var id_set = [id];
-         setEmailDocumentStarred( is_marked, id_set );
-         //console.log('email/exportable response:' + JSON.stringify(response, null, 2));
-         })
-         .fail(function(resp){
-         alert('fail');
-         console.log("fail");
-         });
-         */
-
       };
 
-      /*
-      $(this).toggleClass('datatable_row_marked');
-      var is_marked = $(this).hasClass('datatable_row_marked');
-      if (is_marked) {
-        $(this).find("i").first().removeClass('fa-star-o').addClass('fa-star');
-      }
-      else {
-        $(this).find("i").first().removeClass('fa-star').addClass('fa-star-o');
-      }
-      */
-
-      var is_exportable = _email_doc_id_starred_map[ email_id ];
-      var is_marked = (is_exportable === 'true');
+      var is_marked = _email_doc_id_starred_map[ email_id ];
       console.log("is_marked " + is_marked);
 
       if (is_marked) {
@@ -695,8 +650,8 @@ var newman_datatable_email = (function () {
 
   return {
     'initDataTableEvents' : initDataTableEvents,
-    'setAllEmailDocumentStarred' : setAllEmailDocumentStarred,
-    'receiveAllEmailDocumentStarred' : receiveAllEmailDocumentStarred,
+    'setStarredEmailDocumentList' : setStarredEmailDocumentList,
+    //'receiveStarredEmailDocumentList' : receiveStarredEmailDocumentList,
     'setEmailDocumentStarred' : setEmailDocumentStarred,
     'showEmailDocumentView' : showEmailDocumentView,
     'highlightDataTableRow' : highlightDataTableRow,

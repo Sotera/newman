@@ -227,8 +227,8 @@ var newman_data_source = (function () {
           // initialize search-filter
           newman_search_filter.initFilter();
 
-          // TODO: need to retrofit with new service
-          //newman_service_email_exportable.requestService();
+          // re-initialize starred-documents
+          newman_email_starred.initStarredDocumentList();
 
           // re-initialize search
           searchByField();

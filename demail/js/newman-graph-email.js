@@ -310,6 +310,7 @@ var newman_graph_email = (function () {
   }
 
   function updateUIGraphView( search_response, auto_display_doc_uid, starred_email_doc_list ) {
+    console.log('newman_graph_email.updateUIGraphView(search_response, ' + auto_display_doc_uid + ', starred_email_doc_list)');
 
     //validate search-response
     var filtered_response = validateResponseSearch( search_response );
@@ -322,7 +323,7 @@ var newman_graph_email = (function () {
     $('#document_count').text(filtered_response.rows.length);
     newman_datatable_email.populateDataTable( filtered_response.rows )
     if (starred_email_doc_list ) {
-      newman_datatable_email.setAllEmailDocumentStarred(starred_email_doc_list);
+      newman_datatable_email.setStarredEmailDocumentList(starred_email_doc_list);
     }
 
     // populate attachment-table
@@ -413,7 +414,7 @@ var newman_graph_email_request_by_address = (function () {
     var service_url = getServiceURL(email_address);
     $.get( service_url ).then(function (response) {
       setResponse( response );
-      newman_graph_email.updateUIGraphView( response, false );
+      newman_graph_email.updateUIGraphView( response );
 
       // add to work-flow-history
       history_nav.appendUI(service_url, 'email', email_address);
@@ -568,7 +569,7 @@ var newman_graph_email_request_by_community = (function () {
     var service_url = getServiceURL(email_address);
     $.get( service_url ).then(function (response) {
       setResponse( response );
-      newman_graph_email.updateUIGraphView( response, false );
+      newman_graph_email.updateUIGraphView( response );
 
       // add to work-flow-history
       history_nav.appendUI(service_url, 'community', email_address);
@@ -628,7 +629,7 @@ var newman_graph_email_request_by_topic = (function () {
     var service_url = getServiceURL();
     $.get( service_url ).then(function (response) {
       setResponse( response );
-      newman_graph_email.updateUIGraphView( response, false );
+      newman_graph_email.updateUIGraphView( response );
 
       // add to work-flow-history
       var topic_set_as_string = newman_topic_email.getAllTopicSelectedAsString();

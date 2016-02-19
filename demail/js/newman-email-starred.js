@@ -7,46 +7,48 @@
  * email-graph related container
  */
 var newman_email_starred = (function () {
+  var debug_enabled = true;
+  var starred_doc_id_array = [];
 
-  var ui_id;
 
 
+  function initStarredDocumentList() {
+    newman_email_starred_request_all.requestService();
+  }
 
-  function initUI() {
-
+  function getStarredDocumentList() {
+    return clone( starred_doc_id_array );
   }
 
   /**
    * update from service the UI for email response
    * @param response
    */
-  function updateUIEmailTable(search_response, documentViewEnabled) {
+  function setStarredDocumentList(response) {
 
-    //validate search-response
-    var filtered_response = validateResponseSearch( search_response );
-    //console.log('filtered_response:\n' + JSON.stringify(filtered_response, null, 2));
+    var starred_doc_list_copy;
 
-    if( filtered_response.rows && filtered_response.rows.length > 0 ) {
+    if( response.rows && response.rows.length > 0 ) {
 
-      var id_array = [];
-      _.each(filtered_response.rows, function (element) {
+      starred_doc_id_array = [];
+      _.each(response.rows, function (element) {
         var doc_id = element.num;
         if (doc_id) {
-          id_array.push(doc_id);
+          starred_doc_id_array.push(doc_id);
         }
       });
+      starred_doc_list_copy = clone(starred_doc_id_array);
 
-      if (id_array.length > 0) {
-        newman_graph_email.updateUIGraphView(search_response, documentViewEnabled, id_array);
+      if (debug_enabled) {
+        console.log('newman_email_starred.setStarredDocumentList(search_response)');
+        console.log('\tstarred_doc_id_array:\n' + JSON.stringify(starred_doc_id_array, null, 2));
+      }
 
-      }
-      else {
-        console.warn('No expected email-document-ID found!');
-      }
     }
     else {
-      console.warn('No expected email-document found!');
+      console.warn('No expected "response.rows" found!');
     }
+    return starred_doc_list_copy;
   }
 
   function displayUITab() {
@@ -56,8 +58,9 @@ var newman_email_starred = (function () {
   }
 
   return {
-    'initUI' : initUI,
-    'updateUIEmailTable' : updateUIEmailTable,
+    'initStarredDocumentList' : initStarredDocumentList,
+    'getStarredDocumentList' : getStarredDocumentList,
+    'setStarredDocumentList' : setStarredDocumentList,
     'displayUITab' : displayUITab
   }
 
@@ -214,27 +217,25 @@ var newman_email_starred_request_all = (function () {
   }
 
   function getServiceURL() {
-    console.log('newman_email_starred_request_all.getServiceURL()');
 
       var service_url = _service_url;
       service_url = newman_data_source.appendDataSource(service_url);
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
 
+      console.log('newman_email_starred_request_all.getServiceURL( ' + service_url + ' )');
       return service_url;
   }
 
-  function requestService( response_callback ) {
+  function requestService( response_callback, auto_display_doc_uid ) {
 
     console.log('newman_email_starred_request_all.requestService()');
     var service_url = getServiceURL();
     $.get( service_url ).then(function (response) {
       setResponse( response );
+      var starred_doc_list = newman_email_starred.setStarredDocumentList(response);
 
-      if (response_callback ) {
-        response_callback.receiveAllEmailDocumentStarred( response );
-      }
-      else {
-        newman_email_starred.updateUIEmailTable(response, false);
+      if (response_callback) {
+        response_callback.updateUIGraphView(response, auto_display_doc_uid, starred_doc_list);
       }
     });
   }

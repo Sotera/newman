@@ -2108,8 +2108,8 @@ $(function () {
     // initialize top-ranked email-accounts
     //newman_rank_email.displayUIRankEmail(10);
 
-    // TODO: need to retrofit with newer service
-    //newman_service_email_exportable.requestService();
+    // initialize starred-documents
+    newman_email_starred.initStarredDocumentList();
 
     // close existing analytics displays if applicable
     email_analytics_content.close();
