@@ -95,3 +95,7 @@ def parseParamDocumentUID( **kwargs ):
 def parseParamDocumentDatetime( **kwargs ):
     #tangelo.log("parseParamDocumentUID(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     return kwargs.get('document_datetime', '')
+
+def parseParamAttachmentGUID( **kwargs ):
+    #tangelo.log("parseParamDocumentUID(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    return kwargs.get('attachment_guid', '')

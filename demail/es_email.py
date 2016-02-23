@@ -4,7 +4,7 @@ import tangelo
 import cherrypy
 import mimetypes
 from elasticsearch import Elasticsearch
-from param_utils import parseParamDatetime
+from param_utils import parseParamDatetime, parseParamAttachmentGUID
 from newman.utils.functions import nth
 from newman.newman_config import elasticsearch_hosts
 from es_search import _search_ranked_email_addrs, count, get_cached_email_addr, initialize_email_addr_cache
@@ -246,7 +246,11 @@ def header(h, t=None):
 def get_attachment_by_id(*args, **kwargs):
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+
     attachment_id=nth(args, 0, '')
+
+    if not attachment_id:
+        attachment_id = parseParamAttachmentGUID(**kwargs)
 
     cherrypy.log("email.get_attachments_sender(index=%s, attachment_id=%s)" % (data_set_id, attachment_id))
     if not data_set_id:
