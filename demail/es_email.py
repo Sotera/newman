@@ -3,13 +3,13 @@ import base64
 import tangelo
 import cherrypy
 import mimetypes
-from elasticsearch import Elasticsearch
 from param_utils import parseParamDatetime, parseParamAttachmentGUID
 from newman.utils.functions import nth
-from newman.newman_config import elasticsearch_hosts
 from es_search import _search_ranked_email_addrs, count, get_cached_email_addr, initialize_email_addr_cache
 from es_queries import _build_filter, email_highlighting_query, _build_email_query
 from es_topic import get_categories
+
+from newman.es_connection import es
 
 #map the email_address for the email/rank REST service
 def map_email_addr(email_addr_resp, total_emails):
@@ -59,12 +59,11 @@ def get_top_communities(index, query_terms='', topic_score=None, entity={}, date
     date_bounds = None
     # TODO fix
 
-    es = Elasticsearch(elasticsearch_hosts())
     aggs = { "community_agg" : { "terms" : { "field" : "community", "size" : num_communities }}}
     query = filtered_agg_query(topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="community")
     tangelo.log("Query %s"%query)
 
-    communities_agg = es.search(index=index, doc_type='email_address', size=0, body=query)
+    communities_agg = es().search(index=index, doc_type='email_address', size=0, body=query)
     # total_other = communities_agg["aggregations"]["community_agg"]["doc_count_error_upper_bound"]
     communities = [[community["key"], int(community["doc_count"])] for community in communities_agg["aggregations"]["community_filtered_agg"]["community_agg"]["buckets"]]
     total = sum(domain[1] for domain in communities)
@@ -78,12 +77,11 @@ def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, ent
     date_bounds = None
     # TODO fix
 
-    es = Elasticsearch(elasticsearch_hosts())
     aggs = { "domain_agg" : { "terms" : { "field" : "domain", "size" : num_domains }}}
     query = filtered_agg_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="domain")
     tangelo.log("Query %s"%query)
 
-    domains_agg = es.search(index=index, doc_type='email_address', size=0, body=query)
+    domains_agg = es().search(index=index, doc_type='email_address', size=0, body=query)
     # total_other = domains_agg["aggregations"]["domain_agg"]["doc_count_error_upper_bound"]
     domains = [[domain["key"], int(domain["doc_count"])] for domain in domains_agg["aggregations"]["domain_filtered_agg"]["domain_agg"]["buckets"]]
     total = sum(domain[1] for domain in domains)
@@ -92,12 +90,11 @@ def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, ent
 
 # GET top 10 Attchment types for index
 def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, num_top_attachments=20):
-    es = Elasticsearch(elasticsearch_hosts())
     aggs = { "attachment_type_agg" : { "terms" : { "field" : "extension", "size" : num_top_attachments }}}
     query = filtered_agg_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="attachment")
     tangelo.log("Query %s"%query)
 
-    attch_agg_resp = es.search(index=index, doc_type='attachments', size=0, body=query)
+    attch_agg_resp = es().search(index=index, doc_type='attachments', size=0, body=query)
 
     types = [[attch_type["key"], int(attch_type["doc_count"])] for attch_type in attch_agg_resp["aggregations"]["attachment_filtered_agg"]["attachment_type_agg"]["buckets"]]
     total = sum(type[1] for type in types)
@@ -121,9 +118,7 @@ def get_ranked_email_address(data_set_id, query_terms='', topic_score=None, enti
         },
         "size":0}
 
-    es = Elasticsearch(elasticsearch_hosts())
-
-    resp = es.search(index=data_set_id, doc_type="emails", body=body)
+    resp = es().search(index=data_set_id, doc_type="emails", body=body)
 
     total_docs =resp["aggregations"]["filtered_addrs_agg"]["doc_count"]
     email_addrs = [map_email_filtered(get_cached_email_addr(data_set_id, email_addr["key"]), email_addr["doc_count"],total_docs) for email_addr in resp["aggregations"]["filtered_addrs_agg"]["top_addrs_agg"]["buckets"]]
@@ -170,7 +165,6 @@ def _format_html(text):
 
 def get_email(index, email_id, qs=None):
 
-    es = Elasticsearch(elasticsearch_hosts())
     # fields=["id","datetime","senders","senders_line","tos_line","ccs_line","bccs_line","subject","body","attachments.filename","entities.entity_organization","entities.entity_location","entities.entity_person","entities.entity_misc"]
     # email = es.get(index, doc_type="emails", id=email_id, fields=fields)
 
@@ -180,7 +174,7 @@ def get_email(index, email_id, qs=None):
     highlighted_attachments = {}
 
     if not qs:
-        email = es.get(index, doc_type="emails", id=email_id)
+        email = es().get(index, doc_type="emails", id=email_id)
         source = email["_source"]
         body = source["body"]
         subject = source["subject"]
@@ -188,7 +182,7 @@ def get_email(index, email_id, qs=None):
         query = email_highlighting_query(email_id, highlight_query_string=qs)
         tangelo.log("es_email.get_email(highlighting-query: %s )" % (query))
 
-        email = es.search(index=index, doc_type='emails', body=query)
+        email = es().search(index=index, doc_type='emails', body=query)
         source = email["hits"]["hits"][0]["_source"]
         highlight = email["hits"]["hits"][0].get("highlight", {})
         body = highlight.get('body', [source.get('body','')])[0]
@@ -228,10 +222,9 @@ def get_email(index, email_id, qs=None):
     return { "email" : email, "entities": entities, "lda_topic_scores":topic_scores}
 
 def set_starred(index, ids=[], starred=True):
-    es = Elasticsearch(elasticsearch_hosts())
     body = { "doc" : { "starred" : starred }}
     for id in ids:
-        response = es.update(index, doc_type="emails", id=id, body=body)
+        response = es().update(index, doc_type="emails", id=id, body=body)
 
 
 def header(h, t=None):
@@ -258,9 +251,7 @@ def get_attachment_by_id(*args, **kwargs):
     if not attachment_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing attachment_id")
 
-
-    es = Elasticsearch(elasticsearch_hosts())
-    attachment = es.get(index=data_set_id, doc_type="attachments", id=attachment_id)
+    attachment = es().get(index=data_set_id, doc_type="attachments", id=attachment_id)
 
     if not attachment:
         return tangelo.HTTPStatusCode(400, "no attachments found for (index=%s, attachment_id=%s)" % (data_set_id, attachment_id))
@@ -300,8 +291,7 @@ def get_attachments_by_sender(data_set_id, sender, start_datetime, end_datetime,
     body = _build_email_query(sender_addrs=[sender], date_bounds=(start_datetime, end_datetime), attachments_only=True)
     tangelo.log("get_attachments_by_sender.Query %s"%body)
 
-    es = Elasticsearch(elasticsearch_hosts())
-    attachments_resp = es.search(index=data_set_id, doc_type="emails", size=size, body=body)
+    attachments_resp = es().search(index=data_set_id, doc_type="emails", size=size, body=body)
 
     email_attachments = []
     for attachment_item in attachments_resp["hits"]["hits"]:

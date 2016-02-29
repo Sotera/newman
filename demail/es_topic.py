@@ -1,5 +1,4 @@
-from elasticsearch import Elasticsearch
-from newman.newman_config import elasticsearch_hosts
+from newman.es_connection import es
 
 from es_queries import _build_filter
 from es_queries import _build_email_query
@@ -30,8 +29,8 @@ def _cluster_carrot2(index, type, email_addrs=[], query_terms='', topic_score=No
             "content": cluster_fields
         }
     }
-    es = Elasticsearch(elasticsearch_hosts())
-    resp = es.transport.perform_request("POST", "/{}/{}/_search_with_clusters".format(index,type), {}, body=carrot_query)
+
+    resp = es().transport.perform_request("POST", "/{}/{}/_search_with_clusters".format(index,type), {}, body=carrot_query)
     total_docs = min(resp[1]["hits"]["total"], max_doc_pool_size)
     return resp
 
@@ -72,8 +71,7 @@ _lda_clusters={"query": { "match_all": {}},"sort":[{"idx":{"order": "asc" }}]}
 
 # Get all clusters sorted by score into [{index:, score:, cluster:}]
 def get_lda_clusters(index):
-    es = Elasticsearch(elasticsearch_hosts())
-    resp = es.search(index=index, doc_type='lda-clustering', body=_lda_clusters)
+    resp = es().search(index=index, doc_type='lda-clustering', body=_lda_clusters)
     # return [{"index":hit["_source"]["idx"],"score":hit["sort"][0],"cluster": [term["term"] for term in hit["_source"]["topic"]]} for hit in resp["hits"]["hits"]]
     return [{"idx":hit["_source"]["idx"],"cluster": [term["term"] for term in hit["_source"]["topic"]]} for hit in resp["hits"]["hits"]]
 
@@ -83,12 +81,11 @@ def get_lda_clusters(index):
 # In order to get the more detailed range view look at the nested idx_N_agg and extract the bucket fields.
 # Returns [{u'idx_Num_agg': doc_count},...]
 def agg_cluster_counts(index):
-    es = Elasticsearch(elasticsearch_hosts())
-    count = es.count(index=index, doc_type='lda-clustering', body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
+    count = es().count(index=index, doc_type='lda-clustering', body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
     # print count
     query = _cluster_lda(count, email_addrs=[], query_terms='', entity_dict=[], date_bounds=None)
     # print query
-    resp = es.search(index=index, doc_type='emails', body=query)
+    resp = es().search(index=index, doc_type='emails', body=query)
     return {k: v["doc_count"]for k,v in resp["aggregations"].iteritems()}
 
 # Get all categories

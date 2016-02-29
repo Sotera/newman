@@ -8,14 +8,14 @@ def application_properties():
         'default_max_timeline_bound': APP_CONFIG.get('default_max_timeline_bound'),
         'default_timeline_interval': APP_CONFIG.get('default_timeline_interval'),
         'default_timeline_span' : APP_CONFIG.get('default_timeline_span'),
-        'elasticsearch_hosts' : APP_CONFIG.get('elasticsearch_hosts'),
+        'elasticsearch_config' : APP_CONFIG.get('elasticsearch_config'),
         'data_set_defaults' : APP_CONFIG.get('data_set_defaults')
 
     }
 
 
-def elasticsearch_hosts():
-    return application_properties()["elasticsearch_hosts"]
+def elasticsearch_config():
+    return application_properties()["elasticsearch_config"]
 
 def data_set_defaults():
     return application_properties()["data_set_defaults"]

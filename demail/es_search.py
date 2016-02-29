@@ -1,13 +1,9 @@
-import urllib
 import json
 from threading import Lock
 
 import tangelo
-from elasticsearch import Elasticsearch
 
-from newman.newman_config import elasticsearch_hosts
-from newman.utils.functions import nth
-from param_utils import parseParamDatetime
+from newman.es_connection import es
 from es_queries import _build_email_query
 
 # contains a cache of all email_address.addr, email_address
@@ -24,11 +20,10 @@ def get_graph_row_fields():
     return ["id","tos","senders","ccs","bccs","datetime","subject","body","attachments.guid", "starred"]
 
 def count(index, type="emails", start="2000-01-01", end="now"):
-    es = Elasticsearch(elasticsearch_hosts())
     # TODO apply filter to query not to body
     filter = {"range" : {"datetime" : { "gte": start, "lte": end }}}
     all_query = {"bool":{"must":[{"match_all":{}}]}}
-    count = es.count(index=index, doc_type=type, body={"query" : all_query})
+    count = es().count(index=index, doc_type=type, body={"query" : all_query})
 
     return count["count"]
 
@@ -76,7 +71,6 @@ def _map_node(email_addr, total_docs):
 
 # Get attachment info from the email_address type
 def _get_attachment_info_from_email_address(index, email_address, date_time=None):
-    es = Elasticsearch(elasticsearch_hosts())
     query_email_addr =  {"query":{"filtered" : {
         "query" : _query_all,
         "filter" : {"bool":{
@@ -85,25 +79,23 @@ def _get_attachment_info_from_email_address(index, email_address, date_time=None
             ]
         }}}}}
 
-    resp = es.search(index=index, doc_type="email_address", body=query_email_addr)
+    resp = es().search(index=index, doc_type="email_address", body=query_email_addr)
     # tangelo.log("getRankedEmails(resp: %s)" % (resp))
     return resp
 
 
 # Get search all
 def _search_ranked_email_addrs(index, start, end, size):
-    es = Elasticsearch(elasticsearch_hosts())
     graph_body= {"fields": _graph_fields, "sort" : _sort_email_addrs_by_total, "query" : _query_all}
     # tangelo.log("getRankedEmails(query: %s)" % (graph_body))
 
-    resp = es.search(index=index, doc_type="email_address", size=size, body=graph_body)
+    resp = es().search(index=index, doc_type="email_address", size=size, body=graph_body)
     # tangelo.log("getRankedEmails(resp: %s)" % (resp))
     return resp
 
 # returns {"total":n "hits":[]}
 def _query_emails(index, size, emails_query, additional_fields=[]):
-    es = Elasticsearch(elasticsearch_hosts())
-    emails_resp = es.search(index=index, doc_type="emails", size=size, fields=get_graph_row_fields() + additional_fields, body=emails_query)
+    emails_resp = es().search(index=index, doc_type="emails", size=size, fields=get_graph_row_fields() + additional_fields, body=emails_query)
     tangelo.log("es_search._query_emails(total document hits = %s)" % emails_resp["hits"]["total"])
 
     return {"total":emails_resp["hits"]["total"], "hits":[_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]}
@@ -112,8 +104,7 @@ def _query_emails(index, size, emails_query, additional_fields=[]):
 def _query_email_attachments(index, size, emails_query):
     tangelo.log("_query_email_attachments.Query %s"%emails_query)
 
-    es = Elasticsearch(elasticsearch_hosts())
-    attachments_resp = es.search(index=index, doc_type="emails", size=size, body=emails_query)
+    attachments_resp = es().search(index=index, doc_type="emails", size=size, body=emails_query)
 
     email_attachments = []
     for attachment_item in attachments_resp["hits"]["hits"]:
@@ -154,6 +145,10 @@ def _build_graph_for_emails(index, emails, query_hits):
             nodes.append(_map_node(_EMAIL_ADDR_CACHE[index][from_addr],total))
             addr_index[from_addr] = len(nodes)-1
         for rcvr_addr in email["to"]+email["cc"]+email["bcc"]:
+            if rcvr_addr not in _EMAIL_ADDR_CACHE[index]:
+                tangelo.log("WARNING: RCVR email address not found in cache <%s>" % rcvr_addr)
+                continue;
+
             if rcvr_addr not in addr_index:
                 nodes.append(_map_node(_EMAIL_ADDR_CACHE[index][rcvr_addr], total))
                 addr_index[rcvr_addr] = len(nodes)-1
@@ -337,13 +332,11 @@ def initialize_email_addr_cache(index, update=False):
         global _EMAIL_ADDR_CACHE
         _email_addr_cache_fields= ["community", "community_id", "addr", "received_count", "sent_count", "attachments_count"]
 
-        es = Elasticsearch(elasticsearch_hosts())
-
         body={"query" : {"match_all" : {}}}
 
         num = count(index,"email_address")
         print num
-        addrs = es.search(index=index, doc_type="email_address", size=num, fields=_email_addr_cache_fields, body=body)
+        addrs = es().search(index=index, doc_type="email_address", size=num, fields=_email_addr_cache_fields, body=body)
         addr_index = {f["addr"][0] : f for f in [hit["fields"] for hit in addrs["hits"]["hits"]]}
         _EMAIL_ADDR_CACHE[index] = addr_index
         tangelo.log("done: %s"% num)
@@ -359,7 +352,6 @@ def get_cached_email_addr(index, addr):
 
 import operator
 def export_edges(index):
-    es = Elasticsearch(elasticsearch_hosts())
     body = {
         "query": {
             "filtered": {
@@ -380,9 +372,9 @@ def export_edges(index):
     def rcvrs(fields={}):
         return fields.get("tos",[]) +fields.get("ccs",[])+fields.get("bccs",[])
 
-    count = es.count(index=index, doc_type="emails", body=body)["count"]
+    count = es().count(index=index, doc_type="emails", body=body)["count"]
     # TODO add batch processing
-    addrs = es.search(index=index, doc_type="emails", size=count, from_=0, fields=["senders", "tos", "ccs", "bccs"], body=body)
+    addrs = es().search(index=index, doc_type="emails", size=count, from_=0, fields=["senders", "tos", "ccs", "bccs"], body=body)
 
     edges = reduce(operator.add, [[{"from":hit["fields"]["senders"][0], "to":rcvr}for rcvr in rcvrs(hit["fields"]) ]for hit in addrs["hits"]["hits"]])
 

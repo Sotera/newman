@@ -1,7 +1,6 @@
 import json
 import tangelo
 import cherrypy
-import urllib
 
 from newman.utils.functions import nth
 from newman.settings import getOpt

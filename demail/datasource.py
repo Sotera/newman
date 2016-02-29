@@ -1,6 +1,5 @@
-from elasticsearch import Elasticsearch
 from elasticsearch.client import IndicesClient
-from newman.newman_config import elasticsearch_hosts
+from newman.es_connection import es
 
 from newman.utils.functions import nth
 from newman.newman_config import getDefaultDataSetID, data_set_names
@@ -16,10 +15,9 @@ _current_data_set_selected = getDefaultDataSetID()
 def _index_record(index):
     tangelo.log("datasource._index_record(index: %s)" % (str(index)))
 
-    es = Elasticsearch(elasticsearch_hosts())
-    email_docs_count = es.count(index=index, doc_type="emails", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
-    emails_addrs_count = es.count(index=index, doc_type="email_address", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
-    emails_attch_count = es.count(index=index, doc_type="attachments", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
+    email_docs_count = es().count(index=index, doc_type="emails", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
+    emails_addrs_count = es().count(index=index, doc_type="email_address", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
+    emails_attch_count = es().count(index=index, doc_type="attachments", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
 
 
     #TODO: still need to re-work the absolute date-time bounds and the suggested date-time bounds
@@ -37,8 +35,7 @@ def _index_record(index):
            }
 
 def listAllDataSet():
-    es = Elasticsearch(elasticsearch_hosts())
-    ic = IndicesClient(es)
+    ic = IndicesClient(es())
     stats = ic.stats(index="_all")
 
     tangelo.log("datasource.listAllDataSet()")

@@ -8,8 +8,7 @@ import csv
 
 import tangelo
 import cherrypy
-from elasticsearch import Elasticsearch
-from newman.newman_config import elasticsearch_hosts
+from newman.es_connection import es
 from bs4 import BeautifulSoup
 from es_topic import get_categories
 
@@ -137,8 +136,6 @@ def export_attachments(data_set_id, sender='', attachment_extension='jpg', date_
         print "invalid service call - missing index"
         return 1
 
-    es = Elasticsearch(elasticsearch_hosts())
-
     # TODO get accurate count -- this is not strictly needed as attachments will be accessed as inner docs on the email_address
     max_inner_attachments_returned = 100000
 
@@ -146,9 +143,9 @@ def export_attachments(data_set_id, sender='', attachment_extension='jpg', date_
     rows=[]
     body = _attch_nested__ext_query(sender, attachment_extension, date_bounds, max_inner_attachments_returned=max_inner_attachments_returned )
     print body
-    addresses_count = es.count(index=data_set_id, doc_type="email_address", body=body)["count"]
+    addresses_count = es().count(index=data_set_id, doc_type="email_address", body=body)["count"]
     print "total addresses: " + str(addresses_count)
-    addresses = es.search(index=data_set_id, doc_type="email_address", body=body, size=addresses_count)
+    addresses = es().search(index=data_set_id, doc_type="email_address", body=body, size=addresses_count)
     for address in addresses["hits"]["hits"]:
         rows += [[address["_source"]["addr"], attachment["_source"]["guid"], attachment["_source"]["filename"], attachment["_source"]["datetime"]] for attachment in address["inner_hits"]["sender_attachments"]["hits"]["hits"]]
 
@@ -177,7 +174,7 @@ def export_attachments(data_set_id, sender='', attachment_extension='jpg', date_
     # Paging
     while index < len(rows):
         # Get num_returned attachments from ES
-        attachments = es.mget(index=data_set_id, doc_type="attachments", body={"docs":[{"_id":row[1]} for row in rows[index: index+num_returned]]})
+        attachments = es().mget(index=data_set_id, doc_type="attachments", body={"docs":[{"_id":row[1]} for row in rows[index: index+num_returned]]})
         index+=num_returned
 
         # Add all attachments to the archive
@@ -336,9 +333,8 @@ def export_emails_archive(data_set_id, email_ids=[]):
     if not data_set_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing index")
 
-    es = Elasticsearch(elasticsearch_hosts())
     # TODO can implement with multiple doc_types and combine attachments in
-    emails = es.mget(index=data_set_id, doc_type="emails", body={"docs":[{"_id":id} for id in email_ids]})
+    emails = es().mget(index=data_set_id, doc_type="emails", body={"docs":[{"_id":id} for id in email_ids]})
     topics = get_categories(data_set_id)
 
 
@@ -396,7 +392,7 @@ def export_emails_archive(data_set_id, email_ids=[]):
 
         # Get the attachments
         if email["attachments"]:
-            attachments = es.mget(index=data_set_id, doc_type="attachments", body={"docs":[{"_id":attch["guid"]} for attch in email["attachments"]]})
+            attachments = es().mget(index=data_set_id, doc_type="attachments", body={"docs":[{"_id":attch["guid"]} for attch in email["attachments"]]})
             for attachment_source in attachments["docs"]:
                 attachment = attachment_source["_source"]
                 filename = attachment["filename"]
@@ -417,9 +413,8 @@ if __name__ == "__main__":
     email_ids = ["e65c3704-7fe8-11e5-bb05-08002705cb99"]
     # email_ids = ["f326dd04-7fe8-11e5-bb05-08002705cb99"]
 
-    es = Elasticsearch(elasticsearch_hosts())
     # TODO can implement with multiple doc_types and combine attachments in
-    emails = es.mget(index="sample", doc_type="emails", body={"docs":[{"_id":id} for id in email_ids]})
+    emails = es().mget(index="sample", doc_type="emails", body={"docs":[{"_id":id} for id in email_ids]})
 
     data_string = prettyprint_email_as_html_template(emails["docs"][0]["_source"], topics)
     with open("/tmp/output.html", "w") as text_file:
