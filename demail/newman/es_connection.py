@@ -8,12 +8,11 @@ _ES_LOCK = Lock()
 
 def es():
     global _ES
-    tangelo.log("IN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
     if _ES:
         return _ES
 
-    tangelo.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>INITIALIZING ElasticSearch connection!")
+    tangelo.log("INITIALIZING ElasticSearch connection!")
 
     _ES_LOCK.acquire()
     try:
