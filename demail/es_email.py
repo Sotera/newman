@@ -166,7 +166,7 @@ def _format_html(text):
 def get_email(index, email_id, qs=None):
 
     # fields=["id","datetime","senders","senders_line","tos_line","ccs_line","bccs_line","subject","body","attachments.filename","entities.entity_organization","entities.entity_location","entities.entity_person","entities.entity_misc"]
-    # email = es.get(index, doc_type="emails", id=email_id, fields=fields)
+    # email = es().get(index, doc_type="emails", id=email_id, fields=fields)
 
     source = ''
     body='_DEFAULT_'
@@ -177,6 +177,8 @@ def get_email(index, email_id, qs=None):
         email = es().get(index, doc_type="emails", id=email_id)
         source = email["_source"]
         body = source["body"]
+        body_translated = source["body_translated"]
+        body_lang = source["body_lang"]
         subject = source["subject"]
     else:
         query = email_highlighting_query(email_id, highlight_query_string=qs)
@@ -184,13 +186,17 @@ def get_email(index, email_id, qs=None):
 
         email = es().search(index=index, doc_type='emails', body=query)
         source = email["hits"]["hits"][0]["_source"]
+        body_lang = source["body_lang"]
         highlight = email["hits"]["hits"][0].get("highlight", {})
         body = highlight.get('body', [source.get('body','')])[0]
+        body_translated = highlight.get('body_translated', [source.get('body_translated','')])[0]
+
         subject = highlight.get('subject', [source['subject']])[0]
         # TODO highlighting attachments need to return content and further test this method
         highlighted_attachments = _find_attachment_highlighting(highlight, source.get("attachments", [""]))
 
     body = _format_html(body)
+    body_translated = _format_html(body_translated)
     subject = _format_html(subject)
 
     topic_scores=[]
@@ -213,13 +219,35 @@ def get_email(index, email_id, qs=None):
              source.get("starred", False),
              highlighted_attachments
              ]
-
     entities = []
     for type in ["person","location","organization","misc"]:
         if ("entity_"+type) in source["entities"]:
             entities += [ [source["id"][0]+"_entity_"+str(i), type ,i, val] for i,val in enumerate(source["entities"].get("entity_"+type, [""]), len(entities))]
 
-    return { "email" : email, "entities": entities, "lda_topic_scores":topic_scores}
+    resp = {"email_contents" : { "email" : email, "entities": entities, "lda_topic_scores":topic_scores}}
+
+    # only add translated text if the language is not english
+    if not body_lang == 'en':
+        email_translated = [source["id"],
+                 # TODO REMOVE unused fields
+                 "DEPRECATED",
+                 source.get("datetime",""),
+                 "false",
+                 "".join(source["senders"]),
+                 ["".join(source["tos_line"]), ";".join(source["tos"])],
+                 ["".join(source["ccs_line"]), ";".join(source["ccs"])],
+                 ["".join(source["bccs_line"]), ";".join(source["bccs"])],
+                 subject,
+                 # Wrap in <pre>
+                 "<pre>"+body_translated+"</pre>",
+                 [[f["guid"],f["filename"]] for f in source.get("attachments", [""])],
+                 source.get("starred", False),
+                 highlighted_attachments
+                 ]
+
+        resp["email_contents_translated"] = { "email" : email_translated, "entities": entities, "lda_topic_scores":topic_scores, "lang": body_lang}
+
+    return resp
 
 def set_starred(index, ids=[], starred=True):
     body = { "doc" : { "starred" : starred }}
