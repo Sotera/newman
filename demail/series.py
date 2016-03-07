@@ -52,7 +52,7 @@ def _map_activity(index, account_id, sent_rcvd):
             "interval_inbound_count" : sent_rcvd[1]["doc_count"]
             }
 
-def entity_histogram_query(email_addrs=[], qs='', topic_score=None, date_bounds=None, entity_agg_size=10):
+def entity_histogram_query(email_addrs=[], qs='', topic_score=None, entity_field='body', date_bounds=None, entity_agg_size=10):
     qs = '*' if not qs else qs
 
     return {
@@ -70,16 +70,16 @@ def entity_histogram_query(email_addrs=[], qs='', topic_score=None, date_bounds=
                 "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, date_bounds=date_bounds),
                 "aggs": {
                     "person" : {
-                        "terms" : {"field" : "entities.entity_person", "size": entity_agg_size}
+                        "terms" : {"field" : "entities."+entity_field+"_entities.entity_person", "size": entity_agg_size}
                     },
                     "organization" : {
-                        "terms" : {"field" : "entities.entity_organization", "size": entity_agg_size}
+                        "terms" : {"field" : "entities."+entity_field+"_entities.entity_organization", "size": entity_agg_size}
                     },
                     "location" : {
-                        "terms" : {"field" : "entities.entity_location", "size": entity_agg_size}
+                        "terms" : {"field" : "entities."+entity_field+"_entities.entity_location", "size": entity_agg_size}
                     },
                     "misc" : {
-                        "terms" : {"field" : "entities.mics", "size": entity_agg_size}
+                        "terms" : {"field" : "entities."+entity_field+"_entities.misc", "size": entity_agg_size}
                     }
 
                 }

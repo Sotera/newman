@@ -180,7 +180,7 @@ def get_email(index, email_id, qs=None):
         subject = source["subject"]
         body_translated = source.get("body_translated",'')
         subject_translated = source.get("subject_translated",'')
-        body_lang = source.get("body_lang",'')
+        body_lang = source.get("body_lang",'en')
     else:
         query = email_highlighting_query(email_id, highlight_query_string=qs)
         tangelo.log("es_email.get_email(highlighting-query: %s )" % (query))
@@ -222,13 +222,13 @@ def get_email(index, email_id, qs=None):
              ]
     entities = []
     for type in ["person","location","organization","misc"]:
-        if ("entity_"+type) in source["entities"]:
-            entities += [ [source["id"][0]+"_entity_"+str(i), type ,i, val] for i,val in enumerate(source["entities"].get("entity_"+type, [""]), len(entities))]
+        if "body_entities" in source["entities"] and ("entity_"+type) in source["entities"]["body_entities"]:
+            entities += [ [source["id"][0]+"_entity_"+str(i), type, i, val] for i,val in enumerate(source["entities"]["body_entities"].get("entity_"+type, [""]), len(entities))]
 
     resp = {"email_contents" : { "email" : email, "entities": entities, "lda_topic_scores":topic_scores}}
 
     # only add translated text if the language is not english
-    if not body_lang == 'en':
+    if body_lang and not body_lang == 'en':
         email_translated = [source["id"],
                  # TODO REMOVE unused fields
                  "DEPRECATED",
@@ -245,6 +245,10 @@ def get_email(index, email_id, qs=None):
                  source.get("starred", False),
                  highlighted_attachments
                  ]
+        entities = []
+        for type in ["person","location","organization","misc"]:
+            if "body_entities" in source["entities"] and ("entity_"+type) in source["entities"]["body_entities_translated"]:
+                entities += [ [source["id"][0]+"_entity_"+str(i), type, i, val] for i,val in enumerate(source["entities"].get("entity_"+type, [""]), len(entities))]
 
         resp["email_contents_translated"] = { "email" : email_translated, "entities": entities, "lda_topic_scores":topic_scores, "original_lang": body_lang}
 
