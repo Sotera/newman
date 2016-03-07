@@ -2168,6 +2168,12 @@ $(function () {
       else if (element_ID.endsWith('dashboard_tab_content_ranks')) {
         newman_rank_email.revalidateUIRankEmail();
       }
+      else if (element_ID.endsWith('dashboard_tab_geo_analytics')) {
+        newman_geo_map.initMap();
+      }
+      else if (element_ID.endsWith('dashboard_tab_chart_analytics')) {
+        initDashboardCharts();
+      }
 
 
     });
@@ -2341,36 +2347,7 @@ $(function () {
       $('#export_download_link').hide();
     });
 
-    /*
-    $('#email_view_all_starred').click(function () {
-      do_search(true, 'exportable');
-    });
-    */
 
-    // initialize data-table events
-    //newman_datatable_email.initDataTableEvents();
-
-    /*
-    $("#export_starred_set").click(function () {
-      $.ajax({
-        url: 'email/download',
-        type: "GET",
-        contentType: "application/json; charset=utf-8",
-        dataType: "json"
-      }).done(function (response) {
-        //console.log(JSON.stringify(response, null, 2));
-
-        $('#export_download_link a').attr('href', response.file);
-        $('#export_link_spin').hide();
-        $('#export_download_link').show();
-      }).fail(function (resp) {
-        alert('fail');
-
-        console.log("fail");
-        $('#export_modal').modal('hide');
-      });
-    });
-    */
     $("#export_starred_set").click(function () {
       newman_email_starred_request_export.requestService();
     });
@@ -2445,9 +2422,6 @@ $(function () {
     if (hasher.getHash().length < 1) {
       hasher.setHash(newman_service_email_search_all.getServiceURLBase());
     }
-
-
-
 
   }, 6000); //end of setTimeout
   //});

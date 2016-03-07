@@ -1,0 +1,253 @@
+[
+  {
+    "name": "Shanghai",
+    "email_outbound" : 1,
+    "email_inbound" : 2,
+    "attach_outbound" : 0,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Shanghai",
+    "lat": 31.23,
+    "lng": 121.47
+  },
+  {
+    "name": "Bombay",
+    "email_outbound" : 4,
+    "email_inbound" : 3,
+    "attach_outbound" : 2,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Bombay",
+    "lat": 18.96,
+    "lng": 72.82
+  },
+  {
+    "name": "Karachi",
+    "email_outbound" : 1,
+    "email_inbound" : 2,
+    "attach_outbound" : 0,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Karachi",
+    "lat": 24.86,
+    "lng": 67.01
+  },
+  {
+    "name": "Delhi",
+    "email_outbound" : 4,
+    "email_inbound" : 3,
+    "attach_outbound" : 2,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Delhi",
+    "lat": 28.67,
+    "lng": 77.21
+  },
+  {
+    "name": "Istanbul",
+    "email_outbound" : 1,
+    "email_inbound" : 2,
+    "attach_outbound" : 0,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Istanbul",
+    "lat": 41.1,
+    "lng": 29
+  },
+  {
+    "name": "Moscow",
+    "email_outbound" : 4,
+    "email_inbound" : 3,
+    "attach_outbound" : 2,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Moscow",
+    "lat": 55.75,
+    "lng": 37.62
+  },
+  {
+    "name": "Rome",
+    "email_outbound" : 1,
+    "email_inbound" : 2,
+    "attach_outbound" : 0,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Rome",
+    "lat": 41.89,
+    "lng": 12.5
+  },
+  {
+    "name": "Soul",
+    "email_outbound" : 4,
+    "email_inbound" : 3,
+    "attach_outbound" : 2,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Soul",
+    "lat": 37.56,
+    "lng": 126.99
+  },
+  {
+    "name": "Tokyo",
+    "email_outbound" : 1,
+    "email_inbound" : 2,
+    "attach_outbound" : 0,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Tokyo",
+    "lat": 35.67,
+    "lng": 139.77
+  },
+  {
+    "name": "New York",
+    "email_outbound" : 4,
+    "email_inbound" : 3,
+    "attach_outbound" : 1,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/New_York",
+    "lat": 40.67,
+    "lng": -73.94
+  },
+  {
+    "name": "Chicago",
+    "email_outbound" : 1,
+    "email_inbound" : 2,
+    "attach_outbound" : 0,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Chicago",
+    "lat": 41.84,
+    "lng": -87.68
+  },
+  {
+    "name": "Tehran",
+    "email_outbound" : 4,
+    "email_inbound" : 3,
+    "attach_outbound" : 1,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Tehran",
+    "lat": 35.67,
+    "lng": 51.43
+  },
+  {
+    "name": "Peking",
+    "email_outbound" : 1,
+    "email_inbound" : 2,
+    "attach_outbound" : 0,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Peking",
+    "lat": 39.93,
+    "lng": 116.4
+  },
+  {
+    "name": "London",
+    "email_outbound" : 4,
+    "email_inbound" : 3,
+    "attach_outbound" : 1,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/London",
+    "lat": 51.52,
+    "lng": -0.1
+  },
+  {
+    "name": "Los Angeles",
+    "email_outbound" : 1,
+    "email_inbound" : 2,
+    "attach_outbound" : 0,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Los_Angeles",
+    "lat": 34.11,
+    "lng": -118.41
+  },
+  {
+    "name": "Taibei",
+    "email_outbound" : 4,
+    "email_inbound" : 3,
+    "attach_outbound" : 1,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Taibei",
+    "lat": 25.02,
+    "lng": 121.45
+  },
+  {
+    "name": "Singapore",
+    "email_outbound" : 1,
+    "email_inbound" : 2,
+    "attach_outbound" : 0,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Singapore",
+    "lat": 1.3,
+    "lng": 103.85
+  },
+  {
+    "name": "Paris",
+    "email_outbound" : 4,
+    "email_inbound" : 3,
+    "attach_outbound" : 1,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Paris",
+    "lat": 48.86,
+    "lng": 2.34
+  },
+  {
+    "name": "Berlin",
+    "email_outbound" : 0,
+    "email_inbound" : 1,
+    "attach_outbound" : 0,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Berlin",
+    "lat": 52.52,
+    "lng": 13.38
+  },
+  {
+    "name": "Madrid",
+    "email_outbound" : 3,
+    "email_inbound" : 2,
+    "attach_outbound" : 1,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Madrid",
+    "lat": 40.42,
+    "lng": -3.71
+  },
+  {
+    "name": "Amsterdam",
+    "email_outbound" : 0,
+    "email_inbound" : 1,
+    "attach_outbound" : 0,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Amsterdam",
+    "lat": 52.37,
+    "lng": 4.89
+  },
+  {
+    "name": "San Francisco",
+    "email_outbound" : 3,
+    "email_inbound" : 2,
+    "attach_outbound" : 1,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/San_Francisco",
+    "lat": 37.77,
+    "lng": -122.45
+  },
+  {
+    "name": "Miami",
+    "email_outbound" : 0,
+    "email_inbound" : 1,
+    "attach_outbound" : 2,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Miami",
+    "lat": 25.7753,
+    "lng": -80.2089
+  },
+  {
+    "name": "Hong Kong",
+    "email_outbound" : 3,
+    "email_inbound" : 2,
+    "attach_outbound" : 1,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Hong_Kong",
+    "lat": 22.2783,
+    "lng": 114.1747
+  },
+  {
+    "name": "Washington",
+    "email_outbound" : 4,
+    "email_inbound" : 3,
+    "attach_outbound" : 0,
+    "attach_inbound" : 0,
+    "url": "https://en.wikipedia.org/wiki/Washington",
+    "lat": 38.91,
+    "lng": -77.02
+  }
+]
+

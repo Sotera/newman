@@ -26,6 +26,10 @@
     <link href="plugins/select2/select2.css" rel="stylesheet" type="text/css">
     <link href="plugins/justified-gallery/justifiedGallery.css" rel="stylesheet" type="text/css">
     <link href="plugins/chartist/chartist.min.css" rel="stylesheet" type="text/css">
+    <link href="plugins/leaflet/leaflet.css" rel="stylesheet" type="text/css">
+    <link href="plugins/leaflet-draw/leaflet.draw.css" rel="stylesheet" type="text/css">
+    <link href="plugins/leaflet-awesome-markers/leaflet.awesome-markers.css" rel="stylesheet" type="text/css">
+    <link href="plugins/leaflet-easy-button/leaflet-easy-button.css" rel="stylesheet" type="text/css">
     <link href="css/newman-style-dark.css" rel="stylesheet" type="text/css">
     <link href="css/newman-slider-theme.css" rel="stylesheet" type="text/css">
     <link href="css/newman-datatable.css" rel="stylesheet" type="text/css">
@@ -410,12 +414,12 @@
                   <thead style="font-size: small; display: table-header-group" id="search_result_treetable_header_copy">
                   <tr>
                     <th>&nbsp;</th>
-                    <th><i class="fa fa-send-o fa-fw" rel="tooltip" data-placement="bottom" title="Emails Sent"></i></th>
-                    <th><i class="fa fa-inbox fa-fw" rel="tooltip" data-placement="bottom" title="Emails Received"></i></th>
-                    <th><i class="fa fa-paperclip fa-fw" rel="tooltip" data-placement="bottom" title="File Attachments"></i></th>
-                    <th><i class="fa fa-envelope-o fa-fw" rel="tooltip" data-placement="bottom" title="Search Matched"></i></th>
-                    <th><i class="fa fa-users fa-fw" rel="tooltip" data-placement="bottom" title="Accounts Associated"></i></th>
-                    <th><i class="fa fa-cubes fa-fw" rel="tooltip" data-placement="bottom" title="Aggregate"></i></th>
+                    <th><i class="fa fa-send-o fa-fw" rel="tooltip" data-placement="left" title="Emails Sent"></i></th>
+                    <th><i class="fa fa-inbox fa-fw" rel="tooltip" data-placement="left" title="Emails Received"></i></th>
+                    <th><i class="fa fa-paperclip fa-fw" rel="tooltip" data-placement="left" title="File Attachments"></i></th>
+                    <th><i class="fa fa-envelope-o fa-fw" rel="tooltip" data-placement="left" title="Search Matched"></i></th>
+                    <th><i class="fa fa-users fa-fw" rel="tooltip" data-placement="left" title="Accounts Associated"></i></th>
+                    <th><i class="fa fa-cubes fa-fw" rel="tooltip" data-placement="left" title="Aggregate"></i></th>
                   </tr>
                   </thead>
 
@@ -435,12 +439,12 @@
                   <thead style="font-size: small; visibility: hidden; display: table-footer-group" id="search_result_treetable_header">
                   <tr>
                     <th>&nbsp;</th>
-                    <th><i class="fa fa-send-o fa-fw" rel="tooltip" data-placement="bottom" title="Emails Sent"></i></th>
-                    <th><i class="fa fa-inbox fa-fw" rel="tooltip" data-placement="bottom" title="Emails Received"></i></th>
-                    <th><i class="fa fa-paperclip fa-fw" rel="tooltip" data-placement="bottom" title="File Attachments"></i></th>
-                    <th><i class="fa fa-envelope-o fa-fw" rel="tooltip" data-placement="bottom" title="Search Matched"></i></th>
-                    <th><i class="fa fa-users fa-fw" rel="tooltip" data-placement="bottom" title="Accounts Associated"></i></th>
-                    <th><i class="fa fa-cubes fa-fw" rel="tooltip" data-placement="bottom" title="Aggregate"></i></th>
+                    <th><i class="fa fa-send-o fa-fw" rel="tooltip" data-placement="left" title="Emails Sent"></i></th>
+                    <th><i class="fa fa-inbox fa-fw" rel="tooltip" data-placement="left" title="Emails Received"></i></th>
+                    <th><i class="fa fa-paperclip fa-fw" rel="tooltip" data-placement="left" title="File Attachments"></i></th>
+                    <th><i class="fa fa-envelope-o fa-fw" rel="tooltip" data-placement="left" title="Search Matched"></i></th>
+                    <th><i class="fa fa-users fa-fw" rel="tooltip" data-placement="left" title="Accounts Associated"></i></th>
+                    <th><i class="fa fa-cubes fa-fw" rel="tooltip" data-placement="left" title="Aggregate"></i></th>
                   </tr>
                   </thead>
 
@@ -448,29 +452,6 @@
 
                   <tbody style="font-size: 11px;" id="search_result_treetable_body">
                   </tbody>
-                  <!--
-                  <tbody>
-                  <tr class="treegrid-1">
-                    <td>Root node</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
-                  </tr>
-                  <tr class="treegrid-2 treegrid-parent-1">
-                    <td>Node 1-1 no-child</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
-                  </tr>
-                  <tr class="treegrid-3 treegrid-parent-1">
-                    <td>Node 1-2</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
-                  </tr>
-                  <tr class="treegrid-4 treegrid-parent-3">
-                    <td>Node 1-2-1</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
-                  </tr>
-                  <tr class="treegrid-5 treegrid-parent-3">
-                    <td>Node 1-2-2</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
-                  </tr>
-                  <tr class="treegrid-6 treegrid-parent-5">
-                    <td>Node 1-5-1</td><td>Additional info</td><td>Additional info2</td><td>Additional info3</td>
-                  </tr>
-                  </tbody>
-                  -->
-
 
                 </table>
 
@@ -548,8 +529,16 @@
           <!--End Search-Research-Dashboard-Left-->
 
           <!--Start Dashboard-Right-->
-          <div class="col-sm-7" style= "height: 100%; padding: 0;">
-            <div style= "height: 100%;">
+          <div class="col-sm-7" style= "height: 100%; padding: 0; margin: 0">
+            <!-- Start-Analytics-Tab-Container -->
+            <div class="tabbable tabs-below" style= "padding: 0; margin: 0;">
+
+
+              <!-- Start-Analytics-Tab-Content -->
+              <div class="tab-content" style= "height: 100%; padding: 0; margin: 0;">
+
+                <!-- Start-Analytics-Content-Chart -->
+                <div class="tab-pane active" id="dashboard_tab_chart_analytics" style= "padding: 0; margin: 0;">
 
               <!-- Start Dashboard-Right-Row-1 -->
               <div class="row box">
@@ -557,17 +546,17 @@
                 <ul class="nav nav-tabs box-name" style="height: 30px;" role="tablist" id="dashboard_row1_tab_list">
                   <li class="active" style="height: inherit;">
                     <a href="#dashboard_tab_content_outbound_activities" style="height: inherit;" role="tab" data-toggle="tab">
-                      <i class="fa fa-send-o" rel="tooltip" data-placement="bottom" title="Email Sent"></i> Sent
+                      <i class="fa fa-send-o" rel="tooltip" data-placement="left" title="Email Sent"></i> Sent
                     </a>
                   </li>
                   <li style="height: inherit;">
                     <a href="#dashboard_tab_content_inbound_activities" style="height: inherit;" role="tab" data-toggle="tab">
-                      <i class="fa fa-inbox" rel="tooltip" data-placement="bottom" title="Email Received"></i> Received
+                      <i class="fa fa-inbox" rel="tooltip" data-placement="left" title="Email Received"></i> Received
                     </a>
                   </li>
                   <li style="height: inherit;">
                     <a href="#dashboard_tab_content_attach_activities" style="height: inherit;" role="tab" data-toggle="tab">
-                      <i class="fa fa-paperclip" rel="tooltip" data-placement="bottom" title="File Attachment(s)"></i> Attached
+                      <i class="fa fa-paperclip" rel="tooltip" data-placement="left" title="File Attachments"></i> Attached
                     </a>
                   </li>
                 </ul>
@@ -721,7 +710,35 @@
               </div>
               <!-- End-Dashboard-Right-Row-3 -->
 
+                </div>
+                <!-- End-Analytics-Content-Chart -->
+
+                <!-- Start-Analytics-Content-Geo -->
+                <div class="tab-pane" id="dashboard_tab_geo_analytics" style= "height: 100%; padding: 0; margin: 0;">
+                  <div id="map" class="map" style= "position: relative; width: 840px; height: 600px; padding: 0; margin: 0;"></div>
+                </div>
+                <!-- End-Analytics-Content-Geo -->
+
+              </div>
+              <!-- End-Analytics-Tab-Content -->
+
+              <!-- Start-Analytics-Tab -->
+              <ul class="nav nav-tabs" style= "padding: 0; margin: 0;">
+                <li  class="active">
+                  <a href="#dashboard_tab_chart_analytics" data-toggle="tab">
+                    <i class="fa fa-bar-chart fa-lg" rel="tooltip" data-placement="left" title="Chart"></i>
+                  </a>
+                </li>
+                <li>
+                  <a href="#dashboard_tab_geo_analytics" data-toggle="tab">
+                    <i class="fa fa-globe fa-lg" rel="tooltip" data-placement="left" title="Geo"></i>
+                  </a>
+                </li>
+              </ul>
+              <!-- End-Analytics-Tab -->
+
             </div>
+            <!-- End-Analytics-Tab-Container -->
           </div>
           <!--End Dashboard-Right-->
 
@@ -1044,17 +1061,25 @@
     <script src="plugins/datatables/js/dataTables.bootstrap.min.js"></script>
     <!--<script src="plugins/datatables-fixedheader/js/dataTables.fixedHeader.min.js"></script>
     <script src="plugins/datatables-fixedcolumns/js/dataTables.fixedColumns.min.js"></script>-->
-    <script src="plugins/millermedeiros/signals.js"></script>
-    <script src="plugins/millermedeiros/hasher.js"></script>
-    <script src="plugins/millermedeiros/crossroads.js"></script>
+    <script src="plugins/millermedeiros/signals.min.js"></script>
+    <script src="plugins/millermedeiros/hasher.min.js"></script>
+    <script src="plugins/millermedeiros/crossroads.min.js"></script>
     <script src="plugins/justified-gallery/jquery.justifiedGallery.min.js"></script>
     <script src="plugins/tinymce/tinymce.min.js"></script>
     <script src="plugins/tinymce/jquery.tinymce.min.js"></script>
     <script src="plugins/morris/morris.min.js"></script>
     <script src="plugins/raphael/raphael-min.js"></script>
     <script src="plugins/font-awesome/font-awesome-unicode-map.js"></script>
+    <script src="plugins/leaflet/leaflet.js"></script>
+    <!--<script src="plugins/leaflet/eu-countries.js"></script>-->
+    <script src="plugins/leaflet/us-states.js"></script>
+    <script src="plugins/leaflet-awesome-markers/leaflet.awesome-markers.min.js"></script>
+    <script src="plugins/leaflet-tilelayer-cache/L.TileLayer.PouchDBCached.js"></script>
+    <script src="plugins/leaflet-draw/leaflet.draw.js"></script>
+    <script src="plugins/leaflet-easy-button/leaflet-easy-button.js"></script>
+    <script src="plugins/pouchdb/pouchdb-5.2.1.min.js"></script>
 
-    <script src="plugins/user-ale/userale.js"></script>
+    <!--<script src="plugins/user-ale/userale.js"></script>-->
 
     <!-- All functions for this theme + document.ready processing -->
     <script src="js/newman-config.js"></script>
@@ -1078,6 +1103,9 @@
     <script src="js/newman-graph-email.js"></script>
     <script src="js/newman_search_result.js"></script>
     <script src="js/newman_search_result_collection.js"></script>
+    <script src="js/geo/newman_leaflet_draw.js"></script>
+    <script src="js/geo/newman_geo_map.js"></script>
+    <script src="js/sample_markers.json"></script>
     <script src="js/searchtool.js"></script>
     <script src="js/graphtool.js"></script>
 
