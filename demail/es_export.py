@@ -270,17 +270,17 @@ def prettyprint_email_as_html_template(email_json, topics):
         # TODO this is a bit of a hack
         raw_body = email_json.get("body",'').replace('&','&amp;').replace('<','&lt;').replace('<','&gt;')
 
-        for org in email_json["entities"]["entity_organization"]:
+        for org in email_json["entities"]["body_entities"]["entity_organization"]:
             # markup = '<span class="mitie mitie-organization" id="TODO_id" mitie-type="organization" mitie-value="'+org+'">'+org+'</span>'
             markup = '<em style="background-color: #ffcc33;">'+org+'</em>'
             raw_body = raw_body.replace(org, markup)
-        for location in email_json["entities"]["entity_location"]:
+        for location in email_json["entities"]["body_entities"]["entity_location"]:
             markup = '<em style="background-color: #00ff00;">'+location+'</em>'
             raw_body = raw_body.replace(location, markup)
-        for person in email_json["entities"]["entity_person"]:
+        for person in email_json["entities"]["body_entities"]["entity_person"]:
             markup = '<em style="background-color: #00ccff;">'+person+'</em>'
             raw_body = raw_body.replace(person, markup)
-        for misc in email_json["entities"]["entity_misc"]:
+        for misc in email_json["entities"]["body_entities"]["entity_misc"]:
             markup = '<em style="background-color: #c0c0c0;">'+misc+'</em>'
             raw_body = raw_body.replace(misc, markup)
 

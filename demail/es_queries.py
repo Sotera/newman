@@ -68,7 +68,7 @@ def _addrs_filter(senders=[], tos=[], ccs=[], bccs=[], address_filter_mode="unio
         return []
 
 # Expects entity_map to be of the form
-# {"entities.entity_person":[],"entities.entity_location":[],"entities.entity_organization":[],"entities.entity_misc":[]}
+# {"entities.body_entities.entity_person":[],"entities.body_entities.entity_location":[],"entities.body_entities.entity_organization":[],"entities.body_entities.entity_misc":[]}
 # Or whatever keys match the current entity style
 def _entity_filter(entity_dict=[]):
     return list(itertools.chain(*[_terms_filter(k,v) for k,v in entity_dict.iteritems()]))

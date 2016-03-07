@@ -282,7 +282,7 @@ var newman_entity_email = (function () {
 
       if(entity_set_as_string) {
         entity_set_as_string = entity_set_as_string.trim().replace(' ', ',');
-        var key = 'entities.entity_organization'
+        var key = 'entities.body_entities.entity_organization'
         if (url_path.indexOf('?') > 0) {
           url_path += '&' + key + '=' + entity_set_as_string;
         }
@@ -301,7 +301,7 @@ var newman_entity_email = (function () {
 
       if(entity_set_as_string) {
         entity_set_as_string = entity_set_as_string.trim().replace(' ', ',');
-        var key = 'entities.entity_person'
+        var key = 'entities.body_entities.entity_person'
         if (url_path.indexOf('?') > 0) {
           url_path += '&' + key + '=' + entity_set_as_string;
         }
@@ -320,7 +320,7 @@ var newman_entity_email = (function () {
 
       if(entity_set_as_string) {
         entity_set_as_string = entity_set_as_string.trim().replace(' ', ',');
-        var key = 'entities.entity_location'
+        var key = 'entities.body_entities.entity_location'
         if (url_path.indexOf('?') > 0) {
           url_path += '&' + key + '=' + entity_set_as_string;
         }
@@ -339,7 +339,7 @@ var newman_entity_email = (function () {
 
       if(entity_set_as_string) {
         entity_set_as_string = entity_set_as_string.trim().replace(' ', ',');
-        var key = 'entities.entity_misc'
+        var key = 'entities.body_entities.entity_misc'
         if (url_path.indexOf('?') > 0) {
           url_path += '&' + key + '=' + entity_set_as_string;
         }
