@@ -177,9 +177,9 @@ def get_email(index, email_id, qs=None):
         email = es().get(index, doc_type="emails", id=email_id)
         source = email["_source"]
         body = source["body"]
-        body_translated = source["body_translated"]
-        body_lang = source["body_lang"]
         subject = source["subject"]
+        body_translated = source.get("body_translated",'')
+        body_lang = source.get("body_lang",'')
     else:
         query = email_highlighting_query(email_id, highlight_query_string=qs)
         tangelo.log("es_email.get_email(highlighting-query: %s )" % (query))
