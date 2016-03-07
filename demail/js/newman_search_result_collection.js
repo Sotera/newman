@@ -2,7 +2,7 @@
  * search-result-list container
  */
 function EmailSearchResultList() {
-  this.debug_enabled = false;
+  this.debug_enabled = true;
   this.result_list_max = 25;
   this.result_list = [];
 }
@@ -373,7 +373,7 @@ EmailSearchResultTreeTable.prototype = {
  * search-result-collection related reference
  */
 var newman_search_result_collection = (function () {
-  var debug_enabled = false;
+  var debug_enabled = true;
   var count = 0;
 
   var ui_treetable_id = 'search_result_treetable';
@@ -413,6 +413,7 @@ var newman_search_result_collection = (function () {
 
     if (ui_container && ui_appendable) {
 
+      var text_search_node_list = [];
       var data_source_list = search_result_table.data_source_list.result_list;
 
       /**
@@ -440,7 +441,10 @@ var newman_search_result_collection = (function () {
             var text_search_html_row = _array[1];
             ui_appendable.append( text_search_html_row );
 
+
             if (text_search_element.hasChild()) {
+              text_search_node_list.push( text_search_node_index );
+
               var address_search_list = text_search_element.getChildrenAsList();
               _.each(address_search_list, function (address_search_element, index) {
 
@@ -575,7 +579,7 @@ var newman_search_result_collection = (function () {
         expanderCollapsedClass : 'fa fa-plus-square-o'
       });
 
-      //expandDataSourceSelected(ui_container, ui_container_copy);
+      collapseAllSearchResultNode(text_search_node_list, ui_container, ui_container_copy);
 
     }
     else {
@@ -647,12 +651,17 @@ var newman_search_result_collection = (function () {
         event.stopImmediatePropagation();
       });
 
+      var all_child_selected_icon_class = 'fa fa-check-circle-o';
+      var all_child_unselected_icon_class = 'fa fa-circle-o';
+
       if (level_index == 1) {
         node_index = '' + level_index + count;
         var row_id = table_id + '|' + node_index + '|' + data_element.uid;
+        var child_node_prev_icon_class = 'fa fa-caret-square-o-up';
+        var child_node_next_icon_class = 'fa fa-caret-square-o-down';
 
         table_row = $('<tr class=\"treegrid-' + node_index + '\" id=\"' + row_id + '\" />').append(
-          "<td><i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
+          "<td><i class=\"" + all_child_unselected_icon_class + "\"></i> <i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
           "<td></td>" +
           "<td></td>" +
           "<td>" + data_element.attach_count + "</td>" +
@@ -663,31 +672,48 @@ var newman_search_result_collection = (function () {
       }
       else if (level_index == 2) {
 
-        var email_outbound_count = data_element.document_sent;
-        if (email_outbound_count == 0) {
-          email_outbound_count = '';
-        }
-        var email_inbound_count = data_element.document_received;
-        if (email_inbound_count == 0) {
-          email_inbound_count = '';
-        }
-        var email_attach_count = data_element.attach_count;
-        if (email_attach_count == 0) {
-          email_attach_count = '';
-        }
-
         node_index = '' + level_index + count;
         var row_id = table_id + '|' + node_index + '|' + data_element.uid;
 
-        table_row = $('<tr class=\"treegrid-' + node_index + ' treegrid-parent-' + parent_node_index + '\" id=\"' + row_id  + '\" />').append(
-          "<td><i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
-          "<td>" + email_outbound_count + "</td>" +
-          "<td>" + email_inbound_count + "</td>" +
-          "<td>" + email_attach_count + "</td>" +
-          "<td>" + data_element.document_count + "</td>" +
-          "<td>" + data_element.associate_count + "</td>" +
-          "<td>" + checkbox_html + "</td>"
-        );
+        var email_outbound_count = data_element.document_sent;
+        var email_inbound_count = data_element.document_received;
+        var email_attach_count = data_element.attach_count;
+
+        if (email_address) {
+
+          table_row = $('<tr class=\"treegrid-' + node_index + ' treegrid-parent-' + parent_node_index + '\" id=\"' + row_id + '\" />').append(
+            "<td><i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
+            "<td>" + email_outbound_count + "</td>" +
+            "<td>" + email_inbound_count + "</td>" +
+            "<td>" + email_attach_count + "</td>" +
+            "<td>" + data_element.document_count + "</td>" +
+            "<td>" + data_element.associate_count + "</td>" +
+            "<td>" + checkbox_html + "</td>"
+          );
+        }
+        else {
+
+          if (email_outbound_count == 0) {
+            email_outbound_count = '';
+          }
+          if (email_inbound_count == 0) {
+            email_inbound_count = '';
+          }
+          if (email_attach_count == 0) {
+            email_attach_count = '';
+          }
+
+          table_row = $('<tr class=\"treegrid-' + node_index + ' treegrid-parent-' + parent_node_index + '\" id=\"' + row_id + '\" />').append(
+            "<td><i class=\"" + all_child_unselected_icon_class + "\"></i> <i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
+            "<td>" + email_outbound_count + "</td>" +
+            "<td>" + email_inbound_count + "</td>" +
+            "<td>" + email_attach_count + "</td>" +
+            "<td>" + data_element.document_count + "</td>" +
+            "<td>" + data_element.associate_count + "</td>" +
+            "<td>" + checkbox_html + "</td>"
+          );
+
+        }
 
       }
       else if (level_index == 3) {
@@ -748,6 +774,39 @@ var newman_search_result_collection = (function () {
       var row_id = $(this).attr('id');
       var node_index = $(this).treegrid('getNodeId');
       //console.log('\trow_id: ' + row_id + ', node_index: ' + node_index);
+
+    });
+
+  }
+
+  function collapseAllSearchResultNode(text_search_node_list, ui_treetable, ui_treetable_copy) {
+    console.log('collapseAllSearchResultNode(text_search_node_list[' + text_search_node_list.length + '])');
+
+
+    _.each(text_search_node_list, function(node_id) {
+
+      ui_treetable.treegrid('getAllNodes').each(function() {
+        var row_id = $(this).attr('id');
+        var node_index = $(this).treegrid('getNodeId');
+        //console.log('\trow_id: ' + row_id + ', node_index: ' + node_index + ', node_id: ' + node_id);
+
+        if (node_id == node_index) {
+          //console.log('collapsing node_id: ' + node_id);
+          $(this).treegrid('collapseRecursive');
+        }
+
+      });
+
+      ui_treetable_copy.treegrid('getAllNodes').each(function() {
+        var row_id = $(this).attr('id');
+        var node_index = $(this).treegrid('getNodeId');
+        //console.log('\trow_id: ' + row_id + ', node_index: ' + node_index + ', node_id: ' + node_id);
+
+        if (node_id == node_index) {
+          //console.log('collapsing node_id: ' + node_id);
+          $(this).treegrid('collapseRecursive');
+        }
+      });
 
     });
 
@@ -950,7 +1009,10 @@ var newman_search_result_collection = (function () {
         }
 
         var doc_count = filtered_response.query_hits;
-        var associate_count = filtered_response.graph.nodes.length;
+        var associate_count = filtered_response.graph.nodes.length ;
+        if (associate_count > 0) {
+          associate_count = associate_count - 1; // discounting self from nodes
+        }
 
         var outbound_count = newman_rank_email.getEmailOutboundCount(search_text);
         var inbound_count = newman_rank_email.getEmailInboundCount(search_text);
