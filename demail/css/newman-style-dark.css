@@ -31,7 +31,7 @@ h1, .h1, h2, .h2, h3, .h3 {
   display: block;
   font-size: 14px;
   line-height: 50px;
-  /*background: url(../imgs/logo.png) right 42px no-repeat;*/
+  /*background: url(images/logo.png) right 42px no-repeat;*/
   -webkit-transition: 0.5s;
   -moz-transition: 0.5s;
   -o-transition: 0.5s;
@@ -610,17 +610,17 @@ table.no-border-bottom tr:last-child td {
   width: 40px;
 }
 .table-datatable .sorting {
-  background:url(../img/sort.png) right center no-repeat;
+  background:url(images/sort.png) right center no-repeat;
   padding-right:16px;
   cursor:pointer;
 }
 .table-datatable .sorting_asc {
-  background:url(../img/sort-asc.png) right center no-repeat;
+  background:url(images/sort-asc.png) right center no-repeat;
   padding-right: 16px;
   cursor:pointer;
 }
 .table-datatable .sorting_desc {
-  background:url(../img/sort-desc.png) right center no-repeat;
+  background:url(images/sort-desc.png) right center no-repeat;
   padding-right: 16px;
   cursor:pointer;
 }
@@ -1498,16 +1498,16 @@ ul.DTTT_dropdown.dropdown-menu > li:hover > a {
   cursor: pointer;
 }
 .ui-icon-circle-triangle-w {
-  background: url(../img/ui-left.png) 0 0 no-repeat !important;
+  background: url(images/ui-left.png) 0 0 no-repeat !important;
 }
 .ui-icon-circle-triangle-e {
-  background: url(../img/ui-right.png) 0 0 no-repeat !important;
+  background: url(images/ui-right.png) 0 0 no-repeat !important;
 }
 .ui-icon-circle-arrow-s {
-  background: url(../img/ui-accordion-down.png) 0 0 no-repeat !important;
+  background: url(images/ui-accordion-down.png) 0 0 no-repeat !important;
 }
 .ui-icon-circle-arrow-e {
-  background: url(../img/ui-accordion-right.png) 0 0 no-repeat !important;
+  background: url(images/ui-accordion-right.png) 0 0 no-repeat !important;
 }
 #ui-datepicker-div .ui-slider-horizontal {
   background: rgba(0, 0, 0, 0.5);
@@ -2268,15 +2268,15 @@ border-radius: 50%;}
   position: fixed;
   top: 20px;
   right: 36px;
-  background: url(../img/times.png) 0 0 no-repeat;
+  background: url(images/times.png) 0 0 no-repeat;
 }
 .fancybox-prev span {
   left: 21px;
-  background: url(../img/chevron-left.png) 0 0 no-repeat;
+  background: url(images/chevron-left.png) 0 0 no-repeat;
 }
 .fancybox-next span {
   right: 36px;
-  background: url(../img/chevron-right.png) 0 0 no-repeat;
+  background: url(images/chevron-right.png) 0 0 no-repeat;
 }
 #social a {
   margin:0 15px 0 0;
