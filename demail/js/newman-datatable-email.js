@@ -24,7 +24,7 @@ var newman_datatable_email = (function () {
   var data_table_rows;
   var data_row_is_read_map = {};
 
-  var _content_original, _content_translated;
+  var _content_original, _content_translated, _content_translated_displayed = false;
 
 
   function getStarredHTML() {
@@ -414,6 +414,9 @@ var newman_datatable_email = (function () {
       }
     }
 
+    //set translation button
+    $('#translate_contents_email').addClass( 'clickable-disabled' );
+
     //set conversation button
     $('#query_conversation_email').addClass( 'clickable-disabled' );
 
@@ -436,7 +439,11 @@ var newman_datatable_email = (function () {
           }
 
           if (response.email_contents_translated) {
+            console.log('contains translated contents');
+
             _content_translated = response.email_contents_translated;
+            _content_translated_displayed = false;
+            $('#translate_contents_email').removeClass( 'clickable-disabled').addClass( 'clickable' );
           }
 
         }
@@ -656,6 +663,25 @@ var newman_datatable_email = (function () {
 
           // display email-tab
           newman_graph_email.displayUITab();
+        }
+      }
+    });
+
+    $('#translate_contents_email').off().click(function() {
+      if (_content_translated_displayed) {
+        if (_content_original) {
+          _content_translated_displayed = false;
+          console.log('rendering original contents...');
+          $("#email-body").empty();
+          $("#email-body").append(produceHTMLView(_content_original));
+        }
+      }
+      else {
+        if (_content_translated) {
+          _content_translated_displayed = true;
+          console.log('rendering translated contents...');
+          $("#email-body").empty();
+          $("#email-body").append( produceHTMLView( _content_translated ));
         }
       }
     });

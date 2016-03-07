@@ -935,30 +935,37 @@
         <div style="display: block; width: 100%; height: 100%; margin: 0; padding: 0; background-color:#d3d3d3;">
 
           <div class="row" style="width: 100%; height: 52px; margin: 0; padding: 0;">
-            <div class="col-sm-3" style="margin: 0; padding: 0;">
-              <div class="row" style="height: 25px; margin: 0; padding: 0;">
+            <div class="col-sm-4" style="margin: 0; padding: 0;">
+              <div class="row" style="margin: 0; padding: 0;">
                 <!--Start Data-Panel-Tab-Content-Email-Star(Like)-Button -->
-                <div style="display: inline-block; float: left; margin: 2px 0px 0px 10px;" class="active">
-                  <a id="toggle_mark_for_export" class="btn btn-xs btn-default">
+                <div style="margin: 2px 0px 0px 10px; padding: 0; float: left;" class="col-sm-2">
+                  <button id="toggle_mark_for_export" class="btn btn-xs btn-default clickable">
                     <span><i class="fa fa-star-o fa-lg"></i></span>
-                  </a>
+                  </button>
                 </div>
                 <!--End Data-Panel-Tab-Content-Email-Star(Like)-Button -->
 
                 <!--Start Data-Panel-Tab-Content-Email-Mark-Read-Toggle -->
-                <div style="display: inline-block; float: left; margin: 2px 5px 0px 5px;">
-                  <button id="toggle_mark_as_read" class="btn btn-xs btn-default">
+                <div style="margin: 2px 0px 0px 2px; padding: 0;" class="col-sm-8">
+                  <button id="toggle_mark_as_read" class="btn btn-xs btn-default clickable">
                     <span><i class="fa fa-square-o fa-lg"></i> Read</span>
                   </button>
                 </div>
                 <!--End Data-Panel-Tab-Content-Email-Mark-Read-Toggle -->
               </div>
-              <div class="row" style="height: 25px; margin: 0; padding: 0;">
-                <!--Start Data-Panel-Tab-Content-Email-Conversation-Button -->
-                <div style="display: inline-block; float: left; margin: 0px 0px 2px 10px;">
-                  <a id="query_conversation_email" class="btn btn-xs btn-default clickable-disabled">
-                    <span><i class="fa fa-comments-o"></i> Conversation</span>
-                  </a>
+              <div class="row" style="margin: 0; padding: 0;">
+                <!-- Start-Content-Email-Translation-Button -->
+                <div style="margin: 2px 0px 0px 10px; padding: 0;" class="col-sm-2">
+                  <button id="translate_contents_email" class="btn btn-xs btn-default clickable-disabled">
+                    <span><i class="fa fa-language fa-lg"></i></span>
+                  </button>
+                </div>
+                <!-- End-Content-Email-Translation-Button -->
+                <!-- Start-Content-Email-Conversation-Button -->
+                <div style="margin: 2px 0px 0px 2px; padding: 0;" class="col-sm-8">
+                  <button id="query_conversation_email" class="btn btn-xs btn-default clickable-disabled">
+                    <span><i class="fa fa-comments-o fa-lg"></i> Conversation</span>
+                  </button>
                 </div>
                 <!--
                 <div style="display: inline-block; float: left; margin: 0px 0px 2px 10px;">
@@ -972,10 +979,10 @@
                   </a>
                 </div>
                 -->
-                <!--End Data-Panel-Tab-Content-Email-Conversation-Button -->
+                <!-- End-Content-Email-Conversation-Button -->
               </div>
             </div>
-            <div class="col-sm-9" style="margin: 0; padding: 0;">
+            <div class="col-sm-8" style="margin: 0; padding: 0;">
               <!--Start Data-Panel-Tab-Content-Email-Mini-Topics-Chart -->
               <div style="border: 1px solid #1e1e5f; border-radius: 3px; padding: 0; margin: 0; float: left; display: inline-block;"
                    id="topic_mini_chart">

@@ -36,11 +36,17 @@ ul {
 .clickable {
     cursor: pointer;
 }
-
+.clickable:hover {
+    border: 1px solid #FFFFFF;
+}
 .clickable-disabled {
     background: rgba(253, 253, 253, 0.5);
     color: rgb(214, 214, 214);
 }
+.clickable-disabled:hover {
+    border: 1px solid #FFFFFF;
+}
+
 
 .mitie {
     cursor: pointer;
