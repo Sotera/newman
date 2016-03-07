@@ -24,6 +24,9 @@ var newman_datatable_email = (function () {
   var data_table_rows;
   var data_row_is_read_map = {};
 
+  var _content_original, _content_translated;
+
+
   function getStarredHTML() {
     return _starred_html;
   }
@@ -425,9 +428,20 @@ var newman_datatable_email = (function () {
       function (response) {
         setCurrentEmailDocument(email_id);
 
-        if (response.email.length > 0) {
-          $("#email-body").empty();
-          $("#email-body").append(produceHTMLView(response));
+        if (response) {
+          if (response.email_contents) {
+            _content_original = response.email_contents;
+            $("#email-body").empty();
+            $("#email-body").append( produceHTMLView( _content_original ));
+          }
+
+          if (response.email_contents_translated) {
+            _content_translated = response.email_contents_translated;
+          }
+
+        }
+        else {
+          console.warn( email_url + ' : response undefined!')
         }
       });
   }
