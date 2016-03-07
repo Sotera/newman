@@ -179,6 +179,7 @@ def get_email(index, email_id, qs=None):
         body = source["body"]
         subject = source["subject"]
         body_translated = source.get("body_translated",'')
+        subject_translated = source.get("subject_translated",'')
         body_lang = source.get("body_lang",'')
     else:
         query = email_highlighting_query(email_id, highlight_query_string=qs)
@@ -237,7 +238,7 @@ def get_email(index, email_id, qs=None):
                  ["".join(source["tos_line"]), ";".join(source["tos"])],
                  ["".join(source["ccs_line"]), ";".join(source["ccs"])],
                  ["".join(source["bccs_line"]), ";".join(source["bccs"])],
-                 subject,
+                 subject_translated,
                  # Wrap in <pre>
                  "<pre>"+body_translated+"</pre>",
                  [[f["guid"],f["filename"]] for f in source.get("attachments", [""])],
@@ -245,7 +246,7 @@ def get_email(index, email_id, qs=None):
                  highlighted_attachments
                  ]
 
-        resp["email_contents_translated"] = { "email" : email_translated, "entities": entities, "lda_topic_scores":topic_scores, "lang": body_lang}
+        resp["email_contents_translated"] = { "email" : email_translated, "entities": entities, "lda_topic_scores":topic_scores, "original_lang": body_lang}
 
     return resp
 
