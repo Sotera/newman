@@ -437,6 +437,9 @@ var newman_datatable_email = (function () {
             $("#email-body").empty();
             $("#email-body").append( produceHTMLView( _content_original ));
           }
+          else {
+            _content_original = undefined;
+          }
 
           if (response.email_contents_translated) {
             console.log('contains translated contents');
@@ -445,10 +448,16 @@ var newman_datatable_email = (function () {
             _content_translated_displayed = false;
             $('#translate_contents_email').removeClass( 'clickable-disabled').addClass( 'clickable' );
           }
+          else {
+            _content_translated = undefined;
+          }
 
         }
         else {
-          console.warn( email_url + ' : response undefined!')
+          console.warn( email_url + ' : response undefined!');
+          _content_original = undefined;
+          _content_translated = undefined;
+          _content_translated_displayed = false;
         }
       });
   }
