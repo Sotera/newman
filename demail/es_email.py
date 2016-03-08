@@ -189,9 +189,11 @@ def get_email(index, email_id, qs=None):
         source = email["hits"]["hits"][0]["_source"]
         body_lang = source["body_lang"]
         highlight = email["hits"]["hits"][0].get("highlight", {})
+
         body = highlight.get('body', [source.get('body','')])[0]
         body_translated = highlight.get('body_translated', [source.get('body_translated','')])[0]
 
+        subject_translated = highlight.get('subject_translated', [source['subject_translated']])[0]
         subject = highlight.get('subject', [source['subject']])[0]
         # TODO highlighting attachments need to return content and further test this method
         highlighted_attachments = _find_attachment_highlighting(highlight, source.get("attachments", [""]))
