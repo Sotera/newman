@@ -187,7 +187,7 @@ def get_email(index, email_id, qs=None):
 
         email = es().search(index=index, doc_type='emails', body=query)
         source = email["hits"]["hits"][0]["_source"]
-        body_lang = source["body_lang"]
+        body_lang = source.get("body_lang",'en')
         highlight = email["hits"]["hits"][0].get("highlight", {})
 
         body = highlight.get('body', [source.get('body','')])[0]
