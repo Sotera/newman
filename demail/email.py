@@ -8,8 +8,10 @@ from es_email import get_ranked_email_address_from_email_addrs_index, get_attach
 from es_export import export_emails_archive
 from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarred, parseParamTextQuery
+
 from es_queries import _build_email_query
-from es_search import _build_graph_for_emails, _query_email_attachments, _query_emails, es_get_all_email_by_address, get_top_email_by_text_query
+from es_query_utils import _query_email_attachments, _query_emails
+from es_search import _build_graph_for_emails, es_get_all_email_by_address, get_top_email_by_text_query
 
 #GET /email/<id>?qs="<query string>"
 # deprecated slated for removal

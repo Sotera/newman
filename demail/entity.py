@@ -5,7 +5,8 @@ from param_utils import parseParamDatetime, parseParamEmailAddress, parseParamEn
 import tangelo
 import urllib
 from es_queries import _build_email_query
-from es_search import _build_graph_for_emails, _query_email_attachments, _query_emails
+from es_query_utils import _query_email_attachments, _query_emails
+from es_search import _build_graph_for_emails, _query_email_attachments
 
 #TODO deprecated - remove at some point
 #GET /top/<amt>

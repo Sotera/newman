@@ -9,7 +9,7 @@ from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarre
 #GET /sender_locations/<id>?qs="<query string>"
 # deprecated slated for removal
 def sender_locations(*args, **kwargs):
-    tangelo.log("getEmail(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.log("sender_locations(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     tangelo.content_type("application/json")
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)

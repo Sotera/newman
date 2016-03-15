@@ -3,8 +3,6 @@ import cherrypy
 
 from newman.es_connection import es
 
-
-
 def geo_query():
     return {
         "sort":[{"datetime":{"order":"desc"}}],

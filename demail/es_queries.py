@@ -1,4 +1,19 @@
 import itertools
+import re
+
+STRIP_NON_DIGITS_REGEXP= re.compile(r'[^\d.]+')
+
+def _has_phone_number_filter():
+    return { "exists": { "field": "phone_numbers"}}
+
+'''
+Normalizes the phone number first
+'''
+def _phone_numbers_filter(phone_numbers=[]):
+    return _terms_filter('phone_numbers', [STRIP_NON_DIGITS_REGEXP.sub('', str(phone_number)) for phone_number in phone_numbers])
+
+def _has_geo_xoip_filter():
+    return { "exists": { "field": "originating_locations.geo_coord"}}
 
 def _terms_filter(field='', values=[]):
     return [] if (not field or not values) else [{"terms" : { field : values}}]
@@ -81,7 +96,7 @@ def _date_filter_not_equal(date_bounds=None):
 
 # TODO how do we apply the query_terms as a filter?  Seems that it makes sense to do this as a query only but
 # TODO it is possible we will want to use a term filter on "_all"
-def _build_filter(email_senders=[], email_rcvrs=[], qs='', topic=None, entity_dict={}, date_bounds=None, communities=[], date_mode_inclusive=True, address_filter_mode="union", starred=None):
+def _build_filter(email_senders=[], email_rcvrs=[], qs='', topic=None, entity_dict={}, date_bounds=None, communities=[], date_mode_inclusive=True, address_filter_mode="union", starred=None, phone_numbers=[], has_phone_number_filter=False, has_geo_xoip_filter=False):
 
     # One of these addresses should apear on the email
     address_filter = [] if (not email_senders and not email_rcvrs) else [_addrs_filter(email_senders,email_rcvrs,email_rcvrs,email_rcvrs, address_filter_mode=address_filter_mode)]
@@ -99,6 +114,8 @@ def _build_filter(email_senders=[], email_rcvrs=[], qs='', topic=None, entity_di
 
     starred_filter = [] if not starred else _term_filter("starred", starred)
 
+    phone_numbers_filter = [] if not phone_numbers else _phone_numbers_filter(phone_numbers)
+
     filter =  {
         "bool":{
             "should":[],
@@ -114,7 +131,14 @@ def _build_filter(email_senders=[], email_rcvrs=[], qs='', topic=None, entity_di
     bool_filter["must"] += topic_range
     bool_filter["must"] += entity_filter
     bool_filter["must"] += community_filter
+    bool_filter["must"] += phone_numbers_filter
     bool_filter["must"] += starred_filter
+
+    if has_phone_number_filter:
+        bool_filter["must"] += _has_phone_number_filter()
+    if has_geo_xoip_filter:
+        bool_filter["must"] += _has_geo_xoip_filter()
+
 
     # tangelo.log("====================================2(query: %s)" % (bool_filter))
 
@@ -133,7 +157,7 @@ def _build_filter(email_senders=[], email_rcvrs=[], qs='', topic=None, entity_di
 # address_filter_mode - see address_filter
 # sort_mode
 # attachments_only - set to true will only return emails with attachments
-def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='', topic=None, entity={}, date_bounds=None, communities=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True, address_filter_mode="union", attachments_only=False, starred=None):
+def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='', topic=None, entity={}, date_bounds=None, communities=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True, address_filter_mode="union", attachments_only=False, starred=None, phone_numbers=[], has_phone_number_filter=False, has_geo_xoip_filter=False):
 
     # This checks if the query text is a simple term or a query string and sets the correct portion
     term_query = { "match_all" : {} }
@@ -152,7 +176,7 @@ def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='
                     {
                         "filtered" : {
                             "query" : term_query,
-                            "filter" : _build_filter(email_senders=sender_addrs, email_rcvrs=recipient_addrs, topic=topic, entity_dict=entity, date_bounds=date_bounds, communities=communities, date_mode_inclusive=date_mode_inclusive, address_filter_mode=address_filter_mode, starred=starred)
+                            "filter" : _build_filter(email_senders=sender_addrs, email_rcvrs=recipient_addrs, topic=topic, entity_dict=entity, date_bounds=date_bounds, communities=communities, date_mode_inclusive=date_mode_inclusive, address_filter_mode=address_filter_mode, starred=starred, phone_numbers=phone_numbers, has_phone_number_filter=has_phone_number_filter, has_geo_xoip_filter=has_geo_xoip_filter)
                         }
                     }
                 ]
@@ -173,34 +197,6 @@ def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='
         query_email_addr["sort"] = { "datetime": { "order": sort_order }}
     elif sort_mode == "topic":
         query_email_addr["sort"] = {"topic_scores.idx_"+topic["idx"]:{"order": sort_order }}
-    return query_email_addr
-
-# TODO REMOVE and combine with email_query
-# Build a query for sender email attachments
-# Deprecated
-def _build_email_attachment_query(sender_address, qs='', topic=None, entity={}, date_bounds=None, communities=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True):
-
-    term_query = {"match_all" : {}} if not qs else {"match" : {"_all" : qs}}
-
-    query_email_addr =  {
-        "filter":{"exists":{"field":"attachments"}},
-        "query" : {
-            "filtered" : {
-                "query" : term_query,
-                "filter" :  _build_filter(email_senders=[sender_address], topic=topic, entity_dict=entity, date_bounds=date_bounds, communities=communities, date_mode_inclusive=date_mode_inclusive)
-            }
-        },
-        "sort":  {}
-        # Multilevel sort
-        #     "sort": [
-        #     { "_score": { "order": "desc" }},
-        #     { "datetime": { "order": "desc" }}
-        # ]
-    }
-    if sort_mode == 'default' and not qs:
-        query_email_addr["sort"] = { "datetime": { "order": sort_order }}
-    elif sort_mode == "topic":
-        query_email_addr["sort"] = {"topic_scores.idx_"+topic["idx"]:{"order": "asc" }}
     return query_email_addr
 
 # id - id of email
@@ -238,3 +234,4 @@ def email_highlighting_query(id, highlight_query_string='', fragment_size=200, n
             }
         }
     }
+
