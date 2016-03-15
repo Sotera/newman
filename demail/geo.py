@@ -1,8 +1,7 @@
-import json
 import tangelo
 import cherrypy
 
-from es_geo import es_get_sender_locations
+from es_geo import es_get_sender_locations, es_get_exif_emails
 from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarred, parseParamTextQuery
 
@@ -18,8 +17,24 @@ def sender_locations(*args, **kwargs):
 
     return es_get_sender_locations(data_set_id, size)
 
+
+#GET /sender_locations/<id>?qs="<query string>"
+# deprecated slated for removal
+def exif_emails(*args, **kwargs):
+    tangelo.log("geo.exif_emails(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.content_type("application/json")
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+
+    qs = parseParamTextQuery(**kwargs)
+
+    return es_get_exif_emails(data_set_id, size)
+
+
 get_actions = {
-    "sender_locations" : sender_locations
+    "sender_locations" : sender_locations,
+    "exif_emails" : exif_emails
+
 }
 
 def unknown(*args):
