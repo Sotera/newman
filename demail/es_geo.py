@@ -1,5 +1,6 @@
 import tangelo
 import cherrypy
+import json
 
 from newman.es_connection import es
 
@@ -39,10 +40,12 @@ def search_geo_emails():
 
 
 def _map_geo_response(doc):
+    #tangelo.log("_map_geo_response(doc)\n%s" % json.dumps(doc, sort_keys=False, indent=2))
     return {
         "id":doc.get("id"),
         "from":doc.get("senders",[''])[0],
         "tos":", ".join(doc.get("tos",[''])),
+        "subject":doc.get("subject"),
         "originating_locations":doc.get("originating_locations",[])
     }
 
