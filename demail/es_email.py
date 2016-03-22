@@ -225,7 +225,7 @@ def get_email(index, email_id, qs=None):
     entities = []
     for type in ["person","location","organization","misc"]:
         if "body_entities" in source["entities"] and ("entity_"+type) in source["entities"]["body_entities"]:
-            entities += [ [source["id"][0]+"_entity_"+str(i), type,     i, val] for i,val in enumerate(source["entities"]["body_entities"].get("entity_"+type, [""]), len(entities))]
+            entities += [ [source["id"][0]+"_entity_"+str(i), type,     i, val] for i,val in enumerate(source["entities"]["body_entities"].get("entity_"+type, []), len(entities))]
 
     resp = {"email_contents" : { "email" : email, "entities": entities, "lda_topic_scores":topic_scores}}
 
@@ -247,12 +247,12 @@ def get_email(index, email_id, qs=None):
                  source.get("starred", False),
                  highlighted_attachments
                  ]
-        entities = []
+        entities_translated = []
         for type in ["person","location","organization","misc"]:
-            if "body_entities" in source["entities"] and ("entity_"+type) in source["entities"]["body_entities_translated"]:
-                entities += [ [source["id"][0]+"_entity_"+str(i), type, i, val] for i,val in enumerate(source["entities"].get("entity_"+type, [""]), len(entities))]
+            if "body_entities_translated" in source["entities"] and ("entity_"+type) in source["entities"]["body_entities_translated"]:
+                entities_translated += [ [source["id"][0]+"_entity_"+str(i), type, i, val] for i,val in enumerate(source["entities"]["body_entities_translated"].get("entity_"+type, []), len(entities_translated))]
 
-        resp["email_contents_translated"] = { "email" : email_translated, "entities": entities, "lda_topic_scores":topic_scores, "original_lang": body_lang}
+        resp["email_contents_translated"] = { "email" : email_translated, "entities": entities_translated, "lda_topic_scores":topic_scores, "original_lang": body_lang}
 
     return resp
 
