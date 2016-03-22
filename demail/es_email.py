@@ -193,7 +193,7 @@ def get_email(index, email_id, qs=None):
         body = highlight.get('body', [source.get('body','')])[0]
         body_translated = highlight.get('body_translated', [source.get('body_translated','')])[0]
 
-        subject_translated = highlight.get('subject_translated', [source['subject_translated']])[0]
+        subject_translated = highlight.get('subject_translated', [source.get('subject_translated','')])[0]
         subject = highlight.get('subject', [source['subject']])[0]
         # TODO highlighting attachments need to return content and further test this method
         highlighted_attachments = _find_attachment_highlighting(highlight, source.get("attachments", [""]))
@@ -270,7 +270,7 @@ def header(h, t=None):
 
     return r
 
-# GET email/attachment/<attachment-GUID>?data_set_id=<data_set>
+# GET <host>:<port>:/email/attachment/<attachment-GUID>?data_set_id=<data_set>
 def get_attachment_by_id(*args, **kwargs):
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
