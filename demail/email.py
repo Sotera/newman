@@ -13,7 +13,7 @@ from es_queries import _build_email_query
 from es_query_utils import _query_email_attachments, _query_emails
 from es_search import _build_graph_for_emails, es_get_all_email_by_address, get_top_email_by_text_query
 
-#GET /email/<id>?qs="<query string>"
+#GET <host>:<port>:/email/email/<id>?qs="<query_string>"
 # deprecated slated for removal
 def getEmail(*args, **kwargs):
     tangelo.log("getEmail(args: %s kwargs: %s)" % (str(args), str(kwargs)))
@@ -29,7 +29,7 @@ def getEmail(*args, **kwargs):
 
     return get_email(data_set_id, email_id, qs)
 
-# /email/set_starred/<email_id>?starred=<True|False>
+# <host>:<port>:/email/set_starred/<email_id>?data_set_id=<data_set_id>&starred=<True|False>
 # Defaults to True
 def setStarred(*args, **kwargs):
     tangelo.log("setStarred(args: %s kwargs: %s)" % (str(args), str(kwargs)))
@@ -45,7 +45,7 @@ def setStarred(*args, **kwargs):
 
     return set_starred(data_set_id, [email_id], starred)
 
-# /emails/view_starred
+# <host>:<port>:/email/search_all_starred?data_set_id=<data_set_id>
 # common URL params apply, date, size, etc
 def searchStarred(*args, **kwargs):
     tangelo.log("email.searchStarred(args: %s kwargs: %s)" % (str(args), str(kwargs)))
@@ -73,7 +73,7 @@ def searchStarred(*args, **kwargs):
 
     return graph
 
-#GET /rank
+#GET <host>:<port>:/email/rank
 def getRankedEmails(*args, **kwargs):
     tangelo.content_type("application/json")
     tangelo.log("getRankedEmails(args: %s kwargs: %s)" % (str(args), str(kwargs)))
@@ -86,7 +86,7 @@ def getRankedEmails(*args, **kwargs):
 # The overall top 20.
 # TODO merge with getRankedAddresses function
 # Returnedd:  The graph structure returned will contain the search results for the query per user
-#GET /rank
+#GET <host>:<port>:/email/ranked_addresses_search?data_set_id=<data_set>&qs=<query_text>
 def getRankedAddressesWithTextSearch(*args, **kwargs):
     tangelo.content_type("application/json")
     tangelo.log("getRankedAddresses(args: %s kwargs: %s)" % (str(args), str(kwargs)))
@@ -136,7 +136,7 @@ def getRankedAddressesWithTextSearch(*args, **kwargs):
 # The overall top 20.
 # TODO merge with getRankedAddresses function
 # Returnedd:  The graph structure returned will contain the search results for the query per user
-#GET /rank
+#GET <host>:<port>:/email/ranked_addresses?data_set_id=<data_set>&qs=<query_text>
 def getRankedAddresses(*args, **kwargs):
     tangelo.content_type("application/json")
     tangelo.log("getRankedAddresses(args: %s kwargs: %s)" % (str(args), str(kwargs)))
@@ -170,7 +170,7 @@ def getRankedAddresses(*args, **kwargs):
     return {"top_address_list" : top_address_list}
 
 # DEPRECATED  TODO remove
-#GET /target
+#GET <host>:<port>:/email/target?data_set_id=<data_set>
 #deprecated; use new service url http://<host>:<port>/datasource/all/
 def getTarget(*args, **kwargs):
     target = getOpt('target')
@@ -178,7 +178,7 @@ def getTarget(*args, **kwargs):
     tangelo.content_type("application/json")
     return { "email" : []}
 
-#GET /domains?data_set_id=<data_set>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
+#GET <host>:<port>:/email/domains?data_set_id=<data_set>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 def getDomains(*args, **kwargs):
     tangelo.log("getDomains(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     tangelo.content_type("application/json")
@@ -190,7 +190,7 @@ def getDomains(*args, **kwargs):
     return {"domains" : get_top_domains(data_set_id, date_bounds=(start_datetime, end_datetime), num_domains=top_count)[:top_count]}
 
 
-#GET /communities?data_set_id=<data_set>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
+#GET <host>:<port>:/email/communities?data_set_id=<data_set>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 def getCommunities(*args, **kwargs):
     tangelo.log("getCommunities(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     tangelo.content_type("application/json")
@@ -201,7 +201,7 @@ def getCommunities(*args, **kwargs):
 
     return {"communities" : get_top_communities(data_set_id, date_bounds=(start_datetime, end_datetime), num_communities=top_count)[:top_count]}
 
-#GET /attachments/<sender>
+#GET <host>:<port>:/email/search_all_attach_by_sender/<sender>?data_set_id=<data_set>
 def getAllAttachmentBySender(*args, **kwargs):
     tangelo.log("getAttachmentsSender(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
@@ -234,7 +234,7 @@ def exportMany(*args, **kwargs):
     return export_emails_archive(data_set_id, email_ids)
 
 
-# POST email/exportmany/?data_set_id=<data_set>
+# POST <host>:<port>:/email/export_all_starred?data_set_id=<data_set>
 # TODO set all params
 def exportStarred(*args, **kwargs):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)

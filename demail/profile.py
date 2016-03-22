@@ -5,7 +5,7 @@ from es_phone_numbers import es_get_email_by_phone_numbers, get_top_phone_number
 from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime, parseParamTextQuery, parseParamPhoneNumbers
 
-#GET /phone_numbers?phone_numbers=<>&qs="<query string>"
+#GET <host>:<port>/profile/phone_numbers?phone_numbers=<phone_numbers>&qs="<query_string>"
 def phone_numbers(*args, **kwargs):
     tangelo.log("phone_numbers(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     tangelo.content_type("application/json")
@@ -18,7 +18,7 @@ def phone_numbers(*args, **kwargs):
     return es_get_email_by_phone_numbers(data_set_id, qs, phone_numbers=phone_numbers, date_bounds=(start_datetime, end_datetime), size=size)
 
 
-#GET /top_phone_numbers?qs="<query string>"
+#GET <host>:<port>/profile/top_phone_numbers?qs="<query_string>"
 def top_phone_numbers(*args, **kwargs):
     tangelo.log("phone_numbers(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     tangelo.content_type("application/json")

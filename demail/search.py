@@ -9,7 +9,7 @@ import urllib
 from newman.utils.functions import nth
 
 
-#GET /search/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
+#GET <host>:<port>:/search/search/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
 def search(*path_args, **param_args):
     tangelo.content_type("application/json")
     tangelo.log("search.search(path_args[%s] %s)" % (len(path_args), str(path_args)))
@@ -56,7 +56,7 @@ def search(*path_args, **param_args):
             return {"graph":{"nodes":[], "links":[]}, "rows":[]}        
     return {"graph":{"nodes":[], "links":[]}, "rows":[]}
 
-#GET /search_by_address_set?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>&order=prev&sender=<s1,s2...>&recipient=<r1,r2..>
+#GET <host>:<port>:/search/search_by_address_set?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>&order=prev&sender=<s1,s2...>&recipient=<r1,r2..>
 # 'order' param controls if we are paging the next or previous sets of data and can be next or prev, default is next
 def search_email_by_address_set(*path_args, **param_args):
     tangelo.content_type("application/json")
@@ -76,7 +76,7 @@ def search_email_by_address_set(*path_args, **param_args):
                                            end_datetime,
                                            size)
 
-#GET /search_by_conversation_forward_backward?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>&order=prev&sender=<s1,s2...>&recipient=<r1,r2..>
+#GET <host>:<port>:/search/search_by_conversation_forward_backward?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>&order=prev&sender=<s1,s2...>&recipient=<r1,r2..>
 # 'order' param controls if we are paging the next or previous sets of data and can be next or prev, default is next
 def search_email_by_conversation_forward_backward(*path_args, **param_args):
     tangelo.content_type("application/json")
@@ -101,7 +101,7 @@ def search_email_by_conversation_forward_backward(*path_args, **param_args):
                                                              order)
     
 
-#GET /search/conversation/?data_set_id=<id>&start_datetime=<datetime>&sender=<s1,s2...>&recipient=<r1,r2..>
+#GET <host>:<port>:/search/conversation/?data_set_id=<id>&start_datetime=<datetime>&sender=<s1,s2...>&recipient=<r1,r2..>
 def search_email_by_conversation(*path_args, **param_args):
     tangelo.content_type("application/json")
     tangelo.log("search.search_email_by_conversation(path_args[%s] %s)" % (len(path_args), str(path_args)))
@@ -137,7 +137,7 @@ def search_email_by_conversation(*path_args, **param_args):
                                document_datetime)
 
 
-#GET /search_by_community/<community_name>?data_set_id=<data_set>&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
+#GET <host>:<port>:/search/search_by_community/<community_name>?data_set_id=<data_set>&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 def search_email_by_community(*args, **param_args):
     tangelo.content_type("application/json")
     tangelo.log("search_email_by_community(args: %s kwargs: %s)" % (str(args), str(param_args)))
@@ -159,7 +159,7 @@ def search_email_by_community(*args, **param_args):
 
     return es_get_all_email_by_community(data_set_id, community, email_addrs, qs, start_datetime, end_datetime, size)
 
-#GET /search_by_topic/?data_set_id=<data_set>&topic_index=1&topic_threshold=0.5&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
+#GET <host>:<port>:/search/search_by_topic/?data_set_id=<data_set>&topic_index=1&topic_threshold=0.5&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 def search_email_by_topic(*args, **param_args):
     tangelo.content_type("application/json")
     tangelo.log("search_email_by_topic(args: %s kwargs: %s)" % (str(args), str(param_args)))

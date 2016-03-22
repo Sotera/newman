@@ -5,7 +5,7 @@ from es_geo import es_get_sender_locations, es_get_exif_emails
 from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarred, parseParamTextQuery
 
-#GET /sender_locations/<id>?qs="<query string>"
+#GET <host>:<port>/geo/sender_locations?data_set_id=<data_set_id>&qs="<query_string>"
 # deprecated slated for removal
 def sender_locations(*args, **kwargs):
     tangelo.log("sender_locations(args: %s kwargs: %s)" % (str(args), str(kwargs)))
@@ -18,7 +18,7 @@ def sender_locations(*args, **kwargs):
     return es_get_sender_locations(data_set_id, size)
 
 
-#GET /sender_locations/<id>?qs="<query string>"
+#GET <host>:<port>/geo/exif_emails?data_set_id=<data_set_id>&qs="<query_string>"
 # deprecated slated for removal
 def exif_emails(*args, **kwargs):
     tangelo.log("geo.exif_emails(args: %s kwargs: %s)" % (str(args), str(kwargs)))
