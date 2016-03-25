@@ -1,6 +1,6 @@
 /**
  * Created by jlee on 3/2/16.
- * Local patch for Leaflet.draw plugin
+ * Local patch for leaflet.draw.js plugin
  */
 
 (function (window, document, undefined) {

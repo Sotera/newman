@@ -8,6 +8,7 @@
 
     <meta charset="utf-8">
     <title>Newman 2.0</title>
+
     <link href="plugins/jquery-ui/jquery-ui.css" rel="stylesheet" type="text/css">
     <!--<link href="plugins/jquery-treetable/css/jquery.treetable.css" rel="stylesheet" type="text/css">-->
     <!--<link href="plugins/jquery-treetable/css/jquery.treetable.theme.default.css" rel="stylesheet" type="text/css">-->
@@ -28,8 +29,12 @@
     <link href="plugins/chartist/chartist.min.css" rel="stylesheet" type="text/css">
     <link href="plugins/leaflet/leaflet.css" rel="stylesheet" type="text/css">
     <link href="plugins/leaflet-draw/leaflet.draw.css" rel="stylesheet" type="text/css">
-    <link href="plugins/leaflet-awesome-markers/leaflet.awesome-markers.css" rel="stylesheet" type="text/css">
     <link href="plugins/leaflet-easy-button/leaflet-easy-button.css" rel="stylesheet" type="text/css">
+    <!--<link href="plugins/leaflet-awesome-markers/leaflet.awesome-markers.css" rel="stylesheet" type="text/css">-->
+    <link href="plugins/leaflet-awesome-markers/newman.leaflet.awesome-markers.css" rel="stylesheet" type="text/css">
+
+
+
     <link href="css/newman-style-dark.css" rel="stylesheet" type="text/css">
     <link href="css/newman-slider-theme.css" rel="stylesheet" type="text/css">
     <link href="css/newman-datatable.css" rel="stylesheet" type="text/css">
@@ -743,6 +748,7 @@
           <!--End Dashboard-Right-->
 
         </div>
+        <!--End Home-Dashboard-Content-->
 
         <!--Start Email-Analytics-Content-->
         <div id="content-analytics-email" class="container-fluid analytics-content" >
@@ -1080,9 +1086,9 @@
     <script src="plugins/leaflet/leaflet.js"></script>
     <!--<script src="plugins/leaflet/eu-countries.js"></script>-->
     <script src="plugins/leaflet/us-states.js"></script>
-    <script src="plugins/leaflet-awesome-markers/leaflet.awesome-markers.min.js"></script>
+    <!--<script src="plugins/leaflet-awesome-markers/leaflet.awesome-markers.min.js"></script>--><!-- patched by newman.leaflet.awesome-markers.js -->
     <script src="plugins/leaflet-tilelayer-cache/L.TileLayer.PouchDBCached.js"></script>
-    <script src="plugins/leaflet-draw/leaflet.draw.js"></script>
+    <!--<script src="plugins/leaflet-draw/leaflet.draw.js"></script>--><!-- patched by newman.leaflet.draw.js -->
     <script src="plugins/leaflet-easy-button/leaflet-easy-button.js"></script>
     <script src="plugins/pouchdb/pouchdb-5.2.1.min.js"></script>
 
@@ -1107,11 +1113,14 @@
     <script src="js/newman-data-source.js"></script>
     <script src="js/newman-service.js"></script>
     <script src="js/newman-datatable-email.js"></script>
+    <script src="js/newman_email_document_view.js"></script>
     <script src="js/newman-graph-email.js"></script>
     <script src="js/newman_search_result.js"></script>
     <script src="js/newman_search_result_collection.js"></script>
-    <script src="js/geo/newman_leaflet_draw.js"></script>
+    <script src="js/geo/newman.leaflet.draw.js"></script>
+    <script src="js/geo/newman.leaflet.awesome-markers.js"></script>
     <script src="js/geo/newman_geo_map.js"></script>
+    <script src="js/geo/newman_geo_email_sender.js"></script>
     <script src="js/sample_markers.json"></script>
     <script src="js/searchtool.js"></script>
     <script src="js/graphtool.js"></script>

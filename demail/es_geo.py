@@ -46,6 +46,7 @@ def _map_geo_response(doc):
         "from":doc.get("senders",[''])[0],
         "tos":", ".join(doc.get("tos",[''])),
         "subject":doc.get("subject"),
+        "datetime":doc.get("datetime"),
         "originating_locations":doc.get("originating_locations",[])
     }
 
