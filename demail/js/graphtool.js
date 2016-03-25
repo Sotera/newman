@@ -313,9 +313,6 @@ function updateUIOutboundCount( count ) {
 }
 
 
-
-
-
 function searchByEntity(entityid, type, value){
   console.log('searchByEntity(' + entityid + ', ' + type + ', ' + value + ')');
 
@@ -325,72 +322,64 @@ function searchByEntity(entityid, type, value){
     });
 }
 
-function clear_content_view_email() {
-  newman_datatable_email.clearCurrentEmailDocument();
-}
 
+/*
 function produceHTMLView(email_response) {
   console.log( 'produceHTMLView( email_response )' );
 
-  var d = _.object(['email_id', 'attach_id','datetime', 'exportable', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], email_response.email);
+  var contents = _.object(['email_id', 'attach_id','datetime', 'exportable', 'from', 'to', 'cc', 'bcc', 'subject', 'body', 'attach'], email_response.email);
   //console.log('produceHTMLView()\n' + JSON.stringify(d, null, 2));
-  var _email_document_uid_selected = d.email_id;
-  var _email_document_datetime_selected = d.datetime;
+  var _email_document_uid_selected = contents.email_id;
+  var _email_document_datetime_selected = contents.datetime;
 
   //draw_mini_topic_chart(d.email_id);
   // render mini-topic-chart
   if (email_response.lda_topic_scores) {
-    newman_datatable_document_view.renderMiniTopicChart(email_response.lda_topic_scores);
+    newman_email_document_view.renderMiniTopicChart(email_response.lda_topic_scores);
   }
 
-  var el = $('<div>').addClass('body-view');
+  var email_html = $('<div>').addClass('body-view');
   //html += "<b>ID: </b>" + d.email_id + "<BR>";
 
-  el.append(
+  email_html.append(
     $('<div>').append());
       
-  el.append(
+  email_html.append(
     $('<p>').append(
       $('<span>').addClass('bold').text("ID: "))
-      .append($('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'email/' + d.email_id + '/' + d.email_id + '.txt'}).text(d.email_id), $('<span>').text('    '),
-              $('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'email/' + d.email_id + '/' + d.email_id + '.html'}).append($('<span>').addClass('glyphicon glyphicon-print'))));
+      .append($('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'email/' + contents.email_id + '/' + contents.email_id + '.txt'}).text(contents.email_id), $('<span>').text('    '),
+              $('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'email/' + contents.email_id + '/' + contents.email_id + '.html'}).append($('<span>').addClass('glyphicon glyphicon-print'))));
 
 
-  var anchor_sender = $('<a>', { 'class': 'from clickable'}).on("click", function() {
-        draw_attachments_table(d.from).done(function() {
-          $('#tab-list li:eq(4) a').tab('show');
+  var sender_anchor = $('<a>', { 'class': 'from clickable'}).on("click", function() {
+    console.log( 'clicked sender : ' + contents.from );
 
-        });
-        return false;
-      }).text(d.from);
+  }).text(contents.from);
 
   var sender_checkbox = $('<input>', {
     'type': 'checkbox',
-    'id': 'checkbox.' + d.from,
-    'value': d.from,
+    'id': 'checkbox.' + contents.from,
+    'value': contents.from,
     'checked': 'checked',
     'disabled': 'true',
     'style': 'margin: 2px 2px 2px 2px;'
   });
   console.log('sender_checkbox : checked,  id : ' + sender_checkbox.prop('id') + ', value : ' + sender_checkbox.prop('value'));
   newman_graph_email.setNodeSelected(sender_checkbox.prop('value'), 'source', sender_checkbox.prop('id'), true, false);
-  anchor_sender.append( sender_checkbox );
+  sender_anchor.append( sender_checkbox );
 
 
-  var from_hover = node_highlight(d.from);
-  anchor_sender.on('mouseover', from_hover.highlight);
-  anchor_sender.on('mouseout', from_hover.unhighlight);
+  var from_hover = node_highlight(contents.from);
+  sender_anchor.on('mouseover', from_hover.highlight);
+  sender_anchor.on('mouseout', from_hover.unhighlight);
 
-  el.append(
+  email_html.append(
     $('<p>')
       .append($('<span>').addClass('bold').text("From: "))
-      .append(anchor_sender)
-
+      .append(sender_anchor)
   );
 
-
-
-  var recipients = _.zip(['To', 'Cc', 'Bcc'], [d.to, d.cc, d.bcc]);
+  var recipients = _.zip(['To', 'Cc', 'Bcc'], [contents.to, contents.cc, contents.bcc]);
   _.each(recipients, function(recipient) {
     //console.log('email-recipient : ' + JSON.stringify(recipient, null, 2));
     var tokens_original = tokenize(recipient[1][0]);
@@ -399,7 +388,7 @@ function produceHTMLView(email_response) {
     //console.log('email-recipient-tokens(extracted) : ' + JSON.stringify(tokens_extracted, null, 2));
 
     var emails = _.uniq(tokens_extracted);
-    el.append($('<p>').append($('<span>').addClass('bold').text( recipient[0]+ ': '))
+    email_html.append($('<p>').append($('<span>').addClass('bold').text( recipient[0]+ ': '))
               .append(
                 _.map(emails, function(address_text){
                   var hover = node_highlight(address_text);
@@ -470,15 +459,15 @@ function produceHTMLView(email_response) {
   });
 
 
-  var items = _.zip(['Subject','Date'], [d.subject, d.datetime]);
+  var items = _.zip(['Subject','Date'], [contents.subject, contents.datetime]);
   
   _.each(items, function(item){
-    el.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
+    email_html.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
               .append(item[1]) );
   });
 
   var attachments = $('<p>').append($('<span>').addClass('bold').text("Attachments: "));
-  var attach_field = d.attach;
+  var attach_field = contents.attach;
   if (attach_field) {
     _.each(attach_field, function (attach) {
       //console.log('email-body-attachment : \n' + JSON.stringify(attach, null, 2));
@@ -489,8 +478,8 @@ function produceHTMLView(email_response) {
       attachments.append($('<span>').html('&nbsp'));
     });
   }
-  el.append(attachments);
-  el.append($('<p>'));
+  email_html.append(attachments);
+  email_html.append($('<p>'));
 
   //console.log('email-body : \n' + JSON.stringify(d.body, null, 2));
 
@@ -501,7 +490,7 @@ function produceHTMLView(email_response) {
     });
     //console.log('entity_matched_list :\n' + JSON.stringify(entity_matched_list, null, 2));
     if (entity_matched_list) {
-      var body_text = d.body;
+      var body_text = contents.body;
       var new_text_tokens = [];
       _.each(entity_matched_list, function (entity_matched) {
         var entity_type = entity_matched[1]
@@ -521,35 +510,36 @@ function produceHTMLView(email_response) {
         body_text += text_token;
       });
       //console.log('new_body_text :\n\n' + body_text + '\n');
-      d.body = body_text;
+      contents.body = body_text;
     }
   }
   else {
     console.log('No entity set provided!');
   }
 
-  el.append($('<div>').append(d.body));
+  email_html.append($('<div>').append(contents.body));
 
-  el.find(".mitie").each(function(i,el){
+  email_html.find(".mitie").each(function(i,el){
     var jqel = $(el);
     jqel.on('click', _.partial(searchByEntity, jqel.attr('mitie-id'), jqel.attr('mitie-type'), jqel.attr('mitie-value')));
   });
 
   //highlight searched text
   if (searchType() == 'all'){
-    el.highlight($('#txt_search').val());
+    email_html.highlight($('#txt_search').val());
   }
 
   // exportable text (when email is initially loaded)
-  if (d.exportable === 'true') {
+  if (contents.exportable === 'true') {
     $("#toggle_mark_for_export").addClass('marked')
   }
   else {
     $("#toggle_mark_for_export").removeClass('marked')
   }
 
-  return el;
+  return email_html;
 }
+*/
 
 function onEntityClicked(entity_key, entity_type) {
   newman_entity_email.onEntityClicked(entity_key, entity_type);
@@ -1009,36 +999,15 @@ function loadSearchResult( url_path ) {
   updateUIInboundCount(); // initialize to blank
   updateUIOutboundCount(); // initialize to blank
 
-  //$.get("email/exportable").then(function(response_exportable) {
-  //  newman_service_email_exportable.setResponse(response_exportable);
+  $.getJSON( url_path , function (search_response) {
 
-    $.getJSON( url_path , function (search_response) {
+    //validate search-response
+    var filtered_response = validateResponseSearch( search_response );
 
-      //validate search-response
-      var filtered_response = validateResponseSearch( search_response );
+    console.log( '.getJSON(' + url_path + ')' );
+    newman_graph_email.updateUIGraphView( filtered_response, false );
 
-      console.log( '.getJSON(' + url_path + ')' );
-      newman_graph_email.updateUIGraphView( filtered_response, false );
-
-      /*
-      //var exported = _.indexBy(response_exportable.emails, _.identity);
-      var exported = _.object(response_exportable.emails);
-
-      $('#search_status').empty();
-      //d3.select("#search_status").text("");
-
-      $('#document_count').text(filtered_response.rows.length);
-
-      // populate data-table
-      newman_datatable_email.populateDataTable( filtered_response.rows )
-
-      // render graph display
-      drawGraph( filtered_response.graph );
-      */
-
-    });
-
-  //});
+  });
 
   //hasher.setHash( url_path );
   //email_analytics_content.open();
@@ -2273,73 +2242,6 @@ $(function () {
       }
       $('#txt_search').val('');
     });
-
-    /**
-     *    CMU Active-Search deprecated and disabled
-     */
-    /*
-    $("#submit_activesearch_like").click(function () {
-      if (current_email == null) {
-        alert('please select an email to seed');
-        return;
-      }
-      $("#email-body").empty();
-      $("#email-body").append(waiting_bar);
-      $.get("activesearch/like").then(
-        function (resp) {
-          newman_datatable_email.setCurrentEmailDocument(resp);
-          $.get("email/email/" + encodeURIComponent(resp)).then(
-            function (resp) {
-              if (resp.email.length > 0) {
-                $("#email-body").empty();
-                $("#email-body").append(produceHTMLView(resp));
-              }
-            });
-        });
-    });
-
-    $("#submit_activesearch_dislike").click(function () {
-      if (current_email == null) {
-        alert('please select an email to seed');
-        return;
-      }
-      $("#email-body").empty();
-      $("#email-body").append(waiting_bar);
-      $.get("activesearch/dislike").then(
-        function (resp) {
-          newman_datatable_email.setCurrentEmailDocument(resp);
-          $.get("email/email/" + encodeURIComponent(resp)).then(
-            function (resp) {
-              if (resp.email.length > 0) {
-                $("#email-body").empty();
-                $("#email-body").append(produceHTMLView(resp));
-              }
-            });
-        });
-    });
-
-    $("#submit_activesearch").click(function () {
-      console.log("seed active search for email_id... ");
-      if (current_email == null) {
-        alert('please select an email to seed');
-        return;
-      }
-      var id = current_email;
-      $("#email-body").empty();
-      $("#email-body").append(waiting_bar);
-      $.get("activesearch/seed/" + encodeURIComponent(id)).then(
-        function (resp) {
-          newman_datatable_email.setCurrentEmailDocument(resp);
-          $.get("email/email/" + encodeURIComponent(resp)).then(
-            function (resp) {
-              if (resp.email.length > 0) {
-                $("#email-body").empty();
-                $("#email-body").append(produceHTMLView(resp));
-              }
-            });
-        });
-    });
-    */
 
     //on modal close event
     $('#export_modal').on('hidden.bs.modal', function () {
