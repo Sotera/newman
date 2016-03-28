@@ -67,7 +67,7 @@ def es_get_exif_emails(data_set_id, size):
     emails_resp = es().search(index=data_set_id, doc_type="emails", size=size, body=_geo_exif_query())
     tangelo.log("es_geo.es_get_exif_emails(total document hits = %s)" % emails_resp["hits"]["total"])
     docs = [hit["_source"] for hit in emails_resp["hits"]["hits"]]
-    return {"total":emails_resp["hits"]["total"], "exif_gps" : docs}
+    return {"total":emails_resp["hits"]["total"], "exif_docs" : docs}
 
 
 if __name__ == "__main__":

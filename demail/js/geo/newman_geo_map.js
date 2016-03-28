@@ -8,7 +8,7 @@ var newman_geo_map = (function () {
   var debug_enabled = true;
 
   var default_view_center = new L.LatLng(32.9022, 13.1858), default_view_zoom = 2;
-  var min_zoom = 2, max_zoom = 17;
+  var min_zoom = 2, max_zoom = 16;
   var map;
   var map_tile_layer;
   var map_tile_layer_url;
@@ -25,6 +25,8 @@ var newman_geo_map = (function () {
 
   var marker_list = [];
   var marker_icon_map = {};
+  var marker_init_sender_button, marker_init_attach_button;
+  var map_marker_layer_all_sender, map_marker_layer_all_attach;
 
   function markMap(new_marker_list) {
     if (map) {
@@ -33,38 +35,43 @@ var newman_geo_map = (function () {
           //console.log('marker_list:\n' + JSON.stringify(new_marker_list, null, 2));
         }
 
-        var coord_sent_marker_map = {};
+        var sender_coord_marker_map = {};
 
         _.each(new_marker_list, function(item) {
           //console.log('marker:\n' + JSON.stringify(item, null, 2));
-          var latitude = parseFloat(item.lat);
-          var longitude = parseFloat(item.lng);
+          var latitude = parseFloat(item.email_lat);
+          var longitude = parseFloat(item.email_lon);
           var coord_sent = item.coord_sent;
-          var coord_received = item.coord_received;
-          var attach_count = item.attach_count;
+
 
           if (latitude && longitude) {
 
             if (coord_sent === true) {
               var coord_key = latitude + ',' + longitude, coord_content_list = [];
-              if (coord_key in coord_sent_marker_map) {
-                coord_content_list = coord_sent_marker_map[coord_key];
+              if (coord_key in sender_coord_marker_map) {
+                coord_content_list = sender_coord_marker_map[coord_key];
               }
               coord_content_list.push(clone(item));
-              coord_sent_marker_map[coord_key] = coord_content_list;
+              sender_coord_marker_map[coord_key] = coord_content_list;
             }
           }
         });
 
-        markAllDocSent(coord_sent_marker_map);
+        markAllSender(sender_coord_marker_map);
 
       }
     }
   }
 
-  function markAllDocSent(coord_marker_map) {
+  function markAllSender(coord_marker_map) {
 
     if (map && coord_marker_map) {
+      if (map_marker_layer_all_sender) {
+        map_marker_layer_all_sender.clearLayers();
+      }
+      else {
+        map_marker_layer_all_sender = new L.FeatureGroup();
+      }
 
       _.each(coord_marker_map, function(marker_content_list, key) {
         //console.log('marker_content_list:\n' + JSON.stringify(marker_content_list, null, 2));
@@ -92,12 +99,12 @@ var newman_geo_map = (function () {
           row.append( column_0 );
           row.append( column_1 );
 
-          var doc_id = marker_content.doc_id;
+          var doc_id = marker_content.email_id;
           var marker_doc_id = 'marker-doc-' + doc_id;
-          var datetime = marker_content.datetime;
-          var subject = marker_content.subject;
-          //var latitude = parseFloat(marker_content.lat);
-          //var longitude = parseFloat(marker_content.lng);
+          var datetime = marker_content.email_datetime;
+          var subject = marker_content.email_subject;
+          //var latitude = parseFloat(marker_content.email_lat);
+          //var longitude = parseFloat(marker_content.email_lon);
 
           if (subject) {
             var max_length = 40;
@@ -106,7 +113,7 @@ var newman_geo_map = (function () {
             }
           }
           else {
-            subject = marker_content.doc_id;
+            subject = '<' + doc_id + '>';
           }
 
           if (datetime) {
@@ -162,10 +169,11 @@ var newman_geo_map = (function () {
 
         L.marker([latitude, longitude], {icon: marker_icon})
           .bindPopup(popup_container[0], popup_options)
-          .addTo(map);
+          .addTo(map_marker_layer_all_sender);
 
       });
 
+      map.addLayer( map_marker_layer_all_sender );
     }
   }
 
@@ -207,6 +215,28 @@ var newman_geo_map = (function () {
 
     };
 
+  }
+
+  function getAllMarker() {
+
+    if (map) {
+      var marker_obj_array = [];
+      var marker_geo_json_array = [];
+
+      _.each(map._layers, function(layer) {
+
+        if (map._layers[layer].feature) {
+
+          marker_obj_array.push( this );
+          marker_geo_json_array.push( JSON.stringify( this.toGeoJSON() ));
+        }
+
+      });
+
+      if (debug_enabled) {
+        console.log('marker_geo_json_array['+marker_geo_json_array.length+']\n' + JSON.stringify(marker_geo_json_array));
+      }
+    }
   }
 
   function initCacheSeeding(new_zoom_level, world_map_enabled) {
@@ -286,7 +316,7 @@ var newman_geo_map = (function () {
             icon: 'fa-cloud-download',
             title: 'Initiate tile caching',
             onClick: function(control) {
-              initCacheSeeding(10);
+              initCacheSeeding( 10 );
               control.state('tile-caching');
               control._map.on('caching:end', function(e){
                 //console.log('control._map.on("caching:end")');
@@ -306,7 +336,7 @@ var newman_geo_map = (function () {
       area_caching_button.addTo( map );
       area_caching_button.disable();
 
-      initCacheSeeding(5, true);
+      //initCacheSeeding(5, true);
     }
 
     /*
@@ -317,6 +347,74 @@ var newman_geo_map = (function () {
     }
     window.addEventListener('DOMContentLoaded', _readyState);
     */
+  }
+
+  function isMarkedForAllSender() {
+
+    if (map_marker_layer_all_sender && map && map.hasLayer(map_marker_layer_all_sender)) {
+      return true;
+    }
+    return false;
+  }
+
+  function initAllEmailSenderButton() {
+
+    if (map) {
+      if (marker_init_sender_button) {
+        map.removeLayer( marker_init_sender_button );
+      }
+
+
+      marker_init_sender_button = L.easyButton('fa-paper-plane-o', function() {
+
+
+        if (isMarkedForAllSender()) {
+          map.removeLayer( map_marker_layer_all_sender )
+        }
+        else {
+          markMap( newman_geo_email_sender.getDocGeoLocMap() );
+        }
+
+      });
+
+      marker_init_sender_button.addTo( map );
+
+    }
+
+  }
+
+  function isMarkedForAllAttachment() {
+
+    if (map_marker_layer_all_attach && map && map.hasLayer(map_marker_layer_all_attach)) {
+      return true;
+    }
+    return false;
+  }
+
+  function initAllEmailAttachButton() {
+
+    if (map) {
+      if (marker_init_attach_button) {
+        map.removeLayer( marker_init_attach_button );
+      }
+
+
+      marker_init_attach_button = L.easyButton('fa-paperclip', function() {
+
+        if (isMarkedForAllAttachment()) {
+          map.removeLayer( map_marker_layer_all_attach )
+        }
+        else {
+
+          //TODO: implement displaying all attachments
+        }
+
+      });
+
+      marker_init_attach_button.addTo( map );
+
+    }
+
   }
 
   function initMapControlDraw() {
@@ -519,9 +617,6 @@ var newman_geo_map = (function () {
         });
       }
       */
-
-      newman_geo_email_sender.initDocGeoLoc();
-
     }
 
     if (_.size(marker_icon_map) == 0) {
@@ -543,6 +638,8 @@ var newman_geo_map = (function () {
 
       initMapControlDraw();
       initCacheSeedingButton();
+      initAllEmailSenderButton();
+      initAllEmailAttachButton();
     }
 
 
@@ -697,6 +794,8 @@ var newman_geo_map = (function () {
     legend.addTo(map);
 */
 
+    newman_geo_email_sender.initDocGeoLoc();
+    newman_geo_email_attach.initDocGeoLoc();
 
   }
 
@@ -718,6 +817,8 @@ var newman_geo_map = (function () {
   return {
     'initMap' : initMap,
     'initCacheSeeding' : initCacheSeeding,
+    'isMarkedForAllSender' : isMarkedForAllSender,
+    'isMarkedForAllAttachment' : isMarkedForAllAttachment,
     'markMap' : markMap
   }
 
