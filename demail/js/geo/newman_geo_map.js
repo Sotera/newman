@@ -28,6 +28,8 @@ var newman_geo_map = (function () {
   var marker_init_sender_button, marker_init_attach_button;
   var map_marker_layer_all_sender, map_marker_layer_all_attach;
 
+
+
   function markMap(new_marker_list) {
     if (map) {
       if (new_marker_list && new_marker_list.length > 0) {
@@ -35,31 +37,51 @@ var newman_geo_map = (function () {
           //console.log('marker_list:\n' + JSON.stringify(new_marker_list, null, 2));
         }
 
-        var sender_coord_marker_map = {};
+        var sender_coord_marker_map = {}, attach_coord_marker_map = {};
 
         _.each(new_marker_list, function(item) {
           //console.log('marker:\n' + JSON.stringify(item, null, 2));
-          var latitude = parseFloat(item.email_lat);
-          var longitude = parseFloat(item.email_lon);
-          var coord_sent = item.coord_sent;
 
+          var latitude = parseFloat( item.latitude ).toFixed(3); //adjust decimal places to cluster
+          var longitude = parseFloat( item.longitude ).toFixed(3); //adjust decimal places to cluster
 
           if (latitude && longitude) {
+            var coord_key = latitude + ',' + longitude, coord_content_list = [];
 
-            if (coord_sent === true) {
-              var coord_key = latitude + ',' + longitude, coord_content_list = [];
+            if (item.coord_sent === true) {
+
               if (coord_key in sender_coord_marker_map) {
                 coord_content_list = sender_coord_marker_map[coord_key];
               }
               coord_content_list.push(clone(item));
               sender_coord_marker_map[coord_key] = coord_content_list;
             }
+            else if (item.coord_origin === true) {
+
+              if (coord_key in attach_coord_marker_map) {
+                coord_content_list = attach_coord_marker_map[coord_key];
+              }
+              coord_content_list.push(clone(item));
+              attach_coord_marker_map[coord_key] = coord_content_list;
+            }
           }
         });
 
-        markAllSender(sender_coord_marker_map);
+        if (_.size(sender_coord_marker_map) > 0) {
+          markAllSender(sender_coord_marker_map);
+        }
+
+        if (_.size(attach_coord_marker_map) > 0) {
+          markAllAttachment(attach_coord_marker_map);
+        }
 
       }
+    }
+  }
+
+  function clearAllSender() {
+    if (map_marker_layer_all_sender) {
+      map_marker_layer_all_sender.clearLayers();
     }
   }
 
@@ -76,15 +98,15 @@ var newman_geo_map = (function () {
       _.each(coord_marker_map, function(marker_content_list, key) {
         //console.log('marker_content_list:\n' + JSON.stringify(marker_content_list, null, 2));
         var key_array = key.split(',');
-        var latitude = parseFloat(key_array[0]);
-        var longitude = parseFloat(key_array[1]);
+        var latitude = parseFloat(key_array[0]).toFixed(5);
+        var longitude = parseFloat(key_array[1]).toFixed(5);
 
         var marker_icon = marker_icon_map['fa-paper-plane-o'];
         //marker_icon = marker_icon_map['fa-paperclip'];
         //marker_icon = marker_icon_map['fa-inbox'];
 
         if (marker_content_list.length > 1) {
-          marker_icon = newTextMarker( marker_content_list.length );
+          marker_icon = newTextMarker( marker_content_list.length, 'blue' );
         }
 
         // Create popup container to all text and markup
@@ -107,13 +129,19 @@ var newman_geo_map = (function () {
           //var longitude = parseFloat(marker_content.email_lon);
 
           if (subject) {
-            var max_length = 40;
-            if (subject.length > max_length) {
-              subject = subject.substring(0, (max_length-3)) + '...';
+            subject = subject.trim();
+            if (subject) {
+              var max_length = 40;
+              if (subject.length > max_length) {
+                subject = subject.substring(0, (max_length - 3)) + '...';
+              }
+            }
+            else {
+              subject = '\<' + doc_id + '\>';
             }
           }
           else {
-            subject = '<' + doc_id + '>';
+            subject = '\<' + doc_id + '\>';
           }
 
           if (datetime) {
@@ -137,9 +165,19 @@ var newman_geo_map = (function () {
             on: {
               click: function () {
                 if (debug_enabled) {
-                  console.log('selected marker-doc-id : ' + doc_id);
+                  console.log('selected marker-doc-id : ' + doc_id + ', [' + latitude + ', ' + longitude + ']');
                 }
                 newman_datatable_email.showEmailDocumentView( doc_id );
+
+                clearAllAttachment();
+                var geo_attach_obj = newman_geo_email_attach.getAttachDocGeoLocByEmail( doc_id );
+                if (geo_attach_obj) {
+                  if (debug_enabled) {
+                    console.log('geo_attach_obj : ' + doc_id + '\n' + JSON.stringify(geo_attach_obj, null, 2));
+                  }
+                  var marker_map = [geo_attach_obj];
+                  markMap( marker_map );
+                }
               }
             }
           });
@@ -177,12 +215,157 @@ var newman_geo_map = (function () {
     }
   }
 
+  function clearAllAttachment() {
+    if (map_marker_layer_all_attach) {
+      map_marker_layer_all_attach.clearLayers();
+    }
+  }
+
+  function markAllAttachment(coord_marker_map) {
+
+    if (map && coord_marker_map) {
+      if (map_marker_layer_all_attach) {
+        map_marker_layer_all_attach.clearLayers();
+      }
+      else {
+        map_marker_layer_all_attach = new L.FeatureGroup();
+      }
+
+      _.each(coord_marker_map, function(marker_content_list, key) {
+        //console.log('marker_content_list:\n' + JSON.stringify(marker_content_list, null, 2));
+        var key_array = key.split(',');
+        var latitude = parseFloat(key_array[0]).toFixed(5);
+        var adjusted_latitude = applyGeoOffset(latitude).toFixed(5);
+        var longitude = parseFloat(key_array[1]).toFixed(5);
+        var adjusted_longitude = applyGeoOffset(longitude).toFixed(5);
+
+        var marker_icon = marker_icon_map['fa-paperclip'];
+        if (marker_content_list.length > 1) {
+          marker_icon = newTextMarker( marker_content_list.length, 'green' );
+        }
+
+        // Create popup container to all text and markup
+        var popup_container = $('<div class="row-column-popup-content-container" style="width: 430px;" />');
+
+        _.each(marker_content_list, function(marker_content, index) {
+          //console.log('marker_content:\n' + JSON.stringify(marker_content, null, 2));
+
+          var row = $('<div class="row" style="margin: 0; padding: 0;" />');
+          var column_0 = $('<div class="col-xs-4" style="margin: 0; padding: 0; line-height: 26px; color: #0080AB;" />');
+          var column_1 = $('<div class="col-xs-6" style="margin: 0; padding: 0; line-height: 22px;" />');
+          var column_2 = $('<div class="col-xs-2" style="margin: 0; padding: 0; line-height: 26px;" />');
+          row.append( column_0 );
+          row.append( column_1 );
+          row.append( column_2 );
+
+
+          var doc_id = marker_content.email_id;
+          var attach_id = marker_content.attach_id;
+          var marker_doc_id = 'marker-doc-' + doc_id;
+          var datetime = marker_content.email_datetime;
+          var subject = marker_content.email_subject;
+          var file_name = marker_content.attach_file;
+          var file_ext = file_name.split('.')[1];
+
+          if (subject) {
+            subject = subject.trim();
+            if (subject) {
+              var max_length = 40;
+              if (subject.length > max_length) {
+                subject = subject.substring(0, (max_length - 3)) + '...';
+              }
+            }
+            else {
+              subject = '\<' + doc_id + '\>';
+            }
+          }
+          else {
+            subject = '\<' + doc_id + '\>';
+          }
+
+          if (datetime) {
+            //datetime = datetime.substring(0, 10);
+            datetime = datetime.replace('T', '  ');
+          }
+          else {
+            datetime = '';
+          }
+          column_0.html( datetime );
+
+          var button = $('<button />', {
+            style: 'text-align: left; font-size: 95%',
+            width: '100%',
+            type: 'button',
+            class: 'btn btn-small outline',
+            html:  subject,
+            value: marker_doc_id,
+            id: marker_doc_id,
+            on: {
+              click: function () {
+                if (debug_enabled) {
+                  console.log('selected marker-doc-id : ' + doc_id + ', [' + latitude + ', ' + longitude + ']');
+                  //console.log('adjusted coordinate [' + adjusted_latitude + ', ' + adjusted_longitude + ']');
+                }
+                newman_datatable_email.showEmailDocumentView( doc_id );
+
+                clearAllSender();
+                var geo_email_obj = newman_geo_email_attach.getEmailDocGeoLoc( doc_id );
+                if (geo_email_obj) {
+                  if (debug_enabled) {
+                    console.log('geo_email_obj : ' + doc_id + '\n' + JSON.stringify(geo_email_obj, null, 2));
+                  }
+                  var marker_map = [geo_email_obj];
+                  markMap( marker_map );
+                }
+              }
+            }
+          });
+          column_1.append( button )
+
+          var attach_image_url = 'email/attachment/' + encodeURIComponent( attach_id );
+          attach_image_url = newman_data_source.appendDataSource( attach_image_url );
+
+          var image_html = (function() {
+            var image = $('<img>').css('height', '26px').css('width','26px');
+            switch (getDocTypeByExt( file_ext )) {
+              case "image" : return image.attr('src', attach_image_url );
+              case "pdf" : return image.attr('src', 'imgs/document-icons/pdf-2.png');
+              case "powerpoint" : return image.attr('src', 'imgs/document-icons/powerpoint-2.png');
+              case "word" : return image.attr('src', 'imgs/document-icons/word-2.png');
+              case "excel" : return image.attr('src', 'imgs/document-icons/excel-2.png');
+              default : return image.attr('src', 'imgs/document-icons/text-2.png');
+            }
+          }());
+
+          var image_url_anchor = $('<a />').attr({ "target" : "_blank" ,"href" : attach_image_url });
+          image_url_anchor.append( image_html );
+          column_2.append( image_url_anchor );
+
+          popup_container.append( row );
+
+        });
+
+        // specify customized popup options
+        var popup_options = {
+          'className' : 'row-column-popup-tip row-column-popup-content-wrapper row-column-popup-content'
+        }
+
+        L.marker([latitude, longitude], {icon: marker_icon})
+          .bindPopup(popup_container[0], popup_options)
+          .addTo(map_marker_layer_all_attach);
+
+      });
+
+      map.addLayer( map_marker_layer_all_attach );
+    }
+  }
+
   function newTextMarker(text, color) {
 
     var icon = L.AwesomeMarkers.icon({
       text: text,
       /*textFormat: 'letter',*/
-      color: color //colors: 'red', 'darkred', 'orange', 'green', 'darkgreen', 'purple', 'darkpuple', 'blue', 'darkblue', 'cadetblue'
+      markerColor: color //colors: 'red', 'darkred', 'orange', 'green', 'darkgreen', 'purple', 'darkpuple', 'blue', 'darkblue', 'cadetblue'
     });
 
     return icon;
@@ -209,7 +392,7 @@ var newman_geo_map = (function () {
       }),
       "fa-paperclip" : L.AwesomeMarkers.icon({
         prefix: 'fa',
-        markerColor: 'blue', //colors: 'red', 'darkred', 'orange', 'green', 'darkgreen', 'purple', 'darkpuple', 'blue', 'darkblue', 'cadetblue'
+        markerColor: 'green', //colors: 'red', 'darkred', 'orange', 'green', 'darkgreen', 'purple', 'darkpuple', 'blue', 'darkblue', 'cadetblue'
         icon: 'paperclip'
       })
 
@@ -372,7 +555,8 @@ var newman_geo_map = (function () {
           map.removeLayer( map_marker_layer_all_sender )
         }
         else {
-          markMap( newman_geo_email_sender.getDocGeoLocMap() );
+
+          markMap( newman_geo_email_sender.getAllEmailDocGeoLoc() );
         }
 
       });
@@ -406,7 +590,7 @@ var newman_geo_map = (function () {
         }
         else {
 
-          //TODO: implement displaying all attachments
+          markMap( newman_geo_email_attach.getAllAttachDocGeoLoc() );
         }
 
       });
@@ -794,8 +978,8 @@ var newman_geo_map = (function () {
     legend.addTo(map);
 */
 
-    newman_geo_email_sender.initDocGeoLoc();
-    newman_geo_email_attach.initDocGeoLoc();
+    newman_geo_email_sender.initEmailDocGeoLoc();
+    newman_geo_email_attach.initAttachDocGeoLoc();
 
   }
 

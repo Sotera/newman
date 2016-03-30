@@ -1557,7 +1557,8 @@ function draw_mini_topic_chart(email_id){
     });
 }
 
-
+//deprecated
+/*
 function document_type(ext){
   var fn = (function(ext, matches){
     return _.any(matches, function(img){
@@ -1593,8 +1594,8 @@ function document_type(ext){
   return "other";
 }
 
-//deprecated
-/*
+
+
 function draw_attachments_table(email_address){
   var deferred = $.Deferred();
   var attachment_url = 'email/search_all_attach_by_sender/' + email_address;

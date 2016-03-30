@@ -12,16 +12,24 @@ var newman_geo_email_sender = (function () {
   var email_id_list = [];
   var email_geo_loc_map = {};
 
-  function initDocGeoLoc() {
+  function initEmailDocGeoLoc() {
     newman_geo_email_sender_request.requestService();
   }
 
-  function getDocGeoLocMap() {
+  function getAllEmailDocGeoLoc() {
     return (_.values( email_geo_loc_map ));
   }
 
-  function getDocGeoLocList() {
-    return (_.values( email_id_list ));
+  function getEmailDocGeoLoc( key ) {
+    var value = email_geo_loc_map[ key ];
+    if (value) {
+      return clone(value);
+    }
+    return value;
+  }
+
+  function getAllEmailDocGeoLocKey() {
+    return clone( email_id_list );
   }
 
 
@@ -29,7 +37,7 @@ var newman_geo_email_sender = (function () {
    * update from service response
    * @param response
    */
-  function updateDocGeoLoc(response) {
+  function updateEmailDocGeoLoc(response) {
 
     if( response.XOIP_locations && response.XOIP_locations.length > 0 ) {
 
@@ -46,12 +54,12 @@ var newman_geo_email_sender = (function () {
           "email_datetime" : datetime,
           "email_subject" : subject,
           "email_id" : doc_id,
-          "email_lat" : latitude,
-          "email_lon" : longitude,
+          "latitude" : latitude,
+          "longitude" : longitude,
           "coord_sent" : true,
         }
 
-        putDocGeoLoc( doc_id, geo_email_obj );
+        putEmailDocGeoLoc( doc_id, geo_email_obj );
 
       });
 
@@ -59,7 +67,7 @@ var newman_geo_email_sender = (function () {
         console.log('newman_geo_email_sender.updateGeoEmailSenderLocation(response)');
         console.log('email_geo_loc_map:\n' + JSON.stringify(email_geo_loc_map, null, 2));
       }
-      //displayDocGeoLoc();
+      //displayEmailDocGeoLoc();
 
     }
     else {
@@ -73,7 +81,7 @@ var newman_geo_email_sender = (function () {
    * @param doc_id
    * @param geo_obj
    */
-  function putDocGeoLoc(doc_id, geo_obj) {
+  function putEmailDocGeoLoc(doc_id, geo_obj) {
 
     if (doc_id && geo_obj) {
       email_id_list.push(doc_id);
@@ -84,17 +92,17 @@ var newman_geo_email_sender = (function () {
   /**
    * plot all geo-objects on geo-gui display
    */
-  function displayDocGeoLoc() {
+  function displayEmailDocGeoLoc() {
 
-    newman_geo_map.markMap( getDocGeoLocMap() );
   }
 
   return {
-    'initDocGeoLoc' : initDocGeoLoc,
-    'getDocGeoLocMap' : getDocGeoLocMap,
-    'updateDocGeoLoc' : updateDocGeoLoc,
-    'putDocGeoLoc' : putDocGeoLoc,
-    'displayDocGeoLoc' : displayDocGeoLoc
+    'initEmailDocGeoLoc' : initEmailDocGeoLoc,
+    'getAllEmailDocGeoLoc' : getAllEmailDocGeoLoc,
+    'getEmailDocGeoLoc' : getEmailDocGeoLoc,
+    'updateEmailDocGeoLoc' : updateEmailDocGeoLoc,
+    'putEmailDocGeoLoc' : putEmailDocGeoLoc,
+    'displayEmailDocGeoLoc' : displayEmailDocGeoLoc
   }
 
 }());
@@ -131,7 +139,7 @@ var newman_geo_email_sender_request = (function () {
     $.get( service_url ).then(function (response) {
       setResponse( response );
 
-      newman_geo_email_sender.updateDocGeoLoc( response );
+      newman_geo_email_sender.updateEmailDocGeoLoc( response );
 
     });
   }
