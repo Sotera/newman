@@ -129,7 +129,7 @@ def ingest(data):
                     spit(logfile, "[Error] rebuild return with non-zero code: {} \n".format(rtn))
                     return
                     
-            args = ["./bin/ingest.sh", cfg]
+            args = ["./bin/ingest_old.sh", cfg]
             cherrypy.log("running ingest: {}".format(" ".join(args)))
             spit(logfile, "[Running] {} \n".format(" ".join(args)))
 
