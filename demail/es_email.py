@@ -193,7 +193,7 @@ def get_email(index, email_id, qs=None):
         body = highlight.get('body', [source.get('body','')])[0]
         body_translated = highlight.get('body_translated', [source.get('body_translated','')])[0]
 
-        subject_translated = highlight.get('subject_translated', [source['subject_translated']])[0]
+        subject_translated = highlight.get('subject_translated', [source.get('subject_translated','')])[0]
         subject = highlight.get('subject', [source['subject']])[0]
         # TODO highlighting attachments need to return content and further test this method
         highlighted_attachments = _find_attachment_highlighting(highlight, source.get("attachments", [""]))
@@ -225,7 +225,7 @@ def get_email(index, email_id, qs=None):
     entities = []
     for type in ["person","location","organization","misc"]:
         if "body_entities" in source["entities"] and ("entity_"+type) in source["entities"]["body_entities"]:
-            entities += [ [source["id"][0]+"_entity_"+str(i), type,     i, val] for i,val in enumerate(source["entities"]["body_entities"].get("entity_"+type, [""]), len(entities))]
+            entities += [ [source["id"][0]+"_entity_"+str(i), type,     i, val] for i,val in enumerate(source["entities"]["body_entities"].get("entity_"+type, []), len(entities))]
 
     resp = {"email_contents" : { "email" : email, "entities": entities, "lda_topic_scores":topic_scores}}
 
@@ -247,12 +247,12 @@ def get_email(index, email_id, qs=None):
                  source.get("starred", False),
                  highlighted_attachments
                  ]
-        entities = []
+        entities_translated = []
         for type in ["person","location","organization","misc"]:
-            if "body_entities" in source["entities"] and ("entity_"+type) in source["entities"]["body_entities_translated"]:
-                entities += [ [source["id"][0]+"_entity_"+str(i), type, i, val] for i,val in enumerate(source["entities"].get("entity_"+type, [""]), len(entities))]
+            if "body_entities_translated" in source["entities"] and ("entity_"+type) in source["entities"]["body_entities_translated"]:
+                entities_translated += [ [source["id"][0]+"_entity_"+str(i), type, i, val] for i,val in enumerate(source["entities"]["body_entities_translated"].get("entity_"+type, []), len(entities_translated))]
 
-        resp["email_contents_translated"] = { "email" : email_translated, "entities": entities, "lda_topic_scores":topic_scores, "original_lang": body_lang}
+        resp["email_contents_translated"] = { "email" : email_translated, "entities": entities_translated, "lda_topic_scores":topic_scores, "original_lang": body_lang}
 
     return resp
 
@@ -270,7 +270,7 @@ def header(h, t=None):
 
     return r
 
-# GET email/attachment/<attachment-GUID>?data_set_id=<data_set>
+# GET <host>:<port>:/email/attachment/<attachment-GUID>?data_set_id=<data_set>
 def get_attachment_by_id(*args, **kwargs):
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)

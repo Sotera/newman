@@ -18,7 +18,7 @@ def getTopRollup(*args):
 def getRollup(*args):
     return { "rollupId" : [] }
 
-#GET /entity?entities.entity_person=mike,joe&entities.entity_location=paris,los angeles
+#GET <host>:<port>:/entity/entity?entities.entity_person=mike,joe&entities.entity_location=paris,los angeles
 def get_graph_for_entity(*args, **kwargs):
     tangelo.content_type("application/json")
     tangelo.log("entity.get_graph_for_entity(args: %s kwargs: %s)" % (str(args), str(kwargs)))

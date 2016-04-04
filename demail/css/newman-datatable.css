@@ -52,7 +52,7 @@
     color: #4888f3;
 }
 
-.datatable_row_marked:hover {
+.datatable_row_marked:hover, .datatable_row_marked:active, .datatable_row_marked:focus {
     color: #4888f3;
 }
 
@@ -60,7 +60,7 @@
     color: #000000;
 }
 
-.datatable_row_unmarked:hover {
+.datatable_row_unmarked:hover, .datatable_row_unmarked:active, .datatable_row_unmarked:focus {
     color: #000000;
 }
 

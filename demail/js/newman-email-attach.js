@@ -119,7 +119,7 @@ var newman_email_attach = (function () {
             var attach_image_url = 'email/attachment/' + encodeURIComponent(d[0]) + '/' + encodeURIComponent(d[1]);
             attach_image_url = newman_data_source.appendDataSource( attach_image_url );
 
-            switch (document_type(ext)){
+            switch (getDocTypeByExt( ext )){
               case "image" : return img.attr('src', attach_image_url );
               case "pdf" : return img.attr('src', 'imgs/document-icons/pdf-2.png');
               case "powerpoint" : return img.attr('src', 'imgs/document-icons/powerpoint-2.png');

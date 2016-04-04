@@ -20,11 +20,17 @@ var newman_datatable_email = (function () {
 
   var _email_doc_id_starred_map = {};
 
+  function isEmailDocumentStarred( doc_id ) {
+    return _email_doc_id_starred_map[ doc_id ];
+  }
+
   var data_table_ui;
   var data_table_rows;
   var data_row_is_read_map = {};
 
-  var _content_original, _content_translated, _content_translated_displayed = false;
+  function isEmailDocumentRead( doc_id ) {
+    return data_row_is_read_map[ doc_id ];
+  }
 
 
   function getStarredHTML() {
@@ -192,11 +198,11 @@ var newman_datatable_email = (function () {
     }
   }
 
-  function markAsRead(is_marked, id_list_selected) {
+  function setEmailDocumentRead(is_marked, id_list_selected) {
 
     if (id_list_selected) {
       if (debug_enabled) {
-        console.log('markAsRead(' + is_marked + ')');
+        console.log('setEmailDocumentRead(' + is_marked + ')');
         console.log('id_list_selected:' + JSON.stringify(id_list_selected, null, 2));
       }
 
@@ -240,7 +246,7 @@ var newman_datatable_email = (function () {
   function populateDataTable(data_rows) {
     console.log('populateDataTable( ' + data_rows.length + ' )');
     //console.log( '\tdata_rows :\n' + JSON.stringify(data_rows, null, 2));
-    initDataTableEvents();
+    initEvents();
 
     data_row_is_read_map = {};
 
@@ -370,7 +376,7 @@ var newman_datatable_email = (function () {
     // make email-document-content-view visible and open
     bottom_panel.open();
 
-
+/*
     //$('#tab-list li:eq(2) a').tab('show')
     $(document).scrollTop(0);
     $("#email-body").empty();
@@ -378,39 +384,37 @@ var newman_datatable_email = (function () {
 
     //update exportable toggle button
     var is_exportable = _email_doc_id_starred_map[email_id];
+    var export_toggle_button = $("#toggle_mark_for_export");
     if (is_exportable === true) {
       //already marked as starred, mark as un-starred
-      var toggle_ui = $("#toggle_mark_for_export");
-      if (toggle_ui) {
-        toggle_ui.empty();
-        toggle_ui.removeClass('datatable_row_unmarked').addClass('datatable_row_marked');
-        toggle_ui.append('<span><i class=\"fa fa-star fa-lg\"></i></span>');
+      if (export_toggle_button) {
+        export_toggle_button.empty();
+        export_toggle_button.removeClass('datatable_row_unmarked').addClass('datatable_row_marked');
+        export_toggle_button.append('<span><i class=\"fa fa-star fa-lg\"></i></span>');
       }
     }
     else {
-      var toggle_ui = $("#toggle_mark_for_export");
-      if (toggle_ui) {
-        toggle_ui.empty();
-        toggle_ui.removeClass('datatable_row_marked').addClass('datatable_row_unmarked');
-        toggle_ui.append('<span><i class=\"fa fa-star-o fa-lg\"></i></span>');
+      if (export_toggle_button) {
+        export_toggle_button.empty();
+        export_toggle_button.removeClass('datatable_row_marked').addClass('datatable_row_unmarked');
+        export_toggle_button.append('<span><i class=\"fa fa-star-o fa-lg\"></i></span>');
       }
     }
 
     //update read-unread toggle button
     var is_read = data_row_is_read_map[email_id];
+    var read_toggle_button = $("#toggle_mark_as_read");
     if (is_read) {
       //already marked as read, mark as unread
-      var toggle_ui = $("#toggle_mark_as_read");
-      if (toggle_ui) {
-        toggle_ui.empty();
-        toggle_ui.append('<span><i class=\"fa fa-check-square-o fa-lg\"></i> Unread</span>');
+      if (read_toggle_button) {
+        read_toggle_button.empty();
+        read_toggle_button.append('<span><i class=\"fa fa-check-square-o fa-lg\"></i> Unread</span>');
       }
     }
     else {
-      var toggle_ui = $("#toggle_mark_as_read");
-      if (toggle_ui) {
-        toggle_ui.empty();
-        toggle_ui.append('<span><i class=\"fa fa-square-o fa-lg\"></i> Read</span>');
+      if (read_toggle_button) {
+        read_toggle_button.empty();
+        read_toggle_button.append('<span><i class=\"fa fa-square-o fa-lg\"></i> Read</span>');
       }
     }
 
@@ -419,6 +423,8 @@ var newman_datatable_email = (function () {
 
     //set conversation button
     $('#query_conversation_email').addClass( 'clickable-disabled' );
+*/
+
 
     var email_url = 'email/email/' + encodeURIComponent(email_id);
     email_url = newman_data_source.appendDataSource(email_url);
@@ -431,34 +437,15 @@ var newman_datatable_email = (function () {
       function (response) {
         setCurrentEmailDocument(email_id);
 
-        if (response) {
-          if (response.email_contents) {
-            _content_original = response.email_contents;
-            $("#email-body").empty();
-            $("#email-body").append( produceHTMLView( _content_original ));
-          }
-          else {
-            _content_original = undefined;
-          }
+        // set target email-document-id
+        newman_email_document_view.setDocumentID(email_id);
 
-          if (response.email_contents_translated) {
-            console.log('contains translated contents');
+        // initialize email-document-view UI events
+        newman_email_document_view.initUI( _email_doc_id_starred_map[email_id], data_row_is_read_map[email_id] );
 
-            _content_translated = response.email_contents_translated;
-            _content_translated_displayed = false;
-            $('#translate_contents_email').removeClass( 'clickable-disabled').addClass( 'clickable' );
-          }
-          else {
-            _content_translated = undefined;
-          }
+        // parse email-document-service response
+        newman_email_document_view.setDocumentRequestResponse( response );
 
-        }
-        else {
-          console.warn( email_url + ' : response undefined!');
-          _content_original = undefined;
-          _content_translated = undefined;
-          _content_translated_displayed = false;
-        }
       });
   }
 
@@ -488,22 +475,6 @@ var newman_datatable_email = (function () {
     }
 
   }
-
-
-  /*
-  function receiveStarredEmailDocumentList( starred_doc_list ) {
-    if (starred_doc_list && starred_doc_list.length > 0) {
-      console.log('receiveStarredEmailDocumentList(starred_doc_list[' + starred_doc_list.length + '])');
-      console.log('\tstarred_doc_list:\n' + JSON.stringify(starred_doc_list, null, 2));
-
-      _email_doc_id_starred_map = {};
-
-      _.each(starred_doc_list, function (doc_id) {
-        _email_doc_id_starred_map[doc_id] = true;
-      });
-    }
-  }
-  */
 
 
   function setStarredEmailDocumentList(starred_doc_list) {
@@ -567,7 +538,7 @@ var newman_datatable_email = (function () {
    }
    */
 
-  function initDataTableEvents() {
+  function initEvents() {
 
     $('#email_view_all_starred').off().click(function () {
       console.log("clicked #email_view_all_starred");
@@ -587,121 +558,16 @@ var newman_datatable_email = (function () {
 
     });
 
-    $("#toggle_mark_for_export").off().click(function () {
-      console.log("clicked toggle_mark_for_export");
-      if (!_current_email_doc_id) {
-        //alert("please select an email first");
-        console.log("current_email_document undefined!");
-        return;
-      }
-      var email_id = _current_email_doc_id;
-
-      var requestUpdate = function (id, exportable) {
-
-        newman_email_starred_request_toggle.requestService(id, exportable);
-
-        newman_email_starred.displayUITab();
-
-      };
-
-      var is_marked = _email_doc_id_starred_map[ email_id ];
-      console.log("is_marked " + is_marked);
-
-      if (is_marked) {
-        // already marked as exportable; un-mark
-        $(this).removeClass('datatable_row_marked').addClass('datatable_row_unmarked');
-        $(this).find("i").first().removeClass('fa-star').addClass('fa-star-o');
-      }
-      else {
-        // mark as exportable
-        $(this).removeClass('datatable_row_unmarked').addClass('datatable_row_marked');
-        $(this).find("i").first().removeClass('fa-star-o').addClass('fa-star');
-      }
-
-      var id_set = [email_id];
-      setEmailDocumentStarred(!is_marked, id_set);
-
-      requestUpdate(email_id, !is_marked);
-
-    });
-
-    $("#toggle_mark_as_read").off().click(function () {
-      console.log("clicked toggle_mark_as_read");
-      if (_current_email_doc_id) {
-        var id = _current_email_doc_id;
-        var id_set = [id];
-        var mark_read = data_row_is_read_map[id];
-        if (mark_read) {
-          //already marked as read, mark as unread
-          markAsRead(false, id_set);
-
-          //update toggle-button
-          var toggle_ui = $("#toggle_mark_as_read");
-          if (toggle_ui) {
-            toggle_ui.empty();
-            toggle_ui.append('<span><i class=\"fa fa-square-o fa-lg\"></i> Read</span>');
-          }
-        }
-        else {
-          markAsRead(true, id_set);
-
-          //update toggle-button
-          var toggle_ui = $("#toggle_mark_as_read");
-          if (toggle_ui) {
-            toggle_ui.empty();
-            toggle_ui.append('<span><i class=\"fa fa-check-square-o fa-lg\"></i> Unread</span>');
-          }
-        }
-      }
-      else {
-        //alert("please select an email first");
-        console.log("current_email_document undefined!");
-      }
-
-    });
-
-    $('#query_conversation_email').off().click(function() {
-      var sendser_count = newman_graph_email.sizeOfAllSourceNodeSelected();
-      var receipient_count = newman_graph_email.sizeOfAllTargetNodeSelected();
-      console.log("clicked query_conversation_email: senders[" + sendser_count + '] receipient_count[' + receipient_count + ']' );
-
-      if (sendser_count > 0 && receipient_count > 0) {
-        if (_current_email_doc_id && _current_email_doc_datetime) {
-          //query all email documents between the addresses
-          newman_graph_email_request_by_conversation.requestService(_current_email_doc_id, _current_email_doc_datetime, true);
-
-          // display email-tab
-          newman_graph_email.displayUITab();
-        }
-      }
-    });
-
-    $('#translate_contents_email').off().click(function() {
-      if (_content_translated_displayed) {
-        if (_content_original) {
-          _content_translated_displayed = false;
-          console.log('rendering original contents...');
-          $("#email-body").empty();
-          $("#email-body").append(produceHTMLView(_content_original));
-        }
-      }
-      else {
-        if (_content_translated) {
-          _content_translated_displayed = true;
-          console.log('rendering translated contents...');
-          $("#email-body").empty();
-          $("#email-body").append( produceHTMLView( _content_translated ));
-        }
-      }
-    });
-
   }
 
+
   return {
-    'initDataTableEvents' : initDataTableEvents,
+    'initEvents' : initEvents,
     'setStarredEmailDocumentList' : setStarredEmailDocumentList,
-    //'receiveStarredEmailDocumentList' : receiveStarredEmailDocumentList,
+    'isEmailDocumentStarred' : isEmailDocumentStarred,
     'setEmailDocumentStarred' : setEmailDocumentStarred,
+    'isEmailDocumentRead' : isEmailDocumentRead,
+    'setEmailDocumentRead' : setEmailDocumentRead,
     'showEmailDocumentView' : showEmailDocumentView,
     'highlightDataTableRow' : highlightDataTableRow,
     'setCurrentEmailDocument' : setCurrentEmailDocument,
@@ -709,139 +575,6 @@ var newman_datatable_email = (function () {
     'clearCurrentEmailDocument' : clearCurrentEmailDocument,
     'populateDataTable' : populateDataTable,
     'updateDataTableColumn' : updateDataTableColumn
-  }
-}());
-
-
-/**
- * email-document-view related container
- */
-var newman_datatable_document_view = (function () {
-  var debug_enabled = false;
-
-  var pop_over = (function () {
-    //init
-    $('#topic_mini_chart').popover({
-      placement: 'right',
-      trigger: 'manual',
-      content: '',
-      html: true
-    });
-
-    var pop = $('#topic_mini_chart').data('bs.popover');
-    var timer = null;
-
-    var show = function (content) {
-      if (timer) {
-        clearTimeout(timer);
-      }
-      pop.options.content = content;
-      pop.show();
-    };
-
-    var hide = function () {
-      if (timer) {
-        clearTimeout(timer);
-      }
-      var fn = function () {
-        pop.hide();
-      };
-      timer = _.delay(fn, 150);
-    };
-
-    return {show: show, hide: hide};
-
-  })();
-
-  function renderMiniTopicChart(topic_score_array) {
-
-    if (debug_enabled) {
-      console.log('renderMiniTopicChart\n' + JSON.stringify(topic_score_array, null, 2));
-    }
-
-    $('#topic_mini_chart').empty();
-
-    if (topic_score_array && topic_score_array.length > 0) {
-
-      $('#topic_mini_chart').empty();
-
-      //var width = 200, height = 40, barHeight = 10;
-      var width = 308, height = 44, barHeight = 10;
-
-      var margin = {top: 2, right: 0, bottom: 0, left: 0};
-      width = width - margin.left - margin.right;
-
-      var y = d3.scale.linear().range([height, 0]);
-
-      var chart = d3.select("#topic_mini_chart").append('svg')
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom);
-
-      chart.append("text")
-        .attr("x", (width / 2))
-        //.attr("y", (margin.top / 2))
-        .attr("y", 10)
-        //.attr("text-anchor", "middle")
-        .text("Topic Scores")
-        .style("text-anchor", "middle")
-        .style("font-size", "10px")
-        .style("color", "whitesmoke")
-        .style("line-height", "10px");
-
-      y.domain([0, 100]);
-
-      var barWidth = width / topic_score_array.length;
-
-      var bar = chart.selectAll("g")
-        .data(topic_score_array)
-        .enter().append("g")
-        .attr("transform", function (d, i) {
-          return "translate(" + i * barWidth + ",0)";
-        });
-
-      bar.append("rect")
-        .attr("y", function (d) {
-          return margin.top + y(+d[2] * 100);
-        })
-        .attr("height", function (d) {
-          return height - y(+d[2] * 100);
-        })
-        .attr("width", barWidth - 1)
-        .style("fill", function (d, i) {
-
-          return newman_topic_email.getTopicColor(i);
-
-        })
-        .attr('class', 'clickable')
-        .on("click", function (d, i) {
-          if (debug_enabled) {
-            console.log('clicked mini-topic-chart\n' + JSON.stringify(d, null, 2));
-          }
-
-          newman_topic_email.onTopicClicked(d[1], d[2], d[0]);
-        })
-        .on("mouseover", function (d, i) {
-          //var str = "topic: " + i + "<br/>" + Math.floor(100 * d[2]) + '%';
-          var str = "<ul><li>" + _.take(d[1].split(' '), 10).join('</li><li>') + "</li></ul>";
-          pop_over.show(str);
-        })
-        .on("mouseout", function (d, i) {
-          pop_over.hide();
-
-        });
-
-      // bar.append("text")
-      //   .attr("x", barWidth / 2)
-      //   .attr("y", function(d) { return y(+d*100) + 3;})
-      //   .attr("dy", ".75em")
-      //   .text(function(d, i) { return topics[i]; });
-
-    } //end of if (topic_score_array && topic_score_array.length > 0)
-
-  }
-
-  return {
-    'renderMiniTopicChart': renderMiniTopicChart
   }
 }());
 

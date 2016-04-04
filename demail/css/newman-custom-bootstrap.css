@@ -105,27 +105,33 @@
 
 .btn.outline {
     background: none;
-    padding: 5px 5px 5px 5px;
+    padding: 4px 5px 4px 5px;
     border-radius: 6px;
     border: 0px solid #0080AB;
     color: #0080AB;
-    font-weight:normal;
+    font-weight: normal;
     font-size: 12px;
     line-height: inherit;
     margin: 0px;
 }
 .btn-small.outline {
+    padding: 2px 3px 2px 3px;
     position: relative;
-    width: inherit;
+    font-weight: lighter;
+    font-size: 11px;
+/*  width: inherit;
     height: inherit;
-    text-align: match-parent;
+    line-height: inherit;
+    text-align: match-parent;*/
 }
+/*
 .btn-small.outline:hover {
     color: #006588;
     border-radius: 6px;
     border: 1px solid #BBBBBB;
 }
-.btn-small.outline:focus, .btn-small.outline:active, .open > .dropdown-toggle.btn-small {
+*/
+.btn-small.outline:hover, .btn-small.outline:focus, .btn-small.outline:active, .open > .dropdown-toggle.btn-small {
     color: #006588;
     border-radius: 6px;
     border: 1px solid #BBBBBB;

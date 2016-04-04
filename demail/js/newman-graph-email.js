@@ -349,7 +349,7 @@ var newman_graph_email = (function () {
       bottom_panel.close();
 
       // clear existing content if any
-      clear_content_view_email();
+      newman_email_document_view.clearDocument();
     }
   }
 

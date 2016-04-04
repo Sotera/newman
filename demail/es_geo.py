@@ -1,5 +1,6 @@
 import tangelo
 import cherrypy
+import json
 
 from newman.es_connection import es
 
@@ -39,10 +40,13 @@ def search_geo_emails():
 
 
 def _map_geo_response(doc):
+    #tangelo.log("_map_geo_response(doc)\n%s" % json.dumps(doc, sort_keys=False, indent=2))
     return {
         "id":doc.get("id"),
         "from":doc.get("senders",[''])[0],
         "tos":", ".join(doc.get("tos",[''])),
+        "subject":doc.get("subject"),
+        "datetime":doc.get("datetime"),
         "originating_locations":doc.get("originating_locations",[])
     }
 
@@ -63,7 +67,7 @@ def es_get_exif_emails(data_set_id, size):
     emails_resp = es().search(index=data_set_id, doc_type="emails", size=size, body=_geo_exif_query())
     tangelo.log("es_geo.es_get_exif_emails(total document hits = %s)" % emails_resp["hits"]["total"])
     docs = [hit["_source"] for hit in emails_resp["hits"]["hits"]]
-    return {"total":emails_resp["hits"]["total"], "exif_gps" : docs}
+    return {"total":emails_resp["hits"]["total"], "exif_docs" : docs}
 
 
 if __name__ == "__main__":
