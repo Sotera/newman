@@ -17,10 +17,10 @@ def map_email_addr(email_addr_resp, total_emails):
     fields = email_addr_resp["fields"]
 
     return [fields["addr"][0],
-            fields["community"][0],
-            str(fields["community_id"][0]),
+            fields.get("community",[''])[0],
+            str(fields.get("community_id",[''])[0]),
             # TODO remove this
-            str(fields["community_id"][0]),
+            str(fields.get("community_id",[''])[0]),
             (fields["sent_count"][0] + fields["received_count"][0]) / float(total_emails),
             str(fields["received_count"][0]),
             str(fields["sent_count"][0]),
