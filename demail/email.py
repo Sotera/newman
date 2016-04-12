@@ -4,9 +4,10 @@ import cherrypy
 
 from newman.utils.functions import nth
 from newman.settings import getOpt
+from newman.es_connection import getDefaultDataSetID
+
 from es_email import get_ranked_email_address_from_email_addrs_index, get_attachment_by_id, get_attachments_by_sender, get_email, get_top_domains, get_top_communities, set_starred
 from es_export import export_emails_archive
-from newman.newman_config import getDefaultDataSetID
 from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarred, parseParamTextQuery
 
 from es_queries import _build_email_query

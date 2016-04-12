@@ -10,43 +10,47 @@ import os
 import sys
 import datetime
 
+from es_search import initialize_email_addr_cache
 from newman.utils.file import rm, spit
 
 webroot = cherrypy.config.get("webroot")
 base_dir = os.path.abspath("{}/../".format(webroot))
 work_dir = os.path.abspath("{}/../work_dir/".format(webroot))
 ingest_parent_dir = "/vagrant"
-
+index_prefix=".newman-"
 
 def fmtNow():
     return datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')
 
 '''
-email - email address to index
+ingest-id - email address to index
 file - name of file to ingest
 type - type of ingest pst|mbox
 '''
 def extract_pst(*args, **kwargs):
     cherrypy.log("search.extract_pst(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
 
-    email=kwargs.get("ingest-id")
+    ingest_id=kwargs.get("ingest-id")
     ingest_file=kwargs.get("file")
     type=kwargs.get("type", "pst")
 
     # path = "{}/{}".format(ingest_parent_dir, type)
-    if not email or not type or not ingest_file:
+    if not ingest_id or not type or not ingest_file:
         raise TypeError("Encountered a 'None' value for 'email', 'type', or 'ingest_file!'")
+
+    # Add the prefix for the newman indexes
+    ingest_id = index_prefix+ingest_id
 
     logname = "pst_{}".format(fmtNow())
     ingester_log = "{}/{}.ingester.log".format(work_dir, logname)
     # errfile = "{}/{}.err.log".format(work_dir, logname)
     service_status_log = "{}/{}.status.log".format(work_dir, logname)
 
-    spit(service_status_log, "[Start] email address={}\n".format(email), True)
+    spit(service_status_log, "[Start] email address={}\n".format(ingest_id), True)
 
     def extract_thread():
         try:
-            args = ["./bin/ingest.sh", email, ingest_parent_dir, ingest_file, type]
+            args = ["./bin/ingest.sh", ingest_id, ingest_parent_dir, ingest_file, type]
 
             cherrypy.log("running pst: {}".format(" ".join(args)))
             spit(service_status_log, "[Running] {} \n".format(" ".join(args)))
@@ -55,13 +59,17 @@ def extract_pst(*args, **kwargs):
                 kwargs = {'stdout': t, 'stderr': t, 'cwd': base_dir, 'bufsize' : 1 }
                 subp = subprocess.Popen(args, **kwargs)
                 out, err = subp.communicate()
+
                 # TODO should never see this line  - remove this
                 cherrypy.log("complete: {}".format(fmtNow()))
+
                 rtn = subp.returncode
                 if rtn != 0:
                     spit(service_status_log, "[Error] return with non-zero code: {} \n".format(rtn))
                 else:
-                    spit(service_status_log, "[Complete]")
+                    spit(service_status_log, "[Done Ingesting data.  Reloading the email_addr cache.]")
+                    initialize_email_addr_cache(ingest_id, update=True)
+                    spit(service_status_log, "[Complete.]")
         except:
             error_info = sys.exc_info()[0]
             spit(service_status_log, "[Error] {}\n".format(error_info.replace('\n', ' ')))
@@ -69,7 +77,7 @@ def extract_pst(*args, **kwargs):
 
     thr = threading.Thread(target=extract_thread, args=())
     thr.start()
-    tangelo.content_type("application/json")    
+    tangelo.content_type("application/json")
     return {'log' : logname }
 
 def list_psts():

@@ -2,7 +2,7 @@ import tangelo
 import cherrypy
 
 from es_phone_numbers import es_get_email_by_phone_numbers, get_top_phone_numbers
-from newman.newman_config import getDefaultDataSetID
+from newman.es_connection import getDefaultDataSetID
 from param_utils import parseParamDatetime, parseParamTextQuery, parseParamPhoneNumbers
 
 #GET <host>:<port>/profile/phone_numbers?phone_numbers=<phone_numbers>&qs="<query_string>"

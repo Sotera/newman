@@ -1,7 +1,7 @@
 import tangelo
 import re
-from newman.newman_config import getDefaultDataSetID, default_min_timeline_bound, default_max_timeline_bound
-
+from newman.newman_config import default_min_timeline_bound, default_max_timeline_bound
+from newman.es_connection import getDefaultDataSetID
 
 def parseParamDatetime( **kwargs ):
     tangelo.log("parseParamDatetime(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))

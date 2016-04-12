@@ -2,7 +2,7 @@ import tangelo
 import cherrypy
 
 from es_search import es_get_all_email_by_address, es_get_all_email_by_address_set, get_top_email_by_text_query, es_get_all_email_by_community, es_get_all_email_by_topic, es_get_conversation, es_get_all_email_by_conversation_forward_backward
-from newman.newman_config import getDefaultDataSetID
+from newman.es_connection import getDefaultDataSetID
 from param_utils import parseParamDatetime, parseParamAllSenderAllRecipient, parseParamEmailSender, parseParamEmailRecipient, parseParam_email_addr, parseParamTopic, parseParamTextQuery,\
     parseParamDocumentUID, parseParamDocumentDatetime
 import urllib

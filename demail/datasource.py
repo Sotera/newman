@@ -1,16 +1,13 @@
-from elasticsearch.client import IndicesClient
-from newman.es_connection import es
+from newman.es_connection import es, index_list, getDefaultDataSetID
 
 from newman.utils.functions import nth
-from newman.newman_config import getDefaultDataSetID, data_set_names
+from newman.newman_config import data_set_names, index_creator_prefix, index_creator_interval, index_creator_span
 from es_search import initialize_email_addr_cache
 from es_email import get_ranked_email_address_from_email_addrs_index
 from series import get_datetime_bounds
 import tangelo
 import urllib
 from param_utils import parseParamDatetime
-
-_current_data_set_selected = getDefaultDataSetID()
 
 def _index_record(index):
     tangelo.log("datasource._index_record(index: %s)" % (str(index)))
@@ -35,13 +32,12 @@ def _index_record(index):
            }
 
 def listAllDataSet():
-    ic = IndicesClient(es())
-    stats = ic.stats(index="_all")
 
     tangelo.log("datasource.listAllDataSet()")
-    # Ignore index keys in ES that are not in the newman_app.conf
-    indexes = [_index_record(index) for index in stats["indices"] if index in data_set_names()]
 
+    # Ignore index keys in ES that are not in the newman_app.conf
+    # Find all the indexes that begin with the index loader prefix
+    indexes = [_index_record(index) for index in index_list() if index in data_set_names() or index.startswith(index_creator_prefix())]
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**{})
 
@@ -49,7 +45,7 @@ def listAllDataSet():
     email_addrs = {email_addr[0]:email_addr for email_addr in email_addrs}
 
     return {
-            "data_set_selected": _current_data_set_selected,
+            "data_set_selected": getDefaultDataSetID(),
             "data_sets": indexes,
             "top_hits": {
                          "order_by":"rank",
