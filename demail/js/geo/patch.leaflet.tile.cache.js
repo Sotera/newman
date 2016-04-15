@@ -262,7 +262,7 @@ L.TileLayer.include({
 		if (this._local_db) {
 
 			PouchDB.replicate(local_tile_db_name, remote_tile_db_name,
-					{retry: true}
+					{retry: false}
 			).on('change', function (info) {
 				// handle change
 			}).on('paused', function (err) {
@@ -276,7 +276,7 @@ L.TileLayer.include({
 				console.log('pushTileCache complete!\n' + JSON.stringify(info, null, 2));
 			}).on('error', function (err) {
 				// handle error
-				console.warn('pushTileCache failed!\n' + JSON.stringify(err, null, 2));
+				console.warn(err);
 			});
 
 		}
@@ -300,7 +300,7 @@ L.TileLayer.include({
 				console.log('pullTileCache complete!\n' + JSON.stringify(info, null, 2));
 			}).on('error', function (err) {
 				// handle error
-				console.warn('pullTileCache failed!\n' + JSON.stringify(err, null, 2));
+				console.warn(err);
 			});
 
 		}
