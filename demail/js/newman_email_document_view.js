@@ -532,26 +532,40 @@ var newman_email_document_view = (function () {
       //console.log('entity_matched_list :\n' + JSON.stringify(entity_matched_list, null, 2));
       if (entity_matched_list) {
         var body_text = contents.body;
+
+        //console.log('body_text :\n' + JSON.stringify(body_text, null, 2));
+        body_text = body_text.replace(new RegExp('<pre>|</pre>>', 'g'), '');
+        //console.log('new body_text :\n' + JSON.stringify(body_text, null, 2));
+
         var new_text_tokens = [];
         _.each(entity_matched_list, function (entity_matched) {
           var entity_type = entity_matched[1]
           var entity_key = entity_matched[3];
           var index = body_text.toLocaleLowerCase().indexOf(entity_key.toLocaleLowerCase());
-          var split_index = index + entity_key.length;
-          var text_token = body_text.substring(0, index);
 
-          //text_token += '<a class=\"newman-entity-' + entity_type + '\" href=\"\">' + entity_key + '</a>';
-          text_token += '<button class="newman-entity-' + entity_type + '" onclick="onEntityClicked(\''+entity_key+'\',\''+ entity_type + '\')">' + entity_key + '</button>';
+          if (index >= 0 ) {
+            var split_index = index + entity_key.length;
+            var text_token = body_text.substring(0, index);
 
-          new_text_tokens.push(text_token);
-          body_text = body_text.substring(split_index);
+            //text_token += '<a class=\"newman-entity-' + entity_type + '\" href=\"\">' + entity_key + '</a>';
+            text_token += '<button class="newman-entity-' + entity_type + '" onclick="onEntityClicked(\'' + entity_key + '\',\'' + entity_type + '\')">' + entity_key + '</button>';
+
+            new_text_tokens.push(text_token);
+            body_text = body_text.substring(split_index);
+
+          }
         });
-        body_text = '';
+        if (body_text) {
+          new_text_tokens.push(body_text);
+        }
+
+        var new_body_text = '<pre>';
         _.each(new_text_tokens, function (text_token) {
-          body_text += text_token;
+          new_body_text += text_token;
         });
-        //console.log('new_body_text :\n\n' + body_text + '\n');
-        contents.body = body_text;
+        new_body_text += '</pre>';
+        //console.log('new_body_text :\n\n' + new_body_text + '\n');
+        contents.body = new_body_text;
       }
     }
     else {

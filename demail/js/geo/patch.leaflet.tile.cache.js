@@ -1,4 +1,6 @@
 
+var local_tile_db_name = 'offline-tiles';
+var remote_tile_db_name = 'http://localhost:5984/' + local_tile_db_name;
 
 L.TileLayer.addInitHook(function() {
 
@@ -8,7 +10,7 @@ L.TileLayer.addInitHook(function() {
 		return;
 	}
 
-	this._local_db = new PouchDB('offline-tiles');
+	this._local_db = new PouchDB( local_tile_db_name );
 	this._canvas = document.createElement('canvas');
 
 	if (!(this._canvas.getContext && this._canvas.getContext('2d'))) {
@@ -19,11 +21,11 @@ L.TileLayer.addInitHook(function() {
 	}
 });
 
-L.TileLayer.prototype.options.useCache     = false;
+L.TileLayer.prototype.options.useCache     = true;
 L.TileLayer.prototype.options.saveToCache  = true;
 L.TileLayer.prototype.options.useOnlyCache = false;
 L.TileLayer.prototype.options.cacheFormat = 'image/png';
-L.TileLayer.prototype.options.cacheMaxAge  = 24*3600*1000;
+L.TileLayer.prototype.options.cacheMaxAge  = 30*24*3600*1000; // 30-days
 
 
 L.TileLayer.include({
@@ -68,7 +70,7 @@ L.TileLayer.include({
 				});
 				if (Date.now() > data.timestamp + this.options.cacheMaxAge && !this.options.useOnlyCache) {
 					// Tile is too old, try to refresh it
-					//console.log('Tile is too old: ', tileUrl);
+					console.warn('Tile is too old: ' + tileUrl);
 
 					if (this.options.saveToCache) {
 						tile.onload = L.bind(this._saveTile, this, tile, tileUrl, data._revs_info[0].rev, done);
@@ -232,7 +234,78 @@ L.TileLayer.include({
 			}
 		}.bind(this));
 
+	},
+
+	exportToFile : function( file_name ) {
+		var db_file_name = 'cache.' + local_tile_db_name + '.db';
+		if (file_name) {
+			db_file_name = file_name;
+		}
+
+		console.log('exportToFile(' + db_file_name + ')');
+
+		var pouch = require('pouchdb');
+		var pouchRepStream = require('pouchdb-replication-stream');
+		pouch.plugin(pouchRepStream.plugin);
+		var fs = require('fs');
+		var ws = fs.createWriteStream( db_file_name );
+
+		this._local_db.dump(ws).then(function (response) {
+			// response should be {ok: true}
+			console.log(JSON.stringify(response, null, 2));
+		});
+
+
+	},
+
+	pushTileCache : function() {
+		if (this._local_db) {
+
+			PouchDB.replicate(local_tile_db_name, remote_tile_db_name,
+					{retry: true}
+			).on('change', function (info) {
+				// handle change
+			}).on('paused', function (err) {
+				// replication paused (e.g. replication up to date, user went offline)
+			}).on('active', function () {
+				// replicate resumed (e.g. new changes replicating, user went back online)
+			}).on('denied', function (err) {
+				// a document failed to replicate, e.g. due to permissions
+			}).on('complete', function (info) {
+				// handle complete
+				console.log('pushTileCache complete!\n' + JSON.stringify(info, null, 2));
+			}).on('error', function (err) {
+				// handle error
+				console.warn('pushTileCache failed!\n' + JSON.stringify(err, null, 2));
+			});
+
+		}
+	},
+
+  pullTileCache : function() {
+		if (this._local_db) {
+
+			PouchDB.replicate(remote_tile_db_name, this.db,
+					{retry: false}
+			).on('change', function (info) {
+				// handle change
+			}).on('paused', function (err) {
+				// replication paused (e.g. replication up to date, user went offline)
+			}).on('active', function () {
+				// replicate resumed (e.g. new changes replicating, user went back online)
+			}).on('denied', function (err) {
+				// a document failed to replicate, e.g. due to permissions
+			}).on('complete', function (info) {
+				// handle complete
+				console.log('pullTileCache complete!\n' + JSON.stringify(info, null, 2));
+			}).on('error', function (err) {
+				// handle error
+				console.warn('pullTileCache failed!\n' + JSON.stringify(err, null, 2));
+			});
+
+		}
 	}
+
 
 });
 

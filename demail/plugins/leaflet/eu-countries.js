@@ -1,4 +1,4 @@
-var euCountries = {
+var country_border_eu = {
   "type": "FeatureCollection", "features": [
     {
       "type": "Feature",

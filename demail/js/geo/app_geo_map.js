@@ -7,12 +7,13 @@
 var newman_geo_map = (function () {
   var debug_enabled = true;
 
-  var default_view_center = new L.LatLng(32.9022, 13.1858), default_view_zoom = 2;
+  var default_view_center = new L.LatLng(31.7964452, 35.1051469), default_view_zoom = 2;
   var min_zoom = 2, max_zoom = 16;
   var map;
   var map_tile_layer;
   var map_tile_layer_url;
   var map_tile_layer_attribute;
+  var map_tile_layer_exported = false;
 
   var south_west_max = L.latLng(-90, -180);
   var north_east_max = L.latLng(90, 180);
@@ -811,8 +812,8 @@ var newman_geo_map = (function () {
       map = L.map(
         'map',
         {
-          worldCopyJump: true,
-          maxBounds: world_bounds
+          /*maxBounds: world_bounds,*/
+          worldCopyJump: true
         }
       ).setView(default_view_center, default_view_zoom);
 
@@ -841,10 +842,9 @@ var newman_geo_map = (function () {
           attribution: map_tile_layer_attribute,
           detectRetina: true,
           reuseTiles: true,
-          continuousWorld: true, // if true, the coordinates won't be wrapped by world width (-180, 180) or clamped to lie within (-90 to 90).
+          continuousWorld: false, // if true, the coordinates won't be wrapped by world width (-180, 180) or clamped to lie within (-90 to 90).
           noWrap: false, // if true, the tiles won't load outside the world width (-180, 180) instead of repeating.
           useCache: true, // plug-in:  to enable caching of tiles
-          cacheMaxAge: 2419200000 // plug-in: Time, in milliseconds, for any given tile to be considered 'fresh'
         }
       );
 
@@ -863,6 +863,13 @@ var newman_geo_map = (function () {
 
       map.addLayer(map_tile_layer);
       //map.fitBounds(bounds);
+
+
+      if (!map_tile_layer_exported) {
+        map_tile_layer.pushTileCache();
+        map_tile_layer_exported = true;
+      }
+
 
     }
 

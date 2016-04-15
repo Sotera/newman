@@ -31,7 +31,7 @@
     <link href="plugins/leaflet-draw/leaflet.draw.css" rel="stylesheet" type="text/css">
     <link href="plugins/leaflet-easy-button/leaflet-easy-button.css" rel="stylesheet" type="text/css">
     <!--<link href="plugins/leaflet-awesome-markers/leaflet.awesome-markers.css" rel="stylesheet" type="text/css">-->
-    <link href="plugins/leaflet-awesome-markers/newman.leaflet.awesome-markers.css" rel="stylesheet" type="text/css">
+    <link href="plugins/leaflet-awesome-markers/patch.leaflet.awesome-markers.css" rel="stylesheet" type="text/css">
 
 
 
@@ -720,7 +720,7 @@
 
                 <!-- Start-Analytics-Content-Geo -->
                 <div class="tab-pane" id="dashboard_tab_geo_analytics" style= "height: 100%; padding: 0; margin: 0;">
-                  <div id="map" class="map" style= "position: relative; width: 840px; height: 600px; padding: 0; margin: 0;"></div>
+                  <div id="map" class="map" style= "position: relative; width: 1024px; height: 600px; padding: 0; margin: 0;"></div>
                 </div>
                 <!-- End-Analytics-Content-Geo -->
 
@@ -1054,7 +1054,6 @@
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="plugins/jquery/jquery.min.js"></script>
     <script src="plugins/jquery-ui/jquery-ui.min.js"></script>
-    <!--<script src="plugins/jquery-treetable/jquery.treetable.js"></script>-->
     <script src="plugins/jquery-treegrid/js/jquery.treegrid.min.js"></script>
     <script src="plugins/jquery-treegrid/js/jquery.treegrid.bootstrap3.js"></script>
     <script src="plugins/d3/d3.min.js"></script>
@@ -1086,11 +1085,12 @@
     <script src="plugins/leaflet/leaflet.js"></script>
     <!--<script src="plugins/leaflet/eu-countries.js"></script>-->
     <script src="plugins/leaflet/us-states.js"></script>
-    <!--<script src="plugins/leaflet-awesome-markers/leaflet.awesome-markers.min.js"></script>--><!-- patched by newman.leaflet.awesome-markers.js -->
-    <script src="plugins/leaflet-tilelayer-cache/L.TileLayer.PouchDBCached.js"></script>
-    <!--<script src="plugins/leaflet-draw/leaflet.draw.js"></script>--><!-- patched by newman.leaflet.draw.js -->
+    <!--<script src="plugins/leaflet-awesome-markers/leaflet.awesome-markers.min.js"></script>--><!-- patched by patch.leaflet.awesome-markers.js -->
+    <!--<script src="plugins/leaflet-tilelayer-cache/L.TileLayer.PouchDBCached.js"></script>--><!-- patched by patch.leaflet.tile.cache.js -->
+    <!--<script src="plugins/leaflet-draw/leaflet.draw.js"></script>--><!-- patched by patch.leaflet.draw.js -->
     <script src="plugins/leaflet-easy-button/leaflet-easy-button.js"></script>
-    <script src="plugins/pouchdb/pouchdb-5.2.1.min.js"></script>
+    <!--<script src="plugins/pouchdb/pouchdb-5.2.1.min.js"></script>-->
+    <script src="plugins/pouchdb/pouchdb-5.3.1.min.js"></script>
 
     <!--<script src="plugins/user-ale/userale.js"></script>-->
 
@@ -1118,11 +1118,12 @@
     <script src="js/newman-graph-email.js"></script>
     <script src="js/newman_search_result.js"></script>
     <script src="js/newman_search_result_collection.js"></script>
-    <script src="js/geo/newman.leaflet.draw.js"></script>
-    <script src="js/geo/newman.leaflet.awesome-markers.js"></script>
-    <script src="js/geo/newman_geo_map.js"></script>
-    <script src="js/geo/newman_geo_email_sender.js"></script>
-    <script src="js/geo/newman_geo_email_attach.js"></script>
+    <script src="js/geo/patch.leaflet.draw.js"></script>
+    <script src="js/geo/patch.leaflet.awesome-markers.js"></script>
+    <script src="js/geo/patch.leaflet.tile.cache.js"></script>
+    <script src="js/geo/app_geo_map.js"></script>
+    <script src="js/geo/app_geo_email_sender.js"></script>
+    <script src="js/geo/app_geo_email_attach.js"></script>
     <script src="js/sample_markers.json"></script>
     <script src="js/searchtool.js"></script>
     <script src="js/graphtool.js"></script>
