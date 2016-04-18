@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from settings import APP_CONFIG
+import json
 
 def application_properties():
     return {
@@ -10,10 +11,12 @@ def application_properties():
         'default_timeline_span' : APP_CONFIG.get('default_timeline_span'),
         'elasticsearch_config' : APP_CONFIG.get('elasticsearch_config'),
         'data_set_defaults' : APP_CONFIG.get('data_set_defaults'),
-        'index_creator_defaults' : APP_CONFIG.get('index_creator_defaults')
-
+        'index_creator_defaults' : APP_CONFIG.get('index_creator_defaults'),
+        'tile_cache_config' : APP_CONFIG.get('tile_cache_config')
     }
 
+def getTileCacheConfig():
+    return application_properties()["tile_cache_config"]
 
 def elasticsearch_config():
     return application_properties()["elasticsearch_config"]

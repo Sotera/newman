@@ -1,16 +1,18 @@
 
-var local_tile_db_name = 'offline-tiles';
-var remote_tile_db_name = 'http://localhost:5984/' + local_tile_db_name;
-
 L.TileLayer.addInitHook(function() {
 
 	if (!this.options.useCache) {
-		this._local_db     = null;
+		this._local_db = null;
 		this._canvas = null;
 		return;
 	}
 
-	this._local_db = new PouchDB( local_tile_db_name );
+	//initialize from external config
+	this.options.useOnlyCache = app_geo_config.getUseTileCacheOnly();
+	this.local_tile_db_name = app_geo_config.getLocalTileDBName();
+	this.remote_tile_db_name = app_geo_config.getRemoteTileDBName();
+
+	this._local_db = new PouchDB( this.local_tile_db_name );
 	this._canvas = document.createElement('canvas');
 
 	if (!(this._canvas.getContext && this._canvas.getContext('2d'))) {
@@ -25,7 +27,7 @@ L.TileLayer.prototype.options.useCache     = true;
 L.TileLayer.prototype.options.saveToCache  = true;
 L.TileLayer.prototype.options.useOnlyCache = false;
 L.TileLayer.prototype.options.cacheFormat = 'image/png';
-L.TileLayer.prototype.options.cacheMaxAge  = 30*24*3600*1000; // 30-days
+L.TileLayer.prototype.options.cacheMaxAge  = 6*30*24*3600*1000; // 6*30-days
 
 
 L.TileLayer.include({
@@ -237,7 +239,7 @@ L.TileLayer.include({
 	},
 
 	exportToFile : function( file_name ) {
-		var db_file_name = 'cache.' + local_tile_db_name + '.db';
+		var db_file_name = 'cache.' + this.local_tile_db_name + '.db';
 		if (file_name) {
 			db_file_name = file_name;
 		}
@@ -258,10 +260,15 @@ L.TileLayer.include({
 
 	},
 
-	pushTileCache : function() {
+	uploadTileCache : function() {
+		console.log('uploadTileCache()');
+		console.log('\toptions.useOnlyCache : ' + this.options.useOnlyCache);
+		console.log('\tlocal_tile_db_name : ' + this.local_tile_db_name);
+		console.log('\tremote_tile_db_name : ' + this.remote_tile_db_name);
+
 		if (this._local_db) {
 
-			PouchDB.replicate(local_tile_db_name, remote_tile_db_name,
+			PouchDB.replicate(this.local_tile_db_name, this.remote_tile_db_name,
 					{retry: false}
 			).on('change', function (info) {
 				// handle change
@@ -280,12 +287,18 @@ L.TileLayer.include({
 			});
 
 		}
+
 	},
 
-  pullTileCache : function() {
+  downloadTileCache : function() {
+		console.log('downloadTileCache()');
+		console.log('\toptions.useOnlyCache : ' + this.options.useOnlyCache);
+		console.log('\tlocal_tile_db_name : ' + this.local_tile_db_name);
+		console.log('\tremote_tile_db_name : ' + this.remote_tile_db_name);
+
 		if (this._local_db) {
 
-			PouchDB.replicate(remote_tile_db_name, this.db,
+			PouchDB.replicate(this.remote_tile_db_name, this.local_tile_db_name,
 					{retry: false}
 			).on('change', function (info) {
 				// handle change
@@ -304,6 +317,7 @@ L.TileLayer.include({
 			});
 
 		}
+
 	}
 
 

@@ -173,7 +173,7 @@ var newman_geo_email_attach = (function () {
 
 
 /**
- * service container toggle-email-as-starred
+ * service container exif geo-location service
  * @type {{requestService, getResponse}}
  */
 var newman_geo_email_attach_request = (function () {

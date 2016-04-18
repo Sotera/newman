@@ -109,7 +109,7 @@ var newman_geo_email_sender = (function () {
 
 
 /**
- * service container toggle-email-as-starred
+ * service container originating geo-location service
  * @type {{requestService, getResponse}}
  */
 var newman_geo_email_sender_request = (function () {

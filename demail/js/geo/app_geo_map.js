@@ -4,7 +4,7 @@
 /**
  * geo_map related reference
  */
-var newman_geo_map = (function () {
+var app_geo_map = (function () {
   var debug_enabled = true;
 
   var default_view_center = new L.LatLng(31.7964452, 35.1051469), default_view_zoom = 2;
@@ -13,14 +13,14 @@ var newman_geo_map = (function () {
   var map_tile_layer;
   var map_tile_layer_url;
   var map_tile_layer_attribute;
-  var map_tile_layer_exported = false;
+  var map_tile_exported = false, map_tile_imported = false;
 
   var south_west_max = L.latLng(-90, -180);
   var north_east_max = L.latLng(90, 180);
   var world_bounds = L.latLngBounds(south_west_max, north_east_max);
 
   var area_draw_control_layer;
-  var area_caching_button;
+  var area_caching_button, map_tile_db_export_button, map_tile_db_import_button;
 
   var area_select_id_list = [];
 
@@ -481,56 +481,154 @@ var newman_geo_map = (function () {
     }
   }
 
+  function initMap() {
+    if (!map) {
+      map = L.map(
+        'map',
+        {
+          worldCopyJump: true
+        }
+      ).setView(default_view_center, default_view_zoom);
+
+      map.on('zoomend', function (e) {
+        console.log('map_zoom_level: ' + map.getZoom());
+      });
+
+    }
+
+  }
+
+  function initMapTileLayer() {
+
+    // create the tile layer with attribution
+    if (!map_tile_layer) {
+
+      map_tile_layer_url = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+      map_tile_layer_attribute = 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+
+      map_tile_layer = new L.TileLayer(
+        map_tile_layer_url,
+        {
+          minZoom: 2, // absolute-min : 0
+          maxZoom: 17, // absolute-max : 17
+          bounds: world_bounds,
+          attribution: map_tile_layer_attribute,
+          detectRetina: true,
+          reuseTiles: true,
+          continuousWorld: false, // if true, the coordinates won't be wrapped by world width (-180, 180) or clamped to lie within (-90 to 90).
+          noWrap: false, // if true, the tiles won't load outside the world width (-180, 180) instead of repeating.
+          useCache: true, // plug-in:  to enable caching of tiles
+          useOnlyCache: app_geo_config.getUseTileCacheOnly()
+        }
+      );
+
+      // Listen to cache hits and misses
+      // Note: The cache hits/misses are only from this layer, not from the WMS layer.
+      map_tile_layer.on('tilecachehit', function (event) {
+        if (debug_enabled) {
+          //console.log('Cache hit: ', event.url);
+        }
+      });
+      map_tile_layer.on('tilecachemiss', function (event) {
+        if (debug_enabled) {
+          console.log('Cache miss: ', event.url);
+        }
+      });
+
+      if (!map_tile_imported) {
+        //map_tile_layer.downloadTileCache();
+        map_tile_imported = true;
+      }
+    }
+
+    if (map) {
+      map.addLayer(map_tile_layer);
+    }
+
+  }
+
+  function initMapTileExportButton() {
+    if (debug_enabled) {
+      if (map) {
+        if (!map_tile_db_export_button) {
+
+          map_tile_db_export_button = L.easyButton('fa-upload', function () {
+
+            map_tile_layer.uploadTileCache();
+
+          });
+
+          map_tile_db_export_button.addTo(map);
+        }
+      }
+    }
+  }
+
+  function initMapTileImportButton() {
+    if (debug_enabled) {
+      if (map) {
+        if (!map_tile_db_import_button) {
+
+          map_tile_db_import_button = L.easyButton('fa-retweet', function () {
+
+            map_tile_layer.downloadTileCache();
+          });
+
+          map_tile_db_import_button.addTo(map);
+        }
+      }
+    }
+  }
+
   function initCacheSeedingButton() {
 
     if (map) {
-      if (area_caching_button) {
-        map.removeLayer( area_caching_button );
+      if (!area_caching_button) {
+
+        /*
+         area_caching_button = L.easyButton('fa-cloud-download', function() {
+         initCacheSeeding();
+         });
+         */
+        area_caching_button = L.easyButton({
+          states: [
+            {
+              stateName: 'init-tile-caching',
+              icon: 'fa-cloud-download',
+              title: 'Initiate tile caching',
+              onClick: function (control) {
+                initCacheSeeding(map.getZoom() + 4);
+                control.state('tile-caching');
+                control._map.on('caching:end', function (e) {
+                  //console.log('control._map.on("caching:end")');
+
+                  control.state('init-tile-caching');
+                });
+              }
+            },
+            {
+              stateName: 'tile-caching',
+              icon: 'fa-spinner fa-spin',
+              title: 'Tile caching...'
+            }
+          ]
+        });
+
+        area_caching_button.addTo(map);
+        area_caching_button.disable();
+
+        //initCacheSeeding(5, true);
       }
 
       /*
-      area_caching_button = L.easyButton('fa-cloud-download', function() {
-        initCacheSeeding();
-      });
-      */
-      area_caching_button = L.easyButton({
-        states: [
-          {
-            stateName: 'init-tile-caching',
-            icon: 'fa-cloud-download',
-            title: 'Initiate tile caching',
-            onClick: function(control) {
-              initCacheSeeding( 10 );
-              control.state('tile-caching');
-              control._map.on('caching:end', function(e){
-                //console.log('control._map.on("caching:end")');
-
-                control.state('init-tile-caching');
-              });
-            }
-          },
-          {
-            stateName: 'tile-caching',
-            icon: 'fa-spinner fa-spin',
-            title: 'Tile caching...'
-          }
-        ]
-      });
-
-      area_caching_button.addTo( map );
-      area_caching_button.disable();
-
-      //initCacheSeeding(5, true);
+       var _readyState = function(e){
+       if (map) {
+       map.addControl(new initCacheSeedingControl());
+       }
+       }
+       window.addEventListener('DOMContentLoaded', _readyState);
+       */
     }
-
-    /*
-    var _readyState = function(e){
-      if (map) {
-        map.addControl(new initCacheSeedingControl());
-      }
-    }
-    window.addEventListener('DOMContentLoaded', _readyState);
-    */
   }
 
   function isMarkedForAllSender() {
@@ -544,26 +642,23 @@ var newman_geo_map = (function () {
   function initAllEmailSenderButton() {
 
     if (map) {
-      if (marker_init_sender_button) {
-        map.removeLayer( marker_init_sender_button );
+      if (!marker_init_sender_button) {
+
+        marker_init_sender_button = L.easyButton('fa-paper-plane-o', function () {
+
+
+          if (isMarkedForAllSender()) {
+            map.removeLayer(map_marker_layer_all_sender)
+          }
+          else {
+
+            markMap(newman_geo_email_sender.getAllEmailDocGeoLoc());
+          }
+
+        });
+
+        marker_init_sender_button.addTo(map);
       }
-
-
-      marker_init_sender_button = L.easyButton('fa-paper-plane-o', function() {
-
-
-        if (isMarkedForAllSender()) {
-          map.removeLayer( map_marker_layer_all_sender )
-        }
-        else {
-
-          markMap( newman_geo_email_sender.getAllEmailDocGeoLoc() );
-        }
-
-      });
-
-      marker_init_sender_button.addTo( map );
-
     }
 
   }
@@ -579,209 +674,204 @@ var newman_geo_map = (function () {
   function initAllEmailAttachButton() {
 
     if (map) {
-      if (marker_init_attach_button) {
-        map.removeLayer( marker_init_attach_button );
+      if (!marker_init_attach_button) {
+
+        marker_init_attach_button = L.easyButton('fa-paperclip', function () {
+
+          if (isMarkedForAllAttachment()) {
+            map.removeLayer(map_marker_layer_all_attach)
+          }
+          else {
+
+            markMap(newman_geo_email_attach.getAllAttachDocGeoLoc());
+          }
+
+        });
+
+        marker_init_attach_button.addTo(map);
       }
-
-
-      marker_init_attach_button = L.easyButton('fa-paperclip', function() {
-
-        if (isMarkedForAllAttachment()) {
-          map.removeLayer( map_marker_layer_all_attach )
-        }
-        else {
-
-          markMap( newman_geo_email_attach.getAllAttachDocGeoLoc() );
-        }
-
-      });
-
-      marker_init_attach_button.addTo( map );
-
     }
 
   }
 
   function initMapControlDraw() {
     if (map) {
-      if (area_draw_control_layer) {
-        area_draw_control_layer.clearLayers();
-        map.removeLayer( area_draw_control_layer );
-      }
+      if (!area_draw_control_layer) {
 
-      area_draw_control_layer = new L.FeatureGroup();
-      map.addLayer(area_draw_control_layer);
+        area_draw_control_layer = new L.FeatureGroup();
+        map.addLayer(area_draw_control_layer);
 
-      var draw_control = new L.Control.Draw({
-        draw: {
-          position: 'topleft',
-          rectangle: {
-            shapeOptions: {
-              color: "#69ACFF",
-              opacity: 0.5,
-              weight: 1
-            }
+        var draw_control = new L.Control.Draw({
+          draw: {
+            position: 'topleft',
+            rectangle: {
+              shapeOptions: {
+                color: "#69ACFF",
+                opacity: 0.5,
+                weight: 1
+              }
+            },
+            polyline: false,
+            /*polyline: {
+             shapeOptions: {
+             color: "#69ACFF",
+             opacity: 0.8,
+             weight: 2
+             }
+             },*/
+            polygon: false,
+            /* polygon: {
+             shapeOptions: {
+             color: "#69ACFF",
+             opacity: 0.5,
+             weight: 1
+             }
+             },*/
+            circle: false,
+            marker: false
           },
-          polyline: false,
-          /*polyline: {
-            shapeOptions: {
-              color: "#69ACFF",
-              opacity: 0.8,
-              weight: 2
-            }
-          },*/
-          polygon: false,
-          /* polygon: {
-            shapeOptions: {
-              color: "#69ACFF",
-              opacity: 0.5,
-              weight: 1
-            }
-          },*/
-          circle: false,
-          marker: false
-        },
-        edit: {
-          featureGroup: area_draw_control_layer,
           edit: {
-            selectedPathOptions: {
-              opacity: 0.5,
-              weight: 1,
-              dashArray: 'none',
-              maintainColor: true
-            }
-          },
-          remove: {}
-        }
-      });
-      map.addControl(draw_control);
+            featureGroup: area_draw_control_layer,
+            edit: {
+              selectedPathOptions: {
+                opacity: 0.5,
+                weight: 1,
+                dashArray: 'none',
+                maintainColor: true
+              }
+            },
+            remove: {}
+          }
+        });
+        map.addControl(draw_control);
 
-      map.on('draw:created', function (e) {
-        if (debug_enabled) {
-          console.log('draw:created');
-        }
+        map.on('draw:created', function (e) {
+          if (debug_enabled) {
+            console.log('draw:created');
+          }
 
-        var type = e.layerType, layer = e.layer;
+          var type = e.layerType, layer = e.layer;
 
-        if (type === 'marker') {
-          layer.bindPopup('A popup!');
-        }
+          if (type === 'marker') {
+            layer.bindPopup('A popup!');
+          }
 
-        if (type === 'rectangle') {
-          var bounds = layer.getBounds();
-          var sw_lat = bounds.getSouthWest().lat, sw_lng = bounds.getSouthWest().lng;
-          var ne_lat = bounds.getNorthEast().lat, ne_lng = bounds.getNorthEast().lng;
-          console.log('rectangle-bounds: SW[' + sw_lat + ', ' + sw_lng +  '], NE[' + ne_lat + ', ' + ne_lng + ']');
+          if (type === 'rectangle') {
+            var bounds = layer.getBounds();
+            var sw_lat = bounds.getSouthWest().lat, sw_lng = bounds.getSouthWest().lng;
+            var ne_lat = bounds.getNorthEast().lat, ne_lng = bounds.getNorthEast().lng;
+            console.log('rectangle-bounds: SW[' + sw_lat + ', ' + sw_lng + '], NE[' + ne_lat + ', ' + ne_lng + ']');
 
 
-          var id = L.Util.stamp(layer);
-          area_select_id_list.push( id );
-          console.log('area_select_id_list[' + id + ']');
+            var id = L.Util.stamp(layer);
+            area_select_id_list.push(id);
+            console.log('area_select_id_list[' + id + ']');
 
-          area_caching_button.enable();
-        }
+            area_caching_button.enable();
+          }
 
-        area_draw_control_layer.addLayer(layer);
+          area_draw_control_layer.addLayer(layer);
 
-        if (debug_enabled) {
-          area_draw_control_layer.eachLayer(function (layer) {
-            console.log('layer._leaflet_id: ' + layer._leaflet_id);
+          if (debug_enabled) {
+            area_draw_control_layer.eachLayer(function (layer) {
+              console.log('layer._leaflet_id: ' + layer._leaflet_id);
+            });
+          }
+        });
+
+        map.on('draw:edited', function (e) {
+          if (debug_enabled) {
+            console.log('draw:edited');
+          }
+
+          var layers = e.layers;
+          layers.eachLayer(function (layer) {
+            var layer_id = layer._leaflet_id;
+
+            _.each(area_select_id_list, function (element) {
+              if (element == layer_id) {
+                console.log('layer_id: ' + layer_id);
+
+                var bounds = layer.getBounds();
+                var sw_lat = bounds.getSouthWest().lat, sw_lng = bounds.getSouthWest().lng;
+                var ne_lat = bounds.getNorthEast().lat, ne_lng = bounds.getNorthEast().lng;
+                console.log('rectangle-bounds: SW[' + sw_lat + ', ' + sw_lng + '], NE[' + ne_lat + ', ' + ne_lng + ']');
+
+                area_caching_button.enable();
+              }
+            });
+
           });
-        }
-      });
+        });
 
-      map.on('draw:edited', function (e) {
-        if (debug_enabled) {
-          console.log('draw:edited');
-        }
+        map.on('draw:deleted', function (e) {
+          if (debug_enabled) {
+            console.log('draw:deleted');
+          }
 
-        var layers = e.layers;
-        layers.eachLayer(function (layer) {
-          var layer_id = layer._leaflet_id;
+          var layers = e.layers;
+          layers.eachLayer(function (layer) {
+            var layer_id = layer._leaflet_id;
+            console.log('layer: ' + layer_id + ' removed!');
 
-          _.each(area_select_id_list, function(element) {
-            if (element == layer_id) {
-              console.log('layer_id: ' + layer_id);
+            var target_index = -1;
+            _.each(area_select_id_list, function (element, index) {
+              if (element == layer_id) {
+                target_index = index;
+              }
+            });
+            if (target_index > -1) {
+              area_select_id_list.splice(target_index, 1);
+              console.log('area_select_id_list[' + target_index + ']!');
 
-              var bounds = layer.getBounds();
-              var sw_lat = bounds.getSouthWest().lat, sw_lng = bounds.getSouthWest().lng;
-              var ne_lat = bounds.getNorthEast().lat, ne_lng = bounds.getNorthEast().lng;
-              console.log('rectangle-bounds: SW[' + sw_lat + ', ' + sw_lng +  '], NE[' + ne_lat + ', ' + ne_lng + ']');
-
-              area_caching_button.enable();
+              if (area_select_id_list.length == 0) {
+                area_caching_button.disable();
+              }
+              else {
+                area_caching_button.enable();
+              }
             }
+
           });
 
         });
-      });
 
-      map.on('draw:deleted', function (e) {
-        if (debug_enabled) {
-          console.log('draw:deleted');
-        }
-
-        var layers = e.layers;
-        layers.eachLayer(function (layer) {
-          var layer_id = layer._leaflet_id;
-          console.log('layer: ' + layer_id + ' removed!');
-
-          var target_index = -1;
-          _.each(area_select_id_list, function(element, index) {
-            if (element == layer_id) {
-              target_index = index;
-            }
-          });
-          if (target_index > -1) {
-            area_select_id_list.splice(target_index, 1);
-            console.log('area_select_id_list[' + target_index + ']!');
-
-            if (area_select_id_list.length == 0) {
-              area_caching_button.disable();
-            }
-            else {
-              area_caching_button.enable();
-            }
+        map.on('draw:drawstart', function (e) {
+          if (debug_enabled) {
+            console.log('draw:drawstart');
           }
 
         });
 
-      });
+        map.on('draw:drawstop', function (e) {
+          if (debug_enabled) {
+            console.log('draw:drawstop');
+          }
 
-      map.on('draw:drawstart', function (e) {
-        if (debug_enabled) {
-          console.log('draw:drawstart');
-        }
+        });
 
-      });
+        /*
+         map.on('click', function (e) {
 
-      map.on('draw:drawstop', function (e) {
-        if (debug_enabled) {
-          console.log('draw:drawstop');
-        }
+         });
 
-      });
+         map.on('moveend', function (e) {
+         console.log('map:moveend');
+         });
 
-      /*
-      map.on('click', function (e) {
+         map.on('dragend', function (e) {
+         console.log('map:dragend');
 
-      });
+         });
+         */
 
-      map.on('moveend', function (e) {
-        console.log('map:moveend');
-      });
-
-      map.on('dragend', function (e) {
-        console.log('map:dragend');
-
-      });
-      */
-
+      }
     }
   }
 
 
 
-  function initMap(new_marker_list) {
+  function init(new_marker_list) {
     if (debug_enabled) {
       console.log('initMap()');
     }
@@ -809,10 +899,11 @@ var newman_geo_map = (function () {
     }
 
     if (!map) {
+
+      /*
       map = L.map(
         'map',
         {
-          /*maxBounds: world_bounds,*/
           worldCopyJump: true
         }
       ).setView(default_view_center, default_view_zoom);
@@ -820,14 +911,13 @@ var newman_geo_map = (function () {
       map.on('zoomend', function (e) {
         console.log('map_zoom_level: ' + map.getZoom());
       });
+      */
 
-      initMapControlDraw();
-      initCacheSeedingButton();
-      initAllEmailSenderButton();
-      initAllEmailAttachButton();
+      initMap();
+      initMapTileLayer();
     }
 
-
+/*
     // create the tile layer with attribution
     if (!map_tile_layer) {
       map_tile_layer_url = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -845,6 +935,7 @@ var newman_geo_map = (function () {
           continuousWorld: false, // if true, the coordinates won't be wrapped by world width (-180, 180) or clamped to lie within (-90 to 90).
           noWrap: false, // if true, the tiles won't load outside the world width (-180, 180) instead of repeating.
           useCache: true, // plug-in:  to enable caching of tiles
+          useOnlyCache: app_geo_config.getUseTileCacheOnly()
         }
       );
 
@@ -863,15 +954,8 @@ var newman_geo_map = (function () {
 
       map.addLayer(map_tile_layer);
       //map.fitBounds(bounds);
-
-
-      if (!map_tile_layer_exported) {
-        map_tile_layer.pushTileCache();
-        map_tile_layer_exported = true;
-      }
-
-
     }
+*/
 
 
 /*
@@ -985,8 +1069,26 @@ var newman_geo_map = (function () {
     legend.addTo(map);
 */
 
+    initMapControlDraw();
+    initMapTileExportButton();
+    initMapTileImportButton();
+    initCacheSeedingButton();
+    initAllEmailSenderButton();
+    initAllEmailAttachButton();
+
     newman_geo_email_sender.initEmailDocGeoLoc();
     newman_geo_email_attach.initAttachDocGeoLoc();
+
+  }
+
+  function applyMapFeatureGeoJSON( geojson_map_feature ) {
+
+
+  }
+
+
+  function initMapFeatureGeoJSON( geojson_map_feature ) {
+
 
   }
 
@@ -1005,12 +1107,27 @@ var newman_geo_map = (function () {
     xobj.send(null);
   }
 
+  function isUseTileCacheOnly() {
+    return tile_cache_only_internal;
+  }
+
+  function getLocalTileDBName() {
+    return tile_cache_remote_database;
+  }
+
+  function getRemoteTileDBName() {
+    return 'http://' + tile_cache_remote_host + ':' + tile_cache_remote_port +'/' + tile_cache_remote_database;
+  }
+
+
   return {
+    'init' : init,
     'initMap' : initMap,
+    'initMapTileLayer' : initMapTileLayer,
     'initCacheSeeding' : initCacheSeeding,
     'isMarkedForAllSender' : isMarkedForAllSender,
     'isMarkedForAllAttachment' : isMarkedForAllAttachment,
-    'markMap' : markMap
+    'markMap' : markMap,
   }
 
 }());

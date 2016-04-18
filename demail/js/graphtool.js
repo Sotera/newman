@@ -1568,6 +1568,8 @@ var email_analytics_content = (function () {
 $(function () {
   "use strict";
 
+  app_geo_config.requestService();
+
   newman_search_result_collection.initTreeTableEvent();
 
   initDashboardDomain();
@@ -1583,8 +1585,8 @@ $(function () {
 
     data_source_selected = newman_data_source.getSelected();
 
-    // initialize top-ranked email-accounts
-    //newman_rank_email.displayUIRankEmail(10);
+    // initialize map tiles
+    app_geo_map.initMapTileLayer();
 
     // initialize starred-documents
     newman_email_starred.initStarredDocumentList();
@@ -1647,7 +1649,7 @@ $(function () {
         newman_rank_email.revalidateUIRankEmail();
       }
       else if (element_ID.endsWith('dashboard_tab_geo_analytics')) {
-        newman_geo_map.initMap();
+        app_geo_map.init();
       }
       else if (element_ID.endsWith('dashboard_tab_chart_analytics')) {
         initDashboardCharts();
