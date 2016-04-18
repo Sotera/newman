@@ -53,7 +53,7 @@ var app_geo_config = (function () {
         console.log('\tresponse: ' + JSON.stringify(_response, null, 2));
       }
       tile_cache_only_internal = response.cache_only;
-      tile_cache_remote_host = response.remote_host;
+      tile_cache_remote_host = response.host;
       tile_cache_remote_port = response.port;
       tile_cache_remote_database = response.database;
     }
