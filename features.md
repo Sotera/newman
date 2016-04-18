@@ -3,14 +3,76 @@ layout: page
 title: Features
 permalink: /features/
 ---
-Update in progress April 18, 2016, second change
+Update in progress April 18, 2016
 
-## Graph
+![Newman Home Page](../img/newman_home.png)
 
-The graph shows all of the communications between email addresses in
-the current view.  It is built by directing the **From** to each
-**To/Cc/Bcc**.  The thickness of the line shows more communications
-between the two nodes.
+## Login
+
+Currently, all the analyst has to do is navigate to the instance 
+(IP address and port). Future revisions may require a 
+username/password combination.
+
+## Search
+
+The first step in an investigation is usually to initiate a search. 
+Before that can happen, the data must be loaded into Newman and is 
+currently done outside of the Newman GUI. Multiple data sets (mailboxes, 
+mbox, pst files) can be loaded; however, at this time only one dataset 
+can be searched against. So, the analyst has to choose which dataset to 
+search against to begin. In this example, the shiavo dataset was 
+selected from the dropdown list. After selection, the Newman GUI updates 
+to show the top 20 email addresses based on traffic (sent/received email).
+
+# Search Criteria
+
+![Free Text Search](../img/search_free_text.png)
+
+The search text box is backed by [elasticsearch](http://www.elasticsearch.org) 
+and will return results for all the emails and attachments ingested. For a detailed 
+guide, navigate to [Elastic Search Guide](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-dsl-query-string-query)
+This query string is parsed into a series of terms and operators. A term can be a 
+single word like **quick** or **brown** or a phrase, surrounded by double quotes
+"**quick brown**" which searches for all the words in the phrase, in the same 
+order. Operators allow the analyst to customize the search. Operations that are 
+supported include field names, wildcards, fuzziness, proximity searches, ranges, 
+Boolean operators, and grouping. Elastic Search has a list of reserved characters 
+that need a leading backslash to escape them. For instance to search for **(1+1)=2**, 
+enter **\(1\+1\)\=2**.  The reserved characters are: + - = && || > < ! ( ) { } [ ] 
+^ " ~ * ? : \ /
+
+**Field Names** - When no fields are specified, every field is by default searched. 
+The fields available for searching depend on the dataset and how it was ingested. Most 
+datasets based on email will include the following fields:
+
+**body				body_lang   			body_translated 
+subject		  	subject_lang  		subject_translated 
+senders 			bccs			      	ccs 			         	tos 
+addrs** (this is an aggregated field that includes searches senders, bccs, ccs, tos)
+**attachments.extension	   attachments.exif.gps   	attachments.content
+attachments.filesize	   attachments.filename**
+
+Example searches
+
+**subject:quick**				where subject field contains quick
+**subject:quick OR brown**		where subject field contains quick or brown
+**subject:quick brown**	where subject field contains quick or brown. If you omit 
+the OR operator the default operator will be used and for most datasets this is the 
+OR operator.
+**body:”quick brown”**			where body field contains the exact phrase “quick brown”
+**_missing_:subject**			where the field subject has no value
+**_exists_:attachments.exif.gps**	where the field attachments.exif.gps has a value (i.e. has location)
+
+Note: capitalization does not matter for search terms (i.e. a search for **quick Quick** 
+or **QUICK** will return the same results). The operators (OR AND NOT) must be 
+capitalized and the field names must be all lowercase.
+
+# Email Address
+Email Address search allows the user to search for a specific email
+address. This will filter the emails where this email address is in
+either the **From/To/Cc/Bcc**.  
+
+![Email Address Search](../img/search_email_addr.png)
 
 # Domains  
 With **Domains** selected all of the nodes are colored by domain.  
@@ -41,23 +103,7 @@ in the [Email View](#email-view) pane.
 
 ![Email Table](../img/email_table_01.png)
 
-## Search
 
-# Free Text
-
-Free text allows the user to search all emails and attachments for
-text.  The search is backed by
-[elasticsearch](http://www.elasticsearch.org) and will result all
-of the matching emails.
-
-![Free Text Search](../img/search_free_text.png)
-
-# Email Address
-Email Address search allows the user to search for a specific email
-address. This will filter the emails where this email address is in
-either the **From/To/Cc/Bcc**.  
-
-![Email Address Search](../img/search_email_addr.png)
 
 ## Rank
 
@@ -142,6 +188,13 @@ clicking on the title of the attachment will allow you to download it.
 You can also click the arrow to take you to that email.
 
 ![Attachments](../img/attachments.png)
+
+## Graph
+
+The graph shows all of the communications between email addresses in
+the current view.  It is built by directing the **From** to each
+**To/Cc/Bcc**.  The thickness of the line shows more communications
+between the two nodes.
 
 ## Export
 
