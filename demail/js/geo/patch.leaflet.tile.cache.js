@@ -8,7 +8,7 @@ L.TileLayer.addInitHook(function() {
 	}
 
 	//initialize from external config
-	this.options.useOnlyCache = app_geo_config.getUseTileCacheOnly();
+	this.options.useOnlyCache = app_geo_config.enableOnlyTileCache();
 	this.local_tile_db_name = app_geo_config.getLocalTileDBName();
 	this.remote_tile_db_name = app_geo_config.getRemoteTileDBName();
 

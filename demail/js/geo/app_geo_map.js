@@ -20,7 +20,7 @@ var app_geo_map = (function () {
   var world_bounds = L.latLngBounds(south_west_max, north_east_max);
 
   var area_draw_control_layer;
-  var area_caching_button, map_tile_db_export_button, map_tile_db_import_button;
+  var map_tile_cache_import_button, map_tile_cache_export_button;
 
   var area_select_id_list = [];
 
@@ -518,7 +518,7 @@ var app_geo_map = (function () {
           continuousWorld: false, // if true, the coordinates won't be wrapped by world width (-180, 180) or clamped to lie within (-90 to 90).
           noWrap: false, // if true, the tiles won't load outside the world width (-180, 180) instead of repeating.
           useCache: true, // plug-in:  to enable caching of tiles
-          useOnlyCache: app_geo_config.getUseTileCacheOnly()
+          useOnlyCache: app_geo_config.enableOnlyTileCache()
         }
       );
 
@@ -547,50 +547,159 @@ var app_geo_map = (function () {
 
   }
 
-  function initMapTileExportButton() {
-    if (debug_enabled) {
+  function initMapTileButtonGroup() {
+
+    if (app_geo_config.enableAdvanceMode()) {
+      // enable caching/replicating tiles only in debug mode
+
       if (map) {
-        if (!map_tile_db_export_button) {
 
-          map_tile_db_export_button = L.easyButton('fa-upload', function () {
+        if (!map_tile_cache_import_button) {
 
-            map_tile_layer.uploadTileCache();
+          if (app_geo_config.enableOnlyTileCache()) {
 
+            map_tile_cache_import_button = L.easyButton({
+              states: [
+                {
+                  stateName: 'init-tile-caching',
+                  icon: 'fa-download',
+                  title: 'Initiate downloading map tiles',
+                  onClick: function (control) {
+
+                    map_tile_layer.downloadTileCache();
+
+                    control.state('tile-caching');
+                    control._map.on('caching:end', function (e) {
+                      //console.log('control._map.on("caching:end")');
+                      control.state('init-tile-caching');
+                    });
+                  }
+                },
+                {
+                  stateName: 'tile-caching',
+                  icon: 'fa-spinner fa-spin',
+                  title: 'Downloading tiles...'
+                }
+              ]
+            });
+
+            map_tile_cache_import_button.enable();
+          }
+          else {
+
+            map_tile_cache_import_button = L.easyButton({
+              states: [
+                {
+                  stateName: 'init-tile-caching',
+                  icon: 'fa-cloud-download',
+                  title: 'Initiate caching map tiles',
+                  onClick: function (control) {
+
+                    setTileExportEnabled(false);
+                    control.state('tile-caching');
+
+                    initCacheSeeding(map.getZoom() + 4);
+
+                    control._map.on('caching:end', function (e) {
+                      //console.log('control._map.on("caching:end")');
+
+                      setTileExportEnabled(true);
+                      control.state('init-tile-caching');
+                    });
+                  }
+                },
+                {
+                  stateName: 'tile-caching',
+                  icon: 'fa-spinner fa-spin',
+                  title: 'Caching tiles...'
+                }
+              ]
+            });
+
+            map_tile_cache_import_button.disable();
+          }
+        }
+
+        if (!map_tile_cache_export_button) {
+
+          map_tile_cache_export_button = L.easyButton({
+            states: [
+              {
+                stateName: 'init-tile-caching',
+                icon: 'fa-upload',
+                title: 'Initiate uploading map tiles',
+                onClick: function (control) {
+
+                  setTileImportEnabled(false);
+                  control.state('tile-caching');
+
+                  map_tile_layer.uploadTileCache();
+
+                  control._map.on('caching:end', function (e) {
+                    //console.log('control._map.on("caching:end")');
+
+                    setTileImportEnabled(true);
+                    control.state('init-tile-caching');
+                  });
+                }
+              },
+              {
+                stateName: 'tile-caching',
+                icon: 'fa-spinner fa-spin',
+                title: 'Uploading tiles...'
+              }
+            ]
           });
 
-          map_tile_db_export_button.addTo(map);
+          //map_tile_cache_export_button.disable();
+          map_tile_cache_export_button.enable();
         }
-      }
+
+
+        var button_group = [
+          map_tile_cache_import_button,
+          map_tile_cache_export_button
+        ];
+        // build a toolbar with them
+        L.easyBar(
+          button_group,
+          { position: 'bottomleft'}
+        ).addTo(map);
+
+      } // end of if (map)
+    } // end of if (app_geo_config.enableAdvanceMode())
+
+  }
+
+  function setTileImportEnabled( enabled ) {
+    if (enabled === true) {
+      map_tile_cache_import_button.enable();
+    }
+    else {
+      map_tile_cache_import_button.disable();
     }
   }
 
-  function initMapTileImportButton() {
-    if (debug_enabled) {
-      if (map) {
-        if (!map_tile_db_import_button) {
-
-          map_tile_db_import_button = L.easyButton('fa-retweet', function () {
-
-            map_tile_layer.downloadTileCache();
-          });
-
-          map_tile_db_import_button.addTo(map);
-        }
-      }
+  function setTileExportEnabled( enabled ) {
+    if (enabled === true) {
+      map_tile_cache_export_button.enable();
+    }
+    else {
+      map_tile_cache_export_button.disable();
     }
   }
 
   function initCacheSeedingButton() {
 
     if (map) {
-      if (!area_caching_button) {
+      if (!map_tile_cache_import_button) {
 
         /*
          area_caching_button = L.easyButton('fa-cloud-download', function() {
          initCacheSeeding();
          });
          */
-        area_caching_button = L.easyButton({
+        map_tile_cache_import_button = L.easyButton({
           states: [
             {
               stateName: 'init-tile-caching',
@@ -601,7 +710,6 @@ var app_geo_map = (function () {
                 control.state('tile-caching');
                 control._map.on('caching:end', function (e) {
                   //console.log('control._map.on("caching:end")');
-
                   control.state('init-tile-caching');
                 });
               }
@@ -614,10 +722,8 @@ var app_geo_map = (function () {
           ]
         });
 
-        area_caching_button.addTo(map);
-        area_caching_button.disable();
-
-        //initCacheSeeding(5, true);
+        map_tile_cache_import_button.disable();
+        map_tile_cache_import_button.addTo(map);
       }
 
       /*
@@ -639,6 +745,15 @@ var app_geo_map = (function () {
     return false;
   }
 
+  function isMarkedForAllAttachment() {
+
+    if (map_marker_layer_all_attach && map && map.hasLayer(map_marker_layer_all_attach)) {
+      return true;
+    }
+    return false;
+  }
+
+  /* deprecated
   function initAllEmailSenderButton() {
 
     if (map) {
@@ -646,12 +761,10 @@ var app_geo_map = (function () {
 
         marker_init_sender_button = L.easyButton('fa-paper-plane-o', function () {
 
-
           if (isMarkedForAllSender()) {
             map.removeLayer(map_marker_layer_all_sender)
           }
           else {
-
             markMap(newman_geo_email_sender.getAllEmailDocGeoLoc());
           }
 
@@ -663,14 +776,6 @@ var app_geo_map = (function () {
 
   }
 
-  function isMarkedForAllAttachment() {
-
-    if (map_marker_layer_all_attach && map && map.hasLayer(map_marker_layer_all_attach)) {
-      return true;
-    }
-    return false;
-  }
-
   function initAllEmailAttachButton() {
 
     if (map) {
@@ -679,10 +784,9 @@ var app_geo_map = (function () {
         marker_init_attach_button = L.easyButton('fa-paperclip', function () {
 
           if (isMarkedForAllAttachment()) {
-            map.removeLayer(map_marker_layer_all_attach)
+            map.removeLayer(map_marker_layer_all_sender)
           }
           else {
-
             markMap(newman_geo_email_attach.getAllAttachDocGeoLoc());
           }
 
@@ -693,6 +797,73 @@ var app_geo_map = (function () {
     }
 
   }
+  */
+
+  function initMapMarkerButtonGroup() {
+
+      if (map) {
+
+        if (!marker_init_sender_button) {
+
+          marker_init_sender_button = L.easyButton({
+            states: [
+              {
+                stateName: 'mark-all-originating-coordinates',
+                icon: 'fa-paper-plane-o',
+                title: 'Mark all originating coordinates',
+                onClick: function (control) {
+
+                  if (isMarkedForAllSender()) {
+                    map.removeLayer(map_marker_layer_all_sender)
+                  }
+                  else {
+                    markMap(newman_geo_email_sender.getAllEmailDocGeoLoc());
+                  }
+                }
+              }
+            ]
+          });
+
+          marker_init_sender_button.enable();
+        }
+
+        if (!marker_init_attach_button) {
+
+          marker_init_attach_button = L.easyButton({
+            states: [
+              {
+                stateName: 'mark-all-attachment-coordinates',
+                icon: 'fa-paperclip',
+                title: 'Mark all attachment coordinates',
+                onClick: function (control) {
+
+                  if (isMarkedForAllAttachment()) {
+                    map.removeLayer(map_marker_layer_all_attach)
+                  }
+                  else {
+
+                    markMap(newman_geo_email_attach.getAllAttachDocGeoLoc());
+                  }
+                }
+              }
+            ]
+          });
+
+          marker_init_attach_button.enable();
+        }
+
+
+        var button_group = [
+          marker_init_sender_button,
+          marker_init_attach_button
+        ];
+        // build a toolbar with them
+        L.easyBar( button_group, { position: 'topleft'} ).addTo(map);
+
+      } // end of if (map)
+
+  }
+
 
   function initMapControlDraw() {
     if (map) {
@@ -767,7 +938,9 @@ var app_geo_map = (function () {
             area_select_id_list.push(id);
             console.log('area_select_id_list[' + id + ']');
 
-            area_caching_button.enable();
+            if (!app_geo_config.enableOnlyTileCache()) {
+              setTileImportEnabled(true);
+            }
           }
 
           area_draw_control_layer.addLayer(layer);
@@ -797,7 +970,9 @@ var app_geo_map = (function () {
                 var ne_lat = bounds.getNorthEast().lat, ne_lng = bounds.getNorthEast().lng;
                 console.log('rectangle-bounds: SW[' + sw_lat + ', ' + sw_lng + '], NE[' + ne_lat + ', ' + ne_lng + ']');
 
-                area_caching_button.enable();
+                if (!app_geo_config.enableOnlyTileCache()) {
+                  setTileImportEnabled(true);
+                }
               }
             });
 
@@ -825,10 +1000,14 @@ var app_geo_map = (function () {
               console.log('area_select_id_list[' + target_index + ']!');
 
               if (area_select_id_list.length == 0) {
-                area_caching_button.disable();
+                if (!app_geo_config.enableOnlyTileCache()) {
+                  setTileImportEnabled(false);
+                }
               }
               else {
-                area_caching_button.enable();
+                if (!app_geo_config.enableOnlyTileCache()) {
+                  setTileImportEnabled(true);
+                };
               }
             }
 
@@ -1070,11 +1249,8 @@ var app_geo_map = (function () {
 */
 
     initMapControlDraw();
-    initMapTileExportButton();
-    initMapTileImportButton();
-    initCacheSeedingButton();
-    initAllEmailSenderButton();
-    initAllEmailAttachButton();
+    initMapTileButtonGroup();
+    initMapMarkerButtonGroup();
 
     newman_geo_email_sender.initEmailDocGeoLoc();
     newman_geo_email_attach.initAttachDocGeoLoc();
