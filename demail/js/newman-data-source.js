@@ -236,6 +236,10 @@ var newman_data_source = (function () {
           // re-initialize dashboard components and widgets
           initDashboardCharts();
 
+          // re-initialize geo components and widgets
+          app_geo_map.clearAll();
+          app_geo_map.init();
+
         }, 2000);
 
       }

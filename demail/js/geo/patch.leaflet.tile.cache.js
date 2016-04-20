@@ -14,6 +14,9 @@ L.TileLayer.addInitHook(function() {
 
 	this._local_db = new PouchDB( this.local_tile_db_name );
 	//this._remote_db = new PouchDB( this.remote_tile_db_name );
+	this._seed_cache_handler = {"is_cancelled" : false};
+	this._download_handler = null;
+	this._upload_handler = null;
 	this._canvas = document.createElement('canvas');
 
 	if (!(this._canvas.getContext && this._canvas.getContext('2d'))) {
@@ -149,6 +152,8 @@ L.TileLayer.include({
 		if (minZoom > maxZoom) return;
 		if (!this._map) return;
 
+		this._seed_cache_handler.is_cancelled = false;
+
 		var queue = [];
 
 		for (var z = minZoom; z<=maxZoom; z++) {
@@ -184,6 +189,13 @@ L.TileLayer.include({
 		this._seedOneTile(tile, queue, seedData);
 	},
 
+	cancelSeedTileCache : function() {
+		if (this._seed_cache_handler) {
+			console.log('cancelSeedTileCache()');
+			this._seed_cache_handler.is_cancelled = true;
+		}
+	},
+
 	_createTile: function () {
 		return document.createElement('img');
 	},
@@ -209,6 +221,10 @@ L.TileLayer.include({
 	//   asynchronously recursively call itself when the tile has
 	//   finished loading.
 	_seedOneTile: function(tile, remaining, seedData) {
+		if (this._seed_cache_handler.is_cancelled) {
+			this.fire('seed:end', seedData);
+			return;
+		}
 		if (!remaining.length) {
 			this.fire('seed:end', seedData);
 			return;
@@ -262,7 +278,7 @@ L.TileLayer.include({
 			}
 			*/
 
-			PouchDB.replicate(this.local_tile_db_name, this.remote_tile_db_name,
+			this._upload_handler = PouchDB.replicate(this.local_tile_db_name, this.remote_tile_db_name,
 			//PouchDB.sync(this.local_tile_db_name, this.remote_tile_db_name,
 					{retry: false}
 			).on('change', function (info) { // handle change
@@ -287,6 +303,13 @@ L.TileLayer.include({
 		}
 	}, // end of uploadTileCache()
 
+	cancelUploadTileCache : function() {
+		if (this._upload_handler) {
+			console.log('cancelUploadTileCache()');
+			this._upload_handler.cancel();
+		}
+	},
+
   downloadTileCache : function( map ) {
 		console.log('downloadTileCache()');
 		console.log('\toptions.useOnlyCache : ' + this.options.useOnlyCache);
@@ -295,7 +318,7 @@ L.TileLayer.include({
 
 		if (this._local_db) {
 
-			PouchDB.replicate(this.remote_tile_db_name, this.local_tile_db_name,
+			this._download_handler = PouchDB.replicate(this.remote_tile_db_name, this.local_tile_db_name,
 					{retry: false}
 			).on('change', function (info) {
 				// handle change
@@ -328,8 +351,14 @@ L.TileLayer.include({
 			});
 
 		}
-	} // end of downloadTileCache()
+	}, // end of downloadTileCache()
 
+	cancelDownloadTileCache : function() {
+		if (this._download_handler) {
+			console.log('cancelDownloadTileCache()');
+			this._download_handler.cancel();
+		}
+	}
 
 });
 

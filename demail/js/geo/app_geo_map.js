@@ -22,13 +22,22 @@ var app_geo_map = (function () {
   var area_draw_control_layer;
   var map_tile_cache_import_button, map_tile_cache_export_button;
 
-  var area_select_id_list = [];
+  var area_drawn_id_list = [];
 
-  function containsAreaSelected() {
-    if (area_select_id_list && area_select_id_list.length > 0) {
+  function containsAreaDrawn() {
+    if (area_drawn_id_list && area_drawn_id_list.length > 0) {
       return true;
     }
     return false;
+  }
+
+  function clearAllAreaDrawn() {
+    if (area_draw_control_layer) {
+      area_draw_control_layer.clearLayers();
+    }
+    if (area_drawn_id_list) {
+      area_drawn_id_list = [];
+    }
   }
 
   var marker_list = [];
@@ -434,8 +443,8 @@ var app_geo_map = (function () {
   function initCacheSeeding(new_zoom_level, world_map_enabled) {
     if (map && map_tile_layer) {
 
-      if (area_draw_control_layer && area_select_id_list.length > 0) {
-        var target_layer_id = area_select_id_list[area_select_id_list.length -1];
+      if (area_draw_control_layer && area_drawn_id_list.length > 0) {
+        var target_layer_id = area_drawn_id_list[area_drawn_id_list.length -1];
         var target_layer;
         area_draw_control_layer.eachLayer(function (layer) {
           if (layer._leaflet_id == target_layer_id) {
@@ -598,7 +607,11 @@ var app_geo_map = (function () {
                 {
                   stateName: 'tile-caching',
                   icon: 'fa-spinner fa-spin',
-                  title: 'Downloading tiles...'
+                  title: 'Downloading tiles...',
+                  onClick: function (control) {
+                    cancelAllDownload();
+                    control.state('init-tile-caching');
+                  }
                 }
               ]
             });
@@ -630,7 +643,11 @@ var app_geo_map = (function () {
                 {
                   stateName: 'tile-caching',
                   icon: 'fa-spinner fa-spin',
-                  title: 'Caching tiles...'
+                  title: 'Caching tiles...',
+                  onClick: function (control) {
+                    cancelTileCaching();
+                    control.state('init-tile-caching');
+                  }
                 }
               ]
             });
@@ -645,13 +662,13 @@ var app_geo_map = (function () {
           map_tile_cache_export_button = L.easyButton({
             states: [
               {
-                stateName: 'init-tile-caching',
+                stateName: 'init-tile-upload',
                 icon: 'fa-upload',
                 title: 'Initiate uploading map tiles',
                 onClick: function (control) {
 
                   setTileCloudDownloadEnabled( false );
-                  control.state('tile-caching');
+                  control.state('tile-upload');
 
                   map_tile_layer.uploadTileCache( map );
 
@@ -659,14 +676,18 @@ var app_geo_map = (function () {
                     //console.log('control._map.on("upload:complete")');
 
                     setTileCloudDownloadEnabled( true );
-                    control.state('init-tile-caching');
+                    control.state('init-tile-upload');
                   });
                 }
               },
               {
-                stateName: 'tile-caching',
+                stateName: 'tile-upload',
                 icon: 'fa-spinner fa-spin',
-                title: 'Uploading tiles...'
+                title: 'Uploading tiles...',
+                onClick: function (control) {
+                  cancelAllUpload();
+                  control.state('init-tile-upload');
+                }
               }
             ]
           });
@@ -691,14 +712,31 @@ var app_geo_map = (function () {
 
   }
 
+  function cancelTileCaching() {
+    if (map_tile_layer) {
+      map_tile_layer.cancelSeedTileCache()
+    }
+  }
+
+  function cancelAllUpload() {
+    if (map_tile_layer) {
+      map_tile_layer.cancelUploadTileCache();
+    }
+  }
+
+  function cancelAllDownload() {
+    if (map_tile_layer) {
+      map_tile_layer.cancelDownloadTileCache();
+    }
+
+  }
+
   function setTileCloudDownloadEnabled( enabled ) {
     if (app_geo_config.enableOnlyTileCache()) {
-      console.log('app_geo_config.enableOnlyTileCache : ' + app_geo_config.enableOnlyTileCache());
       setTileImportEnabled( enabled );
     }
     else {
-      if (enabled === true && containsAreaSelected()) {
-        console.log('enabled === true && containsAreaSelected() : ');
+      if (enabled === true && containsAreaDrawn()) {
         setTileImportEnabled( true );
       }
       else {
@@ -708,20 +746,24 @@ var app_geo_map = (function () {
   }
 
   function setTileImportEnabled( enabled ) {
-    if (enabled === true) {
-      map_tile_cache_import_button.enable();
-    }
-    else {
-      map_tile_cache_import_button.disable();
+    if (map_tile_cache_import_button) {
+      if (enabled === true) {
+        map_tile_cache_import_button.enable();
+      }
+      else {
+        map_tile_cache_import_button.disable();
+      }
     }
   }
 
   function setTileExportEnabled( enabled ) {
-    if (enabled === true) {
-      map_tile_cache_export_button.enable();
-    }
-    else {
-      map_tile_cache_export_button.disable();
+    if (map_tile_cache_export_button) {
+      if (enabled === true) {
+        map_tile_cache_export_button.enable();
+      }
+      else {
+        map_tile_cache_export_button.disable();
+      }
     }
   }
 
@@ -983,7 +1025,7 @@ var app_geo_map = (function () {
 
 
             var id = L.Util.stamp(layer);
-            area_select_id_list.push(id);
+            area_drawn_id_list.push(id);
             console.log('area_select_id_list[' + id + ']');
 
             fireEvent('contains:area_selected', {'area_select_id' : id});
@@ -1007,7 +1049,7 @@ var app_geo_map = (function () {
           layers.eachLayer(function (layer) {
             var layer_id = layer._leaflet_id;
 
-            _.each(area_select_id_list, function (element) {
+            _.each(area_drawn_id_list, function (element) {
               if (element == layer_id) {
                 console.log('layer_id: ' + layer_id);
 
@@ -1034,16 +1076,16 @@ var app_geo_map = (function () {
             console.log('layer: ' + layer_id + ' removed!');
 
             var target_index = -1;
-            _.each(area_select_id_list, function (element, index) {
+            _.each(area_drawn_id_list, function (element, index) {
               if (element == layer_id) {
                 target_index = index;
               }
             });
             if (target_index > -1) {
-              area_select_id_list.splice(target_index, 1);
+              area_drawn_id_list.splice(target_index, 1);
               console.log('area_select_id_list[' + target_index + ']!');
 
-              if (area_select_id_list.length == 0) {
+              if (area_drawn_id_list.length == 0) {
                 fireEvent('contains:no_area_selected', {'area_select_id_removed' : layer_id});
               }
             }
@@ -1329,8 +1371,20 @@ var app_geo_map = (function () {
     }
   }
 
+  function clearAll() {
+    unmarkAllSender();
+    unmarkAllAttachment();
+    clearAllAreaDrawn();
+    cancelTileCaching();
+    cancelAllUpload();
+    cancelAllDownload();
+    setTileCloudDownloadEnabled( true );
+    setTileExportEnabled( true );
+  }
+
   return {
     'init' : init,
+    'clearAll' : clearAll,
     'initMap' : initMap,
     'initMapTileLayer' : initMapTileLayer,
     'initCacheSeeding' : initCacheSeeding,
