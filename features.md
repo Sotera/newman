@@ -54,51 +54,46 @@ datasets based on email will include the following fields:
 
 Example searches
 
-   `subject:quick`                  |  where subject field contains quick
-   `subject:quick OR brown`         |	where subject field contains quick or brown
-   `subject:quick brown`            |	where subject field contains quick or brown. If you omit the OR operator the default operator will be used and for most datasets this is the OR operator.
-   `body:”quick brown”`             |	where body field contains the exact phrase “quick brown”
+   `subject:quick`                  |   where subject field contains quick
+   `subject:quick OR brown`         |   where subject field contains quick or brown
+   `subject:quick brown`            |   the default operator is OR. So, where subject field contains quick or brown.
+   `body:”quick brown”`             |   where body field contains the exact phrase “quick brown”
    `_missing_:subject`              |	where the field subject has no value
    `_exists_:attachments.exif.gps`  |	where the field attachments.exif.gps has a value (i.e. has location)
+
 
 Note: capitalization does not matter for search terms (i.e. a search for `quick` `Quick` 
 or `QUICK` will return the same results). The operators (`OR AND NOT`) must be 
 capitalized and the field names must be all lowercase.
 
 #### Wildcards
-Wildcard searches can be run on individual terms, using ? to replace a single character, and * to replace zero or more characters:
+Wildcard searches can be run on individual terms, using `?` to replace a single character, and `*` to replace zero or more characters:
 
-	`jo?n`	`john*`
+`jo?n`	`john*`
 
 Be aware that wildcard queries can take longer to execute; in particular, searches with a wildcard at the beginning of a word (`*ing`).
 
 #### Fuzziness
 Search for terms that are similar to, but not exactly like our search terms. Using the “fuzzy” operator will find all terms with a maximum of two changes, where a change is the insertion, deletion or substitution of a single character or transposition of two adjacent characters. Different edit distances can be specified by including a number (~1). Using a distance of 1 is usually sufficient to catch 80% of all human misspellings.
  
-	`Jon~`		`tomato~`
+`Jon~`	`tomato~`
 
 #### Proximity searches
 While a phrase query (`“john smith”`) expects all of the terms inexactly the same order, a proximity query allows the specified words to be further apart or in a different order. In the same way that fuzzy queries can specify a maximum edit distance for characters in a word, a proximity search allows the analyst to specify a maximum edit distance of words in a phrase. 
 
-	`“john smith”~5`       finds John Smith, John Adams Smith, Smith, John
+`“john smith”~5`       finds _John Smith_, _John Adams Smith_, _Smith, John_
 
 #### Ranges
-Can be specified for date, numeric, or string fields. Inclusive ranges are specified with square brackets [min TO max] and exclusive ranges with curly brackets {min TO max}
-```
-  attachments.filesize:[100 TO 500]	
-  attachments.filesize:[10000 TO *]	
-  attachments.filesize:[1000 TO 5000}
-  attachments.filesize:>10000
-  attachments.filesize:>=10000
-  attachments.filesize:<10000
-  attachments.filesize:<=10000
-```
+Can be specified for date, numeric, or string fields. Inclusive ranges are specified with square brackets [min TO max] and exclusive ranges with curly brackets {min TO max}.
+
+`attachments.filesize:[100 TO 500]` `attachments.filesize:[10000 TO *]` `attachments.filesize:[1000 TO 5000}` `attachments.filesize:>10000` `attachments.filesize:>=10000` `attachments.filesize:<10000` `attachments.filesize:<=10000`
+
 
 #### Boolean operators
 By default, all terms are optional, as long as one term matches. A search for foo bar baz will find any document that contains one or more of foo or bar or baz.  There are also boolean operators which can be used in the query string itself to provide more control.
 The preferred operators are + (this term must be present) and - (this term must not be present). All other terms are optional. For example, this query:
 
-	`quick brown +fox -news`
+`quick brown +fox -news`
 
 states that:
 - fox must be present
@@ -109,7 +104,8 @@ The familiar operators `AND`, `OR` and `NOT` (also written `&&`, `||` and `!`) a
 
 #### Grouping
 Multiple terms or clauses can be grouped together with parenthesis to form sub queries.
-	`subject:(quick OR brown) AND body:fox`
+
+`subject:(quick OR brown) AND body:fox`
 
 ### Filtering
 
