@@ -67,10 +67,12 @@ var newman_geo_email_attach = (function () {
       attachment_id_list = [];
       attachment_geo_loc_map = {}, email_geo_loc_map = {};
       _.each(response.exif_docs, function (document) {
-        _.each(document.attachments, function (attachment) {
-          var email_datetime = document.datetime;
-          var email_subject = document.subject;
-          var email_id = document.id;
+
+        var email_datetime = document.datetime;
+        var email_subject = document.subject;
+        var email_id = document.id;
+
+        if (document.originating_locations && document.originating_locations.length > 0) {
           var email_lat = document.originating_locations[0].geo_coord.lat;
           var email_lon = document.originating_locations[0].geo_coord.lon;
 
@@ -83,8 +85,12 @@ var newman_geo_email_attach = (function () {
               "longitude": email_lon,
               "coord_sent": true
             }
-            putEmailDocGeoLoc( email_id, geo_email_obj );
+            putEmailDocGeoLoc(email_id, geo_email_obj);
           }
+        }
+
+        _.each(document.attachments, function (attachment) {
+
 
           if (attachment.exif.gps) {
             //console.log('attachment:' + JSON.stringify(attachment, null, 2));
