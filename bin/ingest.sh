@@ -14,7 +14,7 @@ INGEST_ITEM=$3
 TYPE=$4
 
 #newman etl extract
-EXTRACTOR_HOME=/srv/software/pst-extraction-master/
+EXTRACTOR_HOME=/srv/software/newman-etl-extract/
 echo "Extractor home set to $EXTRACTOR_HOME"
 echo "email_address=$EMAIL_ADDRESS parent_dir=$PARENT_DIR path=$INGEST_ITEM type=$TYPE"
 
