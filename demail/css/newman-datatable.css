@@ -1,0 +1,69 @@
+.datatable_container {
+    width: 100%;
+    margin: 0 auto;
+}
+
+.datatable {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;
+    cellspacing: 0 !important;
+    cellpadding: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    vertical-align: top !important;
+    border-spacing: 0 !important;
+    font-size: 12px !important;
+    line-height: 20px !important;
+}
+
+.datatable th {
+    font-size: 12px;
+}
+
+.datatable td {
+    font-size: 12px;
+}
+
+/*
+.datatable th div.dataTables_sizing {
+    font-size: 12px;
+}
+
+.dataTables_length {
+    font-size: 12px;
+}
+
+.dataTables_info {
+    font-size: 12px;
+}
+
+.dataTables_paginate {
+    font-size: 12px;
+}
+*/
+
+.data-table-row-read {
+    font-weight: normal;
+    background: rgba(253, 253, 253, 0.5);
+    /*color: rgb(214, 214, 214);*/
+    color: #c3c1cd;
+}
+
+.datatable_row_marked {
+    color: #4888f3;
+}
+
+.datatable_row_marked:hover, .datatable_row_marked:active, .datatable_row_marked:focus {
+    color: #4888f3;
+}
+
+.datatable_row_unmarked {
+    color: #000000;
+}
+
+.datatable_row_unmarked:hover, .datatable_row_unmarked:active, .datatable_row_unmarked:focus {
+    color: #000000;
+}
+
+.datatable_highlight {
+    background-color: #ffec00 !important;
+}

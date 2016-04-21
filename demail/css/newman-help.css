@@ -1,0 +1,176 @@
+
+    body {
+        padding-top:50px;
+    }
+
+    #masthead {
+        min-height:250px;
+    }
+
+    #masthead h1 {
+        font-size: 30px;
+        line-height: 1;
+        padding-top:20px;
+    }
+
+    #masthead .well {
+        margin-top:8%;
+    }
+
+    @media screen and (min-width: 668px) {
+        #masthead h1 {
+            font-size: 50px;
+        }
+    }
+
+    .navbar-bright {
+        background-color:#111155;
+        color:#fff;
+    }
+
+    .affix-top,.affix{
+        position: static;
+    }
+
+    @media (min-width: 879px) {
+        #sidebar.affix-top {
+            position: static;
+            margin-top:30px;
+            width:228px;
+        }
+
+        #sidebar.affix {
+            position: fixed;
+            top:70px;
+            width:228px;
+        }
+    }
+
+    #sidebar li.active > a {
+        font-weight: bold;
+        color: #ff4500;
+        /*border:0 #808080 solid;*/
+        border-right-width:5px;
+    }
+
+    /* Nav: second level */
+    #sidebar .nav {
+        display: none;
+    }
+
+    #sidebar > li.active .nav {
+        display: block;
+    }
+
+    #sidebar .nav {
+        margin-bottom: 8px;
+    }
+
+    #sidebar .nav > li > a {
+        padding-top: 3px;
+        padding-bottom: 3px;
+        padding-left: 30px;
+        font-size: 90%;
+    }
+
+/*ul.affix {*/
+    /*position: fixed;*/
+    /*top: 0px;*/
+    /*left: 62px;*/
+    /*width: 360px;*/
+/*}*/
+
+/*ul.affix-top {*/
+    /*position: static;*/
+/*}*/
+
+/*ul.affix-bottom {*/
+    /*position: absolute;*/
+/*}*/
+
+/* First level of nav */
+/*.sidenav {*/
+    /*margin-top: 30px;*/
+    /*margin-bottom: 30px;*/
+    /*padding-top: 10px;*/
+    /*padding-bottom: 10px;*/
+    /*background-color: #f7f5fa;*/
+    /*border-radius: 5px;*/
+/*}*/
+
+/* All levels of nav */
+/*.sidebar .nav > li > a {*/
+    /*display: block;*/
+    /*color: #716b7a;*/
+    /*padding: 5px 20px;*/
+/*}*/
+
+/*.sidebar .nav > li > a:hover,*/
+/*.sidebar .nav > li > a:focus {*/
+    /*text-decoration: none;*/
+    /*background-color: #e5e3e9;*/
+/*}*/
+
+/*.sidebar .nav > .active > a,*/
+/*.sidebar .nav > .active:hover > a,*/
+/*.sidebar .nav > .active:focus > a {*/
+    /*font-weight: bold;*/
+    /*color: #563d7c;*/
+    /*background-color: transparent;*/
+/*}*/
+
+/* Nav: second level */
+/*.sidebar .nav .nav {*/
+    /*display: none;*/
+/*}*/
+
+/*.sidebar .nav > li.active .nav {*/
+    /*display: block;*/
+/*}*/
+
+/*.sidebar .nav .nav {*/
+    /*margin-bottom: 8px;*/
+/*}*/
+
+/*.sidebar .nav .nav > li > a {*/
+    /*padding-top: 3px;*/
+    /*padding-bottom: 3px;*/
+    /*padding-left: 30px;*/
+    /*font-size: 90%;*/
+/*}*/
+
+/*#top {*/
+    /*margin-top: 30px;*/
+/*}*/
+
+/*@media screen and (max-width: 767px) {*/
+    /*.row-offcanvas {*/
+        /*position: relative;*/
+        /*-webkit-transition: all 0.25s ease-out;*/
+        /*-moz-transition: all 0.25s ease-out;*/
+        /*transition: all 0.25s ease-out;*/
+    /*}*/
+    /*.row-offcanvas-right*/
+    /*.sidebar-offcanvas {*/
+        /*right: -41.6%;*/
+    /*}*/
+
+    /*.row-offcanvas-left*/
+    /*.sidebar-offcanvas {*/
+        /*left: -41.6%;*/
+    /*}*/
+    /*.row-offcanvas-right.active {*/
+        /*right: 41.6%;*/
+    /*}*/
+    /*.row-offcanvas-left.active {*/
+        /*left: 41.6%;*/
+    /*}*/
+    /*.sidebar-offcanvas {*/
+        /*position: absolute;*/
+        /*top: 0;*/
+        /*width: 41.6%;*/
+    /*}*/
+    /*#sidebar {*/
+        /*padding-top:0;*/
+    /*}*/
+/*}*/

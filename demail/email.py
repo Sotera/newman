@@ -1,220 +1,281 @@
-from newman.db.newman_db import newman_connector
-from newman.db.mysql import execute_query, execute_nonquery
-from newman.utils.functions import nth
-from newman.settings import getOpt 
-from newman.utils.file import rmrf, mkdir, mv 
-from newman.utils.date_utils import fmtNow
-
+import json
 import tangelo
 import cherrypy
-import json
-import urllib
 
-import shutil
-import os
+from newman.utils.functions import nth
+from newman.settings import getOpt
+from newman.es_connection import getDefaultDataSetID
 
-stmt_email_by_id = (
-    " select e.id, e.dir, e.datetime, e.exportable, e.from_addr, e.tos, e.ccs, e.bccs, e.subject, html.body_html, e.attach "
-    " from email e join email_html html on e.id = html.id"
-    " where e.id = %s "
-)
+from es_email import get_ranked_email_address_from_email_addrs_index, get_attachment_by_id, get_attachments_by_sender, get_email, get_top_domains, get_top_communities, set_starred
+from es_export import export_emails_archive
+from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarred, parseParamTextQuery
 
-stmt_email_entities_by_id = (
-    " select subject, entity_type, idx, value "
-    " from entity "
-    " where email_id = %s "
-)
+from es_queries import _build_email_query
+from es_query_utils import _query_email_attachments, _query_emails
+from es_search import _build_graph_for_emails, es_get_all_email_by_address, get_top_email_by_text_query
+
+#GET <host>:<port>:/email/email/<id>?qs="<query_string>"
+# deprecated slated for removal
+def getEmail(*args, **kwargs):
+    tangelo.log("getEmail(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.content_type("application/json")
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+
+    qs = parseParamTextQuery(**kwargs)
+
+    email_id = args[-1]
+    if not email_id:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing email_id")
+
+    return get_email(data_set_id, email_id, qs)
+
+# <host>:<port>:/email/set_starred/<email_id>?data_set_id=<data_set_id>&starred=<True|False>
+# Defaults to True
+def setStarred(*args, **kwargs):
+    tangelo.log("setStarred(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.content_type("application/json")
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+
+    email_id = args[-1]
+    if not email_id:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing email_id")
+
+    starred = parseParamStarred(**kwargs)
+
+    return set_starred(data_set_id, [email_id], starred)
+
+# <host>:<port>:/email/search_all_starred?data_set_id=<data_set_id>
+# common URL params apply, date, size, etc
+def searchStarred(*args, **kwargs):
+    tangelo.log("email.searchStarred(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.content_type("application/json")
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+
+    size = size if size >500 else 2500
+
+    # TODO set from UI
+    query_terms=''
+    email_address_list = []
+
+    query = _build_email_query(email_addrs=email_address_list, qs=query_terms, date_bounds=(start_datetime, end_datetime), starred=True)
+    tangelo.log("email.searchStarred(query: %s)" % (query))
+
+    results = _query_emails(data_set_id, size, query)
+    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+
+    # Get attachments for community
+    query = _build_email_query(email_addrs=email_address_list, qs=query_terms, date_bounds=(start_datetime, end_datetime), attachments_only=True, starred=True)
+    tangelo.log("email.searchStarred(attachment-query: %s)" % (query))
+    attachments = _query_email_attachments(data_set_id, size, query)
+    graph["attachments"] = attachments
+
+    return graph
+
+#GET <host>:<port>:/email/rank
+def getRankedEmails(*args, **kwargs):
+    tangelo.content_type("application/json")
+    tangelo.log("getRankedEmails(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+
+    return get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size)
 
 
-def queryEmail(email):
-    with newman_connector() as read_cnx:
-        with execute_query(read_cnx.conn(), stmt_email_by_id, email) as qry:
-            tangelo.log("node-vals: %s" % qry.stmt)
-            rtn = qry.cursor().fetchone()
-            tangelo.content_type("application/json")
-            return rtn if rtn else []
+# TODO this needs to be reworked so that the ranked emails are the top ranked emails for the query.  Right now they are
+# The overall top 20.
+# TODO merge with getRankedAddresses function
+# Returnedd:  The graph structure returned will contain the search results for the query per user
+#GET <host>:<port>:/email/ranked_addresses_search?data_set_id=<data_set>&qs=<query_text>
+def getRankedAddressesWithTextSearch(*args, **kwargs):
+    tangelo.content_type("application/json")
+    tangelo.log("getRankedAddresses(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    qs = parseParamTextQuery(**kwargs)
 
-def queryEntity(email):
-    with newman_connector() as read_cnx:
-        with execute_query(read_cnx.conn(), stmt_email_entities_by_id, email) as qry:
-            tangelo.log("node-vals: %s" % qry.stmt)
-            rtn = [r for r in qry.cursor()]
-            return rtn if rtn else []
+    # TODO this needs to come from UI
+    size = size if size >500 else 2500
 
-#GET /email/<id>
-def getEmail(*args):
-    email=urllib.unquote(nth(args, 0, ''))
-    if not email:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing id")
-    
-    tangelo.content_type("application/json")    
-    return { "email" : queryEmail(email), "entities": queryEntity(email) }
+    text_search_graph = get_top_email_by_text_query(data_set_id, qs, start_datetime, end_datetime, size)
 
-#GET /entities/<id>
-def getEntities(*args):
-    email=urllib.unquote(nth(args, 0, ''))
-    if not email:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing id")
-    tangelo.content_type("application/json")    
-    return queryEntity(email)
+    text_search = {
+        "text_search_url_path": qs,
+        "parameter": kwargs,
+        "search_result": {
+            "mail_sent_count": "N/A",
+            "mail_received_count": "N/A",
+            "mail_attachment_count": len(text_search_graph["attachments"]),
+            "query_matched_count" : text_search_graph["query_hits"],
+            "associated_count" : len(text_search_graph["graph"]["nodes"])
+        },
+        "TEMPORARY_GRAPH" : text_search_graph
+    }
 
-#GET /rank
-def getRankedEmails(*args):
-    tangelo.content_type("application/json")    
-    stmt = (
-        " select email_addr, community, community_id, group_id, rank, total_received, total_sent "
-        " from email_addr "
-        " where rank > 0 "
-        " order by cast(rank as decimal(4,4)) desc" 
-    )
-    with newman_connector() as read_cnx:
-        with execute_query(read_cnx.conn(), stmt) as qry:
-            rtn = [[str(val) for val in row] for row in qry.cursor()]
-            return { "emails" : rtn }
+    ranked_addresses = get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size)
+    text_search["top_address_list"] = []
+    for i, email_address in enumerate(ranked_addresses["emails"]):
+        graph = es_get_all_email_by_address(data_set_id, email_address[0], qs, start_datetime, end_datetime, size )
 
-#GET /target
-def getTarget(*args):
-    # returns the users who's email is being analyzed
-    #todo: read from file or config 
+        text_search["top_address_list"].append({
+            "address_search_url_path" : email_address[0],
+            "parameters" : kwargs,
+            "search_results" : {
+                "mail_sent_count" : email_address[6],
+                "mail_received_count" : email_address[5],
+                "mail_attachment_count" : email_address[7],
+                "query_matched_count" : graph["query_hits"],
+                "associated_count" : len(graph["graph"]["nodes"])
+            },
+            "TEMPORARY_GRAPH" : graph
+        })
+
+
+    return {"text_search_list" : text_search}
+
+# TODO this needs to be reworked so that the ranked emails are the top ranked emails for the query.  Right now they are
+# The overall top 20.
+# TODO merge with getRankedAddresses function
+# Returnedd:  The graph structure returned will contain the search results for the query per user
+#GET <host>:<port>:/email/ranked_addresses?data_set_id=<data_set>&qs=<query_text>
+def getRankedAddresses(*args, **kwargs):
+    tangelo.content_type("application/json")
+    tangelo.log("getRankedAddresses(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    # TODO - reminder no 'qs' here set to ''
+    # qs = parseParamTextQuery(**kwargs)
+    qs=''
+
+    # TODO this needs to come from UI
+    size = size if size >500 else 2500
+
+    ranked_addresses = get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size)
+    top_address_list = []
+    for i, email_address in enumerate(ranked_addresses["emails"]):
+        graph = es_get_all_email_by_address(data_set_id, email_address[0], qs, start_datetime, end_datetime, size )
+
+        top_address_list.append({
+            "address_search_url_path" : email_address[0],
+            "parameters" : kwargs,
+            "search_results" : {
+                "mail_sent_count" : email_address[6],
+                "mail_received_count" : email_address[5],
+                "mail_attachment_count" : email_address[7],
+                "query_matched_count" : graph["query_hits"],
+                "associated_count" : len(graph["graph"]["nodes"])
+            },
+            "TEMPORARY_GRAPH" : graph
+        })
+
+
+    return {"top_address_list" : top_address_list}
+
+# DEPRECATED  TODO remove
+#GET <host>:<port>:/email/target?data_set_id=<data_set>
+#deprecated; use new service url http://<host>:<port>/datasource/all/
+def getTarget(*args, **kwargs):
     target = getOpt('target')
-    stmt = (
-        " select e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
-        " from email_addr e "
-        " where e.email_addr = %s "
-    )
-    tangelo.content_type("application/json")        
-    with newman_connector() as read_cnx:
-        with execute_query(read_cnx.conn(), stmt, target) as qry:
-            rtn = [[str(val) for val in row] for row in qry.cursor()]
-            return { "email" : rtn }
 
-#GET /domains
-def getDomains(*args):
-    stmt = (
-        "SELECT SUBSTRING_INDEX(email_addr, '@', -1) as eml, count(1) from email_addr group by eml"
-    )
-    tangelo.content_type("application/json")        
-    with newman_connector() as read_cnx:
-        with execute_query(read_cnx.conn(), stmt) as qry:
-            rtn = [[str(val) for val in row] for row in qry.cursor()]
-            return { "domains" : rtn }
+    tangelo.content_type("application/json")
+    return { "email" : []}
 
-#GET /attachments/<sender>
-def getAttachmentsSender(*args):
-    sender=urllib.unquote(nth(args, 0, ''))
+#GET <host>:<port>:/email/domains?data_set_id=<data_set>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
+def getDomains(*args, **kwargs):
+    tangelo.log("getDomains(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.content_type("application/json")
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+
+    #top_count = int(urllib.unquote(nth(args, 0, "40")))
+    top_count = int(size);
+
+    return {"domains" : get_top_domains(data_set_id, date_bounds=(start_datetime, end_datetime), num_domains=top_count)[:top_count]}
+
+
+#GET <host>:<port>:/email/communities?data_set_id=<data_set>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
+def getCommunities(*args, **kwargs):
+    tangelo.log("getCommunities(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.content_type("application/json")
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+
+    #top_count = int(urllib.unquote(nth(args, 0, "40")))
+    top_count = int(size);
+
+    return {"communities" : get_top_communities(data_set_id, date_bounds=(start_datetime, end_datetime), num_communities=top_count)[:top_count]}
+
+#GET <host>:<port>:/email/search_all_attach_by_sender/<sender>?data_set_id=<data_set>
+def getAllAttachmentBySender(*args, **kwargs):
+    tangelo.log("getAttachmentsSender(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    sender=nth(args, 0, '')
+    if not data_set_id:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing data_set_id")
     if not sender:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing id")
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing sender")
 
-    tangelo.content_type("application/json")        
-    stmt = (
-        " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
-        " from email "
-        " where from_addr = %s and attach != '' "
-    )
-    with newman_connector() as read_cnx:
-        with execute_query(read_cnx.conn(), stmt, sender) as qry:
-            rtn = [[ val.encode('utf-8') if isinstance(val, basestring) else str(val) for val in row] for row in qry.cursor()]
-            return { "sender": sender, "email_attachments" : rtn }
+    tangelo.content_type("application/json")
 
-#GET /exportable			
-def getExportable(*args):
-    stmt = (
-        " SELECT id, subject FROM email WHERE exportable='true' "
-    )
-    tangelo.content_type("application/json")        
-    with newman_connector() as read_cnx:
-        with execute_query(read_cnx.conn(), stmt) as qry:
-            rtn = [[str(val) for val in row] for row in qry.cursor()]
-            return { "emails" : rtn }
+    return get_attachments_by_sender(data_set_id, sender, start_datetime, end_datetime, size )
 
+# DEPRECATED TODO remove me
+#GET /exportable
+def getExportable(*args, **kwargs):
+    tangelo.content_type("application/json")
+    return { "emails" : []}
+
+# DEPRECATED TODO remove me
 #POST /exportable
 def setExportable(data):
-    email = data.get('email', None)
-    exportable = data.get('exportable', 'false')
+    tangelo.content_type("application/json")
+    return { "email" : {} }
 
-    if not email:
-        tangelo.content_type("application/json")
-        stmt = (
-            " UPDATE email SET exportable='false' "	
-        )
-        with newman_connector() as read_cnx:
-            with execute_nonquery(read_cnx.conn(), stmt) as qry:
-                return { "success" : "true" }
-        #return tangelo.HTTPStatusCode(400, "invalid service call - missing id")
-    
-    tangelo.content_type("application/json")
-    stmt = (
-        " UPDATE email SET exportable= %s WHERE id = %s "	
-    )
-    with newman_connector() as read_cnx:
-        with execute_nonquery(read_cnx.conn(), stmt, exportable, email ) as qry:
-            return { "email" : queryEmail(email) }
-#POST /exportmany 
-def setExportMany(data):
-    emails = data.get('emails', [])
-    exportable= 'true' if data.get('exportable', True) else 'false'
-    stmt = (
-        " UPDATE email SET exportable=%s WHERE id = %s "	
-    )
-    with newman_connector() as cnx:
-        for email in emails: 
-            with execute_nonquery(cnx.conn(), stmt, exportable, email) as qry:
-                pass
-    tangelo.content_type("application/json")
-    return { 'exported' : emails }
- 
+# POST email/exportmany/?data_set_id=<data_set>&email_ids=<id0,id1,...,idn>
+def exportMany(*args, **kwargs):
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    email_ids = parseParamEmailIds(**kwargs)
+    return export_emails_archive(data_set_id, email_ids)
+
+
+# POST <host>:<port>:/email/export_all_starred?data_set_id=<data_set>
+# TODO set all params
+def exportStarred(*args, **kwargs):
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    # TODO set from UI
+    query_terms=''
+    email_address_list = []
+
+    query = _build_email_query(email_addrs=email_address_list, qs=query_terms, date_bounds=(start_datetime, end_datetime), starred=True)
+    tangelo.log("email.exportStarred(query: %s)" % (query))
+
+    results = _query_emails(data_set_id, size, query)
+    email_ids = [hit["num"] for hit in results["hits"]]
+    return export_emails_archive(data_set_id, email_ids)
+
+
+# DEPRECATED TODO remove me
 #POST /download
 def buildExportable(*args):
-    webroot = cherrypy.config.get("webroot")
-    target = getOpt('target')	
-    base_src = "{}/emails/{}".format(webroot,target)
-    tmp_dir = os.path.abspath("{}/../tmp/".format(webroot))
-    download_dir = "{}/downloads/".format(webroot)
-    tar_gz = "export_{}".format(fmtNow())
-    base_dest = os.path.abspath("{}/../tmp/newman_dl".format(webroot))
+    return { "file" : "downloads/{}.tar.gz".format("NONE") }
 
-    if os.path.exists(base_dest):
-        rmrf(base_dest)
-    if not os.path.exists(download_dir):
-        mkdir(download_dir)
-    mkdir(base_dest)
-	
-    # Get list of paths... 
-    stmt = (
-        " SELECT id, dir FROM email WHERE exportable='true' "
-    )
-    msg = ''
-    paths_to_copy = []
-    tangelo.content_type("application/json")        
-    with newman_connector() as read_cnx:
-        with execute_query(read_cnx.conn(), stmt) as qry:
-            for email_id, val in qry.cursor():
-                src = "{}/{}/".format(base_src,val)
-                dest = "{}/{}/".format(base_dest, val)
-                shutil.copytree(src, dest)
-
-    # compress dir
-    shutil.make_archive("{}/{}".format(tmp_dir, tar_gz), "gztar", root_dir=base_dest) 
-
-    # move to web downloads
-    mv("{}/{}.tar.gz".format(tmp_dir, tar_gz), "{}/{}.tar.gz".format(download_dir, tar_gz))
-
-    return { "file" : "downloads/{}.tar.gz".format(tar_gz) }
-	
 get_actions = {
-    "target" : getTarget, 
-    "email": getEmail,
+    "target" : getTarget,
+    "email" : getEmail,
     "domains" : getDomains,
-    "entities" : getEntities,
+    "communities": getCommunities,
     "rank" : getRankedEmails,
-    "attachments" : getAttachmentsSender,
+    "ranked_addresses" : getRankedAddresses,
+    "ranked_addresses_search" : getRankedAddressesWithTextSearch,
     "exportable" : getExportable,
-    "download" : buildExportable
+    "download" : buildExportable,
+    "attachment" : get_attachment_by_id,
+    "search_all_attach_by_sender" : getAllAttachmentBySender,
+    "export_many" : exportMany,
+    "export_all_starred" : exportStarred,
+    "set_email_starred" : setStarred,
+    "search_all_starred" : searchStarred
 }
 
 post_actions = {
     "exportable" : setExportable,
-    "exportmany" : setExportMany
 }
 
 def unknown(*args):
@@ -222,7 +283,14 @@ def unknown(*args):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-    return get_actions.get(action, unknown)(*args)
+
+    cherrypy.log("email(args[%s] %s)" % (len(args), str(args)))
+    cherrypy.log("email(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+
+    if ("data_set_id" not in kwargs) or (kwargs["data_set_id"] == "default_data_set"):
+        kwargs["data_set_id"] = getDefaultDataSetID()
+
+    return get_actions.get(action, unknown)( *args, **kwargs)
 
 @tangelo.restful
 def post(*pargs, **kwargs):

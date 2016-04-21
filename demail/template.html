@@ -1,0 +1,164 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>##ID1##</title>
+    <style>
+      * { margin: 0 }
+
+      body {
+        margin: 20px;
+      }
+
+      table {
+      border-collapse: collapse;
+      border-spacing: 0;
+      }
+
+      table thead tr th {
+      border: 1px black solid;
+      padding: 5px;
+      font-size: 12px;
+      font-weight: bold;
+      color: red;
+      text-transform: capitalize;
+      }
+
+      tbody {
+      display: table-row-group;
+      vertical-align: middle;
+      }
+
+      table tbody tr td {
+      padding-left: 5px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      padding-right: 20px;
+      }
+
+      tbody tr:nth-child(even) {
+      background-color: #f0f0f0;
+      }
+
+      .pad {
+        margin-top: 15px;
+      }
+
+      .mitie {
+      -webkit-print-color-adjust: exact;
+      }
+      .bar {
+      -webkit-print-color-adjust: exact;
+      display: inline-block;
+      width: 20px;
+      height: 12px;
+      padding-left: 5px;
+      }
+      .bar-label {
+      padding-left: 5px;
+      padding-right: 5px;
+      text-transform: capitalize;
+      }
+      .person, .mitie-person {
+      background-color: #00ccff;
+      -webkit-print-color-adjust: exact;
+      }
+      .location, .mitie-location {
+      background-color: #00ff00;
+      -webkit-print-color-adjust: exact;
+      }
+      .mitie-organization, .organization {
+      background-color: #ffcc33;
+      -webkit-print-color-adjust: exact;
+      }
+      .mitie-misc, .misc {
+      background-color: #c0c0c0;
+      -webkit-print-color-adjust: exact;
+      }
+
+      .bold {
+       font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div>
+        <h2>##ID2##</h2>
+      </div>
+      <!-- topic scores -->
+      <div class="pad">
+        <h3>Topics</h3>
+
+        <div class="pad">
+          <table id="##TOPICS##">
+            <thead>
+              <tr><th>topic</th><th>score</th></tr>
+            </thead>
+          </table>
+        </div>
+
+      </div>
+      <!-- entity legend -->
+      <div style="padding-top: 15px;">
+        <h3>Entity Types</h3>
+        <div class="pad">
+          <div class="bar person"></div>
+          <span class="bar-label">person</span>
+          <br/>
+          <div class="bar location"></div>
+          <span class="bar-label">location</span>
+          <br/>
+          <div class="bar organization"></div>
+          <span class="bar-label">organization</span>
+          <br/>
+          <div class="bar misc"></div>
+          <span class="bar-label">misc</span>
+          <br/>
+
+        </div>
+      </div>
+      <div class="pad">
+        <h3> Message </h3>
+      </div>
+      <div style="padding-top: 15px;">
+        <div class="header-view">
+          <p>
+            <span class="bold">ID: </span>
+            <span>##ID3##</span>
+          </p>
+          <p>
+            <span class="bold">From: </span>
+            <span>##FROM##</span>
+          </p>
+          <p>
+            <span class="bold">To: </span>
+            <span>##TO##</span>
+          </p>
+          <p>
+            <span class="bold">Cc: </span>
+            <span>##CC##</span>
+          </p>
+          <p>
+            <span class="bold">Bcc: </span>
+            <span></span>
+          </p>
+          <p>
+            <span class="bold">Subject: </span>
+            <span>##SUBJECT##</span>
+          </p>
+          <p>
+            <span class="bold">Date: </span>
+            <span>##DATE##</span>
+          </p>
+          <p>
+            <span class="bold">Attachments: </span>
+            <span id="##ATTACHMENTS##"></span>
+          </p>
+        </div>
+        <div style="padding-top: 15px;"></div>
+        <div class="body-view"><pre><code>##BODY##</code></pre></div>
+      </div>
+    </div>
+  </body>
+</html>

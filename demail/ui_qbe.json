@@ -1,0 +1,77 @@
+{
+  "search": {
+    "data_source_list" : [
+      {
+        "data_source_url_path": "<url_base>",
+        "parameter": {
+          "qs": "<query_text>",
+          "data_set_id": "<data_set_id>",
+          "start_datetime": "<state_datetime>",
+          "end_datetime": "<end_datetime>"
+        },
+        "search_result": {
+          "mail_sent_count": "<sent_count>",
+          "mail_received_count": "<received_count>",
+          "mail_attachment_count": "<attachment_count>",
+          "query_matched_count": "<matched_count>",
+          "associated_count": "<associated_count>"
+        },
+        "text_search_list" : [
+          {
+            "text_search_url_path": "<url_base>",
+            "parameter": {
+              "qs": "<query_text>",
+              "data_set_id": "<data_set_id>",
+              "start_datetime": "<state_datetime>",
+              "end_datetime": "<end_datetime>"
+            },
+            "search_result": {
+              "mail_sent_count": "<sent_count>",
+              "mail_received_count": "<received_count>",
+              "mail_attachment_count": "<attachment_count>",
+              "query_matched_count": "<matched_count>",
+              "associated_count": "<associated_count>"
+            },
+            "top_address_list" : [
+              {
+                "address_search_url_path": "<url_base>",
+                "parameter": {
+                  "qs": "<query_text>",
+                  "data_set_id": "<data_set_id>",
+                  "start_datetime": "<state_datetime>",
+                  "end_datetime": "<end_datetime>"
+                },
+                "search_result": {
+                  "mail_sent_count": "<sent_count>",
+                  "mail_received_count": "<received_count>",
+                  "mail_attachment_count": "<attachment_count>",
+                  "query_matched_count": "<matched_count>",
+                  "associated_count": "<associated_count>"
+                }
+              }
+            ]
+          }
+        ],
+        /* Alternatively, if no text_search is listed (e.g. start-up onload), list the top-addresses of the data-source */
+        "top_address_list" : [
+          {
+            "address_search_url_path": "<url_base>",
+            "parameter": {
+              "qs": "<query_text>",
+              "data_set_id": "<data_set_id>",
+              "start_datetime": "<state_datetime>",
+              "end_datetime": "<end_datetime>"
+            },
+            "search_result": {
+              "mail_sent_count": "<sent_count>",
+              "mail_received_count": "<received_count>",
+              "mail_attachment_count": "<attachment_count>",
+              "query_matched_count": "<matched_count>",
+              "associated_count": "<associated_count>"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

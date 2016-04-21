@@ -1,374 +1,196 @@
-
-from newman.db.newman_db import newman_connector
-from newman.db.mysql import execute_query
-from newman.utils.functions import nth, rest, head, jsonGet
-
-from elasticsearch import Elasticsearch
-
 import tangelo
 import cherrypy
-import json
 
-## node vals
-stmt_node_vals = (
-    " select e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
-     " from email_addr e "
-)
-
-stmt_node_vals_filter_email_addr = (
-    " select distinct e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
-    " from email_addr e join xref_emailaddr_email xaddr on e.email_addr = xaddr.email_addr "
-    " join xref_recipients x on xaddr.email_id = x.email_id "
-    " where (x.`from` = %s or x.recipient =  %s )"
-)
-
-stmt_node_vals_filter_text = (
-    " select distinct e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
-    " from email_addr e join xref_emailaddr_email xaddr on e.email_addr = xaddr.email_addr "
-    " join email eml on xaddr.email_id = eml.id "
-   "  join search_results x on x.email_id = eml.id "    
-)
-
-stmt_node_vals_filter_entity = (
-    " select distinct e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
-    " from email_addr e join xref_emailaddr_email xaddr on e.email_addr = xaddr.email_addr "
-    " join xref_entity_email x on x.email_id = xaddr.email_id "
-    " where x.rollup_id = %s "
-)
-
-stmt_node_vals_filter_topic_score = (
-    " select distinct e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
-    " from email_addr e join xref_emailaddr_email xaddr on e.email_addr = xaddr.email_addr "
-    " join xref_email_topic_score x on x.email_id = xaddr.email_id "
-    " where x.category_id = %s and x.idx = %s and x.score > %s "
-)
-
-stmt_node_vals_filter_export = (
-    " select distinct e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
-    " from email_addr e join xref_emailaddr_email xaddr on e.email_addr = xaddr.email_addr "
-    " join email eml on xaddr.email_id = eml.id "
-   "  where eml.exportable = 'true' "
-)
-
-stmt_node_vals_filter_community = (
-    " select distinct e.email_addr, e.community, e.community_id, e.group_id, e.total_received, e.total_sent, e.rank "
-    " from email_addr e join xref_emailaddr_email xaddr on e.email_addr = xaddr.email_addr"
-    " join xref_email_community xeml on xeml.email_id = xaddr.email_id "
-    " where xeml.community_id = %s "
-)
-
-## Email Rows
-stmt_find_emails = (
-    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
-    " from email "
-)
-
-stmt_find_emails_filter_email_addr = (
-    " select distinct id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
-    " from email e join xref_recipients x on e.id = x.email_id"
-    " where (x.`from` = %s or x.recipient = %s) "
-)
-
-stmt_find_emails_filter_text = (
-    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
-   "  from email e join search_results x on x.email_id = e.id "
-) 
-
-stmt_find_emails_filter_entity = (
-    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
-    " from email e join xref_entity_email x on e.id = x.email_id "
-    " where x.rollup_id = %s "
-) 
-
-stmt_find_emails_filter_topic_score = (
-    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
-    " from email e join xref_email_topic_score x on e.id = x.email_id "
-    " where x.category_id = %s and x.idx = %s and x.score > %s "
-)
-
-stmt_find_emails_filter_export = (
-    " select id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
-    " from email e where exportable = 'true' "
-)
-
-stmt_find_emails_filter_community = (
-    " select distinct id, dir, datetime, from_addr, tos, ccs, bccs, subject, attach, bodysize "
-    " from email e join xref_email_community x on e.id = x.email_id "
-    " where x.community_id = %s "
-)
-
-## all edges
-stmt_node_edges = (
-    " select source, target, sum(weight)"
-    " from ("
-    "    select `from` as source, recipient as target, count(1) as weight "
-    "    from xref_recipients"
-    "    group by `from`, recipient"
-    "    union all"
-    "    select recipient as source, `from` as target, count(1) as weight "
-    "    from xref_recipients"
-    "    group by `from`, recipient"
-    "   ) as t "
-    "  group by source, target"
-)
-
-## add edges filtered by source email
-stmt_node_edges_filter_email_addr = (
-    "  select source, target, sum(weight)"
-    "  from ("
-    "    select x.`from` as source, x.recipient as target, count(1) as weight   "
-    "    from xref_recipients x join xref_recipients e on x.email_id = e.email_id "
-    "    where (e.`from` = %s or e.recipient = %s)"
-    "    group by x.`from`, x.recipient "
-    "   union all"
-    "    select x.recipient as source, x.`from` as target, count(1) as weight        "
-    "     from xref_recipients x join xref_recipients e on x.email_id = e.email_id "
-    "    where (e.`from` = %s or e.recipient = %s) "
-    "    group by x.`from`, x.recipient "
-    "   ) as t "
-    "   group by source, target"
-)
-
-stmt_node_edges_filter_text = (
-    " select source, target, sum(weight) "
-    " from ("
-   "  select `from` as source, recipient as target, count(1) as weight "
-   "  from xref_recipients x join search_results e on x.email_id = e.email_id "
-   "  group by `from`, recipient "
-    " union all"
-   "  select recipient as source, `from` as target, count(1) as weight "
-   "  from xref_recipients x join search_results e on x.email_id = e.email_id "
-   "  group by `from`, recipient "
-    " ) as t "
-    " group by source, target"
-)
-
-stmt_node_edges_filter_entity = (
-    " select source, target, sum(weight) "
-    " from ( "
-    "   select `from` as source, recipient as target, count(1) as weight "
-    "   from xref_recipients x join xref_entity_email e on x.email_id = e.email_id"
-    "   where e.rollup_id = %s "
-    "   group by `from`, recipient "
-    "   union all "
-    "   select recipient as source, `from` as target, count(1) as weight "
-    "   from xref_recipients x join xref_entity_email e on x.email_id = e.email_id"
-    "   where e.rollup_id = %s "
-    "   group by `from`, recipient "
-    "   ) as t1 "
-    " group by source, target "
-)
-
-stmt_node_edges_filter_topic_score = (
-    " select source, target, sum(weight) "
-    " from ( "
-    "   select `from` as source, recipient as target, count(1) as weight "
-    "   from xref_recipients xr join xref_email_topic_score x on xr.email_id = x.email_id "
-    "   where x.category_id = %s and x.idx = %s and x.score > %s "
-    "   group by `from`, recipient "
-    "   union all "
-    "   select recipient as source, `from` as target, count(1) as weight "
-    "   from xref_recipients xr join xref_email_topic_score x on xr.email_id = x.email_id "
-    "   where x.category_id = %s and x.idx = %s and x.score > %s "
-    "   group by `from`, recipient "
-    "   ) as t1 "
-    " group by source, target "
-)
-
-stmt_node_edges_filter_export = (
-    "  select source, target, sum(weight)"
-    "  from ("
-    "    select x.`from` as source, x.recipient as target, count(1) as weight   "
-    "    from xref_recipients x join email e on x.email_id = e.id "
-    "    where e.exportable = 'true' "
-    "    group by x.`from`, x.recipient "
-    "   union all"
-    "    select x.recipient as source, x.`from` as target, count(1) as weight        "
-    "     from xref_recipients x join email e on x.email_id = e.id "
-    "    where e.exportable = 'true' "
-    "    group by x.`from`, x.recipient "
-    "   ) as t "
-    "   group by source, target"
-)
-
-stmt_node_edges_filter_community = ( 
-    "  select source, target, sum(weight)"
-    " from ("
-    "    select x.`from` as source, x.recipient as target, count(1) as weight   "
-    "    from xref_recipients x join xref_email_community e on x.email_id = e.email_id "
-    "    where e.community_id = %s "
-    "    group by `from`, recipient "
-    "   union all"
-    "    select x.recipient as source, x.`from` as target, count(1) as weight   "
-    "    from xref_recipients x join xref_email_community e on x.email_id = e.email_id "
-    "    where e.community_id = %s "
-    "    group by x.`from`, x.recipient "
-    " ) as t "
-    "   group by source, target"
-)
-
-def nodeQueryObj(conn, field, args_array):
-
-    #filter by exportable
-    if field.lower() == "exportable": 
-        return (conn, stmt_node_vals_filter_export)
-
-    #filter by community
-    if field.lower() == "community":
-        comm_id = head(args_array)
-        return (conn, stmt_node_vals_filter_community, comm_id)
-
-    #filter by topic 
-    if field.lower() == "topic": 
-        category, idx, score = args_array[:3]
-        return (conn, stmt_node_vals_filter_topic_score, category, idx, score)
-
-    text = head(args_array)    
-    if field.lower() == "email":  return (conn, stmt_node_vals_filter_email_addr, text, text)
-    if field.lower() == "entity": return (conn, stmt_node_vals_filter_entity, text)
-    # filter by text
-    if text: return (conn, stmt_node_vals_filter_text)
-    # all
-    return  (conn, stmt_node_vals)
+from es_search import es_get_all_email_by_address, es_get_all_email_by_address_set, get_top_email_by_text_query, es_get_all_email_by_community, es_get_all_email_by_topic, es_get_conversation, es_get_all_email_by_conversation_forward_backward
+from newman.es_connection import getDefaultDataSetID
+from param_utils import parseParamDatetime, parseParamAllSenderAllRecipient, parseParamEmailSender, parseParamEmailRecipient, parseParam_email_addr, parseParamTopic, parseParamTextQuery,\
+    parseParamDocumentUID, parseParamDocumentDatetime
+import urllib
+from newman.utils.functions import nth
 
 
-def getNodeVals(field, args_array):
-    """
-    nodes should be the all of the emails an email addr is a part of and then all of then all of the email addr associated with that set of emails 
-    """
-    with newman_connector() as read_cnx:
-        tangelo.log("start node query")
-        with execute_query(*nodeQueryObj(read_cnx.conn(), field, args_array)) as qry:
-            tangelo.log("node-vals: %s" % qry.stmt)
-            return {item[0]: 
-                    { 'num': int(item[4]+item[5]), 'comm_id': item[2], 'group_id': item[3], 'comm': item[1], 'rank': item[6] } for item in qry.cursor() }
+#GET <host>:<port>:/search/search/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
+def search(*path_args, **param_args):
+    tangelo.content_type("application/json")
+    tangelo.log("search.search(path_args[%s] %s)" % (len(path_args), str(path_args)))
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
+
+    # TODO this needs to come from UI
+    size = size if size >500 else 2500
+
+    # TODO make sure that the qs param is put on the query
+    qs = parseParamTextQuery(**param_args)
 
 
-def edgeQueryObj(conn, field, args_array):
-    #filter by exportable
-    if field.lower() == "exportable": 
-        return (conn, stmt_node_edges_filter_export)
+    #re-direct based on field
+    if (path_args[0] == "text") or (path_args[0] == "all") :
+        if len(path_args) == 1:
+            return {"graph":{"nodes":[], "links":[]}, "rows":[]}
+        elif len(path_args) >= 2:
+            # TODO remove hacky path_args - should come from params
+            qs=urllib.unquote(nth(path_args, 1, ''))
+            return get_top_email_by_text_query(data_set_id, qs, start_datetime, end_datetime, size)
+    elif path_args[0] == "email":
+        if len(path_args) == 1:
+            return {"graph":{"nodes":[], "links":[]}, "rows":[]}
+        elif len(path_args) >= 2:
+            # TODO remove hacky path_args - should come from params
+            email_address=urllib.unquote(nth(path_args, 1, ''))
+            return es_get_all_email_by_address(data_set_id, email_address, qs, start_datetime, end_datetime, size )
+    # TODO REMOVEV this call
+    # elif path_args[0] == "entity":
+    #     return get_graph_by_entity(*path_args, **param_args)
+    # TODO clean up this method
+    elif path_args[0] == "topic":
+        if len(path_args) == 1:
+            return {"graph":{"nodes":[], "links":[]}, "rows":[]}
+        elif len(path_args) >= 2:
+            #TODO implement search by topic
+            return {"graph":{"nodes":[], "links":[]}, "rows":[]}
+    elif path_args[0] == "community":
+        if len(path_args) == 1:
+            return {"graph":{"nodes":[], "links":[]}, "rows":[]}
+        elif len(path_args) >= 2:
+            #TODO implement search by community
+            return {"graph":{"nodes":[], "links":[]}, "rows":[]}        
+    return {"graph":{"nodes":[], "links":[]}, "rows":[]}
 
-    #filter by community
-    if field.lower() == "community":
-        comm_id = head(args_array)
-        return (conn, stmt_node_edges_filter_community, comm_id, comm_id)
+#GET <host>:<port>:/search/search_by_address_set?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>&order=prev&sender=<s1,s2...>&recipient=<r1,r2..>
+# 'order' param controls if we are paging the next or previous sets of data and can be next or prev, default is next
+def search_email_by_address_set(*path_args, **param_args):
+    tangelo.content_type("application/json")
+    tangelo.log("search.search_email_by_address_set(path_args[%s] %s)" % (len(path_args), str(path_args)))
 
-    #filter by topic 
-    if field.lower() == "topic": 
-        category, idx, score = args_array[:3]
-        return (conn, stmt_node_edges_filter_topic_score, category, idx, score, category, idx, score)
-
-    text = head(args_array)    
-    if field.lower() == "email": return (conn, stmt_node_edges_filter_email_addr, text, text, text, text)
-    if field.lower() == "entity": return (conn, stmt_node_edges_filter_entity, text, text)
-    # filter by text
-    if text: return (conn, stmt_node_edges_filter_text)
-    # all
-    return  (conn, stmt_node_edges)
-
-def getEdges(node_idx, field, args_array):
-    with newman_connector() as read_cnx:
-        tangelo.log("start edge query")
-        with execute_query(*edgeQueryObj(read_cnx.conn(), field, args_array)) as qry:    
-            tangelo.log("edges : %s" % qry.stmt)
-            return [{"source": node_idx.get(from_), "target": node_idx.get(to_), "value": int(weight)} 
-                    for from_, to_, weight in qry.cursor()]
-
-def emailQueryObj(conn, field, args_array):
-    #filter by exportable
-    if field.lower() == "exportable": 
-        return (conn, stmt_find_emails_filter_export)
-
-    #filter by community
-    if field.lower() == "community":
-        comm_id = head(args_array)
-        return (conn, stmt_find_emails_filter_community, comm_id)
-
-
-    #filter by topic 
-    if field.lower() == "topic": 
-        category, idx, score = args_array[:3]
-        #todo verify args
-        return (conn, stmt_find_emails_filter_topic_score, category, idx, score)
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
+    # TODO: set from UI
+    size = param_args.get('size', 2500)
     
-    text = head(args_array)    
-    # filter by email
-    if field.lower() == "email": return (conn, stmt_find_emails_filter_email_addr, text, text)
-    if field.lower() == "entity": return (conn, stmt_find_emails_filter_entity, text)
-    # filter by text
-    if text: return (conn, stmt_find_emails_filter_text)
-    # all
-    return  (conn, stmt_find_emails)
+    # parse the sender address and the recipient address    
+    sender_address_list, recipient_address_list=parseParamAllSenderAllRecipient(**param_args)
 
-def getEmails(colors, field, args_array):
-    cols = ('num', 'directory', 'datetime', 'from', 'to', 'cc', 'bcc', 'subject', 'attach', 'bodysize')
-    rows = []
-    with newman_connector() as read_cnx:    
-        tangelo.log("start email query")
-        with execute_query(*emailQueryObj(read_cnx.conn(), field, args_array)) as qry:
-            tangelo.log("emails : %s" % qry.stmt)
-            for item in qry.cursor():
-                row = dict(zip(cols, item))
-                row["fromcolor"] = colors.get(row.get('from'))
-                rows.append(row)
-    return rows
+    return es_get_all_email_by_address_set(data_set_id,
+                                           sender_address_list,
+                                           recipient_address_list,
+                                           start_datetime,
+                                           end_datetime,
+                                           size)
 
-def ingestESTextResults(hits):
-    stmt = ("insert into search_results (email_id) values (%s)")
+#GET <host>:<port>:/search/search_by_conversation_forward_backward?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>&order=prev&sender=<s1,s2...>&recipient=<r1,r2..>
+# 'order' param controls if we are paging the next or previous sets of data and can be next or prev, default is next
+def search_email_by_conversation_forward_backward(*path_args, **param_args):
+    tangelo.content_type("application/json")
+    tangelo.log("search.search_email_by_address_set(path_args[%s] %s)" % (len(path_args), str(path_args)))
 
-    with newman_connector() as cnx:        
-        with execute_query(cnx.conn(), ("delete from search_results")) as _:
-            pass
-        for hit in hits:
-            with execute_query(cnx.conn(), stmt, hit["_id"]) as qry:        
-                pass
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
+    # TODO: set from UI
+    size = param_args.get('size', 2500)
 
-        cnx.commit()
-
-def createResults(field, args_array):
-
-    ## is text search 
-    if not field.lower() in ["email", "entity"]:
-        text = head(args_array)    
-        if text:
-            tangelo.log("text search : %s" % text)        
-            es = Elasticsearch()
-            res = es.search(index="newman", doc_type="emails", size=1000, q=text, body= {"fields": ["_id"], "query": {"match_all": {}}})
-            
-            ingestESTextResults(jsonGet(['hits','hits'], res, []))
+    order = param_args.get('order', 'next')
+    order = 'desc' if order=='prev' else 'asc'
     
-    node_vals = getNodeVals(field, args_array)
-    colors = {k:v.get("group_id") for k,v in node_vals.iteritems()}
+    # parse the sender address and the recipient address    
+    sender_address_list, recipient_address_list=parseParamAllSenderAllRecipient(**param_args)
 
-    for k,v in node_vals.iteritems():
-        node_vals[k]["color"] = colors.get(k)
-    emails = sorted(getEmails(colors, field, args_array), key=lambda x: str(x.get('datetime')))
-    idx_lookup = {}
-    nodes = []
+    return es_get_all_email_by_conversation_forward_backward(data_set_id,
+                                                             sender_address_list,
+                                                             recipient_address_list,
+                                                             start_datetime,
+                                                             end_datetime,
+                                                             size,
+                                                             order)
+    
 
-    for i, o in enumerate(node_vals.iteritems()):
-        k,v = o
-        idx_lookup[k]=i
-        #nodes.append({"name": k, "num": v.get("num"), "rank": v.get("rank"), "group": v.get("color"), "community": colors.get(v.get("comm"))})
-        nodes.append({"name": k, "num": v.get("num"), "rank": v.get("rank"), "group": v.get("color"), "community": v.get("comm_id")})
-    edges = getEdges(idx_lookup, field, args_array)    
+#GET <host>:<port>:/search/conversation/?data_set_id=<id>&start_datetime=<datetime>&sender=<s1,s2...>&recipient=<r1,r2..>
+def search_email_by_conversation(*path_args, **param_args):
+    tangelo.content_type("application/json")
+    tangelo.log("search.search_email_by_conversation(path_args[%s] %s)" % (len(path_args), str(path_args)))
 
-    results = { 'rows': emails, 'graph': { 'nodes': nodes, 'links': edges }}
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
+    # TODO: set from UI
+    size = param_args.get('size', 2500)
 
-    return results
+    # parse the sender address and the recipient address
+    sender_list = parseParamEmailSender(**param_args)
+    cherrypy.log("\tsender_list: %s)" % str(sender_list))
 
-#GET /search/<fields>/<arg>/<arg>/...
-def search(*args):
-    cherrypy.log("args: %s" % str(args))
-    cherrypy.log("args-len: %s" % len(args))
-    fields=nth(args, 0, 'all')
-    args_array=rest(args)
-    cherrypy.log("search fields: %s, args: %s" % (fields, args_array))
-    return createResults(fields, args_array)
+    recipient_list = parseParamEmailRecipient(**param_args)
+    cherrypy.log("\trecipient_list: %s)" % str(recipient_list))
+    
+    document_uid = parseParamDocumentUID(**param_args)
+    cherrypy.log("\tdocument_uid: %s)" % str(document_uid))
+    
+    document_datetime = parseParamDocumentDatetime(**param_args)
+    cherrypy.log("\tdocument_datetime: %s)" % str(document_datetime))
+    if not document_datetime:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing mandatory param 'document_datetime'")
+
+    sender_address, recipient_address=parseParamAllSenderAllRecipient(**param_args)
+
+    return es_get_conversation(data_set_id,
+                               sender_address,
+                               recipient_address,
+                               start_datetime,
+                               end_datetime,
+                               size/2,
+                               document_uid,
+                               document_datetime)
+
+
+#GET <host>:<port>:/search/search_by_community/<community_name>?data_set_id=<data_set>&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
+def search_email_by_community(*args, **param_args):
+    tangelo.content_type("application/json")
+    tangelo.log("search_email_by_community(args: %s kwargs: %s)" % (str(args), str(param_args)))
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
+    community=nth(args, 0, '')
+
+    # TODO: set from UI
+    size = param_args.get('size', 2500)
+
+    if not data_set_id:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing data_set_id")
+    if not community:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing sender")
+
+    email_addrs = parseParam_email_addr(**param_args)
+
+    qs = parseParamTextQuery(**param_args)
+
+    return es_get_all_email_by_community(data_set_id, community, email_addrs, qs, start_datetime, end_datetime, size)
+
+#GET <host>:<port>:/search/search_by_topic/?data_set_id=<data_set>&topic_index=1&topic_threshold=0.5&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
+def search_email_by_topic(*args, **param_args):
+    tangelo.content_type("application/json")
+    tangelo.log("search_email_by_topic(args: %s kwargs: %s)" % (str(args), str(param_args)))
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
+
+    # TODO: set from UI
+    size = param_args.get('size', 2500)
+
+    if not data_set_id:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing data_set_id")
+
+    if not param_args.get("topic_index"):
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing topic_index")
+    topic = parseParamTopic(**param_args)
+
+    email_addrs = parseParam_email_addr(**param_args)
+
+    qs = parseParamTextQuery(**param_args)
+
+    return es_get_all_email_by_topic(data_set_id, topic=topic, email_addrs=email_addrs, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, size=size)
 
 actions = {
-    "search": search
+    "search": search,
+    "search_by_address": es_get_all_email_by_address,
+    "search_by_conversation": search_email_by_conversation,
+    "search_by_conversation_forward_backward": search_email_by_conversation_forward_backward,
+    "search_by_address_set": search_email_by_address_set,
+    "search_by_text": get_top_email_by_text_query,
+    "search_by_community": search_email_by_community,
+    "search_by_topic": search_email_by_topic
 }
 
 def unknown(*args):
@@ -376,4 +198,10 @@ def unknown(*args):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-    return actions.get(action, unknown)(*args)
+    cherrypy.log("search.%s(args[%s] %s)" % (action,len(args), str(args)))
+    cherrypy.log("search.%s(kwargs[%s] %s)" % (action,len(kwargs), str(kwargs)))
+
+    if ("data_set_id" not in kwargs) or (kwargs["data_set_id"] == "default_data_set"):
+        kwargs["data_set_id"] = getDefaultDataSetID()
+
+    return actions.get(action, unknown)(*args, **kwargs)

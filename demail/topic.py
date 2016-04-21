@@ -1,31 +1,43 @@
-
-from newman.db.newman_db import newman_connector
-from newman.db.mysql import execute_query
-from newman.utils.functions import nth, head
-
 import tangelo
 import cherrypy
-import json
+
+from newman.utils.functions import nth
 from urllib import unquote
+from es_topic import get_categories, get_dynamic_clusters
+from param_utils import parseParamDatetime, parseParamEmailAddress
+
+# GET /topic/<querystr>?data_set_id=<>&start_datetime=<>&end_datetime=<>&size=<>&algorithm=<>&analysis_field=<list of fields from ES>
+# analysis_field should be a field name in elasticsearch where the data to cluster is located.  This is optional as it defaults to "_source.body" but can be set to "_source.attachments.content" or "_all" or anything valid
+def get_topics_by_query(*args, **kwargs):
+    tangelo.content_type("application/json")
+    algorithm = kwargs.get('algorithm', 'lingo')
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    email_address_list = parseParamEmailAddress(**kwargs);
 
 
+    # TODO -------------------------------------------------------------------------
+    # TODO  REMEMBER TO EVALUATE QUERY TERMS -- VERY IMPORTANT for good clustering!
+    # TODO -------------------------------------------------------------------------
+    query_terms=''
+    # TODO set from UI
+    analysis_field = kwargs.get("analysis_field","_source.body")
+    # TODO set from UI
+    num_returned = 20
 
+    clusters = get_dynamic_clusters(data_set_id, "emails", email_addrs=email_address_list, query_terms=query_terms, topic_score=None, entity={}, date_bounds=(start_datetime, end_datetime), cluster_fields=[analysis_field], cluster_title_fields=["_source.subject"], algorithm=algorithm, max_doc_pool_size=500)
+
+    return {"topics" : clusters[:num_returned]}
 
 #GET /category/<category>
 # returns topic in sorted order by the idx
-def topic_list(*args):
+def topic_list(*args, **kwargs):
     category=nth(args, 0, 'all')
-    with newman_connector() as read_cnx:
-        stmt = (
-            " select idx, value, docs from topic_category "
-            " where category_id = %s "
-            " order by idx "
-        ) 
-        with execute_query(read_cnx.conn(), stmt, category) as qry:
-            rtn = [r for r in qry.cursor()]
-            tangelo.content_type("application/json")
-            return { "categories" : rtn }
+    #tangelo.log("category %s" %(category))
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    tangelo.content_type("application/json")
+    return get_categories(data_set_id)
 
+# TODO DEPRECATED REMOVE!
 #GET /email/<email_id>/<category>
 def email_scores(*args):
     email_id=unquote(nth(args, 0, ''))
@@ -33,20 +45,11 @@ def email_scores(*args):
     if not email_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing email")
 
-    stmt = (
-        " select score from xref_email_topic_score "
-        " where category_id = %s and email_id = %s "
-        " order by idx "
-    )
-
-    with newman_connector() as read_cnx:
-        with execute_query(read_cnx.conn(), stmt, category, email_id) as qry:
-            rtn = [head(r) for r in qry.cursor()]
-            tangelo.content_type("application/json")
-            return { "scores" : rtn, "email" : email_id, "category" : category }
+    return { "scores" : [], "email" : email_id, "category" : category }
 
 actions = {
     "category": topic_list,
+    "topic": get_topics_by_query,
     "email" : email_scores
 }
 
@@ -55,4 +58,6 @@ def unknown(*args):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-    return actions.get(action, unknown)(*args)
+    cherrypy.log("topic.%s(args[%s] %s)" % (action,len(args), str(args)))
+    cherrypy.log("topic.%s(kwargs[%s] %s)" % (action,len(kwargs), str(kwargs)))
+    return actions.get(action, unknown)(*args, **kwargs)

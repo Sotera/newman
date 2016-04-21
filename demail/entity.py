@@ -1,55 +1,97 @@
-from newman.db.newman_db import newman_connector
-from newman.db.mysql import execute_query, execute_nonquery
 from newman.utils.functions import nth
+from series import get_entity_histogram
+from param_utils import parseParamDatetime, parseParamEmailAddress, parseParamEntity, parseParamTextQuery
 
 import tangelo
-import cherrypy
-import json
 import urllib
+from es_queries import _build_email_query
+from es_query_utils import _query_email_attachments, _query_emails
+from es_search import _build_graph_for_emails, _query_email_attachments
 
-
-
-stmt_entity_rollup_id = (
-    " select rollup_id "
-    " from xref_rollup_entity "
-    " where entity_id = %s "
-)
-
-stmt_top_rollup_entities = (
-    " select rollup_id, `type`, val, total_entities "
-    " from entity_rollup "
-    " order by total_entities desc "
-)
-
+#TODO deprecated - remove at some point
 #GET /top/<amt>
 def getTopRollup(*args):
-    amt=urllib.unquote(nth(args, 0, ''))
-    if not amt:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing id")
-    
-    stmt = stmt_top_rollup_entities + ("limit {0}".format(amt));
-    with newman_connector() as read_cnx:
-        with execute_query(read_cnx.conn(), stmt) as qry:
-            rtn = [r for r in qry.cursor()]
-            rtn = rtn if rtn else []
-            tangelo.content_type("application/json")
-            return { "entities" : rtn }
+    return { "entities" : []}
 
+#TODO deprecated - remove at some point
 #GET /rollup/<id>
 def getRollup(*args):
-    entity=urllib.unquote(nth(args, 0, ''))
-    if not entity:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing id")
+    return { "rollupId" : [] }
 
-    with newman_connector() as read_cnx:
-        with execute_query(read_cnx.conn(), stmt_entity_rollup_id, entity) as qry:
-            rtn = qry.cursor().fetchone()
-            tangelo.content_type("application/json")
-            return { "rollupId" : rtn }
+#GET <host>:<port>:/entity/entity?entities.entity_person=mike,joe&entities.entity_location=paris,los angeles
+def get_graph_for_entity(*args, **kwargs):
+    tangelo.content_type("application/json")
+    tangelo.log("entity.get_graph_for_entity(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    email_address_list = parseParamEmailAddress(**kwargs);
+    entity_dict = parseParamEntity(**kwargs)
+    # TODO set from UI
+    size = size if size >500 else 2500
+
+    qs = parseParamTextQuery(**kwargs)
+
+    query = _build_email_query(email_addrs=email_address_list, qs=qs, entity=entity_dict, date_bounds=(start_datetime, end_datetime))
+    tangelo.log("entity.get_graph_for_entity(query: %s)" % (query))
+
+    results = _query_emails(data_set_id, size, query)
+    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+
+    # Get attachments for community
+    query = _build_email_query(email_addrs=email_address_list, qs=qs, entity=entity_dict, date_bounds=(start_datetime, end_datetime), attachments_only=True)
+    tangelo.log("entity.get_graph_by_entity(attachment-query: %s)" % (query))
+    attachments = _query_email_attachments(data_set_id, size, query)
+    graph["attachments"] = attachments
+
+    return graph
+
+
+#GET /top/<count>
+def get_top_entities(*args, **kwargs):
+    tangelo.content_type("application/json")
+    tangelo.log("entity.get_top_entities(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    top_count=int(urllib.unquote(nth(args, 0, "20")))
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    email_address_list = parseParamEmailAddress(**kwargs);
+
+    # TODO set from UI
+    qs = parseParamTextQuery(**kwargs)
+
+    if not email_address_list :
+        # TODO qs not being evaluated in inner filter called by this method
+        entities = get_entity_histogram(data_set_id, "emails", qs=qs, date_bounds=(start_datetime, end_datetime))[:top_count]
+        result = {"entities" :
+                  [
+                   [
+                    str(i),
+                    entity ["type"],
+                    entity ["key"],
+                    entity ["doc_count"]
+                   ] for i,entity in enumerate(entities)
+                  ]
+                 }
+        
+    else:
+        # TODO qs not being evaluated in inner filter called by this method
+        entities = get_entity_histogram(data_set_id, "emails", email_address_list, qs=qs, date_bounds=(start_datetime, end_datetime))[:top_count]
+        result = {"entities" :
+                  [
+                   [
+                    str(i),
+                    entity ["type"],
+                    entity ["key"],
+                    entity ["doc_count"]
+                   ] for i,entity in enumerate(entities)
+                  ]
+                 }
+
+    return result    
+    
 
 actions = {
-    "rollup" : getRollup,
-    "top" : getTopRollup
+    "top" : get_top_entities,
+    "entity" : get_graph_for_entity
 }
 
 def unknown(*args):
@@ -57,4 +99,4 @@ def unknown(*args):
 
 @tangelo.restful
 def get(action, *args, **kwargs):
-    return actions.get(action, unknown)(*args)
+    return actions.get(action, unknown)(*args, **kwargs)

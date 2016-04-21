@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="generator" content="Bootply"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="css/thirdparty/bootstrap.min.css" rel="stylesheet">
+    <link href="css/thirdparty/font-awesome.min.css" rel="stylesheet">
+    <link href="css/newman-help.css" rel="stylesheet">
+</head>
+
+<body>
+<nav class="navbar navbar-default navbar-fixed-top" role="banner">
+    <div class="container">
+        <div class="navbar-header">
+            <!--<button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">-->
+            <!--<span class="sr-only">Toggle navigation</span>-->
+            <!--<span class="icon-bar"></span>-->
+            <!--<span class="icon-bar"></span>-->
+            <!--<span class="icon-bar"></span>-->
+            <!--</button>-->
+            <a href="/" class="navbar-brand">Newman User Guide</a>
+        </div>
+        <!--<nav class="collapse navbar-collapse" role="navigation">-->
+        <!--<ul class="nav navbar-nav">-->
+        <!--<li>-->
+        <!--<a href="#sec">Get Started</a>-->
+        <!--</li>-->
+        <!--<li>-->
+        <!--<a href="#sec">Edit</a>-->
+        <!--</li>-->
+        <!--<li>-->
+        <!--<a href="#sec">Visualize</a>-->
+        <!--</li>-->
+        <!--<li>-->
+        <!--<a href="#sec">Prototype</a>-->
+        <!--</li>-->
+        <!--</ul>-->
+        <!--</nav>-->
+    </div>
+</nav>
+
+<!--<div id="masthead">-->
+<div class="container">
+    <div class="row">
+        <div class="col-md-7">
+            <h1>Newman
+                <p class="lead">User Guide</p>
+            </h1>
+        </div>
+        <!--<div class="col-md-5">-->
+        <!--<div class="well well-lg">-->
+        <!--<div class="row">-->
+        <!--<div class="col-sm-6">-->
+        <!--<img src="//placehold.it/180x100" class="img-responsive">-->
+        <!--</div>-->
+        <!--<div class="col-sm-6">-->
+        <!--Some text here-->
+        <!--</div>-->
+        <!--</div>-->
+        <!--</div>-->
+        <!--</div>-->
+    </div>
+</div>
+<!--/container-->
+<!--</div>&lt;!&ndash;/masthead&ndash;&gt;-->
+
+<!--main-->
+<div class="container">
+<div class="row">
+<!--left-->
+<div class="col-md-3" id="leftCol">
+    <ul class="nav nav-stacked" id="sidebar">
+        <li class="active">
+
+            <a href="#intro">Introduction</a>
+
+        </li>
+        <li>
+            <a href="#search">Searching</a>
+            <ul class="nav">
+                <li>
+                    <a href="#searchresults">Search Results</a>
+                </li>
+                <li>
+                    <a href="#understandingsearch">Understanding Search Results</a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <a href="#profile">User Newman Profile</a>
+            <ul class="nav">
+                <li>
+                    <a href="#viewprofile">Viewing a Profile</a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <a href="#eventgraph">Event Graph</a>
+            <ul class="nav">
+                <li>
+                    <a href="#graphdisplay">Graph Display</a>
+                </li>
+                <li>
+                    <a href="#graphinteraction">Graph Interaction</a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <a href="#timeline">Timeline</a>
+            <ul class="nav">
+                <li>
+                    <a href="#timelinedisplay">Timeline Display</a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <a href="#infopanel">Information Panel</a>
+            <ul class="nav">
+                <li>
+                    <a href="#paneldisplay">Panel Display</a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+<!--/left-->
+
+<!--right-->
+<div class="col-md-9">
+<article id="intro">
+    <h1>Introduction</h1>
+
+    <p>
+        Newman is a de-aliasing tool that relies on a complex of similarity metrics for usernames between social
+        media sites. Newman enables analysts to independently verify similarity scores of users across Twitter
+        and Instagram. The similarity score between usernames is based on a combination of network graph
+        similarity, NLP content analysis and username similarity.
+    </p>
+
+    <p>
+        Newman provides a histogram of the most highly used hashtags and associated users for a particular
+        user.
+    </p>
+</article>
+
+<hr/>
+
+<article id="search">
+    <h1>Searching</h1>
+
+    <p>
+        Enter the Twitter/Instagram username of the person you are trying to find. The search engine will find
+        all usernames with characters prefixed as terms.
+    </p>
+
+    <p style="font-style: italic">
+        &nbsp;&nbsp;&nbsp; Ex: Search Term `liz` returns Lizzie Borden but not Elizabeth Olson
+    </p>
+
+    <p class="text-info">Hint: The search will autosearch as you type but will only show up to 20 usernames on the
+        screen at once.</p>
+
+    <section id="searchresults">
+        <h3>Search Results</h3>
+        <img src="imgs/search-screen.png" alt="Search Results Screen" style="width: 678px; height: 488px">
+    </section>
+
+    <section id="understandingsearch">
+        <h3>Understanding Search Results</h3>
+
+        <p>
+            Newman returns up to 20 total users based on name relevancy. The users will have an icon next to them
+            which represents what social media platform the user belongs to. Selecting the username will take you to
+            our profile analysis page for that person.
+        </p>
+
+        <p>
+            <span class="fa fa-twitter fa-lg"></span> = Twitter
+            <span class="fa fa-instagram fa-lg"></span> = Instagram
+        </p>
+    </section>
+</article>
+
+<hr/>
+
+<article id="profile">
+    <h1>User Newman Profile</h1>
+    <img src="imgs/profile-screen.png" alt="User Profile" style="width: 678px; height: 488px">
+
+    <section id="viewprofile">
+        <h3>Viewing a Profile</h3>
+
+        <p>
+            At the top of the screen, Newman will display the user selected and the associated social media icon.
+            Selecting `Search User` will allow you to go back to the search page.
+        </p>
+
+        <p>
+            The left side panel shows the visual representation of the user's posts and associations with other
+            users while the right side panel
+            shows information such as the associated users, possible aliases, hashtags, and the content of any
+            selected post.
+        </p>
+
+        <p>
+            At the very bottom of the screen is a table list of all of the selected users posts. This can be
+            collapsed and expanded to give more viewing room to
+            the graph/information panels.
+        </p>
+    </section>
+</article>
+
+<hr/>
+
+<article id="eventgraph">
+    <h1>Event Graph</h1>
+    <img src="imgs/graph-screen.png" alt="Event Graph" style="width: 463px; height: 414px">
+
+    <section id="graphdisplay">
+        <h3>Graph Display</h3>
+
+        <p>
+            The graph displays all of the user's posts as nodes and the users associated to each post. These
+            associations are made through
+            actions such as mentions, likes, retweets, comments, etc.
+        </p>
+    </section>
+
+    <section id="graphinteraction">
+        <h3>Graph Interaction</h3>
+
+        <p>
+            <b>Pan The Graph</b>
+        <ul>
+            <li>
+                <b>Left-click on an empty part of the graph space</b> and <i>hold down the mouse button</i>
+                Then, drag the mouse while holding down the mouse button to move the graph.
+            </li>
+        </ul>
+        </p>
+        <p>
+            <b>Selection</b>
+        <ul>
+            <li><b>Left-click</b> on a user node and select the <i>magnifying glass</i> to show that user's graph
+                display.
+            </li>
+            <li><b>Left-click</b> on a post node and select the <i>magnifying glass</i> to show the content of the
+                post in the information panel.
+            </li>
+        </ul>
+        </p>
+        <p>
+            <b>Zooming</b>
+        <ul>
+            <li>While your mouse is over the graph, <i>scroll <b>up</b></i> to <i>zoom <b>in</b></i></li>
+            <li>While your mouse is over the graph, <i>scroll <b>down</b></i> to <i>zoom <b>out</b></i></li>
+        </ul>
+        </p>
+        <p class="text-info">Hint: The legend can be used to filter out the node labels. Just check/uncheck whatever you
+            want to see.</p>
+    </section>
+</article>
+
+<hr/>
+
+<article id="timeline">
+    <h1>Timeline</h1>
+    <img src="imgs/timeline-screen.png" alt="Timeline" style="width: 640px; height: 368px">
+
+    <section id="timelinedisplay">
+        <h3>Timeline Display</h3>
+
+        <p>
+            The graph display a timeline based profile view of the user account. The volume of the user's posts,
+            likes, tags and associated users are shown over the user's course of activity.
+        </p>
+    </section>
+
+</article>
+
+<hr/>
+
+<article id="infopanel">
+    <h1>Information Panel</h1>
+    <img src="imgs/information-screen.png" alt="Information Panel" style="width: 472px; height: 452px">
+
+    <section id="paneldisplay">
+        <h3>Panel Display</h3>
+
+        <p>
+            The graph displays all of the user's posts as nodes and the users associated to each post. These
+            associations are made through
+            actions such as mentions, likes, retweets, comments, etc.
+        </p>
+    </section>
+
+    <section id="associated">
+        <h3>Associated Users</h3>
+
+        <p>
+            The Associated Users pane shows the top 20 users associated with the current selected user. The bars
+            represent how often that user
+            associates with the user. These associations are quantified through actions such as mentions, likes,
+            retweets, comments, etc.
+        </p>
+    </section>
+
+    <section id="aliases">
+        <h3>Possible Aliases</h3>
+
+        <p>
+            The Possible Aliases pane shows all of the possible aliases for the selected user based on the MIT
+            rankings which uses a custom algorithm to
+            determine what aliases this user may be using. The bars represent the MIT score.
+        </p>
+    </section>
+
+    <section id="hashtags">
+        <h3>Hashtags</h3>
+
+        <p>
+            The Hashtags pane shows the top 20 hashtags the selected user uses in their posts. The bars represent
+            the number of times the hashtag was used in the user's posts.
+        </p>
+    </section>
+
+    <section id="content">
+        <h3>Content</h3>
+
+        <p>
+            The Content panel displays information on the selected post:
+        <ul>
+            <li>
+                <b>Post</b> - The actual text of the post made by the user.
+            </li>
+            <li>
+                <b>URL</b> - The link to the actual post made by the user.
+            </li>
+            <li>
+                <b>Associated Users</b> - Lists the users that associated with this post.
+            </li>
+            <li>
+                <b>Tags</b> - List of hashtags that were used in this post.
+            </li>
+            <li>
+                <b>User Post</b> - The embedded version of the actual user post.
+            </li>
+        </ul>
+        </p>
+    </section>
+    <p class="text-info">Hint: Putting your mouse over the bars will give you the number used to define the bar
+        length.</p>
+</article>
+
+</div>
+<!--/right-->
+</div>
+<!--/row-->
+</div>
+<!--/container-->
+
+<!-- script references -->
+<!--<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>-->
+<script src="js/thirdparty/jquery-1.9.1.min.js"></script>
+<script src="js/thirdparty/bootstrap.min.js"></script>
+<script src="js/newman-help.js"></script>
+</body>
+</html>

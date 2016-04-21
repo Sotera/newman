@@ -3,17 +3,77 @@
  */
 
 /**
+ * validate search-service email-document response
+ * @param response data received from service
+ * @returns filtered response
+ */
+function validateResponseEmailDocs(response) {
+  if (response) {
+    console.log( 'validateResponseEmailDocs(...)' );
+
+    // validate email_docs
+    if (response.email_docs) {
+      console.log( '\temail_docs[' + response.email_docs.length + ']' );
+
+      var new_email_docs = [];
+      var invalid_doc_count = 0;
+      _.each(response.email_docs, function (item) {
+
+        if (validateDateTime(item.datetime)) {
+
+          if (item.from) {
+            var address = decodeURIComponent( item.from );
+
+            // check for email address
+            if (validateEmailAddress( address )) {
+              item.from = address;
+              //console.log('\tfrom \'' + address + '\'');
+
+              new_email_docs.push(item);
+            }
+            else {
+              console.log('\tinvalid email : ' + item.from);
+              invalid_doc_count++;
+            }
+          }
+          else {
+            console.log('\tundefined email : ' + item.from);
+            invalid_doc_count++;
+          }
+        }
+        else {
+          console.log('\tinvalid datetime : ' + item.datetime);
+          invalid_doc_count++;
+        }
+
+      });
+
+      response.email_docs = new_email_docs;
+      console.log( '\tnew email_docs[' + response.email_docs.length + '], invalid row ' + invalid_doc_count );
+    }
+
+    return response;
+  }
+
+  console.log( 'response undefined' );
+  return response;
+}
+
+/**
  * validate search-service response
  * @param response data received from service
  * @returns filtered response
  */
 function validateResponseSearch(response) {
+  var debug_enabled = false;
   if (response) {
-    console.log( 'validateResponseSearch(...)' );
 
     // validate graph nodes and links
     if (response.graph) {
-      console.log( '\tnodes[' + response.graph.nodes.length + '] links[' + response.graph.links.length + ']' );
+      if (debug_enabled) {
+        console.log('validateResponseSearch(response.graph)');
+        console.log('\tnodes[' + response.graph.nodes.length + '] links[' + response.graph.links.length + ']');
+      }
 
       var new_nodes = [];
       var new_links = [];
@@ -31,7 +91,10 @@ function validateResponseSearch(response) {
           new_nodes.push( item );
         }
         else {
-          console.log('\tinvalid node(email) { name: ' + item.name + ', community: ' + item.community + ' index: ' + index + ' }');
+          if (debug_enabled) {
+            console.log('\tinvalid node(email) { name: ' + item.name + ', community: ' + item.community + ' index: ' + index + ' }');
+          }
+
           invalid_node_count++;
 
           _.each(response.graph.links, function (item) {
@@ -40,7 +103,10 @@ function validateResponseSearch(response) {
 
               clone_links.splice(index, 1);
 
-              console.log('\t\tinvalidated link { source: ' + item.source + ', target: ' + item.target + ", value: " + item.value + ' }');
+              if (debug_enabled) {
+                console.log('\t\tinvalidated link { source: ' + item.source + ', target: ' + item.target + ", value: " + item.value + ' }');
+              }
+
               invalid_link_count++;
             }
 
@@ -57,21 +123,29 @@ function validateResponseSearch(response) {
           new_links.push( item );
         }
         else {
-          console.log('\tundefined link { source: ' + item.source + ', target: ' + item.target + ", value: " + item.value + ' }');
+          if (debug_enabled) {
+            console.log('\tundefined link { source: ' + item.source + ', target: ' + item.target + ", value: " + item.value + ' }');
+          }
+
           invalid_link_count++;
         }
       });
 
       response.graph.nodes = new_nodes;
       response.graph.links = new_links;
-      console.log( '\tnew nodes[' + response.graph.nodes.length + '], invalid nodes ' + invalid_node_count +
-        ', new links[' + response.graph.links.length + '], invalid links ' + invalid_link_count );
+
+      if (debug_enabled) {
+        console.log('\tnew nodes[' + response.graph.nodes.length + '], invalid nodes ' + invalid_node_count +
+                    ', new links[' + response.graph.links.length + '], invalid links ' + invalid_link_count);
+      }
 
     }
 
     // validate rows
     if (response.rows) {
-      console.log( '\trows[' + response.rows.length + ']' );
+      if (debug_enabled) {
+        console.log('\trows[' + response.rows.length + ']');
+      }
 
       var new_rows = [];
       var invalid_row_count = 0;
@@ -90,30 +164,40 @@ function validateResponseSearch(response) {
               new_rows.push(item);
             }
             else {
-              console.log('\tinvalid email : ' + item.from);
+              if (debug_enabled) {
+                console.log('\tinvalid email : ' + item.from);
+              }
               invalid_row_count++;
             }
           }
           else {
-            console.log('\tundefined email : ' + item.from);
+            if (debug_enabled) {
+              console.log('\tundefined email : ' + item.from);
+            }
             invalid_row_count++;
           }
         }
         else {
-          console.log('\tinvalid datetime : ' + item.datetime);
+          if (debug_enabled) {
+            console.log('\tinvalid datetime : ' + item.datetime);
+          }
           invalid_row_count++;
         }
 
       });
 
       response.rows = new_rows;
-      console.log( '\tnew rows[' + response.rows.length + '], invalid row ' + invalid_row_count );
+      if (debug_enabled) {
+        console.log('\tnew rows[' + response.rows.length + '], invalid row ' + invalid_row_count);
+      }
     }
 
     return response;
   }
 
-  console.log( 'response undefined' );
+  if (debug_enabled) {
+    console.log('response undefined');
+  }
   return response;
 }
 
@@ -141,9 +225,10 @@ function validateResponseEmailRank(response) {
           email[1],
           parseInt(email[2]),
           parseInt(email[3]),
-          parseFloat(email[4]),
+          parseFloat(email[4]).toFixed(3),
           parseInt(email[5]),
-          parseInt(email[6])
+          parseInt(email[6]),
+          parseInt(email[7])
         ];
 
         if (new_email) {
@@ -286,6 +371,7 @@ function validateDateTime(datetime_text) {
  * @returns true if the argument is valid, false otherwise
  */
 function validateEmailAddress(email_address) {
+  var debug_enabled = false;
   if(email_address) {
     /*
      var regex = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
@@ -297,10 +383,14 @@ function validateEmailAddress(email_address) {
       if(validateEmailDomain(domain)) {
         return true;
       }
-      console.log( '\tinvalid email-domain: ' + name );
+      if(debug_enabled) {
+        console.log('\tinvalid email-domain: ' + name);
+      }
       return false;
     }
-    console.log( '\tinvalid email-user: ' + name );
+    if(debug_enabled) {
+      console.log('\tinvalid email-user: ' + name);
+    }
     return false;
   }
   return false;
@@ -336,58 +426,6 @@ function validateEmailDomain(email_domain) {
     return false;
   }
   return false;
-}
-
-/**
- * validate domain-service response
- * @param response data received from service
- * @returns filtered response
- */
-function validateResponseDomain(response) {
-
-
-  if (response) {
-    console.log('validateResponseDomain(...)');
-
-    if (response.domains) {
-      console.log( '\tdomains[' + response.domains.length + ']' );
-
-      var new_domains = [];
-      var invalid_item_count = 0;
-      _.each(response.domains, function (domain) {
-
-        var domain_text = decodeURIComponent( domain[0] );
-        var domain_count = parseInt(domain[1]);
-
-        if (domain_text && validateEmailDomain(domain_text)) {
-          //console.log('\tdomain : \'' + domain_text + '\'');
-          new_domains.push([domain_text, domain_count]);
-        }
-        else {
-          //console.log('\tinvalid domain : ' + domain_text);
-          invalid_item_count++;
-        }
-      });
-
-      new_domains = new_domains.sort( descendingPredicatByIndex(1) );
-      var new_response = { "domains": new_domains };
-      //console.log( 'validated-response:\n' + JSON.stringify(new_response, null, 2) );
-
-      console.log( '\tnew domains[' + new_response.domains.length + ']' );
-
-      // initialize domain-map
-      _.each(new_domains, function(object, index) {
-        all_domain_map.put(object[0], object[0], object[1], color_set_domain(index));
-      });
-
-      return new_response;
-
-    }
-    console.log( 'response.domains undefined' );
-  }
-
-  console.log( 'response undefined' );
-  return response;
 }
 
 /**
@@ -435,112 +473,4 @@ function validateResponseEmailTopicScore(response) {
   }
 
   return response;
-}
-
-/**
- * check for whitespace
- * @param text
- * @returns true if the argument contains any whitespace, false otherwise
- */
-function containsWhitespace(text) {
-  if(text) {
-    var regex = /\s/g;
-    return regex.test(text);
-  }
-  return false;
-}
-
-/**
- * remove all empty space from text
- * @param text
- * @returns text string without any empty space
- */
-function removeAllWhitespace(text) {
-  if(text) {
-    text = text.replace(/\s/g, "").trim();
-  }
-  return text;
-}
-
-/**
- * sort predicate based on property
- */
-function descendingPredicatByProperty(property){
-  return function (a, b) {
-
-    if (a[property] > b[property]) {
-      return -1;
-    }
-
-    if (a[property] < b[property]) {
-      return 1;
-    }
-
-    return 0;
-  }
-}
-
-/**
- * sort predicate based on index
- */
-function descendingPredicatByIndex(index){
-  return function(a, b) {
-
-    if( a[index] > b[index]){
-      return -1;
-    }
-
-    if( a[index] < b[index] ){
-      return 1;
-    }
-
-    return 0;
-  }
-}
-
-/**
- * sort predicate based on descending value
- */
-function descendingPredicatByValue(){
-  return function(a, b) {
-    return b - a;
-  }
-}
-
-/**
- * sort predicate based on ascending value
- */
-function ascendingPredicatByValue(){
-  return function(a, b) {
-    return a - b;
-  }
-}
-
-/**
- *
- * @param from, floor int value
- * @param to, ceiling int value
- * @returns {number}
- */
-function generateRandomInt( from, to ) {
-  return Math.floor(Math.random() * (to - from + 1) + from);
-}
-
-/**
- * return a deep-copy of the argument
- * @param source to be cloned
- * @returns deep-copy
- */
-function clone( source ) {
-  if (source) {
-    var copy;
-    if (jQuery.isArray(source)) {
-      copy = jQuery.extend(true, [], source);
-    }
-    else {
-      copy = jQuery.extend(true, {}, source);
-    }
-    return copy;
-  }
-  return source;
 }

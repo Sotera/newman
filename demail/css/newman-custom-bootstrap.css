@@ -1,0 +1,391 @@
+/*
+.navbar-default .navbar-nav>li>a:hover {
+   border: 1px;
+	border-color: white;
+    border-radius: 8px;
+    font-size: 14px;
+}
+*/
+
+.navbar-default .navbar-nav>li>a:focus, .navbar-nav>li>a:hover {
+    border: 1px;
+	border-color: white;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.navbar-default .navbar-nav>li>a {
+    border: 0px;
+    border-color: black;
+    border-radius: 0px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.navbar-header, .dropdown-menu li:hover, .open > .dropdown-menu li:hover {
+    cursor: pointer;
+}
+
+/*
+[class*='-legend-user'] {
+    background-color: #FF7F0E;
+    color:#fff;
+}
+[class*='-legend-user']:hover,[class*='-legend-user']:active {
+    background-color: rgba(255, 127, 14, 0.70);
+    color:#fff;
+}
+[class*='-legend-post'] {
+    background-color:#5195ce;
+    color:#fff;
+}
+[class*='-legend-post']:hover,[class*='-legend-post']:active {
+    background-color:#62a6df;
+    color:#fff;
+}
+
+[class*='-dark'] {
+    background-color:#02243C;
+    color:#f0f0f0;
+}
+[class*='-light'] {
+    background-color:#f9f9f9;
+    color:#999;
+}
+[class*='-blue'] {
+    background-color:#5195ce;
+    color:#fff;
+}
+[class*='-apple'] {
+    background-color:#005DB3;
+    color:#f8f8f8;
+}
+[class*='-gray'] {
+    background-color:#e6e6e6;
+    color:#666;
+}
+[class*='-green'] {
+    background-color:#5BC236;
+    color:#fff;
+}
+*/
+
+/* hover and active */
+/*
+[class*='-dark']:hover,[class*='-dark']:focus {
+    background-color:#12254d;
+    color:#fff;
+}
+[class*='-light']:hover,[class*='-light']:active {
+    background-color:#eeeeee;
+    color:#fff;
+}
+[class*='-blue']:hover,[class*='-blue']:active {
+    background-color:#62a6df;
+    color:#fff;
+}
+[class*='-apple']:hover,[class*='-apple']:active {
+    background-color:#116ec4;
+    color:#fff;
+}
+[class*='-gray']:hover,[class*='-gray']:active {
+    background-color:#d5d5d5;
+    color:#fff;
+}
+[class*='-green']:hover,[class*='-green']:active {
+    background-color:#6cd347;
+    color:#fff;
+}
+*/
+
+/***********************
+  clear-outline button
+************************/
+
+.btn.outline {
+    background: none;
+    padding: 4px 5px 4px 5px;
+    border-radius: 6px;
+    border: 0px solid #0080AB;
+    color: #0080AB;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: inherit;
+    margin: 0px;
+}
+.btn-small.outline {
+    padding: 2px 3px 2px 3px;
+    position: relative;
+    font-weight: lighter;
+    font-size: 11px;
+/*  width: inherit;
+    height: inherit;
+    line-height: inherit;
+    text-align: match-parent;*/
+}
+/*
+.btn-small.outline:hover {
+    color: #006588;
+    border-radius: 6px;
+    border: 1px solid #BBBBBB;
+}
+*/
+.btn-small.outline:hover, .btn-small.outline:focus, .btn-small.outline:active, .open > .dropdown-toggle.btn-small {
+    color: #006588;
+    border-radius: 6px;
+    border: 1px solid #BBBBBB;
+}
+/*
+.btn-small.outline:focus, .btn-small.outline:active, .open > .dropdown-toggle.btn-small {
+    color: #006588;
+    border-radius: 6px;
+    border: 1px solid #006588;
+    box-shadow: none;
+}
+*/
+
+.btn.outline-inverse {
+    background: none;
+    padding: 2px 2px 2px 2px;
+    border-radius: 6px;
+    border: 0px solid #FFFFFF;
+    font-weight:normal;
+    font-size: 12px;
+    position: relative;
+}
+
+.btn.outline-inverse:hover {
+    border-radius: 6px;
+    border: 1px solid #FFFFFF;
+    color: whitesmoke;
+}
+
+text.label.highlight {
+    background: none;
+    padding: 2px 2px 2px 2px;
+    border-radius: 6px;
+    border: 1px solid #223d88;
+    color: #223d88;
+    font-weight:normal;
+    font-size: 14px;
+    position: relative;
+}
+
+text.label.highlight:hover {
+    border: 1px solid #223d88;
+}
+
+/***********************
+  extra-large caret
+************************/
+.caret {
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #FFFFFF;
+}
+
+/***********************
+  right-checkbox,radio button
+************************/
+.radio-inline-right, .checkbox-inline-right {
+    display: inline-block;
+    padding-left: 0px;
+    padding-right: 5px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    vertical-align: middle;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+
+/***********************
+  circular background
+************************/
+.circle-legend-account {
+    background-color: #FF7F0E;
+    color:#fff;
+    width: 22px;
+    height: 22px;
+    -moz-border-radius: 11px;
+    -webkit-border-radius: 11px;
+    border-radius: 11px;
+    margin-left: 11px;
+}
+
+.circle-legend-account:hover, .circle-legend-account:active {
+    background-color: rgba(255, 127, 14, 0.70);
+    color:#fff;
+    width: 24px;
+    height: 24px;
+    -moz-border-radius: 12px;
+    -webkit-border-radius: 12px;
+    border-radius: 12px;
+    margin-left: 12px;
+}
+
+.circle-legend-content {
+    background-color: #1F77B4;
+    color:#fff;
+    width: 22px;
+    height: 22px;
+    -moz-border-radius: 11px;
+    -webkit-border-radius: 11px;
+    border-radius: 11px;
+    margin-left: 11px;
+}
+
+.circle-legend-content:hover, .circle-legend-content:active {
+    background-color: rgba(31, 119, 180, 0.7);
+    color:#fff;
+    width: 24px;
+    height: 24px;
+    -moz-border-radius: 12px;
+    -webkit-border-radius: 12px;
+    border-radius: 12px;
+    margin-left: 12px;
+}
+
+/***********************
+  icon tooltip
+************************/
+
+.tooltip.top .tooltip-arrow {
+    bottom: 0;
+    left: 50%;
+    margin-left: -5px;
+    border-top-color: #FFFFFF;
+    border-width: 5px 5px 0;
+}
+.tooltip-inner {
+    /*background: rgba(245, 245, 245, 1.0);*/
+    background: rgba(40, 70, 165, 0.75);
+    border: solid 1px #FFFFFF;
+}
+
+/***********************
+  pop-over
+************************/
+
+
+.popover-title {
+    font-size: 11px !important;
+    margin: 0;
+    padding: 0px 2px 0px 2px;
+}
+
+.popover-content {
+    font-size: 10px !important;
+    margin: 0;
+    padding: 0px 2px 0px 2px;
+}
+
+/***********************
+ custom inclusion of right, left and below tabs
+************************/
+
+.tabs-below > .nav-tabs,
+.tabs-right > .nav-tabs,
+.tabs-left > .nav-tabs {
+    border-bottom: 0;
+}
+
+.tab-content > .tab-pane,
+.pill-content > .pill-pane {
+    display: none;
+}
+
+.tab-content > .active,
+.pill-content > .active {
+    display: block;
+}
+
+.tabs-below > .nav-tabs {
+    border-top: 1px solid #ddd;
+}
+
+.tabs-below > .nav-tabs > li {
+    margin-top: -1px;
+    margin-bottom: 0;
+}
+
+.tabs-below > .nav-tabs > li > a {
+    -webkit-border-radius: 0 0 4px 4px;
+    -moz-border-radius: 0 0 4px 4px;
+    border-radius: 0 0 4px 4px;
+}
+
+.tabs-below > .nav-tabs > li > a:hover,
+.tabs-below > .nav-tabs > li > a:focus {
+    border-top-color: #ddd;
+    border-bottom-color: transparent;
+}
+
+.tabs-below > .nav-tabs > .active > a,
+.tabs-below > .nav-tabs > .active > a:hover,
+.tabs-below > .nav-tabs > .active > a:focus {
+    border-color: transparent #ddd #ddd #ddd;
+}
+
+.tabs-left > .nav-tabs > li,
+.tabs-right > .nav-tabs > li {
+    float: none;
+}
+
+.tabs-left > .nav-tabs > li > a,
+.tabs-right > .nav-tabs > li > a {
+    min-width: 74px;
+    margin-right: 0;
+    margin-bottom: 3px;
+}
+
+.tabs-left > .nav-tabs {
+    float: left;
+    margin-right: 19px;
+    border-right: 1px solid #ddd;
+}
+
+.tabs-left > .nav-tabs > li > a {
+    margin-right: -1px;
+    -webkit-border-radius: 4px 0 0 4px;
+    -moz-border-radius: 4px 0 0 4px;
+    border-radius: 4px 0 0 4px;
+}
+
+.tabs-left > .nav-tabs > li > a:hover,
+.tabs-left > .nav-tabs > li > a:focus {
+    border-color: #eeeeee #dddddd #eeeeee #eeeeee;
+}
+
+.tabs-left > .nav-tabs .active > a,
+.tabs-left > .nav-tabs .active > a:hover,
+.tabs-left > .nav-tabs .active > a:focus {
+    border-color: #ddd transparent #ddd #ddd;
+    *border-right-color: #ffffff;
+}
+
+.tabs-right > .nav-tabs {
+    float: right;
+    margin-left: 19px;
+    border-left: 1px solid #ddd;
+}
+
+.tabs-right > .nav-tabs > li > a {
+    margin-left: -1px;
+    -webkit-border-radius: 0 4px 4px 0;
+    -moz-border-radius: 0 4px 4px 0;
+    border-radius: 0 4px 4px 0;
+}
+
+.tabs-right > .nav-tabs > li > a:hover,
+.tabs-right > .nav-tabs > li > a:focus {
+    border-color: #eeeeee #eeeeee #eeeeee #dddddd;
+}
+
+.tabs-right > .nav-tabs .active > a,
+.tabs-right > .nav-tabs .active > a:hover,
+.tabs-right > .nav-tabs .active > a:focus {
+    border-color: #ddd #ddd #ddd transparent;
+    *border-left-color: #ffffff;
+}
