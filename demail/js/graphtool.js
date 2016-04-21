@@ -1649,7 +1649,7 @@ $(function () {
         newman_rank_email.revalidateUIRankEmail();
       }
       else if (element_ID.endsWith('dashboard_tab_geo_analytics')) {
-        app_geo_map.init();
+        app_geo_map.init( true );
       }
       else if (element_ID.endsWith('dashboard_tab_chart_analytics')) {
         initDashboardCharts();

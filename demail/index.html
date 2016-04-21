@@ -540,180 +540,180 @@
 
 
               <!-- Start-Analytics-Tab-Content -->
-              <div class="tab-content" style= "height: 100%; padding: 0; margin: 0;">
+              <div id="analytics_tab_content" class="tab-content" style= "height: 100%; padding: 0; margin: 0;">
 
                 <!-- Start-Analytics-Content-Chart -->
                 <div class="tab-pane active" id="dashboard_tab_chart_analytics" style= "padding: 0; margin: 0;">
 
-              <!-- Start Dashboard-Right-Row-1 -->
-              <div class="row box">
-                <!--Start Dashboard-Right-Row-1-Panel-Nav-Tabs-->
-                <ul class="nav nav-tabs box-name" style="height: 30px;" role="tablist" id="dashboard_row1_tab_list">
-                  <li class="active" style="height: inherit;">
-                    <a href="#dashboard_tab_content_outbound_activities" style="height: inherit;" role="tab" data-toggle="tab">
-                      <i class="fa fa-send-o" rel="tooltip" data-placement="left" title="Email Sent"></i> Sent
-                    </a>
-                  </li>
-                  <li style="height: inherit;">
-                    <a href="#dashboard_tab_content_inbound_activities" style="height: inherit;" role="tab" data-toggle="tab">
-                      <i class="fa fa-inbox" rel="tooltip" data-placement="left" title="Email Received"></i> Received
-                    </a>
-                  </li>
-                  <li style="height: inherit;">
-                    <a href="#dashboard_tab_content_attach_activities" style="height: inherit;" role="tab" data-toggle="tab">
-                      <i class="fa fa-paperclip" rel="tooltip" data-placement="left" title="File Attachments"></i> Attached
-                    </a>
-                  </li>
-                </ul>
-                <!--End Dashboard-Right-Row-1-Panel-Nav-Tabs-->
+                  <!-- Start Dashboard-Right-Row-1 -->
+                  <div class="row box">
+                    <!--Start Dashboard-Right-Row-1-Panel-Nav-Tabs-->
+                    <ul class="nav nav-tabs box-name" style="height: 30px;" role="tablist" id="dashboard_row1_tab_list">
+                      <li class="active" style="height: inherit;">
+                        <a href="#dashboard_tab_content_outbound_activities" style="height: inherit;" role="tab" data-toggle="tab">
+                          <i class="fa fa-send-o" rel="tooltip" data-placement="left" title="Email Sent"></i> Sent
+                        </a>
+                      </li>
+                      <li style="height: inherit;">
+                        <a href="#dashboard_tab_content_inbound_activities" style="height: inherit;" role="tab" data-toggle="tab">
+                          <i class="fa fa-inbox" rel="tooltip" data-placement="left" title="Email Received"></i> Received
+                        </a>
+                      </li>
+                      <li style="height: inherit;">
+                        <a href="#dashboard_tab_content_attach_activities" style="height: inherit;" role="tab" data-toggle="tab">
+                          <i class="fa fa-paperclip" rel="tooltip" data-placement="left" title="File Attachments"></i> Attached
+                        </a>
+                      </li>
+                    </ul>
+                    <!--End Dashboard-Right-Row-1-Panel-Nav-Tabs-->
 
-                <!--Start Dashboard-Right-Row-1-Panel-Tab-Content-->
-                <div class="tab-content">
-                  <div class="tab-pane active" id="dashboard_tab_content_outbound_activities">
-                    <div class="box-content" style="padding: 0px; width: 100%; height: 164px;">
-                      <div id="chart_line_outbound_activities" style="width: 100%; height: 100%;"></div>
-                    </div>
-                  </div>
-                  <div class="tab-pane" id="dashboard_tab_content_inbound_activities">
-                    <div class="box-content" style="padding: 0px; width: 100%; height: 164px;">
-                      <div id="chart_line_inbound_activities" style="width: 100%; height: 100%;"></div>
-                    </div>
-                  </div>
-                  <div class="tab-pane" id="dashboard_tab_content_attach_activities">
-                    <div class="box-content" style="padding: 0px; width: 100%; height: 164px;">
-                      <div id="chart_line_attach_activities" style="width: 100%; height: 100%;"></div>
-                    </div>
-                  </div>
-                </div>
-                <!-- End Dashboard-Right-Row-1-Panel-Tab-Content -->
-              </div>
-              <!-- End Dashboard-Right-Row-1 -->
-
-              <!-- Start Dashboard-Right-Row-2 -->
-              <div class="row box" >
-                <!--Start Dashboard-Right-Row-2-Panel-Nav-Tabs-->
-                <ul class="nav nav-tabs box-name" style="height: 30px;" role="tablist" id="dashboard_row2_tab_list">
-                  <li class="active" style="height: inherit;">
-                    <a href="#dashboard_tab_content_entities" style="height: inherit;" role="tab" data-toggle="tab">Entities</a>
-                  </li>
-                  <li style="height: inherit;">
-                    <a href="#dashboard_tab_content_topics" style="height: inherit;" role="tab" data-toggle="tab">Topics</a>
-                  </li>
-                </ul>
-                <!--End Dashboard-Right-Row-2-Panel-Nav-Tabs-->
-
-                <!--Start Dashboard-Right-Row-2-Panel-Tab-Content-->
-                <div class="tab-content">
-                  <div class="tab-pane active" id="dashboard_tab_content_entities">
-                    <div class="box-content">
-                      <div class="row" style="margin: 0; padding: 0;">
-                        <div class="col-xs-3" style="margin: 0; padding: 0;">
-                          <div id="chart_donut_entities" style="width: 160px; height: 160px; position: relative;"></div>
+                    <!--Start Dashboard-Right-Row-1-Panel-Tab-Content-->
+                    <div class="tab-content">
+                      <div class="tab-pane active" id="dashboard_tab_content_outbound_activities">
+                        <div class="box-content" style="padding: 0px; width: 100%; height: 164px;">
+                          <div id="chart_line_outbound_activities" style="width: 100%; height: 100%;"></div>
                         </div>
-                        <div class="col-xs-7" style="margin: 0; padding: 0;">
-                          <div id="chart_horizontal_bar_entities" style="width: 100%; height: 100%; position: relative;"></div>
+                      </div>
+                      <div class="tab-pane" id="dashboard_tab_content_inbound_activities">
+                        <div class="box-content" style="padding: 0px; width: 100%; height: 164px;">
+                          <div id="chart_line_inbound_activities" style="width: 100%; height: 100%;"></div>
                         </div>
-                        <div class="col-xs-2" style="margin: 0; padding: 0;">
-                          <div id="chart_legend_entities" style="width: 100%; height: 100%; position: relative;"></div>
+                      </div>
+                      <div class="tab-pane" id="dashboard_tab_content_attach_activities">
+                        <div class="box-content" style="padding: 0px; width: 100%; height: 164px;">
+                          <div id="chart_line_attach_activities" style="width: 100%; height: 100%;"></div>
                         </div>
                       </div>
                     </div>
+                    <!-- End Dashboard-Right-Row-1-Panel-Tab-Content -->
                   </div>
-                  <div class="tab-pane" id="dashboard_tab_content_topics">
-                    <div class="box-content">
-                      <div class="row" style="margin: 0; padding: 0;">
-                        <div class="col-xs-3" style="margin: 0; padding: 0;">
-                          <div id="chart_donut_topics" style="width: 160px; height: 160px;"></div>
+                  <!-- End Dashboard-Right-Row-1 -->
+
+                  <!-- Start Dashboard-Right-Row-2 -->
+                  <div class="row box" >
+                    <!--Start Dashboard-Right-Row-2-Panel-Nav-Tabs-->
+                    <ul class="nav nav-tabs box-name" style="height: 30px;" role="tablist" id="dashboard_row2_tab_list">
+                      <li class="active" style="height: inherit;">
+                        <a href="#dashboard_tab_content_entities" style="height: inherit;" role="tab" data-toggle="tab">Entities</a>
+                      </li>
+                      <li style="height: inherit;">
+                        <a href="#dashboard_tab_content_topics" style="height: inherit;" role="tab" data-toggle="tab">Topics</a>
+                      </li>
+                    </ul>
+                    <!--End Dashboard-Right-Row-2-Panel-Nav-Tabs-->
+
+                    <!--Start Dashboard-Right-Row-2-Panel-Tab-Content-->
+                    <div class="tab-content">
+                      <div class="tab-pane active" id="dashboard_tab_content_entities">
+                        <div class="box-content">
+                          <div class="row" style="margin: 0; padding: 0;">
+                            <div class="col-xs-3" style="margin: 0; padding: 0;">
+                              <div id="chart_donut_entities" style="width: 160px; height: 160px; position: relative;"></div>
+                            </div>
+                            <div class="col-xs-7" style="margin: 0; padding: 0;">
+                              <div id="chart_horizontal_bar_entities" style="width: 100%; height: 100%; position: relative;"></div>
+                            </div>
+                            <div class="col-xs-2" style="margin: 0; padding: 0;">
+                              <div id="chart_legend_entities" style="width: 100%; height: 100%; position: relative;"></div>
+                            </div>
+                          </div>
                         </div>
-                        <div class="col-xs-9" style="margin: 0; padding: 0;">
-                          <div id="chart_horizontal_bar_topics" style="width: 100%; height: 100%; position: relative"></div>
+                      </div>
+                      <div class="tab-pane" id="dashboard_tab_content_topics">
+                        <div class="box-content">
+                          <div class="row" style="margin: 0; padding: 0;">
+                            <div class="col-xs-3" style="margin: 0; padding: 0;">
+                              <div id="chart_donut_topics" style="width: 160px; height: 160px;"></div>
+                            </div>
+                            <div class="col-xs-9" style="margin: 0; padding: 0;">
+                              <div id="chart_horizontal_bar_topics" style="width: 100%; height: 100%; position: relative"></div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
+                    <!-- Start Dashboard-Right-Row-2-Panel-Tab-Content -->
                   </div>
-                </div>
-                <!-- Start Dashboard-Right-Row-2-Panel-Tab-Content -->
-              </div>
-              <!-- End Dashboard-Right-Row-2 -->
+                  <!-- End Dashboard-Right-Row-2 -->
 
-              <!--Start Dashboard-Right-Row-3 -->
-              <div class="row box">
-                <!--Start Dashboard-Right-Row-3-Panel-Nav-Tabs-->
-                <ul class="nav nav-tabs box-name" style="height: 30px;" role="tablist" id="dashboard_row3_tab_list">
-                  <li class="active" style="height: inherit;">
-                    <a href="#dashboard_tab_content_ranks" style="height: inherit;" role="tab" data-toggle="tab">Ranks</a>
-                  </li>
-                  <li style="height: inherit;">
-                    <a href="#dashboard_tab_content_domains" style="height: inherit;" role="tab" data-toggle="tab">Domains</a>
-                  </li>
-                  <li style="height: inherit;">
-                    <a href="#dashboard_tab_content_communities" style="height: inherit;" role="tab" data-toggle="tab">Communities</a>
-                  </li>
-                  <li style="height: inherit;">
-                    <a href="#dashboard_tab_content_attach_types" style="height: inherit;" role="tab" data-toggle="tab">Attach Types</a>
-                  </li>
-                </ul>
-                <!--End Dashboard-Right-Row-3-Panel-Nav-Tabs-->
+                  <!--Start Dashboard-Right-Row-3 -->
+                  <div class="row box">
+                    <!--Start Dashboard-Right-Row-3-Panel-Nav-Tabs-->
+                    <ul class="nav nav-tabs box-name" style="height: 30px;" role="tablist" id="dashboard_row3_tab_list">
+                      <li class="active" style="height: inherit;">
+                        <a href="#dashboard_tab_content_ranks" style="height: inherit;" role="tab" data-toggle="tab">Ranks</a>
+                      </li>
+                      <li style="height: inherit;">
+                        <a href="#dashboard_tab_content_domains" style="height: inherit;" role="tab" data-toggle="tab">Domains</a>
+                      </li>
+                      <li style="height: inherit;">
+                        <a href="#dashboard_tab_content_communities" style="height: inherit;" role="tab" data-toggle="tab">Communities</a>
+                      </li>
+                      <li style="height: inherit;">
+                        <a href="#dashboard_tab_content_attach_types" style="height: inherit;" role="tab" data-toggle="tab">Attach Types</a>
+                      </li>
+                    </ul>
+                    <!--End Dashboard-Right-Row-3-Panel-Nav-Tabs-->
 
-                <!--Start Dashboard-Right-Row-3-Panel-Tab-Content-->
-                <div class="tab-content">
+                    <!--Start Dashboard-Right-Row-3-Panel-Tab-Content-->
+                    <div class="tab-content">
 
-                  <div class="tab-pane active" id="dashboard_tab_content_ranks">
-                    <div class="box-content">
-                      <div class="row" style="margin: 0; padding: 0;">
-                        <div class="col-xs-3" style="margin: 0; padding: 0;">
-                          <div id="chart_donut_ranks" style="width: 160px; height: 160px;"></div>
-                        </div>
-                        <div class="col-xs-9" style="margin: 0; padding: 0;">
-                          <div id="chart_horizontal_bar_ranks" style="width: 100%; height: 100%; position: relative"></div>
+                      <div class="tab-pane active" id="dashboard_tab_content_ranks">
+                        <div class="box-content">
+                          <div class="row" style="margin: 0; padding: 0;">
+                            <div class="col-xs-3" style="margin: 0; padding: 0;">
+                              <div id="chart_donut_ranks" style="width: 160px; height: 160px;"></div>
+                            </div>
+                            <div class="col-xs-9" style="margin: 0; padding: 0;">
+                              <div id="chart_horizontal_bar_ranks" style="width: 100%; height: 100%; position: relative"></div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                  <div class="tab-pane" id="dashboard_tab_content_domains">
-                    <div class="box-content">
-                      <div class="row box" style="margin: 0; padding: 0;">
-                        <div class="col-xs-3" style="margin: 0; padding: 0;">
-                          <div id="chart_donut_domains" style="width: 160px; height: 160px;"></div>
-                        </div>
-                        <div class="col-xs-9" style="margin: 0; padding: 0;">
-                          <div id="chart_horizontal_bar_domains" style="width: 100%; height: 100%; position: relative"></div>
+                      <div class="tab-pane" id="dashboard_tab_content_domains">
+                        <div class="box-content">
+                          <div class="row box" style="margin: 0; padding: 0;">
+                            <div class="col-xs-3" style="margin: 0; padding: 0;">
+                              <div id="chart_donut_domains" style="width: 160px; height: 160px;"></div>
+                            </div>
+                            <div class="col-xs-9" style="margin: 0; padding: 0;">
+                              <div id="chart_horizontal_bar_domains" style="width: 100%; height: 100%; position: relative"></div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                  <div class="tab-pane" id="dashboard_tab_content_communities">
-                    <div class="box-content">
-                      <div class="row" style="margin: 0; padding: 0;">
-                        <div class="col-xs-3" style="margin: 0; padding: 0;">
-                          <div id="chart_donut_communities" style="width: 160px; height: 160px;"></div>
-                        </div>
-                        <div class="col-xs-9" style="margin: 0; padding: 0;">
-                          <div id="chart_horizontal_bar_communities" style="width: 100%; height: 100%; position: relative"></div>
+                      <div class="tab-pane" id="dashboard_tab_content_communities">
+                        <div class="box-content">
+                          <div class="row" style="margin: 0; padding: 0;">
+                            <div class="col-xs-3" style="margin: 0; padding: 0;">
+                              <div id="chart_donut_communities" style="width: 160px; height: 160px;"></div>
+                            </div>
+                            <div class="col-xs-9" style="margin: 0; padding: 0;">
+                              <div id="chart_horizontal_bar_communities" style="width: 100%; height: 100%; position: relative"></div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                  <div class="tab-pane" id="dashboard_tab_content_attach_types">
-                    <div class="box-content">
-                      <div class="row" style="margin: 0; padding: 0;">
-                        <div class="col-xs-3" style="margin: 0; padding: 0;">
-                          <div id="chart_donut_attach_types" style="width: 160px; height: 160px;"></div>
-                        </div>
-                        <div class="col-xs-9" style="margin: 0; padding: 0;">
-                          <div id="chart_horizontal_bar_attach_types" style="width: 100%; height: 100%; position: relative"></div>
+                      <div class="tab-pane" id="dashboard_tab_content_attach_types">
+                        <div class="box-content">
+                          <div class="row" style="margin: 0; padding: 0;">
+                            <div class="col-xs-3" style="margin: 0; padding: 0;">
+                              <div id="chart_donut_attach_types" style="width: 160px; height: 160px;"></div>
+                            </div>
+                            <div class="col-xs-9" style="margin: 0; padding: 0;">
+                              <div id="chart_horizontal_bar_attach_types" style="width: 100%; height: 100%; position: relative"></div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                </div>
-                <!-- End-Dashboard-Right-Row-3-Panel-Tab-Content -->
-              </div>
-              <!-- End-Dashboard-Right-Row-3 -->
+                    </div>
+                    <!-- End-Dashboard-Right-Row-3-Panel-Tab-Content -->
+                  </div>
+                  <!-- End-Dashboard-Right-Row-3 -->
 
                 </div>
                 <!-- End-Analytics-Content-Chart -->

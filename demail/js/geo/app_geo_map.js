@@ -6,6 +6,7 @@
  */
 var app_geo_map = (function () {
   var debug_enabled = true;
+  var _is_initialized = false;
 
   var default_view_center = new L.LatLng(31.7964452, 35.1051469), default_view_zoom = 2;
   var min_zoom = 2, max_zoom = 16;
@@ -1128,28 +1129,19 @@ var app_geo_map = (function () {
   }
 
 
-
-  function init(new_marker_list) {
+  function init( is_visible ) {
     if (debug_enabled) {
       console.log('initMap()');
     }
 
-    if (new_marker_list && new_marker_list.length > 0) {
-      // initialize markers
+    if (is_visible === true) {
+       _is_initialized = true;
     }
-    else {
-
-      /*
-      if (marker_list.length == 0) {
-        loadJSON('js/sample_markers.json', function (response) {
-          // Parse JSON string into object
-          var json_object = JSON.parse(response);
-          marker_list = json_object;
-          //plot markers
-          markMap( marker_list );
-        });
+    else if (!_is_initialized) {
+      if (debug_enabled) {
+        console.log('map not visible!');
       }
-      */
+      return;
     }
 
     if (_.size(marker_icon_map) == 0) {
@@ -1348,6 +1340,19 @@ var app_geo_map = (function () {
   }
 
 
+
+  /**
+    USAGE:
+
+   loadJSON('js/sample_markers.json', function (response) {
+     // Parse JSON string into object
+     var json_object = JSON.parse(response);
+     marker_list = json_object;
+     //plot markers
+     markMap( marker_list );
+   });
+
+   **/
   function loadJSON(file_path, callback) {
 
     var xobj = new XMLHttpRequest();
