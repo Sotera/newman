@@ -62,10 +62,10 @@ var newman_geo_email_attach = (function () {
    */
   function updateAttachDocGeoLoc(response) {
 
+    clearAllAttachDocGeoLoc();
+
     if( response.exif_docs && response.exif_docs.length > 0 ) {
 
-      attachment_id_list = [];
-      attachment_geo_loc_map = {}, email_geo_loc_map = {};
       _.each(response.exif_docs, function (document) {
 
         var email_datetime = document.datetime;
@@ -141,6 +141,12 @@ var newman_geo_email_attach = (function () {
       attachment_id_list.push(doc_id);
       attachment_geo_loc_map[doc_id] = geo_obj;
     }
+  }
+
+  function clearAllAttachDocGeoLoc() {
+    attachment_id_list.length = 0;
+    attachment_geo_loc_map = {};
+    email_geo_loc_map = {};
   }
 
   /**

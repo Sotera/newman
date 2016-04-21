@@ -36,7 +36,7 @@ var app_geo_map = (function () {
       area_draw_control_layer.clearLayers();
     }
     if (area_drawn_id_list) {
-      area_drawn_id_list = [];
+      area_drawn_id_list.length = 0;
     }
   }
 
