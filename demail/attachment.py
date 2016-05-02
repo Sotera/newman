@@ -2,7 +2,8 @@ import tangelo
 import urllib
 
 from newman.utils.functions import nth
-from param_utils import parseParamDatetime, parseParamEmailAddress
+from param_utils import parseParamDatetime, parseParamTextQuery, parseParamEncrypted, parseParamEmailAddress
+
 from es_email import get_top_attachment_types
 
 
@@ -20,13 +21,14 @@ def getAttachFileType(*args, **kwargs):
 
 
     email_address_list = parseParamEmailAddress(**kwargs);
+    encrypted = parseParamEncrypted(**kwargs)
 
 
     if not email_address_list :
-        file_types = get_top_attachment_types(data_set_id, date_bounds=(start_datetime, end_datetime), num_top_attachments=top_count)[:top_count]
+        file_types = get_top_attachment_types(data_set_id, date_bounds=(start_datetime, end_datetime), encrypted=encrypted, num_top_attachments=top_count)[:top_count]
     else :
         #TODO: implement populating the attachment file-types under individual email-accounts; simulate result for now
-        file_types = get_top_attachment_types(data_set_id, date_bounds=(start_datetime, end_datetime), num_top_attachments=top_count)[:top_count]
+        file_types = get_top_attachment_types(data_set_id, date_bounds=(start_datetime, end_datetime), encrypted=encrypted, num_top_attachments=top_count)[:top_count]
 
     result = {
               "account_id" : data_set_id,
@@ -37,6 +39,7 @@ def getAttachFileType(*args, **kwargs):
              }
         
     return result
+
 
 actions = {
     "types" : getAttachFileType

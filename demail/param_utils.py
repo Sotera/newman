@@ -30,6 +30,16 @@ def parseParamEmailAddress( **kwargs ):
     
     return key_list
 
+'''
+returns None|True|False
+'''
+def parseParamEncrypted( **kwargs ):
+    tangelo.log("parseParamEncrypted(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    encrypted = kwargs.get('encrypted', None)
+
+    return encrypted in ['true', 'True', 1, 'T', 't', 'yes'] if encrypted else None
+
+
 def parseParam_email_addr( **kwargs ):
     tangelo.log("parseParam_email_addr(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     email_addrs = kwargs.get('email_addr','').split(",")

@@ -27,8 +27,8 @@ ingest-id - email address to index
 file - name of file to ingest
 type - type of ingest pst|mbox
 '''
-def extract_pst(*args, **kwargs):
-    cherrypy.log("search.extract_pst(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+def extract(*args, **kwargs):
+    cherrypy.log("search.extract(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
 
     ingest_id=kwargs.get("ingest-id")
     ingest_file=kwargs.get("file")
@@ -41,7 +41,7 @@ def extract_pst(*args, **kwargs):
     # Add the prefix for the newman indexes
     ingest_id = index_prefix+ingest_id
 
-    logname = "pst_{}".format(fmtNow())
+    logname = "{}_{}".format(type, fmtNow())
     ingester_log = "{}/{}.ingester.log".format(work_dir, logname)
     # errfile = "{}/{}.err.log".format(work_dir, logname)
     service_status_log = "{}/{}.status.log".format(work_dir, logname)
@@ -52,7 +52,7 @@ def extract_pst(*args, **kwargs):
         try:
             args = ["./bin/ingest.sh", ingest_id, ingest_parent_dir, ingest_file, type]
 
-            cherrypy.log("running pst: {}".format(" ".join(args)))
+            cherrypy.log("running ingest: {}".format(" ".join(args)))
             spit(service_status_log, "[Running] {} \n".format(" ".join(args)))
 
             with open(ingester_log, 'w') as t:
@@ -80,18 +80,18 @@ def extract_pst(*args, **kwargs):
     tangelo.content_type("application/json")
     return {'log' : logname }
 
-def list_psts():
+def list():
     path = "{}/".format(ingest_parent_dir)
     _, dirnames, filenames = os.walk(path).next()
     tangelo.content_type("application/json")    
     return { 'items' : filenames }    
 
 get_actions = {
-    "list" : list_psts
+    "list" : list
 }    
 
 actions = {
-    "extract" : extract_pst
+    "extract" : extract
 }
 
 def unknown(*args):

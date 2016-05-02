@@ -42,11 +42,11 @@ def map_email_filtered(fields, emailer_filtered, filtered_total):
             fields.get("starred",[False])[0]
             ]
 
-def filtered_agg_query(email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, aggs={}, name=""):
+def filtered_agg_query(email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, encrypted=None, aggs={}, name=""):
     return {"aggs" :
         {
             name+"_filtered_agg" : {
-                "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, qs=query_terms, date_bounds=date_bounds),
+                "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, qs=query_terms, date_bounds=date_bounds, encrypted=encrypted),
                 "aggs": aggs
             }
         },
@@ -54,13 +54,13 @@ def filtered_agg_query(email_addrs=[], query_terms='', topic_score=None, entity=
     }
 
 # GET communities for email_address index
-def get_top_communities(index, query_terms='', topic_score=None, entity={}, date_bounds=None, num_communities=20):
+def get_top_communities(index, query_terms='', topic_score=None, entity={}, date_bounds=None, encrypted=None, num_communities=20):
     # TODO fix -hack until we can do date filtering on the email_address
     date_bounds = None
     # TODO fix
 
     aggs = { "community_agg" : { "terms" : { "field" : "community", "size" : num_communities }}}
-    query = filtered_agg_query(topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="community")
+    query = filtered_agg_query(topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="community", encrypted=encrypted)
     tangelo.log("Query %s"%query)
 
     communities_agg = es().search(index=index, doc_type='email_address', size=0, body=query)
@@ -72,13 +72,13 @@ def get_top_communities(index, query_terms='', topic_score=None, entity={}, date
 
 
 # GET domains for email_address index
-def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, num_domains=20):
+def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, encrypted=None, num_domains=20):
     # TODO fix -hack until we can do date filtering on the email_address
     date_bounds = None
     # TODO fix
 
     aggs = { "domain_agg" : { "terms" : { "field" : "domain", "size" : num_domains }}}
-    query = filtered_agg_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="domain")
+    query = filtered_agg_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="domain", encrypted=encrypted)
     tangelo.log("Query %s"%query)
 
     domains_agg = es().search(index=index, doc_type='email_address', size=0, body=query)
@@ -89,9 +89,9 @@ def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, ent
     return domains
 
 # GET top 10 Attchment types for index
-def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, num_top_attachments=20):
+def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, encrypted=None, num_top_attachments=20):
     aggs = { "attachment_type_agg" : { "terms" : { "field" : "extension", "size" : num_top_attachments }}}
-    query = filtered_agg_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="attachment")
+    query = filtered_agg_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="attachment", encrypted=encrypted)
     tangelo.log("Query %s"%query)
 
     attch_agg_resp = es().search(index=index, doc_type='attachments', size=0, body=query)
@@ -177,8 +177,8 @@ def get_email(index, email_id, qs=None):
         email = es().get(index, doc_type="emails", id=email_id)
         source = email["_source"]
         body = source["body"]
-        subject = source["subject"]
         body_translated = source.get("body_translated",'')
+        subject = source["subject"]
         subject_translated = source.get("subject_translated",'')
         body_lang = source.get("body_lang",'en')
     else:
@@ -193,14 +193,15 @@ def get_email(index, email_id, qs=None):
         body = highlight.get('body', [source.get('body','')])[0]
         body_translated = highlight.get('body_translated', [source.get('body_translated','')])[0]
 
-        subject_translated = highlight.get('subject_translated', [source.get('subject_translated','')])[0]
         subject = highlight.get('subject', [source['subject']])[0]
+        subject_translated = highlight.get('subject_translated', [source.get('subject_translated','')])[0]
         # TODO highlighting attachments need to return content and further test this method
         highlighted_attachments = _find_attachment_highlighting(highlight, source.get("attachments", [""]))
 
     body = _format_html(body)
     body_translated = _format_html(body_translated)
     subject = _format_html(subject)
+    subject_translated = _format_html(subject_translated)
 
     topic_scores=[]
     if source["topic_scores"]:
@@ -218,7 +219,7 @@ def get_email(index, email_id, qs=None):
              subject,
              # Wrap in <pre>
              "<pre>"+body+"</pre>",
-             [[f["guid"],f["filename"]] for f in source.get("attachments", [""])],
+             [[f["guid"],f["filename"],f["content_encrypted"]] for f in source.get("attachments", [""])],
              source.get("starred", False),
              highlighted_attachments
              ]

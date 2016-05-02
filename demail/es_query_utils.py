@@ -69,6 +69,7 @@ def _query_email_attachments(index, size, emails_query):
             l = list(attachment_entry)
             l[1] = attachment["guid"]
             l.append(attachment["filename"])
+            l.append(attachment["content_encrypted"])
             l.append(0)
             email_attachments.append(l)
     return email_attachments
