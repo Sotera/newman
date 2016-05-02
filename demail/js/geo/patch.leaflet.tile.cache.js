@@ -8,11 +8,15 @@ L.TileLayer.addInitHook(function() {
 	}
 
 	//initialize from external config
-	this.options.useOnlyCache = app_geo_config.getUseTileCacheOnly();
+	this.options.useOnlyCache = app_geo_config.enableOnlyTileCache();
 	this.local_tile_db_name = app_geo_config.getLocalTileDBName();
 	this.remote_tile_db_name = app_geo_config.getRemoteTileDBName();
 
 	this._local_db = new PouchDB( this.local_tile_db_name );
+	//this._remote_db = new PouchDB( this.remote_tile_db_name );
+	this._seed_cache_handler = {"is_cancelled" : false};
+	this._download_handler = null;
+	this._upload_handler = null;
 	this._canvas = document.createElement('canvas');
 
 	if (!(this._canvas.getContext && this._canvas.getContext('2d'))) {
@@ -66,7 +70,7 @@ L.TileLayer.include({
 	_onCacheLookup: function(tile, tileUrl, done) {
 		return function(err, data) {
 			if (data) {
-				this.fire('tilecachehit', {
+				this.fire('tile_cache:hit', {
 					tile: tile,
 					url: tileUrl
 				});
@@ -91,7 +95,7 @@ L.TileLayer.include({
 					tile.src = data.dataUrl;    // data.dataUrl is already a base64-encoded PNG image.
 				}
 			} else {
-				this.fire('tilecachemiss', {
+				this.fire('tile_cache:miss', {
 					tile: tile,
 					url: tileUrl
 				});
@@ -148,6 +152,8 @@ L.TileLayer.include({
 		if (minZoom > maxZoom) return;
 		if (!this._map) return;
 
+		this._seed_cache_handler.is_cancelled = false;
+
 		var queue = [];
 
 		for (var z = minZoom; z<=maxZoom; z++) {
@@ -177,10 +183,17 @@ L.TileLayer.include({
 			maxZoom: maxZoom,
 			queueLength: queue.length
 		}
-		this.fire('seedstart', seedData);
+		this.fire('seed:start', seedData);
 		var tile = this._createTile();
 		tile._layer = this;
 		this._seedOneTile(tile, queue, seedData);
+	},
+
+	cancelSeedTileCache : function() {
+		if (this._seed_cache_handler) {
+			console.log('cancelSeedTileCache()');
+			this._seed_cache_handler.is_cancelled = true;
+		}
 	},
 
 	_createTile: function () {
@@ -208,11 +221,15 @@ L.TileLayer.include({
 	//   asynchronously recursively call itself when the tile has
 	//   finished loading.
 	_seedOneTile: function(tile, remaining, seedData) {
-		if (!remaining.length) {
-			this.fire('seedend', seedData);
+		if (this._seed_cache_handler.is_cancelled) {
+			this.fire('seed:end', seedData);
 			return;
 		}
-		this.fire('seedprogress', {
+		if (!remaining.length) {
+			this.fire('seed:end', seedData);
+			return;
+		}
+		this.fire('seed:progress', {
 			bbox:    seedData.bbox,
 			minZoom: seedData.minZoom,
 			maxZoom: seedData.maxZoom,
@@ -238,59 +255,62 @@ L.TileLayer.include({
 
 	},
 
-	exportToFile : function( file_name ) {
-		var db_file_name = 'cache.' + this.local_tile_db_name + '.db';
-		if (file_name) {
-			db_file_name = file_name;
-		}
-
-		console.log('exportToFile(' + db_file_name + ')');
-
-		var pouch = require('pouchdb');
-		var pouchRepStream = require('pouchdb-replication-stream');
-		pouch.plugin(pouchRepStream.plugin);
-		var fs = require('fs');
-		var ws = fs.createWriteStream( db_file_name );
-
-		this._local_db.dump(ws).then(function (response) {
-			// response should be {ok: true}
-			console.log(JSON.stringify(response, null, 2));
-		});
-
-
+	_fireMapEvent :	function(event_type, event_obj) {
+			//console.log('_fireMapEvent(' + event_type + ')');
+			//console.log('\n' + JSON.stringify(event_obj, null, 2));
+			this.fire(event_type, event_obj);
 	},
 
-	uploadTileCache : function() {
+	uploadTileCache : function( map ) {
 		console.log('uploadTileCache()');
 		console.log('\toptions.useOnlyCache : ' + this.options.useOnlyCache);
 		console.log('\tlocal_tile_db_name : ' + this.local_tile_db_name);
 		console.log('\tremote_tile_db_name : ' + this.remote_tile_db_name);
 
 		if (this._local_db) {
+			/*
+			function newMapEvent(event_type, event_obj) {
+				if (map) {
+					//console.log('fireMapEvent(' + event_type + ')');
+					//console.log('\n' + JSON.stringify(event_obj, null, 2));
+					map.fireMapEvent(event_type, event_obj);
+				}
+			}
+			*/
 
-			PouchDB.replicate(this.local_tile_db_name, this.remote_tile_db_name,
+			this._upload_handler = PouchDB.replicate(this.local_tile_db_name, this.remote_tile_db_name,
+			//PouchDB.sync(this.local_tile_db_name, this.remote_tile_db_name,
 					{retry: false}
-			).on('change', function (info) {
-				// handle change
-			}).on('paused', function (err) {
-				// replication paused (e.g. replication up to date, user went offline)
+			).on('change', function (info) { // handle change
+			}).on('paused', function (err) { // replication paused (e.g. replication up to date, user went offline)
+				//this._fireMapEvent('upload:paused', err);
+				//this.fire('upload:paused', err);
 			}).on('active', function () {
 				// replicate resumed (e.g. new changes replicating, user went back online)
-			}).on('denied', function (err) {
-				// a document failed to replicate, e.g. due to permissions
-			}).on('complete', function (info) {
-				// handle complete
-				console.log('pushTileCache complete!\n' + JSON.stringify(info, null, 2));
-			}).on('error', function (err) {
-				// handle error
+			}).on('denied', function (err) {  // a document failed to replicate, e.g. due to permissions
+				//this._fireMapEvent('upload:denied', err);
+				//this.fire('upload:denied', err);
+			}).on('complete', function (info) { // handle complete
+				console.log('uploadTileCache complete!\n' + JSON.stringify(info, null, 2));
+
+				map.fireEvent('upload:complete', info);
+			}).on('error', function (err) { // handle error
 				console.warn(err);
+				//this._fireMapEvent('upload:error', err);
+				//this.fire('upload:error', {'error':err});
 			});
 
 		}
+	}, // end of uploadTileCache()
 
+	cancelUploadTileCache : function() {
+		if (this._upload_handler) {
+			console.log('cancelUploadTileCache()');
+			this._upload_handler.cancel();
+		}
 	},
 
-  downloadTileCache : function() {
+  downloadTileCache : function( map ) {
 		console.log('downloadTileCache()');
 		console.log('\toptions.useOnlyCache : ' + this.options.useOnlyCache);
 		console.log('\tlocal_tile_db_name : ' + this.local_tile_db_name);
@@ -298,28 +318,47 @@ L.TileLayer.include({
 
 		if (this._local_db) {
 
-			PouchDB.replicate(this.remote_tile_db_name, this.local_tile_db_name,
+			this._download_handler = PouchDB.replicate(this.remote_tile_db_name, this.local_tile_db_name,
 					{retry: false}
 			).on('change', function (info) {
 				// handle change
 			}).on('paused', function (err) {
 				// replication paused (e.g. replication up to date, user went offline)
+				if (map) {
+					map.fireEvent('download:paused', err);
+				}
+				//this.fire('download:paused', err);
 			}).on('active', function () {
 				// replicate resumed (e.g. new changes replicating, user went back online)
 			}).on('denied', function (err) {
 				// a document failed to replicate, e.g. due to permissions
-			}).on('complete', function (info) {
-				// handle complete
-				console.log('pullTileCache complete!\n' + JSON.stringify(info, null, 2));
-			}).on('error', function (err) {
-				// handle error
+				if (map) {
+					map.fireEvent('download:denied', err);
+				}
+				//this.fire('download:denied', err);
+			}).on('complete', function (info) { // handle complete
+				//console.log('downloadTileCache complete!\n' + JSON.stringify(info, null, 2));
+				if (map) {
+					map.fireEvent('download:complete', info);
+				}
+				//this.fire('download:complete', info);
+			}).on('error', function (err) { // handle error
 				console.warn(err);
+				if (map) {
+					map.fireEvent('download:error', err);
+				}
+				//this.fire('download:error', {'error':err});
 			});
 
 		}
+	}, // end of downloadTileCache()
 
+	cancelDownloadTileCache : function() {
+		if (this._download_handler) {
+			console.log('cancelDownloadTileCache()');
+			this._download_handler.cancel();
+		}
 	}
-
 
 });
 

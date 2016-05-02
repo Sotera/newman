@@ -1,3 +1,18 @@
+/**
+ * returns true if the element is visible or false otherwise
+ * @param element-id
+ * @returns true if the element (referenced by id) is visible
+ */
+function isElementVisible(element_id) {
+  var element = document.getElementById( element_id );
+  if (element) {
+    var rect = element.getBoundingClientRect();
+    var viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+    return !(rect.bottom < 0 || rect.top - viewHeight >= 0);
+  }
+  return false;
+}
+
 String.prototype.replaceAll = function(search, replacement) {
   var target = this;
   return target.replace(new RegExp(search, 'g'), replacement);

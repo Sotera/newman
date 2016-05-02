@@ -39,10 +39,10 @@ var newman_geo_email_sender = (function () {
    */
   function updateEmailDocGeoLoc(response) {
 
+    clearAllEmailDocGeoLoc();
+
     if( response.XOIP_locations && response.XOIP_locations.length > 0 ) {
 
-      email_id_list = [];
-      email_geo_loc_map = {};
       _.each(response.XOIP_locations, function (element) {
         var datetime = element.datetime;
         var subject = element.subject;
@@ -87,6 +87,11 @@ var newman_geo_email_sender = (function () {
       email_id_list.push(doc_id);
       email_geo_loc_map[doc_id] = geo_obj;
     }
+  }
+
+  function clearAllEmailDocGeoLoc() {
+    email_id_list.length = 0;
+    email_geo_loc_map = {};
   }
 
   /**
