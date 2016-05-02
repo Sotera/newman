@@ -1,4 +1,21 @@
 /**
+ * converts a string to an unicode-string
+ * @param string
+ * @returns unicode-string
+ */
+function toUnicode(theString) {
+  var unicodeString = '';
+  for (var i=0; i < theString.length; i++) {
+    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+    while (theUnicode.length < 4) {
+      theUnicode = '0' + theUnicode;
+    }
+    theUnicode = '\\u' + theUnicode;
+    unicodeString += theUnicode;
+  }
+  return unicodeString;
+}
+/**
  * returns true if the element is visible or false otherwise
  * @param element-id
  * @returns true if the element (referenced by id) is visible
