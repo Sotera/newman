@@ -320,7 +320,7 @@ var newman_graph_email = (function () {
     email_analytics_content.open();
 
     // populate data-table
-    $('#document_count').text(filtered_response.rows.length);
+    $('#document_count').text(filtered_response.query_hits);
     newman_datatable_email.populateDataTable( filtered_response.rows )
     if (starred_email_doc_list ) {
       newman_datatable_email.setStarredEmailDocumentList(starred_email_doc_list);
