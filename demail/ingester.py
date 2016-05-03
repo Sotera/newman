@@ -9,6 +9,8 @@ import json
 import os
 import sys
 import datetime
+import uuid
+import time
 
 from es_search import initialize_email_addr_cache
 from newman.utils.file import rm, spit
@@ -80,6 +82,14 @@ def extract(*args, **kwargs):
     tangelo.content_type("application/json")
     return {'log' : logname }
 
+def get_ingest_id():
+    '''
+    create a time based uuid1. can get time back with uuid.time
+    :return: json containing the id
+    '''
+    tangelo.content_type("application/json")
+    return {"ingest_id" : str(uuid.uuid1(clock_seq=long(time.time()*100000000)))}
+
 def list():
     path = "{}/".format(ingest_parent_dir)
     _, dirnames, filenames = os.walk(path).next()
@@ -87,8 +97,9 @@ def list():
     return { 'items' : filenames }    
 
 get_actions = {
-    "list" : list
-}    
+    "list" : list,
+    "ingest_id" : get_ingest_id
+}
 
 actions = {
     "extract" : extract
