@@ -25,16 +25,23 @@ def fmtNow():
     return datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')
 
 '''
-ingest-id - email address to index
+case-id - used to group multiple ingests
+ingest-id - id for a single execution of ingest
+alternate-id - product_id or external id reference
+label - user label for ingest
+
 file - name of file to ingest
 type - type of ingest pst|mbox
 '''
 def extract(*args, **kwargs):
     cherrypy.log("search.extract(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
 
-    ingest_id=kwargs.get("ingest-id")
-    ingest_file=kwargs.get("file")
-    type=kwargs.get("type", "pst")
+    case_id = kwargs.get("case_id")
+    ingest_id = kwargs.get("ingest_id")
+    alt_ref_id = kwargs.get("alt_ref_id")
+    label = kwargs.get("label")
+    ingest_file = kwargs.get("file")
+    type = kwargs.get("type", "pst")
 
     # path = "{}/{}".format(ingest_parent_dir, type)
     if not ingest_id or not type or not ingest_file:
@@ -52,7 +59,7 @@ def extract(*args, **kwargs):
 
     def extract_thread():
         try:
-            args = ["./bin/ingest.sh", ingest_id, ingest_parent_dir, ingest_file, type]
+            args = ["./bin/ingest.sh", ingest_id, ingest_parent_dir, ingest_file, type, case_id, alt_ref_id, label]
 
             cherrypy.log("running ingest: {}".format(" ".join(args)))
             spit(service_status_log, "[Running] {} \n".format(" ".join(args)))
@@ -94,7 +101,7 @@ def get_ingest_id():
     tangelo.content_type("application/json")
     u = uuid.uuid1(clock_seq=long(time.time()*1e9))
     dt = datetime.datetime.fromtimestamp((u.time - 0x01b21dd213814000L)*100/1e9)
-    str_time = dt.strftime('%Y/%m/%dT%H:%M:%S')
+    str_time = dt.strftime('%Y-%m-%dT%H:%M:%S')
     return {"ingest_id" : str(u), "datetime" : str_time}
 
 def list():
