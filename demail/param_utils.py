@@ -3,6 +3,11 @@ import re
 from newman.newman_config import default_min_timeline_bound, default_max_timeline_bound
 from newman.es_connection import getDefaultDataSetID
 
+def parseParamDataSetIds( **kwargs ):
+    tangelo.log("parseParamDataSetIds(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    data_set_id = kwargs.get('data_set_id', '').split(',')
+    return data_set_id
+
 def parseParamDatetime( **kwargs ):
     tangelo.log("parseParamDatetime(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     data_set_id = kwargs.get('data_set_id', getDefaultDataSetID())
@@ -11,9 +16,10 @@ def parseParamDatetime( **kwargs ):
     end_datetime = str(kwargs.get('end_datetime', default_max_timeline_bound()))
 
     size = kwargs.get('size', 20)
-    
+
     if data_set_id == 'default_data_set':
         data_set_id = getDefaultDataSetID()
+
     if start_datetime == '1970-01-01':
         start_datetime = default_min_timeline_bound()   
     if end_datetime == 'now':
@@ -29,6 +35,12 @@ def parseParamEmailAddress( **kwargs ):
     tangelo.log("\tkey_list[] = %s" % str(key_list))
     
     return key_list
+
+def parseParamIngestIds( **kwargs ):
+    tangelo.log("parseParamIngestIds(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    ingest_ids = kwargs.get('ingest_ids', '').split(',')
+    return ingest_ids
+
 
 '''
 returns None|True|False

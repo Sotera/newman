@@ -49,40 +49,85 @@ def _search_ranked_email_addrs(index, start, end, size):
     # tangelo.log("getRankedEmails(resp: %s)" % (resp))
     return resp
 
+
+def initialize_email_addr_cache(ingest_ids, update=False):
+    '''
+    Initialize the cache --
+    :param ingest_ids: comma seperated list of ingest_ids
+    :param update:
+    :return:
+    '''
+    _email_addr_cache_fields= ["community", "community_id", "addr", "received_count", "sent_count", "attachments_count", "ingest_id"]
+
+    for ingest_id in ingest_ids.split(","):
+        if ingest_id in _EMAIL_ADDR_CACHE and not update:
+            tangelo.log("APPLICATION CACHE -- index=%s"% ingest_id)
+            continue
+
+        _EMAIL_ADDR_CACHE_LOCK.acquire()
+        try:
+            tangelo.log("INITIALIZING CACHE -- index=%s"% ingest_id)
+            global _EMAIL_ADDR_CACHE
+
+            body={"query" : {"match_all" : {}}}
+
+            num = count(ingest_id,"email_address")
+            print num
+            addrs = es().search(index=ingest_id, doc_type="email_address", size=num, fields=_email_addr_cache_fields, body=body)
+            addr_index = {f["addr"][0] : f for f in [hit["fields"] for hit in addrs["hits"]["hits"]]}
+            _EMAIL_ADDR_CACHE[ingest_id] = addr_index
+            tangelo.log("done: %s"% num)
+        except Exception as e:
+            tangelo.log("FAILED initializing cache for -- index={0} Exception={1}".format( ingest_id, e))
+        finally:
+            _EMAIL_ADDR_CACHE_LOCK.release()
+            tangelo.log("INITIALIZING CACHE COMPLETE! -- index=%s"% ingest_id)
+
+    return {"acknowledge" : "ok"}
+
+def get_cached_email_addr(index, addr):
+    return _EMAIL_ADDR_CACHE[index][addr]
+
+
 # This will generate the graph structure for a specific email address.  Will aply date filter and term query.
-def _build_graph_for_emails(index, emails, query_hits):
+def _build_graph_for_emails(data_set_id, emails, query_hits):
     nodes = []
     edge_map = {}
     addr_index = {}
 
-    total = count(index,"email_address")
+    total = count(data_set_id, "email_address")
     print total
 
+    # Initialize all datasets
+    initialize_email_addr_cache(data_set_id)
+
     for email in emails:
+        ingest_id = email["ingest_id"]
+
         from_addr = email["from"]
-        if from_addr not in _EMAIL_ADDR_CACHE[index]:
+        if from_addr not in _EMAIL_ADDR_CACHE[ingest_id]:
             tangelo.log("WARNING: From email address not found in cache <%s>" % email)
             continue;
 
         if from_addr not in addr_index:
-            nodes.append(_map_node(_EMAIL_ADDR_CACHE[index][from_addr],total))
+            nodes.append(_map_node(_EMAIL_ADDR_CACHE[ingest_id][from_addr],total))
             addr_index[from_addr] = len(nodes)-1
         for rcvr_addr in email["to"]+email["cc"]+email["bcc"]:
-            if rcvr_addr not in _EMAIL_ADDR_CACHE[index]:
+            if rcvr_addr not in _EMAIL_ADDR_CACHE[ingest_id]:
                 tangelo.log("WARNING: RCVR email address not found in cache <%s>" % rcvr_addr)
                 continue;
 
             if rcvr_addr not in addr_index:
-                nodes.append(_map_node(_EMAIL_ADDR_CACHE[index][rcvr_addr], total))
+                nodes.append(_map_node(_EMAIL_ADDR_CACHE[ingest_id][rcvr_addr], total))
                 addr_index[rcvr_addr] = len(nodes)-1
-            #TODO reduce by key instead of mapping?  src->target and sum on value
+
             edge_key = from_addr+"#"+rcvr_addr
             if edge_key not in edge_map:
                 edge_map[edge_key] = {"source" : addr_index[from_addr],"target": addr_index[rcvr_addr],"value": 1}
             else:
                 edge_map[edge_key]["value"]=edge_map[edge_key]["value"]+1
 
-    return {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in emails], "query_hits" : query_hits}
+    return {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in emails], "query_hits" : query_hits, "data_set_id" : data_set_id}
 
 # Build a graph with rows for a specific email address.
 def es_get_all_email_by_address(data_set_id, email_address, qs, start_datetime, end_datetime, encrypted, size):
@@ -99,6 +144,7 @@ def es_get_all_email_by_address(data_set_id, email_address, qs, start_datetime, 
     tangelo.log("search.get_graph_by_entity(attachment-query: %s)" % (query))
     attachments = _query_email_attachments(data_set_id, size, query)
     graph["attachments"] = attachments
+    graph["data_set_id"] = data_set_id
     return graph
 
 # Get all rows for two or more email addresses, results will be sorted by time asc
@@ -120,6 +166,8 @@ def es_get_all_email_by_conversation_forward_backward(data_set_id, sender, recip
     tangelo.log("es_search.es_get_all_email_by_conversation_forward_backward(attachment-query: %s)" % (query))
     attachments = _query_email_attachments(data_set_id, size, query)
     graph["attachments"] = attachments
+
+    graph["data_set_id"] = data_set_id
     return graph
 
 # Get all rows , graph, attachments for two or more email addresses attempt to center around the start_date
@@ -165,6 +213,7 @@ def es_get_conversation(data_set_id, sender, recipients, start_datetime, end_dat
     except ValueError:
         graph["attachments_index"] = -1
 
+    graph["data_set_id"] = data_set_id
     return graph
 
 
@@ -184,6 +233,7 @@ def es_get_all_email_by_community(data_set_id, community, email_addrs, qs, start
     tangelo.log("es_search.es_get_all_email_by_community(attachment-query: %s)" % (query))
     attachments = _query_email_attachments(data_set_id, size, query)
     graph["attachments"] = attachments
+    graph["data_set_id"] = data_set_id
 
     return graph
 
@@ -203,18 +253,19 @@ def es_get_all_email_by_topic(data_set_id, topic, email_addrs, qs, start_datetim
     tangelo.log("es_search.es_get_all_email_by_topic(attachment-query: %s)" % (query))
     attachments = _query_email_attachments(data_set_id, size, query)
     graph["attachments"] = attachments
+    graph["data_set_id"] = data_set_id
     return graph
 
 
 # GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
 # build a graph for a specific email address.
 # args should be a list of terms to search for in any document field
-def get_top_email_by_text_query(data_set_id, qs, start_datetime, end_datetime, encrypted, size):
+def get_top_email_by_text_query(data_set_id, ingest_ids, qs, start_datetime, end_datetime, encrypted, size):
 
     if not qs:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing search term(s)")
 
-    query  = _build_email_query(qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
+    query  = _build_email_query(ingest_ids=ingest_ids, qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
     tangelo.log("es_search.get_graph_for_text_query(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
@@ -226,36 +277,8 @@ def get_top_email_by_text_query(data_set_id, qs, start_datetime, end_datetime, e
     attachments = _query_email_attachments(data_set_id, size, query)
     graph["attachments"] = attachments
 
+    graph["data_set_id"] = data_set_id
     return graph
-
-def initialize_email_addr_cache(index, update=False):
-
-    if index in _EMAIL_ADDR_CACHE and not update:
-        tangelo.log("APPLICATION CACHE -- index=%s"% index)
-        return
-
-    _EMAIL_ADDR_CACHE_LOCK.acquire()
-    try:
-        tangelo.log("INITIALIZING CACHE -- index=%s"% index)
-        global _EMAIL_ADDR_CACHE
-        _email_addr_cache_fields= ["community", "community_id", "addr", "received_count", "sent_count", "attachments_count"]
-
-        body={"query" : {"match_all" : {}}}
-
-        num = count(index,"email_address")
-        print num
-        addrs = es().search(index=index, doc_type="email_address", size=num, fields=_email_addr_cache_fields, body=body)
-        addr_index = {f["addr"][0] : f for f in [hit["fields"] for hit in addrs["hits"]["hits"]]}
-        _EMAIL_ADDR_CACHE[index] = addr_index
-        tangelo.log("done: %s"% num)
-    finally:
-        _EMAIL_ADDR_CACHE_LOCK.release()
-        tangelo.log("INITIALIZING CACHE COMPLETE! -- index=%s"% index)
-
-    return {"acknowledge" : "ok"}
-
-def get_cached_email_addr(index, addr):
-    return _EMAIL_ADDR_CACHE[index][addr]
 
 
 import operator

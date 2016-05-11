@@ -3,7 +3,7 @@ import cherrypy
 
 from es_search import es_get_all_email_by_address, get_top_email_by_text_query, es_get_all_email_by_community, es_get_all_email_by_topic, es_get_conversation, es_get_all_email_by_conversation_forward_backward
 from newman.es_connection import getDefaultDataSetID
-from param_utils import parseParamDatetime, parseParamAllSenderAllRecipient, parseParamEmailSender, parseParamEmailRecipient, parseParam_email_addr, parseParamTopic, parseParamTextQuery,\
+from param_utils import parseParamDatetime, parseParamIngestIds, parseParamAllSenderAllRecipient, parseParamEmailSender, parseParamEmailRecipient, parseParam_email_addr, parseParamTopic, parseParamTextQuery,\
     parseParamDocumentUID, parseParamDocumentDatetime, parseParamEncrypted
 import urllib
 from newman.utils.functions import nth
@@ -15,6 +15,7 @@ def search(*path_args, **param_args):
     tangelo.log("search.search(path_args[%s] %s)" % (len(path_args), str(path_args)))
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
+    ingest_ids = parseParamIngestIds(**param_args)
 
     # TODO this needs to come from UI
     size = size if size >500 else 2500
@@ -28,9 +29,8 @@ def search(*path_args, **param_args):
         if len(path_args) == 1:
             return {"graph":{"nodes":[], "links":[]}, "rows":[]}
         elif len(path_args) >= 2:
-            # TODO remove hacky path_args - should come from params
-            qs=urllib.unquote(nth(path_args, 1, ''))
-            return get_top_email_by_text_query(data_set_id, qs, start_datetime, end_datetime, encrypted, size)
+
+            return get_top_email_by_text_query(data_set_id, ingest_ids, qs, start_datetime, end_datetime, encrypted, size)
     elif path_args[0] == "email":
         if len(path_args) == 1:
             return {"graph":{"nodes":[], "links":[]}, "rows":[]}

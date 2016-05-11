@@ -3,14 +3,9 @@ import re
 
 STRIP_NON_DIGITS_REGEXP= re.compile(r'[^\d.]+')
 
+
 def _has_phone_number_filter():
     return { "exists": { "field": "phone_numbers"}}
-
-'''
-Normalizes the phone number first
-'''
-def _phone_numbers_filter(phone_numbers=[]):
-    return _terms_filter('phone_numbers', [STRIP_NON_DIGITS_REGEXP.sub('', str(phone_number)) for phone_number in phone_numbers])
 
 def _has_geo_xoip_filter():
     return { "exists": { "field": "originating_locations.geo_coord"}}
@@ -23,6 +18,16 @@ def _terms_filter(field='', values=[]):
 
 def _term_filter(field='', value=None):
     return [] if (not field or not value) else [{"term" : { field : value}}]
+
+def _ingest_id_filter(ingest_ids=[]):
+    return _terms_filter('ingest_id', ingest_ids)
+
+'''
+Normalizes the phone number first
+'''
+def _phone_numbers_filter(phone_numbers=[]):
+    return _terms_filter('phone_numbers', [STRIP_NON_DIGITS_REGEXP.sub('', str(phone_number)) for phone_number in phone_numbers])
+
 
 # address_filter_mode = "union"|"intersect"|"conversation" ,
 #   union will match any emails with any of the addresses,
@@ -99,7 +104,9 @@ def _date_filter_not_equal(date_bounds=None):
 
 # TODO how do we apply the query_terms as a filter?  Seems that it makes sense to do this as a query only but
 # TODO it is possible we will want to use a term filter on "_all"
-def _build_filter(email_senders=[], email_rcvrs=[], qs='', topic=None, entity_dict={}, date_bounds=None, communities=[], date_mode_inclusive=True, address_filter_mode="union", starred=None, phone_numbers=[], has_phone_number_filter=False, has_geo_xoip_filter=False, encrypted=None):
+def _build_filter(ingest_ids=[], email_senders=[], email_rcvrs=[], qs='', topic=None, entity_dict={}, date_bounds=None, communities=[], date_mode_inclusive=True, address_filter_mode="union", starred=None, phone_numbers=[], has_phone_number_filter=False, has_geo_xoip_filter=False, encrypted=None):
+
+    ingest_ids_filter = [] if not ingest_ids else _ingest_id_filter(ingest_ids)
 
     # One of these addresses should apear on the email
     address_filter = [] if (not email_senders and not email_rcvrs) else [_addrs_filter(email_senders,email_rcvrs,email_rcvrs,email_rcvrs, address_filter_mode=address_filter_mode)]
@@ -128,6 +135,7 @@ def _build_filter(email_senders=[], email_rcvrs=[], qs='', topic=None, entity_di
     }
 
     bool_filter = filter["bool"]
+    bool_filter["must"] += ingest_ids
     bool_filter["must"] += address_filter
 
     bool_filter["must"] += date_range
@@ -162,7 +170,7 @@ def _build_filter(email_senders=[], email_rcvrs=[], qs='', topic=None, entity_di
 # address_filter_mode - see address_filter
 # sort_mode
 # attachments_only - set to true will only return emails with attachments
-def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='', topic=None, entity={}, date_bounds=None, communities=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True, address_filter_mode="union", attachments_only=False, encrypted=None, starred=None, phone_numbers=[], has_phone_number_filter=False, has_geo_xoip_filter=False):
+def _build_email_query(ingest_ids=[], email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='', topic=None, entity={}, date_bounds=None, communities=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True, address_filter_mode="union", attachments_only=False, encrypted=None, starred=None, phone_numbers=[], has_phone_number_filter=False, has_geo_xoip_filter=False):
 
     # This checks if the query text is a simple term or a query string and sets the correct portion
     term_query = { "match_all" : {} }
@@ -181,7 +189,7 @@ def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='
                     {
                         "filtered" : {
                             "query" : term_query,
-                            "filter" : _build_filter(email_senders=sender_addrs, email_rcvrs=recipient_addrs, topic=topic, entity_dict=entity, date_bounds=date_bounds, communities=communities, date_mode_inclusive=date_mode_inclusive, address_filter_mode=address_filter_mode, encrypted=encrypted, starred=starred, phone_numbers=phone_numbers, has_phone_number_filter=has_phone_number_filter, has_geo_xoip_filter=has_geo_xoip_filter)
+                            "filter" : _build_filter(ingest_ids=ingest_ids, email_senders=sender_addrs, email_rcvrs=recipient_addrs, topic=topic, entity_dict=entity, date_bounds=date_bounds, communities=communities, date_mode_inclusive=date_mode_inclusive, address_filter_mode=address_filter_mode, encrypted=encrypted, starred=starred, phone_numbers=phone_numbers, has_phone_number_filter=has_phone_number_filter, has_geo_xoip_filter=has_geo_xoip_filter)
                         }
                     }
                 ]

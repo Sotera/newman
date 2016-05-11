@@ -1,16 +1,14 @@
-import itertools
-import re
 import tangelo
 
 from newman.es_connection import es
 
 
 def get_graph_row_fields():
-    return ["id","tos","senders","ccs","bccs","datetime","subject","body","attachments.guid", "starred"]
+    return ["id","tos","senders","ccs","bccs","datetime","subject","body","attachments.guid","starred","case_id","ingest_id","alt_ref_id","label"]
 
 def _map_emails(fields):
     row = {}
-    row["num"] =  fields["id"][0]
+    row["email_id"] =  fields["id"][0]
     row["from"] = fields.get("senders",[""])[0]
     row["to"] = fields.get("tos", [])
     row["cc"] = fields.get("ccs", [])
@@ -18,7 +16,8 @@ def _map_emails(fields):
     row["datetime"] = fields.get("datetime",[""])[0]
     row["subject"] =  fields.get("subject",[""])[0]
     row["starred"] = fields.get("starred", [False])[0]
-    row["fromcolor"] =  "1950"
+    # TODO remove
+    # row["fromcolor"] =  "1950"
     row["attach"] =  str(len(fields.get("attachments.guid",[])))
     row["bodysize"] = len(fields.get("body",[""])[0])
     # row["directory"] = "deprecated",
@@ -26,6 +25,13 @@ def _map_emails(fields):
         if name.startswith("topic"):
             row["topic_idx"] = name.split(".")[1]
             row["topic_score"] = val[0]
+
+    # Collection meta
+    row["case_id"] = fields["case_id"][0]
+    row["ingest_id"] = fields["ingest_id"][0]
+    row["alt_ref_id"] = fields["alt_ref_id"][0]
+    row["label"] = fields["label"][0]
+
     return row
 
 def _map_emails_to_row(row):
@@ -39,14 +45,18 @@ def _map_node(email_addr, total_docs):
     node={}
     name = email_addr["addr"][0]
     node["community"] = email_addr.get("community", ["<address_not_specified>"])[0]
-    node["group"] =  email_addr["community_id"][0]
-    node["fromcolor"] =  str(email_addr["community_id"][0])
+    # TODO remove
+    # node["group"] =  email_addr["community_id"][0]
+    # TODO remove
+    # node["fromcolor"] =  str(email_addr["community_id"][0])
     node["name"] = name
     node["num"] =  email_addr["sent_count"][0] + email_addr["received_count"][0]
     node["rank"] = (email_addr["sent_count"][0] + email_addr["received_count"][0]) / float(total_docs)
     node["email_sent"] = (email_addr["sent_count"][0])
     node["email_received"] = (email_addr["received_count"][0])
-    node["directory"] = "deprecated"
+    node["ingest_id"] = (email_addr["ingest_id"][0])
+    # TODO remove
+    # node["directory"] = "deprecated"
     return node
 
 def _query_email_attachments(index, size, emails_query):
@@ -55,23 +65,28 @@ def _query_email_attachments(index, size, emails_query):
     attachments_resp = es().search(index=index, doc_type="emails", size=size, body=emails_query)
 
     email_attachments = []
-    for attachment_item in attachments_resp["hits"]["hits"]:
-        _source = attachment_item["_source"]
-        attachment_entry = [_source["id"],
-                             "PLACEHOLDER",
-                             _source["datetime"],
-                             _source.get("senders",""),
-                             ';'.join(_source.get("tos","")),
-                             ';'.join(_source.get("ccs","")),
-                             ';'.join(_source.get("bccs","")),
-                             _source.get("subject","")]
-        for attachment in _source["attachments"]:
-            l = list(attachment_entry)
-            l[1] = attachment["guid"]
-            l.append(attachment["filename"])
-            l.append(attachment["content_encrypted"])
-            l.append(0)
-            email_attachments.append(l)
+    try:
+        for attachment_item in attachments_resp["hits"]["hits"]:
+            _source = attachment_item["_source"]
+            email_entry = {"email_id" : _source["id"],
+                           "ingest_id": _source["ingest_id"],
+                           "case_id": _source["case_id"],
+                           "label": _source["label"],
+                           "datetime": _source["datetime"],
+                           "from" : _source.get("senders",[""])[0],
+                           "to" : ';'.join(_source.get("tos","")),
+                           "cc" : ';'.join(_source.get("ccs","")),
+                           "bcc" : ';'.join(_source.get("bccs","")),
+                           "subject" : _source.get("subject","")}
+            for attachment in _source["attachments"]:
+                attachment_entry = email_entry.copy()
+                attachment_entry["attachment_id"] = attachment["guid"]
+                attachment_entry["filename"] = attachment["filename"]
+                attachment_entry["content_encrypted"] = attachment["content_encrypted"]
+                attachment_entry["content_type"] = attachment["content_type"]
+                email_attachments.append(attachment_entry)
+    except KeyError as ke:
+        tangelo.log("_query_email_attachments.Query FAILED id={0}  - KeyError={1}".format(_source["id"], ke))
     return email_attachments
 
 # returns {"total":n "hits":[]}

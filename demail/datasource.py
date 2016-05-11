@@ -35,11 +35,12 @@ def listAllDataSet():
 
     tangelo.log("datasource.listAllDataSet()")
 
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**{})
+
     # Ignore index keys in ES that are not in the newman_app.conf
     # Find all the indexes that begin with the index loader prefix
     indexes = [_index_record(index) for index in index_list() if index in data_set_names() or index.startswith(index_creator_prefix())]
 
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**{})
 
     email_addrs = get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size)["emails"]
     email_addrs = {email_addr[0]:email_addr for email_addr in email_addrs}
@@ -66,7 +67,7 @@ def setSelectedDataSet(*args):
         return tangelo.HTTPStatusCode(400, "invalid service call - missing data_set_id")
 
     resp = initialize_email_addr_cache(data_set_id)
-    _current_data_set_selected = data_set_id
+
     return _index_record(data_set_id)
 
 actions = {

@@ -182,6 +182,7 @@ def get_email(index, email_id, qs=None):
         subject_translated = source.get("subject_translated",'')
         body_lang = source.get("body_lang",'en')
     else:
+        # Process highlighted text based on query box
         query = email_highlighting_query(email_id, highlight_query_string=qs)
         tangelo.log("es_email.get_email(highlighting-query: %s )" % (query))
 
@@ -217,6 +218,7 @@ def get_email(index, email_id, qs=None):
              ["".join(source["ccs_line"]), ";".join(source["ccs"])],
              ["".join(source["bccs_line"]), ";".join(source["bccs"])],
              subject,
+             # TODO wrapa in UI
              # Wrap in <pre>
              "<pre>"+body+"</pre>",
              [[f["guid"],f["filename"],f["content_encrypted"]] for f in source.get("attachments", [""])],
@@ -242,6 +244,7 @@ def get_email(index, email_id, qs=None):
                  ["".join(source["ccs_line"]), ";".join(source["ccs"])],
                  ["".join(source["bccs_line"]), ";".join(source["bccs"])],
                  subject_translated,
+                 # TODO wrapa in UI
                  # Wrap in <pre>
                  "<pre>"+body_translated+"</pre>",
                  [[f["guid"],f["filename"]] for f in source.get("attachments", [""])],
@@ -254,6 +257,13 @@ def get_email(index, email_id, qs=None):
                 entities_translated += [ [source["id"][0]+"_entity_"+str(i), type, i, val] for i,val in enumerate(source["entities"]["body_entities_translated"].get("entity_"+type, []), len(entities_translated))]
 
         resp["email_contents_translated"] = { "email" : email_translated, "entities": entities_translated, "lda_topic_scores":topic_scores, "original_lang": body_lang}
+
+    # Generic tracking metadata
+    resp["case_id"] = source["case_id"]
+    resp["ingest_id"] = source["ingest_id"]
+    resp["alt_ref_id"] = source["alt_ref_id"]
+    resp["label"] = source["label"]
+    resp["original_artifact"] = source["original_artifact"]
 
     return resp
 
