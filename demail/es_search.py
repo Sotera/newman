@@ -102,7 +102,7 @@ def _build_graph_for_emails(data_set_id, emails, query_hits):
     initialize_email_addr_cache(data_set_id)
 
     for email in emails:
-        ingest_id = email["ingest_id"]
+        ingest_id = email["original_ingest_id"]
 
         from_addr = email["from"]
         if from_addr not in _EMAIL_ADDR_CACHE[ingest_id]:
