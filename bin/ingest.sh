@@ -15,6 +15,7 @@ TYPE=$4
 CASE_ID=$5
 ALTERNATE_ID=$6
 LABEL=$7
+FORCE_LANGUAGE=$8
 
 #newman etl extract
 EXTRACTOR_HOME=/srv/software/pst-extraction-master/
@@ -33,8 +34,8 @@ cp $PARENT_DIR/$INGEST_ITEM $INGEST_DIR
 
 if [ "$TYPE" == "pst" ]; then
     echo "ingest pst"
-    ./bin/pst_all.sh $INGEST_ID $CASE_ID $ALTERNATE_ID $LABEL
+    ./bin/pst_all.sh $INGEST_ID $CASE_ID $ALTERNATE_ID $LABEL $FORCE_LANGUAGE
 else
     echo "ingest mbox"
-    ./bin/mbox_all.sh $INGEST_ID $CASE_ID $ALTERNATE_ID $LABEL
+    ./bin/mbox_all.sh $INGEST_ID $CASE_ID $ALTERNATE_ID $LABEL $FORCE_LANGUAGE
 fi

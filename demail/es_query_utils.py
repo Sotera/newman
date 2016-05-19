@@ -16,21 +16,19 @@ def _map_emails(fields):
     row["datetime"] = fields.get("datetime",[""])[0]
     row["subject"] =  fields.get("subject",[""])[0]
     row["starred"] = fields.get("starred", [False])[0]
-    # TODO remove
-    # row["fromcolor"] =  "1950"
     row["attach"] =  str(len(fields.get("attachments.guid",[])))
     row["bodysize"] = len(fields.get("body",[""])[0])
-    # row["directory"] = "deprecated",
+
     for name, val in fields.items():
         if name.startswith("topic"):
             row["topic_idx"] = name.split(".")[1]
             row["topic_score"] = val[0]
 
     # Collection meta
-    row["case_id"] = fields["case_id"][0]
-    row["ingest_id"] = fields["ingest_id"][0]
-    row["alt_ref_id"] = fields["alt_ref_id"][0]
-    row["label"] = fields["label"][0]
+    row["original_ingest_id"] = fields["ingest_id"][0]
+    row["original_case_id"] = fields["case_id"][0]
+    row["original_alt_ref_id"] = fields["alt_ref_id"][0]
+    row["original_label"] = fields["label"][0]
 
     return row
 
@@ -45,18 +43,12 @@ def _map_node(email_addr, total_docs):
     node={}
     name = email_addr["addr"][0]
     node["community"] = email_addr.get("community", ["<address_not_specified>"])[0]
-    # TODO remove
-    # node["group"] =  email_addr["community_id"][0]
-    # TODO remove
-    # node["fromcolor"] =  str(email_addr["community_id"][0])
     node["name"] = name
     node["num"] =  email_addr["sent_count"][0] + email_addr["received_count"][0]
     node["rank"] = (email_addr["sent_count"][0] + email_addr["received_count"][0]) / float(total_docs)
     node["email_sent"] = (email_addr["sent_count"][0])
     node["email_received"] = (email_addr["received_count"][0])
-    node["ingest_id"] = (email_addr["ingest_id"][0])
-    # TODO remove
-    # node["directory"] = "deprecated"
+    node["original_ingest_id"] = (email_addr["ingest_id"][0])
     return node
 
 def _query_email_attachments(index, size, emails_query):
@@ -68,16 +60,19 @@ def _query_email_attachments(index, size, emails_query):
     try:
         for attachment_item in attachments_resp["hits"]["hits"]:
             _source = attachment_item["_source"]
-            email_entry = {"email_id" : _source["id"],
-                           "ingest_id": _source["ingest_id"],
-                           "case_id": _source["case_id"],
-                           "label": _source["label"],
-                           "datetime": _source["datetime"],
-                           "from" : _source.get("senders",[""])[0],
-                           "to" : ';'.join(_source.get("tos","")),
-                           "cc" : ';'.join(_source.get("ccs","")),
-                           "bcc" : ';'.join(_source.get("bccs","")),
-                           "subject" : _source.get("subject","")}
+            email_entry = {
+                "email_id" : _source["id"],
+                "original_ingest_id": _source["ingest_id"],
+                "original_case_id": _source["case_id"],
+                "original_alt_ref_id": _source["alt_ref_id"],
+                "original_label": _source["label"],
+                "datetime": _source["datetime"],
+                "from" : _source.get("senders",[""])[0],
+                "to" : ';'.join(_source.get("tos","")),
+                "cc" : ';'.join(_source.get("ccs","")),
+                "bcc" : ';'.join(_source.get("bccs","")),
+                "subject" : _source.get("subject","")
+            }
             for attachment in _source["attachments"]:
                 attachment_entry = email_entry.copy()
                 attachment_entry["attachment_id"] = attachment["guid"]

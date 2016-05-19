@@ -42,6 +42,7 @@ def extract(*args, **kwargs):
     label = kwargs.get("label")
     ingest_file = kwargs.get("file")
     type = kwargs.get("type", "pst")
+    force_language = kwargs.get("force_language", "en")
 
     # path = "{}/{}".format(ingest_parent_dir, type)
     if not ingest_id or not type or not ingest_file:
@@ -59,7 +60,7 @@ def extract(*args, **kwargs):
 
     def extract_thread():
         try:
-            args = ["./bin/ingest.sh", ingest_id, ingest_parent_dir, ingest_file, type, case_id, alt_ref_id, label]
+            args = ["./bin/ingest.sh", ingest_id, ingest_parent_dir, ingest_file, type, case_id, alt_ref_id, label, force_language]
 
             cherrypy.log("running ingest: {}".format(" ".join(args)))
             spit(service_status_log, "[Running] {} \n".format(" ".join(args)))

@@ -28,6 +28,7 @@ def parseParamDatetime( **kwargs ):
     tangelo.log("\tdata_set_index '%s', start_date '%s', end_date '%s', size '%s'" % (data_set_id, start_datetime, end_datetime, size))
     return data_set_id, start_datetime, end_datetime, size
 
+# Deprecated - dont use pathparams
 def parseParamEmailAddress( **kwargs ):
     tangelo.log("parseParamEmailAddress(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     email_regex = re.compile("[^@]+@[^@]+\\.[^@]+")

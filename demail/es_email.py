@@ -134,7 +134,6 @@ def get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime,
     email_address = [map_email_addr(email_addr, total_docs) for email_addr in email_addrs['hits']['hits']]
     return {"emails": email_address }
 
-
 # hackish way to find if a is highlighted
 # return the names of highlighted
 # TODO also return the highlighted content so the attachment extracted text highlighting can be viewed
@@ -172,15 +171,18 @@ def get_email(index, email_id, qs=None):
     body='_DEFAULT_'
     subject='_DEFAULT_'
     highlighted_attachments = {}
+    attachments = []
 
     if not qs:
         email = es().get(index, doc_type="emails", id=email_id)
         source = email["_source"]
+        attachments = source.get("attachments", [])
         body = source["body"]
         body_translated = source.get("body_translated",'')
         subject = source["subject"]
         subject_translated = source.get("subject_translated",'')
         body_lang = source.get("body_lang",'en')
+        source.get("image")
     else:
         # Process highlighted text based on query box
         query = email_highlighting_query(email_id, highlight_query_string=qs)
@@ -188,6 +190,7 @@ def get_email(index, email_id, qs=None):
 
         email = es().search(index=index, doc_type='emails', body=query)
         source = email["hits"]["hits"][0]["_source"]
+        attachments = source.get("attachments", [])
         body_lang = source.get("body_lang",'en')
         highlight = email["hits"]["hits"][0].get("highlight", {})
 
@@ -197,7 +200,7 @@ def get_email(index, email_id, qs=None):
         subject = highlight.get('subject', [source['subject']])[0]
         subject_translated = highlight.get('subject_translated', [source.get('subject_translated','')])[0]
         # TODO highlighting attachments need to return content and further test this method
-        highlighted_attachments = _find_attachment_highlighting(highlight, source.get("attachments", [""]))
+        highlighted_attachments = _find_attachment_highlighting(highlight, attachments)
 
     body = _format_html(body)
     body_translated = _format_html(body_translated)
@@ -223,7 +226,8 @@ def get_email(index, email_id, qs=None):
              "<pre>"+body+"</pre>",
              [[f["guid"],f["filename"],f["content_encrypted"]] for f in source.get("attachments", [""])],
              source.get("starred", False),
-             highlighted_attachments
+             highlighted_attachments,
+             attachments.get("image_analytics", {})
              ]
     entities = []
     for type in ["person","location","organization","misc"]:
@@ -249,7 +253,8 @@ def get_email(index, email_id, qs=None):
                  "<pre>"+body_translated+"</pre>",
                  [[f["guid"],f["filename"]] for f in source.get("attachments", [""])],
                  source.get("starred", False),
-                 highlighted_attachments
+                 highlighted_attachments,
+                 attachments.get("image_analytics", {})
                  ]
         entities_translated = []
         for type in ["person","location","organization","misc"]:

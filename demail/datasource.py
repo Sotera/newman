@@ -1,7 +1,7 @@
 from newman.es_connection import es, index_list, getDefaultDataSetID
 
 from newman.utils.functions import nth
-from newman.newman_config import data_set_names, index_creator_prefix, index_creator_interval, index_creator_span
+from newman.newman_config import data_set_names, index_creator_prefix
 from es_search import initialize_email_addr_cache
 from es_email import get_ranked_email_address_from_email_addrs_index
 from series import get_datetime_bounds
@@ -16,20 +16,25 @@ def _index_record(index):
     emails_addrs_count = es().count(index=index, doc_type="email_address", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
     emails_attch_count = es().count(index=index, doc_type="attachments", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
 
+    # TODO Replace with a single query
+    hits = [es().search(index=dataset, doc_type=dataset, body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["hits"]["hits"][0] for dataset in index.split(",")]
 
     #TODO: still need to re-work the absolute date-time bounds and the suggested date-time bounds
     bounds = get_datetime_bounds(index)
 
     return {'data_set_id':index,
-           'data_set_label':index,
-           'data_set_document_count' : email_docs_count,
-           'data_set_node_count' : emails_addrs_count,
-           'data_set_attachment_count' : emails_attch_count,
-           'data_set_datetime_min' : bounds[0],
-           'data_set_datetime_max' : bounds[1],
-           'start_datetime_selected' : bounds[0],
-           'end_datetime_selected' : bounds[1]
-           }
+            'data_set_case_id' : "; ".join(hit["_source"]["case_id"] for hit in hits),
+            'data_set_ingest_id' : "; ".join(hit["_source"]["ingest_id"] for hit in hits),
+            'data_set_alt_ref_id' : "; ".join(hit["_source"]["alt_ref_id"] for hit in hits),
+            'data_set_label' : "; ".join(hit["_source"]["label"] for hit in hits),
+            'data_set_document_count' : email_docs_count,
+            'data_set_node_count' : emails_addrs_count,
+            'data_set_attachment_count' : emails_attch_count,
+            'data_set_datetime_min' : bounds[0],
+            'data_set_datetime_max' : bounds[1],
+            'start_datetime_selected' : bounds[0],
+            'end_datetime_selected' : bounds[1]
+            }
 
 def listAllDataSet():
 
@@ -46,17 +51,17 @@ def listAllDataSet():
     email_addrs = {email_addr[0]:email_addr for email_addr in email_addrs}
 
     return {
-            "data_set_selected": getDefaultDataSetID(),
-            "data_sets": indexes,
-            "top_hits": {
-                         "order_by":"rank",
-                         "email_addrs": email_addrs
-                        }
-           }
+        "data_set_selected": getDefaultDataSetID(),
+        "data_sets": indexes,
+        "top_hits": {
+            "order_by":"rank",
+            "email_addrs": email_addrs
+        }
+    }
 
 #GET /all
 def getAll(*args):
-    tangelo.content_type("application/json")    
+    tangelo.content_type("application/json")
     return listAllDataSet()
 
 #GET /dataset/<id>
