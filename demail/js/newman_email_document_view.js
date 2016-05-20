@@ -534,7 +534,8 @@ var newman_email_document_view = (function () {
         var body_text = contents.body;
 
         //console.log('body_text :\n' + JSON.stringify(body_text, null, 2));
-        body_text = body_text.replace(new RegExp('<pre>|</pre>>', 'g'), '');
+//        TODO remove -- no longer added by service layer
+//        body_text = body_text.replace(new RegExp('<pre>|</pre>>', 'g'), '');
         //console.log('new body_text :\n' + JSON.stringify(body_text, null, 2));
 
         var new_text_tokens = [];

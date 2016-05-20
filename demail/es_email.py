@@ -162,6 +162,26 @@ def _format_html(text):
     # Now replace the hacky delimeter tags with HTML
     return ret.replace('#_#HIGHLIGHT_START#_#','<em style="background-color: #ffff99;">').replace('#_#HIGHLIGHT_END#_#','</em>')
 
+_OCR_SEP  ="\n\n===============================OCR EXTRACTION=======================================\n"
+_TIKA_SEP ="\n\n===============================TIKA EXTRACTION======================================\n"
+
+def _format_body_pannel(email_body, attachments):
+    '''
+    Combine the body text with all the tika and ocr text
+    :param body: str
+    :param attachments:
+    :return: all text merged
+    '''
+
+    def text(attachment):
+        if "image_analytics" in attachment and "ocr_output" in attachment["image_analytics"]:
+            return _OCR_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["image_analytics"]["ocr_output"]
+        if "content" in attachment:
+            return _TIKA_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["content"]
+
+    body = email_body + "".join(text(attachment) for attachment in attachments)
+    return body
+
 def get_email(index, email_id, qs=None):
 
     # fields=["id","datetime","senders","senders_line","tos_line","ccs_line","bccs_line","subject","body","attachments.filename","entities.entity_organization","entities.entity_location","entities.entity_person","entities.entity_misc"]
@@ -221,13 +241,11 @@ def get_email(index, email_id, qs=None):
              ["".join(source["ccs_line"]), ";".join(source["ccs"])],
              ["".join(source["bccs_line"]), ";".join(source["bccs"])],
              subject,
-             # TODO wrapa in UI
-             # Wrap in <pre>
-             "<pre>"+body+"</pre>",
+             _format_body_pannel(body, attachments),
              [[f["guid"],f["filename"],f["content_encrypted"]] for f in source.get("attachments", [""])],
              source.get("starred", False),
              highlighted_attachments,
-             attachments.get("image_analytics", {})
+             [[attachment.get("filename", ""), attachment.get("image_analytics", {})] for attachment in attachments]
              ]
     entities = []
     for type in ["person","location","organization","misc"]:
@@ -248,13 +266,12 @@ def get_email(index, email_id, qs=None):
                  ["".join(source["ccs_line"]), ";".join(source["ccs"])],
                  ["".join(source["bccs_line"]), ";".join(source["bccs"])],
                  subject_translated,
-                 # TODO wrapa in UI
-                 # Wrap in <pre>
-                 "<pre>"+body_translated+"</pre>",
+                 body_translated,
                  [[f["guid"],f["filename"]] for f in source.get("attachments", [""])],
                  source.get("starred", False),
                  highlighted_attachments,
-                 attachments.get("image_analytics", {})
+                 ""
+                 # attachments.get("image_analytics", {})
                  ]
         entities_translated = []
         for type in ["person","location","organization","misc"]:
