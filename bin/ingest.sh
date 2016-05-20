@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-# TODO
-# cleanup linking and other files
-# Type should be pst|mbox
-
 set -e
 
 CURRECT_DIR=$(pwd)

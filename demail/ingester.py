@@ -12,6 +12,8 @@ import datetime
 import uuid
 import time
 
+from threading import Lock
+
 from es_search import initialize_email_addr_cache
 from newman.utils.file import rm, spit
 
@@ -20,6 +22,8 @@ base_dir = os.path.abspath("{}/../".format(webroot))
 work_dir = os.path.abspath("{}/../work_dir/".format(webroot))
 ingest_parent_dir = "/vagrant"
 index_prefix=".newman-"
+
+_INGESTER_LOCK=threading.Condition(threading.lock())
 
 def fmtNow():
     return datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')
@@ -34,6 +38,10 @@ file - name of file to ingest
 type - type of ingest pst|mbox
 '''
 def extract(*args, **kwargs):
+    global _INGESTER_LOCK
+
+    tangelo.content_type("application/json")
+
     cherrypy.log("search.extract(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
 
     case_id = kwargs.get("case_id")
@@ -59,36 +67,44 @@ def extract(*args, **kwargs):
     spit(service_status_log, "[Start] email address={}\n".format(ingest_id), True)
 
     def extract_thread():
-        try:
-            args = ["./bin/ingest.sh", ingest_id, ingest_parent_dir, ingest_file, type, case_id, alt_ref_id, label, force_language]
+        if not _INGESTER_LOCK.aquire(False):
+            spit(service_status_log, "Ingester is currently processing data, you must wait until current ingest is completed before ingesting again.  If you believe this is an error check the ingester logs.")
+            return
+        else:
+            try:
+                args = ["./bin/ingest.sh", ingest_id, ingest_parent_dir, ingest_file, type, case_id, alt_ref_id, label, force_language]
 
-            cherrypy.log("running ingest: {}".format(" ".join(args)))
-            spit(service_status_log, "[Running] {} \n".format(" ".join(args)))
+                cherrypy.log("running ingest: {}".format(" ".join(args)))
+                spit(service_status_log, "[Running] {} \n".format(" ".join(args)))
 
-            with open(ingester_log, 'w') as t:
-                kwargs = {'stdout': t, 'stderr': t, 'cwd': base_dir, 'bufsize' : 1 }
-                subp = subprocess.Popen(args, **kwargs)
-                out, err = subp.communicate()
+                with open(ingester_log, 'w') as t:
+                    kwargs = {'stdout': t, 'stderr': t, 'cwd': base_dir, 'bufsize' : 1 }
+                    subp = subprocess.Popen(args, **kwargs)
+                    out, err = subp.communicate()
 
-                # TODO should never see this line  - remove this
-                cherrypy.log("complete: {}".format(fmtNow()))
+                    # TODO should never see this line  - remove this
+                    cherrypy.log("complete: {}".format(fmtNow()))
 
-                rtn = subp.returncode
-                if rtn != 0:
-                    spit(service_status_log, "[Error] return with non-zero code: {} \n".format(rtn))
-                else:
-                    spit(service_status_log, "[Done Ingesting data.  Reloading the email_addr cache.]")
-                    initialize_email_addr_cache(ingest_id, update=True)
-                    spit(service_status_log, "[Complete.]")
-        except:
-            error_info = sys.exc_info()[0]
-            spit(service_status_log, "[Error] {}\n".format(error_info.replace('\n', ' ')))
-            # cherrypy.log(error_info)
+                    rtn = subp.returncode
+                    if rtn != 0:
+                        spit(service_status_log, "[Error] return with non-zero code: {} \n".format(rtn))
+                    else:
+                        spit(service_status_log, "[Done Ingesting data.  Reloading the email_addr cache.]")
+                        initialize_email_addr_cache(ingest_id, update=True)
+                        spit(service_status_log, "[Complete.]")
+            except:
+                error_info = sys.exc_info()[0]
+                spit(service_status_log, "[Error] {}\n".format(error_info.replace('\n', ' ')))
+            finally:
+                _INGESTER_LOCK.release()
 
-    thr = threading.Thread(target=extract_thread, args=())
-    thr.start()
-    tangelo.content_type("application/json")
-    return {'log' : logname }
+    if not _INGESTER_LOCK.locked():
+        thr = threading.Thread(target=extract_thread, args=())
+        thr.start()
+        return {'log' : logname }
+
+    return {'log' : logname, 'status' : "Ingester is currently processing data, you must wait until current ingest is completed before ingesting again.  If you believe this is an error check the ingester logs." }
+
 
 def get_ingest_id():
     '''
