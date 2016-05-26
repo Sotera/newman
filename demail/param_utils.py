@@ -95,6 +95,13 @@ def parseParamEmailIds( **kwargs ):
 
     return [x for x in email_ids if (x is not '' and x is not None)]
 
+def parseParamCommunityIds( **kwargs ):
+    tangelo.log("parseParamCommunityIds(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    value = kwargs.get('community_ids','')
+    community_ids = value.split(",")
+
+    return [x for x in community_ids  if (x is not '' and x is not None)]
+
 def parseParamPhoneNumbers( **kwargs ):
     tangelo.log("parseParamPhoneNumbers(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     value = kwargs.get('phone_numbers')

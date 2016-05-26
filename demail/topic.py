@@ -4,7 +4,7 @@ import cherrypy
 from newman.utils.functions import nth
 from urllib import unquote
 from es_topic import get_categories, get_dynamic_clusters
-from param_utils import parseParamDatetime, parseParamEmailAddress
+from param_utils import parseParamDatetime, parseParamEmailAddress, parseParamCommunityIds, parseParamTextQuery
 
 # GET /topic/<querystr>?data_set_id=<>&start_datetime=<>&end_datetime=<>&size=<>&algorithm=<>&analysis_field=<list of fields from ES>
 # analysis_field should be a field name in elasticsearch where the data to cluster is located.  This is optional as it defaults to "_source.body" but can be set to "_source.attachments.content" or "_all" or anything valid
@@ -14,19 +14,24 @@ def get_topics_by_query(*args, **kwargs):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
     email_address_list = parseParamEmailAddress(**kwargs);
 
+    community = parseParamCommunityIds(**kwargs)
+    qs=parseParamTextQuery(**kwargs)
 
-    # TODO -------------------------------------------------------------------------
-    # TODO  REMEMBER TO EVALUATE QUERY TERMS -- VERY IMPORTANT for good clustering!
-    # TODO -------------------------------------------------------------------------
-    query_terms=''
     # TODO set from UI
     analysis_field = kwargs.get("analysis_field","_source.body")
+    ndocs = kwargs.get("ndocs",0)
+    doc_ids= bool(kwargs.get("doc_ids",False))
+    qs_hint= kwargs.get("qs_hint",'')
+
+    # analysis_field = kwargs.get("ndocs",0)
+
     # TODO set from UI
-    num_returned = 20
+    n_clusters_returned = 50
 
-    clusters = get_dynamic_clusters(data_set_id, "emails", email_addrs=email_address_list, query_terms=query_terms, topic_score=None, entity={}, date_bounds=(start_datetime, end_datetime), cluster_fields=[analysis_field], cluster_title_fields=["_source.subject"], algorithm=algorithm, max_doc_pool_size=500)
 
-    return {"topics" : clusters[:num_returned]}
+    clusters, total_docs = get_dynamic_clusters(data_set_id, "emails", email_addrs=email_address_list, qs=qs, qs_hint=qs_hint, date_bounds=(start_datetime, end_datetime), community=community, cluster_fields=[analysis_field], cluster_title_fields=[analysis_field], algorithm=algorithm, max_doc_pool_size=size, docs_return_size=ndocs, doc_ids=doc_ids)
+
+    return {"topics" : clusters[:n_clusters_returned], "total_docs" : total_docs}
 
 #GET /category/<category>
 # returns topic in sorted order by the idx

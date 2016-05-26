@@ -3,7 +3,7 @@ from newman.es_connection import es
 from es_queries import _build_filter
 from es_queries import _build_email_query
 from operator import itemgetter
-
+import tangelo
 
 
 
@@ -14,8 +14,8 @@ from operator import itemgetter
 _lda_clusters={"query": { "match_all": {}},"sort":[{"idx":{"order": "asc" }}]}
 
 
-def _cluster_carrot2(index, type, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, cluster_fields=["_source.body"], cluster_title_fields=["_source.subject"], algorithm="lingo", max_doc_pool_size=500):
-    query = _build_email_query(email_addrs=email_addrs, qs=query_terms,  entity=entity, date_bounds=date_bounds)
+def _cluster_carrot2(index, type, email_addrs=[], qs='', qs_hint='', topic_score=None, community=[], entity={}, date_bounds=None, cluster_fields=["_source.body"], cluster_title_fields=["_source.subject"], algorithm="lingo", max_doc_pool_size=500, docs_return_size=0):
+    query = _build_email_query(email_addrs=email_addrs, qs=qs,  community=community, entity=entity, date_bounds=date_bounds)
     carrot_query = {
         "search_request": {
             "query": query["query"],
@@ -23,24 +23,35 @@ def _cluster_carrot2(index, type, email_addrs=[], query_terms='', topic_score=No
         },
         "algorithm":algorithm,
         "max_hits": 0,
-        "query_hint": query_terms,
+        "query_hint": qs_hint,
         "field_mapping": {
-            "title": cluster_title_fields,
+            "title": ["_source.sender", "_source.subject"],#cluster_title_fields,
             "content": cluster_fields
-        }
+        },
+        # Apply custom attributes for lingo | sta like this
+        # "attributes": {
+        #     "LingoClusteringAlgorithm.phraseLabelBoost": 1.5
+        # }
     }
 
     resp = es().transport.perform_request("POST", "/{}/{}/_search_with_clusters".format(index,type), {}, body=carrot_query)
     total_docs = min(resp[1]["hits"]["total"], max_doc_pool_size)
     return resp
 
+def chris_message_reader(id):
+    return ""
+
 # GET dynamic clusters based on algorithm of choice
-def get_dynamic_clusters(index, type, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, cluster_fields=["_source.body"], cluster_title_fields=["_source.subject"], algorithm="lingo", max_doc_pool_size=500):
-    resp = _cluster_carrot2(index, type, email_addrs, query_terms, topic_score, entity, date_bounds, cluster_fields=cluster_fields, cluster_title_fields=cluster_title_fields, algorithm=algorithm, max_doc_pool_size=max_doc_pool_size)
-    clusters = [[cluster["label"], cluster["score"], len(cluster["documents"])] for cluster in resp[1]["clusters"]]
+def get_dynamic_clusters(index, type, email_addrs=[], qs='', qs_hint='', topic_score=None, community=[], entity={}, date_bounds=None, cluster_fields=["_source.body"], cluster_title_fields=["_source.body"], algorithm="lingo", max_doc_pool_size=500, docs_return_size=0, doc_ids=False):
+    resp = _cluster_carrot2(index, type, email_addrs, qs, qs_hint, topic_score, community, entity, date_bounds, cluster_fields=cluster_fields, cluster_title_fields=cluster_title_fields, algorithm=algorithm, max_doc_pool_size=max_doc_pool_size, docs_return_size=docs_return_size)
+    # tangelo.log("resp:%s"%str(resp))
+    clusters = [[cluster["label"], cluster["score"], len(cluster["documents"]), cluster["documents"]] for cluster in resp[1]["clusters"]]
     total_cluster_docs=sum(cluster[2] for cluster in clusters)
     clusters = sorted(clusters, key=itemgetter(1), reverse=True)
-    return [[i, cluster[0], "{0:.2f}".format(round(100.0*cluster[2]/total_cluster_docs,2)), cluster[1], cluster[2]] for i, cluster in enumerate(clusters)]
+    tot = resp[1]["hits"]["total"]
+    # return [[i, cluster[0], "{0:.2f}".format(round(100.0*cluster[2]/total_cluster_docs,2)), cluster[1], cluster[2], cluster[3] if doc_ids else []] for i, cluster in enumerate(clusters)], tot
+    return [cluster[0] +", "+str(cluster[2]) for i, cluster in enumerate(clusters)], tot
+
 
 def _cluster_lda(num_clusters, email_addrs=[], query_terms='', entity_dict={}, topic_score=0.5, date_bounds=None):
     return {
