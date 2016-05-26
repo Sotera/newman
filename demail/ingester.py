@@ -8,22 +8,28 @@ import cherrypy
 import json
 import os
 import sys
+import traceback
 import datetime
 import uuid
 import time
 
-from threading import Lock
-
 from es_search import initialize_email_addr_cache
 from newman.utils.file import rm, spit
+from newman.newman_config import index_creator_prefix
+
 
 webroot = cherrypy.config.get("webroot")
 base_dir = os.path.abspath("{}/../".format(webroot))
 work_dir = os.path.abspath("{}/../work_dir/".format(webroot))
 ingest_parent_dir = "/vagrant"
-index_prefix=".newman-"
 
-_INGESTER_LOCK=threading.Condition(threading.lock())
+_INGESTER_LOCK=threading.Lock()
+_INGESTER_CONDITION=threading.Condition(_INGESTER_LOCK)
+
+# TODO need to add an ingest id for monitoring specific ingests
+def ingest_status(*args, **kwargs):
+    tangelo.content_type("application/json")
+    return {"status" : "Currently ingesting." if _INGESTER_LOCK.locked() else "Ingester available."}
 
 def fmtNow():
     return datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')
@@ -36,9 +42,10 @@ label - user label for ingest
 
 file - name of file to ingest
 type - type of ingest pst|mbox
+{"case_id" : "email@x.y_case", "ingest_id" : "email@x.y", "alt_ref_id" : "email@x.y_ref", "label":"email@x.y_label", "file" : "yipsusan@gmail.com.mbox", "type":"mbox", "force_language":"en"}
 '''
 def extract(*args, **kwargs):
-    global _INGESTER_LOCK
+    global _INGESTER_CONDITION
 
     tangelo.content_type("application/json")
 
@@ -57,7 +64,7 @@ def extract(*args, **kwargs):
         raise TypeError("Encountered a 'None' value for 'email', 'type', or 'ingest_file!'")
 
     # Add the prefix for the newman indexes
-    ingest_id = index_prefix+ingest_id
+    ingest_id = index_creator_prefix() + ingest_id
 
     logname = "{}_{}".format(type, fmtNow())
     ingester_log = "{}/{}.ingester.log".format(work_dir, logname)
@@ -67,11 +74,11 @@ def extract(*args, **kwargs):
     spit(service_status_log, "[Start] email address={}\n".format(ingest_id), True)
 
     def extract_thread():
-        if not _INGESTER_LOCK.aquire(False):
-            spit(service_status_log, "Ingester is currently processing data, you must wait until current ingest is completed before ingesting again.  If you believe this is an error check the ingester logs.")
-            return
-        else:
-            try:
+        try:
+            if not _INGESTER_CONDITION.acquire(False):
+                spit(service_status_log, "Ingester is currently processing data, you must wait until current ingest is completed before ingesting again.  If you believe this is an error check the ingester logs.")
+                return
+            else:
                 args = ["./bin/ingest.sh", ingest_id, ingest_parent_dir, ingest_file, type, case_id, alt_ref_id, label, force_language]
 
                 cherrypy.log("running ingest: {}".format(" ".join(args)))
@@ -92,11 +99,13 @@ def extract(*args, **kwargs):
                         spit(service_status_log, "[Done Ingesting data.  Reloading the email_addr cache.]")
                         initialize_email_addr_cache(ingest_id, update=True)
                         spit(service_status_log, "[Complete.]")
-            except:
-                error_info = sys.exc_info()[0]
-                spit(service_status_log, "[Error] {}\n".format(error_info.replace('\n', ' ')))
-            finally:
-                _INGESTER_LOCK.release()
+        except Exception as e:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            spit(service_status_log, "[Error] <{}>\n".format(e))
+            tb = traceback.extract_tb(exc_traceback)
+            spit(service_status_log,"[Error] <{}>\n".format(tb))
+        finally:
+            _INGESTER_CONDITION.release()
 
     if not _INGESTER_LOCK.locked():
         thr = threading.Thread(target=extract_thread, args=())
@@ -124,12 +133,13 @@ def get_ingest_id():
 def list():
     path = "{}/".format(ingest_parent_dir)
     _, dirnames, filenames = os.walk(path).next()
-    tangelo.content_type("application/json")    
-    return { 'items' : filenames }    
+    tangelo.content_type("application/json")
+    return { 'items' : filenames }
 
 get_actions = {
     "list" : list,
-    "ingest_id" : get_ingest_id
+    "ingest_id" : get_ingest_id,
+    "status" : ingest_status
 }
 
 actions = {
