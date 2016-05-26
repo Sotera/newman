@@ -208,10 +208,14 @@ def es_get_conversation(data_set_id, sender, recipients, start_datetime, end_dat
 
     # Find the first index in the attachment array where the current emails attachments start or -1
     graph["attachments"] = attachments_desc+attachments_asc
-    try:
-        graph["attachments_index"] = [attach[0] for attach in graph["attachments"]].index(document_uid)
-    except ValueError:
-        graph["attachments_index"] = -1
+
+    def find_attch():
+        for i,attch in enumerate(graph["attachments"]):
+            if attch["email_id"] == document_uid:
+                return i
+        return -1
+
+    graph["attachments_index"] = find_attch()
 
     graph["data_set_id"] = data_set_id
     return graph
