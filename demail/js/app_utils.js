@@ -53,11 +53,41 @@ function applyGeoOffset( geo_value ) {
 }
 
 /**
- * return a deep-copy of the argument
+ * return a separated-string representation of the argument object keys
+ * @param map
+ * @param separator
+ * @returns a separated-string representation of the argument object keys
+ */
+function getObjectKeysAsString(map, separator) {
+  if (_.isEmpty(map)) {
+    return '';
+  }
+
+  //console.log('getObjectKeysAsString(...)\n' + JSON.stringify(map, null, 2) + '\nseparator "' + separator + '"');
+
+  var key_list = '';
+  _.each(map, function (value, key) {
+    key_list += (key + ' ');
+  });
+  key_list = key_list.trim();
+
+  if (separator) {
+    key_list = key_list.replace(/[ \u00A0]/g, separator);
+  }
+  else {
+    key_list = key_list.replace(/[ \u00A0]/g, ',');
+  }
+
+  return key_list;
+}
+
+/**
+ * return a file-type category
  * @param file-extension
  * @returns file-type category of 'image', 'pdf', 'powerpoint', 'word', 'excel', or 'other'
  */
 function getDocTypeByExt( extension ) {
+
   var contains = (function(ext, file_ext_list) {
     return _.any(file_ext_list, function(file_ext) {
       return ext.localeCompare(file_ext) === 0;
@@ -65,28 +95,29 @@ function getDocTypeByExt( extension ) {
   });
 
   if (extension) {
+    var lower_case_ext = extension.toLowerCase();
     //img
-    if (contains(extension, ['jpg', 'jpeg', 'png', 'bmp', 'tiff', 'png'])) {
+    if (contains(lower_case_ext, ['jpg', 'jpeg', 'png', 'bmp', 'tiff', 'png'])) {
       return "image";
     }
 
     //pdf
-    if (contains(extension, ['pdf'])) {
+    if (contains(lower_case_ext, ['pdf'])) {
       return "pdf";
     }
 
     //ppt
-    if (contains(extension, ['ppt', 'pptx'])) {
+    if (contains(lower_case_ext, ['ppt', 'pptx'])) {
       return "powerpoint";
     }
 
     //word
-    if (contains(extension, ['doc', 'docx'])) {
+    if (contains(lower_case_ext, ['doc', 'docx'])) {
       return "word";
     }
 
     //excel
-    if (contains(extension, ['xls', 'xlx', 'xlsx'])) {
+    if (contains(lower_case_ext, ['xls', 'xlx', 'xlsx'])) {
       return "excel";
     }
 

@@ -241,8 +241,8 @@ def get_email(index, email_id, qs=None):
              ["".join(source["ccs_line"]), ";".join(source["ccs"])],
              ["".join(source["bccs_line"]), ";".join(source["bccs"])],
              subject,
-             _format_body_pannel(body, attachments),
-             [[f["guid"],f["filename"],f["content_encrypted"]] for f in source.get("attachments", [""])],
+             body,
+             [[f["guid"],f["filename"],f.get("content_encrypted", False)] for f in source.get("attachments", [""])],
              source.get("starred", False),
              highlighted_attachments,
              [[attachment.get("filename", ""), attachment.get("image_analytics", {})] for attachment in attachments]

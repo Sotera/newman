@@ -1,0 +1,44 @@
+.app-text-icon {
+    font-family: FontAwesome !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    text-decoration: inherit !important;
+}
+
+.btn-histogram {
+    padding: 2px 3px 2px 3px;
+    position: relative;
+    font-weight: lighter;
+    font-size: 12px;
+    color: #000000;
+}
+
+.btn-histogram.outline {
+    padding: 2px 3px 2px 3px;
+    position: relative;
+    font-weight: lighter;
+    font-size: 12px;
+    color: #000000;
+    border-radius: 4px;
+    border: 1px solid #BBBBBB;
+}
+
+.btn-histogram.outline:hover, .btn-histogram.outline:focus, .btn-histogram.outline:active, .open > .dropdown-toggle.btn-histogram {
+    /*color: #006588;*/
+    color: #FFFFFF;
+    background-color: #1f77b4;
+    border-radius: 4px;
+    border: 1px solid #FFFFFF;
+}
+
+.btn-histogram.outline-inverse {
+    padding: 2px 3px 2px 3px;
+    position: relative;
+    font-weight: lighter;
+    font-size: 12px;
+    color: #FFFFFF;
+    background-color: #1f77b4;
+    border-radius: 4px;
+    border: 1px solid #FFFFFF;
+}
+

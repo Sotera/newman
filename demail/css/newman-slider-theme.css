@@ -14,7 +14,7 @@
 .ui-rangeSlider{
   height: 20px;
   line-height: 20px;
-  padding-top: 25px;
+  padding-top: 4px;
   font-size: smaller;
 }
 
@@ -194,21 +194,25 @@
 
 .ui-rangeSlider-label {
   padding: 2px 5px;
-  top: 2px;
+  top: 4px;
 
-  -moz-border-radius: 6px;
-       border-radius: 6px;
+  -moz-border-radius: 4px;
+       border-radius: 4px;
 
+  border: 1px solid #FFFFFF;
+  background: transparent;
+/*
   -webkit-box-shadow: 0px 1px 0px #c2c5d6;
      -moz-box-shadow: 0px 1px 0px #c2c5d6;
           box-shadow: 0px 1px 0px #c2c5d6;
+*/
 
   cursor: col-resize;
 
   color: white;
-  font-size: 12px;
+  font-size: 11px;
   height: 20px;
-  line-height: 20px;
+  line-height: 18px;
 
 }
 
@@ -218,11 +222,12 @@
   left: 50%;
   display: block;
   z-index:99;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
 
   margin-left: -5px;
-  border-top: 10px solid #888DA0;
+  /*border-top: 8px solid #888DA0; *//* down-arrow */
+  border-bottom: 8px solid #E1E1E1; /* up-arrow */
 }
 
 .ui-rangeSlider-disabled .ui-rangeSlider-label-inner{

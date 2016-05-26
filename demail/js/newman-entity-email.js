@@ -88,7 +88,7 @@ var newman_entity_email = (function () {
 
         var entities = response.entities;
 
-        var width = 380, height_bar = 15, margin_top = 8, margin_bottom = 2;
+        var width = 380, height_bar = 13, margin_top = 8, margin_bottom = 2;
         var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 100};
         width = width - margin.left - margin.right;
 
@@ -259,7 +259,7 @@ var newman_entity_email = (function () {
       });
     }
 
-    entity_set_as_string = entity_set_as_string.trim().replace(' ', ',');
+    entity_set_as_string = entity_set_as_string.trim().replace(/\s/g, ',');
 
     return entity_set_as_string;
   }
@@ -281,7 +281,7 @@ var newman_entity_email = (function () {
       }
 
       if(entity_set_as_string) {
-        entity_set_as_string = entity_set_as_string.trim().replace(' ', ',');
+        entity_set_as_string = entity_set_as_string.trim().replace(/\s/g, ',');
         var key = 'entities.body_entities.entity_organization'
         if (url_path.indexOf('?') > 0) {
           url_path += '&' + key + '=' + entity_set_as_string;
@@ -300,7 +300,7 @@ var newman_entity_email = (function () {
       }
 
       if(entity_set_as_string) {
-        entity_set_as_string = entity_set_as_string.trim().replace(' ', ',');
+        entity_set_as_string = entity_set_as_string.trim().replace(/\s/g, ',');
         var key = 'entities.body_entities.entity_person'
         if (url_path.indexOf('?') > 0) {
           url_path += '&' + key + '=' + entity_set_as_string;
@@ -319,7 +319,7 @@ var newman_entity_email = (function () {
       }
 
       if(entity_set_as_string) {
-        entity_set_as_string = entity_set_as_string.trim().replace(' ', ',');
+        entity_set_as_string = entity_set_as_string.trim().replace(/\s/g, ',');
         var key = 'entities.body_entities.entity_location'
         if (url_path.indexOf('?') > 0) {
           url_path += '&' + key + '=' + entity_set_as_string;
@@ -338,7 +338,7 @@ var newman_entity_email = (function () {
       }
 
       if(entity_set_as_string) {
-        entity_set_as_string = entity_set_as_string.trim().replace(' ', ',');
+        entity_set_as_string = entity_set_as_string.trim().replace(/\s/g, ',');
         var key = 'entities.body_entities.entity_misc'
         if (url_path.indexOf('?') > 0) {
           url_path += '&' + key + '=' + entity_set_as_string;
@@ -559,7 +559,7 @@ var newman_service_entity_search = (function () {
       if (entity_set_as_string.length > 30) {
         entity_set_as_string = entity_set_as_string.substring(0, 30);
       }
-      history_nav.appendUI(service_url, 'entity', entity_set_as_string);
+      app_nav_history.appendHist(service_url, 'entity', entity_set_as_string);
     });
   }
 

@@ -29,26 +29,27 @@ var newman_email_attach = (function () {
       console.log( 'email_attach_list :\n' + JSON.stringify(response_attachment_list, null, 2));
     }
 
+    /*
     var email_attach_list = _.mapcat(response_attachment_list, function(response){
       var o = _.object(["email_id", "attach_id", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"], response);
-      var copy = _.omit(o, "attach");
+      var copy = _.omit(o, "filename");
       var attachments = _.map(o.attach.split(';'), function(attach) {
         return _.extend(_.clone(copy), {'attach': attach });
       });
       return attachments;
     });
-
     if (debug_enabled) {
       console.log( 'email_attach_list :\n' + JSON.stringify(email_attach_list, null, 2));
     }
+    */
 
     $('#attach-table').empty();
     $('#attach-table').append($('<thead>')).append($('<tbody>'));
 
     var lastSort = "";
     var thead = d3.select("#attach-table").select("thead").append("tr").selectAll("tr")
-      //.data(['Date', 'Subject', 'Attachments', 'Type','Email'])
-      .data(['Date', 'Subject', 'Attachments', 'Type'])
+      //.data(['Date', 'Subject', 'Attachment', 'Type','Email'])
+      .data(['Date', 'Subject', 'Attachment', 'Type'])
       .enter()
       .append("th")
       .text( function(d) {
@@ -60,27 +61,28 @@ var newman_email_attach = (function () {
         d3.select("#attach-table").select("tbody").selectAll("tr").sort(function(a,b){
           if (i === 3 ){
             var extfn = (function(d){
-              var i = d.attach.toLowerCase().lastIndexOf(".");
-              var l = d.attach.length;
-              return d.attach.toLowerCase().substr(i+1, l - i);
+              var i = d.filename.toLowerCase().lastIndexOf(".");
+              var l = d.filename.length;
+              return d.filename.toLowerCase().substr(i+1, l - i);
             });
             var exta = extfn(a), extb = extfn(b);
             return exta.localeCompare(extb) * direction;
           }
-          var fields = ["datetime", "subject", "attach", "datetime", "datetime"];
+          var fields = ["datetime", "subject", "filename", "datetime", "datetime"];
           return a[fields[i]].localeCompare(b[fields[i]]) * direction;
         });
       });
 
 
-    var tr = d3.select("#attach-table").select("tbody").selectAll("tr").data(email_attach_list).enter().append("tr");
+    var tr = d3.select("#attach-table").select("tbody").selectAll("tr")
+      .data(response_attachment_list).enter().append("tr");
 
     var popover = image_preview_popover();
 
     tr.selectAll("td")
       .data(function(d) {
-        //return [d.datetime, d.subject, [d.attach_id, d.attach], [d.attach_id, d.attach], d.email_id]
-        return [[d.datetime, d.email_id], [d.subject, d.email_id], [d.attach_id, d.attach, d.email_id], [d.attach_id, d.attach, d.email_id]]
+        //return [d.datetime, d.subject, [d.attachment_id, d.filename], [d.attachment_id, d.filename], d.email_id]
+        return [[d.datetime, d.email_id], [d.subject, d.email_id], [d.attachment_id, d.filename, d.email_id], [d.attachment_id, d.filename, d.email_id]]
       })
       .enter()
       .append("td")
@@ -95,8 +97,8 @@ var newman_email_attach = (function () {
       .html(function(d, i){
 
         if (i == 0 || i == 1) {
-          var el = $('<div>').append(d[0]);
-          return el.html();
+          var col_1_row = $('<div>').append(d[0]);
+          return col_1_row.html();
         }
 
         if (i == 2){ // attachment link
@@ -104,17 +106,19 @@ var newman_email_attach = (function () {
           var attach_url = 'email/attachment/' + encodeURIComponent(d[0]);
           attach_url = newman_data_source.appendDataSource( attach_url );
 
-          var el = $('<div>').append($('<a>', { "target": "_blank" ,"href" : attach_url }).html(d[1]));
-          return el.html();
+          var col_2_row = $('<div>').append($('<a>', { "target": "_blank" ,"href" : attach_url }).html(d[1]));
+          return col_2_row.html();
         }
 
-        if (i == 3){
+        if (i == 3) {
+
           var ext = (function(){
             var i = d[1].toLowerCase().lastIndexOf(".");
             var l = d[1].length;
             return d[1].toLowerCase().substr(i+1, l - i);
           }());
-          var img = (function(){
+
+          var image_icon = (function() { // image icon
             var img = $('<img>').css('max-height', '50px').css('width','50px');
             var attach_image_url = 'email/attachment/' + encodeURIComponent(d[0]) + '/' + encodeURIComponent(d[1]);
             attach_image_url = newman_data_source.appendDataSource( attach_image_url );
@@ -130,8 +134,8 @@ var newman_email_attach = (function () {
 
           }());
 
-          var el = $('<div>').append(img);
-          return el.html();
+          var col_3_row = $('<div>').append(image_icon);
+          return col_3_row.html();
         }
 
         return d;
@@ -194,7 +198,7 @@ var newman_email_attach_request_all_by_sender = (function () {
         newman_email_attach.updateUIAttachmentTable( attachment_list );
 
         // add to work-flow-history
-        history_nav.appendUI(service_url, 'attachment', email_address);
+        app_nav_history.appendHist(service_url, 'attachment', email_address);
       }
     });
   }
@@ -215,13 +219,13 @@ var newman_email_attach_request_all_by_sender = (function () {
 
     var id = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
 
-    history_nav.push(id,
+    app_nav_history.push(id,
       label,
       '',
       url_path,
       field);
 
-    history_nav.refreshUI();
+    app_nav_history.refreshUI();
   }
 
 

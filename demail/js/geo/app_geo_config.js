@@ -32,7 +32,7 @@ var app_geo_config = (function () {
 
   }
 
-  function requestService( callback ) {
+  function requestGeoConfig( callback ) {
 
     var service_url = getServiceURL();
     $.get( service_url ).then(function (response) {
@@ -84,7 +84,7 @@ var app_geo_config = (function () {
   return {
     'getServiceURLBase' : getServiceURLBase,
     'getServiceURL' : getServiceURL,
-    'requestService' : requestService,
+    'requestGeoConfig' : requestGeoConfig,
     'getResponse' : getResponse,
     'setResponse' : setResponse,
     "enableAdvanceMode" : enableAdvanceMode,

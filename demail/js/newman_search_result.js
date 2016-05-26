@@ -80,6 +80,7 @@ function EmailSearchResult(_label,
     }
     return int_value;
   }
+
 }
 
 
@@ -87,7 +88,7 @@ EmailSearchResult.prototype = {
   constructor : EmailSearchResult,
 
   setUID : function( new_uid ) {
-    if (uid) {
+    if (new_uid) {
       this.uid = new_uid;
     }
   },

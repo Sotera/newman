@@ -347,7 +347,7 @@ var search_result = (function () {
   var onTreeTableRowClicked = function( element ) {
 
     if (element) {
-      history_nav.appendUI(element.url, element.search_field, element.label);
+      app_nav_history.appendHist(element.url, element.search_field, element.label);
 
       loadSearchResult(element.url);
     }
@@ -365,17 +365,17 @@ var search_result = (function () {
         data_list.sort(descendingPredicatByProperty('rank'));
         //console.log( 'data_list: ' + JSON.stringify(data_list, null, 2) );
 
-        var data_set_selected = newman_data_source.getSelected();
+        var dataset_selected_map = newman_data_source.getAllSelected();
 
         var root_result = getRoot();
         if (!root_result) {
-          var data_set_id = data_set_selected.uid;
+          var data_set_id = dataset_selected_map.uid;
           if (!data_set_id) {
             data_set_id = newman_data_source.getDefaultDataSourceID();
           }
 
           root_result = setRoot(
-            '(' + data_set_selected.label + ')',
+            '(' + dataset_selected_map.label + ')',
             '',
             'text',
             '',
@@ -538,7 +538,7 @@ var search_result = (function () {
               }
               var id = decodeURIComponent( element.url ).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',','_');
 
-              history_nav.push(id,
+              app_nav_history.push(id,
                                label,
                                '',
                                element.url,
@@ -773,16 +773,23 @@ function reloadDashboardSearchResult() {
   searchByField();
 }
 
-function initDashboardActivityTimeline() {
-  newman_datetime_range.initDateTimeRange();
-  newman_activity_outbound.displayUIActivityOutboundTopRanked();
-  newman_activity_inbound.displayUIActivityInboundTopRanked();
-  newman_activity_attachment.displayUIActivityAttachTopRanked();
+function clearSearchText() {
+
+  var text_search_field = $("#txt_search");
+  if (text_search_field) {
+    text_search_field.val( '' );
+  }
+
 }
 
-function reloadDashboardActivityTimeline() {
+function reloadDashboardActivityTimeline(timeline_init_enabled) {
+  /*
   newman_activity_outbound.displayUIActivityOutboundSelected();
   newman_activity_inbound.displayUIActivityInboundSelected();
+  */
+  if (timeline_init_enabled === true) {
+    newman_activity_email.displayUIActivity();
+  }
   newman_activity_attachment.displayUIActivityAttachSelected();
 }
 
@@ -825,7 +832,7 @@ function reloadDashboardFileTypeAttachment() {
 /**
  * draw dashboard charts and widgets
  */
-function initDashboardCharts() {
+function initDashboardCharts( is_first_init ) {
 
   /**
    *  initialize dashboard components and widgets
@@ -833,7 +840,7 @@ function initDashboardCharts() {
 
   //re-render activity-time-series
   //initDashboardActivityTimeline();
-  reloadDashboardActivityTimeline();
+  reloadDashboardActivityTimeline( is_first_init );
 
   //re-render entity analytics
   reloadDashboardEntityEmail();

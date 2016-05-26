@@ -267,14 +267,14 @@ var newman_datatable_email = (function () {
       }
 
       var exportable_icon = _non_starred_html;
-      var is_exportable = _email_doc_id_starred_map[ row.num ];
+      var is_exportable = _email_doc_id_starred_map[ row.email_id ];
       if (is_exportable === true) {
         exportable_icon = _starred_html;
       }
 
       //var date_text = row.datetime.substring(0, 10);
       var date_text = row.datetime;
-      return [date_text, row.from, recipient_count, row.bodysize, attach_count, row.subject, exportable_icon, row.num];
+      return [date_text, row.from, recipient_count, row.bodysize, attach_count, row.subject, exportable_icon, row.email_id];
 
     });
 

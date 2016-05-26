@@ -30,7 +30,7 @@ var newman_aggregate_filter = (function () {
   function refreshUI() { // update/reload UI components
 
     //trigger activities-overtime refresh
-    reloadDashboardActivityTimeline();
+    reloadDashboardActivityTimeline( true );
 
     //trigger entities refresh
     reloadDashboardEntityEmail();
@@ -125,9 +125,9 @@ var newman_aggregate_filter = (function () {
 
   function clearAllAggregateFilter() {
 
-    if (_aggregate_filter_list.length > 0) {
+    if (_aggregate_filter_list && _aggregate_filter_list.length > 0) {
       // clear all if previously contained any aggregate-filter
-      _aggregate_filter_list = [];
+      _aggregate_filter_list.length = 0;
 
       // refresh UI component
       refreshUI();

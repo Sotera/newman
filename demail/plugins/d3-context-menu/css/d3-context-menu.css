@@ -27,19 +27,23 @@
 	margin: 0px 2px 0px 2px;
 }
 
+.d3-context-menu ul li:hover {
+	background-color: #4677f8;
+	color: #fefefe;
+}
+
+/* customized menu title */
 .context-menu-title {
 	font: 12px Verdana, sans-serif;
-	color: #fefefe;
-	background-color: #0b4291;
+	/*color: #fefefe;*/
+	/*background-color: #0b4291;*/
+	color: #4B4B4B;
+	background-color: rgba(210, 210, 210, 0.6);
 	text-align: center;
 	display: inline-block;
 	margin: 0px 2px 0px 2px;
 	opacity: 1;
 	border-radius: 8px;
 	padding: 2px 6px !important;
-}
-
-.d3-context-menu ul li:hover {
-	background-color: #4677f8;
-	color: #fefefe;
+	pointer-events: none; !important;
 }

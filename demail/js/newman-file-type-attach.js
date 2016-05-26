@@ -73,7 +73,7 @@ var newman_file_type_attach = (function () {
       });
       colors =partial_color_0.concat(partial_color_1);
 
-        var width = 530, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
+        var width = 530, height_bar = 13, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
         var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
         width = width - margin.left - margin.right;
 

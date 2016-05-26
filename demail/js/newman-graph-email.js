@@ -87,7 +87,121 @@ var newman_graph_email = (function () {
       $(graph_ui_id).empty();
     }
 
+    // initialize search keyboard event
+    $('#txt_search').keyup(function (event) {
+
+      if (event.keyCode === 13) {
+        newman_datetime_range.setDatetimeBounds( newman_activity_email.getDatetimeBounds() );
+        searchByField();
+      }
+      event.preventDefault();
+    });
+
+    $("#search_form").submit(function (e) {
+      return false;
+    });
+
+    $('#email_group_conversation').on('click', group_email_conversation);
+    //$('#email_view_export_all').on('click', add_view_to_export);
+    //$('#email_view_export_all_remove').on('click', remove_view_from_export);
+
+    $('#top-entities').append(waiting_bar);
+
+    $("#txt_search_submit").click(function () {
+      newman_datetime_range.setDatetimeBounds( newman_activity_email.getDatetimeBounds() );
+      searchByField();
+    });
+
+    //on modal close event
+    $('#export_modal').on('hidden.bs.modal', function () {
+      $('#export_link_spin').show();
+      $('#export_download_link').hide();
+    });
+
+
+    $("#export_starred_set").click(function () {
+      newman_email_starred_request_export.requestService();
+    });
+
+    $("#color_by_community").click(function () {
+      //console.log($("#color_by_community").val());
+      recolornodes('community');
+    });
+
+    $("#color_by_domain").click(function () {
+      //console.log($("#color_by_domain").val());
+      recolornodes('domain');
+    });
+
+    $("#usetext").on("change", function () {
+      toggle_labels();
+    });
+
+    $("#rankval").click(function () {
+      console.log(d3.select("#rankval").property("checked"));
+      if (d3.select("#rankval").property("checked")) {
+        d3.selectAll("circle").style("opacity", function (d) {
+          return 0.2 + (d.rank);
+        });
+        d3.selectAll("circle").style("stroke-width", function (d) {
+          return 5 * (d.rank);
+        });
+      }
+      else {
+        d3.selectAll("circle").style("opacity", "100");
+        d3.selectAll("circle").style("stroke-width", "0");
+      }
+      //recolornodes('rank');
+    });
+
   }
+
+  /* deprecated since v2.11 */
+  /*
+  var highlight_target = (function () {
+    var groupId = data_source_selected_map.group;
+    var rank = data_source_selected_map.rank;
+    var highlight = function () {
+      //graph
+      d3.select("#g_circle_" + groupId).style("stroke", "#ffff00");
+      d3.select("#g_circle_" + groupId).style("stroke-width", function (d) {
+        return 10;
+      });
+      //email-table
+      $('#result_table tbody tr td:nth-child(2)').each(function (i, el) {
+        if (data_source_selected_map.email.localeCompare(el.innerText.trim()) == 0) {
+          $(el).addClass('highlight-td');
+        }
+      });
+    }
+
+    var unhighlight = function () {
+      //graph
+      d3.select("#g_circle_" + groupId).style("stroke", "#ff0000");
+      if (d3.select("#rankval").property("checked")) {
+        d3.select("#g_circle_" + groupId).style("opacity", function (d) {
+          return 0.2 + (rank);
+        });
+        d3.select("#g_circle_" + groupId).style("stroke-width", function (d) {
+          return 5 * (rank);
+        });
+      }
+      else {
+        d3.select("#g_circle_" + groupId).style("opacity", "100");
+        d3.select("#g_circle_" + groupId).style("stroke-width", "0");
+      }
+      //email-table
+      $('#result_table tbody tr td:nth-child(2)').each(function (i, el) {
+        $(el).removeClass('highlight-td');
+      });
+    };
+
+    return {
+      'highlight': highlight,
+      'unhighlight': unhighlight
+    }
+  }());
+  */
 
 
   function getTopCount() {
@@ -110,7 +224,7 @@ var newman_graph_email = (function () {
       }
 
       if(node_set_as_string) {
-        node_set_as_string = encodeURIComponent( node_set_as_string.trim().replace(' ', ',') );
+        node_set_as_string = encodeURIComponent( node_set_as_string.trim().replace(/\s/g, ',') );
         var key = 'sender'
         if (url_path.indexOf('?') > 0) {
           url_path += '&' + key + '=' + node_set_as_string;
@@ -142,7 +256,7 @@ var newman_graph_email = (function () {
       }
 
       if(node_set_as_string) {
-        node_set_as_string = encodeURIComponent( node_set_as_string.trim().replace(' ', ',') );
+        node_set_as_string = encodeURIComponent( node_set_as_string.trim().replace(/\s/g, ',') );
         var key = 'recipient'
         if (url_path.indexOf('?') > 0) {
           url_path += '&' + key + '=' + node_set_as_string;
@@ -251,7 +365,7 @@ var newman_graph_email = (function () {
       });
     }
 
-    node_set_as_string = node_set_as_string.trim().replace(' ', ',');
+    node_set_as_string = node_set_as_string.trim().replace(/\s/g, ',');
 
     return node_set_as_string;
   }
@@ -275,7 +389,7 @@ var newman_graph_email = (function () {
       });
     }
 
-    node_set_as_string = node_set_as_string.trim().replace(' ', ',');
+    node_set_as_string = node_set_as_string.trim().replace(/\s/g, ',');
 
     return node_set_as_string;
   }
@@ -417,7 +531,7 @@ var newman_graph_email_request_by_address = (function () {
       newman_graph_email.updateUIGraphView( response );
 
       // add to work-flow-history
-      history_nav.appendUI(service_url, 'email', email_address);
+      app_nav_history.appendHist(service_url, 'email', email_address);
     });
   }
 
@@ -506,8 +620,8 @@ var newman_graph_email_request_by_conversation_forward_backward = (function () {
 
       // add to work-flow-history
       var address_set_as_string = newman_graph_email.getAllSourceNodeSelectedAsString() + ' ' + newman_graph_email.getAllTargetNodeSelectedAsString();
-      address_set_as_string = address_set_as_string.trim().replace(' ', ',');
-      history_nav.appendUI(service_url, 'email', address_set_as_string);
+      address_set_as_string = address_set_as_string.trim().replace(/\s/g, ',');
+      app_nav_history.appendHist(service_url, 'email', address_set_as_string);
     });
   }
 
@@ -572,7 +686,7 @@ var newman_graph_email_request_by_community = (function () {
       newman_graph_email.updateUIGraphView( response );
 
       // add to work-flow-history
-      history_nav.appendUI(service_url, 'community', email_address);
+      app_nav_history.appendHist(service_url, 'community', email_address);
     });
   }
 
@@ -633,7 +747,7 @@ var newman_graph_email_request_by_topic = (function () {
 
       // add to work-flow-history
       var topic_set_as_string = newman_topic_email.getAllTopicSelectedAsString();
-      history_nav.appendUI(service_url, 'topic', topic_set_as_string);
+      app_nav_history.appendHist(service_url, 'topic', topic_set_as_string);
     });
   }
 
@@ -726,8 +840,8 @@ var newman_graph_email_request_by_conversation = (function () {
 
       // add to work-flow-history
       var address_set_as_string = newman_graph_email.getAllSourceNodeSelectedAsString() + ' ' + newman_graph_email.getAllTargetNodeSelectedAsString();
-      address_set_as_string = address_set_as_string.trim().replace(' ', ',');
-      history_nav.appendUI(service_url, 'conversation', address_set_as_string);
+      address_set_as_string = address_set_as_string.trim().replace(/\s/g, ',');
+      app_nav_history.appendHist(service_url, 'conversation', address_set_as_string);
     });
   }
 

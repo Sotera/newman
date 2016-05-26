@@ -15,7 +15,6 @@ var svg = d3.select("#graph_email").append("svg")
 var vis = svg.append('svg:g');
 
 var node_label_enabled = false;
-var data_source_selected = null;
 
 var doubleEncodeURIComponent= function(uri){
   return encodeURIComponent(encodeURIComponent(uri));
@@ -36,7 +35,7 @@ var bottom_panel= (function(){
     show();
 
     toggle_button.find("span").first().switchClass(icon_class_open, icon_class_close);
-    container.css("height", "calc(100% - 70px)").css("bottom", "0px"); // height : 100% - 70px(top-menu)
+    container.css("height", "calc(100% - 160px)").css("bottom", "0px"); // height : 100% - 160px(top-menu)
 
     // hide graph-visual-filter-panel
     newman_graph_email_visual_filter.hide();
@@ -45,7 +44,7 @@ var bottom_panel= (function(){
   var close = function(){
 
     toggle_button.find("span").first().switchClass(icon_class_close, icon_class_open);
-    container.css("bottom", "calc(90px - 100%)"); // offset : 70px(top-menu) + 20px(toggle-button)
+    container.css("bottom", "calc(180px - 100%)"); // offset : 160px(top-menu) + 20px(toggle-button)
 
     // display graph-visual-filter-panel
     newman_graph_email_visual_filter.show();
@@ -466,42 +465,6 @@ function searchByField( search_filter ) {
     field = search_filter;
   }
 
-  /*
-  var listItems = $('#search_field_list li');
-  listItems.each(function(index, li) {
-    $(li).removeClass('active')
-  });
-
-  if (field) {
-    if (field === 'all') {
-      $('#search_field_all').addClass('active');
-    }
-    else if (field === 'email') {
-      $('#search_field_email').addClass('active');
-    }
-    else if (field === 'community') {
-      $('#search_field_community').addClass('active');
-    }
-    else if (field === 'topic') {
-      $('#search_field_topic').addClass('active');
-    }
-    else if (field === 'entity') {
-      $('#search_field_entity').addClass('active');
-    }
-    else {
-      field = 'all';
-      $('#search_field_all').addClass('active');
-    }
-  }
-  else {
-    field = 'all';
-    $('#search_field_all').addClass('active');
-  }
-   setSearchType( field );
-  */
-
-
-
   search_result.clearAll();
 
   var text_input = $("#txt_search").val();
@@ -540,7 +503,7 @@ function do_search(load_on_response, field, value) {
  * @param load_on_response
  * @param parent_search_uid
  */
-function requestSearch(field, search_text, load_on_response, parent_search_uid, clear_cache) {
+function requestSearch(field, search_text, load_on_response, parent_search_uid, clear_cache, alt_data_source) {
 
   if (!field) {
     field = 'all';
@@ -569,7 +532,12 @@ function requestSearch(field, search_text, load_on_response, parent_search_uid, 
   url_path = newman_search_filter.appendFilter(url_path, search_text);
   url_path = newman_search_filter.appendURLQuery(url_path);
 
-  url_path = newman_data_source.appendDataSource(url_path);
+  if (alt_data_source) {
+    url_path = newman_data_source.appendDataSource(url_path, alt_data_source);
+  }
+  else {
+    url_path = newman_data_source.appendDataSource(url_path);
+  }
   url_path = newman_datetime_range.appendDatetimeRange(url_path);
   //url_path = newman_entity_email.appendEntity(url_path);
 
@@ -579,146 +547,16 @@ function requestSearch(field, search_text, load_on_response, parent_search_uid, 
     $.getJSON(url_path, function (search_response) {
 
       // new implementation to be retrofitted
-      newman_search_result_collection.onSearchResponse(field, search_text, load_on_response, url_path, search_response, parent_search_uid, clear_cache);
+      newman_search_result_collection.onSearchResponse (
+        field,
+        search_text,
+        load_on_response,
+        url_path,
+        search_response,
+        parent_search_uid,
+        clear_cache
+      );
 
-      // disable old search-result for now ...
-      /*
-      console.log('.getJSON(' + url_path + ')');
-      var current_data_set_url = newman_service_email_search_all.getServiceURL();
-      var filtered_response = validateResponseSearch(search_response);
-
-      if (url_path.endsWith(current_data_set_url)) {
-        //console.log( 'url_path.endsWith(service_response_email_search_all.getServiceURL())' );
-        newman_service_email_search_all.setResponse(search_response);
-      }
-
-      if (load_on_response) {
-
-        email_analytics_content.open();
-
-        //showSearchPopup( field, decodeURIComponent(search_text) );
-        loadSearchResult(url_path);
-
-        var label = ' all';
-        if (search_text) {
-          label = ' ' + decodeURIComponent(search_text);
-        }
-        history_nav.appendUI(url_path, field, label);
-
-      }
-      else { // not load_on_response
-
-        dashboard_content.open();
-
-        var data_set_selected = newman_data_source.getSelected();
-
-        // clear previously selected aggregate-filter if any
-        newman_aggregate_filter.clearAllAggregateFilter();
-
-        if (url_path.endsWith(current_data_set_url)) {
-          // result from search-all under the current data-set
-
-          //initiate subsequent searches
-          //var ranks = newman_data_source.getSelectedTopHits(10);
-          var ranked_email_accounts = newman_rank_email.getRankedList();
-          console.log('ranked_emails[' + ranked_email_accounts.length + ']');
-          //console.log('ranked_emails[' + ranked_email_accounts.length + '] : ' + JSON.stringify(ranked_email_accounts, null, 2));
-          _.each(ranked_email_accounts, function (element, index) {
-            var email_address = element["email"];
-            requestSearch('email', email_address, false);
-            //newman_aggregate_filter.initAggregateFilterSelected( email_address );
-          });
-          newman_search_filter.setSelectedFilter();
-
-          var doc_count = 0;
-          if (filtered_response.query_hits) {
-            doc_count = filtered_response.query_hits;
-          }
-          else if (filtered_response.rows) {
-            doc_count = filtered_response.rows.length;
-          }
-
-          var associate_count = 0;
-          if (filtered_response.graph && filtered_response.graph.nodes) {
-            associate_count = filtered_response.graph.nodes.length;
-          }
-
-          var data_set_id = newman_data_source.parseDataSource(url_path);
-          if (!data_set_id) {
-            data_set_id = newman_data_source.getDefaultDataSourceID();
-          }
-          console.log('data_set_id: ' + data_set_id);
-
-          var filter_icon = newman_search_filter.parseFilterIconClass(url_path);
-
-          var root_result = search_result.setRoot(
-            '(' + data_set_selected.label + ')',
-            '',
-            'text',
-            '',
-            url_path,
-            data_set_id,
-            'pst',
-            doc_count,
-            associate_count,
-            0,
-            filter_icon
-          );
-
-        }
-        else { // result from search-field-keywords under the current data-set
-
-          var doc_count = 0;
-          if (filtered_response.query_hits) {
-            doc_count = filtered_response.query_hits;
-          }
-          else if (filtered_response.rows) {
-            doc_count = filtered_response.rows.length;
-          }
-
-          var associate_count = 0;
-          if (filtered_response.graph && filtered_response.graph.nodes) {
-            associate_count = filtered_response.graph.nodes.length;
-          }
-
-          var outbound_count = newman_rank_email.getEmailOutboundCount(search_text);
-          var inbound_count = newman_rank_email.getEmailInboundCount(search_text);
-          var attach_count = newman_rank_email.getEmailAttachCount(search_text);
-          var rank = newman_rank_email.getEmailRank(search_text);
-
-          var data_set_id = newman_data_source.parseDataSource(url_path);
-          if (!data_set_id) {
-            data_set_id = newman_data_source.getDefaultDataSourceID();
-          }
-
-          var filter_icon = newman_search_filter.parseFilterIconClass(url_path);
-
-          search_result.push(
-            search_text,
-            search_text,
-            field,
-            "",
-            url_path,
-            data_set_id,
-            'pst',
-            doc_count,
-            outbound_count,
-            inbound_count,
-            associate_count,
-            attach_count,
-            rank,
-            filter_icon
-          );
-
-          //initiate subsequent-email searches
-          if (field != 'email') {
-            propagateSearch(search_text, filtered_response.rows);
-          }
-        }
-      }
-
-      */
-      // end old search-result handling
 
     }); // end getJSON(...)
 
@@ -794,7 +632,7 @@ function loadSearchResult( url_path ) {
   //hasher.setHash( url_path );
   //email_analytics_content.open();
 
-  history_nav.refreshUI();
+  app_nav_history.refreshUI();
 
 }
 
@@ -1568,28 +1406,11 @@ var email_analytics_content = (function () {
 $(function () {
   "use strict";
 
-  app_geo_config.requestService();
-
-  newman_search_result_collection.initTreeTableEvent();
-
-  initDashboardDomain();
-  initDashboardCommunity();
-
-  // initialize search-filter
-  newman_search_filter.initFilter();
-
   // initialize data-source
-  newman_service_data_source.requestService();
+  newman_data_source.requestAllDataSet();
 
   setTimeout(function() {
 
-    data_source_selected = newman_data_source.getSelected();
-
-    // initialize map tiles
-    app_geo_map.initMapTileLayer();
-
-    // initialize starred-documents
-    newman_email_starred.initStarredDocumentList();
 
     // close existing analytics displays if applicable
     email_analytics_content.close();
@@ -1598,14 +1419,15 @@ $(function () {
     //bottom_panel.close();
     bottom_panel.hide();
 
-    // initialize search-result UI
-    search_result.setUI($('#search_result_container'));
-
     // initialize navigation-history
-    history_nav.initialize();
+    app_nav_history.initialize();
 
-    // initialize dashboard and its components and widgets
-    initDashboardCharts();
+    // initialize dashboard domain
+    initDashboardDomain();
+
+    // initialize dashboard community
+    initDashboardCommunity();
+
 
     $("[rel=tooltip]").tooltip();
 
@@ -1615,23 +1437,11 @@ $(function () {
       var element_ID = $(e.target).attr("href");
       console.log('tab_select ' + element_ID);
 
-      if (element_ID.endsWith('dashboard_tab_content_outbound_activities')) {
-        console.log('\trevalidateUIActivityOutbound() called');
-
-        newman_activity_outbound.revalidateUIActivityOutbound();
+      if (element_ID.endsWith('dashboard_tab_chart_analytics')) {
+        initDashboardCharts();
       }
-      else if (element_ID.endsWith('dashboard_tab_content_inbound_activities')) {
-        console.log('\trevalidateUIActivityInbound() called');
-
-        newman_activity_inbound.revalidateUIActivityInbound();
-      }
-      else if (element_ID.endsWith('dashboard_tab_content_attach_activities')) {
-        console.log('\trevalidateUIActivityAttach() called');
-
-        newman_activity_attachment.revalidateUIActivityAttach();
-      }
-      else if (element_ID.endsWith('dashboard_tab_content_entities')) {
-        newman_entity_email.revalidateUIEntityEmail();
+      else if (element_ID.endsWith('dashboard_tab_geo_analytics')) {
+        app_geo_map.init( true );
       }
       else if (element_ID.endsWith('dashboard_tab_content_topics')) {
         newman_topic_email.revalidateUITopicEmail();
@@ -1642,29 +1452,32 @@ $(function () {
       else if (element_ID.endsWith('dashboard_tab_content_communities')) {
         newman_community_email.revalidateUICommunity();
       }
+      else if (element_ID.endsWith('dashboard_tab_content_attach_activities')) {
+        newman_activity_attachment.revalidateUIActivityAttach();
+      }
       else if (element_ID.endsWith('dashboard_tab_content_attach_types')) {
         newman_file_type_attach.revalidateUIFileTypeAttach();
       }
       else if (element_ID.endsWith('dashboard_tab_content_ranks')) {
         newman_rank_email.revalidateUIRankEmail();
       }
-      else if (element_ID.endsWith('dashboard_tab_geo_analytics')) {
-        app_geo_map.init( true );
-      }
-      else if (element_ID.endsWith('dashboard_tab_chart_analytics')) {
+      else {
+        // default to dashboard
         initDashboardCharts();
       }
 
 
     });
 
+    newman_graph_email.initUI();
 
-    //$('#target_email').html(data_source_selected.email);
-
+    /* deprecated since v2.11 */
+    /*
     // initialize search keyboard event
     $('#txt_search').keyup(function (event) {
 
       if (event.keyCode === 13) {
+        newman_datetime_range.setDatetimeBounds( newman_activity_email.getDatetimeBounds() );
         searchByField();
       }
       event.preventDefault();
@@ -1674,59 +1487,6 @@ $(function () {
       return false;
     });
 
-    $('#target_email').on('dblclick', function () {
-      setSearchType('email');
-      //$("#txt_search").val(data_source_selected.email);
-      requestSearch('email', data_source_selected.email, true);
-    });
-
-    var highlight_target = (function () {
-      var groupId = data_source_selected.group;
-      var rank = data_source_selected.rank;
-      var highlight = function () {
-        //graph
-        d3.select("#g_circle_" + groupId).style("stroke", "#ffff00");
-        d3.select("#g_circle_" + groupId).style("stroke-width", function (d) {
-          return 10;
-        });
-        //email-table
-        $('#result_table tbody tr td:nth-child(2)').each(function (i, el) {
-          if (data_source_selected.email.localeCompare(el.innerText.trim()) == 0) {
-            $(el).addClass('highlight-td');
-          }
-        });
-      }
-
-      var unhighlight = function () {
-        //graph
-        d3.select("#g_circle_" + groupId).style("stroke", "#ff0000");
-        if (d3.select("#rankval").property("checked")) {
-          d3.select("#g_circle_" + groupId).style("opacity", function (d) {
-            return 0.2 + (rank);
-          });
-          d3.select("#g_circle_" + groupId).style("stroke-width", function (d) {
-            return 5 * (rank);
-          });
-        }
-        else {
-          d3.select("#g_circle_" + groupId).style("opacity", "100");
-          d3.select("#g_circle_" + groupId).style("stroke-width", "0");
-        }
-        //email-table
-        $('#result_table tbody tr td:nth-child(2)').each(function (i, el) {
-          $(el).removeClass('highlight-td');
-        });
-      };
-
-      return {
-        highlight: highlight,
-        unhighlight: unhighlight
-      }
-    }());
-
-    $('#target_email').on('mouseover', highlight_target.highlight);
-    $('#target_email').on('mouseout', highlight_target.unhighlight);
-
     $('#email_group_conversation').on('click', group_email_conversation);
     //$('#email_view_export_all').on('click', add_view_to_export);
     //$('#email_view_export_all_remove').on('click', remove_view_from_export);
@@ -1734,24 +1494,8 @@ $(function () {
     $('#top-entities').append(waiting_bar);
 
     $("#txt_search_submit").click(function () {
+      newman_datetime_range.setDatetimeBounds( newman_activity_email.getDatetimeBounds() );
       searchByField();
-    });
-
-
-    $('#tab-list li:eq(1) a').on('click', function () {
-      var _from = $('#email-body-tab').find(".from").first().html();
-      if (_from) {
-        draw_attachments_table(_from);
-      }
-    });
-
-    $("input[name='searchType']").change(function (e) {
-      if ($(this).val() == 'email') {
-        $('#txt_search').attr('placeholder', 'From/To/Cc/Bcc...');
-      } else {
-        $('#txt_search').attr('placeholder', 'Search text...');
-      }
-      $('#txt_search').val('');
     });
 
     //on modal close event
@@ -1795,7 +1539,7 @@ $(function () {
       }
       //recolornodes('rank');
     });
-
+    */
 
     function parseHash(newHash, oldHash) {
       console.log('parseHash( ' + newHash + ', ' + oldHash + ' )');
