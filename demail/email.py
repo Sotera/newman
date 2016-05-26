@@ -15,7 +15,6 @@ from es_query_utils import _query_email_attachments, _query_emails
 from es_search import _build_graph_for_emails, es_get_all_email_by_address, get_top_email_by_text_query
 
 #GET <host>:<port>:/email/email/<id>?qs="<query_string>"
-# deprecated slated for removal
 def getEmail(*args, **kwargs):
     tangelo.log("getEmail(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     tangelo.content_type("application/json")
@@ -26,7 +25,7 @@ def getEmail(*args, **kwargs):
 
     email_id = args[-1]
     if not email_id:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing email_id")
+        return tangelo.HTTPStatusCode(400, "Invalid service call - missing email_id")
 
     return get_email(data_set_id, email_id, qs)
 

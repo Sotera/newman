@@ -4,6 +4,19 @@ import re
 STRIP_NON_DIGITS_REGEXP= re.compile(r'[^\d.]+')
 
 
+def ids_query(id):
+    return {
+        "filter": {
+            "bool": {
+                "should": [{
+                    "ids" : {
+                        "values" : [id]
+                    }
+                }]
+            }
+        }
+    }
+
 def _has_phone_number_filter():
     return { "exists": { "field": "phone_numbers"}}
 

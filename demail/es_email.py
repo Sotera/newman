@@ -6,7 +6,7 @@ import mimetypes
 from param_utils import parseParamDatetime, parseParamAttachmentGUID
 from newman.utils.functions import nth
 from es_search import _search_ranked_email_addrs, count, get_cached_email_addr, initialize_email_addr_cache
-from es_queries import _build_filter, email_highlighting_query, _build_email_query
+from es_queries import _build_filter, email_highlighting_query, _build_email_query, ids_query
 from es_topic import get_categories
 
 from newman.es_connection import es
@@ -173,16 +173,20 @@ def _format_body_pannel(email_body, attachments):
     :return: all text merged
     '''
 
+    if not attachments:
+        return email_body
+
     def text(attachment):
         if "image_analytics" in attachment and "ocr_output" in attachment["image_analytics"]:
             return _OCR_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["image_analytics"]["ocr_output"]
         if "content" in attachment:
             return _TIKA_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["content"]
 
+
     body = email_body + "".join(text(attachment) for attachment in attachments)
     return body
 
-def get_email(index, email_id, qs=None):
+def get_email(data_set_id, email_id, qs=None):
 
     # fields=["id","datetime","senders","senders_line","tos_line","ccs_line","bccs_line","subject","body","attachments.filename","entities.entity_organization","entities.entity_location","entities.entity_person","entities.entity_misc"]
     # email = es().get(index, doc_type="emails", id=email_id, fields=fields)
@@ -194,8 +198,15 @@ def get_email(index, email_id, qs=None):
     attachments = []
 
     if not qs:
-        email = es().get(index, doc_type="emails", id=email_id)
-        source = email["_source"]
+        # TODO fix this in the UI
+        # Had to convert to search from get as get only functions on one index
+        # email = es().get(single_index_name, doc_type="emails", id=email_id)
+        # source = email["_source"]
+
+        query = ids_query(email_id)
+        email = es().search(index=data_set_id, doc_type='emails', body=query)
+
+        source = email["hits"]["hits"][0]["_source"]
         attachments = source.get("attachments", [])
         body = source["body"]
         body_translated = source.get("body_translated",'')
@@ -208,7 +219,7 @@ def get_email(index, email_id, qs=None):
         query = email_highlighting_query(email_id, highlight_query_string=qs)
         tangelo.log("es_email.get_email(highlighting-query: %s )" % (query))
 
-        email = es().search(index=index, doc_type='emails', body=query)
+        email = es().search(index=data_set_id, doc_type='emails', body=query)
         source = email["hits"]["hits"][0]["_source"]
         attachments = source.get("attachments", [])
         body_lang = source.get("body_lang",'en')
@@ -229,7 +240,7 @@ def get_email(index, email_id, qs=None):
 
     topic_scores=[]
     if source["topic_scores"]:
-        topic_scores = [ [topic[0], topic[1], str(source["topic_scores"]["idx_"+str(topic[0])])] for topic in get_categories(index)["categories"]]
+        topic_scores = [ [topic[0], topic[1], str(source["topic_scores"]["idx_"+str(topic[0])])] for topic in get_categories(data_set_id)["categories"]]
 
     email = [source["id"],
              # TODO REMOVE unused fields
@@ -241,8 +252,9 @@ def get_email(index, email_id, qs=None):
              ["".join(source["ccs_line"]), ";".join(source["ccs"])],
              ["".join(source["bccs_line"]), ";".join(source["bccs"])],
              subject,
-             body,
-             [[f["guid"],f["filename"],f.get("content_encrypted", False)] for f in source.get("attachments", [""])],
+             _format_body_pannel(body, attachments),
+             # body,
+             [[f["guid"],f["filename"],f["content_encrypted"]] for f in source.get("attachments", [""])],
              source.get("starred", False),
              highlighted_attachments,
              [[attachment.get("filename", ""), attachment.get("image_analytics", {})] for attachment in attachments]
@@ -315,16 +327,22 @@ def get_attachment_by_id(*args, **kwargs):
 
     cherrypy.log("email.get_attachments_sender(index=%s, attachment_id=%s)" % (data_set_id, attachment_id))
     if not data_set_id:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing index")
+        return tangelo.HTTPStatusCode(400, "Invalid service call - missing index")
     if not attachment_id:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing attachment_id")
+        return tangelo.HTTPStatusCode(400, "Invalid service call - missing attachment_id")
 
-    attachment = es().get(index=data_set_id, doc_type="attachments", id=attachment_id)
+    # TODO fix this call, should be a get but the UI is sending in multiple indexes
+    # attachment = es().get(index=data_set_id, doc_type="attachments", id=attachment_id)
+    query = ids_query(attachment_id)
+    attachments = es().search(index=data_set_id, doc_type='attachments', body=query)
+    tangelo.log("att%s"%attachments)
+    # ...
 
-    if not attachment:
-        return tangelo.HTTPStatusCode(400, "no attachments found for (index=%s, attachment_id=%s)" % (data_set_id, attachment_id))
+    if not attachments:
+        return tangelo.HTTPStatusCode(400, "Attachment not found for (index=%s, attachment_id=%s)" % (data_set_id, attachment_id))
+    attachment = attachments["hits"]["hits"][0]["_source"]
 
-    attachment = attachment["_source"]
+    # attachment = attachment["_source"]
     ext = attachment["extension"]
     filename = attachment["filename"]
 
