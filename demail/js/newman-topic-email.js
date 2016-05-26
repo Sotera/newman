@@ -63,7 +63,7 @@ var newman_topic_email = (function () {
       });
 
       var colors = d3.scale.category20b();
-      var width = 530, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 7;
+      var width = 530, height_bar = 13, margin_top = 8, margin_bottom = 2, width_bar_factor = 7;
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
       width = width - margin.left - margin.right;
 
@@ -212,7 +212,7 @@ var newman_topic_email = (function () {
       }
 
       if(topic_indices_as_string) {
-        topic_indices_as_string = topic_indices_as_string.trim().replace(' ', ',');
+        topic_indices_as_string = topic_indices_as_string.trim().replace(/\s/g, ',');
       }
       else {
         topic_indices_as_string = '0';

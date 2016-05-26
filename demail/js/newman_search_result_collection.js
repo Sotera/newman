@@ -220,18 +220,24 @@ EmailSearchResultTreeTable.prototype = {
                                _rank,
                                _icon_class) {
 
-    var new_result = new EmailSearchResult( decodeURIComponent(_label),
-                                            decodeURIComponent(_search_text),
-                                            _search_field,
-                                            _url,
-                                            _data_source_id,
-                                            _document_count,
-                                            _document_sent,
-                                            _document_received,
-                                            _associate_count,
-                                            _attach_count,
-                                            _rank,
-                                            _icon_class );
+    var new_result = new EmailSearchResult(
+      decodeURIComponent(_label),
+      decodeURIComponent(_search_text),
+      _search_field,
+      _url,
+      decodeURIComponent(_data_source_id),
+      _document_count,
+      _document_sent,
+      _document_received,
+      _associate_count,
+      _attach_count,
+      _rank,
+      _icon_class
+    );
+
+    new_result.setUID( _data_source_id );
+
+    //console.log('appendDataSource(...)\nnew_result : ' + JSON.stringify(new_result, null, 2));
 
     this.data_source_list.push( new_result );
 
@@ -254,18 +260,20 @@ EmailSearchResultTreeTable.prototype = {
                                    parent_uid,
                                    clear_children) {
 
-    var new_result = new EmailSearchResult( decodeURIComponent(_label),
-                                            decodeURIComponent(_search_text),
-                                            _search_field,
-                                            _url,
-                                            _data_source_id,
-                                            _document_count,
-                                            _document_sent,
-                                            _document_received,
-                                            _associate_count,
-                                            _attach_count,
-                                            _rank,
-                                            _icon_class );
+    var new_result = new EmailSearchResult(
+      decodeURIComponent(_label),
+      decodeURIComponent(_search_text),
+      _search_field,
+      _url,
+      decodeURIComponent( _data_source_id ),
+      _document_count,
+      _document_sent,
+      _document_received,
+      _associate_count,
+      _attach_count,
+      _rank,
+      _icon_class
+    );
 
 
     if (parent_uid) {
@@ -281,6 +289,10 @@ EmailSearchResultTreeTable.prototype = {
         }
         data_source_node.appendChild( new_result );
       }// end of if (data_source_node)
+      else {
+        console.log( 'data_source_node "' + _data_source_id + '" not found!');
+        console.log( 'data_source_list : ' +  JSON.stringify(this.data_source_list, null, 2));
+      }
     }
 
     this.table_row_map[new_result.uid] = new_result;
@@ -303,19 +315,21 @@ EmailSearchResultTreeTable.prototype = {
                                       parent_uid,
                                       clear_children) {
 
-    var new_result = new EmailSearchResult( decodeURIComponent(_label),
-                                            decodeURIComponent(_search_text),
-                                            _search_field,
-                                            _url,
-                                            _data_source_id,
-                                            _document_count,
-                                            _document_sent,
-                                            _document_received,
-                                            _associate_count,
-                                            _attach_count,
-                                            _rank,
-                                            _icon_class,
-                                            decodeURIComponent(_email_address) );
+    var new_result = new EmailSearchResult(
+      decodeURIComponent(_label),
+      decodeURIComponent(_search_text),
+      _search_field,
+      _url,
+      decodeURIComponent(_data_source_id),
+      _document_count,
+      _document_sent,
+      _document_received,
+      _associate_count,
+      _attach_count,
+      _rank,
+      _icon_class,
+      decodeURIComponent(_email_address)
+    );
 
     if (parent_uid) {
       new_result.setParentUID(parent_uid);
@@ -381,10 +395,163 @@ var newman_search_result_collection = (function () {
 
   var search_result_table = new EmailSearchResultTreeTable();
 
+  // local dataset select-deselect cache
+  var dataset_selected_map = {};
+
+  // local copy of last-known all dataset
+  var all_dataset_map = {};
+
+  function removeSelected( key, refresh_enabled ) {
+    if (key) {
+      var all_selected_count = getAllSelectedCount();
+
+      if (all_selected_count > 1) {
+        delete dataset_selected_map[key];
+
+        if (debug_enabled) {
+          console.log('removeSelected( ' + key + ' )');
+          console.log('dataset_selected_map[' + all_selected_count + '], is-empty = ' + _.isEmpty(dataset_selected_map));
+        }
+      }
+
+      //request multi-data-source query
+      if (refresh_enabled === true) {
+        onChangeSelected();
+      }
+    }
+  }
+
+  /* disabled; must have at least one data-source selected */
+  /*
+  function clearAllSelected( refresh_enabled ) {
+
+    if (!_.isEmpty(dataset_selected_map)) {
+      // deep-delete
+      var key_list = _.keys(dataset_selected_map);
+      _.each(key_list, function(key) {
+        delete dataset_selected_map[ key ];
+      });
+      dataset_selected_map = {};
+    }
+
+    if (debug_enabled) {
+      console.log('clearAllSelected()');
+      console.log('dataset_selected_map[' + getAllSelectedCount() + '], is-empty = ' + _.isEmpty(dataset_selected_map));
+    }
+
+    //apply data-source-select change
+    if (refresh_enabled === true) {
+      onChangeSelected();
+    }
+  }
+  */
+
+  function putSelected( key, value, refresh_enabled ) {
+    if (key && value) {
+      dataset_selected_map[key] = value;
+
+      if (debug_enabled) {
+        console.log('putSelected( ' + key + ' )');
+        console.log('dataset_selected_map [' + getAllSelectedCount() + ']');
+      }
+
+      //request multi-data-source query
+      if (refresh_enabled === true) {
+        onChangeSelected();
+      }
+    }
+  }
+
+  function onChangeSelected() {
+
+    var all_selected_count = getAllSelectedCount();
+
+    if (all_selected_count > 0) {
+      newman_data_source.clearAllSelected();
+
+      _.each(dataset_selected_map, function (value, key) {
+        newman_data_source.setSelectedByID(key, true);
+      });
+
+      newman_data_source.refreshUI();
+      newman_data_source.requestAllSelected();
+    }
+    else {
+      newman_data_source.onRequestAllSelected();
+    }
+  }
+
+  function isSelectedEmpty() {
+    if (debug_enabled) {
+      console.log('isSelectedEmpty()');
+    }
+    return _.isEmpty( dataset_selected_map );
+  }
+
+  function isSelected( key ) {
+    var has_value = false;
+    if (key) {
+      if (key in dataset_selected_map) {
+        has_value = true;
+      }
+    }
+    if (debug_enabled) {
+      //console.log('isSelected( ' + key + ' ) : ' + has_value);
+    }
+    return has_value;
+  }
+
+  function getSelected( key ) {
+    var value;
+    if (key) {
+      if (debug_enabled) {
+        console.log('getSelected( ' + key + ' )');
+      }
+      value = dataset_selected_map[ key ];
+    }
+    return value;
+  }
+
+  function isMultiSelectedAsString( id_selected_string ) {
+    var is_multi_selected = false;
+    if (id_selected_string) {
+      if (debug_enabled) {
+        //console.log('isMultiSelectedAsString( ' + id_selected_string + ' )');
+      }
+      var dataset_id_list = id_selected_string.split(',');
+      if (dataset_id_list.length > 1) {
+        if (debug_enabled) {
+          console.log('dataset_id_list :\n' + JSON.stringify(dataset_id_list, null, 2));
+        }
+        is_multi_selected = true;
+      }
+    }
+    return is_multi_selected;
+  }
+
+  function getAllSelectedCount() {
+    return _.size( dataset_selected_map );
+  }
+
+  function getAllSelectedAsString() {
+    if (debug_enabled) {
+      console.log('getAllSelectedAsString( ' + getAllSelectedCount + ' )');
+    }
+    var all_dataset_as_string = getObjectKeysAsString( dataset_selected_map, ',' );
+    return all_dataset_as_string;
+  }
+
+  function getAllSelectedAsList() {
+    if (debug_enabled) {
+      console.log('getAllSelectedAsList( ' + getAllSelectedCount() + ' )');
+    }
+    var all_dataset_list = _.keys( dataset_selected_map );
+    return all_dataset_list;
+  }
 
   function clearAllUI() {
-    if (ui_treetable_body) {
-      ui_treetable_body.empty();
+    if (ui_treetable_body_id) {
+      ui_treetable_body_id.empty();
     }
   }
 
@@ -396,8 +563,7 @@ var newman_search_result_collection = (function () {
 
   function  populateTable() {
     if (debug_enabled) {
-      console.log('populateTable()');
-      console.log( 'search_result_table.data_source_list: ' + JSON.stringify(search_result_table.data_source_list, null, 2) );
+      //console.log( 'populateTable() : search_result_table.data_source_list:\n' + JSON.stringify(search_result_table.data_source_list, null, 2) );
     }
 
 
@@ -599,10 +765,12 @@ var newman_search_result_collection = (function () {
       var email_address = data_element.email_address;
       if (email_address) {
         var checkbox_id = 'checkbox_' + email_address;
-        checkbox_html = "<input type=\"checkbox\" id=\"" + checkbox_id + "\"/>";
 
         if (newman_aggregate_filter.containsAggregateFilter(checkbox_id)) {
           checkbox_html = "<input type=\"checkbox\" id=\"" + checkbox_id + "\" checked/>";
+        }
+        else {
+          checkbox_html = "<input type=\"checkbox\" id=\"" + checkbox_id + "\"/>";
         }
 
         ui_callback.on('change', 'td input:checkbox', function (event) {
@@ -651,24 +819,79 @@ var newman_search_result_collection = (function () {
         event.stopImmediatePropagation();
       });
 
-      var all_child_selected_icon_class = 'fa fa-check-circle-o';
-      var all_child_unselected_icon_class = 'fa fa-circle-o';
 
       if (level_index == 1) {
-        node_index = '' + level_index + count;
-        var row_id = table_id + '|' + node_index + '|' + data_element.uid;
-        var child_node_prev_icon_class = 'fa fa-caret-square-o-up';
-        var child_node_next_icon_class = 'fa fa-caret-square-o-down';
 
-        table_row = $('<tr class=\"treegrid-' + node_index + '\" id=\"' + row_id + '\" />').append(
-          "<td><i class=\"" + all_child_unselected_icon_class + "\"></i> <i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
-          "<td></td>" +
-          "<td></td>" +
-          "<td>" + data_element.attach_count + "</td>" +
-          "<td>" + data_element.document_count + "</td>" +
-          "<td>" + data_element.associate_count + "</td>" +
-          "<td></td>"
-        );
+        var dataset_id_list = data_element.data_source_id;
+        if (isMultiSelectedAsString( dataset_id_list )) { // multi-select data source union
+
+          node_index = '' + level_index + count;
+          var row_id = table_id + '|' + node_index + '|' + data_element.uid;
+          var child_node_prev_icon_class = 'fa fa-caret-square-o-up';
+          var child_node_next_icon_class = 'fa fa-caret-square-o-down';
+
+          table_row = $('<tr class=\"treegrid-' + node_index + '\" id=\"' + row_id + '\" />').append(
+            "<td><i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
+            "<td></td>" +
+            "<td></td>" +
+            "<td>" + data_element.attach_count + "</td>" +
+            "<td>" + data_element.associate_count + "</td>" +
+            "<td>" + data_element.document_count + "</td>" +
+            "<td></td>"
+          );
+
+        } // end-of multi-select data source union
+        else { // single-select data source
+
+          var checkbox_id = 'checkbox_' + data_element.data_source_id;
+
+          if (isSelected(data_element.data_source_id)) {
+            checkbox_html = "<input type=\"checkbox\" class=\"fa_toggle\" id=\"" + checkbox_id + "\" checked/>";
+          }
+          else {
+            checkbox_html = "<input type=\"checkbox\" class=\"fa_toggle\" id=\"" + checkbox_id + "\"/>";
+          }
+
+          ui_callback.on('change', 'td input:checkbox', function (event) {
+            // Ignore this event if preventDefault has been called.
+            if (event.defaultPrevented) return;
+
+            var attr_id = $(this).attr('id');
+            if (attr_id) {
+              console.log('\tid : ' + attr_id + ' is-checked : ' + this.checked);
+              var dataset_id = attr_id.substring(9);
+
+              if (this.checked) {
+                putSelected(dataset_id, this.checked, true);
+              }
+              else {
+                var all_selected_count = getAllSelectedCount();
+                removeSelected(dataset_id, true);
+              }
+
+            }
+
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          });
+
+
+          node_index = '' + level_index + count;
+          var row_id = table_id + '|' + node_index + '|' + data_element.uid;
+          var child_node_prev_icon_class = 'fa fa-caret-square-o-up';
+          var child_node_next_icon_class = 'fa fa-caret-square-o-down';
+
+          table_row = $('<tr class=\"treegrid-' + node_index + '\" id=\"' + row_id + '\" />').append(
+            "<td><i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
+            "<td></td>" +
+            "<td></td>" +
+            "<td>" + data_element.attach_count + "</td>" +
+            "<td>" + data_element.associate_count + "</td>" +
+            "<td>" + data_element.document_count + "</td>" +
+            "<td>" + checkbox_html + "</td>"
+          );
+
+        } // end-of single-select data source
       }
       else if (level_index == 2) {
 
@@ -686,8 +909,8 @@ var newman_search_result_collection = (function () {
             "<td>" + email_outbound_count + "</td>" +
             "<td>" + email_inbound_count + "</td>" +
             "<td>" + email_attach_count + "</td>" +
-            "<td>" + data_element.document_count + "</td>" +
             "<td>" + data_element.associate_count + "</td>" +
+            "<td>" + data_element.document_count + "</td>" +
             "<td>" + checkbox_html + "</td>"
           );
         }
@@ -704,12 +927,12 @@ var newman_search_result_collection = (function () {
           }
 
           table_row = $('<tr class=\"treegrid-' + node_index + ' treegrid-parent-' + parent_node_index + '\" id=\"' + row_id + '\" />').append(
-            "<td><i class=\"" + all_child_unselected_icon_class + "\"></i> <i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
+            "<td><i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
             "<td>" + email_outbound_count + "</td>" +
             "<td>" + email_inbound_count + "</td>" +
             "<td>" + email_attach_count + "</td>" +
-            "<td>" + data_element.document_count + "</td>" +
             "<td>" + data_element.associate_count + "</td>" +
+            "<td>" + data_element.document_count + "</td>" +
             "<td>" + checkbox_html + "</td>"
           );
 
@@ -726,8 +949,8 @@ var newman_search_result_collection = (function () {
           "<td>" + data_element.document_sent + "</td>" +
           "<td>" + data_element.document_received + "</td>" +
           "<td>" + data_element.attach_count + "</td>" +
-          "<td>" + data_element.document_count + "</td>" +
           "<td>" + data_element.associate_count + "</td>" +
+          "<td>" + data_element.document_count + "</td>" +
           "<td>" + checkbox_html + "</td>"
         );
       }
@@ -740,8 +963,8 @@ var newman_search_result_collection = (function () {
   function expandDataSourceSelected(ui_treetable, ui_treetable_copy) {
     console.log('expandDataSourceSelected()');
 
-    var data_set_selected = newman_data_source.getSelected();
-    console.log('\tdata_set_selected: ' + data_set_selected.uid);
+    var dataset_selected_map = newman_data_source.getAllSelected();
+    console.log('\tdata_set_selected: ' + dataset_selected_map.uid);
 
     ui_treetable.treegrid('getRootNodes').each(function() {
       var row_id = $(this).attr('id');
@@ -752,7 +975,7 @@ var newman_search_result_collection = (function () {
       if (tokens) {
         var node_uid = tokens[2];
         if (node_uid) {
-          if (node_uid == data_set_selected.uid) {
+          if (node_uid == dataset_selected_map.uid) {
             //$(this).treegrid('expandRecursive');
             //$(this).treegrid('render');
           }
@@ -815,7 +1038,7 @@ var newman_search_result_collection = (function () {
   function onTreeTableRowClicked( element ) {
 
     if (element) {
-      history_nav.appendUI(element.url, element.search_field, element.label);
+      app_nav_history.appendHist(element.url, element.search_field, element.label);
 
       loadSearchResult(element.url);
     }
@@ -836,58 +1059,130 @@ var newman_search_result_collection = (function () {
     search_result_table.deleteTableRow( key );
   }
 
-  function onDataSourceResponse(_response_map) {
-    if (_response_map) {
+  function onDatasetMultiSelected(response) {
+
+    if (response) {
+      if (debug_enabled) {
+        console.log('onDatasetMultiSelected() : response :\n' + JSON.stringify(response, null, 2));
+      }
+
+      if (getAllSelectedCount() > 1) { // existing multi-selected data-sources
+
+
+        var data_set_id = response.data_set_id;
+
+        var label = response.data_set_label;
+        label = newman_dataset_label.getLabelFromDatasetID(data_set_id);
+        var search_text = '';
+        var url_path = '';
+        var field = '';
+
+        var doc_count = response.data_set_document_count;
+        var associate_count = response.data_set_node_count;
+        var attach_count = response.data_set_attachment_count;
+
+        var outbound_count = '';
+        var inbound_count = '';
+        var rank = '';
+
+        var icon_class = 'fa fa-cubes fa-lg';
+        var parent_node_uid = undefined;
+
+        var node = search_result_table.appendDataSource(
+          label,
+          search_text,
+          field,
+          url_path,
+          data_set_id,
+          doc_count,
+          outbound_count,
+          inbound_count,
+          associate_count,
+          attach_count,
+          rank,
+          icon_class,
+          parent_node_uid
+        );
+      } // end-of existing multi-selected data-sources
+
+    }
+  }
+
+  function onRequestAllSelected(dataset_map, multi_selected_response) {
+    if (dataset_map && (_.size(dataset_map) > 0)) {
+
+      //console.log( 'data_set_key_list :\n' + JSON.stringify(dataset_map, null, 2) );
+
+      // initialize local result-collection data source select/deselect cache
+      var is_dataset_select_empty = false;
+      if (getAllSelectedCount() == 0) {
+        // initial first-load state; no data-source selected locally
+        is_dataset_select_empty = true;
+      }
+
+      if (is_dataset_select_empty) {
+        all_dataset_map = dataset_map;
+      }
+
       search_result_table.clearAll();
 
-      var data_set_key_list = _.keys(_response_map);
-      //console.log( 'data_set_key_list :\n' + JSON.stringify(data_set_key_list, null, 2) );
+      _.each(all_dataset_map, function (data_set_element, key) {
 
-      _.each(data_set_key_list, function (key) {
-        var data_set_element = _response_map[key];
-        if (data_set_element) {
-          if (debug_enabled) {
-            console.log('data_set_element :\n' + JSON.stringify(data_set_element, null, 2));
-          }
+        if (debug_enabled) {
+          console.log('data_set_element :\n' + JSON.stringify(data_set_element, null, 2));
+        }
 
-          var label = data_set_element.data_set_label;
-          var search_text = '';
-          var url_path = '';
-          var field = '';
-          var data_set_id = data_set_element.data_set_id;
+        var label = data_set_element.label;
+        var search_text = '';
+        var url_path = '';
+        var field = '';
+        var data_set_id = data_set_element.uid;
 
-          var doc_count = data_set_element.data_set_document_count;
-          var associate_count = data_set_element.data_set_node_count;
-          var attach_count = data_set_element.data_set_attachment_count;
+        var doc_count = data_set_element.document_count;
+        var associate_count = data_set_element.node_count;
+        var attach_count = data_set_element.attach_count;
 
-          var outbound_count = '';
-          var inbound_count = '';
-          var rank = '';
+        var outbound_count = '';
+        var inbound_count = '';
+        var rank = '';
 
-          var icon_class = 'fa fa-database';
-          var parent_node_uid = undefined;
+        var icon_class = 'fa fa-cube fa-lg';
+        var parent_node_uid = undefined;
 
-          var node = search_result_table.appendDataSource(label,
-                                                          search_text,
-                                                          field,
-                                                          url_path,
-                                                          data_set_id,
-                                                          doc_count,
-                                                          outbound_count,
-                                                          inbound_count,
-                                                          associate_count,
-                                                          attach_count,
-                                                          rank,
-                                                          icon_class,
-                                                          parent_node_uid);
+        var node = search_result_table.appendDataSource(
+          label,
+          search_text,
+          field,
+          url_path,
+          data_set_id,
+          doc_count,
+          outbound_count,
+          inbound_count,
+          associate_count,
+          attach_count,
+          rank,
+          icon_class,
+          parent_node_uid
+        );
 
 
-        } // end of if(data_set_element)
+        if (data_set_element.is_selected) {
+          putSelected(data_set_id, true);
+        }
+
       }); // end of _.each(...)
+
+
+      if (multi_selected_response) {
+        onDatasetMultiSelected( multi_selected_response );
+      }
 
       // refresh UI
       populateTable();
     }
+
+    //validation check
+    console.log('newman_data_source.getAllSelectedAsString() : ' + newman_data_source.getAllSelectedAsString());
   } // end onDataSourceResponse(...)
 
   /*
@@ -970,39 +1265,42 @@ var newman_search_result_collection = (function () {
       if (search_text) {
         label = ' ' + decodeURIComponent(search_text);
       }
-      history_nav.appendUI(url_path, field, label);
+      app_nav_history.appendHist(url_path, field, label);
 
     }
     else { // cache response on result-tree-table
 
       dashboard_content.open();
 
-      var data_set_selected = newman_data_source.getSelected();
+      var dataset_selected_map = newman_data_source.getAllSelected();
 
       // clear previously selected aggregate-filter if any
       newman_aggregate_filter.clearAllAggregateFilter();
 
 
       if (url_path.endsWith(current_data_set_url)) { // result from search-all under the current data-set
+
         if (debug_enabled) {
-          console.log('search-all-result "' + url_path + '"')
+          console.log('search-all-result "' + url_path + '" current_data_set_url "' + current_data_set_url + '"')
         }
 
         // clear all previous buffered results, except for the data-sources (level-0)
         search_result_table.clearChildren();
 
         //initiate top-ranked email address searches
-        initiateTopRankedAddressSearch();
+        /* TODO: must retrofit */
+        //initiateTopRankedAddressSearch();
 
       }
       else { // result from search-field-keywords under the current data-set
+
         if (debug_enabled) {
-          console.log('search-result "' + url_path + '"')
+          console.log('search-result "' + url_path + '" current_data_set_url "' + current_data_set_url + '"')
         }
 
-        var label = decodeURIComponent(search_text);
+        var label = decodeURIComponent( search_text );
 
-        var data_set_id = newman_data_source.parseDataSource(url_path);
+        var data_set_id = decodeURIComponent( newman_data_source.parseDataSource(url_path) );
         if (!data_set_id) {
           console.warn('Required "data_set_id" undefined!')
           return;
@@ -1024,31 +1322,41 @@ var newman_search_result_collection = (function () {
 
         if (field == 'all') {
 
-          // clear all previous buffered results, except for the data-sources (level-0)
-          search_result_table.clearChildren();
+          if (search_text) { // result from key-word search
 
-          var icon_class = newman_search_filter.getFilterIconClass('text');
+            var icon_class = newman_search_filter.getFilterIconClass('text');
 
-          var node = search_result_table.appendTextSearchList(label,
-                                                              search_text,
-                                                              field,
-                                                              url_path,
-                                                              data_set_id,
-                                                              doc_count,
-                                                              outbound_count,
-                                                              inbound_count,
-                                                              associate_count,
-                                                              attach_count,
-                                                              rank,
-                                                              icon_class,
-                                                              parent_node_uid,
-                                                              clear_buffer);
+            var node = search_result_table.appendTextSearchList(label,
+              search_text,
+              field,
+              url_path,
+              data_set_id,
+              doc_count,
+              outbound_count,
+              inbound_count,
+              associate_count,
+              attach_count,
+              rank,
+              icon_class,
+              parent_node_uid,
+              clear_buffer);
 
-          //initiate subsequent-email searches
-          propagateSearch(search_text, filtered_response.rows, node.uid);
+            if (isMultiSelectedAsString(data_set_id)) {
+              searchByDataSource(data_set_id, field, search_text, clear_buffer);
+            }
+          }
+          else { // result from blank search
+
+            // clear all previous buffered results, except for the data-sources (level-0)
+            //search_result_table.clearChildren();
+
+            //initiate subsequent-email searches
+            //searchRankedEmailByDataSource(parent_node_uid, data_set_id);
+          }
 
         }
         else if (field == 'text') {
+
 
           // clear all previous buffered results, except for the data-sources (level-0)
           search_result_table.clearChildren();
@@ -1071,6 +1379,9 @@ var newman_search_result_collection = (function () {
 
         }
         else if (field == 'email') {
+
+          //console.log('search_response :\n' + JSON.stringify(search_response, null, 2));
+
           if (parent_search_uid) {
             parent_node_uid = parent_search_uid;
           }
@@ -1080,6 +1391,8 @@ var newman_search_result_collection = (function () {
           //if (parent_node_uid != data_set_id) {
             //count++;
             //if (count < 3) {
+
+
               var node = search_result_table.appendAddressSearchList(label,
                                                                       search_text,
                                                                       field,
@@ -1095,6 +1408,7 @@ var newman_search_result_collection = (function () {
                                                                       email_address,
                                                                       parent_node_uid,
                                                                       clear_buffer);
+
             //}
           //}
         }
@@ -1112,21 +1426,87 @@ var newman_search_result_collection = (function () {
 
   } // end onSearchResponse(...)
 
-  function initiateTopRankedAddressSearch() {
-    console.log('initiateTopRankedAddressSearch()');
+  /*
+  function partitionSearchResponse( response ) {
 
-    //initiate top-ranked email address search
-    var ranked_email_accounts = newman_rank_email.getRankedList();
-    console.log('\tranked_emails[' + ranked_email_accounts.length + ']');
-    //console.log(JSON.stringify(ranked_email_accounts, null, 2));
+    if (response) {
+      var dataset_id_list = response.data_set_id.split(',');
 
-    _.each(ranked_email_accounts, function (element, index) {
-      var email_address = element["email"];
-      requestSearch('email', email_address, false);
-      //newman_aggregate_filter.initAggregateFilterSelected( email_address );
+      _.each(dataset_id_list, function(dataset_id, index) {
+        var new_graph = clone( response.graph );
+        var new_emails = clone( response.rows );
+        var new_attachments = clone( response.attachments );
+
+      });
+
+
+    }
+
+  }
+  */
+
+  function searchByDataSource( _data_id_list_string, _field, _search_text, _clear_buffer ) {
+    if (_data_id_list_string) {
+      var dataset_id_list = _data_id_list_string.split(',');
+
+      var field = _field;
+      var search_text = _search_text;
+      var load_on_response = false;
+      var parent_search_uid;
+      var clear_cache = _clear_buffer;
+
+      _.each(dataset_id_list, function (dataset_id, index) {
+        parent_search_uid = dataset_id;
+        requestSearch( field, search_text, load_on_response, parent_search_uid, clear_cache, dataset_id );
+
+      });
+      newman_search_filter.resetSelectedFilter();
+    }
+  }
+
+  function  searchRankedEmailByDataSource( parent_search_uid, dataset_id_list_string ) {
+    console.log('searchRankedEmailByDataSource( ' + dataset_id_list_string + ' )');
+    var dataset_id_list = dataset_id_list_string.split(',');
+    dataset_id_list.push( dataset_id_list_string );
+
+    _.each(dataset_id_list, function (dataset_id) {
+      console.log('\tdataset_id : ' + dataset_id + ' )');
+
+      var ranked_email_list = newman_rank_email_service.getRankedEmailByDataSource(dataset_id);
+      if (ranked_email_list) {
+        console.log('ranked_emails :\n' + JSON.stringify(ranked_email_list, null, 2));
+
+        _.each(ranked_email_list, function (element) {
+          //console.log('ranked_email_list.element :\n' + JSON.stringify(element, null, 2));
+
+          var email_account = element.email;
+          requestSearch('email', email_account, false, dataset_id, false, dataset_id);
+        });
+
+      }
     });
-    newman_search_filter.setSelectedFilter();
+  }
 
+  function initiateTopRankedAddressSearch(_data_id_list_string) {
+    if (_data_id_list_string) {
+      console.log('initiateTopRankedAddressSearch(' + _data_id_list_string + ')');
+
+      var dataset_id_list = _data_id_list_string.split(',');
+
+
+      //initiate top-ranked email address search
+      var ranked_email_accounts = newman_rank_email.getRankedList();
+      console.log('\tranked_emails[' + ranked_email_accounts.length + ']');
+      //console.log(JSON.stringify(ranked_email_accounts, null, 2));
+
+      _.each(ranked_email_accounts, function (element, index) {
+        var email_address = element["email"];
+        requestSearch('email', email_address, false);
+        //newman_aggregate_filter.initAggregateFilterSelected( email_address );
+      });
+      newman_search_filter.setSelectedFilter();
+
+    }
   }
 
 
@@ -1136,10 +1516,10 @@ var newman_search_result_collection = (function () {
     // Adjust the width of thead cells when window resizes
     $('#search_result_treetable_body').bind('treetable_rows_updated', function(event) {
       if (debug_enabled) {
-        console.log('event: "treetable_rows_updated"');
+        //console.log('event: "treetable_rows_updated"');
 
-        var max_width = $('#search_result_treetable_body').width();
-        console.log('\tmax_width: ' + max_width);
+        //var max_width = $('#search_result_treetable_body').width();
+        //console.log('\tmax_width: ' + max_width);
       }
 
 
@@ -1182,8 +1562,11 @@ var newman_search_result_collection = (function () {
       'clearAll' : clearAll,
       'deleteTableRow' : deleteTableRow,
       'uncheckTreeTableRow' : uncheckTreeTableRow,
-      'onDataSourceResponse' : onDataSourceResponse,
-      'onSearchResponse' : onSearchResponse
+      'onRequestAllSelected' : onRequestAllSelected,
+      'onSearchResponse' : onSearchResponse,
+      'getAllSelectedCount' : getAllSelectedCount,
+      'getAllSelectedAsString' : getAllSelectedAsString,
+      'getAllSelectedAsList' : getAllSelectedAsList
     }
 
 }());

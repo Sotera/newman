@@ -110,7 +110,7 @@
     border: 0px solid #0080AB;
     color: #0080AB;
     font-weight: normal;
-    font-size: 12px;
+/*  font-size: 12px; */
     line-height: inherit;
     margin: 0px;
 }
@@ -118,24 +118,28 @@
     padding: 2px 3px 2px 3px;
     position: relative;
     font-weight: lighter;
-    font-size: 11px;
-/*  width: inherit;
-    height: inherit;
-    line-height: inherit;
-    text-align: match-parent;*/
+    font-size: 12px;
 }
-/*
-.btn-small.outline:hover {
-    color: #006588;
-    border-radius: 6px;
-    border: 1px solid #BBBBBB;
-}
-*/
 .btn-small.outline:hover, .btn-small.outline:focus, .btn-small.outline:active, .open > .dropdown-toggle.btn-small {
     color: #006588;
     border-radius: 6px;
     border: 1px solid #BBBBBB;
 }
+
+.btn-default.outline {
+    padding: 2px 5px 2px 5px;
+    position: relative;
+    font-weight: normal;
+    font-size: 14px;
+    border: 1px solid #BBBBBB;
+}
+.btn-default.outline:hover, .btn-default.outline:focus, .btn-default.outline:active, .open > .dropdown-toggle.btn-default {
+    border-radius: 6px;
+    border: 1px solid #FFFFFF;
+    background: #5E9FF5;
+    color: #FFFFFF;
+}
+
 /*
 .btn-small.outline:focus, .btn-small.outline:active, .open > .dropdown-toggle.btn-small {
     color: #006588;
@@ -197,6 +201,52 @@ text.label.highlight:hover {
     vertical-align: middle;
     font-weight: normal;
     cursor: pointer;
+}
+
+input.fa_checkbox_round, input.fa_checkbox_squared, input.fa_toggle {
+    visibility: hidden;
+}
+
+input.fa_checkbox_round:checked:after, input.fa_checkbox_round:after,
+input.fa_checkbox_squared:checked:after, input.fa_checkbox_squared:after,
+input.fa_toggle:checked:after, input.fa_toggle:after {
+    visibility: visible;
+    font-family: FontAwesome;
+    font-size: 14px; height: 16px; width: 16px;
+    position: relative;
+    left: 0px;
+    background-color: transparent;
+    display: inline-block;
+}
+
+input.fa_checkbox_round:checked:after {
+    content: '\f058';
+}
+
+input.fa_checkbox_round:after {
+    content: '\f10c';
+}
+
+input.fa_checkbox_squared:checked:after {
+    content: '\f14a';
+}
+
+input.fa_checkbox_squared:after {
+    content: '\f096';
+}
+
+input.fa_toggle:checked:after {
+    content: '\f205';
+    color: #0080AB;
+}
+
+input.fa_toggle:after {
+    content: '\f204';
+    color: #006588;
+}
+
+input.fa_toggle.disabled {
+    color: #DADADA;
 }
 
 
@@ -284,6 +334,10 @@ text.label.highlight:hover {
 /***********************
  custom inclusion of right, left and below tabs
 ************************/
+.nav-tabs > li > a
+{
+    padding: 2px 6px 2px 6px;
+}
 
 .tabs-below > .nav-tabs,
 .tabs-right > .nav-tabs,
@@ -314,6 +368,7 @@ text.label.highlight:hover {
     -webkit-border-radius: 0 0 4px 4px;
     -moz-border-radius: 0 0 4px 4px;
     border-radius: 0 0 4px 4px;
+    padding: 2px 6px 2px 6px;
 }
 
 .tabs-below > .nav-tabs > li > a:hover,

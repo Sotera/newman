@@ -1150,19 +1150,6 @@ var app_geo_map = (function () {
 
     if (!map) {
 
-      /*
-      map = L.map(
-        'map',
-        {
-          worldCopyJump: true
-        }
-      ).setView(default_view_center, default_view_zoom);
-
-      map.on('zoomend', function (e) {
-        console.log('map_zoom_level: ' + map.getZoom());
-      });
-      */
-
       initMap();
       initMapTileLayer();
     }

@@ -2,7 +2,7 @@
  * Created by jlee on 9/5/15.
  */
 
-var history_nav = (function () {
+var app_nav_history = (function () {
   var debug_enabled = false;
 
   var hist_max = 11; //dashboard_home(1) + max(10)
@@ -26,9 +26,9 @@ var history_nav = (function () {
     }
 
     if(!icon_class) {
-      icon_class = 'fa fa-asterisk';
+      icon_class = 'fa fa-file-text-o';
       if (data_field === 'all') {
-        icon_class = 'fa fa-asterisk';
+        icon_class = 'fa fa-file-text-o';
       }
       else if (data_field === 'text') {
         icon_class = 'fa fa-file-text-o';
@@ -138,7 +138,22 @@ var history_nav = (function () {
   };
 
   var initialize = function() {
-    hist_list = [];
+    if (hist_list) {
+      hist_list.length = 0;
+    }
+    else {
+      hist_list = [];
+    }
+
+    $('#dashboard_home_button').on("click", function(e) {
+      if (debug_enabled) {
+        console.log('dashboard_home_button-clicked');
+      }
+
+      loadDashboard()
+
+      e.preventDefault();
+    });
 
     push('hist_dashboard_home',
          ' Dashboard',
@@ -150,58 +165,131 @@ var history_nav = (function () {
 
   }
 
-  var refreshUI = function() {
+  function loadDashboard() {
+
+    // close data-table-view
+    bottom_panel.close();
+
+    dashboard_content.open();
+  }
+
+  var refreshUI = function( ui_type ) {
 
     if (debug_enabled) {
       console.log('user_hist[' + hist_list.length + ']');
     }
 
-    clearUI();
+    clearUI( ui_type );
 
-    _.each(hist_list, function( element ) {
-      if (debug_enabled) {
-        console.log('\t' + element.label + ', ' + element.uid + ', ' + element.icon_class + ', ' + element.data_url);
-      }
+    if (ui_type === 'breadcrumb_bar') {
 
-      var button = $('<button />', {
-        type: 'button',
-        class: 'breadcrumb-button',
-        html: '<i class=\"' + element.icon_class + '\"/></i> ' + element.label,
-        value: element.uid,
-        id: element.uid,
-        on: {
-          click: function () {
-            console.log( 'hist-item-selected : ' + this.id + ', data-url: ' + element.data_url );
+      _.each(hist_list, function (element) {
+        if (debug_enabled) {
+          console.log('\t' + element.label + ', ' + element.uid + ', ' + element.icon_class + ', ' + element.data_url);
+        }
 
-            // close data-table-view
-            bottom_panel.close();
+        var button_html = $('<button />', {
+          type: 'button',
+          class: 'breadcrumb-button',
+          html: '<i class=\"' + element.icon_class + '\"/></i> ' + element.label,
+          value: element.uid,
+          id: element.uid,
+          on: {
+            click: function () {
+              console.log('hist-item-selected : ' + this.id + ', data-url: ' + element.data_url);
 
-            if (this.id == 'hist_dashboard_home') {
+              if (this.id == 'hist_dashboard_home') {
 
-              dashboard_content.open();
-            }
-            else {
+                loadDashboard();
+                //dashboard_content.open();
+              }
+              else {
 
-              loadSearchResult( element.data_url );
+                // close data-table-view
+                bottom_panel.close();
+
+                loadSearchResult(element.data_url);
+              }
             }
           }
+        });
+
+        var hist_item_html = $('<li/>')
+        hist_item_html.append(button_html);
+
+        //console.log( '\t' + hist_item_html );
+        $('#hist_list').append(hist_item_html);
+
+      });
+
+    }
+    else {
+
+      var list_copy = clone( hist_list );
+      list_copy.reverse();
+
+      _.each(list_copy, function (element) {
+        if (debug_enabled) {
+          console.log('\t' + element.label + ', ' + element.uid + ', ' + element.icon_class + ', ' + element.data_url);
+        }
+
+        var button_html = $('<button />', {
+          type: 'button',
+          class: 'button-dropdown-menu-item',
+          html: '<i class=\"' + element.icon_class + '\"/></i> ' + element.label,
+          value: element.uid,
+          id: element.uid,
+          on: {
+            click: function () {
+              console.log('hist-item-selected : ' + this.id + ', data-url: ' + element.data_url);
+
+              // close data-table-view
+              bottom_panel.close();
+
+              if (this.id == 'hist_dashboard_home') {
+
+                dashboard_content.open();
+              }
+              else {
+
+                loadSearchResult(element.data_url);
+              }
+            }
+          }
+        });
+
+        var hist_item_html = $('<li style=\"line-height: 20px; text-align: left\"/>')
+        hist_item_html.append(button_html);
+
+        //console.log( '\t' + hist_item_html );
+        $('#recent_hist_list').append(hist_item_html);
+
+        var hist_count = hist_list.length - 1;
+        if (hist_count > 0) {
+          $('#recent_hist_selected').find('.dropdown-toggle').html('<span class=\"fa fa-history\"> History [' + hist_count + ']</span>');
         }
       });
 
-      var hist_item = $( '<li/>' )
-      hist_item.append( button );
-
-      //console.log( '\t' + html_text );
-      $('#hist_list').append( hist_item );
-
-    });
+    }
 
   };
 
-  var clearUI = function () {
-    $('#hist_list li').each(function () {
-      $(this).remove();
-    });
+  var clearUI = function (ui_type) {
+
+    if (ui_type === 'breadcrumb_bar') {
+
+      $('#hist_list li').each(function () {
+        $(this).remove();
+      });
+
+    }
+    else {
+
+      $('#recent_hist_list li').each(function () {
+        $(this).remove();
+      });
+
+    }
   }
 
   var removeLast = function () {
@@ -211,10 +299,12 @@ var history_nav = (function () {
     }
   }
 
-  function appendUI(url_path, field, label) {
+  function appendHist(url_path, field, label) {
     if (url_path && field && label) {
       //var key = decodeURIComponent(url_path).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',', '_');
-      var key = encodeURIComponent(url_path);
+
+      var dataset_id = getURLParameter( url_path, 'data_set_id' );
+      var dataset_label = newman_dataset_label.getLabelFromDatasetID( dataset_id, true );
 
       try {
         label = decodeURIComponent(label);
@@ -231,6 +321,10 @@ var history_nav = (function () {
         label = '"' + label + '"';
       }
 
+      label = label + ' (' + dataset_label + ')';
+
+      var key = encodeURIComponent(url_path);
+
       push(key, label, '', url_path, field);
 
 
@@ -246,7 +340,7 @@ var history_nav = (function () {
     "getHistByID": getHistByID,
     "getHistByDataURL": getHistByDataURL,
     "refreshUI": refreshUI,
-    'appendUI': appendUI,
+    'appendHist': appendHist,
     "initialize": initialize
   }
 

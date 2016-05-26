@@ -148,7 +148,7 @@ var newman_domain_email = (function () {
       var colors = getAllColorAsList();
       //console.log('color_list:\n' + JSON.stringify(colors, null, 2));
 
-      var width = 530, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
+      var width = 530, height_bar = 13, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
       width = width - margin.left - margin.right;
 

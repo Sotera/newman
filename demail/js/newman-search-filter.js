@@ -18,9 +18,11 @@ var newman_search_filter = (function () {
   };
 
   var initFilter = function() {
-    pushFilter('search_filter_all', 'all', 'fa fa-asterisk');
+    pushFilter('search_filter_all', 'all', 'fa fa-file-text-o');
     pushFilter('search_filter_text', 'text', 'fa fa-file-text-o');
     pushFilter('search_filter_email', 'email', 'fa fa-user');
+
+    /* Deprecated since v2.11 */
     //pushFilter('search_filter_attach', 'attach', 'fa fa-paperclip');
     //pushFilter('search_filter_entity', 'entity', 'fa fa-sitemap');
     //pushFilter('search_filter_topic', 'topic', 'fa fa-list-ul');
@@ -339,6 +341,7 @@ var newman_search_filter = (function () {
       var search_text = $("#txt_search").val();
 
       if (search_text) {
+        //search_text = toUnicode( search_text );
 
         if (!param_key) {
           param_key = 'qs';
