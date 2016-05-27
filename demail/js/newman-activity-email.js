@@ -34,7 +34,7 @@ var newman_activity_color = (function () {
  * activity-over-time related container
  */
 var newman_activity_email = (function () {
-  var debug_enabled = true;
+  var debug_enabled = false;
 
   var chart_ui_id_text = 'chart_line_activities';
   var chart_ui_id_element = $('#' + chart_ui_id_text);

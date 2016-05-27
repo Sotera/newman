@@ -659,7 +659,16 @@ var newman_data_source = (function () {
   }
 
   function requestAllDataSet() {
+    //newman_data_source_service.requestAllDataSet();
 
+    // forced-loading data-source config prior to requesting all data sets
+    app_data_source_config.requestDataSetConfig( newman_data_source );
+  }
+
+  function onRequestDataSetConfig( response ) {
+    //console.log( 'onRequestDataSetConfig( response )' );
+
+    // request all data sets after forced-loading data-source config
     newman_data_source_service.requestAllDataSet();
   }
 
@@ -670,30 +679,36 @@ var newman_data_source = (function () {
 
     if (_all_dataset_response) {
 
-      var dataset_map = _.object(_.map( response.data_sets, function (element, index) {
+      _.each( _all_dataset_response.data_sets, function (element, index) {
 
-        var is_selected_default = false;
-        if (index < _default_data_source_max_selected) {
-          is_selected_default = true;
+        if (app_data_source_config.isDataSetExcluded(element.data_set_id)) {
+          console.warn( 'data-set "' + element.data_set_id + '" is excluded by config!' );
+        }
+        else {
+
+          var is_selected_default = false;
+          if (index < _default_data_source_max_selected) {
+            is_selected_default = true;
+          }
+
+          push(
+            element.data_set_id,
+            element.data_set_label,
+            element.data_set_datetime_min,
+            element.data_set_datetime_max,
+            element.data_set_document_count,
+            element.data_set_node_count,
+            element.data_set_attachment_count,
+            element.start_datetime_selected,
+            element.end_datetime_selected,
+            is_selected_default,
+            '', // placeholder for case_id
+            '' // placeholder for alt_ref_id
+          );
+
         }
 
-        push(
-          element.data_set_id,
-          element.data_set_label,
-          element.data_set_datetime_min,
-          element.data_set_datetime_max,
-          element.data_set_document_count,
-          element.data_set_node_count,
-          element.data_set_attachment_count,
-          element.start_datetime_selected,
-          element.end_datetime_selected,
-          is_selected_default,
-          '', // placeholder for case_id
-          '' // placeholder for alt_ref_id
-        );
-
-        return [element['data_set_id'], element];
-      }));
+      });
 
       refreshUI();
       //console.log('_response_map: ' + JSON.stringify(_response_map, null, 2));
@@ -901,7 +916,8 @@ var newman_data_source = (function () {
     'appendDataSource' : appendDataSource,
     'appendEachDataSource' : appendEachDataSource,
     "parseDataSource" : parseDataSource,
-    "getDefaultDataSourceID" : getDefaultDataSourceID
+    "getDefaultDataSourceID" : getDefaultDataSourceID,
+    'onRequestDataSetConfig' : onRequestDataSetConfig
   }
 
 }());
