@@ -393,7 +393,7 @@ var newman_activity_email = (function () {
     }
 
     if (debug_enabled) {
-      console.log('setDatetimeBounds(' + activity_datetime_start + ', ' + activity_datetime_end + ')');
+      //console.log('setDatetimeBounds(' + activity_datetime_start + ', ' + activity_datetime_end + ')');
     }
 
     if (!is_initialized) {
