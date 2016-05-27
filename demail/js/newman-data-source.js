@@ -169,7 +169,7 @@ var newman_data_source = (function () {
         }
       }
       else {
-        requestAllSelected();
+        requestAllSelected( true );
       }
     });
 
@@ -577,7 +577,7 @@ var newman_data_source = (function () {
     return _data_source_list.length - 1;
   }
 
-  function requestAllSelected() {
+  function requestAllSelected(is_forced_override) {
     //console.log( 'requestAllSelected()' );
 
     var dataset_count = getDatasetCount();
@@ -595,7 +595,7 @@ var newman_data_source = (function () {
       else {
         var selected_id_set = getAllSelectedAsString();
 
-        newman_data_source_service.requestDataSetSelect( selected_id_set );
+        newman_data_source_service.requestDataSetSelect( selected_id_set, is_forced_override );
       }
     }
     else {
@@ -608,7 +608,7 @@ var newman_data_source = (function () {
 
   }
 
-  function onRequestAllSelected( response ) {
+  function onRequestAllSelected( response, is_forced_override ) {
     if (debug_enabled) {
       console.log('onRequestAllSelected(...)\n' + JSON.stringify(response, null, 2));
     }
@@ -632,7 +632,7 @@ var newman_data_source = (function () {
     // initialize data tree-table events
     newman_search_result_collection.initTreeTableEvent();
     // build data tree-table nodes
-    newman_search_result_collection.onRequestAllSelected( getAllSelected(), _all_selected_response );
+    newman_search_result_collection.onRequestAllSelected( getAllSelected(), _all_selected_response, is_forced_override );
 
 
     // re-initialize aggregate-filter
@@ -925,7 +925,7 @@ var newman_data_source_service = (function () {
     });
   }
 
-  function requestDataSetSelect(dataset_id_list) {
+  function requestDataSetSelect(dataset_id_list, is_forced_override) {
     console.log('newman_data_source_service.requestDataSetSelect('+dataset_id_list+')');
 
     if (dataset_id_list) {
@@ -933,7 +933,7 @@ var newman_data_source_service = (function () {
       $.get('datasource/dataset/' + encodeURIComponent(dataset_id_list)).then(function ( response ) {
       //$.get('datasource/dataset/' + dataset_id_list).then(function ( response ) {
         //console.log(JSON.stringify(response, null, 2));
-        newman_data_source.onRequestAllSelected( response );
+        newman_data_source.onRequestAllSelected( response, is_forced_override );
       });
     }
   }

@@ -732,81 +732,21 @@ function drawGraph(graph){
       }
     });
 
-  var click_node = function(){
-    var timer = null, clicks=0, last="";
+  var onNodeClicked = function(){
+    var clicks=0, last="";
     return function(n){
       clicks++;
-
-      var fn = function(){
-
-        if (clicks > 1){
-          //requestSearch('email', $('#txt_search').val(), true);
-        }
-        clicks=0;
-      };
 
       if (clicks == 1) {
         console.log('clicked\n' + JSON.stringify(n, null, 2));
 
-        //$('#txt_search').val(n.name);
-        var t = Math.floor($('#radial-wrap').height() / 2);
-        var l = Math.floor($('#radial-wrap').width() / 2);
-
-        $('#radial-wrap')
-          .css('top', (30 + d3.event.clientY - t) + "px")
-          .css('left', (d3.event.clientX - l) + "px");
-
-        $('#radial-wrap').find(".email_addr a span").first().text(n.name);
-
-        //$('#radial').find(".attach").first().unbind("click")
-        $('#radial')
-          .find('#popup_show_attachment').first().off()
-          .on("click", function(e) {
-            console.log('node-clicked show-email-attachments');
-
-            /*
-            draw_attachments_table(n.name).done(function () {
-              // TODO: needs rework, no longer working
-              $('#tab-list li:eq(4) a').tab('show');
-            });
-            */
-            e.preventDefault();
-          });
-
-
-        //$('#radial').find('.email').first().unbind('click')
-        $('#radial')
-          .find('#popup_search_email_address').first().off()
-          .on("click", function(e) {
-            console.log( 'node-clicked search-by-email' );
-
-            //requestSearch("email", n.name, true);
-
-            e.preventDefault();
-          })
-          .find("span").first().css("color", getEmailDomainColor(n.name));
-
-        //$('#radial').find(".community").first().unbind('click')
-        $('#radial')
-          .find("#popup_search_community").first().off()
-          .on("click", function(e){
-            console.log( 'node-clicked search-by-community' );
-
-            //requestSearch("community", n.community, true);
-
-            e.preventDefault();
-            }).find("span").first().css("color", newman_community_email.getCommunityColor( n.community ));
-
-        _.delay(function() {  $("#alink").focus(); }, 150);
-
-        _.delay(fn, 150, n.name);
       }
     };
   }();
 
   node.on("click", function(n){
     setSearchType('email');
-    //click_node(n);
+
   });
 
   node.on('contextmenu', d3.contextMenu(node_context_menu, {

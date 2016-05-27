@@ -421,9 +421,9 @@ var newman_search_result_collection = (function () {
     }
   }
 
-  /* disabled; must have at least one data-source selected */
-  /*
-  function clearAllSelected( refresh_enabled ) {
+  /* Must have at least one data-source selected or forced-reset */
+
+  function _clearAllSelected() {
 
     if (!_.isEmpty(dataset_selected_map)) {
       // deep-delete
@@ -439,12 +439,8 @@ var newman_search_result_collection = (function () {
       console.log('dataset_selected_map[' + getAllSelectedCount() + '], is-empty = ' + _.isEmpty(dataset_selected_map));
     }
 
-    //apply data-source-select change
-    if (refresh_enabled === true) {
-      onChangeSelected();
-    }
   }
-  */
+
 
   function putSelected( key, value, refresh_enabled ) {
     if (key && value) {
@@ -1108,10 +1104,14 @@ var newman_search_result_collection = (function () {
     }
   }
 
-  function onRequestAllSelected(dataset_map, multi_selected_response) {
+  function onRequestAllSelected(dataset_map, multi_selected_response, is_forced_override) {
     if (dataset_map && (_.size(dataset_map) > 0)) {
 
       //console.log( 'data_set_key_list :\n' + JSON.stringify(dataset_map, null, 2) );
+
+      if (is_forced_override === true) {
+        _clearAllSelected();
+      }
 
       // initialize local result-collection data source select/deselect cache
       var is_dataset_select_empty = false;

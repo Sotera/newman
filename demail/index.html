@@ -47,56 +47,6 @@
 
   </head>
   <body>
-  <!-- hidden link //hack -->
-  <a id="alink" class='hidden-button ctrl'
-    style="height:0;width:0;position: absolute;top: -2000px;" href='#' tabindex='1'>
-  </a>
-
-    <div id="radial-wrap" class="tip ctrl">
-      <div class="email_addr"><a><span></span></a></div>
-      <ul id="radial">
-        <li class='slice' id="popup_show_attachment">
-          <!--<a class="clickable attach" title="Show Attachments" >-->
-          <a class="clickable" title="Show Attachments" >
-            <span class="glyphicon glyphicon-file"></span>
-          </a>
-        </li>
-        <li class='slice' id="popup_search_email_address">
-          <!--<a class="clickable email" title="Search By Email" >-->
-          <a class="clickable" title="Search By Email" >
-            <span class="glyphicon glyphicon-envelope" ></span>
-          </a>
-        </li>
-        <li class='slice' id="popup_search_community">
-          <!--<a class="clickable community" title="Search By Community" >-->
-          <a class="clickable" title="Search By Community" >
-            <span class="glyphicon glyphicon-search"></span> 
-          </a>
-        </li>
-      </ul>
-    </div>
-
-    <!-- modal info panel -->
-    <div id="info-panel" class="modal fade">
-      <div class="modal-dialog">
-        <div class="modal-content">
-
-          <div class="modal-header">
-            <h3>Information</h3>
-          </div>
-
-          <div class="modal-body">
-    	    Will fill this in later...
-          </div>
-
-          <div class="modal-footer">
-            <a class="btn btn-default" data-dismiss="modal">OK</a>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
   <!-- modal email download/export -->
   <!--
   <div class="modal fade" id="export_modal" tabindex="-1" role="dialog" aria-labelledby="export_modal" aria-hidden="true">
@@ -332,10 +282,12 @@
                 -->
               <!-- End-Search-Aggregate-Search-Filter -->
 
+              <!--
               <button id="temporal_control_toggle" type="button" class="btn navbar-btn button-dropdown-menu" data-toggle="collapse" data-target="#temporal_control_container"
                       style="font-size: 13px; font-weight: lighter; padding: 0px 2px 0px 2px; margin: 0;">
                 <span class="fa fa-area-chart fa-inverse"></span>
               </button>
+              -->
             </div>
 
 
@@ -399,7 +351,14 @@
 
       <div class="col-xs-1" id="temporal_control_content" style="margin: 0; padding: 0;">
         <div class="box-content" style="padding: 0px; width: 100%; height: 124px;">
-          <div class="row" style="margin: 0; padding: 0; height: 64px;">
+          <div class="row" style="margin: 0; padding: 0; height: 38px;">
+          </div>
+          <div class="row" style="margin: 0; padding: 0; height: 26px;">
+            <div class="col-sm-12" style="margin: 0; padding: 0;">
+              <div style="margin: 0 2px 0 2px; padding: 0; border: 1px solid #BBBBBB; font-weight: normal; color: #000000;">
+                <span id="timeline_range_text" style="margin: 0; padding: 0 2px 0 2px; font-size: 9px">&nbsp;</span>
+              </div>
+            </div>
           </div>
           <div class="row" style="margin: 0; padding: 0; height: 24px;">
           </div>
@@ -410,7 +369,7 @@
               </button>
             </div>
             <div class="col-sm-6" style="margin: 0; padding: 0 2px 0 2px; text-align: right;">
-              <button id="timelime_apply_button" type="button" class="btn btn-histogram outline" >
+              <button id="timeline_apply_button" type="button" class="btn btn-histogram outline" >
                 <span class="fa fa-refresh"> Apply</span>
               </button>
             </div>

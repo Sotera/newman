@@ -291,6 +291,7 @@ var newman_activity_email = (function () {
     }
 
     //console.log('new_activity_list :\n' + JSON.stringify(new_activity_list, null, 2));
+    //console.log('_trimEmptyListValue(activity_list) : start_datetime ' + start_datetime + ', end_datetime ' + end_datetime);
 
     setDatetimeBounds( start_datetime, end_datetime );
 
@@ -351,9 +352,9 @@ var newman_activity_email = (function () {
       activity_chart = undefined;
     }
 
-    $('#timelime_apply_button').off().on("click", function(e) {
+    $('#timeline_apply_button').off().on("click", function(e) {
       if (debug_enabled) {
-        console.log('timelime_apply_button-clicked');
+        console.log('timeline_apply_button-clicked');
       }
 
       applyDatetimeBounds();
@@ -378,15 +379,21 @@ var newman_activity_email = (function () {
       if (datetime_start.length > 10) {
         activity_datetime_start = datetime_start.substring(0, 10);
       }
+      else {
+        activity_datetime_start = datetime_start;
+      }
     }
     if (datetime_end) {
       if (datetime_end.length > 10) {
         activity_datetime_end = datetime_end.substring(0, 10);
       }
+      else {
+        activity_datetime_end = datetime_end;
+      }
     }
 
     if (debug_enabled) {
-      //console.log('setDatetimeBounds(' + activity_datetime_start + ', ' + activity_datetime_end + ')');
+      console.log('setDatetimeBounds(' + activity_datetime_start + ', ' + activity_datetime_end + ')');
     }
 
     if (!is_initialized) {
@@ -398,6 +405,8 @@ var newman_activity_email = (function () {
 
       is_initialized = true;
     }
+
+    $('#timeline_range_text').html(activity_datetime_start + ' ~ ' + activity_datetime_end);
   }
 
   function getDatetimeBounds() {
@@ -433,6 +442,7 @@ var newman_activity_email = (function () {
     'displayUIActivity' : displayUIActivity,
     'updateUIActivity' : updateUIActivity,
     'revalidateUIActivity' : revalidateUIActivity,
+    'setDatetimeBounds' : setDatetimeBounds,
     'getDatetimeBounds' : getDatetimeBounds
   }
 
