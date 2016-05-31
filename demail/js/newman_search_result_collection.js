@@ -3,7 +3,7 @@
  */
 function EmailSearchResultList() {
   this.debug_enabled = true;
-  this.result_list_max = 25;
+  //this.result_list_max = 25;
   this.result_list = [];
 }
 
@@ -61,7 +61,7 @@ EmailSearchResultList.prototype = {
     }
 
     if (this.debug_enabled) {
-      console.log('indexOfUID( ' + uid + ' ) ' + _index_found);
+      //console.log('indexOfUID( ' + uid + ' ) ' + _index_found);
     }
     return _index_found;
   },
@@ -85,7 +85,8 @@ EmailSearchResultList.prototype = {
       }
     });
 
-    this.result_list = [];
+    //this.result_list = [];
+    this.result_list.length = 0;
   },
 
   pop : function () {
@@ -177,14 +178,6 @@ EmailSearchResultTreeTable.prototype = {
     return this.data_source_list.isEmpty();
   },
 
-  getChildrenCount : function() {
-    return this.data_source_list.size();
-  },
-
-  getTableRow : function( key ) {
-    return this.table_row_map[key];
-  },
-
   deleteTableRow : function( key ) {
     if (key) {
       delete this.table_row_map[key];
@@ -196,6 +189,18 @@ EmailSearchResultTreeTable.prototype = {
        }
        */
     }
+  },
+
+  getChildrenCount : function() {
+    return this.data_source_list.size();
+  },
+
+  getChildren : function() {
+    return clone(this.data_source_list);
+  },
+
+  getTableRow : function( key ) {
+    return this.table_row_map[key];
   },
 
   clearChildren : function() {
@@ -220,12 +225,16 @@ EmailSearchResultTreeTable.prototype = {
                                _rank,
                                _icon_class) {
 
+    _label = decodeURIComponent(_label);
+    _search_text = decodeURIComponent(_search_text),
+    _data_source_id = decodeURIComponent(_data_source_id);
+
     var new_result = new EmailSearchResult(
-      decodeURIComponent(_label),
-      decodeURIComponent(_search_text),
+      _label,
+      _search_text,
       _search_field,
       _url,
-      decodeURIComponent(_data_source_id),
+      _data_source_id,
       _document_count,
       _document_sent,
       _document_received,
@@ -260,12 +269,16 @@ EmailSearchResultTreeTable.prototype = {
                                    parent_uid,
                                    clear_children) {
 
+    _label = decodeURIComponent(_label);
+    _search_text = decodeURIComponent(_search_text),
+    _data_source_id = decodeURIComponent(_data_source_id);
+
     var new_result = new EmailSearchResult(
-      decodeURIComponent(_label),
-      decodeURIComponent(_search_text),
+      _label,
+      _search_text,
       _search_field,
       _url,
-      decodeURIComponent( _data_source_id ),
+      _data_source_id,
       _document_count,
       _document_sent,
       _document_received,
@@ -284,9 +297,10 @@ EmailSearchResultTreeTable.prototype = {
       var data_source_node = this.data_source_list.getByUID( _data_source_id );
       if (data_source_node) {
 
-        if (clear_children === true) {
+        //if (clear_children === true) {
           data_source_node.clearChildren();
-        }
+        //}
+
         data_source_node.appendChild( new_result );
       }// end of if (data_source_node)
       else {
@@ -315,12 +329,17 @@ EmailSearchResultTreeTable.prototype = {
                                       parent_uid,
                                       clear_children) {
 
+    _label = decodeURIComponent(_label);
+    _search_text = decodeURIComponent(_search_text),
+    _data_source_id = decodeURIComponent(_data_source_id);
+    _email_address = decodeURIComponent(_email_address);
+
     var new_result = new EmailSearchResult(
-      decodeURIComponent(_label),
-      decodeURIComponent(_search_text),
+      _label,
+      _search_text,
       _search_field,
       _url,
-      decodeURIComponent(_data_source_id),
+      _data_source_id,
       _document_count,
       _document_sent,
       _document_received,
@@ -328,7 +347,7 @@ EmailSearchResultTreeTable.prototype = {
       _attach_count,
       _rank,
       _icon_class,
-      decodeURIComponent(_email_address)
+      _email_address
     );
 
     if (parent_uid) {
@@ -348,18 +367,21 @@ EmailSearchResultTreeTable.prototype = {
             if (clear_children === true) {
               parent_node.clearChildren();
             }
+
             parent_node.appendChild( new_result );
 
             //data_source_node.setChild( parent_node ); //override to make sure
           }
-          else { // no parent-node found, default to grand-parent-node
+          else { // no parent-node found, default to grand-parent-node (root-node)
             if (this.debug_enabled) {
               console.log('parent_node ' + parent_uid + ' NOT found!');
             }
 
+            /*
             if (clear_children === true) {
               data_source_node.clearChildren();
             }
+            */
             data_source_node.appendChild( new_result );
           }
         }
@@ -368,9 +390,11 @@ EmailSearchResultTreeTable.prototype = {
             console.log('data_source_node.hasChild() : false');
           }
 
+
           if (clear_children === true) {
             data_source_node.clearChildren();
           }
+
           data_source_node.appendChild( new_result );
         }
       }// end of if (data_source_node)
@@ -400,6 +424,49 @@ var newman_search_result_collection = (function () {
 
   // local copy of last-known all dataset
   var all_dataset_map = {};
+  var initial_service_url;
+  var is_initial_response = true;
+
+  var subsequent_search_result_list_max = 5;
+
+
+  function _initDebugEvent( param_0, param_1, param_2 ) {
+
+    var dataset_id_list = param_0, parent_search_uid = param_1, max = param_2;
+
+    $('#debug_toggle').off().on('click', function () {
+      // start target call
+
+        _.each(dataset_id_list, function (dataset_id) {
+          console.log('\tdataset_id : ' + dataset_id );
+
+          if (isSelected( dataset_id )) {
+            var ranked_email_list = newman_rank_email_service.getRankedEmailByDataSource(dataset_id);
+            if (ranked_email_list) {
+              console.log('ranked_emails :\n' + JSON.stringify(ranked_email_list, null, 2));
+
+              _.each(ranked_email_list, function (element, index) {
+                //console.log('ranked_email_list.element :\n' + JSON.stringify(element, null, 2));
+
+                var email_account = element.email;
+                if (max) {
+                  if (index < max) {
+                    requestSearch('email', email_account, false, parent_search_uid, false, dataset_id);
+                  }
+                }
+                else {
+                  requestSearch('email', email_account, false, parent_search_uid, false, dataset_id);
+                }
+              });
+
+            }
+          } // end-of if (isSelected( dataset_id ))
+
+        });
+
+      // end-of target call
+    });
+  }
 
   function removeSelected( key, refresh_enabled ) {
     if (key) {
@@ -517,7 +584,7 @@ var newman_search_result_collection = (function () {
       var dataset_id_list = id_selected_string.split(',');
       if (dataset_id_list.length > 1) {
         if (debug_enabled) {
-          console.log('dataset_id_list :\n' + JSON.stringify(dataset_id_list, null, 2));
+          //console.log('dataset_id_list :\n' + JSON.stringify(dataset_id_list, null, 2));
         }
         is_multi_selected = true;
       }
@@ -573,6 +640,7 @@ var newman_search_result_collection = (function () {
     var ui_container_copy = $('#'+ui_treetable_copy_id);
     var ui_appendable_copy = $('#'+ui_treetable_body_copy_id);
 
+
     if (ui_container && ui_appendable) {
 
       var text_search_node_list = [];
@@ -585,10 +653,10 @@ var newman_search_result_collection = (function () {
       ui_appendable.empty();
       _.each(data_source_list, function (data_source_element, index) {
         if (debug_enabled) {
-          console.log('\tlabel: ' + data_source_element.label + ', url: ' + data_source_element.url + ', data_source_id: ' + data_source_element.data_source_id );
+          console.log('\tdata-source: ' + data_source_element.label + ', url: ' + data_source_element.url + ', data_source_id: ' + data_source_element.data_source_id );
         }
 
-        var _array = populateTableRow( ui_treetable_id, ui_appendable, data_source_element, 1, 0, (index+1) );
+        var _array = populateTableRow( ui_treetable_id, ui_appendable, data_source_element, 1, 0, (index+1), true );
         var data_source_node_index = _array[0];
         var data_source_html_row = _array[1];
         ui_appendable.append( data_source_html_row );
@@ -598,7 +666,7 @@ var newman_search_result_collection = (function () {
           var text_search_list = data_source_element.getChildrenAsList();
           _.each(text_search_list, function (text_search_element, index) {
 
-            var _array = populateTableRow( ui_treetable_id, ui_appendable, text_search_element, 2, data_source_node_index, (index+1) );
+            var _array = populateTableRow( ui_treetable_id, ui_appendable, text_search_element, 2, data_source_node_index, (index+1), true );
             var text_search_node_index = _array[0];
             var text_search_html_row = _array[1];
             ui_appendable.append( text_search_html_row );
@@ -610,7 +678,7 @@ var newman_search_result_collection = (function () {
               var address_search_list = text_search_element.getChildrenAsList();
               _.each(address_search_list, function (address_search_element, index) {
 
-                var _array = populateTableRow( ui_treetable_id, ui_appendable, address_search_element, 3, text_search_node_index, (index+1) );
+                var _array = populateTableRow( ui_treetable_id, ui_appendable, address_search_element, 3, text_search_node_index, (index+1), true );
                 var address_search_node_index = _array[0];
                 var address_search_html_row = _array[1];
                 ui_appendable.append( address_search_html_row );
@@ -741,7 +809,7 @@ var newman_search_result_collection = (function () {
         expanderCollapsedClass : 'fa fa-plus-square-o'
       });
 
-      collapseAllSearchResultNode(text_search_node_list, ui_container, ui_container_copy);
+      //collapseAllSearchResultNode(text_search_node_list, ui_container, ui_container_copy);
 
     }
     else {
@@ -750,76 +818,41 @@ var newman_search_result_collection = (function () {
 
   } // end of populateTable(...)
 
-  function populateTableRow( table_id, ui_callback, data_element, level_index, parent_node_index, count ) {
+  function populateTableRow( table_id, ui_callback, data_element, level_index, parent_node_index, count, data_select_enabled ) {
     var node_index;
     var table_row;
 
     if (ui_callback && data_element) {
       //console.log( 'data_element: ' + JSON.stringify(data_element, null, 2) );
 
+      var button_html = '';
       var checkbox_html = '';
       var email_address = data_element.email_address;
       if (email_address) {
-        var checkbox_id = 'checkbox_' + email_address;
 
-        if (newman_aggregate_filter.containsAggregateFilter(checkbox_id)) {
-          checkbox_html = "<input type=\"checkbox\" id=\"" + checkbox_id + "\" checked/>";
-        }
-        else {
-          checkbox_html = "<input type=\"checkbox\" id=\"" + checkbox_id + "\"/>";
-        }
+        if (data_select_enabled) {
+          var checkbox_id = 'checkbox_' + email_address;
 
-        ui_callback.on('change', 'td input:checkbox', function (event) {
-          // Ignore this event if preventDefault has been called.
-          if (event.defaultPrevented) return;
-
-          var attr_id = $(this).attr('id');
-          if (attr_id) {
-            console.log('\tid : ' + attr_id + ' is-checked : ' + this.checked);
-            newman_aggregate_filter.setAggregateFilterSelected(attr_id, this.checked, true);
-          }
-
-          event.preventDefault();
-          event.stopImmediatePropagation();
-        });
-      }
-
-      var button_html = "<button type=\"button\" class=\"btn btn-small outline\" id=\"" + data_element.uid + "\">" + data_element.label + "</button>";
-
-      ui_callback.on('click', 'td button:button', function (event) {
-        // Ignore this event if preventDefault has been called.
-        if (event.defaultPrevented) return;
-
-        var column_index = parseInt($(this).index());
-        var row_index = parseInt($(this).parent().index());
-        console.log('search-result-selected [' + row_index + ',' + column_index + ']');
-
-        var attr_id = $(this).attr('id');
-        if (attr_id) {
-          console.log('\tid : ' + attr_id);
-
-          var row_element = search_result_table.getTableRow(attr_id);
-
-          if (row_element) {
-            //console.log('\element : ' + JSON.stringify(item, null, 2));
-
-            onTreeTableRowClicked(row_element);
+          if (newman_aggregate_filter.containsAggregateFilter(checkbox_id)) {
+            checkbox_html = "<input type=\"checkbox\" value=\"email_address\" id=\"" + checkbox_id + "\" checked/>";
           }
           else {
-            console.warn('Expected "row_element" not found for "' + attr_id + '"!');
+            checkbox_html = "<input type=\"checkbox\" value=\"email_address\" id=\"" + checkbox_id + "\"/>";
           }
         }
 
+        button_html = "<button type=\"button\" class=\"btn btn-small outline\" value=\"email_address\" id=\"" + data_element.uid + "\">" + data_element.label + "</button>";
 
-        event.preventDefault();
-        event.stopImmediatePropagation();
-      });
+      }
 
 
-      if (level_index == 1) {
+      if (level_index == 1) { // data-source-row
 
         var dataset_id_list = data_element.data_source_id;
-        if (isMultiSelectedAsString( dataset_id_list )) { // multi-select data source union
+        if (isMultiSelectedAsString( dataset_id_list )) { // multi-select data-source union
+
+          button_html = "<button type=\"button\" class=\"btn btn-small outline\" value=\"data_source\" id=\"" + data_element.uid + "\">" + data_element.label + "</button>";
+
 
           node_index = '' + level_index + count;
           var row_id = table_id + '|' + node_index + '|' + data_element.uid;
@@ -836,40 +869,24 @@ var newman_search_result_collection = (function () {
             "<td></td>"
           );
 
-        } // end-of multi-select data source union
-        else { // single-select data source
+        }
+        else { // single-select data-source
 
           var checkbox_id = 'checkbox_' + data_element.data_source_id;
 
-          if (isSelected(data_element.data_source_id)) {
-            checkbox_html = "<input type=\"checkbox\" class=\"fa_toggle\" id=\"" + checkbox_id + "\" checked/>";
+          if (data_select_enabled === true) {
+            if (isSelected(data_element.data_source_id)) {
+              checkbox_html = "<input type=\"checkbox\" class=\"fa_toggle\" value=\"data_source\" id=\"" + checkbox_id + "\" checked/>";
+            }
+            else {
+              checkbox_html = "<input type=\"checkbox\" class=\"fa_toggle\" value=\"data_source\" id=\"" + checkbox_id + "\"/>";
+            }
           }
           else {
-            checkbox_html = "<input type=\"checkbox\" class=\"fa_toggle\" id=\"" + checkbox_id + "\"/>";
+            checkbox_html = '';
           }
 
-          ui_callback.on('change', 'td input:checkbox', function (event) {
-            // Ignore this event if preventDefault has been called.
-            if (event.defaultPrevented) return;
-
-            var attr_id = $(this).attr('id');
-            if (attr_id) {
-              console.log('\tid : ' + attr_id + ' is-checked : ' + this.checked);
-              var dataset_id = attr_id.substring(9);
-
-              if (this.checked) {
-                putSelected(dataset_id, this.checked, true);
-              }
-              else {
-                var all_selected_count = getAllSelectedCount();
-                removeSelected(dataset_id, true);
-              }
-
-            }
-
-            event.preventDefault();
-            event.stopImmediatePropagation();
-          });
+          button_html = "<button type=\"button\" class=\"btn btn-small outline\" value=\"data_source\" id=\"" + data_element.uid + "\">" + data_element.label + "</button>";
 
 
           node_index = '' + level_index + count;
@@ -889,7 +906,7 @@ var newman_search_result_collection = (function () {
 
         } // end-of single-select data source
       }
-      else if (level_index == 2) {
+      else if (level_index == 2) { // search-result-row or email-address-row
 
         node_index = '' + level_index + count;
         var row_id = table_id + '|' + node_index + '|' + data_element.uid;
@@ -898,7 +915,7 @@ var newman_search_result_collection = (function () {
         var email_inbound_count = data_element.document_received;
         var email_attach_count = data_element.attach_count;
 
-        if (email_address) {
+        if (email_address) { // email-address-row
 
           table_row = $('<tr class=\"treegrid-' + node_index + ' treegrid-parent-' + parent_node_index + '\" id=\"' + row_id + '\" />').append(
             "<td><i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
@@ -910,7 +927,9 @@ var newman_search_result_collection = (function () {
             "<td>" + checkbox_html + "</td>"
           );
         }
-        else {
+        else { // search-result-row
+
+          button_html = "<button type=\"button\" class=\"btn btn-small outline\" value=\"search_result\" id=\"" + data_element.uid + "\">" + data_element.label + "</button>";
 
           if (email_outbound_count == 0) {
             email_outbound_count = '';
@@ -935,7 +954,7 @@ var newman_search_result_collection = (function () {
         }
 
       }
-      else if (level_index == 3) {
+      else if (level_index == 3) { // email-address-row
 
         node_index = '' + level_index + count;
         var row_id = table_id + '|' + node_index + '|' + data_element.uid;
@@ -951,7 +970,73 @@ var newman_search_result_collection = (function () {
         );
       }
 
+      // event handling on the table-row
+
+      // on checkbox event
+      ui_callback.on('change', 'td input:checkbox', function (event) {
+        // Ignore this event if preventDefault has been called.
+        if (event.defaultPrevented) return;
+
+        var attr_id = $(this).attr('id');
+        var attr_value = $(this).attr('value');
+        if (attr_id && attr_value) {
+          console.log('\tid : "' + attr_id + '" value : "' + attr_value + '" is-checked : "' + this.checked + '"');
+          var element_id = attr_id.substring(9);
+
+          if (attr_value == 'data_source') {
+
+            if (this.checked) {
+              putSelected(element_id, this.checked, true);
+            }
+            else {
+              var all_selected_count = getAllSelectedCount();
+              removeSelected(element_id, true);
+            }
+
+          }
+          else if (attr_value == 'email_address') {
+
+            newman_aggregate_filter.setAggregateFilterSelected(attr_id, this.checked, true);
+          }
+
+        }
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      });
+
     }
+
+    // on button event
+    ui_callback.on('click', 'td button:button', function (event) {
+      // Ignore this event if preventDefault has been called.
+      if (event.defaultPrevented) return;
+
+      var column_index = parseInt($(this).index());
+      var row_index = parseInt($(this).parent().index());
+      console.log('search-result-selected [' + row_index + ',' + column_index + ']');
+
+      var attr_id = $(this).attr('id');
+      var attr_value = $(this).attr('value');
+      if (attr_id) {
+        console.log('\tid : "' + attr_id + '" value : "' + attr_value + '"');
+
+        var row_element = search_result_table.getTableRow(attr_id);
+
+        if (row_element) {
+          //console.log('\element : ' + JSON.stringify(item, null, 2));
+
+          onTreeTableRowClicked(row_element);
+        }
+        else {
+          console.warn('Expected "row_element" not found for "' + attr_id + '"!');
+        }
+      }
+
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    });
 
     return [node_index, table_row];
   } // end of populateTableRow(...)
@@ -1246,22 +1331,33 @@ var newman_search_result_collection = (function () {
       console.log('newman_search_result_collection.onSearchResponse(' + search_text + ')');
     }
 
+    var filtered_response = validateResponseSearch(search_response);
+
     // reset search-input filter to default (search-all)
     newman_search_filter.resetSelectedFilter();
 
-    var current_data_set_url = newman_service_email_search_all.getServiceURL();
-    var filtered_response = validateResponseSearch(search_response);
+    if (is_initial_response) {
+      initial_service_url = url_path;
+      is_initial_response = false;
+    }
 
-    if (url_path.endsWith(current_data_set_url)) { // search-all without query-text; same as default start-up
+    // should be deprecated or retrofitted since v2.11
+    /*
+    initial_service_url = newman_service_email_search_all.getServiceURLInit();
+
+    if (url_path.endsWith(initial_service_url)) { // search-all without query-text; same as default start-up
       console.log('url_path.endsWith(service_response_email_search_all.getServiceURL())');
+
+      // should be deprecated or retrofitted since v2.11
       newman_service_email_search_all.setResponse(search_response);
     }
+    */
 
     if (load_on_response) {
 
       loadSearchResult(url_path);
 
-      var label = ' all';
+      var label = ' <blank>';
       if (search_text) {
         label = ' ' + decodeURIComponent(search_text);
       }
@@ -1277,34 +1373,43 @@ var newman_search_result_collection = (function () {
       // clear previously selected aggregate-filter if any
       newman_aggregate_filter.clearAllAggregateFilter();
 
+      var data_set_id = decodeURIComponent( newman_data_source.parseDataSource(url_path) );
+      if (!data_set_id) {
+        console.warn('Unable to parse "data_set_id"; data-set undefined!')
+        return;
+      }
 
-      if (url_path.endsWith(current_data_set_url)) { // result from search-all under the current data-set
+      if (url_path.endsWith(initial_service_url)) { // result from search-all under the current data-set
+
+        console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ if (url_path.endsWith(app_startup_url)) ~~~~~~~~~~~~~~~~~~~~~~~');
 
         if (debug_enabled) {
-          console.log('search-all-result "' + url_path + '" current_data_set_url "' + current_data_set_url + '"')
+          console.log('search_result_url "' + url_path + '"');
+          console.log('app_startup_url "' + initial_service_url + '"');
         }
 
-        // clear all previous buffered results, except for the data-sources (level-0)
-        search_result_table.clearChildren();
 
-        //initiate top-ranked email address searches
-        /* TODO: must retrofit */
-        //initiateTopRankedAddressSearch();
+        // clear all previous buffered results, except for the data-sources (level-0)
+        //search_result_table.clearChildren();
+
+        //console.log('search_result_table.getChildren() :\n' + JSON.stringify(search_result_table.getChildren(), null, 2));
+
+
+        //initiate subsequent-email searches
+        //searchRankedEmailByDataSource(data_set_id, true, data_set_id, subsequent_search_result_list_max);
 
       }
       else { // result from search-field-keywords under the current data-set
 
+        console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ if NOT (url_path.endsWith(initial_service_url)) ~~~~~~~~~~~~~~~~~~~~~~~');
+
+
         if (debug_enabled) {
-          console.log('search-result "' + url_path + '" current_data_set_url "' + current_data_set_url + '"')
+          console.log('search_result_url "' + url_path + '"');
+          console.log('app_startup_url "' + initial_service_url + '"');
         }
 
         var label = decodeURIComponent( search_text );
-
-        var data_set_id = decodeURIComponent( newman_data_source.parseDataSource(url_path) );
-        if (!data_set_id) {
-          console.warn('Required "data_set_id" undefined!')
-          return;
-        }
 
         var doc_count = filtered_response.query_hits;
         var associate_count = filtered_response.graph.nodes.length ;
@@ -1321,10 +1426,15 @@ var newman_search_result_collection = (function () {
         var parent_node_uid = data_set_id;
 
         if (field == 'all') {
+          console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ if (field == \'all\') { ~~~~~~~~~~~~~~~~~~~~~~~');
 
           if (search_text) { // result from key-word search
 
-            var icon_class = newman_search_filter.getFilterIconClass('text');
+            console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ if (search_text) // result from key-word search ~~~~~~~~~~~~~~~~~~~~~~~');
+
+            if (!icon_class) {
+              icon_class = newman_search_filter.getFilterIconClass('all');
+            }
 
             var node = search_result_table.appendTextSearchList(label,
               search_text,
@@ -1341,22 +1451,31 @@ var newman_search_result_collection = (function () {
               parent_node_uid,
               clear_buffer);
 
+            //initiate subsequent-email searches
+            //searchRankedEmailByDataSource(node.uid, false, data_set_id, subsequent_search_result_list_max);
+
+            // propagate the same search under each individual data-set if applicable
             if (isMultiSelectedAsString(data_set_id)) {
-              searchByDataSource(data_set_id, field, search_text, clear_buffer);
+              searchByDataSource(field, search_text, clear_buffer, data_set_id);
             }
           }
           else { // result from blank search
 
+            console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ if NOT (search_text) // result from blank search ~~~~~~~~~~~~~~~~~~~~~~~');
+
             // clear all previous buffered results, except for the data-sources (level-0)
-            //search_result_table.clearChildren();
+            search_result_table.clearChildren();
 
             //initiate subsequent-email searches
-            //searchRankedEmailByDataSource(parent_node_uid, data_set_id);
+            searchRankedEmailByDataSource(parent_node_uid, true, data_set_id, subsequent_search_result_list_max);
           }
 
         }
+// deprecated since 2.1.1; to be removed
+/*
         else if (field == 'text') {
 
+          console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ else if (field == \'text\') { ~~~~~~~~~~~~~~~~~~~~~~~');
 
           // clear all previous buffered results, except for the data-sources (level-0)
           search_result_table.clearChildren();
@@ -1375,10 +1494,12 @@ var newman_search_result_collection = (function () {
                                                               icon_class,
                                                               parent_node_uid,
                                                               clear_buffer);
-
-
         }
+*/
         else if (field == 'email') {
+
+          console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ else if (field == \'email\') ~~~~~~~~~~~~~~~~~~~~~~~~~~' );
+          console.log('\t clear_buffer = ' + clear_buffer);
 
           //console.log('search_response :\n' + JSON.stringify(search_response, null, 2));
 
@@ -1411,8 +1532,8 @@ var newman_search_result_collection = (function () {
 
             //}
           //}
-        }
-      }
+        } // end-of else if (field == 'email')
+      } // end-of else { // result from search-field-keywords under the current data-set
 
 
 
@@ -1426,26 +1547,8 @@ var newman_search_result_collection = (function () {
 
   } // end onSearchResponse(...)
 
-  /*
-  function partitionSearchResponse( response ) {
 
-    if (response) {
-      var dataset_id_list = response.data_set_id.split(',');
-
-      _.each(dataset_id_list, function(dataset_id, index) {
-        var new_graph = clone( response.graph );
-        var new_emails = clone( response.rows );
-        var new_attachments = clone( response.attachments );
-
-      });
-
-
-    }
-
-  }
-  */
-
-  function searchByDataSource( _data_id_list_string, _field, _search_text, _clear_buffer ) {
+  function searchByDataSource( _field, _search_text, _clear_buffer, _data_id_list_string ) {
     if (_data_id_list_string) {
       var dataset_id_list = _data_id_list_string.split(',');
 
@@ -1460,31 +1563,48 @@ var newman_search_result_collection = (function () {
         requestSearch( field, search_text, load_on_response, parent_search_uid, clear_cache, dataset_id );
 
       });
-      newman_search_filter.resetSelectedFilter();
+
     }
   }
 
-  function  searchRankedEmailByDataSource( parent_search_uid, dataset_id_list_string ) {
+  function  searchRankedEmailByDataSource( parent_search_uid, _clear_buffer, dataset_id_list_string, max ) {
     console.log('searchRankedEmailByDataSource( ' + dataset_id_list_string + ' )');
     var dataset_id_list = dataset_id_list_string.split(',');
     dataset_id_list.push( dataset_id_list_string );
 
+    console.log('parent_search_uid ' + parent_search_uid + ' max ' + max);
+    console.log('dataset_id_list[' + dataset_id_list.length + '] :\n' + JSON.stringify(dataset_id_list, null, 2));
+
+    //_initDebugEvent( dataset_id_list, parent_search_uid, max );
+
+
     _.each(dataset_id_list, function (dataset_id) {
-      console.log('\tdataset_id : ' + dataset_id + ' )');
+      console.log('\tdataset_id : ' + dataset_id );
 
-      var ranked_email_list = newman_rank_email_service.getRankedEmailByDataSource(dataset_id);
-      if (ranked_email_list) {
-        console.log('ranked_emails :\n' + JSON.stringify(ranked_email_list, null, 2));
+      if (isSelected( dataset_id ) || isMultiSelectedAsString(dataset_id)) {
+        var ranked_email_list = newman_rank_email_service.getRankedEmailByDataSource(dataset_id);
+        if (ranked_email_list) {
+          //console.log('ranked_emails :\n' + JSON.stringify(ranked_email_list, null, 2));
 
-        _.each(ranked_email_list, function (element) {
-          //console.log('ranked_email_list.element :\n' + JSON.stringify(element, null, 2));
+          _.each(ranked_email_list, function (element, index) {
+            //console.log('ranked_email_list.element :\n' + JSON.stringify(element, null, 2));
 
-          var email_account = element.email;
-          requestSearch('email', email_account, false, dataset_id, false, dataset_id);
-        });
+            var email_account = element.email;
+            if (max) {
+              if (index < max) {
+                requestSearch('email', email_account, false, parent_search_uid, _clear_buffer, dataset_id);
+              }
+            }
+            else {
+              requestSearch('email', email_account, false, parent_search_uid, _clear_buffer, dataset_id);
+            }
+          });
 
-      }
+        }
+      } // end-of if (isSelected( dataset_id ))
+
     });
+
   }
 
   function initiateTopRankedAddressSearch(_data_id_list_string) {

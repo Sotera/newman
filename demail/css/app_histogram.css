@@ -1,8 +1,10 @@
 .app-text-icon {
+    visibility: visible;
     font-family: FontAwesome !important;
+    font-size: 14px; height: 16px; width: 16px;
     font-style: normal !important;
     font-weight: normal !important;
-    text-decoration: inherit !important;
+    display: inline-block !important;
 }
 
 .btn-histogram {

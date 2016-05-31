@@ -505,15 +505,15 @@ function do_search(load_on_response, field, value) {
  */
 function requestSearch(field, search_text, load_on_response, parent_search_uid, clear_cache, alt_data_source) {
 
-  if (!field) {
+  if (field == undefined) {
     field = 'all';
   }
 
-  if (!load_on_response) {
+  if (load_on_response == undefined) {
     load_on_response = false;
   }
 
-  if (!clear_cache) {
+  if (clear_cache == undefined) {
     clear_cache = false;
   }
 
@@ -1198,11 +1198,13 @@ function redraw_legend() {
 };
 
 
+/*
 function refresh_dashboard() {
   console.log( 'refresh_dashboard()' );
   search_result.refreshUI();
 
 }
+*/
 
 var dashboard_content = (function () {
 

@@ -263,11 +263,21 @@ var newman_data_source = (function () {
 
     var found = false;
     _.each(_data_source_list, function (element) {
-
       if (element.label === label) {
         found = true;
       }
+    });
 
+    return found;
+  }
+
+  function containsID( dataset_id ) {
+
+    var found = false;
+    _.each(_data_source_list, function (element) {
+      if (element.uid === dataset_id) {
+        found = true;
+      }
     });
 
     return found;
@@ -702,8 +712,8 @@ var newman_data_source = (function () {
             element.start_datetime_selected,
             element.end_datetime_selected,
             is_selected_default,
-            '', // placeholder for case_id
-            '' // placeholder for alt_ref_id
+            element.data_set_case_id,
+            element.data_set_alt_ref_id
           );
 
         }
@@ -900,6 +910,7 @@ var newman_data_source = (function () {
     'clearAllSelected' : clearAllSelected,
     "setSelectedByLabel" : setSelectedByLabel,
     'isSelectedByLabel' : isSelectedByLabel,
+    'containsID' : containsID,
     "getByID" : getByID,
     'getLabelByID' : getLabelByID,
     "setSelectedByID" : setSelectedByID,

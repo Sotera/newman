@@ -170,12 +170,14 @@ var newman_activity_email = (function () {
             activity_data_set_keys.length = 0;
             var timeline_dates = ['x'];
 
-            var outbound_acct_id = acct_id + ' (Sent)'; //+ FONT_AWESOME_ICON_UNICODE['send-o'];
+            var outbound_acct_id = acct_id + ' (Sent)';
+            //var outbound_acct_id = acct_id + ' ' + FONT_AWESOME_ICON_UNICODE['send-o'];
             var outbound_data_set = [outbound_acct_id];
             activity_data_color_map[outbound_acct_id] = newman_activity_color.getChartColor( account_index );
             activity_data_set_keys.push( outbound_acct_id );
 
-            var inbound_acct_id = acct_id + ' (Received)'; //+ FONT_AWESOME_ICON_UNICODE['envelope-o'];
+            var inbound_acct_id = acct_id + ' (Received)';
+            //var inbound_acct_id = acct_id + ' ' + FONT_AWESOME_ICON_UNICODE['envelope-o'];
             var inbound_data_set = [inbound_acct_id];
             activity_data_color_map[inbound_acct_id] = newman_activity_color.getChartColor( account_index, true );
             activity_data_set_keys.push( inbound_acct_id );

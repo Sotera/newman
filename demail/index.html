@@ -33,17 +33,15 @@
     <!--<link href="plugins/leaflet-awesome-markers/leaflet.awesome-markers.css" rel="stylesheet" type="text/css">-->
     <link href="plugins/leaflet-awesome-markers/patch.leaflet.awesome-markers.css" rel="stylesheet" type="text/css">
 
-
-
-    <link href="css/newman-style-dark.css" rel="stylesheet" type="text/css">
-    <link href="css/newman-slider-theme.css" rel="stylesheet" type="text/css">
-    <link href="css/newman-datatable.css" rel="stylesheet" type="text/css">
-    <link href="css/default.css" rel="stylesheet" type="text/css">
-    <!--<link href="css/ner.css" rel="stylesheet">-->
-    <link href="css/newman-custom-bootstrap.css" rel="stylesheet" type="text/css">
-    <link href="css/newman-profile-chart.css" rel="stylesheet" type="text/css">
-    <link href="css/newman-help.css" rel="stylesheet" type="text/css">
+    <link href="css/app_custom_bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="css/app_style_dark.css" rel="stylesheet" type="text/css">
+    <link href="css/app_slider_theme.css" rel="stylesheet" type="text/css">
+    <link href="css/app_datatable.css" rel="stylesheet" type="text/css">
     <link href="css/app_histogram.css" rel="stylesheet" type="text/css">
+    <link href="css/newman_default.css" rel="stylesheet" type="text/css">
+    <link href="css/newman_profile_chart.css" rel="stylesheet" type="text/css">
+    <link href="css/newman_help.css" rel="stylesheet" type="text/css">
+
 
   </head>
   <body>
@@ -252,11 +250,20 @@
           </div>
           <!-- End-Recent-Hist-Select -->
 
-          <!-- Start-Datetime-Range-Container -->
-          <div class="col-xs-3 col-sm-3" style="margin: 0px 20px 0px 20px; padding: 0; top: 4px;">
+          <!-- Start-Debug-Toggle-Container -->
+          <div class="col-xs-1 col-sm-1" style="margin: 0px 0px 0px 0px; padding: 0; top: 4px;">
+            <!--
+            <button id="debug_toggle" type="button" class="btn navbar-btn button-dropdown-menu"
+                    style="font-size: 13px; font-weight: lighter; padding: 0px 2px 0px 2px; margin: 0;">
+              <span class="fa fa-bolt fa-inverse"></span>
+            </button>
+            -->
+          </div>
+          <!-- End-Debug-Toggle-Container -->
+
+          <div class="col-xs-2 col-sm-2" style="margin: 0px 0px 0px 0px; padding: 0; top: 4px;">
 
           </div>
-          <!-- End-Datetime-Range-Container -->
 
           <!-- Start-Datetime-Range-Container -->
           <!--
@@ -269,7 +276,7 @@
           <!-- End-Datetime-Range-Container -->
 
 
-            <div class="col-xs-1 col-sm-1" style="padding: 0px 10px 0px 10px; top: 4px; text-align: left;">
+            <div class="col-xs-1 col-sm-1" style="padding: 0px 0px 0px 0px; top: 4px; text-align: left;">
               <!-- Start-Search-Aggregate-Search-Filter -->
               <!--
                 <div class="dropdown" style="width: 100%; position:relative; display: inline-block;" id="search_filter_selected">

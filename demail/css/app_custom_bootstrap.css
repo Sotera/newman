@@ -207,9 +207,9 @@ input.fa_checkbox_round, input.fa_checkbox_squared, input.fa_toggle {
     visibility: hidden;
 }
 
-input.fa_checkbox_round:checked:after, input.fa_checkbox_round:after,
-input.fa_checkbox_squared:checked:after, input.fa_checkbox_squared:after,
-input.fa_toggle:checked:after, input.fa_toggle:after {
+input.fa_checkbox_round:checked::after, input.fa_checkbox_round::after,
+input.fa_checkbox_squared:checked::after, input.fa_checkbox_squared::after,
+input.fa_toggle:checked::after, input.fa_toggle::after {
     visibility: visible;
     font-family: FontAwesome;
     font-size: 14px; height: 16px; width: 16px;
@@ -217,30 +217,33 @@ input.fa_toggle:checked:after, input.fa_toggle:after {
     left: 0px;
     background-color: transparent;
     display: inline-block;
+    z-index: 1;
 }
 
-input.fa_checkbox_round:checked:after {
+input.fa_checkbox_round:checked::after {
     content: '\f058';
 }
 
-input.fa_checkbox_round:after {
+input.fa_checkbox_round::after {
     content: '\f10c';
 }
 
-input.fa_checkbox_squared:checked:after {
+input.fa_checkbox_squared:checked::after {
     content: '\f14a';
 }
 
-input.fa_checkbox_squared:after {
+input.fa_checkbox_squared::after {
     content: '\f096';
 }
 
-input.fa_toggle:checked:after {
+input.fa_toggle:checked::after {
+    font-family: FontAwesome;
     content: '\f205';
     color: #0080AB;
 }
 
-input.fa_toggle:after {
+input.fa_toggle::after {
+    font-family: FontAwesome;
     content: '\f204';
     color: #006588;
 }
