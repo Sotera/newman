@@ -292,12 +292,12 @@ def get_email(data_set_id, email_id, qs=None):
 
         resp["email_contents_translated"] = { "email" : email_translated, "entities": entities_translated, "lda_topic_scores":topic_scores, "original_lang": body_lang}
 
-    # Generic tracking metadata
-    resp["case_id"] = source["case_id"]
-    resp["ingest_id"] = source["ingest_id"]
-    resp["alt_ref_id"] = source["alt_ref_id"]
-    resp["label"] = source["label"]
-    resp["original_artifact"] = source["original_artifact"]
+    # Data source related metadata
+    resp["dataset_case_id"] = source["case_id"]
+    resp["dataset_ingest_id"] = source["ingest_id"]
+    resp["dataset_alt_ref_id"] = source["alt_ref_id"]
+    resp["dataset_label"] = source["label"]
+    resp["dataset_original_artifact"] = source["original_artifact"]
 
     return resp
 
