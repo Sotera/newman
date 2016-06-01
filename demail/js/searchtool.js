@@ -53,6 +53,7 @@ function logUIEvent( ui_activity,
 */
 
 
+// TODO: Should be deprecated and retrofitted ASAP
 /**
  * search result container
  */

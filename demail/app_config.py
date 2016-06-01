@@ -1,18 +1,26 @@
 import tangelo
 import cherrypy
 
-from newman.newman_config import getTileCacheConfig
+from newman.newman_config import getTileCacheConfig, getDataSetDefaults
 
 #GET <host>:<port>/app_config/tile_cache_config
-# deprecated slated for removal
 def getAppConfigCacheTile(*args, **kwargs):
     tangelo.log("getAppConfigCacheTile(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     tangelo.content_type("application/json")
 
     return getTileCacheConfig();
 
+#GET <host>:<port>/app_config/data_set_config
+def getAppConfigDataSetConfig(*args, **kwargs):
+    tangelo.log("getAppConfigDataSetConfig(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.content_type("application/json")
+
+    return getDataSetDefaults();
+
+
 
 get_actions = {
+    "data_set_config" : getAppConfigDataSetConfig,
     "tile_cache_config" : getAppConfigCacheTile
 }
 

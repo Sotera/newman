@@ -36,16 +36,16 @@ var app_geo_config = (function () {
 
     var service_url = getServiceURL();
     $.get( service_url ).then(function (response) {
-      setResponse( response );
+      onRequestGeoConfig( response );
 
       if (callback) {
-        callback.receiveResponse( response, 'app_geo_config' );
+        callback.onRequestGeoConfig( response );
       }
 
     });
   }
 
-  function setResponse( response ) {
+  function onRequestGeoConfig( response ) {
     if (response) {
 
       _response = response;
@@ -85,8 +85,8 @@ var app_geo_config = (function () {
     'getServiceURLBase' : getServiceURLBase,
     'getServiceURL' : getServiceURL,
     'requestGeoConfig' : requestGeoConfig,
+    'onRequestGeoConfig' : onRequestGeoConfig,
     'getResponse' : getResponse,
-    'setResponse' : setResponse,
     "enableAdvanceMode" : enableAdvanceMode,
     "enableOnlyTileCache" : enableOnlyTileCache,
     'getLocalTileDBName' : getLocalTileDBName,

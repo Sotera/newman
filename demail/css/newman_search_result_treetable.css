@@ -1,0 +1,16 @@
+.next_page_enabled {
+    position: relative;
+    width: inherit;
+    height: inherit;
+    text-align: match-parent;
+}
+.next_page_enabled:hover {
+    color: #006588;
+    border-radius: 6px;
+    border: 1px solid #BBBBBB;
+}
+.next_page_enabled:focus, .next_page_enabled:active {
+    color: #006588;
+    border-radius: 6px;
+    border: 1px solid #BBBBBB;
+}

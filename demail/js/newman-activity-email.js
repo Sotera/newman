@@ -34,7 +34,7 @@ var newman_activity_color = (function () {
  * activity-over-time related container
  */
 var newman_activity_email = (function () {
-  var debug_enabled = true;
+  var debug_enabled = false;
 
   var chart_ui_id_text = 'chart_line_activities';
   var chart_ui_id_element = $('#' + chart_ui_id_text);
@@ -170,12 +170,14 @@ var newman_activity_email = (function () {
             activity_data_set_keys.length = 0;
             var timeline_dates = ['x'];
 
-            var outbound_acct_id = acct_id + ' (Sent)'; //+ FONT_AWESOME_ICON_UNICODE['send-o'];
+            var outbound_acct_id = acct_id + ' (Sent)';
+            //var outbound_acct_id = acct_id + ' ' + FONT_AWESOME_ICON_UNICODE['send-o'];
             var outbound_data_set = [outbound_acct_id];
             activity_data_color_map[outbound_acct_id] = newman_activity_color.getChartColor( account_index );
             activity_data_set_keys.push( outbound_acct_id );
 
-            var inbound_acct_id = acct_id + ' (Received)'; //+ FONT_AWESOME_ICON_UNICODE['envelope-o'];
+            var inbound_acct_id = acct_id + ' (Received)';
+            //var inbound_acct_id = acct_id + ' ' + FONT_AWESOME_ICON_UNICODE['envelope-o'];
             var inbound_data_set = [inbound_acct_id];
             activity_data_color_map[inbound_acct_id] = newman_activity_color.getChartColor( account_index, true );
             activity_data_set_keys.push( inbound_acct_id );
@@ -291,6 +293,7 @@ var newman_activity_email = (function () {
     }
 
     //console.log('new_activity_list :\n' + JSON.stringify(new_activity_list, null, 2));
+    //console.log('_trimEmptyListValue(activity_list) : start_datetime ' + start_datetime + ', end_datetime ' + end_datetime);
 
     setDatetimeBounds( start_datetime, end_datetime );
 
@@ -351,9 +354,9 @@ var newman_activity_email = (function () {
       activity_chart = undefined;
     }
 
-    $('#timelime_apply_button').off().on("click", function(e) {
+    $('#timeline_apply_button').off().on("click", function(e) {
       if (debug_enabled) {
-        console.log('timelime_apply_button-clicked');
+        console.log('timeline_apply_button-clicked');
       }
 
       applyDatetimeBounds();
@@ -378,10 +381,16 @@ var newman_activity_email = (function () {
       if (datetime_start.length > 10) {
         activity_datetime_start = datetime_start.substring(0, 10);
       }
+      else {
+        activity_datetime_start = datetime_start;
+      }
     }
     if (datetime_end) {
       if (datetime_end.length > 10) {
         activity_datetime_end = datetime_end.substring(0, 10);
+      }
+      else {
+        activity_datetime_end = datetime_end;
       }
     }
 
@@ -398,6 +407,8 @@ var newman_activity_email = (function () {
 
       is_initialized = true;
     }
+
+    $('#timeline_range_text').html(activity_datetime_start + ' ~ ' + activity_datetime_end);
   }
 
   function getDatetimeBounds() {
@@ -433,6 +444,7 @@ var newman_activity_email = (function () {
     'displayUIActivity' : displayUIActivity,
     'updateUIActivity' : updateUIActivity,
     'revalidateUIActivity' : revalidateUIActivity,
+    'setDatetimeBounds' : setDatetimeBounds,
     'getDatetimeBounds' : getDatetimeBounds
   }
 

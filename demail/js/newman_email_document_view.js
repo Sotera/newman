@@ -30,10 +30,24 @@ var newman_email_document_view = (function () {
 
 
   var _content_original, _content_translated, _content_translated_displayed = false;
+  var _dataset_uid = '', _dataset_label = '', _dataset_case_id = '', _dataset_alt_ref_id = '';
 
   function setDocumentRequestResponse( response ) {
 
     if (response) {
+      if (response.dataset_ingest_id) {
+        _dataset_uid = response.dataset_ingest_id;
+      }
+      if (response.dataset_label) {
+        _dataset_label = response.dataset_label;
+      }
+      if (response.dataset_case_id) {
+        _dataset_case_id = response.dataset_case_id;
+      }
+      if (response.dataset_alt_ref_id) {
+        _dataset_alt_ref_id = response.dataset_alt_ref_id;
+      }
+
       if (response.email_contents) {
         _content_original = response.email_contents;
         $("#email-body").empty();
@@ -381,15 +395,19 @@ var newman_email_document_view = (function () {
     email_html.append(
       $('<div>').append());
 
+    /*
     email_html.append(
-      $('<p>').append( $('<span>').addClass('bold').text("ID: ") )
-        .append(
+      $('<p>').append( $('<span>').addClass('bold').text("ID: ") ).append(
           $('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'email/' + contents.email_id + '/' + contents.email_id + '.txt'})
             .text(contents.email_id), $('<span>').text('    '),
           $('<a>', { 'class': 'clickable', 'target': '_blank', 'href' : 'email/' + contents.email_id + '/' + contents.email_id + '.html'})
             .append($('<span>').addClass('glyphicon glyphicon-print'))
         )
     );
+    */
+
+    email_html.append( $('<p>').append( $('<span>').addClass('bold').text("Case ID: ")).append( _dataset_case_id ));
+    email_html.append( $('<p>').append( $('<span>').addClass('bold').text("Alt ID: ")).append( _dataset_alt_ref_id ));
 
 
     var sender_anchor = $('<a>', { 'class': 'from clickable'}).on("click", function() {
@@ -420,7 +438,7 @@ var newman_email_document_view = (function () {
         .append(sender_anchor)
     );
 
-    var recipients = _.zip(['To', 'Cc', 'Bcc'], [contents.to, contents.cc, contents.bcc]);
+    var recipients = _.zip(['To', 'CC', 'BCC'], [contents.to, contents.cc, contents.bcc]);
     _.each(recipients, function(recipient) {
       //console.log('email-recipient : ' + JSON.stringify(recipient, null, 2));
       var tokens_original = tokenize(recipient[1][0]);

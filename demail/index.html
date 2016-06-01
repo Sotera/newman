@@ -33,70 +33,18 @@
     <!--<link href="plugins/leaflet-awesome-markers/leaflet.awesome-markers.css" rel="stylesheet" type="text/css">-->
     <link href="plugins/leaflet-awesome-markers/patch.leaflet.awesome-markers.css" rel="stylesheet" type="text/css">
 
-
-
-    <link href="css/newman-style-dark.css" rel="stylesheet" type="text/css">
-    <link href="css/newman-slider-theme.css" rel="stylesheet" type="text/css">
-    <link href="css/newman-datatable.css" rel="stylesheet" type="text/css">
-    <link href="css/default.css" rel="stylesheet" type="text/css">
-    <!--<link href="css/ner.css" rel="stylesheet">-->
-    <link href="css/newman-custom-bootstrap.css" rel="stylesheet" type="text/css">
-    <link href="css/newman-profile-chart.css" rel="stylesheet" type="text/css">
-    <link href="css/newman-help.css" rel="stylesheet" type="text/css">
+    <link href="css/app_custom_bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="css/app_style_dark.css" rel="stylesheet" type="text/css">
+    <link href="css/app_slider_theme.css" rel="stylesheet" type="text/css">
+    <link href="css/app_datatable.css" rel="stylesheet" type="text/css">
     <link href="css/app_histogram.css" rel="stylesheet" type="text/css">
+    <link href="css/newman_default.css" rel="stylesheet" type="text/css">
+    <link href="css/newman_profile_chart.css" rel="stylesheet" type="text/css">
+    <link href="css/newman_help.css" rel="stylesheet" type="text/css">
+
 
   </head>
   <body>
-  <!-- hidden link //hack -->
-  <a id="alink" class='hidden-button ctrl'
-    style="height:0;width:0;position: absolute;top: -2000px;" href='#' tabindex='1'>
-  </a>
-
-    <div id="radial-wrap" class="tip ctrl">
-      <div class="email_addr"><a><span></span></a></div>
-      <ul id="radial">
-        <li class='slice' id="popup_show_attachment">
-          <!--<a class="clickable attach" title="Show Attachments" >-->
-          <a class="clickable" title="Show Attachments" >
-            <span class="glyphicon glyphicon-file"></span>
-          </a>
-        </li>
-        <li class='slice' id="popup_search_email_address">
-          <!--<a class="clickable email" title="Search By Email" >-->
-          <a class="clickable" title="Search By Email" >
-            <span class="glyphicon glyphicon-envelope" ></span>
-          </a>
-        </li>
-        <li class='slice' id="popup_search_community">
-          <!--<a class="clickable community" title="Search By Community" >-->
-          <a class="clickable" title="Search By Community" >
-            <span class="glyphicon glyphicon-search"></span> 
-          </a>
-        </li>
-      </ul>
-    </div>
-
-    <!-- modal info panel -->
-    <div id="info-panel" class="modal fade">
-      <div class="modal-dialog">
-        <div class="modal-content">
-
-          <div class="modal-header">
-            <h3>Information</h3>
-          </div>
-
-          <div class="modal-body">
-    	    Will fill this in later...
-          </div>
-
-          <div class="modal-footer">
-            <a class="btn btn-default" data-dismiss="modal">OK</a>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
   <!-- modal email download/export -->
   <!--
   <div class="modal fade" id="export_modal" tabindex="-1" role="dialog" aria-labelledby="export_modal" aria-hidden="true">
@@ -302,11 +250,20 @@
           </div>
           <!-- End-Recent-Hist-Select -->
 
-          <!-- Start-Datetime-Range-Container -->
-          <div class="col-xs-3 col-sm-3" style="margin: 0px 20px 0px 20px; padding: 0; top: 4px;">
+          <!-- Start-Debug-Toggle-Container -->
+          <div class="col-xs-1 col-sm-1" style="margin: 0px 0px 0px 0px; padding: 0; top: 4px;">
+            <!--
+            <button id="debug_toggle" type="button" class="btn navbar-btn button-dropdown-menu"
+                    style="font-size: 13px; font-weight: lighter; padding: 0px 2px 0px 2px; margin: 0;">
+              <span class="fa fa-bolt fa-inverse"></span>
+            </button>
+            -->
+          </div>
+          <!-- End-Debug-Toggle-Container -->
+
+          <div class="col-xs-2 col-sm-2" style="margin: 0px 0px 0px 0px; padding: 0; top: 4px;">
 
           </div>
-          <!-- End-Datetime-Range-Container -->
 
           <!-- Start-Datetime-Range-Container -->
           <!--
@@ -319,7 +276,7 @@
           <!-- End-Datetime-Range-Container -->
 
 
-            <div class="col-xs-1 col-sm-1" style="padding: 0px 10px 0px 10px; top: 4px; text-align: left;">
+            <div class="col-xs-1 col-sm-1" style="padding: 0px 0px 0px 0px; top: 4px; text-align: left;">
               <!-- Start-Search-Aggregate-Search-Filter -->
               <!--
                 <div class="dropdown" style="width: 100%; position:relative; display: inline-block;" id="search_filter_selected">
@@ -332,10 +289,12 @@
                 -->
               <!-- End-Search-Aggregate-Search-Filter -->
 
+              <!--
               <button id="temporal_control_toggle" type="button" class="btn navbar-btn button-dropdown-menu" data-toggle="collapse" data-target="#temporal_control_container"
                       style="font-size: 13px; font-weight: lighter; padding: 0px 2px 0px 2px; margin: 0;">
                 <span class="fa fa-area-chart fa-inverse"></span>
               </button>
+              -->
             </div>
 
 
@@ -399,7 +358,14 @@
 
       <div class="col-xs-1" id="temporal_control_content" style="margin: 0; padding: 0;">
         <div class="box-content" style="padding: 0px; width: 100%; height: 124px;">
-          <div class="row" style="margin: 0; padding: 0; height: 64px;">
+          <div class="row" style="margin: 0; padding: 0; height: 38px;">
+          </div>
+          <div class="row" style="margin: 0; padding: 0; height: 26px;">
+            <div class="col-sm-12" style="margin: 0; padding: 0;">
+              <div style="margin: 0 2px 0 2px; padding: 0; border: 1px solid #BBBBBB; font-weight: normal; color: #000000;">
+                <span id="timeline_range_text" style="margin: 0; padding: 0 2px 0 2px; font-size: 9px">&nbsp;</span>
+              </div>
+            </div>
           </div>
           <div class="row" style="margin: 0; padding: 0; height: 24px;">
           </div>
@@ -410,7 +376,7 @@
               </button>
             </div>
             <div class="col-sm-6" style="margin: 0; padding: 0 2px 0 2px; text-align: right;">
-              <button id="timelime_apply_button" type="button" class="btn btn-histogram outline" >
+              <button id="timeline_apply_button" type="button" class="btn btn-histogram outline" >
                 <span class="fa fa-refresh"> Apply</span>
               </button>
             </div>
@@ -1234,7 +1200,8 @@
     <script src="js/newman-email-attach.js"></script>
     <script src="js/newman-email-starred.js"></script>
     <script src="js/newman-file-type-attach.js"></script>
-    <script src="js/newman-data-source.js"></script>
+    <script src="js/data_source/app_data_source_config.js"></script>
+    <script src="js/data_source/newman_data_source.js"></script>
     <script src="js/newman-service.js"></script>
     <script src="js/newman-datatable-email.js"></script>
     <script src="js/newman_email_document_view.js"></script>

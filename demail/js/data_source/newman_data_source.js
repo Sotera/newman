@@ -169,7 +169,7 @@ var newman_data_source = (function () {
         }
       }
       else {
-        requestAllSelected();
+        requestAllSelected( true );
       }
     });
 
@@ -263,11 +263,21 @@ var newman_data_source = (function () {
 
     var found = false;
     _.each(_data_source_list, function (element) {
-
       if (element.label === label) {
         found = true;
       }
+    });
 
+    return found;
+  }
+
+  function containsID( dataset_id ) {
+
+    var found = false;
+    _.each(_data_source_list, function (element) {
+      if (element.uid === dataset_id) {
+        found = true;
+      }
     });
 
     return found;
@@ -577,7 +587,7 @@ var newman_data_source = (function () {
     return _data_source_list.length - 1;
   }
 
-  function requestAllSelected() {
+  function requestAllSelected(is_forced_override) {
     //console.log( 'requestAllSelected()' );
 
     var dataset_count = getDatasetCount();
@@ -595,7 +605,7 @@ var newman_data_source = (function () {
       else {
         var selected_id_set = getAllSelectedAsString();
 
-        newman_data_source_service.requestDataSetSelect( selected_id_set );
+        newman_data_source_service.requestDataSetSelect( selected_id_set, is_forced_override );
       }
     }
     else {
@@ -608,7 +618,7 @@ var newman_data_source = (function () {
 
   }
 
-  function onRequestAllSelected( response ) {
+  function onRequestAllSelected( response, is_forced_override ) {
     if (debug_enabled) {
       console.log('onRequestAllSelected(...)\n' + JSON.stringify(response, null, 2));
     }
@@ -632,7 +642,7 @@ var newman_data_source = (function () {
     // initialize data tree-table events
     newman_search_result_collection.initTreeTableEvent();
     // build data tree-table nodes
-    newman_search_result_collection.onRequestAllSelected( getAllSelected(), _all_selected_response );
+    newman_search_result_collection.onRequestAllSelected( getAllSelected(), _all_selected_response, is_forced_override );
 
 
     // re-initialize aggregate-filter
@@ -659,7 +669,16 @@ var newman_data_source = (function () {
   }
 
   function requestAllDataSet() {
+    //newman_data_source_service.requestAllDataSet();
 
+    // forced-loading data-source config prior to requesting all data sets
+    app_data_source_config.requestDataSetConfig( newman_data_source );
+  }
+
+  function onRequestDataSetConfig( response ) {
+    //console.log( 'onRequestDataSetConfig( response )' );
+
+    // request all data sets after forced-loading data-source config
     newman_data_source_service.requestAllDataSet();
   }
 
@@ -670,30 +689,36 @@ var newman_data_source = (function () {
 
     if (_all_dataset_response) {
 
-      var dataset_map = _.object(_.map( response.data_sets, function (element, index) {
+      _.each( _all_dataset_response.data_sets, function (element, index) {
 
-        var is_selected_default = false;
-        if (index < _default_data_source_max_selected) {
-          is_selected_default = true;
+        if (app_data_source_config.isDataSetExcluded(element.data_set_id)) {
+          console.warn( 'data-set "' + element.data_set_id + '" is excluded by config!' );
+        }
+        else {
+
+          var is_selected_default = false;
+          if (index < _default_data_source_max_selected) {
+            is_selected_default = true;
+          }
+
+          push(
+            element.data_set_id,
+            element.data_set_label,
+            element.data_set_datetime_min,
+            element.data_set_datetime_max,
+            element.data_set_document_count,
+            element.data_set_node_count,
+            element.data_set_attachment_count,
+            element.start_datetime_selected,
+            element.end_datetime_selected,
+            is_selected_default,
+            element.data_set_case_id,
+            element.data_set_alt_ref_id
+          );
+
         }
 
-        push(
-          element.data_set_id,
-          element.data_set_label,
-          element.data_set_datetime_min,
-          element.data_set_datetime_max,
-          element.data_set_document_count,
-          element.data_set_node_count,
-          element.data_set_attachment_count,
-          element.start_datetime_selected,
-          element.end_datetime_selected,
-          is_selected_default,
-          '', // placeholder for case_id
-          '' // placeholder for alt_ref_id
-        );
-
-        return [element['data_set_id'], element];
-      }));
+      });
 
       refreshUI();
       //console.log('_response_map: ' + JSON.stringify(_response_map, null, 2));
@@ -885,6 +910,7 @@ var newman_data_source = (function () {
     'clearAllSelected' : clearAllSelected,
     "setSelectedByLabel" : setSelectedByLabel,
     'isSelectedByLabel' : isSelectedByLabel,
+    'containsID' : containsID,
     "getByID" : getByID,
     'getLabelByID' : getLabelByID,
     "setSelectedByID" : setSelectedByID,
@@ -901,7 +927,8 @@ var newman_data_source = (function () {
     'appendDataSource' : appendDataSource,
     'appendEachDataSource' : appendEachDataSource,
     "parseDataSource" : parseDataSource,
-    "getDefaultDataSourceID" : getDefaultDataSourceID
+    "getDefaultDataSourceID" : getDefaultDataSourceID,
+    'onRequestDataSetConfig' : onRequestDataSetConfig
   }
 
 }());
@@ -925,7 +952,7 @@ var newman_data_source_service = (function () {
     });
   }
 
-  function requestDataSetSelect(dataset_id_list) {
+  function requestDataSetSelect(dataset_id_list, is_forced_override) {
     console.log('newman_data_source_service.requestDataSetSelect('+dataset_id_list+')');
 
     if (dataset_id_list) {
@@ -933,7 +960,7 @@ var newman_data_source_service = (function () {
       $.get('datasource/dataset/' + encodeURIComponent(dataset_id_list)).then(function ( response ) {
       //$.get('datasource/dataset/' + dataset_id_list).then(function ( response ) {
         //console.log(JSON.stringify(response, null, 2));
-        newman_data_source.onRequestAllSelected( response );
+        newman_data_source.onRequestAllSelected( response, is_forced_override );
       });
     }
   }

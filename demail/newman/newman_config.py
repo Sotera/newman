@@ -21,7 +21,7 @@ def getTileCacheConfig():
 def elasticsearch_config():
     return application_properties()["elasticsearch_config"]
 
-def data_set_defaults():
+def getDataSetDefaults():
     return application_properties()["data_set_defaults"]
 
 def data_set_names():
@@ -46,14 +46,10 @@ def default_max_timeline_bound():
     return str(application_properties()["default_max_timeline_bound"])
 
 def default_timeline_span(data_set_id=None):
-    if not data_set_id or not data_set_id in data_set_defaults():
-        return str(application_properties()["default_timeline_span"])
-    return data_set_defaults()[data_set_id]["default_timeline_span"]
+    return str(application_properties()["default_timeline_span"])
 
 def default_timeline_interval(data_set_id=None):
-    if not data_set_id or not data_set_id in data_set_defaults():
-        return str(application_properties()["default_timeline_interval"])
-    return data_set_defaults()[data_set_id]["default_timeline_interval"]
+    return str(application_properties()["default_timeline_interval"])
 
 def _getDefaultDataSetID():
     return str(application_properties()["default_data_set_id"])

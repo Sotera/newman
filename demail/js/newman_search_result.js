@@ -92,11 +92,17 @@ EmailSearchResult.prototype = {
       this.uid = new_uid;
     }
   },
+  getUID : function() {
+    return this.uid;
+  },
 
   setParentUID : function( uid ) {
     if (uid) {
       this.parent_uid = uid;
     }
+  },
+  getParentUID : function() {
+    return this.parent_uid;
   },
 
   contains : function ( element ) {
@@ -106,6 +112,31 @@ EmailSearchResult.prototype = {
       //console.log('contains( ' + element.uid + ' )');
 
       if (this.uid === element.uid) {
+        matched = true;
+      }
+    }
+
+    return matched
+  },
+
+  isIdentical : function ( new_element ) {
+    var matched =  false;
+
+    if (new_element) {
+      //console.log('contains( ' + element.uid + ' )');
+
+      if (this.uid === new_element.uid &&
+          this.label === new_element.label &&
+          this.search_text === new_element.search_text &&
+          this.search_field === new_element.search_field &&
+          this.url === new_element.url &&
+          this.data_source_id === new_element.data_source_id &&
+          this.email_address === new_element.email_address &&
+          this.document_sent === new_element.document_sent &&
+          this.document_received === new_element.document_received &&
+          this.attach_count === new_element.attach_count &&
+          this.icon_class === new_element.icon_class) {
+
         matched = true;
       }
     }
@@ -194,18 +225,46 @@ EmailSearchResult.prototype = {
     return _index_found;
   },
 
+  containsChild : function( new_child ) {
+    var matched =  false;
+    if (new_child) {
+
+      _.each(this.children_list, function (element, index) {
+        if (element.isIdentical( new_child )) {
+          matched = true;
+        }
+      });
+
+    }
+
+    if (this.debug_enabled) {
+      console.log('containsChild( ' + new_child.label + ' ) : ' + matched);
+    }
+    return matched
+  },
+
   appendChild : function( child ) {
+    var appended = false;
     if (child) {
-      if (this.debug_enabled) {
-        console.log('appendChild( ' + child.label + ' )');
+
+      if (this.containsChild( child )) {
+        console.log( 'An identical child element already exists!' )
       }
+      else {
 
-      if (!this.indexOfChild( child ) >= 0) {
-        this.children_list.unshift( child );
-
-        //console.log( '\tchildren_list :\n' + JSON.stringify(this.children_list, null, 2) );
+        if (!this.indexOfChild(child) >= 0) {
+          this.children_list.unshift(child);
+          appended = true;
+          //console.log( '\tchildren_list :\n' + JSON.stringify(this.children_list, null, 2) );
+        }
       }
     }
+
+    if (this.debug_enabled) {
+      console.log('appendChild( ' + child.label + ' ) : ' + appended);
+    }
+
+    return appended;
   },
 
   appendChildren : function ( new_list ) {
@@ -265,19 +324,59 @@ EmailSearchResult.prototype = {
 
     _.each(this.children_list, function ( child ) {
       if (child instanceof EmailSearchResult) {
+
         child.clearAll();
+
+        /*
+        var key_list = _.keys( child );
+        _.each(key_list, function ( key ) {
+          if (this.debug_enabled) {
+            console.log('\tdelete [' + key + ']');
+          }
+
+          if (Array.isArray( child[key] )) { // skip arrays
+            if (this.debug_enabled) {
+              console.log('\t\t' + key + '[' + child[key].length + ']');
+            }
+          }
+          else { // delete objects
+            delete child[key];
+          }
+        });
+        */
+
       }
     });
 
-    this.children_list = [];
+    //this.children_list = [];
+    this.children_list.length = 0;
   },
 
   clearAll : function () {
     if (this.debug_enabled) {
-      console.log('clearAll( ' + this.uid + ' )');
+      console.log('clearAll( ' + this.label + ' )');
     }
 
+    // clear html-table-row map
     newman_search_result_collection.deleteTableRow( this.uid );
+
+    /*
+    var key_list = _.keys( this );
+    _.each(key_list, function ( key ) {
+      if (this.debug_enabled) {
+        console.log('\tdelete [' + key + ']');
+      }
+
+      if (Array.isArray( this[key] )) { // skip arrays
+        if (this.debug_enabled) {
+          console.log('\t\t' + key + '[' + this[key].length + ']');
+        }
+      }
+      else { // delete objects
+        delete this[key];
+      }
+    });
+    */
 
     this.clearChildren();
   }
