@@ -335,8 +335,6 @@ def get_attachment_by_id(*args, **kwargs):
     # attachment = es().get(index=data_set_id, doc_type="attachments", id=attachment_id)
     query = ids_query(attachment_id)
     attachments = es().search(index=data_set_id, doc_type='attachments', body=query)
-    tangelo.log("att%s"%attachments)
-    # ...
 
     if not attachments:
         return tangelo.HTTPStatusCode(400, "Attachment not found for (index=%s, attachment_id=%s)" % (data_set_id, attachment_id))
