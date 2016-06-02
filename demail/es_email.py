@@ -178,13 +178,20 @@ def _format_body_pannel(email_body, attachments):
 
     def text(attachment):
         if "image_analytics" in attachment and "ocr_output" in attachment["image_analytics"]:
-            return _OCR_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["image_analytics"]["ocr_output"]
-        if "content" in attachment:
-            return _TIKA_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["content"]
+            return _OCR_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["image_analytics"]["ocr_output"] + "\n"
+        if "content" in attachment and attachment["content"]:
+            return _TIKA_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["content"] + "\n"
 
 
     body = email_body + "".join(text(attachment) for attachment in attachments)
     return body
+
+def _getAttachmentOCRContent(attachments):
+
+    content = [{attachment.get("filename", "") : attachment.get("image_analytics", {})} for attachment in attachments]
+    
+    return content
+
 
 def get_email(data_set_id, email_id, qs=None):
 
@@ -255,16 +262,23 @@ def get_email(data_set_id, email_id, qs=None):
              _format_body_pannel(body, attachments),
              # body,
              [[f["guid"],f["filename"],f["content_encrypted"]] for f in source.get("attachments", [""])],
-             source.get("starred", False),
-             highlighted_attachments,
-             [[attachment.get("filename", ""), attachment.get("image_analytics", {})] for attachment in attachments]
+             source.get("starred", False)
              ]
+
     entities = []
     for type in ["person","location","organization","misc"]:
         if "body_entities" in source["entities"] and ("entity_"+type) in source["entities"]["body_entities"]:
             entities += [ [source["id"][0]+"_entity_"+str(i), type,     i, val] for i,val in enumerate(source["entities"]["body_entities"].get("entity_"+type, []), len(entities))]
 
-    resp = {"email_contents" : { "email" : email, "entities": entities, "lda_topic_scores":topic_scores}}
+    resp = {"email_contents" :
+             {
+               "email" : email,
+               "entities" : entities,
+               "attachment_ocr" : _getAttachmentOCRContent(attachments),
+               "attachment_highlighted" : highlighted_attachments,
+               "lda_topic_scores" : topic_scores
+             }
+           }
 
     # only add translated text if the language is not english
     if body_lang and not body_lang == 'en':
@@ -281,16 +295,20 @@ def get_email(data_set_id, email_id, qs=None):
                  body_translated,
                  [[f["guid"],f["filename"]] for f in source.get("attachments", [""])],
                  source.get("starred", False),
-                 highlighted_attachments,
-                 ""
-                 # attachments.get("image_analytics", {})
                  ]
         entities_translated = []
         for type in ["person","location","organization","misc"]:
             if "body_entities_translated" in source["entities"] and ("entity_"+type) in source["entities"]["body_entities_translated"]:
                 entities_translated += [ [source["id"][0]+"_entity_"+str(i), type, i, val] for i,val in enumerate(source["entities"]["body_entities_translated"].get("entity_"+type, []), len(entities_translated))]
 
-        resp["email_contents_translated"] = { "email" : email_translated, "entities": entities_translated, "lda_topic_scores":topic_scores, "original_lang": body_lang}
+        resp["email_contents_translated"] = {
+                                             "email" : email_translated,
+                                             "entities": entities_translated,
+                                             "attachment_ocr" : _getAttachmentOCRContent(attachments),
+                                             "attachment_highlighted" : highlighted_attachments,
+                                             "lda_topic_scores":topic_scores,
+                                             "original_lang": body_lang
+                                            }
 
     # Data source related metadata
     resp["dataset_case_id"] = source["case_id"]
