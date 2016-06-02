@@ -669,6 +669,11 @@ var newman_data_source = (function () {
   }
 
   function requestAllDataSet() {
+
+    // request validation config
+    app_validation_config.requestValidationConfig();
+
+    /* preceded by service call to load data-source config below */
     //newman_data_source_service.requestAllDataSet();
 
     // forced-loading data-source config prior to requesting all data sets

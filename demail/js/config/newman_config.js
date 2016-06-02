@@ -26,7 +26,6 @@ var newman_config_datetime = (function () {
     return '1970-01-01';
   }
 
-
   function getDatetimeEnd () {
 
     var today = new Date();
@@ -42,7 +41,6 @@ var newman_config_datetime = (function () {
 
     return today_text;
   }
-
 
   return {
     'getDatetimeStart' : getDatetimeStart,

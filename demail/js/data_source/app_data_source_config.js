@@ -4,7 +4,7 @@
 
 
 /**
- * service container geo-config
+ * service container data-source-config
  * @type {{requestService, getResponse}}
  */
 var app_data_source_config = (function () {

@@ -426,8 +426,16 @@ var newman_graph_email = (function () {
   function updateUIGraphView( search_response, auto_display_doc_uid, starred_email_doc_list ) {
     console.log('newman_graph_email.updateUIGraphView(search_response, ' + auto_display_doc_uid + ', starred_email_doc_list)');
 
-    //validate search-response
-    var filtered_response = validateResponseSearch( search_response );
+    //validate search-response if enabled
+
+    var filtered_response = search_response;
+    if (app_validation_config.validateEmailSearchResponse()) {
+      //console.log('search_response validation enabled!');
+      filtered_response = validateEmailSearchResponse(search_response);
+    }
+    else {
+      console.log('search_response validation disabled!');
+    }
     //console.log('filtered_response:\n' + JSON.stringify(filtered_response, null, 2));
 
     // open analytics content view

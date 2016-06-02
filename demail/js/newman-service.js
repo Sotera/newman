@@ -50,14 +50,17 @@ var newman_service_email_search_all = (function () {
     });
   }
 
-  function setResponse( response, validate_enabled ) {
+  function setResponse( response ) {
     if (response) {
-      if (validate_enabled) {
-        _response = validateResponseSearch(response);
+      _response = response;
+      if (app_validation_config.validateEmailSearchResponse()) {
+        //console.log('search_response validation enabled!');
+        _response = validateEmailSearchResponse(response);
       }
       else {
-        _response = response;
+        console.log('search_response validation disabled!');
       }
+
       //console.log('received service_response_email_search_all.graph.nodes[' + response.graph.nodes.length + ']');
       //console.log('received service_response_email_search_all.graph.links[' + response.graph.links.length + ']');
       //console.log('received service_response_email_search_all.rows[' + response.rows.length + ']');

@@ -12,8 +12,12 @@ def application_properties():
         'elasticsearch_config' : APP_CONFIG.get('elasticsearch_config'),
         'data_set_defaults' : APP_CONFIG.get('data_set_defaults'),
         'index_creator_defaults' : APP_CONFIG.get('index_creator_defaults'),
-        'tile_cache_config' : APP_CONFIG.get('tile_cache_config')
+        'tile_cache_config' : APP_CONFIG.get('tile_cache_config'),
+        'validation_config' : APP_CONFIG.get('validation_config')
     }
+
+def getValidationConfig():
+    return application_properties()["validation_config"]
 
 def getTileCacheConfig():
     return application_properties()["tile_cache_config"]

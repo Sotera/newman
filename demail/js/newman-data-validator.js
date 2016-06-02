@@ -64,14 +64,14 @@ function validateResponseEmailDocs(response) {
  * @param response data received from service
  * @returns filtered response
  */
-function validateResponseSearch(response) {
+function validateEmailSearchResponse(response) {
   var debug_enabled = false;
   if (response) {
 
     // validate graph nodes and links
     if (response.graph) {
       if (debug_enabled) {
-        console.log('validateResponseSearch(response.graph)');
+        console.log('validateEmailSearchResponse(response.graph)');
         console.log('\tnodes[' + response.graph.nodes.length + '] links[' + response.graph.links.length + ']');
       }
 

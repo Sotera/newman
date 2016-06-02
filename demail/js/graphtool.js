@@ -621,9 +621,6 @@ function loadSearchResult( url_path ) {
 
   $.getJSON( url_path , function (search_response) {
 
-    //validate search-response
-    var filtered_response = validateResponseSearch( search_response );
-
     console.log( '.getJSON(' + url_path + ')' );
     newman_graph_email.updateUIGraphView( filtered_response, false );
 
@@ -1522,7 +1519,7 @@ $(function () {
       hasher.setHash(newman_service_email_search_all.getServiceURLBase());
     }
 
-  }, 6000); //end of setTimeout
+  }, 3000); //end of setTimeout
   //});
 
 });

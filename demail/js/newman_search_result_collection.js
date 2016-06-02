@@ -1331,7 +1331,16 @@ var newman_search_result_collection = (function () {
       console.log('newman_search_result_collection.onSearchResponse(' + search_text + ')');
     }
 
-    var filtered_response = validateResponseSearch(search_response);
+    var filtered_response = search_response;
+    if (app_validation_config.validateEmailSearchResponse()) {
+      if (debug_enabled) {
+        console.log('search_response validation enabled!');
+      }
+      filtered_response = validateEmailSearchResponse(search_response);
+    }
+    else {
+      console.log('search_response validation disabled!');
+    }
 
     // reset search-input filter to default (search-all)
     newman_search_filter.resetSelectedFilter();
