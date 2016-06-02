@@ -9,7 +9,7 @@
 var newman_email_attach = (function () {
 
   var debug_enabled = false;
-  var ui_id = '#attach-table';
+  var ui_id = '#email_attachment_table';
   
 
   function initUI() {
@@ -43,11 +43,11 @@ var newman_email_attach = (function () {
     }
     */
 
-    $('#attach-table').empty();
-    $('#attach-table').append($('<thead>')).append($('<tbody>'));
+    $('#email_attachment_table').empty();
+    $('#email_attachment_table').append($('<thead>')).append($('<tbody>'));
 
     var lastSort = "";
-    var thead = d3.select("#attach-table").select("thead").append("tr").selectAll("tr")
+    var thead = d3.select("#email_attachment_table").select("thead").append("tr").selectAll("tr")
       //.data(['Date', 'Subject', 'Attachment', 'Type','Email'])
       .data(['Date', 'Subject', 'Attachment', 'Type'])
       .enter()
@@ -58,7 +58,7 @@ var newman_email_attach = (function () {
       .attr('class', 'clickable').on("click", function(k, i){
         var direction = (lastSort == k) ? -1 : 1;
         lastSort = (direction == -1) ? "" : k; //toggle
-        d3.select("#attach-table").select("tbody").selectAll("tr").sort(function(a,b){
+        d3.select("#email_attachment_table").select("tbody").selectAll("tr").sort(function(a,b){
           if (i === 3 ){
             var extfn = (function(d){
               var i = d.filename.toLowerCase().lastIndexOf(".");
@@ -74,7 +74,7 @@ var newman_email_attach = (function () {
       });
 
 
-    var tr = d3.select("#attach-table").select("tbody").selectAll("tr")
+    var tr = d3.select("#email_attachment_table").select("tbody").selectAll("tr")
       .data(response_attachment_list).enter().append("tr");
 
     var popover = image_preview_popover();

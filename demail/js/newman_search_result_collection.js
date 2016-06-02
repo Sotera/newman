@@ -1451,12 +1451,16 @@ var newman_search_result_collection = (function () {
               parent_node_uid,
               clear_buffer);
 
-            //initiate subsequent-email searches
-            //searchRankedEmailByDataSource(node.uid, false, data_set_id, subsequent_search_result_list_max);
-
             // propagate the same search under each individual data-set if applicable
             if (isMultiSelectedAsString(data_set_id)) {
               searchByDataSource(field, search_text, clear_buffer, data_set_id);
+            }
+            else {
+
+              if (getAllSelectedCount() == 1) {
+                //initiate subsequent-email searches
+                searchRankedEmailByDataSource(node.uid, false, data_set_id, subsequent_search_result_list_max);
+              }
             }
           }
           else { // result from blank search
@@ -1569,8 +1573,18 @@ var newman_search_result_collection = (function () {
 
   function  searchRankedEmailByDataSource( parent_search_uid, _clear_buffer, dataset_id_list_string, max ) {
     console.log('searchRankedEmailByDataSource( ' + dataset_id_list_string + ' )');
+    var search_count_max = max;
     var dataset_id_list = dataset_id_list_string.split(',');
-    dataset_id_list.push( dataset_id_list_string );
+    var dataset_count = dataset_id_list.length;
+    if(dataset_count > 1) {
+      // include the dataset-union string if more than 1 dataset
+      dataset_id_list.push(dataset_id_list_string);
+    }
+    else if(dataset_count == 1 && getAllSelectedCount() == 1) {
+      if (search_count_max) {
+        search_count_max = search_count_max * 2;
+      }
+    }
 
     console.log('parent_search_uid ' + parent_search_uid + ' max ' + max);
     console.log('dataset_id_list[' + dataset_id_list.length + '] :\n' + JSON.stringify(dataset_id_list, null, 2));
@@ -1590,8 +1604,8 @@ var newman_search_result_collection = (function () {
             //console.log('ranked_email_list.element :\n' + JSON.stringify(element, null, 2));
 
             var email_account = element.email;
-            if (max) {
-              if (index < max) {
+            if (search_count_max) {
+              if (index < search_count_max) {
                 requestSearch('email', email_account, false, parent_search_uid, _clear_buffer, dataset_id);
               }
             }
