@@ -622,7 +622,7 @@ function loadSearchResult( url_path ) {
   $.getJSON( url_path , function (search_response) {
 
     console.log( '.getJSON(' + url_path + ')' );
-    newman_graph_email.updateUIGraphView( filtered_response, false );
+    newman_graph_email.updateUIGraphView( search_response, false );
 
   });
 
