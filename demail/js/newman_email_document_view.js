@@ -406,8 +406,29 @@ var newman_email_document_view = (function () {
     );
     */
 
-    email_html.append( $('<p>').append( $('<span>').addClass('bold').text("Case ID: ")).append( _dataset_case_id ));
-    email_html.append( $('<p>').append( $('<span>').addClass('bold').text("Alt ID: ")).append( _dataset_alt_ref_id ));
+    if (app_display_config.isDisplayedEmailDocID()) {
+      var label = app_display_config.getLabelEmailDocID();
+      if (!label) {
+        label = 'Email ID'
+      }
+      email_html.append( $('<p>').append( $('<span>').addClass('bold').text( label + ": " )).append( _dataset_case_id ));
+    }
+
+    if (app_display_config.isDisplayedEmailCaseID()) {
+      var label = app_display_config.getLabelEmailCaseID();
+      if (!label) {
+        label = 'Case ID'
+      }
+      email_html.append($('<p>').append($('<span>').addClass('bold').text( label + ": " )).append( _dataset_case_id ));
+    }
+
+    if (app_display_config.isDisplayedEmailAltRefID()) {
+      var label = app_display_config.getLabelEmailAltRefID();
+      if (!label) {
+        label = 'Alt ID'
+      }
+      email_html.append($('<p>').append($('<span>').addClass('bold').text( label + ": " )).append( _dataset_alt_ref_id ));
+    }
 
 
     var sender_anchor = $('<a>', { 'class': 'from clickable'}).on("click", function() {

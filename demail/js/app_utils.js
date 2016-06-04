@@ -82,6 +82,20 @@ function getObjectKeysAsString(map, separator) {
 }
 
 /**
+ * return a truncated string within max-length and ending with '..'
+ * @param string
+ * @returns truncated string within max-length and ending with '..'
+ */
+function truncateString( text, max_length ) {
+  if (text) {
+    if (text.length > max_length) {
+      text = text.substring(0, (max_length-2)) + '..';
+    }
+  }
+  return text;
+}
+
+/**
  * return a file-type category
  * @param file-extension
  * @returns file-type category of 'image', 'pdf', 'powerpoint', 'word', 'excel', or 'other'

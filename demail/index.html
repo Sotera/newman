@@ -798,6 +798,12 @@
                 </div>
                 <!-- End-Analytics-Content-Geo -->
 
+                <!-- Start-Analytics-Content-Data-Extract -->
+                <div class="tab-pane" id="dashboard_tab_data_extract" style= "height: 100%; overflow-y: scroll; padding: 0; margin: 0;">
+                  <div id="data_extract_table" class="info-table" style= "display: table; table-layout: fixed; width: 100%; font-size: 12px;"></div>
+                </div>
+                <!-- End-Analytics-Content-Data-Extract -->
+
                 <!-- Start-Ingest-Status-Content -->
                 <div class="tab-pane" id="dashboard_tab_ingest_status" style= "height: 100%; padding: 0; margin: 0;">
 
@@ -818,6 +824,11 @@
                 <li >
                   <a href="#dashboard_tab_geo_analytics" data-toggle="tab">
                     <i class="fa fa-globe fa-lg" rel="tooltip" data-placement="left" title="Geo"></i>
+                  </a>
+                </li>
+                <li >
+                  <a href="#dashboard_tab_data_extract" data-toggle="tab">
+                    <i class="fa fa-table fa-lg" rel="tooltip" data-placement="left" title="Extract"></i>
                   </a>
                 </li>
                 <li>
@@ -1184,6 +1195,7 @@
     <!--<script src="plugins/user-ale/userale.js"></script>-->
 
     <!-- All functions for this theme + document.ready processing -->
+    <script src="js/config/app_display_config.js"></script>
     <script src="js/config/app_validation_config.js"></script>
     <script src="js/config/newman_config.js"></script>
     <script src="js/app_utils.js"></script>
@@ -1216,7 +1228,7 @@
     <script src="js/geo/app_geo_map.js"></script>
     <script src="js/geo/app_geo_email_sender.js"></script>
     <script src="js/geo/app_geo_email_attach.js"></script>
-    <script src="js/ingest/app_ingest_email.js"></script>
+    <script src="js/ingest/app_email_ingest.js"></script>
     <script src="js/sample_markers.json"></script>
     <script src="js/searchtool.js"></script>
     <script src="js/graphtool.js"></script>

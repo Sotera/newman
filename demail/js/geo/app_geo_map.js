@@ -122,7 +122,7 @@ var app_geo_map = (function () {
 
         var marker_icon = marker_icon_map['fa-paper-plane-o'];
         //marker_icon = marker_icon_map['fa-paperclip'];
-        //marker_icon = marker_icon_map['fa-inbox'];
+        //marker_icon = marker_icon_map['fa-envelope-o'];
 
         if (marker_content_list.length > 1) {
           marker_icon = newTextMarker( marker_content_list.length, 'blue' );
@@ -150,10 +150,7 @@ var app_geo_map = (function () {
           if (subject) {
             subject = subject.trim();
             if (subject) {
-              var max_length = 40;
-              if (subject.length > max_length) {
-                subject = subject.substring(0, (max_length - 3)) + '...';
-              }
+              subject = truncateString( subject, 40 );
             }
             else {
               subject = '\<' + doc_id + '\>';
@@ -289,10 +286,7 @@ var app_geo_map = (function () {
           if (subject) {
             subject = subject.trim();
             if (subject) {
-              var max_length = 40;
-              if (subject.length > max_length) {
-                subject = subject.substring(0, (max_length - 3)) + '...';
-              }
+              subject = truncateString( subject, 40 );
             }
             else {
               subject = '\<' + doc_id + '\>';
@@ -399,7 +393,7 @@ var app_geo_map = (function () {
         markerColor: 'blue', //colors: 'red', 'darkred', 'orange', 'green', 'darkgreen', 'purple', 'darkpuple', 'blue', 'darkblue', 'cadetblue'
         icon: 'envelope-o'
       }),
-      "fa-inbox" : L.AwesomeMarkers.icon({
+      "fa-user" : L.AwesomeMarkers.icon({
         prefix: 'fa',
         markerColor: 'blue', //colors: 'red', 'darkred', 'orange', 'green', 'darkgreen', 'purple', 'darkpuple', 'blue', 'darkblue', 'cadetblue'
         icon: 'inbox'

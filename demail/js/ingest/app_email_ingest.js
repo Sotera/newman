@@ -6,7 +6,7 @@
 /**
  * data-ingest related container
  */
-var app_ingest_email = (function () {
+var app_email_ingest = (function () {
   var debug_enabled = true;
 
   var _ingest_id;
@@ -104,7 +104,7 @@ var app_ingest_email = (function () {
 
     if( response ) {
       if (debug_enabled) {
-        console.log('app_ingest_email.updateIngestID(response)\n' + JSON.stringify(response, null, 2));
+        console.log('app_email_ingest.updateIngestID(response)\n' + JSON.stringify(response, null, 2));
       }
 
       _ingest_id = response.ingest_id;
@@ -115,7 +115,7 @@ var app_ingest_email = (function () {
 
   function initIngestRequest() {
     if (_ingest_parameter_map) {
-      app_ingest_email_request.requestService( _ingest_parameter_map );
+      app_email_ingest_request.requestService( _ingest_parameter_map );
     }
   }
 
@@ -143,7 +143,7 @@ var app_ingest_email = (function () {
       clearAllIngestParameter();
 
       if (debug_enabled) {
-        console.log('app_ingest_email.updateIngestResponse(response)\n' + JSON.stringify(response, null, 2));
+        console.log('app_email_ingest.updateIngestResponse(response)\n' + JSON.stringify(response, null, 2));
       }
 
       $("#data_ingest_modal").modal('hide');
@@ -235,7 +235,7 @@ var app_ingest_email = (function () {
  * service container initiating data-ingest service
  * @type {{requestService, getResponse}}
  */
-var app_ingest_email_request = (function () {
+var app_email_ingest_request = (function () {
   var debug_enabled = false;
 
   var _service_url = 'ingester/extract';
@@ -246,7 +246,7 @@ var app_ingest_email_request = (function () {
   }
 
   function getServiceURL() {
-    console.log('app_ingest_email_request.getServiceURL()');
+    console.log('app_email_ingest_request.getServiceURL()');
 
     var service_url = _service_url;
 
@@ -269,7 +269,7 @@ var app_ingest_email_request = (function () {
         .done(function(response) {
           setResponse(response);
 
-          app_ingest_email.updateIngestResponse(response);
+          app_email_ingest.updateIngestResponse(response);
         })
         .fail(function(response) {
           console.warn("Service request to '" + service_url + "' failed!");
@@ -333,7 +333,7 @@ var app_ingest_id_request = (function () {
     $.get( service_url ).then(function (response) {
       setResponse( response );
 
-      app_ingest_email.updateIngestID( response );
+      app_email_ingest.updateIngestID( response );
 
     });
   }

@@ -13,8 +13,12 @@ def application_properties():
         'data_set_defaults' : APP_CONFIG.get('data_set_defaults'),
         'index_creator_defaults' : APP_CONFIG.get('index_creator_defaults'),
         'tile_cache_config' : APP_CONFIG.get('tile_cache_config'),
-        'validation_config' : APP_CONFIG.get('validation_config')
+        'validation_config' : APP_CONFIG.get('validation_config'),
+        'display_config' : APP_CONFIG.get('display_config')
     }
+
+def getDisplayConfig():
+    return application_properties()["display_config"]
 
 def getValidationConfig():
     return application_properties()["validation_config"]

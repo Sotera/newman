@@ -9,12 +9,7 @@ var newman_dataset_label = (function () {
   var label_length_max = 25;
 
   function formatDatasetLabel( label ) {
-    if (label) {
-      if (label.length > label_length_max) {
-        label = label.substring(0, (label_length_max-2)) + '..';
-      }
-    }
-    return label;
+    return truncateString( label, label_length_max );
   }
 
   function trimDatasetLabel( label ) {
@@ -450,9 +445,7 @@ var newman_data_source = (function () {
     label_text = label_text.trim();
     label_text = label_text.replace(/[ \u00A0]/g, ", ");
 
-    if (label_text.length > (max_length + 3)) {
-      label_text = label_text.substring(0, max_length) + '...';
-    }
+    label_text = truncateString( label_text, 40 );
 
     return label_text;
   }
@@ -483,7 +476,7 @@ var newman_data_source = (function () {
             click: function () {
               console.log('data-source-item-selected : ' + this.id + ', label ' + element.label);
 
-              app_ingest_email.init();
+              app_email_ingest.init();
               var modal_options = {
                 "backdrop" : "static",
                 "keyboard" : true,
@@ -669,6 +662,9 @@ var newman_data_source = (function () {
   }
 
   function requestAllDataSet() {
+
+    // request display config
+    app_display_config.requestDisplayConfig();
 
     // request validation config
     app_validation_config.requestValidationConfig();

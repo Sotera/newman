@@ -313,9 +313,7 @@ var app_nav_history = (function () {
         // catch non-uri/utf8-encoded character; do nothing
       }
 
-      if (label.length > 20) {
-        label = label.substring(0, 18) + '..';
-      }
+      label = truncateString(label, 20);
 
       if (label.indexOf(' ') >= 0) {
         label = '"' + label + '"';

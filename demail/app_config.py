@@ -1,7 +1,7 @@
 import tangelo
 import cherrypy
 
-from newman.newman_config import getTileCacheConfig, getDataSetDefaults, getValidationConfig
+from newman.newman_config import getTileCacheConfig, getDataSetDefaults, getValidationConfig, getDisplayConfig
 
 #GET <host>:<port>/app_config/tile_cache_config
 def getAppConfigCacheTile(*args, **kwargs):
@@ -24,10 +24,18 @@ def getAppConfigValidation(*args, **kwargs):
 
     return getValidationConfig();
 
+#GET <host>:<port>/app_config/display_config
+def getAppConfigDisplay(*args, **kwargs):
+    tangelo.log("getAppConfigDisplay(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.content_type("application/json")
+
+    return getDisplayConfig();
+
 get_actions = {
     "data_set_config" : getAppConfigDataSetConfig,
     "tile_cache_config" : getAppConfigCacheTile,
-    "validation_config" : getAppConfigValidation
+    "validation_config" : getAppConfigValidation,
+    "display_config" : getAppConfigDisplay
 }
 
 def unknown(*args):

@@ -50,9 +50,7 @@ function EmailSearchResult(_label,
   function _format_label(label) {
     var new_label = label;
     if (label) {
-      if (label.length > 30) {
-        new_label = label.substring(0, 28) + '..';
-      }
+      new_label = truncateString( label, 30 );
     }
     return new_label;
   }
