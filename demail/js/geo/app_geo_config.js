@@ -51,7 +51,7 @@ var app_geo_config = (function () {
       _response = response;
 
       if (debug_enabled) {
-        console.log('\tresponse: ' + JSON.stringify(_response, null, 2));
+        console.log('onRequestGeoConfig() : response:\n' + JSON.stringify(_response, null, 2));
       }
       tile_cache_advance_mode = response.advance_mode;
       tile_cache_intranet_only = response.cache_only;

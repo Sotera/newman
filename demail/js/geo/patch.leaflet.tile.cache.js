@@ -68,6 +68,8 @@ L.TileLayer.include({
 	// Returns a callback (closure over tile/key/originalSrc) to be run when the DB
 	//   backend is finished with a fetch operation.
 	_onCacheLookup: function(tile, tileUrl, done) {
+		this.options.useOnlyCache = app_geo_config.enableOnlyTileCache();
+
 		return function(err, data) {
 			if (data) {
 				this.fire('tile_cache:hit', {
@@ -262,6 +264,10 @@ L.TileLayer.include({
 	},
 
 	uploadTileCache : function( map ) {
+		this.options.useOnlyCache = app_geo_config.enableOnlyTileCache();
+		this.local_tile_db_name = app_geo_config.getLocalTileDBName();
+		this.remote_tile_db_name = app_geo_config.getRemoteTileDBName();
+
 		console.log('uploadTileCache()');
 		console.log('\toptions.useOnlyCache : ' + this.options.useOnlyCache);
 		console.log('\tlocal_tile_db_name : ' + this.local_tile_db_name);
@@ -311,6 +317,11 @@ L.TileLayer.include({
 	},
 
   downloadTileCache : function( map ) {
+
+		this.options.useOnlyCache = app_geo_config.enableOnlyTileCache();
+		this.local_tile_db_name = app_geo_config.getLocalTileDBName();
+		this.remote_tile_db_name = app_geo_config.getRemoteTileDBName();
+
 		console.log('downloadTileCache()');
 		console.log('\toptions.useOnlyCache : ' + this.options.useOnlyCache);
 		console.log('\tlocal_tile_db_name : ' + this.local_tile_db_name);

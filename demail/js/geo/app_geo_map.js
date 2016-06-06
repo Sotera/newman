@@ -5,7 +5,7 @@
  * geo_map related reference
  */
 var app_geo_map = (function () {
-  var debug_enabled = true;
+  var debug_enabled = false;
   var _is_initialized = false;
 
   var default_view_center = new L.LatLng(31.7964452, 35.1051469), default_view_zoom = 2;
