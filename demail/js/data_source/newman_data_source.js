@@ -612,6 +612,10 @@ var newman_data_source = (function () {
   }
 
   function onRequestAllSelected( response, is_forced_override ) {
+    /*
+     * upon receiving all data-source-select responses, request all dependent init services
+     */
+
     if (debug_enabled) {
       console.log('onRequestAllSelected(...)\n' + JSON.stringify(response, null, 2));
     }
@@ -629,6 +633,8 @@ var newman_data_source = (function () {
       newman_datetime_range.setDateTimeRange( data_set_datetime_min, data_set_datetime_max, default_start_date, default_end_date );
     }
 
+    // initialize data-extract-tables
+    app_email_extract.requestPhoneList();
 
     // initialize search-result UI
     search_result.setUI($('#search_result_container'));
@@ -662,6 +668,9 @@ var newman_data_source = (function () {
   }
 
   function requestAllDataSet() {
+    /*
+     * make the very first service calls to request configurations and all available data-sources
+     */
 
     // request display config
     app_display_config.requestDisplayConfig();
@@ -684,6 +693,10 @@ var newman_data_source = (function () {
   }
 
   function onRequestAllDataSet( response ) {
+    /*
+     * upon receiving all available data-sources, request the one-time start-up (static-data) init services
+     */
+
     if (response) {
       _all_dataset_response = response;
     }

@@ -224,33 +224,46 @@ ul {
 }
 
 .result_thead >tr >th {
-    border: 1px black solid;
+    border: 1px #BBBBBB solid;
     padding: 5px;
     font-size: 10px;
     font-weight: bold;
-    color: red;
+    color: #525252;
 }
 
-#attach-table tbody > tr >td:last-child {
+#email_attachment_table tbody > tr >td:last-child {
     vertical-align: middle;
     text-align: center;
 }
 
 .info-table thead >tr >th {
-    border: 1px black solid;
-    padding: 5px;
+    border-right: 1px #BBBBBB solid;
+    border-top: 1px #BBBBBB solid;
+    border-bottom: 1px #BBBBBB solid;
+    padding: 5px 5px 5px 5px;
     font-size: 12px;
     font-weight: bold;
-    color: red;
+    color: #525252;
+}
+
+.info-table thead >tr >th:first-child {
+    border-left: 1px #BBBBBB solid;
+    padding: 5px 5px 5px 20px;
+}
+
+.info-table thead >tr >th:hover,
+.info-table thead >tr >th:focus {
+    background: #5E9FF5;
+    color: #FFFFFF;
 }
 
 .info-table tbody >tr >td {
-    padding: 2px;
+    padding: 2px 2px 1px 5px;
     font-size: 12px;
 }
 
 .info-table tbody >tr >td:first-child {
-    text-align: center;
+    padding: 2px 2px 1px 20px;
 }
 
 .info-table tbody tr:nth-child(even) {
