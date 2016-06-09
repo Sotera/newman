@@ -39,7 +39,7 @@ def _map_emails_to_row(row):
     return row
 
 
-def _map_node(email_addr, total_docs):
+def _map_node(email_addr, total_docs, ingest_set):
     node={}
     name = email_addr["addr"][0]
     node["community"] = email_addr.get("community", ["<address_not_specified>"])[0]
@@ -48,7 +48,7 @@ def _map_node(email_addr, total_docs):
     node["rank"] = (email_addr["sent_count"][0] + email_addr["received_count"][0]) / float(total_docs)
     node["email_sent"] = (email_addr["sent_count"][0])
     node["email_received"] = (email_addr["received_count"][0])
-    node["original_ingest_id"] = (email_addr["ingest_id"][0])
+    node["original_ingest_id"] = ingest_set
     return node
 
 def _query_email_attachments(index, size, emails_query):

@@ -89,11 +89,17 @@ def get_cached_email_addr(index, addr):
     return _EMAIL_ADDR_CACHE[index][addr]
 
 
-# This will generate the graph structure for a specific email address.  Will aply date filter and term query.
+# This will generate the graph structure for a emails list provided.
 def _build_graph_for_emails(data_set_id, emails, query_hits):
+    # List of all nodes - will contain duplicate node names for as they are not unique between the datasets
     nodes = []
+    # List of edges that map between nodes
     edge_map = {}
-    addr_index = {}
+
+    # quick lookup from address to the index in the nodes list i.e. ["from_addr"]=node_index
+    addr_nodeid_lookup = {}
+
+    addr_to_ingest_ids = {}
 
     total = count(data_set_id, "email_address")
     print total
@@ -109,21 +115,29 @@ def _build_graph_for_emails(data_set_id, emails, query_hits):
             tangelo.log("WARNING: From email address not found in cache <%s>" % email)
             continue;
 
-        if from_addr not in addr_index:
-            nodes.append(_map_node(_EMAIL_ADDR_CACHE[ingest_id][from_addr],total))
-            addr_index[from_addr] = len(nodes)-1
+        if from_addr not in addr_to_ingest_ids :
+            addr_to_ingest_ids[from_addr] = [ingest_id]
+            nodes.append(_map_node(_EMAIL_ADDR_CACHE[ingest_id][from_addr],total, addr_to_ingest_ids[from_addr]))
+            addr_nodeid_lookup[from_addr] = len(nodes)-1
+        elif ingest_id not in addr_to_ingest_ids[from_addr]:
+            addr_to_ingest_ids[from_addr].append(ingest_id)
+
         for rcvr_addr in email["to"]+email["cc"]+email["bcc"]:
             if rcvr_addr not in _EMAIL_ADDR_CACHE[ingest_id]:
                 tangelo.log("WARNING: RCVR email address not found in cache <%s>" % rcvr_addr)
                 continue;
 
-            if rcvr_addr not in addr_index:
-                nodes.append(_map_node(_EMAIL_ADDR_CACHE[ingest_id][rcvr_addr], total))
-                addr_index[rcvr_addr] = len(nodes)-1
+            if rcvr_addr not in addr_to_ingest_ids:
+                addr_to_ingest_ids[rcvr_addr] = [ingest_id]
+                nodes.append(_map_node(_EMAIL_ADDR_CACHE[ingest_id][rcvr_addr], total, addr_to_ingest_ids[rcvr_addr] ))
+                addr_nodeid_lookup[rcvr_addr] = len(nodes)-1
+            elif ingest_id not in addr_to_ingest_ids[rcvr_addr]:
+                addr_to_ingest_ids[rcvr_addr].append(ingest_id)
+
 
             edge_key = from_addr+"#"+rcvr_addr
             if edge_key not in edge_map:
-                edge_map[edge_key] = {"source" : addr_index[from_addr],"target": addr_index[rcvr_addr],"value": 1}
+                edge_map[edge_key] = {"source" : addr_nodeid_lookup[from_addr],"target": addr_nodeid_lookup[rcvr_addr],"value": 1}
             else:
                 edge_map[edge_key]["value"]=edge_map[edge_key]["value"]+1
 
@@ -139,7 +153,6 @@ def es_get_all_email_by_address(data_set_id, email_address, qs, start_datetime, 
     results = _query_emails(data_set_id, size, query)
     graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
 
-    # Get attachments for community
     query = _build_email_query(email_addrs=[email_address], qs=qs, date_bounds=(start_datetime, end_datetime), attachments_only=True, encrypted=encrypted)
     tangelo.log("search.get_graph_by_entity(attachment-query: %s)" % (query))
     attachments = _query_email_attachments(data_set_id, size, query)
