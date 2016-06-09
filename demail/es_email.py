@@ -181,6 +181,7 @@ def _format_body_pannel(email_body, attachments):
             return _OCR_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["image_analytics"]["ocr_output"] + "\n"
         if "content" in attachment and attachment["content"]:
             return _TIKA_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["content"] + "\n"
+        return ""
 
 
     body = email_body + "".join(text(attachment) for attachment in attachments)
