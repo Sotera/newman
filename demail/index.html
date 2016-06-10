@@ -195,10 +195,14 @@
             <!-- Start-Data-Set-Select -->
             <div class="col-xs-1 col-sm-1" style="padding: 0px 10px 0px 10px; top: 2px;">
 
-              <div class="dropdown" style="width: 250%; height: 100%; position:relative; display: inline-block;" id="data_source_selected">
-                <span class="dropdown-toggle btn navbar-btn button-dropdown-menu" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px">
+              <div class="dropdown" style="width: 250%; height: 100%; position:relative; display: inline-block;"
+                   id="data_source_list_dropdown" value="data_source_access">
+                <button class="dropdown-toggle btn navbar-btn button-dropdown-menu"
+                      id="data_source_list_toggle"
+                      data-toggle="dropdown"
+                      style="font-weight: normal; font-size: small; margin: 0px">
                   <span class="fa fa-database"> ...</span>
-                </span>
+                </button>
                 <ul class="dropdown-menu" style="width: 100%; padding: 2px 8px 2px 8px; border-radius: 4px;" id="data_source_list">
 
                 </ul>
@@ -1219,8 +1223,9 @@
     <script src="js/newman-datatable-email.js"></script>
     <script src="js/newman_email_document_view.js"></script>
     <script src="js/newman-graph-email.js"></script>
-    <script src="js/newman_search_result.js"></script>
-    <script src="js/newman_search_result_collection.js"></script>
+    <script src="js/tree_table/app_search_result.js"></script>
+    <script src="js/tree_table/app_search_result_tree_table.js"></script>
+    <script src="js/tree_table/app_search_result_collection.js"></script>
     <script src="js/geo/app_geo_config.js"></script>
     <script src="js/geo/patch.leaflet.draw.js"></script>
     <script src="js/geo/patch.leaflet.awesome-markers.js"></script>

@@ -143,29 +143,62 @@ var newman_data_source = (function () {
 
   function init() {
 
-    $('#data_source_selected').on('shown.bs.dropdown', function () {
-      if (debug_enabled) {
-        console.log("data_source_selected opened..");
-      }
-      _prev_all_selected = getAllSelectedAsString();
-    });
-
-    $('#data_source_selected').on('hidden.bs.dropdown', function () {
-      if (debug_enabled) {
-        console.log("data_source_selected closed..");
-      }
-
-      refreshUI();
-
-      var all_selected_id = getAllSelectedAsString();
-      if (all_selected_id == _prev_all_selected) {
-        if (debug_enabled) {
-          console.log("data_source_selected : no change!");
+    $('#data_source_list_dropdown').on('shown.bs.dropdown', function (event) {
+      var attr_id = $(this).attr('id');
+      var attr_value = $(this).attr('value');
+      if (attr_id && attr_value) {
+        if (attr_value == 'data_source_access') {
+          if (debug_enabled) {
+            console.log("Opened 'data_source_list_dropdown'");
+          }
+          _prev_all_selected = getAllSelectedAsString();
         }
       }
-      else {
-        requestAllSelected( true );
+
+      /*
+       * !!! Important !!!
+       * Must stop event propagation beyond this point, or else
+       * the handling logic can be called repeatedly.
+       */
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      event.stopPropagation();
+    });
+
+    $('#data_source_list_dropdown').on('hidden.bs.dropdown', function (event) {
+      var attr_id = $(this).attr('id');
+      var attr_value = $(this).attr('value');
+      if (attr_id && attr_value) {
+        if (attr_value == 'data_source_access') {
+          if (debug_enabled) {
+            console.log("Closed 'data_source_list_dropdown'");
+          }
+
+          refreshUI();
+
+          var all_selected_id = getAllSelectedAsString();
+          if (all_selected_id == _prev_all_selected) {
+            if (debug_enabled) {
+              console.log("data_source_selected : no change!");
+            }
+          }
+          else {
+            if (debug_enabled) {
+              console.log("data_source_selected : changed!");
+            }
+            requestAllSelected(true);
+          }
+        }
       }
+
+      /*
+       * !!! Important !!!
+       * Must stop event propagation beyond this point, or else
+       * the handling logic can be called repeatedly.
+       */
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      event.stopPropagation();
     });
 
     if (_data_source_list) {
@@ -453,14 +486,14 @@ var newman_data_source = (function () {
 
   function refreshUI() {
     if(debug_enabled) {
-      console.log('data_source_list[' + _data_source_list.length + ']');
+      //console.log('data_source_list[' + _data_source_list.length + ']');
     }
 
     clearUI();
 
     _.each(_data_source_list, function( element ) {
       if(debug_enabled) {
-        console.log('\tlabel "' + element.label + '", uid "' + element.uid + '"');
+        //console.log('\tlabel "' + element.label + '", uid "' + element.uid + '"');
       }
 
       var data_source_item_html = $('<li style=\"line-height: 20px; text-align: left\"/>')
@@ -585,7 +618,7 @@ var newman_data_source = (function () {
 
     var dataset_count = getDatasetCount();
     if (dataset_count > 0) {
-      $('#data_source_selected').find('.dropdown-toggle').html('<span class=\"fa fa-database\"> [' + dataset_count + '] </span>');
+      $('#data_source_list_dropdown').find('.dropdown-toggle').html('<span class=\"fa fa-database\"> [' + dataset_count + '] </span>');
 
       var selected_dataset_map = getAllSelected();
       if (debug_enabled) {
@@ -602,14 +635,10 @@ var newman_data_source = (function () {
       }
     }
     else {
-      $('#data_source_selected').find('.dropdown-toggle').html('<span class=\"fa fa-database\" />');
+      $('#data_source_list_dropdown').find('.dropdown-toggle').html('<span class=\"fa fa-database\" />');
     }
   }
 
-  function applyDatasetMultiSelected() {
-
-
-  }
 
   function onRequestAllSelected( response, is_forced_override ) {
     /*
@@ -678,6 +707,9 @@ var newman_data_source = (function () {
     // request validation config
     app_validation_config.requestValidationConfig();
 
+    // initialize geo-related configuration
+    app_geo_config.requestGeoConfig();
+
     /* preceded by service call to load data-source config below */
     //newman_data_source_service.requestAllDataSet();
 
@@ -740,8 +772,6 @@ var newman_data_source = (function () {
       // initialize search-filter
       newman_search_filter.initFilter();
 
-      // initialize geo-related configuration
-      app_geo_config.requestGeoConfig();
       // initialize map tiles
       app_geo_map.initMapTileLayer();
 

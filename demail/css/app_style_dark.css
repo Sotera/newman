@@ -112,6 +112,19 @@ a.show-sidebar:hover {
   border-radius: 4px;
 }
 
+.dropdown-menu-position-right {
+  top: 0;
+  left: 100%;
+}
+
+.btn + .dropdown-menu-position-right {
+  margin-top: -5px !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  padding: 0 !important;
+  border: 1px !important;
+  width: inherit !important;
+}
+
 .button-dropdown-menu {
   background: none;
   padding: 2px 2px 2px 2px;
@@ -137,9 +150,10 @@ a.show-sidebar:hover {
   border-radius: 6px;
   border: 0px solid #FFFFFF;
   font-weight:normal;
-  font-size: 12px;
+  font-size: 11px;
   position: relative;
-  color: #011d4b;
+  color: #006588;
+  /*color: #011d4b;*/
   /*color: #FFFFFF;*/
   line-height: 20px;
   text-align: center;
@@ -1927,7 +1941,7 @@ ul.DTTT_dropdown.dropdown-menu > li:hover > a {
   background: rgba(255, 255, 255, 0.9);
   padding: 0;
   border: 1px;
-  left: auto;
+  /*left: auto;*/
   width: inherit;
 }
 .btn + .dropdown-menu > li > a {

@@ -1,6 +1,3 @@
-
-
-
 /**
  * search result container object
  */
@@ -103,7 +100,7 @@ EmailSearchResult.prototype = {
     return this.parent_uid;
   },
 
-  contains : function ( element ) {
+  contains : function( element ) {
     var matched =  false;
 
     if (element) {
@@ -117,7 +114,7 @@ EmailSearchResult.prototype = {
     return matched
   },
 
-  isIdentical : function ( new_element ) {
+  isIdentical : function( new_element ) {
     var matched =  false;
 
     if (new_element) {
@@ -142,12 +139,12 @@ EmailSearchResult.prototype = {
     return matched
   },
 
-  indexOfChildUID : function ( child_uid ) {
+  indexOfChildUID : function( child_uid ) {
     var _index = -1;
 
     if (child_uid) {
 
-      _.each(this.children_list, function (child, index) {
+      _.each(this.children_list, function(child, index) {
         if (child.uid === child_uid) {
           _index = index;
           return _index;
@@ -162,7 +159,7 @@ EmailSearchResult.prototype = {
     return _index
   },
 
-  indexOfChild : function ( element ) {
+  indexOfChild : function( element ) {
     var _index = -1;
 
     if (element) {
@@ -175,7 +172,7 @@ EmailSearchResult.prototype = {
     return _index
   },
 
-  getChildByIndex : function ( index ) {
+  getChildByIndex : function( index ) {
     var child;
 
     if (this.debug_enabled) {
@@ -189,7 +186,7 @@ EmailSearchResult.prototype = {
     return child;
   },
 
-  getChildByUID : function ( child_uid ) {
+  getChildByUID : function( child_uid ) {
     var child;
     if (child_uid) {
       var index = this.indexOfChildUID( child_uid );
@@ -203,14 +200,14 @@ EmailSearchResult.prototype = {
     return child;
   },
 
-  setChild : function ( child ) {
+  setChild : function( child ) {
     if (this.debug_enabled) {
       console.log( 'setChild(' + child.uid + ')' );
     }
 
     var _index_found = -1;
 
-    _.each(this.children_list, function (element, index) {
+    _.each(this.children_list, function(element, index) {
       if (element.uid === child.uid) {
         _index_found = index;
       }
@@ -227,7 +224,7 @@ EmailSearchResult.prototype = {
     var matched =  false;
     if (new_child) {
 
-      _.each(this.children_list, function (element, index) {
+      _.each(this.children_list, function(element, index) {
         if (element.isIdentical( new_child )) {
           matched = true;
         }
@@ -265,13 +262,13 @@ EmailSearchResult.prototype = {
     return appended;
   },
 
-  appendChildren : function ( new_list ) {
+  appendChildren : function( new_list ) {
     if (new_list) {
       if (this.debug_enabled) {
         console.log('appendChildren( ' + new_list.length + ' )');
       }
 
-      _.each(new_list, function (element) {
+      _.each(new_list, function(element) {
         this.appendChild( element );
       });
 
@@ -281,26 +278,27 @@ EmailSearchResult.prototype = {
     }
   },
 
-  removeChild : function ( element ) {
+  removeChildByUID : function( uid ) {
     var _index = -1;
+    var removedObj;
 
-    if (element) {
-      if (this.debug_enabled) {
-        console.log('removeChild( ' + element.uid + ' )');
-      }
+    if (uid) {
 
-      _.each(this.children_list, function (child, index) {
-        if (child.uid === element.uid) {
+      _.each(this.children_list, function(child, index) {
+        if (child.uid === uid) {
           _index = index;
         }
       });
 
       if (_index >= 0) {
-        this.children_list.splice(_index, 1);
+        removedObj = this.children_list.splice(_index, 1);
       }
     }
 
-    return _index;
+    if (this.debug_enabled) {
+      console.log('removeChildByUID( ' + uid + ' ) : ' + _index);
+    }
+    return removedObj;
   },
 
   getChildrenAsList : function() {
@@ -315,34 +313,39 @@ EmailSearchResult.prototype = {
     return (this.children_list.length > 0)
   },
 
-  clearChildren : function () {
+  clearChildrenOfUID : function( uid ) {
+    var found = false;
+    if (uid) {
+      _.each(this.children_list, function (child) {
+        if (child instanceof EmailSearchResult) {
+
+          if (child.uid == uid) {
+            found = true;
+            child.clearAll();
+          }
+          else {
+            found = child.clearChildrenOfUID( uid );
+          }
+        }
+      });
+    }
+    if (this.debug_enabled) {
+      console.log('clearChildrenOfUID( ' + uid + ' ) : ' + found );
+    }
+    return found;
+  },
+
+  clearChildren : function() {
     if (this.debug_enabled) {
       console.log('Children( ' + this.children_list.length + ' )');
     }
 
-    _.each(this.children_list, function ( child ) {
+    _.each(this.children_list, function( child ) {
       if (child instanceof EmailSearchResult) {
 
         child.clearAll();
 
-        /*
-        var key_list = _.keys( child );
-        _.each(key_list, function ( key ) {
-          if (this.debug_enabled) {
-            console.log('\tdelete [' + key + ']');
-          }
-
-          if (Array.isArray( child[key] )) { // skip arrays
-            if (this.debug_enabled) {
-              console.log('\t\t' + key + '[' + child[key].length + ']');
-            }
-          }
-          else { // delete objects
-            delete child[key];
-          }
-        });
-        */
-
+        // TODO: should preferably do deep-delete
       }
     });
 
@@ -350,7 +353,7 @@ EmailSearchResult.prototype = {
     this.children_list.length = 0;
   },
 
-  clearAll : function () {
+  clearAll : function() {
     if (this.debug_enabled) {
       console.log('clearAll( ' + this.label + ' )');
     }
@@ -358,27 +361,11 @@ EmailSearchResult.prototype = {
     // clear html-table-row map
     newman_search_result_collection.deleteTableRow( this.uid );
 
-    /*
-    var key_list = _.keys( this );
-    _.each(key_list, function ( key ) {
-      if (this.debug_enabled) {
-        console.log('\tdelete [' + key + ']');
-      }
-
-      if (Array.isArray( this[key] )) { // skip arrays
-        if (this.debug_enabled) {
-          console.log('\t\t' + key + '[' + this[key].length + ']');
-        }
-      }
-      else { // delete objects
-        delete this[key];
-      }
-    });
-    */
+    // TODO: should proferably do deep-delete
 
     this.clearChildren();
   }
 
-};
+} // end-of EmailSearchResult.prototype
 
 

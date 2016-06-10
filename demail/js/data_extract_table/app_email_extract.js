@@ -178,7 +178,7 @@ var app_email_extract_phone_list_request = (function () {
     // append date-time range
     service_url = newman_datetime_range.appendDatetimeRange(service_url);
     // append query-string
-    service_url = newman_search_filter.appendURLQuery(service_url);
+    //service_url = newman_search_filter.appendURLQuery(service_url);
 
     service_url += '&size=' + count;
 
