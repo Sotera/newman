@@ -795,7 +795,7 @@ function reloadDashboardActivityTimeline(timeline_init_enabled) {
 }
 
 function reloadDashboardEntityEmail() {
-  newman_entity_email.displayUIEntityEmail(10);
+  newman_email_entity.requestEmailEntityList();
 }
 
 function reloadDashboardTopicEmail() {

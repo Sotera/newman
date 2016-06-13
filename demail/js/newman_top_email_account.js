@@ -12,35 +12,42 @@ var newman_rank_email = (function () {
 
   var _donut_chart_rank_email;
 
-  var _ranked_element_list = [];
-  var _top_count_max = 20;
-  var _top_count;
+  var response_element_list = [];
+  var min_request_count = 10, max_request_count = 50, ui_display_count = 10;
+
+  function getMinRequestCount() {
+    return min_request_count;
+  }
+
+  function getMaxRequestCount() {
+    return max_request_count;
+  }
+
+  function getUIDisplayCount() {
+    return ui_display_count;
+  }
+
+  function getTopEmailAccountList( count ) {
+    var top_response_element_list = [];
+    _.each(response_element_list, function (item, index) {
+      if (index < count) {
+        top_response_element_list.push( item );
+      }
+    });
+    return top_response_element_list;
+  }
+
+
   /**
    * request and display the top attachment-file-type-related charts
    * @param count
    */
-  function displayUIRankEmail( count ) {
+  function displayUIRankEmail() {
 
-    if (chart_bar_ui_id) {
 
-      _top_count = count;
-      if (!_top_count || _top_count < 1 || _top_count > _top_count_max) {
-        _top_count = _top_count_max;
-      }
+    newman_top_email_account_list_request.requestService( getMaxRequestCount() );
 
-      /*
-      var response = newman_rank_email_service.getResponse();
-      if (response) {
-        console.log("Previous service response retrieved ...");
-        updateUIRankEmail(response);
-      }
-      else {
-      */
-        newman_rank_email_service.requestService(_top_count_max);
-      //}
-    }
   }
-
 
 
 
@@ -51,17 +58,19 @@ var newman_rank_email = (function () {
   function updateUIRankEmail( service_response ) {
 
 
-
-    if (service_response && service_response.length > 0) {
-      initUI();
-
-      _ranked_element_list = service_response;
-
-
-      if (_ranked_element_list.length > _top_count) {
-        _ranked_element_list = _ranked_element_list.splice(0, _top_count);
+    if (service_response) {
+      if (response_element_list.length > 0) { // clear cache if any
+        response_element_list.length = 0;
       }
-      //console.log('ranks: ' + JSON.stringify(ranked_email_address_elements, null, 2));
+
+      response_element_list = service_response;
+    }
+
+    initUI();
+
+    var ui_display_entity_list = getTopEmailAccountList( ui_display_count );
+    if (ui_display_entity_list.length > 0) {
+      //console.log('ui_display_entity_list: ' + JSON.stringify(ui_display_entity_list, null, 2));
 
       var width = 530, height_bar = 13, margin_top = 8, margin_bottom = 2, width_bar_factor = 100;
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
@@ -73,10 +82,10 @@ var newman_rank_email = (function () {
         .attr("width", width + margin.left + margin.right);
 
       x.domain([0, 100]);
-      chart.attr("height", height_bar * _ranked_element_list.length + margin_top + margin_bottom);
+      chart.attr("height", height_bar * ui_display_entity_list.length + margin_top + margin_bottom);
 
       var bar = chart.selectAll("g")
-        .data(_ranked_element_list).enter()
+        .data(ui_display_entity_list).enter()
         .append("g")
         .attr("transform", function (d, i) {
           return "translate(" + margin.left + "," + (+(i * height_bar) + +margin.top) + ")";
@@ -170,7 +179,7 @@ var newman_rank_email = (function () {
       var top_donut_chart_colors = [];
 
 
-      _.each( _ranked_element_list, function(element, index) {
+      _.each(ui_display_entity_list, function (element, index) {
         top_donut_chart_total = top_donut_chart_total + parseFloat(element.rank);
 
         var entity_color = getEmailDomainColor(element.email);
@@ -179,13 +188,13 @@ var newman_rank_email = (function () {
       });
 
 
-      for (var i = 0; i < _ranked_element_list.length; i++) {
-        var value = Math.round((_ranked_element_list[i].rank / top_donut_chart_total) * width_bar_factor);
+      for (var i = 0; i < ui_display_entity_list.length; i++) {
+        var value = Math.round((ui_display_entity_list[i].rank / top_donut_chart_total) * width_bar_factor);
 
         //console.log('index ' + i + ', value ' +value + ', sum ' +top_donut_chart_total);
         var entry = {
           value: value,
-          label: _ranked_element_list[i].email,
+          label: ui_display_entity_list[i].email,
           formatted: value + '%'
         };
         top_donut_chart_data.push(entry);
@@ -202,7 +211,10 @@ var newman_rank_email = (function () {
       });
       _donut_chart_rank_email.select(0);
 
-    };
+    } // end-of if (ui_display_entity_list.length > 0)
+    else {
+      console.log('ui_display_entity_list: empty');
+    }
   }
 
   function initUI() {
@@ -222,26 +234,18 @@ var newman_rank_email = (function () {
     }
   }
 
-  function getTopCount() {
-    _top_count;
-  }
-
-  function getTopCountMax() {
-    _top_count_max;
-  }
-
   function getRankedList() {
-    if (_ranked_element_list) {
+    if (response_element_list) {
       //create a deep-copy, return the copy
-      return clone(_ranked_element_list);
+      return clone(response_element_list);
     }
-    return _ranked_element_list;
+    return response_element_list;
   }
 
   function getEmailRank( key ) {
     var value = 0.0;
     if (key) {
-      _.each(_ranked_element_list, function(element, index) {
+      _.each(response_element_list, function(element, index) {
         if (element["email"] === key) {
           value = element["rank"];
         }
@@ -254,7 +258,7 @@ var newman_rank_email = (function () {
     var value = 0;
     if (key) {
       //console.log('getEmailInboundCount(' + key + ')\n' + JSON.stringify(_ranked_element_list, null, 2));
-      _.each(_ranked_element_list, function(element) {
+      _.each(response_element_list, function(element) {
         if (element["email"] === key) {
           value = element["inbound_count"];
         }
@@ -266,7 +270,7 @@ var newman_rank_email = (function () {
   function getEmailOutboundCount( key ) {
     var value = 0;
     if (key) {
-      _.each(_ranked_element_list, function(element) {
+      _.each(response_element_list, function(element) {
         if (element["email"] === key) {
           value = element["outbound_count"];
         }
@@ -278,7 +282,7 @@ var newman_rank_email = (function () {
   function getEmailAttachCount( key ) {
     var value = 0;
     if (key) {
-      _.each(_ranked_element_list, function(element) {
+      _.each(response_element_list, function(element) {
         if (element["email"] === key) {
           value = element["attach_count"];
         }
@@ -292,8 +296,9 @@ var newman_rank_email = (function () {
     'displayUIRankEmail' : displayUIRankEmail,
     'updateUIRankEmail' : updateUIRankEmail,
     'revalidateUIRankEmail' : revalidateUIRankEmail,
-    'getTopCount' : getTopCount,
-    'getTopCountMax' : getTopCountMax,
+    'getTopCount' : getUIDisplayCount,
+    'getMinRequestCount' : getMinRequestCount,
+    'getMaxRequestCount' : getMaxRequestCount,
     'getRankedList' : getRankedList,
     'getEmailRank' : getEmailRank,
     'getEmailInboundCount' : getEmailInboundCount,
@@ -307,90 +312,101 @@ var newman_rank_email = (function () {
  * email-ranks-related service response container
  * @type {{requestService, getResponse}}
  */
-var newman_rank_email_service = (function () {
+var newman_top_email_account_list_request = (function () {
 
   var _service_url = 'email/rank';
   var _response;
 
-  var _top_count_max = 20;
   var request_response_map = {};
 
   function getServiceURL(top_count) {
-    if (!top_count || top_count < 1 ) {
-      top_count = newman_rank_email.getTopCountMax();
+    if (top_count) {
+
+      var service_url = newman_data_source.appendDataSource(_service_url);
+      service_url = newman_datetime_range.appendDatetimeRange(service_url);
+      service_url += '&size=' + top_count;
+
+      return service_url;
     }
-
-    var service_url = newman_data_source.appendDataSource( _service_url );
-    service_url = newman_datetime_range.appendDatetimeRange( service_url );
-    service_url += '&size=' + top_count;
-
-    return service_url;
   }
 
-  function mapResponse( response ) {
+  function mapResponse( service_url, data_source_string, response ) {
     if (response) {
 
-      var response_as_object = _.map(response.emails, function (element) {
-        return _.object(["email", "community", "community_id", "group_id", "rank", "inbound_count", "outbound_count", 'attach_count'], element);
+      var response_element_list = _.map(response.emails, function (element) {
+        var element_obj = _.object(["email", "community", "community_id", "group_id", "rank", "inbound_count", "outbound_count", 'attach_count'], element);
+
+        return element_obj;
       });
-      //console.log('mapResponse(...)\n' + JSON.stringify(response_as_object, null, 2));
 
-      return response_as_object;
+      var response_obj = { "emails" : response_element_list, "data_source" : data_source_string };
+      console.log('mapResponse(' + service_url + ')\n' + JSON.stringify(response_obj, null, 2));
+
+      request_response_map[ service_url ] = response_obj;
+
+      return response_obj;
     }
     return response;
   }
 
-  function getRankedEmailByDataSource( dataset_id ) {
-    var response;
+  function getTopEmailAccountByDataSource( dataset_id ) {
+    var object_matched, url;
     if (dataset_id) {
-      response = request_response_map[dataset_id];
+      _.each(request_response_map, function(response_element, key) {
+        if (dataset_id == response_element.data_source) {
+          object_matched = response_element.emails;
+          url = key;
+        }
+      });
+      console.log('getTopEmailAccountByDataSource(' + dataset_id + ')\n\ttarget_url : ' + url);
     }
-    return response;
+    return object_matched;
   }
 
-  function onRequestRankedEmailByDataSource(dataset_id, response, url) {
+  function onRequestTopEmailAccountByDataSource(dataset_id, response, url) {
     if (dataset_id && url && response) {
-      var response_as_object = mapResponse(response);
-      request_response_map[ dataset_id ] = response_as_object;
+      var response_as_object = mapResponse( url, dataset_id, response);
     }
   }
 
-  function requestRankedEmailByDataSource(_data_id_list_string, _top_count) {
+  function requestTopEmailAccountByDataSource(_data_id_list_string) {
     if (_data_id_list_string) {
-      var top_count = _top_count_max;
-      if (_top_count && _top_count > 0) {
-        top_count = _top_count;
-      }
+      var top_count = newman_email_entity.getMaxRequestCount();
+
       console.log('requestAllEmailByRank(' + _data_id_list_string + ', ' + top_count + ')');
 
       var dataset_id_list = _data_id_list_string.split(',');
-      var url_map = {};
+      var dataset_url_map = {};
 
+      // create url for each individual data-source
       _.each(dataset_id_list, function (dataset_id, index) {
         var service_url = newman_data_source.appendDataSource(_service_url, dataset_id);
         service_url = newman_datetime_range.appendDatetimeRange(service_url);
         service_url += '&size=' + top_count;
 
-        url_map[dataset_id] = service_url;
+        dataset_url_map[dataset_id] = service_url;
       });
 
+      // create url for each individual the union of data-sources
       var service_url = newman_data_source.appendDataSource(_service_url, _data_id_list_string);
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
       service_url += '&size=' + top_count;
-      url_map[_data_id_list_string] = service_url;
+      dataset_url_map[_data_id_list_string] = service_url;
 
-      console.log('url_map :\n' + JSON.stringify(url_map, null, 2));
+      console.log('url_map :\n' + JSON.stringify(dataset_url_map, null, 2));
 
-      _.each(url_map, function (service_url, key) {
+      // initiate request for each url
+      _.each(dataset_url_map, function (service_url, key) {
 
-        var prev_response = request_response_map[ key ];
+        var prev_response = request_response_map[ service_url ];
         if (prev_response) {
-          console.log('service-response already exists for "' + key + '"');
+          console.log('service-response already exists for "' + service_url + '"');
+
         }
         else {
 
           $.get(service_url).then(function (response) {
-            onRequestRankedEmailByDataSource(key, response, service_url);
+            onRequestTopEmailAccountByDataSource(key, response, service_url);
           });
         }
       });
@@ -398,30 +414,53 @@ var newman_rank_email_service = (function () {
     }
   }
 
-  function requestService(top_count) {
-    console.log('newman_rank_email_service.requestService('+top_count+')');
+  function requestService(count) {
+    var min_count = newman_email_entity.getMinRequestCount();
+    var max_count = newman_email_entity.getMaxRequestCount();
+    if (count) {
+      if (count < min_count || count > max_count) {
+        count = max_count;
+      }
+    }
+    else {
+      count = max_count;
+    }
+    console.log('newman_top_email_account_list_request.requestService('+count+')');
 
-    //$.get(getServiceURL(top_count)).then(function (response) {
-    $.when($.get(getServiceURL(top_count))).done(function (response) {
-      setResponse( response );
-    });
+    var data_source_string = newman_data_source.getAllSelectedAsString();
+    var service_url = getServiceURL( count );
+
+    var prev_response = request_response_map[ service_url ];
+    if (prev_response && prev_response.emails) {
+      console.log("service-response already exists for '" + service_url + "'");
+
+      //newman_rank_email.updateUIRankEmail( prev_response.emails );
+      //TODO: need to fix bug in cache, force making a service call for now
+
+      $.when($.get(service_url)).done(function (response) {
+        setResponse(service_url, data_source_string, response);
+      });
+    }
+    else {
+
+      //$.get( service_url ).then(function (response) {
+      $.when($.get(service_url)).done(function (response) {
+        setResponse(service_url, data_source_string, response);
+      });
+    }
   }
 
-  function setResponse( response ) {
+  function setResponse( service_url, data_source_string, response ) {
     if (response) {
-      _response = mapResponse( validateResponseEmailRank( response ));
-      console.log('received service_response_email_rank[' + response.emails.length + ']');
-      //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
+      _response = mapResponse( service_url, data_source_string, validateResponseTopEmailAccount( response ));
 
-      newman_rank_email.updateUIRankEmail( _response );
+      if (_response.emails) {
+        newman_rank_email.updateUIRankEmail(_response.emails);
+      }
     }
   }
 
   function getResponse() {
-    if (_response) {
-      //create a deep-copy, return the copy
-      return clone( _response )
-    }
     return _response;
   }
 
@@ -442,9 +481,9 @@ var newman_rank_email_service = (function () {
   return {
     'getServiceURL' : getServiceURL,
     'requestService' : requestService,
-    'requestRankedEmailByDataSource' : requestRankedEmailByDataSource,
-    'onRequestRankedEmailByDataSource' : onRequestRankedEmailByDataSource,
-    'getRankedEmailByDataSource' : getRankedEmailByDataSource,
+    'requestTopEmailAccountByDataSource' : requestTopEmailAccountByDataSource,
+    'onRequestTopEmailAccountByDataSource' : onRequestTopEmailAccountByDataSource,
+    'getTopEmailAccountByDataSource' : getTopEmailAccountByDataSource,
     'getResponse' : getResponse,
     'setResponse' : setResponse,
     'clearAllResponse' : clearAllResponse

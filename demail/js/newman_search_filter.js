@@ -22,8 +22,11 @@ var newman_search_filter = (function () {
     pushFilter('search_filter_text', 'text', 'fa fa-file-text-o fa-lg');
     pushFilter('search_filter_email', 'email', 'fa fa-user fa-lg');
     pushFilter('search_filter_attach', 'attach', 'fa fa-paperclip fa-lg');
-    pushFilter('search_filter_entity', 'entity', 'fa fa-code-fork fa-rotate-180 fa-lg');
-    pushFilter('search_filter_topic', 'topic', 'fa fa-list-alt fa-lg');
+    //pushFilter('search_filter_entity', 'entity', 'fa fa-code-fork fa-rotate-180 fa-lg');
+    pushFilter('search_filter_entity', 'entity', 'fa fa-share-alt fa-rotate-90 fa-lg');
+    pushFilter('search_filter_topic', 'topic', 'fa fa-list-ul fa-lg');
+    pushFilter('search_filter_community', 'community', 'fa fa-users fa-lg');
+    pushFilter('search_filter_conversation', 'conversation', 'fa fa-comments-ofa-lg');
 
     refreshUIFilter();
     setSelectedFilter( 'all', true );
@@ -310,12 +313,12 @@ var newman_search_filter = (function () {
     }
   }
 
-  function getFilterIconClass( key ) {
+  function getFilterIconClassByLabel( label ) {
 
     var filter_icon_class;
 
-    if (key) {
-      var search_filter = getFilterByLabel( key )
+    if (label) {
+      var search_filter = getFilterByLabel( label )
       if (search_filter) {
         filter_icon_class = search_filter.icon_class;
       }
@@ -336,10 +339,10 @@ var newman_search_filter = (function () {
         url_path = url_path.substring(0, url_path.length - 1);
       }
 
-      var search_text = $("#txt_search").val();
+      var search_text = getURLQueryPlainText();
 
       if (search_text) {
-        //search_text = toUnicode( search_text );
+        //search_text = toUnicode( search_text ); //convert text to unicode
 
         if (!param_key) {
           param_key = 'qs';
@@ -363,6 +366,12 @@ var newman_search_filter = (function () {
     return appendURL(url_path, 'qs');
   }
 
+  function getURLQueryPlainText() {
+    var search_text = $("#txt_search").val();
+
+    return search_text;
+  }
+
   return {
     "pushFilter" : pushFilter,
     "popFilter" : popFilter,
@@ -377,11 +386,12 @@ var newman_search_filter = (function () {
     "getFilterDefaultID" : getFilterDefaultID,
     "initFilter" : initFilter,
     "parseFilter" : parseFilter,
-    "getFilterIconClass" : getFilterIconClass,
+    "getFilterIconClassByLabel" : getFilterIconClassByLabel,
     "parseFilterIconClass" : parseFilterIconClass,
     "isValidFilter" : isValidFilter,
     'appendURL' : appendURL,
-    'appendURLQuery' : appendURLQuery
+    'appendURLQuery' : appendURLQuery,
+    'getURLQueryPlainText' : getURLQueryPlainText
   }
 
 }());

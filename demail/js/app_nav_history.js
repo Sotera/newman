@@ -26,30 +26,28 @@ var app_nav_history = (function () {
     }
 
     if(!icon_class) {
-      icon_class = 'fa fa-file-text-o';
-      if (data_field === 'all') {
-        icon_class = 'fa fa-file-text-o';
-      }
-      else if (data_field === 'text') {
-        icon_class = 'fa fa-file-text-o';
+      icon_class = newman_search_filter.getFilterIconClassByLabel( 'all' );
+
+      if (data_field === 'text') {
+        icon_class = newman_search_filter.getFilterIconClassByLabel( 'text' );
       }
       else if (data_field === 'email') {
-        icon_class = 'fa fa-user';
+        icon_class = newman_search_filter.getFilterIconClassByLabel( 'email' );
       }
-      else if (data_field === 'community') {
-        icon_class = 'fa fa-users';
-      }
-      else if (data_field === 'topic') {
-        icon_class = 'fa fa-list-ul';
+      else if (data_field === 'attach') {
+        icon_class = newman_search_filter.getFilterIconClassByLabel( 'attach' );
       }
       else if (data_field === 'entity') {
-        icon_class = 'fa fa-sitemap';
+        icon_class = newman_search_filter.getFilterIconClassByLabel( 'entity' );
       }
-      else if (data_field === 'attachment') {
-        icon_class = 'fa fa-paperclip';
+      else if (data_field === 'topic') {
+        icon_class = newman_search_filter.getFilterIconClassByLabel( 'topic' );
+      }
+      else if (data_field === 'community') {
+        icon_class = newman_search_filter.getFilterIconClassByLabel( 'community' );
       }
       else if (data_field === 'conversation') {
-        icon_class = 'fa fa-comments-o';
+        icon_class = newman_search_filter.getFilterIconClassByLabel( 'conversation' );
       }
     }
 

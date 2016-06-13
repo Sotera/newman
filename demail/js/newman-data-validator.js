@@ -206,11 +206,11 @@ function validateEmailSearchResponse(response) {
  * @param response data received from service
  * @returns filtered response
  */
-function validateResponseEmailRank(response) {
+function validateResponseTopEmailAccount(response) {
 
 
   if (response) {
-    console.log('validateResponseEmailRank(...)');
+    console.log('validateResponseTopEmailAccount(...)');
     //console.log( '\tresponse\n' + JSON.stringify(response, null, 2) );
 
     if (response.emails) {

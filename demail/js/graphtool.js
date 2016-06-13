@@ -323,7 +323,7 @@ function searchByEntity(entityid, type, value){
 
 
 function onEntityClicked(entity_key, entity_type) {
-  newman_entity_email.onEntityClicked(entity_key, entity_type);
+  newman_email_entity.onEntityClicked(entity_key, entity_type);
 }
 
 
@@ -539,7 +539,7 @@ function requestSearch(field, search_text, load_on_response, parent_search_uid, 
     url_path = newman_data_source.appendDataSource(url_path);
   }
   url_path = newman_datetime_range.appendDatetimeRange(url_path);
-  //url_path = newman_entity_email.appendEntity(url_path);
+  //url_path = newman_email_entity.appendEntity(url_path);
 
     console.log('\turl : \'' + url_path + '\'');
     //console.log( '\tservice_response_email_search_all.getServiceURL(): \'' + current_data_set_url +'\'' );

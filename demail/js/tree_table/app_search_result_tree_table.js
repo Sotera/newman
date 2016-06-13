@@ -314,7 +314,7 @@ EmailSearchResultTreeTable.prototype = {
 
     _label = decodeURIComponent(_label);
     _search_text = decodeURIComponent(_search_text),
-      _data_source_id = decodeURIComponent(_data_source_id);
+    _data_source_id = decodeURIComponent(_data_source_id);
 
     var new_result = new EmailSearchResult(
       _label,
@@ -340,9 +340,9 @@ EmailSearchResultTreeTable.prototype = {
       var data_source_node = this.data_source_list.getByUID( _data_source_id );
       if (data_source_node) {
 
-        //if (clear_all_sibling === true) {
-        data_source_node.clearChildren(); // always clear and rebuild data-source (root) nodes
-        //}
+        if (clear_all_sibling === true) {
+          data_source_node.clearChildren();
+        }
 
         data_source_node.appendChild( new_result );
       }// end of if (data_source_node)

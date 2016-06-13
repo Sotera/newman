@@ -680,7 +680,7 @@ var newman_data_source = (function () {
     newman_email_starred.initStarredDocumentList();
 
     // re-initialize ranked emails under each data-source
-    newman_rank_email_service.requestRankedEmailByDataSource( getAllSelectedAsString(), 20 );
+    newman_top_email_account_list_request.requestTopEmailAccountByDataSource( getAllSelectedAsString() );
 
     // re-initialize dashboard components and widgets
     initDashboardCharts( true );
@@ -735,6 +735,9 @@ var newman_data_source = (function () {
 
     if (_all_dataset_response) {
 
+      //hack to force-select all available datasets for now
+      _default_data_source_max_selected = _all_dataset_response.data_sets.length;
+
       _.each( _all_dataset_response.data_sets, function (element, index) {
 
         if (app_data_source_config.isDataSetExcluded(element.data_set_id)) {
@@ -765,6 +768,7 @@ var newman_data_source = (function () {
         }
 
       });
+      console.log( 'default_data_source_max_selected = ' + _default_data_source_max_selected );
 
       refreshUI();
       //console.log('_response_map: ' + JSON.stringify(_response_map, null, 2));
