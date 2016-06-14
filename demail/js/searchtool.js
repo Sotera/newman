@@ -795,7 +795,7 @@ function reloadDashboardActivityTimeline(timeline_init_enabled) {
 }
 
 function reloadDashboardEntityEmail() {
-  newman_email_entity.requestEmailEntityList();
+  newman_top_email_entity.requestEmailEntityList();
 }
 
 function reloadDashboardTopicEmail() {
@@ -823,7 +823,7 @@ function initDashboardRankEmail() {
 }
 
 function reloadDashboardRankEmail() {
-  newman_rank_email.displayUIRankEmail(10);
+  newman_rank_email.requestEmailAccountList();
 }
 
 function reloadDashboardFileTypeAttachment() {

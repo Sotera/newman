@@ -679,8 +679,11 @@ var newman_data_source = (function () {
     // re-initialize starred-documents
     newman_email_starred.initStarredDocumentList();
 
-    // re-initialize ranked emails under each data-source
+    // re-initialize top-ranked email-accounts under each data-source
     newman_top_email_account_list_request.requestTopEmailAccountByDataSource( getAllSelectedAsString() );
+
+    // re-initialize top-email-entities under each data-source
+    newman_top_email_entity_list_request.requestTopEmailEntityByDataSource( getAllSelectedAsString() );
 
     // re-initialize dashboard components and widgets
     initDashboardCharts( true );

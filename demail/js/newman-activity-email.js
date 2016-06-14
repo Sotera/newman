@@ -639,7 +639,7 @@ var newman_activity_outbound = (function () {
 
       initUI();
 
-      var ranked_email_accounts = newman_rank_email.getRankedList();
+      var ranked_email_accounts = newman_top_email_account.getRankedList();
       console.log('ranked_emails[' + ranked_email_accounts.length + ']');
 
       _.each(ranked_email_accounts, function (element, index) {
@@ -858,7 +858,7 @@ var newman_activity_inbound = (function () {
 
       initUI();
 
-      var ranked_email_accounts = newman_rank_email.getRankedList();
+      var ranked_email_accounts = newman_top_email_account.getRankedList();
       //console.log('ranked_emails[' + ranked_email_accounts.length + ']');
 
       _.each(ranked_email_accounts, function (element, index) {
@@ -1228,7 +1228,7 @@ var newman_activity_attachment = (function () {
 
       initUI();
 
-      var ranked_email_accounts = newman_rank_email.getRankedList();
+      var ranked_email_accounts = newman_top_email_account.getRankedList();
       //console.log('ranked_emails[' + ranked_email_accounts.length + ']');
 
       _.each(ranked_email_accounts, function (element, index) {

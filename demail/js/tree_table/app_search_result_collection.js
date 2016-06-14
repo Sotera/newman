@@ -1463,7 +1463,7 @@ var newman_search_result_collection = (function () {
       );
     }
 
-    var top_entity_list = newman_email_entity.getTopEmailEntityList( search_count_max );
+    var top_entity_list = newman_top_email_entity.getTopEmailEntityList( search_count_max );
     if (top_entity_list) {
       console.log('top_entity_list :\n' + JSON.stringify(top_entity_list, null, 2));
 
@@ -1476,7 +1476,7 @@ var newman_search_result_collection = (function () {
 
         var entity_text_list = [ element.entity_text ];
 
-        newman_email_entity.requestEmailEntitySearch(
+        newman_top_email_entity.requestEmailEntitySearch(
           parent_node_uid,
           clear_sibling,
           dataset_list_string,

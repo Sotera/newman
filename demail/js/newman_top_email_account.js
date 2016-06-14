@@ -6,6 +6,7 @@
  * email-rank related container
  */
 var newman_rank_email = (function () {
+  var debug_enabled = false;
 
   var chart_bar_ui_id = '#chart_horizontal_bar_ranks';
   var chart_donut_ui_id = '#chart_donut_ranks';
@@ -42,9 +43,7 @@ var newman_rank_email = (function () {
    * request and display the top attachment-file-type-related charts
    * @param count
    */
-  function displayUIRankEmail() {
-
-
+  function requestEmailAccountList() {
     newman_top_email_account_list_request.requestService( getMaxRequestCount() );
 
   }
@@ -53,17 +52,21 @@ var newman_rank_email = (function () {
 
   /**
    * update from service the top email-entities-related charts
-   * @param service_response
+   * @param response
    */
-  function updateUIRankEmail( service_response ) {
+  function onRequestEmailAccountList( response ) {
 
+    if (response) {
+      //if (debug_enabled) {
+        //console.log('onRequestEmailAccountList( response )\n' + JSON.stringify(response, null, 2));
+      //}
 
-    if (service_response) {
       if (response_element_list.length > 0) { // clear cache if any
         response_element_list.length = 0;
       }
-
-      response_element_list = service_response;
+      _.each(response, function (item, index) {
+        response_element_list.push( item );
+      });
     }
 
     initUI();
@@ -293,8 +296,8 @@ var newman_rank_email = (function () {
 
   return {
     'initUI' : initUI,
-    'displayUIRankEmail' : displayUIRankEmail,
-    'updateUIRankEmail' : updateUIRankEmail,
+    'requestEmailAccountList' : requestEmailAccountList,
+    'onRequestEmailAccountList' : onRequestEmailAccountList,
     'revalidateUIRankEmail' : revalidateUIRankEmail,
     'getTopCount' : getUIDisplayCount,
     'getMinRequestCount' : getMinRequestCount,
@@ -315,8 +318,6 @@ var newman_rank_email = (function () {
 var newman_top_email_account_list_request = (function () {
 
   var _service_url = 'email/rank';
-  var _response;
-
   var request_response_map = {};
 
   function getServiceURL(top_count) {
@@ -363,15 +364,15 @@ var newman_top_email_account_list_request = (function () {
     return object_matched;
   }
 
-  function onRequestTopEmailAccountByDataSource(dataset_id, response, url) {
+  function onRequestTopEmailAccountByDataSource( dataset_id, response, url ) {
     if (dataset_id && url && response) {
-      var response_as_object = mapResponse( url, dataset_id, response);
+      var mapped_response = mapResponse( url, dataset_id, response);
     }
   }
 
   function requestTopEmailAccountByDataSource(_data_id_list_string) {
     if (_data_id_list_string) {
-      var top_count = newman_email_entity.getMaxRequestCount();
+      var top_count = newman_top_email_entity.getMaxRequestCount();
 
       console.log('requestAllEmailByRank(' + _data_id_list_string + ', ' + top_count + ')');
 
@@ -415,8 +416,8 @@ var newman_top_email_account_list_request = (function () {
   }
 
   function requestService(count) {
-    var min_count = newman_email_entity.getMinRequestCount();
-    var max_count = newman_email_entity.getMaxRequestCount();
+    var min_count = newman_top_email_entity.getMinRequestCount();
+    var max_count = newman_top_email_entity.getMaxRequestCount();
     if (count) {
       if (count < min_count || count > max_count) {
         count = max_count;
@@ -434,12 +435,8 @@ var newman_top_email_account_list_request = (function () {
     if (prev_response && prev_response.emails) {
       console.log("service-response already exists for '" + service_url + "'");
 
-      //newman_rank_email.updateUIRankEmail( prev_response.emails );
-      //TODO: need to fix bug in cache, force making a service call for now
+      newman_rank_email.onRequestEmailAccountList( prev_response.emails );
 
-      $.when($.get(service_url)).done(function (response) {
-        setResponse(service_url, data_source_string, response);
-      });
     }
     else {
 
@@ -452,16 +449,12 @@ var newman_top_email_account_list_request = (function () {
 
   function setResponse( service_url, data_source_string, response ) {
     if (response) {
-      _response = mapResponse( service_url, data_source_string, validateResponseTopEmailAccount( response ));
+      var mapped_response = mapResponse( service_url, data_source_string, validateResponseTopEmailAccount( response ));
 
-      if (_response.emails) {
-        newman_rank_email.updateUIRankEmail(_response.emails);
+      if (mapped_response.emails) {
+        newman_rank_email.onRequestEmailAccountList( mapped_response.emails );
       }
     }
-  }
-
-  function getResponse() {
-    return _response;
   }
 
   function clearAllResponse() {
@@ -484,8 +477,6 @@ var newman_top_email_account_list_request = (function () {
     'requestTopEmailAccountByDataSource' : requestTopEmailAccountByDataSource,
     'onRequestTopEmailAccountByDataSource' : onRequestTopEmailAccountByDataSource,
     'getTopEmailAccountByDataSource' : getTopEmailAccountByDataSource,
-    'getResponse' : getResponse,
-    'setResponse' : setResponse,
     'clearAllResponse' : clearAllResponse
   }
 
