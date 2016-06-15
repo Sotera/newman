@@ -632,7 +632,7 @@ var newman_top_email_entity_list_request = (function () {
       });
 
       var response_obj = { "entities" : response_element_list, "data_source" : data_source_string };
-      console.log('mapResponse(' + service_url + ')\n' + JSON.stringify(response_obj, null, 2));
+      //console.log('mapResponse(' + service_url + ')\n' + JSON.stringify(response_obj, null, 2));
 
       request_response_map[ service_url ] = response_obj;
 

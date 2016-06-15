@@ -75,7 +75,7 @@ var newman_dataset_label = (function () {
 }());
 
 var newman_data_source = (function () {
-  var debug_enabled = true;
+  var debug_enabled = false;
   var _is_initialized = false;
 
   var _default_data_set_id = 'default_data_set';

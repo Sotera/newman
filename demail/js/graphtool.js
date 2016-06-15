@@ -106,7 +106,8 @@ var toggle_legends = (function(){
   var toggle = function(){
     if (isOpen()){
       close();
-    } else {
+    }
+    else {
       open();
     }
   };
@@ -273,17 +274,23 @@ function dragended(d){
   d3.select(this).classed("fixed", d.fixed = true);
 }
 
-function recolornodes(color_category) {
-  console.log('recolornodes(' + color_category + ')');
-  if( color_category == 'community') {
-    redraw_legend_table_community();
+function setGraphNodeColor(color_category) {
+  console.log('setGraphNodeColor(' + color_category + ')');
+  if (color_category == 'dataset_color') {
+    drawGraphLegendTableDataset();
+    d3.selectAll("circle").style("fill", function(d) {
+      return newman_graph_email.getNodeDatasetColor( d.name );
+    });
+  }
+  else if( color_category == 'community_color' ) {
+    drawGraphLegendTableCommunity();
     d3.selectAll("circle").style("fill", function(d) {
       //console.log('\tcolor_by_community\n' + JSON.stringify(d, null, 2));
       return newman_community_email.getCommunityColor( d.community );
     });
   }
-  if( color_category == 'domain') {
-    redraw_legend_table_domain();
+  else if( color_category == 'domain_color' ) {
+    drawGraphLegendTableDomain();
     d3.selectAll("circle").style("fill", function(d) {
       if(d && d.name) {
         //console.log('\tcolor_by_domain\n' + JSON.stringify(d, null, 2));
@@ -612,20 +619,24 @@ function getTopRankedEmailAccountList(email_doc_rows, top_count ) {
 /**
  * load and parse search result referenced by URL
  */
-function loadSearchResult( url_path ) {
-
+function loadSearchResult( url_path, search_response ) {
+  console.log('loadSearchResult(' + url_path + ')');
 
 
   updateUIInboundCount(); // initialize to blank
   updateUIOutboundCount(); // initialize to blank
 
-  $.getJSON( url_path , function (search_response) {
+  if (search_response) {
 
-    console.log( '.getJSON(' + url_path + ')' );
-    newman_graph_email.updateUIGraphView( search_response, false );
+    newman_graph_email.updateUIGraphView( search_response );
+  }
+  else {
 
-  });
+    $.getJSON(url_path, function ( response ) {
 
+      newman_graph_email.updateUIGraphView( response );
+    });
+  }
   //hasher.setHash( url_path );
   //email_analytics_content.open();
 
@@ -634,7 +645,7 @@ function loadSearchResult( url_path ) {
 }
 
 // Draw a graph for a component
-function drawGraph(graph){
+function drawGraph( graph ){
 
   svg.remove();
   svg = d3.select("#graph_email").append("svg")
@@ -701,17 +712,23 @@ function drawGraph(graph){
     .attr("id", function(d) { return "g_circle_" + d.group; })
     .style("fill", function(d) {
       //console.log('node.append("svg:circle").style("fill")\n' + JSON.stringify(d, null, 2));
-      if (d3.select("#color_by_domain").property("checked")) {
-        if(d && d.name) {
-          return getEmailDomainColor(d.name);
-          //return color(d.group);
+      if (d3.select("#color_by_dataset").property("checked")) {
+        if(d && d.community) {
+          return newman_graph_email.getNodeDatasetColor( d.name );
         }
       }
       else if (d3.select("#color_by_community").property("checked")) {
         if(d && d.community) {
           return newman_community_email.getCommunityColor( d.community );
         }
-      }})
+      }
+      else if (d3.select("#color_by_domain").property("checked")) {
+        if(d && d.name) {
+          return getEmailDomainColor(d.name);
+        }
+      }
+
+    })
     .style("stroke","red")
     .style("stroke-width", function(d) {
       if (d3.select("#rankval").property("checked")) {
@@ -848,7 +865,7 @@ function drawGraph(graph){
     });
   });
 
-  redraw_legend();
+  drawGraphLegend();
 }
 
 function redraw() {
@@ -1018,16 +1035,123 @@ function node_highlight(email){
 };
 
 
-
-
-function redraw_legend_table_domain(){
+function drawGraphLegendTableDataset() {
 
   var lastSort = "";
   $("#legend-table tbody").empty();
   $("#legend-table thead").empty();
 
   var thead = d3.select("#legend-table").select("thead").append("tr").selectAll("tr").data(
-    ['Color', 'Count', 'Domain']).enter().append("th")
+    ['Color', 'Account', 'Dataset']).enter().append("th")
+    .text(function(d){ return d; })
+    .attr('class', 'clickable')
+    .on('click', function(k, i){
+      var direction = (lastSort == k) ? -1 : 1;
+      lastSort = (direction == -1) ? "" : k; //toggle
+      d3.select("#legend-table").select("tbody").selectAll("tr").sort(function(a,b){
+        if (i == 1){
+          return (parseInt(a[i]) - parseInt(b[i])) * direction;
+        }
+        return a[i].localeCompare(b[i]) * direction;
+      });
+    });
+
+  var dataset_group = _.groupBy(d3.selectAll("circle").data(), function(node) {
+    if (node && node.original_ingest_id) {
+      var dataset_id_list = node.original_ingest_id;
+      var dataset_list_string = '';
+      _.each(dataset_id_list, function(dataset_id, index) {
+        if (index == (dataset_id_list.length - 1)) {
+          dataset_list_string += dataset_id;
+        }
+        else {
+          dataset_list_string += dataset_id + ','
+        }
+      });
+      return dataset_list_string;
+    }
+  });
+  //console.log('\tdataset_group: ' + JSON.stringify(dataset_group, null, 2));
+
+  var color_label_by_dataset = _.map(dataset_group, function(value, key) {
+    if(value && key) {
+
+      var dataset_list_string = key;
+      var dataset_id_list = dataset_list_string.split(',');
+
+      var dataset_color = newman_graph_email.getDatasetColor( dataset_id_list );
+      var dataset_label = '';
+      _.each(dataset_id_list, function(dataset_id, index) {
+        if (index == (dataset_id_list.length - 1)) {
+          dataset_label += newman_data_source.getLabelByID( dataset_id );
+        }
+        else {
+          dataset_label += newman_data_source.getLabelByID( dataset_id ) + ', '
+        }
+      });
+
+      return [dataset_color, value.length, dataset_label];
+    }
+  });
+  color_label_by_dataset = color_label_by_dataset.sort(descendingPredicatByIndex(1));
+  //console.log('\tcolor_n_count_by_domain: ' + JSON.stringify(color_n_count_by_domain, null, 2));
+
+  var tr = d3.select("#legend-table").select("tbody").selectAll("tr")
+    .data(color_label_by_dataset).enter().append("tr")
+    .style( "text-align", "left" )
+    .style( "text-align", "left" )
+    //.attr('class', 'clickable')
+    .on("click", function(d, i){
+      console.log(d);
+    })
+    .on("mouseover", function(d, i){
+      var dataset_hovered = d[0]; // use color as the key
+      d3.selectAll("circle").style("stroke","#ffff00");
+      d3.selectAll("circle").each(function(d, i){
+        if(d) {
+          //console.log('node' + JSON.stringify(d, null, 2));
+          if (dataset_hovered.localeCompare(newman_graph_email.getDatasetColor( d.original_ingest_id )) == 0) {
+            d3.select(this).style("stroke-width", function (d) {
+              return 5;
+            });
+          }
+        }
+      });
+    })
+    .on("mouseout", function(d, i){
+      d3.selectAll("circle").style("stroke","#ff0000");
+      if (d3.select("#rankval").property("checked")) {
+        d3.selectAll("circle").each(function(d, i){
+          d3.select(this).style("opacity",function(d) { return 0.2 + (d.rank); });
+          d3.select(this).style("stroke-width",function(d) { return 5 * (d.rank); });
+        });
+      }
+      else {
+        d3.selectAll("circle").each(function(d, i){
+          d3.select(this).style("opacity","100");
+          d3.select(this).style("stroke-width","0");
+        });
+      }
+    });
+
+
+  tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td")
+    .html(function(d, i){
+      if (i == 0){
+        return $('<div>').append($('<div>').css({ 'min-height': '14px', 'width' : '100%', 'background-color' : d})).html();
+      }
+      return d;
+    });
+} // end-of drawGraphLegendTableDataset
+
+function drawGraphLegendTableDomain() {
+
+  var lastSort = "";
+  $("#legend-table tbody").empty();
+  $("#legend-table thead").empty();
+
+  var thead = d3.select("#legend-table").select("thead").append("tr").selectAll("tr").data(
+    ['Color', 'Account', 'Domain']).enter().append("th")
     .text(function(d){ return d; })
     .attr('class', 'clickable')
     .on('click', function(k, i){
@@ -1049,16 +1173,17 @@ function redraw_legend_table_domain(){
   });
   //console.log('\tdomain_list: ' + JSON.stringify(domain_list, null, 2));
 
-  var color_n_count_by_domain = _.map(domain_list, function(value, key){
+  var color_label_by_domain = _.map(domain_list, function(value, key){
     if(value && key) {
       return [getEmailDomainColor(key), value.length, key];
     }
   });
-  color_n_count_by_domain = color_n_count_by_domain.sort(descendingPredicatByIndex(1));
-  //console.log('\tcolor_n_count_by_domain: ' + JSON.stringify(color_n_count_by_domain, null, 2));
+  color_label_by_domain = color_label_by_domain.sort(descendingPredicatByIndex(1));
+  //console.log('\tcolor_n_count_by_domain: ' + JSON.stringify(color_label_by_domain, null, 2));
 
   var tr = d3.select("#legend-table").select("tbody").selectAll("tr")
-    .data(color_n_count_by_domain).enter().append("tr")
+    .data(color_label_by_domain).enter().append("tr")
+    .style( "text-align", "left" )
   //.attr('class', 'clickable')
     .on("click", function(d, i){
       console.log(d);
@@ -1101,50 +1226,49 @@ function redraw_legend_table_domain(){
       }
       return d;
     });
-}
+} // end-of drawGraphLegendTableDomain
 
-function redraw_legend_table_community() {
+function drawGraphLegendTableCommunity() {
   var lastSort = "";
   $("#legend-table tbody").empty();
   $("#legend-table thead").empty();
   
   var thead = d3.select("#legend-table").select("thead").append("tr").selectAll("tr").data(
-    ['Count', 'Community']).enter().append("th")
+    ['Community', 'Account']).enter().append("th")
     .text(function(d){ return d; })
     .attr('class', 'clickable')
     .on('click', function(k, i){
       var direction = (lastSort == k) ? -1 : 1;
       lastSort = (direction == -1) ? "" : k; //toggle
       d3.select("#legend-table").select("tbody").selectAll("tr").sort(function(a,b){
-        if (i == 0){
+        if (i == 1){
           return (parseInt(a[i]) - parseInt(b[i])) * direction;
         }
         return a[i].localeCompare(b[i]) * direction;
       });
     });
 
-  var community_set = _.groupBy(d3.selectAll("circle").data(),
-    function(node) {
+  var community_set = _.groupBy(d3.selectAll("circle").data(), function(node) {
       if(node && node.community) {
         return node.community;
       }
     }
   );
 
-  var node_count_by_community = _.map(community_set,
-    function(value, key){
+  var color_label_by_community = _.map(community_set, function(value, key) {
       if(value && key) {
-        return [value.length, key];
+        return [key, value.length];
       }
     }
   );
-  node_count_by_community = node_count_by_community.sort(descendingPredicatByIndex(0));
-  //console.log('\tnode_count_by_community: ' + JSON.stringify(node_count_by_community, null, 2));
+  color_label_by_community = color_label_by_community.sort(descendingPredicatByIndex(1));
+  //console.log('\tnode_count_by_community: ' + JSON.stringify(color_label_by_community, null, 2));
 
   var tr = d3.select("#legend-table").select("tbody").selectAll("tr")
-    .data(node_count_by_community).enter().append("tr")
+    .data(color_label_by_community).enter().append("tr")
+    .style( "text-align", "left" )
     .on("mouseover", function(d, i){
-      var k = d[1];
+      var k = d[0];
       d3.selectAll("circle").style("stroke","#ffff00");
       d3.selectAll("circle").each(function(d, i){
         if (k.localeCompare(d.community) == 0) {
@@ -1172,8 +1296,8 @@ function redraw_legend_table_community() {
 
   tr.selectAll("td").data(function(d){ return d3.values(d) }).enter().append("td")
     .html(function(d, i){
-      if (i == 1){
-        console.log('tr.selectAll("td").data(d)\n' + JSON.stringify(d, null, 2));
+      if (i == 0){
+        //console.log('tr.selectAll("td").data(d)\n' + JSON.stringify(d, null, 2));
         return $('<div>').append($('<div>').css(
           { 'min-height': '14px',
             'width' : '100%',
@@ -1182,15 +1306,18 @@ function redraw_legend_table_community() {
       }
       return d;
     });
-}
+} // end-of drawGraphLegendTableCommunity
 
-function redraw_legend() {
+function drawGraphLegend() {
 
-  if ($('#color_by_community').prop('checked')) {
-    redraw_legend_table_community();
+  if ($('#color_by_dataset').prop('checked')) {
+    drawGraphLegendTableDataset();
+  }
+  else if ($('#color_by_community').prop('checked')) {
+    drawGraphLegendTableCommunity();
   }
   else if ($('#color_by_domain').prop('checked')) {
-    redraw_legend_table_domain();
+    drawGraphLegendTableDomain();
   }
 };
 
@@ -1409,76 +1536,6 @@ $(function () {
     });
 
     newman_graph_email.initUI();
-
-    /* deprecated since v2.11 */
-    /*
-    // initialize search keyboard event
-    $('#txt_search').keyup(function (event) {
-
-      if (event.keyCode === 13) {
-        newman_datetime_range.setDatetimeBounds( newman_activity_email.getDatetimeBounds() );
-        searchByField();
-      }
-      event.preventDefault();
-    });
-
-    $("#search_form").submit(function (e) {
-      return false;
-    });
-
-    $('#email_group_conversation').on('click', group_email_conversation);
-    //$('#email_view_export_all').on('click', add_view_to_export);
-    //$('#email_view_export_all_remove').on('click', remove_view_from_export);
-
-    $('#top-entities').append(waiting_bar);
-
-    $("#txt_search_submit").click(function () {
-      newman_datetime_range.setDatetimeBounds( newman_activity_email.getDatetimeBounds() );
-      searchByField();
-    });
-
-    //on modal close event
-    $('#export_modal').on('hidden.bs.modal', function () {
-      $('#export_link_spin').show();
-      $('#export_download_link').hide();
-    });
-
-
-    $("#export_starred_set").click(function () {
-      newman_email_starred_request_export.requestService();
-    });
-
-    $("#color_by_community").click(function () {
-      //console.log($("#color_by_community").val());
-      recolornodes('community');
-    });
-
-    $("#color_by_domain").click(function () {
-      //console.log($("#color_by_domain").val());
-      recolornodes('domain');
-    });
-
-    $("#usetext").on("change", function () {
-      toggle_labels();
-    });
-
-    $("#rankval").click(function () {
-      console.log(d3.select("#rankval").property("checked"));
-      if (d3.select("#rankval").property("checked")) {
-        d3.selectAll("circle").style("opacity", function (d) {
-          return 0.2 + (d.rank);
-        });
-        d3.selectAll("circle").style("stroke-width", function (d) {
-          return 5 * (d.rank);
-        });
-      }
-      else {
-        d3.selectAll("circle").style("opacity", "100");
-        d3.selectAll("circle").style("stroke-width", "0");
-      }
-      //recolornodes('rank');
-    });
-    */
 
     function parseHash(newHash, oldHash) {
       console.log('parseHash( ' + newHash + ', ' + oldHash + ' )');

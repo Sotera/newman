@@ -855,24 +855,29 @@
         <div id="content-analytics-email" class="container-fluid analytics-content" >
 
           <!--Start Visual-Filter-->
-          <div id="graph-visual-filter-email" style="position: fixed; left: 1%; background-color: rgba(210, 210, 210, 0.6); z-index: 999; font-size: 11px;
-             border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; width: 30%; display: none;">
+          <div id="graph-visual-filter-email" style="position: fixed; left: 1%; background-color: rgba(210, 210, 210, 0.5); z-index: 999; font-size: 11px;
+             border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; width: 40%; display: none;">
 
             <div class="row" style="margin: 0;">
               <div class="col-sm-2">
                 <div style="padding: 0;">Color</div>
               </div>
-              <div class="col-sm-3" style="padding: 0;" >
+              <div class="col-sm-2" style="padding: 0;" >
                 <label class="radio-inline" >
-                  <input type="radio" name="optionRadios" id="color_by_domain" value="domain" style="margin: 2px 0 0 -15px;" checked="checked"/> Domain
+                  <input type="radio" name="optionRadios" id="color_by_dataset" value="dataset_color" style="margin: 2px 0 0 -15px;" /> Dataset
                 </label>
               </div>
-              <div class="col-sm-3" style="padding: 0; border-right: 1px solid rgba(255, 255, 255, 0.6);">
+              <div class="col-sm-2" style="padding: 0;" >
                 <label class="radio-inline" >
-                  <input type="radio" name="optionRadios" id="color_by_community" value="community" style="margin: 2px 0 0 -15px;" /> Community
+                  <input type="radio" name="optionRadios" id="color_by_community" value="community" style="margin: 2px 0 0 -15px;" checked="checked"/> Community
                 </label>
               </div>
-              <div class="col-sm-4" style="padding: 0 0 0 2px;">
+              <div class="col-sm-3" style="padding: 0; border-right: 1px solid rgba(255, 255, 255, 0.5);">
+                <label class="radio-inline" >
+                  <input type="radio" name="optionRadios" id="color_by_domain" value="domain" style="margin: 2px 0 0 -15px;" /> Domain
+                </label>
+              </div>
+              <div class="col-sm-3" style="padding: 0 0 0 2px;">
                 <span class="fa fa-envelope-o" id="doc_count_inbound" style="padding: 0;"> Inbound </span>
               </div>
             </div>
@@ -880,29 +885,26 @@
               <div class="col-sm-2">
                 <div style="padding: 0;">Display</div>
               </div>
-              <div class="col-sm-3" style="padding: 0;">
+              <div class="col-sm-2" style="padding: 0;">
                 <label class="checkbox-inline" >
                   <input type="checkbox" name="optionrank" id="rankval" value="rank" style="margin: 2px 0 0 -15px;" /> Rank
                 </label>
               </div>
-              <div class="col-sm-3" style="padding: 0; border-right: 1px solid rgba(255, 255, 255, 0.6);">
+              <div class="col-sm-2" style="padding: 0;">
                 <label class="checkbox-inline" >
                   <input type="checkbox" id="usetext" style="margin: 2px 0 0 -15px;" /> Labels
                 </label>
               </div>
-              <div class="col-sm-4" style="padding: 0 0 0 2px;">
+              <div class="col-sm-3" style="padding: 0; border-right: 1px solid rgba(255, 255, 255, 0.5);">
+              </div>
+              <div class="col-sm-3" style="padding: 0 0 0 2px;">
                 <span class="fa fa-envelope-o" id="doc_count_outbound" style="padding: 0;"> Outbound </span>
               </div>
             </div>
 
-            <div class="row" style="border-top: 1px solid rgba(255, 255, 255, 0.6); text-align: center; margin: 0;">
-              <!--
-              <div>
-                <span style="font-weight: bold">Legend</span>
-              </div>
-              -->
+            <div class="row" style="border-top: 1px solid rgba(255, 255, 255, 0.5); text-align: center; margin: 0; background-color: rgba(245, 245, 245, 0.2);">
               <div class="col-sm-12">
-                <div id="toggle_legends"><span class="glyphicon glyphicon-chevron-down">Legend</span></div>
+                <div id="toggle_legends" class="btn btn-small outline" style="color: #525252;"><span class="glyphicon glyphicon-chevron-down">Legend</span></div>
                 <div id="legend_list" style="height: 0px; max-height:375px; overflow-y: scroll;">
                   <table id="legend-table" class="table" style="display: table; table-layout: fixed; width: 98%;">
                     <thead />

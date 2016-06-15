@@ -2,7 +2,7 @@
  * search-result-collection related reference
  */
 var newman_search_result_collection = (function () {
-  var debug_enabled = true;
+  var debug_enabled = false;
   var count = 0;
 
   var subopen_prefix = 'subopen_';
@@ -1189,7 +1189,7 @@ var newman_search_result_collection = (function () {
 
     if (load_on_response) {
 
-      loadSearchResult(url_path);
+      loadSearchResult( url_path, search_response );
 
       var label = ' <blank>';
       if (search_text) {
@@ -1215,7 +1215,7 @@ var newman_search_result_collection = (function () {
 
       if (url_path.endsWith(initial_service_url)) { // result from search-all under the current data-set
 
-        console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ if (url_path.endsWith(app_startup_url)) ~~~~~~~~~~~~~~~~~~~~~~~');
+        //console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ if (url_path.endsWith(app_startup_url)) ~~~~~~~~~~~~~~~~~~~~~~~');
 
         if (debug_enabled) {
           console.log('search_result_url "' + url_path + '"');
@@ -1235,7 +1235,7 @@ var newman_search_result_collection = (function () {
       }
       else { // result from search-field-keywords under the current data-set
 
-        console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ if NOT (url_path.endsWith(initial_service_url)) ~~~~~~~~~~~~~~~~~~~~~~~');
+        //console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ if NOT (url_path.endsWith(initial_service_url)) ~~~~~~~~~~~~~~~~~~~~~~~');
 
 
         if (debug_enabled) {
@@ -1260,11 +1260,11 @@ var newman_search_result_collection = (function () {
         var parent_node_uid = data_set_id;
 
         if (field == 'all') {
-          console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ if (field == \'all\') { ~~~~~~~~~~~~~~~~~~~~~~~');
+          //console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ if (field == \'all\') { ~~~~~~~~~~~~~~~~~~~~~~~');
 
           if (search_text) { // result from key-word search
 
-            console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ if (search_text) // result from key-word search ~~~~~~~~~~~~~~~~~~~~~~~');
+            //console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ if (search_text) // result from key-word search ~~~~~~~~~~~~~~~~~~~~~~~');
 
             if (!icon_class) {
               icon_class = newman_search_filter.getFilterIconClassByLabel( 'all' );
@@ -1295,7 +1295,7 @@ var newman_search_result_collection = (function () {
           }
           else { // result from blank search
 
-            console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ if NOT (search_text) // result from blank search ~~~~~~~~~~~~~~~~~~~~~~~');
+            //console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ if NOT (search_text) // result from blank search ~~~~~~~~~~~~~~~~~~~~~~~');
 
             // clear all previous buffered results, except for the data-sources (level-0)
             search_result_table.clearChildren();
@@ -1307,7 +1307,7 @@ var newman_search_result_collection = (function () {
         }
         else if (field == 'entity') {
 
-          console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ else if (field == \'entity\') { ~~~~~~~~~~~~~~~~~~~~~~~');
+          //console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ else if (field == \'entity\') { ~~~~~~~~~~~~~~~~~~~~~~~');
 
           if (parent_search_uid) {
             parent_node_uid = parent_search_uid;
@@ -1334,14 +1334,13 @@ var newman_search_result_collection = (function () {
         }
         else if (field == 'email') {
 
-          console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ else if (field == \'email\') ~~~~~~~~~~~~~~~~~~~~~~~~~~' );
-          console.log('\t clear_buffer = ' + clear_all_sibling);
+          //console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ else if (field == \'email\') ~~~~~~~~~~~~~~~~~~~~~~~~~~' );
+          //console.log('\t clear_buffer = ' + clear_all_sibling);
 
           //console.log('search_response :\n' + JSON.stringify(search_response, null, 2));
 
           if (parent_search_uid) {
             parent_node_uid = parent_search_uid;
-
 
           }
 
@@ -1465,14 +1464,14 @@ var newman_search_result_collection = (function () {
 
     var top_entity_list = newman_top_email_entity.getTopEmailEntityList( search_count_max );
     if (top_entity_list) {
-      console.log('top_entity_list :\n' + JSON.stringify(top_entity_list, null, 2));
+      //console.log('top_entity_list :\n' + JSON.stringify(top_entity_list, null, 2));
 
       if (clear_sibling === true && parent_node_uid) {
         search_result_table.clearChildrenOfUID( parent_node_uid );
       }
 
       _.each(top_entity_list, function (element, index) {
-        console.log('top_entity_list.element :\n' + JSON.stringify(element, null, 2));
+        //console.log('top_entity_list.element :\n' + JSON.stringify(element, null, 2));
 
         var entity_text_list = [ element.entity_text ];
 
@@ -1487,7 +1486,7 @@ var newman_search_result_collection = (function () {
       });
 
 
-    } // end-of if (ranked_email_list)
+    } // end-of if (top_entity_list)
 
   } // end-of searchTopEmailEntity()
 

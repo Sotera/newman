@@ -70,16 +70,157 @@ var node_context_menu = [
  * email-graph related container
  */
 var newman_graph_email = (function () {
+  var debug_enabled = false;
 
   var graph_ui_id = '#graph_email';
 
-  var _top_count, _top_count_max = 2500;
+  var _top_count;
 
   var _all_source_node = {};
   var _all_source_node_selected = {};
   var _all_target_node = {};
   var _all_target_node_selected = {};
 
+  var _node_dataset_map = {};
+  var _color_scale_max = 40;
+  var _dataset_color_map = {};
+  var _color_scale_0 = d3.scale.category20c();
+  var _color_scale_1 = d3.scale.category20b();
+
+  function getNodeDataset( node_id ) {
+    var element = _node_dataset_map[node_id];
+    return element;
+  }
+
+  function clearAllNodeDataset() {
+    var key_list = _.keys(_node_dataset_map);
+    _.each(key_list, function(key) {
+      var value = _node_dataset_map[key];
+      value.datasets.length = 0;
+      delete _node_dataset_map[key];
+    });
+    key_list = _.keys(_dataset_color_map);
+    _.each(key_list, function(key) {
+      delete _dataset_color_map[key];
+    });
+  }
+
+  function addNodeDataset( node_id, new_dataset_id ) {
+    var element;
+    var color = getDefaultDatasetColor();
+    var shared_dataset_color = getSharedDatasetColor();
+
+    if (new_dataset_id) {
+      var existing_node = _node_dataset_map[node_id];
+      if (existing_node) {
+        // previously added, shared dataset
+        element = clone(existing_node);
+        var dataset_added = false;
+        _.each(existing_node.datasets, function(dataset_id, index){
+          if (dataset_id != new_dataset_id) {
+            element.datasets.push( new_dataset_id );
+            dataset_added = true;
+          }
+        });
+        if (dataset_added) {
+          element.color = shared_dataset_color;
+          _node_dataset_map[node_id] = element;
+        }
+      }
+      else { //new node
+        var existing_color = _dataset_color_map[new_dataset_id];
+        if (existing_color) { // previously added dataset
+          color = existing_color;
+        }
+        else { // new dataset
+          var size = _.size(_dataset_color_map);
+          var index = size;
+
+          if (size <= _color_scale_max) {
+            if (index < 21) {
+              color = _color_scale_0(index);
+            }
+            else {
+              color = _color_scale_1(index);
+            }
+            _dataset_color_map[new_dataset_id] = color;
+          }
+          else { // out of color-scale range
+            color = '#E1E1E1';
+            console.log('Max dataset color scale reached!');
+          }
+        }
+
+        element = {"node_id": node_id, "datasets": [new_dataset_id], "color": color};
+        _node_dataset_map[node_id] = element;
+
+      }
+    }
+
+    if (debug_enabled) {
+      console.log('addNodeDataset(' + node_id + ', ' + new_dataset_id + ')');
+      //console.log('node_color_map :\n' + JSON.stringify(_node_dataset_map, null, 2));
+    }
+
+    return element;
+  }
+
+  function getDefaultDatasetColor() {
+    var default_color = '#E1E1E1';
+    return default_color;
+  }
+
+  function getSharedDatasetColor() {
+    var shared_dataset_color = '#FF0000';
+    return shared_dataset_color;
+  }
+
+
+  function getDatasetColor( dataset_id_list ) {
+    var color = getDefaultDatasetColor();
+    if (dataset_id_list && dataset_id_list.length > 0) {
+      if (dataset_id_list.length == 1) {
+        var existing_color = _dataset_color_map[dataset_id_list[0]];
+        if (existing_color) {
+          color = existing_color;
+        }
+      }
+      else {
+        color = getSharedDatasetColor();
+      }
+    }
+    return color;
+  }
+
+  function getNodeDatasetColor( node_id ) {
+    //console.log('newman_graph_email.getNodeDatasetColor(' + node_id + ')');
+    var color = 'rgb(225, 225, 225)';
+    if (node_id) {
+      var element = getNodeDataset( node_id );
+      if (element) {
+        color = element.color;
+      }
+      else {
+        console.log("Dataset color NOT found for '" + node_id +"'!");
+      }
+    }
+    return color;
+  }
+
+  function assignNodeColorByDataset( graph ) {
+    if (graph && graph.nodes) {
+      clearAllNodeDataset();
+      _.each(graph.nodes, function(node_element, node_index) {
+        if (node_element.original_ingest_id) {
+          var node_id = node_element.name;
+          var dataset_id_list = node_element.original_ingest_id;
+          _.each(dataset_id_list, function(dataset_id) {
+            addNodeDataset( node_id, dataset_id );
+          });
+        }
+      });
+    }
+  }
 
   function initUI() {
 
@@ -123,14 +264,18 @@ var newman_graph_email = (function () {
       newman_email_starred_request_export.requestService();
     });
 
+    $("#color_by_dataset").click(function () {
+      setGraphNodeColor('dataset_color');
+    });
+
     $("#color_by_community").click(function () {
       //console.log($("#color_by_community").val());
-      recolornodes('community');
+      setGraphNodeColor('community_color');
     });
 
     $("#color_by_domain").click(function () {
       //console.log($("#color_by_domain").val());
-      recolornodes('domain');
+      setGraphNodeColor('domain_color');
     });
 
     $("#usetext").on("change", function () {
@@ -151,10 +296,10 @@ var newman_graph_email = (function () {
         d3.selectAll("circle").style("opacity", "100");
         d3.selectAll("circle").style("stroke-width", "0");
       }
-      //recolornodes('rank');
+      //setGraphNodeColor('rank');
     });
 
-  }
+  } // end-of initUI
 
   /* deprecated since v2.11 */
   /*
@@ -455,6 +600,9 @@ var newman_graph_email = (function () {
     updateUIInboundCount();
     updateUIOutboundCount();
 
+    // assign node color by data-source
+    assignNodeColorByDataset( filtered_response.graph );
+
     // render graph display
     drawGraph( filtered_response.graph );
 
@@ -493,7 +641,9 @@ var newman_graph_email = (function () {
     'getAllTargetNodeSelected' : getAllTargetNodeSelected,
     'getAllTargetNodeSelectedAsString' : getAllTargetNodeSelectedAsString,
     'appendAllTargetNodeSelected' : appendAllTargetNodeSelected,
-    'displayUITab' : displayUITab
+    'displayUITab' : displayUITab,
+    'getNodeDatasetColor' : getNodeDatasetColor,
+    'getDatasetColor' : getDatasetColor
   }
 
 }());

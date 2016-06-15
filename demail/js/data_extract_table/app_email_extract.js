@@ -7,7 +7,7 @@
  * data-extract related container
  */
 var app_email_extract = (function () {
-  var debug_enabled = true;
+  var debug_enabled = false;
 
   var ui_appendable = '#data_extract_table';
   var phone_list_count_per_page = 22;
