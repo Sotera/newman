@@ -663,7 +663,7 @@ var newman_data_source = (function () {
     }
 
     // initialize data-extract-tables
-    app_email_extract.requestPhoneList();
+    app_email_extract.requestExtractPhoneList();
 
     // initialize search-result UI
     search_result.setUI($('#search_result_container'));

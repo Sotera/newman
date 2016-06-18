@@ -36,24 +36,38 @@ var app_email_extract = (function () {
 
     var lastSort = "";
     var thead = d3.select(ui_appendable).select("thead").append("tr").selectAll("tr")
-      .data(['Phone Number ( '+ list_start_count + ' ~ ' + list_end_count +' )', 'Document Referenced', ''])
+      .data(['Phone Number', 'Document Referenced', '', ''+ list_start_count + ' ~ ' + list_end_count ])
       .enter()
       .append("th")
       .text( function(d) {
         return d;
+      })
+      .attr('style', function(d, i) {
+        if (i == 3) {
+          return "width : 64px;";
+        }
+
       })
       .attr('class', 'clickable').on("click", function(k, i){
         var direction = (lastSort == k) ? -1 : 1;
         lastSort = (direction == -1) ? "" : k; //toggle
         d3.select(ui_appendable).select("tbody").selectAll("tr").sort( function( a, b ) {
 
-          if (i === 2 ){
+          if ( i == 0 ) {
+            //console.log( 'i == 0 : ' + JSON.stringify(a, null, 2) );
 
+            return a['key'].localeCompare(b['key']) * direction;
+          }
+          else if ( i == 1 ) {
+            //console.log( 'i == 1 : ' + JSON.stringify(a, null, 2) );
 
+            return (a['doc_count'] - b['doc_count']) * direction;
+          }
+          else {
+
+            return a['key'].localeCompare(b['key']) * direction;
           }
 
-          var fields = ["phone_number", "document_referenced", "phone_search"];
-          return a[fields[i]].localeCompare(b[fields[i]]) * direction;
         });
       });
 
@@ -67,7 +81,7 @@ var app_email_extract = (function () {
         //console.log('.data() :\n' + JSON.stringify(d, null, 2));
 
         // returns table-row values as an array
-        return [response_list_item.key, response_list_item.doc_count, response_list_item.key ]
+        return [response_list_item.key, response_list_item.doc_count, response_list_item.key, '']
       })
       .enter()
       .append("td")
@@ -135,11 +149,11 @@ var app_email_extract = (function () {
   }
 
   return {
-    'initPhoneListTable' : initExtractPhoneList,
-    'requestPhoneList' : requestExtractPhoneList,
-    'onRequestPhoneList' : onRequestExtractPhoneList,
+    'initExtractPhoneList' : initExtractPhoneList,
+    'requestExtractPhoneList' : requestExtractPhoneList,
+    'onRequestExtractPhoneList' : onRequestExtractPhoneList,
     'requestExtractPhoneSearch' : requestExtractPhoneSearch,
-    'onRequestPhoneSearch' : onRequestExtractPhoneSearch
+    'onRequestExtractPhoneSearch' : onRequestExtractPhoneSearch
   }
 
 
@@ -189,7 +203,7 @@ var app_email_extract_phone_list_request = (function () {
   function requestService( top_count ) {
 
     $.get(getServiceURL(top_count)).then(function (response) {
-      app_email_extract.onRequestPhoneList( response );
+      app_email_extract.onRequestExtractPhoneList( response );
       setResponse( response );
     });
   }
@@ -257,7 +271,7 @@ var app_email_extract_phone_search_request = (function () {
   function requestService( phone_number_list ) {
     if (phone_number_list) {
       $.get(getServiceURL(phone_number_list)).then(function (response) {
-        app_email_extract.onRequestPhoneSearch(response);
+        app_email_extract.onRequestExtractPhoneSearch(response);
         setResponse(response);
       });
     }
