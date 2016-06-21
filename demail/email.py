@@ -8,7 +8,7 @@ from newman.es_connection import getDefaultDataSetID
 
 from es_email import get_ranked_email_address_from_email_addrs_index, get_attachment_by_id, get_attachments_by_sender, get_email, get_top_domains, get_top_communities, set_starred
 from es_export import export_emails_archive
-from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarred, parseParamTextQuery
+from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarred, parseParamTextQuery, parseParamIngestId
 
 from es_queries import _build_email_query
 from es_query_utils import _query_email_attachments, _query_emails
@@ -29,13 +29,21 @@ def getEmail(*args, **kwargs):
 
     return get_email(data_set_id, email_id, qs)
 
-# <host>:<port>:/email/set_starred/<email_id>?data_set_id=<data_set_id>&starred=<True|False>
+# <host>:<port>:/email/set_starred/<email_id>?ingest_id=<single ingest id>&starred=<True|False>
 # Defaults to True
 def setStarred(*args, **kwargs):
+    '''
+    For this call we need to ensure only one ingest_id is given
+    :param args:
+    :param kwargs:
+    :return:
+    '''
     tangelo.log("setStarred(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     tangelo.content_type("application/json")
 
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    ingest_id = parseParamIngestId(**kwargs)
+
 
     email_id = args[-1]
     if not email_id:
@@ -43,7 +51,7 @@ def setStarred(*args, **kwargs):
 
     starred = parseParamStarred(**kwargs)
 
-    return set_starred(data_set_id, [email_id], starred)
+    return set_starred(ingest_id, [email_id], starred)
 
 # <host>:<port>:/email/search_all_starred?data_set_id=<data_set_id>
 # common URL params apply, date, size, etc

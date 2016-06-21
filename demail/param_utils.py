@@ -37,6 +37,11 @@ def parseParamEmailAddress( **kwargs ):
     
     return key_list
 
+def parseParamIngestId( **kwargs ):
+    tangelo.log("parseParamIngestId(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    ingest_id = kwargs.get('ingest_id', '')
+    return ingest_id
+
 def parseParamIngestIds( **kwargs ):
     tangelo.log("parseParamIngestIds(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     ingest_ids = kwargs.get('ingest_ids', '').split(',')

@@ -320,6 +320,7 @@ def get_email(data_set_id, email_id, qs=None):
 
     return resp
 
+# TODO this will need to handle tuples of (index_id, email_id)
 def set_starred(index, ids=[], starred=True):
     body = { "doc" : { "starred" : starred }}
     for id in ids:
