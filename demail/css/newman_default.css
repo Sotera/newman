@@ -253,8 +253,8 @@ ul {
 
 .info-table thead >tr >th:hover,
 .info-table thead >tr >th:focus {
-    background: #5E9FF5;
-    color: #FFFFFF;
+    border: 1px #5E9FF5 solid;
+    border-radius: 6px;
 }
 
 .info-table tbody >tr >td {
