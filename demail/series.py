@@ -18,7 +18,9 @@ def _date_aggs(date_field="datetime"):
     }
 
 def get_datetime_bounds(index, type="emails"):
+
     resp = es().search(index=index, doc_type=type, body={"aggregations":_date_aggs()})
+    tangelo.log("series.get_datetime_bounds(%s)"%(index))
 
     now = strftime("%Y-%m-%d", gmtime())
     min = resp["aggregations"]["min_date"].get("value_as_string", default_min_timeline_bound())
@@ -34,10 +36,11 @@ def get_datetime_bounds(index, type="emails"):
 
     avg_datetime = parse(pct)
 
+    tangelo.log("series.get_datetime_bounds(inde=%s, min=%s, max=%s)"%(index, resp["aggregations"]["min_date"].get("value_as_string","NONE"), resp["aggregations"]["max_date"].get("value_as_string","NONE")))
 
     delta = timedelta(**{default_timeline_interval(index) : int(default_timeline_span(index))/2})
 
-    return ((avg_datetime-delta).strftime("%Y-%m-%d"), (avg_datetime+delta).strftime("%Y-%m-%d"))
+    return ((avg_datetime-delta).strftime("%Y-%m-%d"), (avg_datetime+delta).strftime("%Y-%m-%d"), parse(min).strftime("%Y-%m-%d"), parse(max).strftime("%Y-%m-%d"))
 
 def _map_attachments(index, account_id, attchments):
     return {"account_id" : account_id,

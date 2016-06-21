@@ -20,7 +20,7 @@ def _index_record(index):
     hits = [es().search(index=dataset, doc_type=dataset, body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["hits"]["hits"][0] for dataset in index.split(",")]
 
     #TODO: still need to re-work the absolute date-time bounds and the suggested date-time bounds
-    bounds = get_datetime_bounds(index)
+    min_window, max_window, min_abs, max_abs = get_datetime_bounds(index)
 
     return {'data_set_id':index,
             'data_set_case_id' : "; ".join(hit["_source"]["case_id"] for hit in hits),
@@ -30,10 +30,12 @@ def _index_record(index):
             'data_set_document_count' : email_docs_count,
             'data_set_node_count' : emails_addrs_count,
             'data_set_attachment_count' : emails_attch_count,
-            'data_set_datetime_min' : bounds[0],
-            'data_set_datetime_max' : bounds[1],
-            'start_datetime_selected' : bounds[0],
-            'end_datetime_selected' : bounds[1]
+            'data_set_datetime_min' : min_window,
+            'data_set_datetime_max' : max_window,
+            'data_set_datetime_min_abs' : min_abs,
+            'data_set_datetime_max_abs' : max_abs,
+            'start_datetime_selected' : min_window,
+            'end_datetime_selected' : max_window
             }
 
 def listAllDataSet():
