@@ -6,15 +6,15 @@
 /**
  * data-extract related container
  */
-var app_email_extract = (function () {
+var app_text_extract_table = (function () {
   var debug_enabled = false;
 
   var ui_appendable = '#data_extract_table';
 
-  var phone_list_per_page_count = 22;
-  var display_start_index = 1, display_end_index = phone_list_per_page_count;
+  var per_page_display_min = 22, per_page_display_max = 52, per_page_display_count = per_page_display_min;
+  var display_start_index = 1, display_end_index = per_page_display_count;
 
-  function initExtractPhoneList() {
+  function initPhoneListTable() {
 
     if (ui_appendable) {
       $(ui_appendable).empty();
@@ -29,14 +29,14 @@ var app_email_extract = (function () {
           console.log('id : "' + attr_id + '" value : "' + attr_value + '" clicked-prev-page!');
           console.log( '\tdisplay_start_index = ' + display_start_index + ', display_end_index = ' + display_end_index );
 
-          var _max = phone_list_per_page_count;
-          var _index = (display_start_index - 1) - phone_list_per_page_count;
-          if (_index < 0) {
-            _index = 0;
+          var max_count = per_page_display_count;
+          var start_index = (display_start_index - 1) - per_page_display_count;
+          if (start_index < 0) {
+            start_index = 0;
           }
-          console.log( '\_max = ' + _max + ', _index = ' + _index );
+          console.log( '\max_count = ' + max_count + ', start_index = ' + start_index );
 
-          requestExtractPhoneList(_max, _index);
+          requestExtractPhoneList(max_count, start_index);
         }
 
         event.preventDefault();
@@ -54,16 +54,39 @@ var app_email_extract = (function () {
           console.log('id : "' + attr_id + '" value : "' + attr_value + '" clicked-next-page!');
           console.log( '\tdisplay_start_index = ' + display_start_index + ', display_end_index = ' + display_end_index );
 
-          var _max = phone_list_per_page_count;
-          var _index = (display_start_index - 1) + phone_list_per_page_count;
-          if (_index > app_email_extract_phone_list_request.getCacheMaxCount()) {
-            _index = _index - phone_list_per_page_count
+          var max_count = per_page_display_count;
+          var start_index = (display_start_index - 1) + per_page_display_count;
+          if (start_index > app_text_extract_table_phone_list_request.getCacheMaxCount()) {
+            start_index = start_index - per_page_display_count
           }
-          console.log( '\_max = ' + _max + ', _index = ' + _index );
+          console.log( '\max_count = ' + max_count + ', start_index = ' + start_index );
 
-          requestExtractPhoneList(_max, _index);
+          requestExtractPhoneList(max_count, start_index);
         }
 
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+      });
+
+      $(ui_appendable).on('change click', "th, input[type='number']", function (event) {
+        var attr_id = $(this).attr('id');
+        var attr_value = $(this).attr('value');
+        var field_value = parseInt( $(this).val() );
+        if (attr_id && attr_value && field_value) {
+
+          if ( field_value < per_page_display_min || field_value > per_page_display_max ) {
+            field_value = parseInt( $(this).val( per_page_display_min ) );
+          }
+          else {
+
+            per_page_display_count = field_value;
+
+            if (debug_enabled) {
+              console.log("Clicked id = '" + attr_id + "' value = '" + attr_value + "' per_page_display_count = '" + per_page_display_count + "'");
+            }
+          }
+        }
         event.preventDefault();
         event.stopImmediatePropagation();
         event.stopPropagation();
@@ -74,18 +97,18 @@ var app_email_extract = (function () {
 
   function populatePhoneListTable( response_list, start_index, max_index ) {
     if (debug_enabled) {
-      console.log( 'populatePhoneListTable( response_list ) : response_list :\n' + JSON.stringify(response_list, null, 2));
+      console.log( 'populatePhoneListTable(...) : response_list[' + response_list.length + ']\n' + JSON.stringify(response_list, null, 2));
     }
 
     if (response_list && response_list.length > 0) {
 
       var page_prev_button_html =
-        "<button type='button' class='btn btn-small outline' value='phone_number_list' id='phone_number_list_prev'>" +
-          "&nbsp;<i class='fa fa-backward' aria-hidden='true'></i>&nbsp;" +
+        "<button type='button' class='btn btn-small outline' value='phone_list_page' id='phone_list_page_prev'>" +
+          "&nbsp;<i class='fa fa-caret-square-o-left fa-lg' aria-hidden='true'></i>&nbsp;" +
         "</button>";
       var page_next_button_html =
-        "<button type='button' class='btn btn-small outline' value='phone_number_list' id='phone_number_list_next'>" +
-          "&nbsp;<i class='fa fa-forward' aria-hidden='true'></i>&nbsp;" +
+        "<button type='button' class='btn btn-small outline' value='phone_list_page' id='phone_list_page_next'>" +
+          "&nbsp;<i class='fa fa-caret-square-o-right fa-lg' aria-hidden='true'></i>&nbsp;" +
         "</button>";
 
       display_start_index = 1;
@@ -102,8 +125,8 @@ var app_email_extract = (function () {
         page_direction_icon = 'fa fa-long-arrow-right';
 
         page_prev_button_html =
-          "<button type='button' class='btn btn-small outline' value='phone_number_list' id='phone_number_list_prev' disabled>" +
-            "&nbsp;<i class='fa fa-backward' aria-hidden='true'></i>&nbsp;" +
+          "<button type='button' class='btn btn-small outline' value='phone_list_page' id='phone_list_page_prev' disabled>" +
+            "&nbsp;<i class='fa fa-caret-square-o-left fa-lg' aria-hidden='true'></i>&nbsp;" +
           "</button>";
 
       }
@@ -111,13 +134,15 @@ var app_email_extract = (function () {
         page_direction_icon = 'fa fa-long-arrow-left';
 
         page_next_button_html =
-          "<button type='button' class='btn btn-small outline' value='phone_number_list' id='phone_number_list_next' disabled>" +
-            "&nbsp;<i class='fa fa-forward' aria-hidden='true'></i>&nbsp;" +
+          "<button type='button' class='btn btn-small outline' value='phone_list_page' id='phone_list_page_next' disabled>" +
+            "&nbsp;<i class='fa fa-caret-square-o-right fa-lg' aria-hidden='true'></i>&nbsp;" +
           "</button>";
 
       }
 
-      var page_label = display_start_index + ' <i class="' + page_direction_icon + '" aria-hidden="true"></i> ' + display_end_index + ' / ' + list_max_index;
+      var per_page_count_button_html = "<input type='number' style='font-size: 11px; width: 38px;' id='attach_page_display_count' step='10' value='" + per_page_display_count + "' />";
+
+      var page_label = display_start_index + ' <i class="' + page_direction_icon + '" aria-hidden="true"></i> ' + display_end_index + ' of ' + list_max_index;
 
 
       $(ui_appendable).append($('<thead>')).append($('<tbody>'));
@@ -127,10 +152,10 @@ var app_email_extract = (function () {
         .data(['Phone Number', 'Document Referenced', page_label, ''])
         .enter()
         .append("th")
-        /*      .text( function(d, i) {
-         if (i != 2) {
-         return d;
-         }
+      /*.text( function(d, i) {
+           if (i != 2) {
+             return d;
+           }
          }) */
         .html(function (d, i) {
           if (i == 2) {
@@ -138,7 +163,7 @@ var app_email_extract = (function () {
             //return d;
             //console.log( 'thead, i == 2, d :\n' + JSON.stringify(d, null, 2) );
 
-            var header_html = page_prev_button_html + d + page_next_button_html;
+            var header_html = page_prev_button_html + d + page_next_button_html + per_page_count_button_html;
 
 
             var col_2_row = $('<span>').append(header_html);
@@ -151,6 +176,9 @@ var app_email_extract = (function () {
           }
         })
         .attr('style', function (d, i) {
+          if (i == 2) {
+            return "width : 256px; min-width : 256px";
+          }
           if (i == 3) {
             return "width : 64px;";
           }
@@ -166,28 +194,26 @@ var app_email_extract = (function () {
 
               if (i == 0) {
                 //console.log( 'i == 0 : ' + JSON.stringify(a, null, 2) );
-
                 return a['key'].localeCompare(b['key']) * direction;
               }
-              else if (i == 1) {
-                //console.log( 'i == 1 : ' + JSON.stringify(a, null, 2) );
 
+              if (i == 1) {
+                //console.log( 'i == 1 : ' + JSON.stringify(a, null, 2) );
                 return (a['doc_count'] - b['doc_count']) * direction;
               }
-              else if (i == 2) {
 
+              if (i == 2) {
                 return a['key'].localeCompare(b['key']) * direction;
               }
 
             });
           }
-          else if (i == 3) { // goto next page
 
-          }
         });
 
 
-      var tr = d3.select(ui_appendable).select("tbody").selectAll("tr")
+      var tr = d3.select(ui_appendable).select("tbody")
+        .selectAll("tr")
         .data(response_list).enter().append("tr");
 
 
@@ -234,24 +260,24 @@ var app_email_extract = (function () {
   } // end-of populatePhoneListTable
 
   function requestExtractPhoneList( phone_list_count, start_index ) {
-    var max = phone_list_per_page_count;
-    if (phone_list_count && phone_list_count > phone_list_per_page_count) {
+    var max = per_page_display_count;
+    if (phone_list_count && phone_list_count > per_page_display_count) {
       max = phone_list_count;
     }
 
-    app_email_extract_phone_list_request.requestService( max, start_index );
+    app_text_extract_table_phone_list_request.requestService( max, start_index );
 
   }
 
   function onRequestExtractPhoneList( response_list, start_index, max_index ) {
     if (response_list) {
-      initExtractPhoneList();
+      initPhoneListTable();
       populatePhoneListTable( response_list, start_index, max_index );
     }
   }
 
-  function getExtractPhoneListPerPageCount() {
-    return phone_list_per_page_count;
+  function getPerPageDisplayCount() {
+    return per_page_display_count;
   }
 
   function requestExtractPhoneSearch( phone_number_list ) {
@@ -267,10 +293,9 @@ var app_email_extract = (function () {
   }
 
   return {
-    'initExtractPhoneList' : initExtractPhoneList,
     'requestExtractPhoneList' : requestExtractPhoneList,
     'onRequestExtractPhoneList' : onRequestExtractPhoneList,
-    'getExtractPhoneListPerPageCount' : getExtractPhoneListPerPageCount,
+    'getPerPageDisplayCount' : getPerPageDisplayCount,
     'requestExtractPhoneSearch' : requestExtractPhoneSearch,
     'onRequestExtractPhoneSearch' : onRequestExtractPhoneSearch
   }
@@ -280,10 +305,10 @@ var app_email_extract = (function () {
 
 
 /**
- * service container initiating data-extract service
+ * service container initiating phone-extract-list service
  * @type {{requestService, getResponse}}
  */
-var app_email_extract_phone_list_request = (function () {
+var app_text_extract_table_phone_list_request = (function () {
   var debug_enabled = false;
 
   var _service_url = 'profile/top_phone_numbers';
@@ -303,7 +328,7 @@ var app_email_extract_phone_list_request = (function () {
     else {
       count = _default_cache_max_count;
     }
-    console.log('app_email_extract_phone_list_request.getServiceURL(' + count + ')');
+    console.log('app_text_extract_table_phone_list_request.getServiceURL(' + count + ')');
 
     var service_url = _service_url;
     // append data-source
@@ -321,12 +346,12 @@ var app_email_extract_phone_list_request = (function () {
 
   function requestService( top_count, start_index ) {
     if (top_count) {
-      if (top_count < app_email_extract.getExtractPhoneListPerPageCount() || top_count > _default_cache_max_count) {
-        top_count = app_email_extract.getExtractPhoneListPerPageCount();
+      if (top_count < app_text_extract_table.getPerPageDisplayCount() || top_count > _default_cache_max_count) {
+        top_count = app_text_extract_table.getPerPageDisplayCount();
       }
     }
     else {
-      top_count = app_email_extract.getExtractPhoneListPerPageCount();
+      top_count = app_text_extract_table.getPerPageDisplayCount();
     }
 
     if (start_index) {
@@ -344,11 +369,11 @@ var app_email_extract_phone_list_request = (function () {
     var cached_obj = _request_response_cache[ service_url ];
 
     if (cached_obj && cached_obj.response) {
-      console.log("app_email_extract_phone_list_request.requestService(" + top_count + ", " + start_index + ")");
+      console.log("app_text_extract_table_phone_list_request.requestService(" + top_count + ", " + start_index + ")");
       console.log("\tservice-response already exists for '" + service_url + "'");
 
       var mapped_response = mapResponse( service_url, data_source_string, cached_obj.response, false, top_count, start_index );
-      app_email_extract.onRequestExtractPhoneList( mapped_response, start_index, cached_obj.response.length );
+      app_text_extract_table.onRequestExtractPhoneList( mapped_response, start_index, cached_obj.response.length );
     }
     else {
 
@@ -356,16 +381,16 @@ var app_email_extract_phone_list_request = (function () {
 
         var mapped_response = mapResponse( service_url, data_source_string, response, true, top_count, start_index );
         if (mapped_response) {
-          app_email_extract.onRequestExtractPhoneList( mapped_response, start_index, response.length );
+          app_text_extract_table.onRequestExtractPhoneList( mapped_response, start_index, response.length );
         }
       });
     }
   }
 
   function mapResponse( service_url, data_source_string, response, cache_enabled, top_count, start_index ) {
-    console.log("app_email_extract_phone_list_request.mapResponse( response[" + response.length + "], " + cache_enabled + " )");
+    console.log("app_text_extract_table_phone_list_request.mapResponse( response[" + response.length + "], " + cache_enabled + " )");
 
-    var _response_list, _start_index = 0, _max_count = app_email_extract.getExtractPhoneListPerPageCount();
+    var _response_list, _start_index = 0, _max_count = app_text_extract_table.getPerPageDisplayCount();
 
     if (start_index) {
       _start_index = start_index;
@@ -428,7 +453,7 @@ var app_email_extract_phone_search_request = (function () {
     if (phone_number_list) {
       _target_phone_number_list = phone_number_list;
 
-      console.log('app_email_extract_phone_list_request.getServiceURL(' + phone_number_list + ')');
+      console.log('app_text_extract_table_phone_list_request.getServiceURL(' + phone_number_list + ')');
 
       var service_url = _service_url;
       // append data-source
@@ -449,7 +474,7 @@ var app_email_extract_phone_search_request = (function () {
   function requestService( phone_number_list ) {
     if (phone_number_list) {
       $.get(getServiceURL(phone_number_list)).then(function (response) {
-        app_email_extract.onRequestExtractPhoneSearch(response);
+        app_text_extract_table.onRequestExtractPhoneSearch(response);
         setResponse(response);
       });
     }

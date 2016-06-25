@@ -311,6 +311,7 @@ a.show-sidebar:hover {
   /*background: #505559;*/
   color: #ffffff;
   background: linear-gradient(#cdcdcd, #011d4b);
+  padding: 0px 15px 0 5px !important;
 }
 
 #main {
@@ -922,9 +923,13 @@ ul.DTTT_dropdown.dropdown-menu > li:hover > a {
   display: inline-block;
   padding: 0px 8px;
 }
+
+/*
 .btn i {
   vertical-align: middle;
 }
+*/
+
 .btn-app {
   width: 50px;
   height: 50px;

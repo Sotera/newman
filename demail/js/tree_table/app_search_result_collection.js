@@ -487,7 +487,7 @@ var newman_search_result_collection = (function () {
                                       "<i class='" + newman_search_filter.getFilterIconClassByLabel('email') + "' aria-hidden='true'></i>" + "&nbsp;Accounts Ranked&nbsp;" +
                               "</button>" +
                               "<input type='number' " +
-                                     "style='font-size: 11px' " +
+                                     "style='font-size: 11px; width: 32px;' " +
                                      "min='" + subopen_menu_item_min + "' " +
                                      "max='" + subopen_menu_item_max + "' " +
                                      "step='10' " +
@@ -502,7 +502,7 @@ var newman_search_result_collection = (function () {
                                       "<i class='" + newman_search_filter.getFilterIconClassByLabel('entity') + "' aria-hidden='true'></i>" + "&nbsp;Entities Extracted&nbsp;" +
                               "</button>" +
                               "<input type='number' " +
-                                     "style='font-size: 11px' " +
+                                     "style='font-size: 11px; width: 32px;' " +
                                      "min='" + subopen_menu_item_min + "' " +
                                      "max='" + subopen_menu_item_max + "' " +
                                      "step='10' " +
@@ -517,7 +517,7 @@ var newman_search_result_collection = (function () {
                                       "<i class='" + newman_search_filter.getFilterIconClassByLabel('topic') + "' aria-hidden='true'></i>" + "&nbsp;Topics  Clustered  &nbsp; " +
                               "</button>" +
                               "<input type='number' " +
-                                     "style='font-size: 11px' " +
+                                     "style='font-size: 11px; width: 32px;' " +
                                      "min='" + subopen_menu_item_min + "' " +
                                      "max='" + subopen_menu_item_max + "' " +
                                      "step='10' " +

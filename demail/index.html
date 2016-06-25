@@ -70,6 +70,7 @@
   </div>
   -->
 
+  <!-- Start Data-Ingest-Modal -->
   <div class="modal fade" id="data_ingest_modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -89,7 +90,7 @@
         <div class="modal-body" style="padding: 5px;">
           <div class="row" style="margin: 0; padding: 6px 0px 6px 0px;" >
             <div class="col-xs-3" style="margin: 0; padding: 0; text-align: right;" >
-              <span class="label label-primary" style="font-size: 80%; font-weight: normal;"> Compressed Dataset File </span>
+              <span class="label label-primary" style="font-size: 80%; font-weight: normal;"> Dataset File </span>
             </div>
             <div class="col-xs-8" style="margin: 0; padding: 0 0 0 2px;" >
               <div id="dataset_file">
@@ -184,6 +185,7 @@
       </div>
     </div>
   </div>
+  <!-- End Data-Ingest-Modal -->
 
   <!--Start Header-->
   <header class="navbar" style="font-family: 'Lucida Grande','Lucida Sans','Lucida Sans Unicode','Segoe UI','Verdana','sans-serif', 'FontAwesome'; font-weight: lighter; min-height: 32px; height: 32px;">
@@ -192,50 +194,14 @@
 
         <div id="top-panel" class="col-xs-12 col-sm-12">
 
-            <!-- Start-Data-Set-Select -->
-            <div class="col-xs-1 col-sm-1" style="padding: 0px 10px 0px 10px; top: 2px;">
-
-              <div class="dropdown" style="width: 250%; height: 100%; position:relative; display: inline-block;"
-                   id="data_source_list_dropdown" value="data_source_access">
-                <button class="dropdown-toggle btn navbar-btn button-dropdown-menu"
-                      id="data_source_list_toggle"
-                      data-toggle="dropdown"
-                      style="font-weight: normal; font-size: small; margin: 0px">
-                  <span class="fa fa-database"> ...</span>
-                </button>
-                <ul class="dropdown-menu" style="width: 100%; padding: 2px 8px 2px 8px; border-radius: 4px;" id="data_source_list">
-
-                </ul>
-              </div>
-
-            </div>
-            <!-- End-Data-Set-Select -->
-
-          <!-- Start-App-Status -->
-          <div class="col-xs-1 col-sm-1" style="padding: 0px 10px 0px 10px; top: 2px;">
-            
-          </div>
-          <!-- End-App-Status -->
-
-            <!-- start search -->
-            <div class="col-xs-12 col-sm-2" style="padding: 0px 5px 0px 0px; top: 2px; text-align: right;">
-
-              <div id="search">
-                <input id="txt_search" type="text" placeholder="search"/>
-                <i id="txt_search_submit" class="fa fa-search"></i>
-              </div>
-
-            </div>
-            <!-- end search -->
-
           <!-- Start-Recent-Hist-Select -->
-          <div class="col-xs-1 col-sm-1" style="padding: 0px 5px 0px 5px; top: 2px;">
+          <div class="col-xs-1 col-sm-1" style="padding: 0px 5px 0px 0px; top: 2px;">
             <div class="row" style="padding: 0; margin: 0; width: 100%;">
 
-              <div class="col-xs-3" style="padding: 0; margin: 0; text-align: right;" >
+              <div class="col-xs-3" style="padding: 0; margin: 0; text-align: left;" >
                 <button id="dashboard_home_button" type="button" class="btn navbar-btn button-dropdown-menu"
                         style="font-size: 13px; font-weight: lighter; padding: 2px 2px 2px 2px; margin: 0;">
-                  <span class="fa fa-tachometer fa-inverse"></span>
+                  <span class="fa fa-home fa-lg fa-inverse"></span>
                 </button>
               </div>
 
@@ -253,6 +219,42 @@
             </div>
           </div>
           <!-- End-Recent-Hist-Select -->
+
+          <!-- Start-Data-Set-Select -->
+          <div class="col-xs-1 col-sm-1" style="padding: 0px 10px 0px 0px; top: 2px;">
+
+            <div class="dropdown" style="width: 250%; height: 100%; position:relative; display: inline-block;"
+                 id="data_source_list_dropdown" value="data_source_access">
+              <button class="dropdown-toggle btn navbar-btn button-dropdown-menu"
+                      id="data_source_list_toggle"
+                      data-toggle="dropdown"
+                      style="font-weight: normal; font-size: small; margin: 0px">
+                <span class="fa fa-database"> ...</span>
+              </button>
+              <ul class="dropdown-menu" style="width: 100%; padding: 2px 8px 2px 8px; border-radius: 4px;" id="data_source_list">
+
+              </ul>
+            </div>
+
+          </div>
+          <!-- End-Data-Set-Select -->
+
+          <!-- start search -->
+          <div class="col-xs-12 col-sm-2" style="padding: 0px 5px 0px 0px; top: 2px; text-align: right;">
+
+            <div id="search">
+              <input id="txt_search" type="text" placeholder="search"/>
+              <i id="txt_search_submit" class="fa fa-search"></i>
+            </div>
+
+          </div>
+          <!-- end search -->
+
+          <!-- Start-App-Status -->
+          <div class="col-xs-1 col-sm-1" style="padding: 0px 10px 0px 10px; top: 2px;">
+
+          </div>
+          <!-- End-App-Status -->
 
           <!-- Start-Debug-Toggle-Container -->
           <div class="col-xs-1 col-sm-1" style="margin: 0px 0px 0px 0px; padding: 0; top: 4px;">
@@ -376,12 +378,12 @@
           <div class="row" style="margin: 0; padding: 0; height: 26px;">
             <div class="col-sm-6" style="margin: 0; padding: 0 2px 0 2px;">
               <button id="default_reset_button" type="button" class="btn btn-histogram outline" >
-                <span class="fa fa-home"> Reset</span>
+                <span class="fa fa-refresh"> Reset</span>
               </button>
             </div>
             <div class="col-sm-6" style="margin: 0; padding: 0 2px 0 2px; text-align: right;">
               <button id="timeline_apply_button" type="button" class="btn btn-histogram outline" >
-                <span class="fa fa-refresh"> Apply</span>
+                <span class="fa fa-check"> Apply</span>
               </button>
             </div>
           </div>
@@ -638,7 +640,7 @@
               <div id="analytics_tab_content" class="tab-content" style= "height: 100%; padding: 0; margin: 0;">
 
                 <!-- Start-Analytics-Content-Chart -->
-                <div class="tab-pane active" id="dashboard_tab_chart_analytics" style= "padding: 0; margin: 0;">
+                <div class="tab-pane active" id="dashboard_tab_chart_analytics" style= "height: 568px; padding: 0; margin: 0;">
 
                   <!-- Start Dashboard-Right-Top -->
                   <div class="row box" >
@@ -797,19 +799,20 @@
                 <!-- End-Analytics-Content-Chart -->
 
                 <!-- Start-Analytics-Content-Geo -->
-                <div class="tab-pane" id="dashboard_tab_geo_analytics" style= "height: 100%; padding: 0; margin: 0;">
-                  <div id="map" class="map" style= "position: relative; width: 1024px; height: 550px; padding: 0; margin: 0;"></div>
+                <div class="tab-pane" id="dashboard_tab_geo_analytics" style= "height: 568px; padding: 0; margin: 0;">
+                  <div id="map" class="map" style= "position: relative; width: 1058px; height: 568px; padding: 0; margin: 0;"></div>
                 </div>
                 <!-- End-Analytics-Content-Geo -->
 
                 <!-- Start-Analytics-Content-Data-Extract -->
-                <div class="tab-pane" id="dashboard_tab_data_extract" style= "height: 100%; overflow-y: scroll; padding: 0; margin: 0;">
-                  <div id="data_extract_table" class="info-table" style= "display: table; table-layout: fixed; width: 100%; font-size: 12px;"></div>
+                <div class="tab-pane" id="dashboard_tab_data_extract" style= "height: 568px; padding: 0; margin: 0; overflow-y: scroll;">
+                  <div id="data_extract_table" class="info-table"
+                       style= "display: table; table-layout: fixed; width: 100%; height: 100%; font-size: 12px;"></div>
                 </div>
                 <!-- End-Analytics-Content-Data-Extract -->
 
                 <!-- Start-Ingest-Status-Content -->
-                <div class="tab-pane" id="dashboard_tab_ingest_status" style= "height: 100%; padding: 0; margin: 0;">
+                <div class="tab-pane" id="dashboard_tab_ingest_status" style= "height: 568px; padding: 0; margin: 0;">
 
                 </div>
                 <!-- End-Ingest-Status-Content-Pane -->
@@ -822,7 +825,7 @@
               <ul class="nav nav-tabs" style= "padding: 0; margin: 0;">
                 <li class="active" >
                   <a href="#dashboard_tab_chart_analytics" data-toggle="tab">
-                    <i class="fa fa-bar-chart fa-lg" rel="tooltip" data-placement="left" title="Dashboard"></i>
+                    <i class="fa fa-tachometer fa-lg" rel="tooltip" data-placement="left" title="Dashboard"></i>
                   </a>
                 </li>
                 <li >
@@ -929,18 +932,18 @@
               <div class="row" style="height: 30px; margin: 0; padding: 0;">
                 <ul class="col-sm-12 nav nav-tabs" role="tablist" id="tab-list" style= "margin: 0; padding: 0; font-size: 13px;">
                   <li class="active" style= "height: 30px;">
-                    <a style= "height: 30px;" href="#email-table-tab" role="tab" data-toggle="tab"><i class="fa fa-envelope-o"></i> Email</a>
+                    <a style= "height: 30px;" href="#email-table-tab" role="tab" data-toggle="tab"><i class="fa fa-envelope-o"></i>&nbsp;Email&nbsp;</a>
                   </li>
                   <li style= "height: 30px;">
-                    <a style= "height: 30px;" href="#attachment-table-tab" role="tab" data-toggle="tab"><i class="fa fa-paperclip"></i> Attachments</a>
+                    <a style= "height: 30px;" href="#attachment-table-tab" role="tab" data-toggle="tab"><i class="fa fa-paperclip"></i>&nbsp;Attachment&nbsp;</a>
                   </li>
                 </ul>
               </div>
               <!--End Data-Panel-Nav-Tabs-->
 
               <!--Start Data-Panel-Tab-Content-->
-              <div class="row box" style="height: calc(100% - 35px); margin: 2px 0px 0px 0px; padding: 0;">
-                <div class="col-sm-12 tab-content" style= "width: 100%; height: 90%; margin: 0; padding: 0px 0px 0px 15px;">
+              <div class="row box" style="margin: 2px 0px 0px 0px; padding: 0;">
+                <div class="col-sm-12 tab-content" style= "width: 100%; margin: 0; padding: 0px 0px 0px 15px;">
 
 
                   <!--Start Data-Panel-Tab-Content-Email-->
@@ -976,7 +979,7 @@
                       </div>
                     </div>
                     <!-- Start Data-Table-Documents -->
-                    <div class="datatable_container" style="width: 100%; height: 95%; overflow-y: scroll;">
+                    <div class="datatable_container" style="width: 100%; height: 542px; overflow-y: scroll;">
                       <!--
                       <table id="result_table" class="table" style="display: table; table-layout: fixed; overflow-y: scroll;" >
                         <thead class="result_thead"></thead>
@@ -993,15 +996,49 @@
                   <!--End Data-Panel-Tab-Content-Email-->
 
                   <div class="tab-pane" id="attachment-table-tab">
-                    <!--
-                    <div style="padding-bottom: 10px;">
-                      <span>Attachments under : </span><span id="attach-sender" style="font-weight: bold;"></span>
-                    </div>
-                    -->
+
                     <!--<div style="height: calc(100% - 30px); overflow-y: scroll;">-->
-                    <div style="height: 100%; overflow-y: scroll;">
+                    <div class="modal-container" style="height: 562px; overflow-y: scroll;">
                       <table id="email_attachment_table" class="info-table" style="display: table; table-layout: fixed; width: 100%; font-size: 12px;"></table>
+
+
+                      <!-- Start Attachment-Enlarged-View-Modal -->
+                      <div class="modal fade" id="attach_image_modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+                        <div class="modal-dialog" style="min-width: 468px; min-height: 468px;">
+                          <div class="modal-content">
+                            <div class="modal-header" style="padding: 2px;">
+                              <div class="row" style="margin: 0; padding: 0;" >
+                                <div class="col-xs-11" style="margin: 0; padding: 0; text-align: left;" >
+                                  <h5 class="modal-title"
+                                      style="font-family: 'Lucida Grande','Lucida Sans','Lucida Sans Unicode','Segoe UI','Verdana','sans-serif'; color: #0080AB;"
+                                      id="attach_image_modal_label">
+                                  </h5>
+                                </div>
+                                <div class="col-xs-1" style="margin: 0; padding: 0; text-align: right;" >
+                                  <button type="button" class="fa fa-times" data-dismiss="modal" aria-hidden="true"></button>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="modal-body" id="attach_image_modal_body" style="padding: 2px;">
+
+                            </div>
+                            <div class="modal-footer" style="padding: 2px;">
+                              <div class="row" style="margin: 0; padding: 0;" >
+                                <div class="col-xs-4" style="margin: 0; padding: 0;" >
+                                </div>
+                                <div class="col-xs-4" style="margin: 0; padding: 0; text-align: center;" >
+                                  <button type="button" id="attach_image_modal_ok" class="btn btn-default outline" data-dismiss="modal"><i class="fa fa-check-circle"></i> OK </button>
+                                </div>
+                                <div class="col-xs-4" style="margin: 0; padding: 0;" >
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!--End Attachment-Enlarged-View-Modal -->
                     </div>
+
                   </div>
                 </div>
               </div>
@@ -1204,7 +1241,7 @@
     <script src="js/config/app_display_config.js"></script>
     <script src="js/config/app_validation_config.js"></script>
     <script src="js/config/newman_config.js"></script>
-    <script src="js/data_extract_table/app_email_extract.js"></script>
+    <script src="js/data_extract_table/app_text_extract_table.js"></script>
     <script src="js/app_utils.js"></script>
     <script src="js/newman-datetime-range.js"></script>
     <script src="js/app_nav_history.js"></script>
@@ -1217,14 +1254,14 @@
     <script src="js/newman_top_email_account.js"></script>
     <script src="js/newman-domain-email.js"></script>
     <script src="js/newman-community-email.js"></script>
-    <script src="js/newman-email-attach.js"></script>
+    <script src="js/newman_email_attach_table.js"></script>
     <script src="js/newman-email-starred.js"></script>
     <script src="js/newman-file-type-attach.js"></script>
     <script src="js/data_source/app_data_source_config.js"></script>
     <script src="js/data_source/newman_data_source.js"></script>
     <script src="js/newman-service.js"></script>
-    <script src="js/newman-datatable-email.js"></script>
-    <script src="js/newman_email_document_view.js"></script>
+    <script src="js/newman_email_doc_table.js"></script>
+    <script src="js/newman_email_doc_view.js"></script>
     <script src="js/newman-graph-email.js"></script>
     <script src="js/tree_table/app_search_result.js"></script>
     <script src="js/tree_table/app_search_result_tree_table.js"></script>

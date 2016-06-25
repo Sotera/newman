@@ -183,7 +183,7 @@ var app_geo_map = (function () {
                 if (debug_enabled) {
                   console.log('selected marker-doc-id : ' + doc_id + ', [' + latitude + ', ' + longitude + ']');
                 }
-                newman_datatable_email.showEmailDocumentView( doc_id );
+                newman_email_doc_table.showEmailDocumentView( doc_id );
 
                 clearAllAttachment();
                 var geo_attach_obj = newman_geo_email_attach.getAttachDocGeoLocByEmail( doc_id );
@@ -212,7 +212,7 @@ var app_geo_map = (function () {
          if (debug_enabled) {
          console.log('selected marker-doc-id : ' + doc_id);
          }
-         newman_datatable_email.showEmailDocumentView( doc_id );
+         newman_email_doc_table.showEmailDocumentView( doc_id );
          });
          */
 
@@ -319,7 +319,7 @@ var app_geo_map = (function () {
                   console.log('selected marker-doc-id : ' + doc_id + ', [' + latitude + ', ' + longitude + ']');
                   //console.log('adjusted coordinate [' + adjusted_latitude + ', ' + adjusted_longitude + ']');
                 }
-                newman_datatable_email.showEmailDocumentView( doc_id );
+                newman_email_doc_table.showEmailDocumentView( doc_id );
 
                 clearAllSender();
                 var geo_email_obj = newman_geo_email_attach.getEmailDocGeoLoc( doc_id );
@@ -340,7 +340,7 @@ var app_geo_map = (function () {
 
           var image_html = (function() {
             var image = $('<img>').css('height', '26px').css('width','26px');
-            switch (getDocTypeByExt( file_ext )) {
+            switch (getDocumentTypeByExt( file_ext )) {
               case "image" : return image.attr('src', attach_image_url );
               case "pdf" : return image.attr('src', 'imgs/document-icons/pdf-2.png');
               case "powerpoint" : return image.attr('src', 'imgs/document-icons/powerpoint-2.png');

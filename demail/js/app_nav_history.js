@@ -155,7 +155,7 @@ var app_nav_history = (function () {
 
     push('hist_dashboard_home',
          ' Dashboard',
-         'fa fa-tachometer',
+         'fa fa-home fa-lg',
          '/',
          '');
 

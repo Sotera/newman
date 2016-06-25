@@ -100,6 +100,27 @@
 */
 
 /***********************
+  modal
+************************/
+.modal, .modal-backdrop {
+    position: absolute !important;
+}
+
+.modal-container {
+
+}
+
+#data_ingest_modal {
+    top: 5%;
+    right: 55%;
+}
+
+#attach_image_modal .modal-dialog  {
+    width: 58%;
+    min-width: 468px;
+}
+
+/***********************
   clear-outline button
 ************************/
 

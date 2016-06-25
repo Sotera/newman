@@ -7,7 +7,7 @@
  * geo-location related container
  */
 var newman_geo_email_attach = (function () {
-  var debug_enabled = true;
+  var debug_enabled = false;
 
   var attachment_id_list = [];
   var attachment_geo_loc_map = {}, email_geo_loc_map = {};
@@ -225,7 +225,7 @@ var newman_geo_email_attach_request = (function () {
 
       _response = response;
       if (debug_enabled) {
-        console.log('\tresponse: ' + JSON.stringify(_response, null, 2));
+        //console.log('response: ' + JSON.stringify(_response, null, 2));
       }
     }
   }

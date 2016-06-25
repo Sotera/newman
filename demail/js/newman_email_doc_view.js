@@ -1,7 +1,7 @@
 /**
  * email-document-view related container
  */
-var newman_email_document_view = (function () {
+var newman_email_doc_view = (function () {
   var debug_enabled = false;
 
   var _document_id = null, _document_datetime = null;
@@ -282,7 +282,7 @@ var newman_email_document_view = (function () {
 
       };
 
-      var is_marked = newman_datatable_email.isEmailDocumentStarred( email_id );
+      var is_marked = newman_email_doc_table.isEmailDocumentStarred( email_id );
       console.log("is_marked " + is_marked);
 
       if (is_marked) {
@@ -297,7 +297,7 @@ var newman_email_document_view = (function () {
       }
 
       var id_set = [email_id];
-      newman_datatable_email.setEmailDocumentStarred(!is_marked, id_set);
+      newman_email_doc_table.setEmailDocumentStarred(!is_marked, id_set);
 
       requestUpdate(email_id, !is_marked);
 
@@ -308,10 +308,10 @@ var newman_email_document_view = (function () {
       if (_document_id) {
         var id = _document_id;
         var id_set = [id];
-        var mark_read = newman_datatable_email.isEmailDocumentRead( id );
+        var mark_read = newman_email_doc_table.isEmailDocumentRead( id );
         if (mark_read) {
           //already marked as read, mark as unread
-          newman_datatable_email.setEmailDocumentRead(false, id_set);
+          newman_email_doc_table.setEmailDocumentRead(false, id_set);
 
           //update toggle-button
           var toggle_ui = $("#toggle_mark_as_read");
@@ -321,7 +321,7 @@ var newman_email_document_view = (function () {
           }
         }
         else {
-          newman_datatable_email.setEmailDocumentRead(true, id_set);
+          newman_email_doc_table.setEmailDocumentRead(true, id_set);
 
           //update toggle-button
           var toggle_ui = $("#toggle_mark_as_read");
@@ -518,7 +518,7 @@ var newman_email_document_view = (function () {
                   console.log("enabled-query_conversation_email");
 
                   //set current email-document uid and datetime
-                  newman_datatable_email.setCurrentEmailDocument(_email_doc_uid, _email_doc_datetime);
+                  newman_email_doc_table.setCurrentEmailDocument(_email_doc_uid, _email_doc_datetime);
                 }
                 else {
                   //console.log('disable query-buttons');

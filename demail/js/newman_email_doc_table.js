@@ -3,9 +3,9 @@
  */
 
 /**
- * email-datatable related container
+ * email-doc-datatable related container
  */
-var newman_datatable_email = (function () {
+var newman_email_doc_table = (function () {
 
   var debug_enabled = false;
   var _current_email_doc_id = null;
@@ -503,13 +503,13 @@ var newman_datatable_email = (function () {
         setCurrentEmailDocument(email_id);
 
         // set target email-document-id
-        newman_email_document_view.setDocumentID(email_id);
+        newman_email_doc_view.setDocumentID(email_id);
 
         // initialize email-document-view UI events
-        newman_email_document_view.initUI( _starred_email_doc_map[email_id], data_row_is_read_map[email_id] );
+        newman_email_doc_view.initUI( _starred_email_doc_map[email_id], data_row_is_read_map[email_id] );
 
         // parse email-document-service response
-        newman_email_document_view.setDocumentRequestResponse( response );
+        newman_email_doc_view.setDocumentRequestResponse( response );
 
       });
   }

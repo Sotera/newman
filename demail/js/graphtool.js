@@ -1553,7 +1553,7 @@ $(function () {
 
     crossroads.addRoute("/email/{id}", function (id) {
       requestSearch('email', id, false);
-      newman_datatable_email.showEmailDocumentView( id );
+      newman_email_doc_table.showEmailDocumentView( id );
     });
 
     crossroads.routed.add(function (request, data) {
