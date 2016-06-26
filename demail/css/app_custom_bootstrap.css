@@ -27,6 +27,10 @@
     cursor: pointer;
 }
 
+input[type="number"]:disabled {
+    color: #DADADA;
+}
+
 /*
 [class*='-legend-user'] {
     background-color: #FF7F0E;
@@ -146,6 +150,9 @@
     color: #006588;
     border-radius: 6px;
     border: 1px solid #BBBBBB;
+}
+.btn-small.outline:disabled {
+    color: #DADADA;
 }
 
 .btn-default.outline {

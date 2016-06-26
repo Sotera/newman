@@ -438,14 +438,14 @@ var newman_search_result_collection = (function () {
           var checkbox_id = checkbox_prefix + email_address;
 
           if (newman_aggregate_filter.containsAggregateFilter(checkbox_id)) {
-            checkbox_html = "<input type=\"checkbox\" value=\"email_address\" id=\"" + checkbox_id + "\" checked/>";
+            checkbox_html = '<input type=\"checkbox\" value=\"email_address\" id=\"' + checkbox_id + '\" checked/>';
           }
           else {
-            checkbox_html = "<input type=\"checkbox\" value=\"email_address\" id=\"" + checkbox_id + "\"/>";
+            checkbox_html = '<input type=\"checkbox\" value=\"email_address\" id=\"' + checkbox_id + '\"/>';
           }
         }
 
-        button_html = "<button type=\"button\" class=\"btn btn-small outline\" value=\"email_address\" id=\"" + data_element.uid + "\">" + data_element.label + "</button>";
+        button_html = '<button type=\"button\" class=\"btn btn-small outline\" value=\"email_address\" id=\"' + data_element.uid + '\">' + data_element.label + '</button>';
 
       }
 
@@ -467,79 +467,79 @@ var newman_search_result_collection = (function () {
 
         if (isMultiSelectedAsString( dataset_id_list ) || isSelected(data_element.data_source_id)) {
 
-          button_html = "<span class='dropdown'>" +
-                          "<button type='button' " +
-                            "class='dropdown-toggle btn btn-small outline' " +
-                            "role='button' " +
-                            "value='data_source' " +
-                            "id='" + subopen_element_id + "' " +
-                            "data-toggle='dropdown' " +
-                            "data-target='#" + subopen_menu_id + "' >" +
+          button_html = '<span class="dropdown">' +
+                          '<button type="button" ' +
+                            'class="dropdown-toggle btn btn-small outline" ' +
+                            'role="button" ' +
+                            'value="data_source" ' +
+                            'id="' + subopen_element_id + '" ' +
+                            'data-toggle="dropdown" ' +
+                            'data-target="#' + subopen_menu_id + '" >' +
                               data_element.label +
-                            " <i class='fa fa-caret-right' aria-hidden='true'></i>" +
-                          "</button>" +
-                          "<ul class='dropdown-menu dropdown-menu-position-right' id='" + subopen_menu_id + "' >" +
-                            "<li>" +
-                              "<button type='button' " +
-                                      "class='button-dropdown-menu-item' " +
-                                      "id='" + subopen_menu_item_id_top_email + "'" +
-                                      "value='" + data_element.uid + "' >" +
-                                      "<i class='" + newman_search_filter.getFilterIconClassByLabel('email') + "' aria-hidden='true'></i>" + "&nbsp;Accounts Ranked&nbsp;" +
-                              "</button>" +
-                              "<input type='number' " +
-                                     "style='font-size: 11px; width: 32px;' " +
-                                     "min='" + subopen_menu_item_min + "' " +
-                                     "max='" + subopen_menu_item_max + "' " +
-                                     "step='10' " +
-                                     "id='" + subopen_menu_item_id_top_email_count + "'" +
-                                     "value='" + subopen_menu_item_top_email_count + "' />" +
-                            "</li>" +
-                            "<li>" +
-                              "<button type='button' " +
-                                      "class='button-dropdown-menu-item' " +
-                                      "id='" + subopen_menu_item_id_top_entity + "'" +
-                                      "value='" + data_element.uid + "' >" +
-                                      "<i class='" + newman_search_filter.getFilterIconClassByLabel('entity') + "' aria-hidden='true'></i>" + "&nbsp;Entities Extracted&nbsp;" +
-                              "</button>" +
-                              "<input type='number' " +
-                                     "style='font-size: 11px; width: 32px;' " +
-                                     "min='" + subopen_menu_item_min + "' " +
-                                     "max='" + subopen_menu_item_max + "' " +
-                                     "step='10' " +
-                                     "id='" + subopen_menu_item_id_top_entity_count + "'" +
-                                     "value='" + subopen_menu_item_top_entity_count + "' />" +
-                            "</li>" +
-                            "<li>" +
-                              "<button type='button' " +
-                                      "class='button-dropdown-menu-item' " +
-                                      "id='" + subopen_menu_item_id_top_topic + "'" +
-                                      "value='" + data_element.uid + "' >" +
-                                      "<i class='" + newman_search_filter.getFilterIconClassByLabel('topic') + "' aria-hidden='true'></i>" + "&nbsp;Topics  Clustered  &nbsp; " +
-                              "</button>" +
-                              "<input type='number' " +
-                                     "style='font-size: 11px; width: 32px;' " +
-                                     "min='" + subopen_menu_item_min + "' " +
-                                     "max='" + subopen_menu_item_max + "' " +
-                                     "step='10' " +
-                                     "id='" + subopen_menu_item_id_top_topic_count + "'" +
-                                     "value='" + subopen_menu_item_top_topic_count + "' />" +
-                            "</li>" +
-                          "</ul>" +
-                        "</span>";
+                            ' <i class="fa fa-caret-right" aria-hidden="true"></i>' +
+                          '</button>' +
+                          '<ul class="dropdown-menu dropdown-menu-position-right" id="' + subopen_menu_id + '" >' +
+                            '<li>' +
+                              '<button type="button" ' +
+                                      'class="button-dropdown-menu-item" ' +
+                                      'id="' + subopen_menu_item_id_top_email + '" ' +
+                                      'value="' + data_element.uid + '" >' +
+                                      '<i class="' + newman_search_filter.getFilterIconClassByLabel('email') + '" aria-hidden="true"></i>' + '&nbsp;Accounts Ranked&nbsp;' +
+                              '</button>' +
+                              '<input type="number" ' +
+                                     'style="font-size: 11px; width: 32px;" ' +
+                                     'min="' + subopen_menu_item_min + '" ' +
+                                     'max="' + subopen_menu_item_max + '" ' +
+                                     'step="10" ' +
+                                     'id="' + subopen_menu_item_id_top_email_count + '" ' +
+                                     'value="' + subopen_menu_item_top_email_count + '" />' +
+                            '</li>' +
+                            '<li>' +
+                              '<button type="button" ' +
+                                      'class="button-dropdown-menu-item" ' +
+                                      'id="' + subopen_menu_item_id_top_entity + '" ' +
+                                      'value="' + data_element.uid + '" >' +
+                                      '<i class="' + newman_search_filter.getFilterIconClassByLabel('entity') + '" aria-hidden="true"></i>' + '&nbsp;Entities Extracted&nbsp;' +
+                              '</button>' +
+                              '<input type="number" ' +
+                                     'style="font-size: 11px; width: 32px;" ' +
+                                     'min="' + subopen_menu_item_min + '" ' +
+                                     'max="' + subopen_menu_item_max + '" ' +
+                                     'step="10" ' +
+                                     'id="' + subopen_menu_item_id_top_entity_count + '" ' +
+                                     'value="' + subopen_menu_item_top_entity_count + '" />' +
+                            '</li>' +
+                            '<li>' +
+                              '<button type="button" ' +
+                                      'class="button-dropdown-menu-item" ' +
+                                      'id="' + subopen_menu_item_id_top_topic + '" ' +
+                                      'value="' + data_element.uid + '" disabled>' +
+                                      '<i class="' + newman_search_filter.getFilterIconClassByLabel('topic') + '" aria-hidden="true"></i>' + '&nbsp;Topics  Clustered  &nbsp; ' +
+                              '</button>' +
+                              '<input type="number" ' +
+                                     'style="font-size: 11px; width: 32px;" ' +
+                                     'min="' + subopen_menu_item_min + '" ' +
+                                     'max="' + subopen_menu_item_max + '" ' +
+                                     'step="10" ' +
+                                     'id="' + subopen_menu_item_id_top_topic_count + '" ' +
+                                     'value="' + subopen_menu_item_top_topic_count + '" disabled/>' +
+                            '</li>' +
+                          '</ul>' +
+                        '</span>';
 
         }
         else {
 
-          button_html = "<span class='dropdown'>" +
-                          "<button type='button' " +
-                            "class='dropdown-toggle btn btn-small outline' " +
-                            "role='button' " +
-                            "value='data_source' " +
-                            "id='" + subopen_element_id + "' disabled>" +
+          button_html = '<span class="dropdown">' +
+                          '<button type="button" ' +
+                            'class="dropdown-toggle btn btn-small outline" ' +
+                            'role="button" ' +
+                            'value="data_source" ' +
+                            'id="' + subopen_element_id + '" disabled>' +
                               data_element.label +
-                            " <i class='fa fa-caret-right' aria-hidden='true'></i>" +
-                          "</button>" +
-                        "</span>";
+                            ' <i class="fa fa-caret-right" aria-hidden="true"></i>' +
+                          '</button>' +
+                        '</span>';
         }
 
 
@@ -567,17 +567,17 @@ var newman_search_result_collection = (function () {
 
           if (data_select_enabled === true) {
             if (isSelected(data_element.data_source_id)) {
-              checkbox_html = "<input type=\"checkbox\" class=\"fa_toggle\" value=\"data_source\" id=\"" + checkbox_id + "\" checked/>";
+              checkbox_html = '<input type=\"checkbox\" class=\"fa_toggle\" value=\"data_source\" id=\"' + checkbox_id + '\" checked/>';
             }
             else {
-              checkbox_html = "<input type=\"checkbox\" class=\"fa_toggle\" value=\"data_source\" id=\"" + checkbox_id + "\"/>";
+              checkbox_html = '<input type=\"checkbox\" class=\"fa_toggle\" value=\"data_source\" id=\"' + checkbox_id + '\"/>';
             }
           }
           else {
             checkbox_html = '';
           }
 
-          //button_html = "<button type=\"button\" class=\"btn btn-small outline\" value=\"data_source\" id=\"" + data_element.uid + "\">" + data_element.label + "</button>";
+          //button_html = '<button type=\"button\" class=\"btn btn-small outline\" value=\"data_source\" id=\"' + data_element.uid + '\" >' + data_element.label + '</button>';
 
 
           node_index = '' + level_index + count;
@@ -620,7 +620,7 @@ var newman_search_result_collection = (function () {
         }
         else { // search-result-row
 
-          button_html = "<button type=\"button\" class=\"btn btn-small outline\" value=\"search_result\" id=\"" + data_element.uid + "\">" + data_element.label + "</button>";
+          button_html = '<button type=\"button\" class=\"btn btn-small outline\" value=\"search_result\" id=\"' + data_element.uid + '\" >' + data_element.label + '</button>';
 
           if (email_outbound_count == 0) {
             email_outbound_count = '';
@@ -633,13 +633,13 @@ var newman_search_result_collection = (function () {
           }
 
           /*
-          var combined_icon_html = "<span class='fa-stack'>" +
-                                     "<i class='fa fa-file-o fa-stack-2x'></i>" +
-                                     "<i class='fa fa-share-alt fa-rotate-180 fa-stack-1x'></i>" +
-                                   "</span> ";
+          var combined_icon_html = '<span class="fa-stack">' +
+                                     '<i class="fa fa-file-o fa-stack-2x"></i>' +
+                                     '<i class="fa fa-share-alt fa-rotate-180 fa-stack-1x"></i>' +
+                                   '</span> ';
           */
 
-          var combined_icon_html = "<i class='fa fa-file-text fa-lg'></i>";
+          var combined_icon_html = '<i class="fa fa-file-text fa-lg"></i>';
 
           table_row = $('<tr class=\"treegrid-' + node_index + ' treegrid-parent-' + parent_node_index + '\" id=\"' + row_id + '\" />').append(
             "<td><i class='" + data_element.icon_class + "'></i> " + button_html + "</td>" +

@@ -165,6 +165,10 @@ a.show-sidebar:hover {
   border: 1px solid #5E9FF5;
 }
 
+.button-dropdown-menu-item:disabled {
+  color:  #DADADA;
+}
+
 .checkbox-dropdown-menu-item-label {
   background: none;
   border-radius: 4px;
