@@ -55,6 +55,17 @@ var newman_geo_email_attach = (function () {
     return clone( attachment_id_list );
   }
 
+  var _attach_doc_metadata_map = {};
+
+  function clearAllAttachDocumentMetadata() {
+    _attach_doc_metadata_map = {};
+  }
+  function getAttachDocumentMetadata( attach_id ) {
+    return _attach_doc_metadata_map[ attach_id ];
+  }
+  function putAttachDocumentMetadata( attach_id, element ) {
+    _attach_doc_metadata_map[ attach_id ] =  element;
+  }
 
   /**
    * update from service response
@@ -63,6 +74,7 @@ var newman_geo_email_attach = (function () {
   function updateAttachDocGeoLoc(response) {
 
     clearAllAttachDocGeoLoc();
+    clearAllAttachDocumentMetadata();
 
     if( response.exif_docs && response.exif_docs.length > 0 ) {
 
@@ -100,6 +112,8 @@ var newman_geo_email_attach = (function () {
             var attach_size = attachment.filesize;
             var attach_lat = attachment.exif.gps.coord.lat;
             var attach_lon = attachment.exif.gps.coord.lon;
+
+            putAttachDocumentMetadata(attach_id, attachment)
 
             var geo_attach_object = {
               "email_datetime": email_datetime,
@@ -178,7 +192,8 @@ var newman_geo_email_attach = (function () {
     'getAllEmailDocGeoLoc' : getAllEmailDocGeoLoc,
     'getEmailDocGeoLoc' : getEmailDocGeoLoc,
     'updateAttachDocGeoLoc' : updateAttachDocGeoLoc,
-    'displayAttachDocGeoLoc' : displayAttachDocGeoLoc
+    'displayAttachDocGeoLoc' : displayAttachDocGeoLoc,
+    'getAttachDocumentMetadata' : getAttachDocumentMetadata
   }
 
 }());

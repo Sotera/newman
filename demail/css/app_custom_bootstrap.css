@@ -111,13 +111,14 @@
 }
 
 #data_ingest_modal {
-    top: 5%;
-    right: 55%;
+    top: 5% !important;
+    right: 55% !important;
 }
 
-#attach_image_modal .modal-dialog  {
-    width: 58%;
-    min-width: 468px;
+#attach_doc_modal .modal-dialog,
+#geo_doc_modal .modal-dialog {
+    width: 58% !important;
+    min-width: 468px !important;
 }
 
 /***********************

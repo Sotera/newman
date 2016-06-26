@@ -799,8 +799,48 @@
                 <!-- End-Analytics-Content-Chart -->
 
                 <!-- Start-Analytics-Content-Geo -->
-                <div class="tab-pane" id="dashboard_tab_geo_analytics" style= "height: 568px; padding: 0; margin: 0;">
+                <div class="tab-pane modal-container" id="dashboard_tab_geo_analytics" style= "height: 568px; padding: 0; margin: 0;">
                   <div id="map" class="map" style= "position: relative; width: 1058px; height: 568px; padding: 0; margin: 0;"></div>
+
+                  <!-- Start Document-Enlarged-View-Modal -->
+                  <div class="modal fade" id="geo_doc_modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+                    <div class="modal-dialog" style="min-width: 468px; min-height: 468px;">
+                      <div class="modal-content">
+                        <div class="modal-header" style="padding: 2px;">
+                          <div class="row" style="margin: 0; padding: 0;" >
+                            <div class="col-xs-11" style="margin: 0; padding: 0; text-align: left;" >
+                              <h5 class="modal-title"
+                                  style="font-family: 'Lucida Grande','Lucida Sans','Lucida Sans Unicode','Segoe UI','Verdana','sans-serif'; color: #0080AB;"
+                                  id="geo_doc_modal_label">
+                              </h5>
+                            </div>
+                            <div class="col-xs-1" style="margin: 0; padding: 0; text-align: right;" >
+                              <button type="button" class="fa fa-times" data-dismiss="modal" aria-hidden="true"></button>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="modal-body" id="geo_doc_modal_body" style="padding: 2px;">
+
+                        </div>
+                        <div class="modal-footer" style="padding: 2px;">
+                          <div class="row" style="margin: 0; padding: 0;" >
+                            <div class="col-xs-4" style="margin: 0; padding: 0; text-align: left;" >
+                              <button type="button" id="geo_doc_modal_open_prev" class="btn btn-default outline" disabled><i class="fa fa-chevron-left fa-lg"></i></button>
+                            </div>
+                            <div class="col-xs-4" style="margin: 0; padding: 0; text-align: center;" >
+                              <!--
+                              <button type="button" id="geo_doc_modal_ok" class="btn btn-default outline" data-dismiss="modal"><i class="fa fa-check-circle"></i> OK </button>
+                              -->
+                            </div>
+                            <div class="col-xs-4" style="margin: 0; padding: 0; text-align: right;" >
+                              <button type="button" id="geo_doc_modal_open_next" class="btn btn-default outline" disabled><i class="fa fa-chevron-right fa-lg"></i></button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!--End Geo-Document-Enlarged-View-Modal -->
                 </div>
                 <!-- End-Analytics-Content-Geo -->
 
@@ -1003,7 +1043,7 @@
 
 
                       <!-- Start Attachment-Enlarged-View-Modal -->
-                      <div class="modal fade" id="attach_image_modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+                      <div class="modal fade" id="attach_doc_modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
                         <div class="modal-dialog" style="min-width: 468px; min-height: 468px;">
                           <div class="modal-content">
                             <div class="modal-header" style="padding: 2px;">
@@ -1011,7 +1051,7 @@
                                 <div class="col-xs-11" style="margin: 0; padding: 0; text-align: left;" >
                                   <h5 class="modal-title"
                                       style="font-family: 'Lucida Grande','Lucida Sans','Lucida Sans Unicode','Segoe UI','Verdana','sans-serif'; color: #0080AB;"
-                                      id="attach_image_modal_label">
+                                      id="attach_doc_modal_label">
                                   </h5>
                                 </div>
                                 <div class="col-xs-1" style="margin: 0; padding: 0; text-align: right;" >
@@ -1019,17 +1059,21 @@
                                 </div>
                               </div>
                             </div>
-                            <div class="modal-body" id="attach_image_modal_body" style="padding: 2px;">
+                            <div class="modal-body" id="attach_doc_modal_body" style="padding: 2px;">
 
                             </div>
                             <div class="modal-footer" style="padding: 2px;">
                               <div class="row" style="margin: 0; padding: 0;" >
-                                <div class="col-xs-4" style="margin: 0; padding: 0;" >
+                                <div class="col-xs-4" style="margin: 0; padding: 0; text-align: left;" >
+                                  <button type="button" id="attach_doc_modal_open_prev" class="btn btn-default outline" disabled><i class="fa fa-chevron-left fa-lg"></i></button>
                                 </div>
                                 <div class="col-xs-4" style="margin: 0; padding: 0; text-align: center;" >
-                                  <button type="button" id="attach_image_modal_ok" class="btn btn-default outline" data-dismiss="modal"><i class="fa fa-check-circle"></i> OK </button>
+                                  <!--
+                                  <button type="button" id="attach_doc_modal_ok" class="btn btn-default outline" data-dismiss="modal"><i class="fa fa-check-circle"></i> OK </button>
+                                  -->
                                 </div>
-                                <div class="col-xs-4" style="margin: 0; padding: 0;" >
+                                <div class="col-xs-4" style="margin: 0; padding: 0; text-align: right;" >
+                                  <button type="button" id="attach_doc_modal_open_next" class="btn btn-default outline" disabled><i class="fa fa-chevron-right fa-lg"></i></button>
                                 </div>
                               </div>
                             </div>
@@ -1040,6 +1084,7 @@
                     </div>
 
                   </div>
+                  <!--End Attachment-Table-Tab -->
                 </div>
               </div>
               <!--End Data-Panel-Tab-Content-->
@@ -1194,6 +1239,7 @@
 
   <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="plugins/jquery/jquery.min.js"></script>
+    <!--<script src="plugins/jquery/jquery-3.0.0.js"></script>-->
     <script src="plugins/jquery-ui/jquery-ui.min.js"></script>
     <script src="plugins/jquery-treegrid/js/jquery.treegrid.min.js"></script>
     <script src="plugins/jquery-treegrid/js/jquery.treegrid.bootstrap3.js"></script>

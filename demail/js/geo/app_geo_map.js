@@ -276,12 +276,22 @@ var app_geo_map = (function () {
 
 
           var doc_id = marker_content.email_id;
-          var attach_id = marker_content.attach_id;
+          var file_uid = marker_content.attach_id;
           var marker_doc_id = 'marker-doc-' + doc_id;
           var datetime = marker_content.email_datetime;
           var subject = marker_content.email_subject;
+
           var file_name = marker_content.attach_file;
-          var file_ext = file_name.split('.')[1];
+          var content_type;
+          var file_metadata = newman_geo_email_attach.getAttachDocumentMetadata( file_uid );
+          if (file_metadata) {
+            content_type = file_metadata.content_type;
+          }
+
+          var doc_type = getDocumentType( file_name, content_type );
+          var image_icon = newman_email_attach_table.getImageHTML( file_uid, doc_type );
+
+
 
           if (subject) {
             subject = subject.trim();
@@ -305,8 +315,8 @@ var app_geo_map = (function () {
           }
           column_0.html( datetime );
 
-          var button = $('<button />', {
-            style: 'text-align: left; font-size: 95%',
+          var email_view_button_html = $('<button />', {
+            style: 'text-align: left; font-size: 95%; min-height: 26px;',
             width: '100%',
             type: 'button',
             class: 'btn btn-small outline',
@@ -333,26 +343,97 @@ var app_geo_map = (function () {
               }
             }
           });
-          column_1.append( button )
+          column_1.append( email_view_button_html );
 
-          var attach_image_url = 'email/attachment/' + encodeURIComponent( attach_id );
+          var attach_image_url = 'email/attachment/' + encodeURIComponent( file_uid );
           attach_image_url = newman_data_source.appendDataSource( attach_image_url );
 
-          var image_html = (function() {
-            var image = $('<img>').css('height', '26px').css('width','26px');
-            switch (getDocumentTypeByExt( file_ext )) {
-              case "image" : return image.attr('src', attach_image_url );
-              case "pdf" : return image.attr('src', 'imgs/document-icons/pdf-2.png');
-              case "powerpoint" : return image.attr('src', 'imgs/document-icons/powerpoint-2.png');
-              case "word" : return image.attr('src', 'imgs/document-icons/word-2.png');
-              case "excel" : return image.attr('src', 'imgs/document-icons/excel-2.png');
-              default : return image.attr('src', 'imgs/document-icons/text-2.png');
+          var image_url_anchor = $('<a />').attr(
+            { "target" : "_blank",
+              "href" : attach_image_url,
+              'data-toggle' : 'tooltip',
+              'rel' : 'tooltip',
+              'data-placement' : 'left',
+              'data-original-title' : file_name,
+              'title' : file_name
             }
-          }());
+          );
 
-          var image_url_anchor = $('<a />').attr({ "target" : "_blank" ,"href" : attach_image_url });
-          image_url_anchor.append( image_html );
+          image_url_anchor.append( image_icon );
           column_2.append( image_url_anchor );
+
+          if (doc_type == 'image') {
+
+            var image_view_button_html = $('<button />', {
+              style: 'text-align: left; min-height: 26px;',
+              width: '26px',
+              height: '26px',
+              type: 'button',
+              class: 'btn btn-small outline',
+              html: "&nbsp;<i class='fa fa-search-plus' aria-hidden='true'></i>&nbsp;",
+              value: file_uid,
+              id: 'attach_image_expand_button_' + file_uid,
+              on: {
+                click: function () {
+                  if (debug_enabled) {
+                    console.log('selected file-uid : ' + file_uid );
+                  }
+
+                  var file_metadata = newman_geo_email_attach.getAttachDocumentMetadata( file_uid );
+                  if (file_metadata) {
+
+                    var file_name = file_metadata.filename;
+                    var content_type = file_metadata.content_type;
+
+                    var doc_type = getDocumentType( file_name, content_type );
+                    var image_icon = newman_email_attach_table.getImageHTML(
+                      file_uid,
+                      doc_type,
+                      newman_email_attach_table.getImageMaxWidth(),
+                      newman_email_attach_table.getImageMaxHeight()
+                    );
+
+                    var attach_url = 'email/attachment/' + encodeURIComponent( file_uid );
+                    attach_url = newman_data_source.appendDataSource( attach_url );
+
+                    var modal_label = $("#geo_doc_modal_label");
+                    var modal_body = $("#geo_doc_modal_body");
+
+                    modal_label.empty();
+                    modal_body.empty();
+
+                    var label_anchor =
+                      $('<a>',
+                        { 'target': '_blank' ,
+                          'href' : attach_url
+                        }
+                      ).html( file_name );
+
+                    modal_label.html( label_anchor );
+                    modal_body.append( image_icon );
+
+                    var modal_options = {
+                      "backdrop": false,
+                      "keyboard": true,
+                    }
+
+                    $('#geo_doc_modal').modal(modal_options);
+
+                    $('.modal-backdrop').appendTo('.modal-container');
+
+                  }
+                  else {
+                    console.warn("Expected document metadata not found '" + file_uid + "' !")
+                  }
+
+
+                }
+              }
+            });
+
+
+            column_2.append(image_view_button_html);
+          }
 
           popup_container.append( row );
 

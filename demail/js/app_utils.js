@@ -108,7 +108,8 @@ function getDocumentType(file_name, content_type) {
     file_type = 'image';
   }
   else {
-    var file_ext = '';
+    var file_ext;
+    //var file_ext = file_name.split('.')[1];
     var index = file_name.lastIndexOf(".");
     if (index > 0) {
       file_ext = file_name.substr(index + 1);

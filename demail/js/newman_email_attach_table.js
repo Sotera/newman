@@ -14,6 +14,20 @@ var newman_email_attach_table = (function () {
   var per_page_display_min = 20, per_page_display_max = 50, per_page_display_count = per_page_display_min;
   var display_start_index = 1, display_end_index = per_page_display_count;
 
+  var image_width_max = 468, image_width_min = 32, image_height_max = 468, image_height_min = 32;
+  function getImageMinWidth() {
+    return image_width_min;
+  }
+  function getImageMaxWidth() {
+    return image_width_max;
+  }
+  function getImageMinHeight() {
+    return image_height_min;
+  }
+  function getImageMaxHeight() {
+    return image_height_max;
+  }
+
   var _attach_doc_metadata_map = {};
 
   function clearAllAttachDocumentMetadata() {
@@ -128,13 +142,18 @@ var newman_email_attach_table = (function () {
             var content_type = file_metadata.content_type;
 
             var doc_type = getDocumentType( file_name, content_type );
-            var image_icon = getImageHTML( file_uid, doc_type, 468, 468 );
+            var image_icon = getImageHTML(
+              file_uid,
+              doc_type,
+              getImageMaxWidth(),
+              getImageMaxHeight()
+            );
 
             var attach_url = 'email/attachment/' + encodeURIComponent( file_uid );
             attach_url = newman_data_source.appendDataSource( attach_url );
 
-            var modal_label = $("#attach_image_modal_label");
-            var modal_body = $("#attach_image_modal_body");
+            var modal_label = $("#attach_doc_modal_label");
+            var modal_body = $("#attach_doc_modal_body");
 
             modal_label.empty();
             modal_body.empty();
@@ -150,11 +169,11 @@ var newman_email_attach_table = (function () {
             modal_body.append( image_icon );
 
             var modal_options = {
-              "backdrop": "static",
+              "backdrop": false,
               "keyboard": true,
             }
 
-            $('#attach_image_modal').modal(modal_options);
+            $('#attach_doc_modal').modal(modal_options);
 
             $('.modal-backdrop').appendTo('.modal-container');
 
@@ -224,20 +243,6 @@ var newman_email_attach_table = (function () {
     if (debug_enabled) {
       console.log( 'populateAttachDocTable(...) : response_list[' + response_list.length + ']\n' + JSON.stringify(response_list, null, 2));
     }
-
-    /*
-    var email_attach_list = _.mapcat(response_attachment_list, function(response){
-      var o = _.object(["email_id", "attach_id", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"], response);
-      var copy = _.omit(o, "filename");
-      var attachments = _.map(o.attach.split(';'), function(attach) {
-        return _.extend(_.clone(copy), {'attach': attach });
-      });
-      return attachments;
-    });
-    if (debug_enabled) {
-      console.log( 'email_attach_list :\n' + JSON.stringify(email_attach_list, null, 2));
-    }
-    */
 
     var page_prev_button_html =
       "<button type='button' class='btn btn-small outline' value='attach_list_page' id='attach_list_page_prev'>" +
@@ -385,30 +390,18 @@ var newman_email_attach_table = (function () {
           return col_row.html();
         }
 
-        /*
-        if (i == 2) { // attachment link
-          console.log( 'row_element :\n' + JSON.stringify(d, null, 2) );
-
-          var attach_url = 'email/attachment/' + encodeURIComponent( d.attachment_id );
-          attach_url = newman_data_source.appendDataSource( attach_url );
-
-          var col_2_row = $('<div>').append($('<a>', { "target": "_blank" ,"href" : attach_url }).html( d.filename ));
-          return col_2_row.html();
-        }
-        */
-
         if (i == 2) {
           var file_uid = d.attachment_id;
           var file_name = d.filename;
           var content_type = d.content_type;
 
-          var image_view_button_html = '';
+          var image_view_button_html;
           var doc_type = getDocumentType( file_name, content_type );
 
           if (doc_type == 'image') {
             image_view_button_html =
               "<button type='button' class='btn btn-small outline' value='" + file_uid + "' id='attach_image_expand_button_" + file_uid + "' >" +
-              "&nbsp;<i class='fa fa-arrows-alt' aria-hidden='true'></i>&nbsp;" +
+              "&nbsp;<i class='fa fa-search-plus' aria-hidden='true'></i>&nbsp;" +
               "</button>";
           }
 
@@ -450,7 +443,7 @@ var newman_email_attach_table = (function () {
 
     var image_icon;
 
-    var min_width = 32, max_width = 480, min_height = 32, max_height = 480;
+    var min_width = image_width_min, max_width = image_width_max, min_height = image_height_min, max_height = image_height_max;
     var width = min_width, height = min_height;
 
     var image_html = $('<img>').css('height', height + 'px').css('width', width + 'px');
@@ -532,7 +525,13 @@ var newman_email_attach_table = (function () {
     'onRequestEmailAttachList' : onRequestEmailAttachList,
     'getPerPageDisplayCount' : getPerPageDisplayCount,
     'onRequestPageDisplay' : onRequestPageDisplay,
-    'displayUITab' : displayUITab
+    'displayUITab' : displayUITab,
+    'getAttachDocumentMetadata' : getAttachDocumentMetadata,
+    'getImageHTML' : getImageHTML,
+    'getImageMinWidth' : getImageMinWidth,
+    'getImageMaxWidth' : getImageMaxWidth,
+    'getImageMinHeight' : getImageMinHeight,
+    'getImageMaxHeight' : getImageMaxHeight
   }
 
 }());
