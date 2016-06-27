@@ -454,15 +454,15 @@ var newman_search_result_collection = (function () {
 
         var dataset_id_list = data_element.data_source_id;
 
-        var subopen_element_id = data_element.data_source_id;
-        var subopen_menu_id = subopen_menu_prefix + data_element.data_source_id;
+        var subopen_element_id = escapeJQueryExpression( data_element.data_source_id );
+        var subopen_menu_id = escapeJQueryExpression( subopen_menu_prefix + data_element.data_source_id );
 
-        var subopen_menu_item_id_top_email = subopen_menu_item_prefix_top_email + data_element.data_source_id;
-        var subopen_menu_item_id_top_email_count = subopen_menu_item_prefix_top_email_count + data_element.data_source_id;
-        var subopen_menu_item_id_top_entity = subopen_menu_item_prefix_top_entity + data_element.data_source_id;
-        var subopen_menu_item_id_top_entity_count = subopen_menu_item_prefix_top_entity_count + data_element.data_source_id;
-        var subopen_menu_item_id_top_topic = subopen_menu_item_prefix_top_topic + data_element.data_source_id;
-        var subopen_menu_item_id_top_topic_count = subopen_menu_item_prefix_top_topic_count + data_element.data_source_id;
+        var subopen_menu_item_id_top_email = escapeJQueryExpression( subopen_menu_item_prefix_top_email + data_element.data_source_id );
+        var subopen_menu_item_id_top_email_count = escapeJQueryExpression( subopen_menu_item_prefix_top_email_count + data_element.data_source_id );
+        var subopen_menu_item_id_top_entity = escapeJQueryExpression( subopen_menu_item_prefix_top_entity + data_element.data_source_id );
+        var subopen_menu_item_id_top_entity_count = escapeJQueryExpression( subopen_menu_item_prefix_top_entity_count + data_element.data_source_id );
+        var subopen_menu_item_id_top_topic = escapeJQueryExpression( subopen_menu_item_prefix_top_topic + data_element.data_source_id );
+        var subopen_menu_item_id_top_topic_count = escapeJQueryExpression( subopen_menu_item_prefix_top_topic_count + data_element.data_source_id );
 
 
         if (isMultiSelectedAsString( dataset_id_list ) || isSelected(data_element.data_source_id)) {
@@ -608,19 +608,24 @@ var newman_search_result_collection = (function () {
 
         if (email_address) { // email-address-row
 
-          table_row = $('<tr class=\"treegrid-' + node_index + ' treegrid-parent-' + parent_node_index + '\" id=\"' + row_id + '\" />').append(
-            "<td><i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
-            "<td>" + email_outbound_count + "</td>" +
-            "<td>" + email_inbound_count + "</td>" +
-            "<td>" + email_attach_count + "</td>" +
-            "<td>" + data_element.associate_count + "</td>" +
-            "<td>" + data_element.document_count + "</td>" +
-            "<td>" + checkbox_html + "</td>"
-          );
+          table_row =
+            $('<tr class=\"treegrid-' + node_index + ' treegrid-parent-' + parent_node_index + '\" id=\"' + row_id + '\" />')
+              .append(
+                "<td><i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
+                "<td>" + email_outbound_count + "</td>" +
+                "<td>" + email_inbound_count + "</td>" +
+                "<td>" + email_attach_count + "</td>" +
+                "<td>" + data_element.associate_count + "</td>" +
+                "<td>" + data_element.document_count + "</td>" +
+                "<td>" + checkbox_html + "</td>"
+              );
         }
         else { // search-result-row
 
-          button_html = '<button type=\"button\" class=\"btn btn-small outline\" value=\"search_result\" id=\"' + data_element.uid + '\" >' + data_element.label + '</button>';
+          button_html =
+            '<button type=\"button\" class=\"btn btn-small outline\" value=\"search_result\" id=\"' + data_element.uid + '\" >' +
+              data_element.label +
+            '</button>';
 
           if (email_outbound_count == 0) {
             email_outbound_count = '';
@@ -641,15 +646,17 @@ var newman_search_result_collection = (function () {
 
           var combined_icon_html = '<i class="fa fa-file-text fa-lg"></i>';
 
-          table_row = $('<tr class=\"treegrid-' + node_index + ' treegrid-parent-' + parent_node_index + '\" id=\"' + row_id + '\" />').append(
-            "<td><i class='" + data_element.icon_class + "'></i> " + button_html + "</td>" +
-            "<td>" + email_outbound_count + "</td>" +
-            "<td>" + email_inbound_count + "</td>" +
-            "<td>" + email_attach_count + "</td>" +
-            "<td>" + data_element.associate_count + "</td>" +
-            "<td>" + data_element.document_count + "</td>" +
-            "<td>" + checkbox_html + "</td>"
-          );
+          table_row =
+            $('<tr class=\"treegrid-' + node_index + ' treegrid-parent-' + parent_node_index + '\" id=\"' + row_id + '\" />')
+              .append(
+                "<td><i class='" + data_element.icon_class + "'></i> " + button_html + "</td>" +
+                "<td>" + email_outbound_count + "</td>" +
+                "<td>" + email_inbound_count + "</td>" +
+                "<td>" + email_attach_count + "</td>" +
+                "<td>" + data_element.associate_count + "</td>" +
+                "<td>" + data_element.document_count + "</td>" +
+                "<td>" + checkbox_html + "</td>"
+              );
 
         }
 
@@ -659,15 +666,17 @@ var newman_search_result_collection = (function () {
         node_index = '' + level_index + count;
         var row_id = table_id + '|' + node_index + '|' + data_element.uid;
 
-        table_row = $('<tr class=\"treegrid-' + node_index + ' treegrid-parent-' + parent_node_index + '\" id=\"' + row_id  + '\" />').append(
-          "<td><i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
-          "<td>" + data_element.document_sent + "</td>" +
-          "<td>" + data_element.document_received + "</td>" +
-          "<td>" + data_element.attach_count + "</td>" +
-          "<td>" + data_element.associate_count + "</td>" +
-          "<td>" + data_element.document_count + "</td>" +
-          "<td>" + checkbox_html + "</td>"
-        );
+        table_row =
+          $('<tr class=\"treegrid-' + node_index + ' treegrid-parent-' + parent_node_index + '\" id=\"' + row_id  + '\" />')
+            .append(
+              "<td><i class=\"" + data_element.icon_class + "\"></i> " + button_html + "</td>" +
+              "<td>" + data_element.document_sent + "</td>" +
+              "<td>" + data_element.document_received + "</td>" +
+              "<td>" + data_element.attach_count + "</td>" +
+              "<td>" + data_element.associate_count + "</td>" +
+              "<td>" + data_element.document_count + "</td>" +
+              "<td>" + checkbox_html + "</td>"
+            );
       }
 
       // event handling on the table-row

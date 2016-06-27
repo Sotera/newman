@@ -96,6 +96,18 @@ function truncateString( text, max_length ) {
 }
 
 /**
+ * return sanitized string with JQuery special characters escaped with '\'
+ * @param text
+ * @returns sanitized string by escaping the characters (e.g. !"#$%&'()*+,./:;<=>?@[\]^`{|}~ )  with '\'
+ */
+function escapeJQueryExpression( expression_text ) {
+  if (expression_text) {
+    return expression_text.replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~]/g, '\\$&');
+  }
+  return expression_text;
+}
+
+/**
  * return a document file-type category
  * @param file-name
  * @param MIME-content-type
