@@ -504,6 +504,36 @@ function do_search(load_on_response, field, value) {
   requestSearch(field, search_text, load_on_response);
 }
 
+var app_graph_search_request = (function () {
+  var _request_response_cache = {};
+
+  function clearAllGraphResponse() {
+    _request_response_cache = {};
+  }
+  function sizeOfAllGraphResponse() {
+    return _.size(_request_response_cache);
+  }
+  function deleteGraphResponse( key ) {
+    delete _request_response_cache[ key ];
+  }
+  function getGraphResponse( key ) {
+    return _request_response_cache[ key ];
+  }
+  function putGraphResponse( key, value ) {
+    _request_response_cache[ key ] = value;
+  }
+
+
+  return {
+    'clearAllGraphResponse' : clearAllGraphResponse,
+    'sizeOfAllGraphResponse' : sizeOfAllGraphResponse,
+    'deleteGraphResponse' : deleteGraphResponse,
+    'getGraphResponse' : getGraphResponse,
+    'putGraphResponse' : putGraphResponse
+  }
+
+}());
+
 /**
  * @param field
  * @param search_text
@@ -527,7 +557,7 @@ function requestSearch(field, search_text, load_on_response, parent_search_uid, 
   //console.log('requestSearch(' + JSON.stringify(arguments, null, 2)  + ')');
   console.log('\tsearch_text \'' + search_text + '\'');
 
-  var url_path = "search/search";
+  var service_url = "search/search";
 
   if (field === 'all' && search_text) {
     //requestSearch('text', search_text, false, '', true);
@@ -536,38 +566,53 @@ function requestSearch(field, search_text, load_on_response, parent_search_uid, 
 
 
   newman_search_filter.setSelectedFilter(field);
-  url_path = newman_search_filter.appendFilter(url_path, search_text);
-  url_path = newman_search_filter.appendURLQuery(url_path);
+  service_url = newman_search_filter.appendFilter(service_url, search_text);
+  service_url = newman_search_filter.appendURLQuery(service_url);
 
   if (alt_data_source) {
-    url_path = newman_data_source.appendDataSource(url_path, alt_data_source);
+    service_url = newman_data_source.appendDataSource(service_url, alt_data_source);
   }
   else {
-    url_path = newman_data_source.appendDataSource(url_path);
+    service_url = newman_data_source.appendDataSource(service_url);
   }
-  url_path = newman_datetime_range.appendDatetimeRange(url_path);
+  service_url = newman_datetime_range.appendDatetimeRange(service_url);
   //url_path = newman_top_email_entity.appendEntity(url_path);
 
-    console.log('\turl : \'' + url_path + '\'');
-    //console.log( '\tservice_response_email_search_all.getServiceURL(): \'' + current_data_set_url +'\'' );
+  var prev_response = app_graph_search_request.getGraphResponse( service_url );
+  if (prev_response) {
+    console.log("service-response already exists...\nloading '" + service_url + "'");
 
-    $.getJSON(url_path, function (search_response) {
+    newman_search_result_collection.onSearchResponse (
+      field,
+      search_text,
+      load_on_response,
+      service_url,
+      prev_response,
+      parent_search_uid,
+      clear_cache
+    );
+  }
+  else {
+    console.log("requesting '" + service_url + "'");
 
-      // new implementation to be retrofitted
+    $.getJSON(service_url, function (search_response) {
+
+      app_graph_search_request.putGraphResponse( service_url, search_response );
+
       newman_search_result_collection.onSearchResponse (
         field,
         search_text,
         load_on_response,
-        url_path,
+        service_url,
         search_response,
         parent_search_uid,
         clear_cache
       );
 
-
     }); // end getJSON(...)
+  }
 
-}
+} // end-of requestSearch(field, search_text, load_on_response, parent_search_uid, clear_cache, alt_data_source)
 
 function  propagateSearch( search_text, email_doc_rows, parent_search_uid ) {
   var ranked_email_accounts = getTopRankedEmailAccountList(email_doc_rows, 20);
@@ -619,8 +664,8 @@ function getTopRankedEmailAccountList(email_doc_rows, top_count ) {
 /**
  * load and parse search result referenced by URL
  */
-function loadSearchResult( url_path, search_response ) {
-  console.log('loadSearchResult(' + url_path + ')');
+function loadSearchResult( service_url, search_response ) {
+  console.log('loadSearchResult(' + service_url + ')');
 
 
   updateUIInboundCount(); // initialize to blank
@@ -632,10 +677,21 @@ function loadSearchResult( url_path, search_response ) {
   }
   else {
 
-    $.getJSON(url_path, function ( response ) {
+    var prev_response = app_graph_search_request.getGraphResponse( service_url );
+    if (prev_response) {
+      console.log("service-response found... \nloading '" + service_url + "'");
 
-      newman_graph_email.updateUIGraphView( response );
-    });
+      newman_graph_email.updateUIGraphView( prev_response );
+    }
+    else {
+      console.log("expected service-response NOT found...\nre-requesting '" + service_url + "'");
+
+      $.getJSON(service_url, function (response) {
+        app_graph_search_request.putGraphResponse( service_url, response );
+
+        newman_graph_email.updateUIGraphView( response );
+      });
+    }
   }
   //hasher.setHash( url_path );
   //email_analytics_content.open();

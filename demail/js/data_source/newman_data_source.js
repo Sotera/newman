@@ -776,6 +776,9 @@ var newman_data_source = (function () {
       refreshUI();
       //console.log('_response_map: ' + JSON.stringify(_response_map, null, 2));
 
+      // clear all graph-search cache if any
+      app_graph_search_request.clearAllGraphResponse();
+
       // initialize search-filter
       newman_search_filter.initFilter();
 
