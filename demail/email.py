@@ -41,7 +41,8 @@ def setStarred(*args, **kwargs):
     tangelo.log("setStarred(args: %s kwargs: %s)" % (str(args), str(kwargs)))
     tangelo.content_type("application/json")
 
-    ingest_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    date_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    ingest_id = parseParamIngestId(**kwargs)
 
     if ',' in ingest_id:
         return tangelo.HTTPStatusCode(400, "Invalid service call - data_set_id must reference only one data_set.  Multiple provided {}".format(ingest_id))
