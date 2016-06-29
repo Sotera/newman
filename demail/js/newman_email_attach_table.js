@@ -33,7 +33,7 @@ var newman_email_attach_table = (function () {
   function clearAllAttachDocumentMetadata() {
     _attach_doc_metadata_map = {};
   }
-  function getAttachDocumentMetadata( attach_id ) {
+  function getAttachDocMetadata( attach_id ) {
     var _value;
     if (attach_id) {
       _value = clone( _attach_doc_metadata_map[ attach_id ] );
@@ -141,7 +141,7 @@ var newman_email_attach_table = (function () {
           console.log('id : "' + attr_id + '" value : "' + attr_value + '" clicked-expand-image!');
 
           var file_uid = attr_value;
-          var file_metadata = getAttachDocumentMetadata( file_uid );
+          var file_metadata = getAttachDocMetadata( file_uid );
           if (file_metadata) {
 
             var file_name = file_metadata.filename;
@@ -299,6 +299,8 @@ var newman_email_attach_table = (function () {
       var per_page_count_button_html = "<input type='number' style='font-size: 11px; width: 38px;' id='attach_page_display_count' step='10' value='" + per_page_display_count + "' />";
 
       var page_label = display_start_index + ' <i class="' + page_direction_icon + '" aria-hidden="true"></i> ' + display_end_index + ' of ' + list_max_index;
+      var file_attach_label = '<i class="fa fa-paperclip fa-lg" aria-hidden="true"></i>';
+      var geo_coord_label = '<i class="fa fa-globe" aria-hidden="true"></i>';
 
       $(ui_appendable).empty();
       $(ui_appendable).append($('<thead>')).append($('<tbody>'));
@@ -306,7 +308,7 @@ var newman_email_attach_table = (function () {
       var lastSort = "";
       var thead = d3.select(ui_appendable).select("thead").append("tr").selectAll("tr")
         //.data(['Date', 'Subject', 'Attachment', 'Type','Email'])
-        .data(['Date', 'Subject', 'Attachment', page_label])
+        .data(['Date', 'Subject', file_attach_label, page_label])
         .enter()
         .append("th")
         /*.text( function(d) {
@@ -316,11 +318,17 @@ var newman_email_attach_table = (function () {
           if (i == 0) {
             return "width : 145px; min-width : 145px";
           }
+
           if (i == 1) {
             return "width : 305px; min-width : 145px";
           }
+
+          if (i == 2) {
+            return "width : 80px; min-width : 80px";
+          }
+
           if (i == 3) {
-            return "width : 256px; min-width : 256px";
+            return "min-width : 256px";
           }
 
         })
@@ -368,10 +376,18 @@ var newman_email_attach_table = (function () {
 
       tr.selectAll("td")
         .data(function (d) {
-          return [d, d, d, d];
+          var geo_coord = newman_geo_email_attach.getAttachDocGeoCoord( d.attachment_id );
+
+          return [d, d, d, geo_coord];
         })
         .enter()
         .append("td")
+        .attr('style', function (d, i) {
+          if (i == 3) {
+            return "text-align : left";
+          }
+
+        })
         /*.on("mouseover", function(d, index) {
 
          if (index == 3) {
@@ -382,7 +398,7 @@ var newman_email_attach_table = (function () {
          })*/
         .on("click", function (d, i) {
 
-          if (i == 0 || i == 1 || i == 3) {
+          if (i == 0 || i == 1) {
             if (debug_enabled) {
               console.log('clicked :\n' + JSON.stringify(d, null, 2));
             }
@@ -394,12 +410,12 @@ var newman_email_attach_table = (function () {
         .html(function (d, i) {
 
           if (i == 0) {
-            var col_row = $('<div>').append(d.datetime);
+            var col_row = $('<div>').append( d.datetime );
             return col_row.html();
           }
 
           if (i == 1) {
-            var col_row = $('<div>').append(d.subject);
+            var col_row = $('<div>').append( d.subject );
             return col_row.html();
           }
 
@@ -447,6 +463,13 @@ var newman_email_attach_table = (function () {
 
           } // end-of if (i == 2)
 
+
+          if (i == 3) {
+            if (d) {
+              var col_row = $('<div>').append(d);
+              return col_row.html();
+            }
+          }
 
         });
 
@@ -542,7 +565,7 @@ var newman_email_attach_table = (function () {
     'onRequestEmailAttachList' : onRequestEmailAttachList,
     'getPerPageDisplayCount' : getPerPageDisplayCount,
     'displayUITab' : displayUITab,
-    'getAttachDocumentMetadata' : getAttachDocumentMetadata,
+    'getAttachDocMetadata' : getAttachDocMetadata,
     'getImageHTML' : getImageHTML,
     'getImageMinWidth' : getImageMinWidth,
     'getImageMaxWidth' : getImageMaxWidth,

@@ -283,7 +283,7 @@ var app_geo_map = (function () {
 
           var file_name = marker_content.attach_file;
           var content_type;
-          var file_metadata = newman_geo_email_attach.getAttachDocumentMetadata( file_uid );
+          var file_metadata = newman_geo_email_attach.getAttachDocMetadata( file_uid );
           if (file_metadata) {
             content_type = file_metadata.content_type;
           }
@@ -379,7 +379,7 @@ var app_geo_map = (function () {
                     console.log('selected file-uid : ' + file_uid );
                   }
 
-                  var file_metadata = newman_geo_email_attach.getAttachDocumentMetadata( file_uid );
+                  var file_metadata = newman_geo_email_attach.getAttachDocMetadata( file_uid );
                   if (file_metadata) {
 
                     var file_name = file_metadata.filename;
@@ -1209,6 +1209,9 @@ var app_geo_map = (function () {
       console.log('initMap()');
     }
 
+    newman_geo_email_sender.initEmailDocGeoLoc();
+    newman_geo_email_attach.initAttachDocGeoLoc();
+
     if (is_visible === true) {
        _is_initialized = true;
     }
@@ -1384,9 +1387,6 @@ var app_geo_map = (function () {
     initMapControlDraw();
     initMapTileButtonGroup();
     initMapMarkerButtonGroup();
-
-    newman_geo_email_sender.initEmailDocGeoLoc();
-    newman_geo_email_attach.initAttachDocGeoLoc();
 
   }
 

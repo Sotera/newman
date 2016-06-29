@@ -57,14 +57,33 @@ var newman_geo_email_attach = (function () {
 
   var _attach_doc_metadata_map = {};
 
-  function clearAllAttachDocumentMetadata() {
+  function clearAllAttachDocMetadata() {
     _attach_doc_metadata_map = {};
   }
-  function getAttachDocumentMetadata( attach_id ) {
-    return _attach_doc_metadata_map[ attach_id ];
+  function getAttachDocMetadata( attach_id ) {
+    var _value;
+    if (attach_id) {
+      _value = clone( _attach_doc_metadata_map[attach_id] );
+    }
+    return _value;
   }
-  function putAttachDocumentMetadata( attach_id, element ) {
-    _attach_doc_metadata_map[ attach_id ] =  element;
+  function putAttachDocMetadata( attach_id, element ) {
+    if (attach_id && element) {
+      _attach_doc_metadata_map[ attach_id ] =  element;
+    }
+  }
+
+  function getAttachDocGeoCoord( attach_id ) {
+
+    var geo_coord = '';
+    var attach_geo_obj = getAttachDocGeoLoc( attach_id );
+    if (attach_geo_obj) {
+      var _lat = attach_geo_obj.latitude;
+      var _lon = attach_geo_obj.longitude;
+      geo_coord = _lat + ', ' + _lon;
+    }
+
+    return geo_coord;
   }
 
   /**
@@ -74,7 +93,7 @@ var newman_geo_email_attach = (function () {
   function updateAttachDocGeoLoc(response) {
 
     clearAllAttachDocGeoLoc();
-    clearAllAttachDocumentMetadata();
+    clearAllAttachDocMetadata();
 
     if( response.exif_docs && response.exif_docs.length > 0 ) {
 
@@ -113,7 +132,7 @@ var newman_geo_email_attach = (function () {
             var attach_lat = attachment.exif.gps.coord.lat;
             var attach_lon = attachment.exif.gps.coord.lon;
 
-            putAttachDocumentMetadata(attach_id, attachment)
+            putAttachDocMetadata(attach_id, attachment)
 
             var geo_attach_object = {
               "email_datetime": email_datetime,
@@ -193,7 +212,8 @@ var newman_geo_email_attach = (function () {
     'getEmailDocGeoLoc' : getEmailDocGeoLoc,
     'updateAttachDocGeoLoc' : updateAttachDocGeoLoc,
     'displayAttachDocGeoLoc' : displayAttachDocGeoLoc,
-    'getAttachDocumentMetadata' : getAttachDocumentMetadata
+    'getAttachDocMetadata' : getAttachDocMetadata,
+    'getAttachDocGeoCoord' : getAttachDocGeoCoord
   }
 
 }());
