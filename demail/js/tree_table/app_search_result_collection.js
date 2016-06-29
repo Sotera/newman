@@ -27,6 +27,7 @@ var newman_search_result_collection = (function () {
   var ui_treetable_body_id = 'search_result_treetable_body';
 
   var search_result_table = new EmailSearchResultTreeTable();
+  var is_ui_component_visible = true;
 
   // local dataset select-deselect cache
   var dataset_selected_map = {};
@@ -229,11 +230,14 @@ var newman_search_result_collection = (function () {
     count = 0;
   }
 
-  function  populateTable() {
+  function populateTable() {
     if (debug_enabled) {
       //console.log( 'populateTable() : search_result_table.data_source_list:\n' + JSON.stringify(search_result_table.data_source_list, null, 2) );
     }
 
+    if (!isUIComponentVisible()) { // update UI only if it is visible
+      return;
+    }
 
     var ui_container = $('#'+ui_treetable_id);
     var ui_appendable = $('#'+ui_treetable_body_id);
@@ -955,7 +959,11 @@ var newman_search_result_collection = (function () {
     if (element) {
       app_nav_history.appendHist(element.url, element.search_field, element.label);
 
+
       loadSearchResult(element.url);
+
+      console.log('loaded search result...');
+      isUIComponentVisible();
     }
   }
 
@@ -1637,10 +1645,45 @@ var newman_search_result_collection = (function () {
 
   }
 
+  function isUIComponentVisible() {
+    var ui_component_parent = $( '#content-dashboard-home' );
+    //console.log( '$("#content-dashboard-home") : ' + $('#content-dashboard-home').css('display'));
+    //console.log( '$("#content-analytics-email") : ' + $('#content-analytics-email').css('display'));
+
+    if(ui_component_parent.css('display') == 'none') { // other parent container is visible
+      is_ui_component_visible = false;
+    }
+    else {
+
+      var ui_component_email_doc_view = $('#container-bottom-left'); // email_doc_view_panel is visible
+      if (ui_component_email_doc_view.css('display') != 'none') {
+        is_ui_component_visible = false;
+      }
+      else {
+        var ui_component = $('#content-dashboard-left');
+        is_ui_component_visible = (ui_component.css('display') != 'none') || (ui_component.is(':visible'));
+      }
+    }
+
+    console.log( 'app_search_result_collection.isUIComponentVisible() : ' + is_ui_component_visible );
+    return is_ui_component_visible;
+  }
+
+  function setUIComponentVisible( visible ) {
+    //console.log( 'app_search_result_collection.setUIComponentVisible( ' + visible + ' )' );
+    if (visible === true) {
+      is_ui_component_visible = true;
+    }
+    else {
+      is_ui_component_visible = false;
+    }
+  }
+
 
     return {
       'initTreeTableEvent' : initTreeTableEvent,
       'clearAllUI' : clearAllUI,
+      'isUIComponentVisible' : isUIComponentVisible,
       'clearAll' : clearAll,
       'deleteTableRow' : deleteTableRow,
       'uncheckTreeTableRow' : uncheckTreeTableRow,

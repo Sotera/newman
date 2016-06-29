@@ -64,7 +64,7 @@ function validateResponseEmailDocs(response) {
  * @param response data received from service
  * @returns filtered response
  */
-function validateEmailSearchResponse(response) {
+function validateEmailSearchResponse( response ) {
   var debug_enabled = false;
   if (response) {
 

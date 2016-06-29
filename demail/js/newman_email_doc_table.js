@@ -30,7 +30,16 @@ var newman_email_doc_table = (function () {
     _email_doc_metadata_map = {};
   }
   function getEmailDocumentMetadata( email_id ) {
-    return _email_doc_metadata_map[ email_id ];
+    var _value;
+    if (email_id) {
+      _value = clone( _email_doc_metadata_map[ email_id ] );
+    }
+    return _value;
+  }
+  function putEmailDocumentMetadata( email_id, email_doc ) {
+    if (email_id && email_doc) {
+      _email_doc_metadata_map[ email_id ] = email_doc;
+    }
   }
 
   var data_table_ui;
@@ -256,6 +265,13 @@ var newman_email_doc_table = (function () {
   function populateDataTable(data_rows) {
     console.log('populateDataTable( ' + data_rows.length + ' )');
     //console.log( '\tdata_rows :\n' + JSON.stringify(data_rows, null, 2));
+
+    var tab_label_html = '<i class="fa fa-envelope-o"></i>&nbsp;Email&nbsp;&nbsp;[' + data_rows.length + ']';
+    var tab_label = $('#email_table_tab_label');
+    if (tab_label) {
+      tab_label.html( tab_label_html );
+    }
+
     initEvents();
 
     data_row_is_read_map = {};
@@ -272,7 +288,7 @@ var newman_email_doc_table = (function () {
 
     data_table_rows = _.map(data_rows, function (row) {
 
-      _email_doc_metadata_map[ row.email_id ] = clone( row );
+      putEmailDocumentMetadata( row.email_id, row );
 
       var recipient_count = recipientCount(row.to, row.cc, row.bcc);
       var attach_count = parseInt(row.attach);

@@ -514,13 +514,21 @@ var app_graph_search_request = (function () {
     return _.size(_request_response_cache);
   }
   function deleteGraphResponse( key ) {
-    delete _request_response_cache[ key ];
+    if (key) {
+      delete _request_response_cache[key];
+    }
   }
   function getGraphResponse( key ) {
-    return _request_response_cache[ key ];
+    var _value;
+    if (key) {
+      _value = clone( _request_response_cache[ key ] );
+    }
+    return _value;
   }
   function putGraphResponse( key, value ) {
-    _request_response_cache[ key ] = value;
+    if (key && value) {
+      _request_response_cache[key] = value;
+    }
   }
 
 
@@ -1401,8 +1409,8 @@ var dashboard_content = (function () {
         email_analytics_content.close();
       }
 
-      dashboard_content_container.fadeToggle('fast');
-      //container.show();
+      //dashboard_content_container.fadeToggle('fast');
+      dashboard_content_container.show();
 
       reloadDashboardActivityTimeline();
 
@@ -1418,8 +1426,8 @@ var dashboard_content = (function () {
   var close = function () {
     if (isVisible()) {
 
-      dashboard_content_container.fadeToggle('fast');
-      //container.hide();
+      //dashboard_content_container.fadeToggle('fast');
+      dashboard_content_container.hide();
     }
   };
 
@@ -1475,8 +1483,8 @@ var email_analytics_content = (function () {
 
       //bottom_panel.show();
 
-      email_container.fadeToggle('fast');
-      //container.show();
+      //email_container.fadeToggle('fast');
+      email_container.show();
     }
     bottom_panel.hide();
   };
@@ -1484,8 +1492,8 @@ var email_analytics_content = (function () {
   var close = function () {
     if (isVisible()) {
 
-      email_container.fadeToggle('fast');
-      //container.hide();
+      //email_container.fadeToggle('fast');
+      email_container.hide();
     }
   };
 

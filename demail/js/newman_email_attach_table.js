@@ -34,10 +34,16 @@ var newman_email_attach_table = (function () {
     _attach_doc_metadata_map = {};
   }
   function getAttachDocumentMetadata( attach_id ) {
-    return _attach_doc_metadata_map[ attach_id ];
+    var _value;
+    if (attach_id) {
+      _value = clone( _attach_doc_metadata_map[ attach_id ] );
+    }
+    return _value;
   }
   function putAttachDocumentMetadata( attach_id, element ) {
-    _attach_doc_metadata_map[ attach_id ] =  element;
+    if (attach_id && element) {
+      _attach_doc_metadata_map[ attach_id ] = element;
+    }
   }
 
   var _attach_response_cache = [];
@@ -244,6 +250,12 @@ var newman_email_attach_table = (function () {
       console.log( 'populateAttachDocTable(...) : response_list[' + response_list.length + ']\n' + JSON.stringify(response_list, null, 2));
     }
 
+    var tab_label_html = '<i class="fa fa-paperclip"></i>&nbsp;Attachment&nbsp;&nbsp;[' + max_index + ']';
+    var tab_label = $('#attachment_table_tab_label');
+    if (tab_label) {
+      tab_label.html( tab_label_html );
+    }
+
     var page_prev_button_html =
       "<button type='button' class='btn btn-small outline' value='attach_list_page' id='attach_list_page_prev'>" +
         "&nbsp;<i class='fa fa-caret-square-o-left fa-lg' aria-hidden='true'></i>&nbsp;" +
@@ -253,190 +265,192 @@ var newman_email_attach_table = (function () {
         "&nbsp;<i class='fa fa-caret-square-o-right fa-lg' aria-hidden='true'></i>&nbsp;" +
       "</button>";
 
-    display_start_index = 1;
-    if (start_index) {
-      display_start_index = start_index + 1;
-    }
-    display_end_index = display_start_index + (response_list.length - 1);
-    var list_max_index = display_end_index;
-    if (max_index) {
-      list_max_index = max_index;
-    }
-    var page_direction_icon = 'fa fa-arrows-h';
-    if (display_start_index == 1 && display_end_index != list_max_index) {
-      page_direction_icon = 'fa fa-long-arrow-right';
+    if (response_list && response_list.length > 0) {
 
-      page_prev_button_html =
-        "<button type='button' class='btn btn-small outline' value='attach_list_page' id='attach_list_page_prev' disabled>" +
+      display_start_index = 1;
+      if (start_index && start_index >= 0) {
+        display_start_index = start_index + 1;
+      }
+      display_end_index = display_start_index + (response_list.length - 1);
+      var list_max_index = display_end_index;
+      if (max_index && max_index >= 0) {
+        list_max_index = max_index;
+      }
+      var page_direction_icon = 'fa fa-arrows-h';
+      if (display_start_index == 1 && display_end_index != list_max_index) {
+        page_direction_icon = 'fa fa-long-arrow-right';
+
+        page_prev_button_html =
+          "<button type='button' class='btn btn-small outline' value='attach_list_page' id='attach_list_page_prev' disabled>" +
           "&nbsp;<i class='fa fa-caret-square-o-left fa-lg' aria-hidden='true'></i>&nbsp;" +
-        "</button>";
+          "</button>";
 
-    }
-    else if (display_start_index > 1 && display_end_index == list_max_index) {
-      page_direction_icon = 'fa fa-long-arrow-left';
+      }
+      else if (display_start_index > 1 && display_end_index == list_max_index) {
+        page_direction_icon = 'fa fa-long-arrow-left';
 
-      page_next_button_html =
-        "<button type='button' class='btn btn-small outline' value='attach_list_page' id='attach_list_page_next' disabled>" +
+        page_next_button_html =
+          "<button type='button' class='btn btn-small outline' value='attach_list_page' id='attach_list_page_next' disabled>" +
           "&nbsp;<i class='fa fa-caret-square-o-right fa-lg' aria-hidden='true'></i>&nbsp;" +
-        "</button>";
+          "</button>";
 
-    }
+      }
 
-    var per_page_count_button_html = "<input type='number' style='font-size: 11px; width: 38px;' id='attach_page_display_count' step='10' value='" + per_page_display_count + "' />";
+      var per_page_count_button_html = "<input type='number' style='font-size: 11px; width: 38px;' id='attach_page_display_count' step='10' value='" + per_page_display_count + "' />";
 
-    var page_label = display_start_index + ' <i class="' + page_direction_icon + '" aria-hidden="true"></i> ' + display_end_index + ' of ' + list_max_index;
+      var page_label = display_start_index + ' <i class="' + page_direction_icon + '" aria-hidden="true"></i> ' + display_end_index + ' of ' + list_max_index;
 
+      $(ui_appendable).empty();
+      $(ui_appendable).append($('<thead>')).append($('<tbody>'));
 
-
-    $(ui_appendable).append($('<thead>')).append($('<tbody>'));
-
-    var lastSort = "";
-    var thead = d3.select(ui_appendable).select("thead").append("tr").selectAll("tr")
-      //.data(['Date', 'Subject', 'Attachment', 'Type','Email'])
-      .data(['Date', 'Subject', 'Attachment', page_label])
-      .enter()
-      .append("th")
-    /*.text( function(d) {
-        return d;
-      })*/
-      .attr('style', function (d, i) {
-        if (i == 0) {
-          return "width : 145px; min-width : 145px";
-        }
-        if (i == 1) {
-          return "width : 305px; min-width : 145px";
-        }
-        if (i == 3) {
-          return "width : 256px; min-width : 256px";
-        }
-
-      })
-      .html(function (d, i) {
-        if (i == 3) {
-
-          var header_html = page_prev_button_html + d + page_next_button_html + per_page_count_button_html;
-
-          var col_2_row = $('<span>').append(header_html);
-
-          return col_2_row.html();
-        }
-        else {
-          return d;
-        }
-      })
-      .attr('class', 'clickable').on("click", function(k, i) {
-
-        if (i == 0 || i == 1 || i == 2) { //sort by column
-          var direction = (lastSort == k) ? -1 : 1;
-          lastSort = (direction == -1) ? "" : k; //toggle
-          d3.select(ui_appendable).select("tbody").selectAll("tr").sort(function (a, b) {
-
-            if (i == 0) {
-             return a['datetime'].localeCompare(b['datetime']) * direction;
-            }
-
-            if (i == 1) {
-              return a['subject'].localeCompare(b['subject']) * direction;
-            }
-
-            if (i == 2) {
-              return a['filename'].localeCompare(b['filename']) * direction;
-            }
-
-          });
-        }
-      });
-
-
-    var tr = d3.select(ui_appendable).select("tbody").selectAll("tr")
-      .data(response_list).enter().append("tr");
-
-    var popover = image_preview_popover();
-
-    tr.selectAll("td")
-      .data(function(d) {
-        return [d, d, d, d];
-      })
-      .enter()
-      .append("td")
-    /*.on("mouseover", function(d, index) {
-
-        if (index == 3) {
-          console.log('mouse-over : index ' + index + '\n' + JSON.stringify(d, null, 2));
-
-        }
-
-      })*/
-      .on("click", function(d, i) {
-
-        if (i == 0 || i == 1 || i == 3) {
-          if (debug_enabled) {
-            console.log('clicked :\n' + JSON.stringify(d, null, 2));
+      var lastSort = "";
+      var thead = d3.select(ui_appendable).select("thead").append("tr").selectAll("tr")
+        //.data(['Date', 'Subject', 'Attachment', 'Type','Email'])
+        .data(['Date', 'Subject', 'Attachment', page_label])
+        .enter()
+        .append("th")
+        /*.text( function(d) {
+         return d;
+         })*/
+        .attr('style', function (d, i) {
+          if (i == 0) {
+            return "width : 145px; min-width : 145px";
+          }
+          if (i == 1) {
+            return "width : 305px; min-width : 145px";
+          }
+          if (i == 3) {
+            return "width : 256px; min-width : 256px";
           }
 
-          newman_email_doc_table.showEmailDocumentView(d.email_id);
-        }
+        })
+        .html(function (d, i) {
+          if (i == 3) {
 
-      })
-      .html(function(d, i){
+            var header_html = page_prev_button_html + d + page_next_button_html + per_page_count_button_html;
 
-        if (i == 0) {
-          var col_row = $('<div>').append( d.datetime );
-          return col_row.html();
-        }
+            var col_2_row = $('<span>').append(header_html);
 
-        if (i == 1) {
-          var col_row = $('<div>').append( d.subject );
-          return col_row.html();
-        }
-
-        if (i == 2) {
-          var file_uid = d.attachment_id;
-          var file_name = d.filename;
-          var content_type = d.content_type;
-
-          var image_view_button_html;
-          var doc_type = getDocumentType( file_name, content_type );
-
-          if (doc_type == 'image') {
-            image_view_button_html =
-              "<button type='button' class='btn btn-small outline' value='" + file_uid + "' id='attach_image_expand_button_" + file_uid + "' >" +
-              "&nbsp;<i class='fa fa-search-plus' aria-hidden='true'></i>&nbsp;" +
-              "</button>";
+            return col_2_row.html();
           }
+          else {
+            return d;
+          }
+        })
+        .attr('class', 'clickable').on("click", function (k, i) {
 
-          var image_icon = getImageHTML( file_uid, doc_type );
+          if (i == 0 || i == 1 || i == 2) { //sort by column
+            var direction = (lastSort == k) ? -1 : 1;
+            lastSort = (direction == -1) ? "" : k; //toggle
+            d3.select(ui_appendable).select("tbody").selectAll("tr").sort(function (a, b) {
 
-          var attach_url = 'email/attachment/' + encodeURIComponent( file_uid );
-          attach_url = newman_data_source.appendDataSource( attach_url );
-
-
-
-          var col_row = $('<div>').append(
-            $('<a>',
-              { 'target': '_blank' ,
-                'href' : attach_url,
-                'data-toggle' : 'tooltip',
-                'rel' : 'tooltip',
-                'data-placement' : 'left',
-                'data-original-title' : file_name,
-                'title' : file_name
+              if (i == 0) {
+                return a['datetime'].localeCompare(b['datetime']) * direction;
               }
-            ).html( image_icon )
-          );
 
-          if (image_view_button_html) {
-            col_row.append( image_view_button_html );
+              if (i == 1) {
+                return a['subject'].localeCompare(b['subject']) * direction;
+              }
+
+              if (i == 2) {
+                return a['filename'].localeCompare(b['filename']) * direction;
+              }
+
+            });
+          }
+        });
+
+
+      var tr = d3.select(ui_appendable).select("tbody").selectAll("tr")
+        .data(response_list).enter().append("tr");
+
+      var popover = image_preview_popover();
+
+      tr.selectAll("td")
+        .data(function (d) {
+          return [d, d, d, d];
+        })
+        .enter()
+        .append("td")
+        /*.on("mouseover", function(d, index) {
+
+         if (index == 3) {
+         console.log('mouse-over : index ' + index + '\n' + JSON.stringify(d, null, 2));
+
+         }
+
+         })*/
+        .on("click", function (d, i) {
+
+          if (i == 0 || i == 1 || i == 3) {
+            if (debug_enabled) {
+              console.log('clicked :\n' + JSON.stringify(d, null, 2));
+            }
+
+            newman_email_doc_table.showEmailDocumentView(d.email_id);
           }
 
+        })
+        .html(function (d, i) {
 
-          return col_row.html();
+          if (i == 0) {
+            var col_row = $('<div>').append(d.datetime);
+            return col_row.html();
+          }
 
-        } // end-of if (i == 2)
+          if (i == 1) {
+            var col_row = $('<div>').append(d.subject);
+            return col_row.html();
+          }
+
+          if (i == 2) {
+            var file_uid = d.attachment_id;
+            var file_name = d.filename;
+            var content_type = d.content_type;
+
+            var image_view_button_html;
+            var doc_type = getDocumentType(file_name, content_type);
+
+            if (doc_type == 'image') {
+              image_view_button_html =
+                "<button type='button' class='btn btn-small outline' value='" + file_uid + "' id='attach_image_expand_button_" + file_uid + "' >" +
+                "&nbsp;<i class='fa fa-search-plus' aria-hidden='true'></i>&nbsp;" +
+                "</button>";
+            }
+
+            var image_icon = getImageHTML(file_uid, doc_type);
+
+            var attach_url = 'email/attachment/' + encodeURIComponent(file_uid);
+            attach_url = newman_data_source.appendDataSource(attach_url);
 
 
-      });
+            var col_row = $('<div>').append(
+              $('<a>',
+                {
+                  'target': '_blank',
+                  'href': attach_url,
+                  'data-toggle': 'tooltip',
+                  'rel': 'tooltip',
+                  'data-placement': 'left',
+                  'data-original-title': file_name,
+                  'title': file_name
+                }
+              ).html(image_icon)
+            );
 
+            if (image_view_button_html) {
+              col_row.append(image_view_button_html);
+            }
+
+
+            return col_row.html();
+
+          } // end-of if (i == 2)
+
+
+        });
+
+    } // end-of if (response_list && response_list.length > 0)
   }
 
   function getImageHTML(file_uid, file_type, new_width, new_height) {
@@ -486,25 +500,28 @@ var newman_email_attach_table = (function () {
   }
 
   function onRequestEmailAttachList( response_list ) {
+    var start_index = 0;
+    var max_index = -1
+    var max_display_count = getPerPageDisplayCount();
+    var mapped_response_list;
+
     if (response_list && response_list.length > 0) {
-      var start_index = 0;
-      var max_index = (response_list.length - 1);
-      var max_display_count = getPerPageDisplayCount();
-      var mapped_response_list = mapResponse( response_list, true, max_display_count, start_index );
+      max_index = (response_list.length - 1);
 
+      mapped_response_list = mapResponse( response_list, true, max_display_count, start_index );
 
-      onRequestPageDisplay(mapped_response_list, start_index, max_index);
     }
+    else {
+      clearAllAttachDocumentMetadata();
+    }
+
+    onRequestPageDisplay(mapped_response_list, start_index, max_index);
   }
 
-  function requestPageDisplay( max_display_count, start_index ) {
-
-
-  }
 
   function onRequestPageDisplay( response_list, start_index, max_index ) {
+    initAttachDocTable();
     if (response_list) {
-      initAttachDocTable();
       populateAttachDocTable( response_list, start_index, max_index );
     }
   }
@@ -524,7 +541,6 @@ var newman_email_attach_table = (function () {
     'populateAttachDocTable' : populateAttachDocTable,
     'onRequestEmailAttachList' : onRequestEmailAttachList,
     'getPerPageDisplayCount' : getPerPageDisplayCount,
-    'onRequestPageDisplay' : onRequestPageDisplay,
     'displayUITab' : displayUITab,
     'getAttachDocumentMetadata' : getAttachDocumentMetadata,
     'getImageHTML' : getImageHTML,

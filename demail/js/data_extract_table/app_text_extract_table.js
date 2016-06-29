@@ -144,7 +144,7 @@ var app_text_extract_table = (function () {
 
       var page_label = display_start_index + ' <i class="' + page_direction_icon + '" aria-hidden="true"></i> ' + display_end_index + ' of ' + list_max_index;
 
-
+      $(ui_appendable).empty();
       $(ui_appendable).append($('<thead>')).append($('<tbody>'));
 
       var lastSort = "";
@@ -270,8 +270,8 @@ var app_text_extract_table = (function () {
   }
 
   function onRequestExtractPhoneList( response_list, start_index, max_index ) {
-    if (response_list) {
-      initPhoneListTable();
+    initPhoneListTable();
+    if (response_list && response_list.length > 0) {
       populatePhoneListTable( response_list, start_index, max_index );
     }
   }
@@ -314,6 +314,22 @@ var app_text_extract_table_phone_list_request = (function () {
   var _service_url = 'profile/top_phone_numbers';
   var _default_cache_max_count = 5000;
   var _request_response_cache = {};
+
+  function clearAllResponseCache() {
+    _request_response_cache = {}
+  }
+  function getResponseCache( key ) {
+    var _value;
+    if (key) {
+     _value = clone( _request_response_cache[ key ] );
+    }
+    return _value;
+  }
+  function putResponseCache( key, value ) {
+    if (key && value) {
+      _request_response_cache[ key ] = value;
+    }
+  }
 
   function getServiceURLBase() {
     return _service_url;
@@ -366,7 +382,7 @@ var app_text_extract_table_phone_list_request = (function () {
 
     var data_source_string = newman_data_source.getAllSelectedAsString();
     var service_url = getServiceURL();
-    var cached_obj = _request_response_cache[ service_url ];
+    var cached_obj = getResponseCache( service_url );
 
     if (cached_obj && cached_obj.response) {
       console.log("app_text_extract_table_phone_list_request.requestService(" + top_count + ", " + start_index + ")");
@@ -400,10 +416,14 @@ var app_text_extract_table_phone_list_request = (function () {
     }
     console.log("\tstart_index = " + _start_index + ", top_count = " + top_count );
 
+    clearAllResponseCache();
+
     if (response && response.length > 0) {
       if (cache_enabled === true) {
-        console.log("\t_request_response_cache[service_url] = response; key = " + service_url);
-        _request_response_cache[service_url] = {"request" : service_url, "response" : response};
+        console.log("\tputResponseCache( key, value ) : key = " + service_url);
+
+        var cache_object = {"request" : service_url, "response" : response};
+        putResponseCache( service_url, cache_object );
         _default_cache_max_count = response.length;
       }
 

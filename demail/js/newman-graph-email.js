@@ -569,7 +569,8 @@ var newman_graph_email = (function () {
   }
 
   function updateUIGraphView( search_response, auto_display_doc_uid, starred_email_doc_list ) {
-    console.log('newman_graph_email.updateUIGraphView(search_response, ' + auto_display_doc_uid + ', starred_email_doc_list)');
+    console.log("newman_graph_email.updateUIGraphView(...) : auto_display_doc_uid = '" + auto_display_doc_uid + "'");
+    //console.log('search_response:\n' + JSON.stringify(search_response, null, 2));
 
     //validate search-response if enabled
 
@@ -588,12 +589,15 @@ var newman_graph_email = (function () {
 
     // populate data-table
     $('#document_count').text(filtered_response.query_hits);
-    newman_email_doc_table.populateDataTable( filtered_response.rows )
+    console.log('email_docs[ ' + search_response.rows.length + ' ]');
+    newman_email_doc_table.populateDataTable( filtered_response.rows );
+
     if (starred_email_doc_list ) {
-      newman_email_doc_table.setStarredEmailDocumentList(starred_email_doc_list);
+      newman_email_doc_table.setStarredEmailDocumentList( starred_email_doc_list );
     }
 
     // populate attachment-table
+    console.log('attachment_docs[ ' + search_response.attachments.length + ' ]');
     newman_email_attach_table.onRequestEmailAttachList( filtered_response.attachments );
 
     // initialize to blank

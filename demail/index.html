@@ -414,7 +414,7 @@
         <div id="content-dashboard-home" class="container-fluid analytics-content">
 
           <!--Start-Dashboard-Left-->
-          <div class="col-sm-5"  style= "height: 100%; padding: 0px 0px 0px 10px;">
+          <div class="col-sm-5" id="content-dashboard-left" style= "height: 100%; padding: 0px 0px 0px 10px;">
             <!-- Start-Dashboard-Left-Tab-Container -->
             <!--<div class="tabbable tabs-below" style= "padding: 0; margin: 0;">-->
               <!-- Start-Dashboard-Left-Tab-Content -->
@@ -972,10 +972,10 @@
               <div class="row" style="height: 30px; margin: 0; padding: 0;">
                 <ul class="col-sm-12 nav nav-tabs" role="tablist" id="tab-list" style= "margin: 0; padding: 0; font-size: 13px;">
                   <li class="active" style= "height: 30px;">
-                    <a style= "height: 30px;" href="#email-table-tab" role="tab" data-toggle="tab"><i class="fa fa-envelope-o"></i>&nbsp;Email&nbsp;</a>
+                    <a style= "height: 30px;" href="#email-table-tab" role="tab" data-toggle="tab" id="email_table_tab_label"><i class="fa fa-envelope-o"></i>&nbsp;Email&nbsp;</a>
                   </li>
                   <li style= "height: 30px;">
-                    <a style= "height: 30px;" href="#attachment-table-tab" role="tab" data-toggle="tab"><i class="fa fa-paperclip"></i>&nbsp;Attachment&nbsp;</a>
+                    <a style= "height: 30px;" href="#attachment-table-tab" role="tab" data-toggle="tab" id="attachment_table_tab_label"><i class="fa fa-paperclip"></i>&nbsp;Attachment&nbsp;</a>
                   </li>
                 </ul>
               </div>
@@ -996,7 +996,7 @@
                       <!--   </a> -->
                       <!-- </div> -->
                       <div style="float: left; margin: 0; padding: 0;">
-                        <span>Documents </span> <span id="document_count"></span>
+                        <span>Documents matched&nbsp;&nbsp;</span><span id="document_count"></span>
                       </div>
                       <div style="float: right; margin: 0; padding: 0px 10px 0px 0px;">
                         <a class="clickable" id="email_view_all_starred">
