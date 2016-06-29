@@ -101,15 +101,16 @@ var newman_email_starred_request_toggle = (function () {
 
     service_url = newman_data_source.appendDataSource(service_url);
     service_url = newman_datetime_range.appendDatetimeRange(service_url);
+    service_url = newman_email_doc_table.appendIngestID( service_url, email_id );
 
     return service_url;
 
   }
 
-  function requestService(email_address, enabled) {
+  function requestService(email_id, enabled) {
 
     console.log('newman_email_starred_request_toggle.requestService()');
-    var service_url = getServiceURL(email_address, enabled);
+    var service_url = getServiceURL(email_id, enabled);
     $.get( service_url ).then(function (response) {
       setResponse( response );
       // no response handling needed

@@ -274,9 +274,9 @@ var newman_email_doc_view = (function () {
       }
       var email_id = _document_id;
 
-      var requestUpdate = function (id, exportable) {
+      var requestUpdate = function (email_uid, exportable) {
 
-        newman_email_starred_request_toggle.requestService(id, exportable);
+        newman_email_starred_request_toggle.requestService(email_uid, exportable);
 
         newman_email_starred.displayUITab();
 
