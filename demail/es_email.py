@@ -179,13 +179,21 @@ def _format_body_pannel(email_body, attachments):
     def text(attachment):
         if "image_analytics" in attachment and "ocr_output" in attachment["image_analytics"]:
             return _OCR_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["image_analytics"]["ocr_output"] + "\n"
+        '''
         if "content" in attachment and attachment["content"]:
             return _TIKA_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["content"] + "\n"
+        '''
         return ""
 
 
     body = email_body + "".join(text(attachment) for attachment in attachments)
     return body
+
+def _getAttachmentTextContent(attachments):
+
+    content = [{attachment.get("filename", "") : attachment.get("content", {})} for attachment in attachments]
+    
+    return content
 
 def _getAttachmentOCRContent(attachments):
 
@@ -275,6 +283,7 @@ def get_email(data_set_id, email_id, qs=None):
              {
                "email" : email,
                "entities" : entities,
+               "attachment_text" : _getAttachmentTextContent(attachments),
                "attachment_ocr" : _getAttachmentOCRContent(attachments),
                "attachment_highlighted" : highlighted_attachments,
                "lda_topic_scores" : topic_scores
@@ -305,6 +314,7 @@ def get_email(data_set_id, email_id, qs=None):
         resp["email_contents_translated"] = {
                                              "email" : email_translated,
                                              "entities": entities_translated,
+                                             "attachment_text" : _getAttachmentTextContent(attachments),
                                              "attachment_ocr" : _getAttachmentOCRContent(attachments),
                                              "attachment_highlighted" : highlighted_attachments,
                                              "lda_topic_scores":topic_scores,
