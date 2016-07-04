@@ -602,6 +602,7 @@ function requestSearch(field, search_text, load_on_response, parent_search_uid, 
   }
   else {
     console.log("requesting '" + service_url + "'");
+    app_status_indicator.setStatusConnecting( true );
 
     $.getJSON(service_url, function (search_response) {
 
@@ -617,6 +618,7 @@ function requestSearch(field, search_text, load_on_response, parent_search_uid, 
         clear_cache
       );
 
+      app_status_indicator.setStatusConnecting( false );
     }); // end getJSON(...)
   }
 
@@ -1551,6 +1553,9 @@ $(function () {
 
     // initialize navigation-history
     app_nav_history.initialize();
+
+    // initialize status indicator
+    app_status_indicator.initStatus();
 
     // initialize dashboard domain
     initDashboardDomain();

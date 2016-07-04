@@ -1363,40 +1363,33 @@ var newman_search_result_collection = (function () {
 
           var email_address = label;
 
-          //if (parent_node_uid != data_set_id) {
-            //count++;
-            //if (count < 3) {
 
+          var node = search_result_table.appendAddressSearchList(
+            label,
+            search_text,
+            field,
+            url_path,
+            data_set_id,
+            doc_count,
+            outbound_count,
+            inbound_count,
+            associate_count,
+            attach_count,
+            rank,
+            icon_class,
+            email_address,
+            parent_node_uid,
+            clear_all_sibling
+          );
 
-              var node = search_result_table.appendAddressSearchList(label,
-                                                                      search_text,
-                                                                      field,
-                                                                      url_path,
-                                                                      data_set_id,
-                                                                      doc_count,
-                                                                      outbound_count,
-                                                                      inbound_count,
-                                                                      associate_count,
-                                                                      attach_count,
-                                                                      rank,
-                                                                      icon_class,
-                                                                      email_address,
-                                                                      parent_node_uid,
-                                                                      clear_all_sibling);
-
-            //}
-          //}
         } // end-of else if (field == 'email')
       } // end-of else { // result from search-field-keywords under the current data-set
 
 
 
       // refresh UI
-      //if (count < 2) {
-        populateTable();
+      populateTable();
 
-      //}
-      //count++;
     } // end result-tree-table
 
   } // end onSearchResponse(...)

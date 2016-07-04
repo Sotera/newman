@@ -406,8 +406,13 @@ var newman_top_email_account_list_request = (function () {
         }
         else {
 
+          app_status_indicator.setStatusConnecting( true );
+
           $.get(service_url).then(function (response) {
+
             onRequestTopEmailAccountByDataSource(key, response, service_url);
+
+            app_status_indicator.setStatusConnecting( false );
           });
         }
       });
@@ -440,9 +445,14 @@ var newman_top_email_account_list_request = (function () {
     }
     else {
 
-      //$.get( service_url ).then(function (response) {
-      $.when($.get(service_url)).done(function (response) {
+      app_status_indicator.setStatusConnecting( true );
+
+      $.get( service_url ).then(function (response) {
+      //$.when($.get(service_url)).done(function (response) {
+
         setResponse(service_url, data_source_string, response);
+
+        app_status_indicator.setStatusConnecting( false );
       });
     }
   }

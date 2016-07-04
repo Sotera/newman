@@ -393,12 +393,16 @@ var app_text_extract_table_phone_list_request = (function () {
     }
     else {
 
+      app_status_indicator.setStatusConnecting( true );
+
       $.get(service_url).then(function (response) {
 
         var mapped_response = mapResponse( service_url, data_source_string, response, true, top_count, start_index );
         if (mapped_response) {
           app_text_extract_table.onRequestExtractPhoneList( mapped_response, start_index, response.length );
         }
+
+        app_status_indicator.setStatusConnecting( false );
       });
     }
   }
