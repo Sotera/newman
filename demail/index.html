@@ -35,11 +35,11 @@
 
     <link href="css/app_custom_bootstrap.css" rel="stylesheet" type="text/css">
     <link href="css/app_style_dark.css" rel="stylesheet" type="text/css">
-    <link href="css/app_slider_theme.css" rel="stylesheet" type="text/css">
+    <!--<link href="css/app_slider_theme.css" rel="stylesheet" type="text/css">-->
     <link href="css/app_datatable.css" rel="stylesheet" type="text/css">
     <link href="css/app_histogram.css" rel="stylesheet" type="text/css">
     <link href="css/newman_default.css" rel="stylesheet" type="text/css">
-    <link href="css/newman_profile_chart.css" rel="stylesheet" type="text/css">
+    <!--<link href="css/newman_profile_chart.css" rel="stylesheet" type="text/css">-->
     <link href="css/newman_help.css" rel="stylesheet" type="text/css">
 
 
@@ -490,8 +490,7 @@
                     <!--End Search-Aggregate-Filter -->
 
                     <!--Start Search-Result-Container -->
-
-                    <div id="search_result_container_copy" style="margin: 0px 15px 0px 0px; padding: 0; height: 30px;">
+                    <div class="v_scroll_left_content" id="search_result_container_copy" style="margin: 0 0 0 15px; padding: 0; height: 30px;">
                       <table id="search_result_treetable_copy" class="table tree-2 table-bordered table-striped table-condensed">
 
                         <thead style="font-size: small; display: table-header-group" id="search_result_treetable_header_copy">
@@ -512,35 +511,32 @@
                       </table>
                     </div>
 
+                    <div class="v_scroll_left_container v_scroll_left">
+                      <div class="v_scroll_left_content" id="search_result_container" style="padding: 0; height: 570px; max-height: 570px;">
+                        <!--<div class="table-scrollable-container" id="search_result_container" style="margin: 0; padding: 0;">-->
 
-                    <div id="search_result_container" style="padding: 0; height: 570px; max-height: 570px; overflow-y: scroll;">
-                      <!--<div class="table-scrollable-container" id="search_result_container" style="margin: 0; padding: 0;">-->
+                        <table id="search_result_treetable" class="table tree-2 table-bordered table-striped table-condensed" >
 
+                          <thead style="font-size: small; visibility: hidden; display: table-footer-group" id="search_result_treetable_header">
+                          <tr>
+                            <th>&nbsp;</th>
+                            <th><i class="fa fa-send-o fa-fw" rel="tooltip" data-placement="left" title="Emails Sent"></i></th>
+                            <th><i class="fa fa-envelope-o fa-fw" rel="tooltip" data-placement="left" title="Emails Received"></i></th>
+                            <th><i class="fa fa-paperclip fa-fw" rel="tooltip" data-placement="left" title="File Attachments"></i></th>
+                            <th><i class="fa fa-users fa-fw" rel="tooltip" data-placement="left" title="Accounts Associated"></i></th>
+                            <th><i class="fa fa-crosshairs fa-fw" rel="tooltip" data-placement="left" title="Search Matched"></i></th>
+                            <th><i class="fa fa-ellipsis-v fa-fw" rel="tooltip" data-placement="left" title="Select/Compare"></i></th>
+                          </tr>
+                          </thead>
 
-                      <table id="search_result_treetable" class="table tree-2 table-bordered table-striped table-condensed" >
+                          <tbody style="font-size: 11px;" id="search_result_treetable_body">
+                          </tbody>
 
-                        <thead style="font-size: small; visibility: hidden; display: table-footer-group" id="search_result_treetable_header">
-                        <tr>
-                          <th>&nbsp;</th>
-                          <th><i class="fa fa-send-o fa-fw" rel="tooltip" data-placement="left" title="Emails Sent"></i></th>
-                          <th><i class="fa fa-envelope-o fa-fw" rel="tooltip" data-placement="left" title="Emails Received"></i></th>
-                          <th><i class="fa fa-paperclip fa-fw" rel="tooltip" data-placement="left" title="File Attachments"></i></th>
-                          <th><i class="fa fa-users fa-fw" rel="tooltip" data-placement="left" title="Accounts Associated"></i></th>
-                          <th><i class="fa fa-crosshairs fa-fw" rel="tooltip" data-placement="left" title="Search Matched"></i></th>
-                          <th><i class="fa fa-ellipsis-v fa-fw" rel="tooltip" data-placement="left" title="Select/Compare"></i></th>
-                        </tr>
-                        </thead>
-
-
-
-                        <tbody style="font-size: 11px;" id="search_result_treetable_body">
-                        </tbody>
-
-                      </table>
-
-
+                        </table>
+                      </div>
+                      <!--End Search-Result-Container-->
                     </div>
-                    <!--End Search-Result-Container-->
+                    <!--End v_scroll_left_container-->
 
                     <!--Start Search-Control-Bottom -->
                     <div class="row" style="margin: 0; border: 1px solid rgba(255, 255, 255, 1.0);">
@@ -898,9 +894,141 @@
         <!--Start Email-Analytics-Content-->
         <div id="content-analytics-email" class="container-fluid analytics-content" >
 
+          <!--Start Data-Panel-Left-->
+          <div class="col-sm-7" style= "height: 100%; margin: 0; padding: 0;">
+            <div class="row col-sm-12" style= "height: 100%; margin: 0; padding: 0;">
+              <!--Start Data-Panel-Nav-Tabs-->
+              <div class="row" style="height: 30px; margin: 0; padding: 0;">
+                <ul class="col-sm-12 nav nav-tabs" role="tablist" id="tab-list" style= "margin: 0 0 0 20px; padding: 0; font-size: 13px;">
+                  <li class="active" style= "height: 30px;">
+                    <a style= "height: 30px;" href="#email-table-tab" role="tab" data-toggle="tab" id="email_table_tab_label"><i class="fa fa-envelope-o"></i>&nbsp;Email&nbsp;</a>
+                  </li>
+                  <li style= "height: 30px;">
+                    <a style= "height: 30px;" href="#attachment-table-tab" role="tab" data-toggle="tab" id="attachment_table_tab_label"><i class="fa fa-paperclip"></i>&nbsp;Attachment&nbsp;</a>
+                  </li>
+                </ul>
+              </div>
+              <!--End Data-Panel-Nav-Tabs-->
+
+              <!--Start Data-Panel-Tab-Content-->
+              <div class="row box" style="margin: 2px 0 0 0; padding: 0;">
+                <div class="col-sm-12 tab-content" style= "width: 100%; margin: 0; padding: 0px 0px 0px 15px;">
+
+
+                  <!--Start Data-Panel-Tab-Content-Email-->
+                  <div class="tab-pane active" id="email-table-tab" style="height: 100%;">
+
+                    <div style="height: 20px; margin: 0; padding: 0 0 0 15px;">
+                      <!-- <div style="float: right;padding-right: 9px;"> -->
+                      <!--   <a class="clickable"> -->
+                      <!--     <span class="glyphicon glyphicon-folder-open" /> -->
+                      <!--   </a> -->
+                      <!-- </div> -->
+                      <div style="float: left; margin: 0; padding: 0;">
+                        <span>Documents matched&nbsp;&nbsp;</span><span id="document_count"></span>
+                      </div>
+                      <div style="float: right; margin: 0; padding: 0px 10px 0px 0px;">
+                        <a class="clickable" id="email_view_all_starred">
+                          <span> View Starred </span>
+                        </a>
+                        |
+                        <!--
+                        <a class="clickable" id="email_view_export_all" title="Mark All">
+                          <span class="glyphicon glyphicon-plus"> </span>
+                        </a>
+                        |
+                        <a class="clickable" id="email_view_export_all_remove" title="Unmark All">
+                          <span class="glyphicon glyphicon-minus"> </span>
+                        </a>
+                        |
+                        -->
+                        <!-- <a class="clickable" id="email_group_conversation" title="Conversations"> -->
+                        <!--   <span class="glyphicon glyphicon-tasks"></span> -->
+                        <!-- </a> -->
+                      </div>
+                    </div>
+
+                    <!-- Start Data-Table-Documents -->
+                    <div class="v_scroll_left_container v_scroll_left">
+                      <div class="datatable_container v_scroll_left_content" style="width: 100%; height: 542px;">
+                        <table id="result_table" class="datatable display" cellspacing="0"
+                               style="width: 100%; height: 100%; display: table; table-layout: fixed; vertical-align: top" >
+                        </table>
+                      </div>
+                    </div>
+                    <!-- End Data-Table-Documents -->
+
+                  </div>
+                  <!--End Data-Panel-Tab-Content-Email-->
+
+                  <div class="tab-pane" id="attachment-table-tab">
+
+                    <div class="v_scroll_left_container v_scroll_left">
+                      <div class="v_scroll_left_content" style="height: 562px;">
+                        <table id="email_attachment_table" class="info-table" style="display: table; table-layout: fixed; width: 100%; font-size: 12px;"></table>
+
+                      </div>
+                    </div>
+                    <!--End v_scroll_left_container -->
+                  </div>
+                  <!--End Attachment-Table-Tab -->
+                </div>
+              </div>
+              <!--End Data-Panel-Tab-Content-->
+
+            </div>
+          </div>
+          <!--End Data-Panel-Left-->
+
+          <!--Start Data-Visual-Right-->
+          <div class="col-sm-5 modal-container" id="data_visual_container"  style= "height: 100%; margin: 0; padding: 0;">
+            <div id="graph_email"  style= "height: 100%;"></div>
+
+            <!-- Start Attachment-Enlarged-View-Modal -->
+            <div class="modal fade" id="attach_doc_modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content" style="max-width: 524px; max-height: 564px">
+                  <div class="modal-header" style="padding: 2px;">
+                    <div class="row" style="margin: 0; padding: 0;" >
+                      <div class="col-xs-11" style="margin: 0; padding: 0; text-align: left;" >
+                        <h5 class="modal-title"
+                            style="font-family: 'Lucida Grande','Lucida Sans','Lucida Sans Unicode','Segoe UI','Verdana','sans-serif'; color: #0080AB;"
+                            id="attach_doc_modal_label">
+                        </h5>
+                      </div>
+                      <div class="col-xs-1" style="margin: 0; padding: 0; text-align: right;" >
+                        <button type="button" class="fa fa-times" data-dismiss="modal" aria-hidden="true"></button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-body" id="attach_doc_modal_body" style="max-height: 520px; max-width: 520px; padding: 2px;">
+
+                  </div>
+                  <div class="modal-footer" style="padding: 2px;">
+                    <div class="row" style="margin: 0; padding: 0;" >
+                      <div class="col-xs-4" style="margin: 0; padding: 0; text-align: left;" >
+                        <button type="button" id="attach_doc_modal_open_prev" class="btn btn-default outline" disabled><i class="fa fa-chevron-left fa-lg"></i></button>
+                      </div>
+                      <div class="col-xs-4" style="margin: 0; padding: 0; text-align: center;" >
+                        <!--
+                        <button type="button" id="attach_doc_modal_ok" class="btn btn-default outline" data-dismiss="modal"><i class="fa fa-check-circle"></i> OK </button>
+                        -->
+                      </div>
+                      <div class="col-xs-4" style="margin: 0; padding: 0; text-align: right;" >
+                        <button type="button" id="attach_doc_modal_open_next" class="btn btn-default outline" disabled><i class="fa fa-chevron-right fa-lg"></i></button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--End Attachment-Enlarged-View-Modal -->
+          </div>
+          <!--End Data-Visual-Right-->
+
           <!--Start Visual-Filter-->
-          <div id="graph-visual-filter-email" style="position: fixed; left: 1%; background-color: rgba(210, 210, 210, 0.5); z-index: 999; font-size: 11px;
-             border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; width: 40%; display: none;">
+          <div id="graph-visual-filter-email" style="position: fixed; right: 15px; width: 41%; background-color: rgba(210, 210, 210, 0.5); z-index: 999; font-size: 11px;
+             border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; display: none;">
 
             <div class="row" style="margin: 0;">
               <div class="col-sm-2">
@@ -960,167 +1088,34 @@
           </div>
           <!--End Visual-Filter-->
 
-          <!--Start Data-Visual-Left-->
-          <div class="col-sm-5"  style= "height: 100%; margin: 0; padding: 0;">
-            <div id="graph_email"  style= "height: 100%;"> </div>
-          </div>
-          <!--End Data-Visual-Left-->
-
-          <!--Start Data-Panel-Right-->
-          <div class="col-sm-7" style= "height: 100%; margin: 0; padding: 0;">
-            <div class="row col-sm-12" style= "height: 100%; margin: 0; padding: 0;">
-              <!--Start Data-Panel-Nav-Tabs-->
-              <div class="row" style="height: 30px; margin: 0; padding: 0;">
-                <ul class="col-sm-12 nav nav-tabs" role="tablist" id="tab-list" style= "margin: 0; padding: 0; font-size: 13px;">
-                  <li class="active" style= "height: 30px;">
-                    <a style= "height: 30px;" href="#email-table-tab" role="tab" data-toggle="tab" id="email_table_tab_label"><i class="fa fa-envelope-o"></i>&nbsp;Email&nbsp;</a>
-                  </li>
-                  <li style= "height: 30px;">
-                    <a style= "height: 30px;" href="#attachment-table-tab" role="tab" data-toggle="tab" id="attachment_table_tab_label"><i class="fa fa-paperclip"></i>&nbsp;Attachment&nbsp;</a>
-                  </li>
-                </ul>
-              </div>
-              <!--End Data-Panel-Nav-Tabs-->
-
-              <!--Start Data-Panel-Tab-Content-->
-              <div class="row box" style="margin: 2px 0px 0px 0px; padding: 0;">
-                <div class="col-sm-12 tab-content" style= "width: 100%; margin: 0; padding: 0px 0px 0px 15px;">
-
-
-                  <!--Start Data-Panel-Tab-Content-Email-->
-                  <div class="tab-pane active" id="email-table-tab" style="height: 100%;">
-
-                    <div style="height: 20px; margin: 0; padding: 0;">
-                      <!-- <div style="float: right;padding-right: 9px;"> -->
-                      <!--   <a class="clickable"> -->
-                      <!--     <span class="glyphicon glyphicon-folder-open" /> -->
-                      <!--   </a> -->
-                      <!-- </div> -->
-                      <div style="float: left; margin: 0; padding: 0;">
-                        <span>Documents matched&nbsp;&nbsp;</span><span id="document_count"></span>
-                      </div>
-                      <div style="float: right; margin: 0; padding: 0px 10px 0px 0px;">
-                        <a class="clickable" id="email_view_all_starred">
-                          <span> View Starred </span>
-                        </a>
-                        |
-                        <!--
-                        <a class="clickable" id="email_view_export_all" title="Mark All">
-                          <span class="glyphicon glyphicon-plus"> </span>
-                        </a>
-                        |
-                        <a class="clickable" id="email_view_export_all_remove" title="Unmark All">
-                          <span class="glyphicon glyphicon-minus"> </span>
-                        </a>
-                        |
-                        -->
-                        <!-- <a class="clickable" id="email_group_conversation" title="Conversations"> -->
-                        <!--   <span class="glyphicon glyphicon-tasks"></span> -->
-                        <!-- </a> -->
-                      </div>
-                    </div>
-                    <!-- Start Data-Table-Documents -->
-                    <div class="datatable_container" style="width: 100%; height: 542px; overflow-y: scroll;">
-                      <!--
-                      <table id="result_table" class="table" style="display: table; table-layout: fixed; overflow-y: scroll;" >
-                        <thead class="result_thead"></thead>
-                        <tbody class="result_tbody"></tbody>
-                      </table>
-                      -->
-                      <table id="result_table" class="datatable display" cellspacing="0"
-                             style="width: 100%; height: 100%; display: table; table-layout: fixed; vertical-align: top" >
-                      </table>
-                    </div>
-                    <!-- End Data-Table-Documents -->
-
-                  </div>
-                  <!--End Data-Panel-Tab-Content-Email-->
-
-                  <div class="tab-pane" id="attachment-table-tab">
-
-                    <!--<div style="height: calc(100% - 30px); overflow-y: scroll;">-->
-                    <div class="modal-container" style="height: 562px; overflow-y: scroll;">
-                      <table id="email_attachment_table" class="info-table" style="display: table; table-layout: fixed; width: 100%; font-size: 12px;"></table>
-
-
-                      <!-- Start Attachment-Enlarged-View-Modal -->
-                      <div class="modal fade" id="attach_doc_modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
-                        <div class="modal-dialog" style="min-width: 468px; min-height: 468px;">
-                          <div class="modal-content">
-                            <div class="modal-header" style="padding: 2px;">
-                              <div class="row" style="margin: 0; padding: 0;" >
-                                <div class="col-xs-11" style="margin: 0; padding: 0; text-align: left;" >
-                                  <h5 class="modal-title"
-                                      style="font-family: 'Lucida Grande','Lucida Sans','Lucida Sans Unicode','Segoe UI','Verdana','sans-serif'; color: #0080AB;"
-                                      id="attach_doc_modal_label">
-                                  </h5>
-                                </div>
-                                <div class="col-xs-1" style="margin: 0; padding: 0; text-align: right;" >
-                                  <button type="button" class="fa fa-times" data-dismiss="modal" aria-hidden="true"></button>
-                                </div>
-                              </div>
-                            </div>
-                            <div class="modal-body" id="attach_doc_modal_body" style="padding: 2px;">
-
-                            </div>
-                            <div class="modal-footer" style="padding: 2px;">
-                              <div class="row" style="margin: 0; padding: 0;" >
-                                <div class="col-xs-4" style="margin: 0; padding: 0; text-align: left;" >
-                                  <button type="button" id="attach_doc_modal_open_prev" class="btn btn-default outline" disabled><i class="fa fa-chevron-left fa-lg"></i></button>
-                                </div>
-                                <div class="col-xs-4" style="margin: 0; padding: 0; text-align: center;" >
-                                  <!--
-                                  <button type="button" id="attach_doc_modal_ok" class="btn btn-default outline" data-dismiss="modal"><i class="fa fa-check-circle"></i> OK </button>
-                                  -->
-                                </div>
-                                <div class="col-xs-4" style="margin: 0; padding: 0; text-align: right;" >
-                                  <button type="button" id="attach_doc_modal_open_next" class="btn btn-default outline" disabled><i class="fa fa-chevron-right fa-lg"></i></button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <!--End Attachment-Enlarged-View-Modal -->
-                    </div>
-
-                  </div>
-                  <!--End Attachment-Table-Tab -->
-                </div>
-              </div>
-              <!--End Data-Panel-Tab-Content-->
-
-            </div>
-          </div>
-          <!--End Data-Panel-Right-->
-
         </div>
         <!--End Email-Analytics-Content-->
 
-        </div>
-        <!--End Content-->
       </div>
-      <!--End Main-container-Row-->
-
-      <!--Start Main-Container-Bottom-Panel-->
-      <div class="row">
-        <div class="col-sm-12">
-
-        </div>
-      </div>
-      <!--End Main-Container-Bottom-Panel-->
-
+      <!--End Content-->
 
     </div>
-    <!-- End-Main-Container-->
+    <!--End Main-container-Row-->
+
+    <!--Start Main-Container-Bottom-Panel-->
+    <div class="row">
+      <div class="col-sm-12">
+
+      </div>
+    </div>
+    <!--End Main-Container-Bottom-Panel-->
+
+
+  </div>
+  <!-- End-Main-Container-->
 
   <!-- Start Data-Table-Container -->
-  <div class="container-fluid col-sm-5" id="container-bottom-left"
-       style="position: fixed; bottom: 0px; height: calc(100% - 160px); margin: 0; padding: 0px 10px 0px 0px; display: none;">
+  <div class="container-fluid" id="container-email-doc-view"
+       style="position: fixed; bottom: 0px; right: 15px; width: 41%; height: calc(100% - 140px); margin: 0; padding: 0; display: none;">
     <div class="row" style="height: 100%; margin: 0; padding: 0;" id="bottom-panel-toggle">
       <div class="col-sm-12" style="height: 100%; margin: 0; padding: 0px 0px 0px 0px;">
         <!-- Start Data-Table-Toggle -->
-        <div class="col-sm-offset-10 toggle-button" id="button-toggle-container-bottom-left">
+        <div class="col-sm-offset-10 toggle-button" id="button-toggle-container-email-doc-view">
           <a><i class="fa fa-files-o"></i> <span class="glyphicon glyphicon-chevron-up"></span></a>
         </div>
         <!-- End Data-Table-Toggle -->

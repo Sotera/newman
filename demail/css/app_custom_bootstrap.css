@@ -121,8 +121,8 @@ input[type="number"]:disabled {
 
 #attach_doc_modal .modal-dialog,
 #geo_doc_modal .modal-dialog {
-    width: 58% !important;
-    min-width: 468px !important;
+    /*top: 0px !important;*/
+    min-width: 520px !important;
 }
 
 /***********************

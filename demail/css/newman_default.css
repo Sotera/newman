@@ -1,3 +1,23 @@
+/* scroll-bar handle */
+/*
+::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 8px !important;
+    border-radius: 8px !important;
+    background: #D7D7D7 !important;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.2) !important;
+}
+*/
+
+.v_scroll_left_container {
+    overflow-x: auto;
+}
+.v_scroll_left {
+    direction: rtl;
+}
+.v_scroll_left_content {
+    direction: ltr;
+}
+
 html, body, #graph {
     width: 100%;
     height: 100%;

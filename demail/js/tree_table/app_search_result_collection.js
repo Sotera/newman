@@ -1648,7 +1648,7 @@ var newman_search_result_collection = (function () {
     }
     else {
 
-      var ui_component_email_doc_view = $('#container-bottom-left'); // email_doc_view_panel is visible
+      var ui_component_email_doc_view = $('#container-email-doc-view'); // email_doc_view_panel is visible
       if (ui_component_email_doc_view.css('display') != 'none') {
         is_ui_component_visible = false;
       }
