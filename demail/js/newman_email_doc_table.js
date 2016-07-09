@@ -304,15 +304,15 @@ var newman_email_doc_table = (function () {
 
       //var date_text = row.datetime.substring(0, 10);
       var date_text = row.datetime;
-      var from_text = truncateString( row.from, 30 );
-      var subject_text = truncateString( row.subject, 50 );
+      var from_text = truncateString( row.from, app_display_config.getLabelLengthMax() );
+      var subject_text = truncateString( row.subject, app_display_config.getTitleLengthMax() );
 
       if (app_display_config.isDisplayedEmailTableColumnAltRefID()) {
 
         data_column_key_index = 5;
         data_column_export_index = 4;
 
-        var alt_id_text = truncateString( row.original_alt_ref_id, 25 );
+        var alt_id_text = truncateString( row.original_alt_ref_id, app_display_config.getLabelLengthMax() );
 
         return [date_text, from_text, alt_id_text, subject_text, exportable_icon, row.email_id];
       }

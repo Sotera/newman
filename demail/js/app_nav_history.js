@@ -311,7 +311,7 @@ var app_nav_history = (function () {
         // catch non-uri/utf8-encoded character; do nothing
       }
 
-      label = truncateString(label, 20);
+      label = truncateString(label, app_display_config.getLabelLengthMax());
 
       if (label.indexOf(' ') >= 0) {
         label = '"' + label + '"';
@@ -329,15 +329,16 @@ var app_nav_history = (function () {
   }
 
   return {
-    "push": push,
-    "pop": pop,
-    "getFirst": getFirst,
-    "getAll": getAll,
-    "getHistByID": getHistByID,
-    "getHistByDataURL": getHistByDataURL,
-    "refreshUI": refreshUI,
-    'appendHist': appendHist,
-    "initialize": initialize
+    'push' : push,
+    'pop' : pop,
+    'getFirst' : getFirst,
+    'getAll' : getAll,
+    'getHistByID' : getHistByID,
+    'getHistByDataURL' : getHistByDataURL,
+    'refreshUI' : refreshUI,
+    'appendHist' : appendHist,
+    'initialize' : initialize,
+    'loadDashboard' : loadDashboard
   }
 
 }());

@@ -10,9 +10,9 @@ var newman_email_attach_table = (function () {
   var debug_enabled = false;
 
   var is_preview_modal_locked = false;
-  var preview_modal_id = '#attach_doc_modal';
-  var preview_modal_label_id = '#attach_doc_modal_label';
-  var preview_modal_body_id = '#attach_doc_modal_body';
+  var preview_modal_id = '#doc_preview_modal_right';
+  var preview_modal_label_id = '#doc_preview_modal_right_label';
+  var preview_modal_body_id = '#doc_preview_modal_right_body';
 
   var ui_appendable = '#email_attachment_table';
 
@@ -160,9 +160,21 @@ var newman_email_attach_table = (function () {
     } // end-of if (ui_appendable)
 
     if (preview_modal_id) {
+      // dynamically set CSS when opening modal
+      $(preview_modal_id).on('show.bs.modal', function(e) {
+        var modal = $(this);
+
+        modal.css('width', 'auto');
+
+        return this;
+      });
+
+      // reset flag after closing modal
       $(preview_modal_id).on("hidden.bs.modal", function () {
         is_preview_modal_locked = false;
-        console.log('modal "' + preview_modal_id + '" closed, locked ' + is_preview_modal_locked);
+        if (debug_enabled) {
+          console.log('modal "' + preview_modal_id + '" closed, locked ' + is_preview_modal_locked);
+        }
       });
     }
   }

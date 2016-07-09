@@ -299,7 +299,37 @@ var newman_graph_email = (function () {
       //setGraphNodeColor('rank');
     });
 
+    $("#email_analytics_prev_button").on("click", function(e) {
+      if (debug_enabled) {
+        console.log('"email_analytics_prev_button" clicked');
+      }
+
+      app_nav_history.loadDashboard()
+
+      e.preventDefault();
+    });
+
   } // end-of initUI
+
+  function setHeaderLabelEmailAnalytics( analytics_label, analytics_icon_class, data_source_label, data_source_icon_class ) {
+
+    var label_field = $("#email_analytics_label");
+    if (label_field) {
+        label_field.empty();
+
+      if (analytics_label && analytics_icon_class) {
+        if (debug_enabled) {
+          console.log('setHeaderLabelEmailAnalytics( ' + analytics_label + ', ' + analytics_icon_class + ' )');
+        }
+
+        var label_html =
+          '<i class="' + analytics_icon_class + '" ></i>&nbsp;' +
+          truncateString(analytics_label, app_display_config.getLabelLengthMax());
+
+          label_field.html( label_html );
+      }
+    }
+  }
 
   /* deprecated since v2.11 */
   /*
@@ -630,6 +660,7 @@ var newman_graph_email = (function () {
 
   return {
     'initUI' : initUI,
+    'setHeaderLabelEmailAnalytics' : setHeaderLabelEmailAnalytics,
     'updateUIGraphView' : updateUIGraphView,
     'getTopCount' : getTopCount,
     'setNodeSelected' : setNodeSelected,
@@ -772,7 +803,7 @@ var newman_graph_email_request_by_conversation_forward_backward = (function () {
     var service_url = getServiceURL(order, document_datetime);
     $.get( service_url ).then(function (response) {
       setResponse( response );
-      setResponse( response );
+
       if (auto_display_enabled === true) {
         newman_graph_email.updateUIGraphView(response, document_uid);
       }

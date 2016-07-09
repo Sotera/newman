@@ -5,6 +5,9 @@ var newman_search_result_collection = (function () {
   var debug_enabled = false;
   var count = 0;
 
+  var multi_dataset_icon_class = 'fa fa-cubes fa-lg';
+  var single_dataset_icon_class = 'fa fa-cube fa-lg';
+
   var subopen_prefix = 'subopen_';
   var subopen_menu_prefix = 'subopen_menu_';
   var subopen_menu_item_min = 10, subopen_menu_item_max = 50;
@@ -957,8 +960,23 @@ var newman_search_result_collection = (function () {
   function onTreeTableRowClicked( element ) {
 
     if (element) {
+      console.log('onTreeTableRowClicked( element ) : element :\n' + JSON.stringify(element, null, 2));
+
       app_nav_history.appendHist(element.url, element.search_field, element.label);
 
+      var element_label = element.label;
+      var element_icon_class = element.icon_class;
+      newman_graph_email.setHeaderLabelEmailAnalytics( element_label, element_icon_class );
+      /*
+      var element_label = element.label;
+      var element_icon_class = element.icon_class;
+      var data_set_label = newman_dataset_label.getLabelFromDatasetID( element.data_source_id );
+      var data_set_icon_class = single_dataset_icon_class;
+      if (isMultiSelectedAsString( element.data_source_id )) {
+        data_set_icon_class = multi_dataset_icon_class;
+      }
+      newman_graph_email.setHeaderLabelEmailAnalytics( element_label, element_icon_class, data_set_label, data_set_icon_class );
+      */
 
       loadSearchResult(element.url);
 
@@ -1008,7 +1026,7 @@ var newman_search_result_collection = (function () {
         var inbound_count = '';
         var rank = '';
 
-        var icon_class = 'fa fa-cubes fa-lg';
+        var icon_class = multi_dataset_icon_class;
         var parent_node_uid = undefined;
 
         var node = search_result_table.appendDataSource(
@@ -1073,7 +1091,7 @@ var newman_search_result_collection = (function () {
         var inbound_count = '';
         var rank = '';
 
-        var icon_class = 'fa fa-cube fa-lg';
+        var icon_class = single_dataset_icon_class;
         var parent_node_uid = undefined;
 
         var node = search_result_table.appendDataSource(

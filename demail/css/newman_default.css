@@ -10,12 +10,13 @@
 
 .v_scroll_left_container {
     overflow-x: auto;
+    overflow-y: scroll;
 }
 .v_scroll_left {
-    direction: rtl;
+    direction: rtl !important;
 }
 .v_scroll_left_content {
-    direction: ltr;
+    direction: ltr !important;
 }
 
 html, body, #graph {

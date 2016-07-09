@@ -6,10 +6,17 @@
  */
 var app_geo_map = (function () {
   var debug_enabled = false;
+
+  var is_preview_modal_locked = false;
+  var preview_modal_id = '#doc_preview_modal_left';
+  var preview_modal_label_id = '#doc_preview_modal_left_label';
+  var preview_modal_body_id = '#doc_preview_modal_left_body';
+
   var _is_initialized = false;
 
   var default_view_center = new L.LatLng(31.7964452, 35.1051469), default_view_zoom = 2;
   var min_zoom = 2, max_zoom = 16;
+
   var map;
   var map_tile_layer;
   var map_tile_layer_url;
@@ -150,7 +157,7 @@ var app_geo_map = (function () {
           if (subject) {
             subject = subject.trim();
             if (subject) {
-              subject = truncateString( subject, 40 );
+              subject = truncateString( subject, app_display_config.getTitleLengthMax() );
             }
             else {
               subject = '\<' + doc_id + '\>';
@@ -269,7 +276,7 @@ var app_geo_map = (function () {
           var row = $('<div class="row" style="margin: 0; padding: 0;" />');
           var column_0 = $('<div class="col-xs-4" style="margin: 0; padding: 0; line-height: 26px; color: #0080AB;" />');
           var column_1 = $('<div class="col-xs-6" style="margin: 0; padding: 0; line-height: 22px;" />');
-          var column_2 = $('<div class="col-xs-2" style="margin: 0; padding: 0; line-height: 26px;" />');
+          var column_2 = $('<div class="col-xs-2" style="margin: 0; padding: 0; line-height: 26px; text-align: right;" />');
           row.append( column_0 );
           row.append( column_1 );
           row.append( column_2 );
@@ -296,7 +303,7 @@ var app_geo_map = (function () {
           if (subject) {
             subject = subject.trim();
             if (subject) {
-              subject = truncateString( subject, 40 );
+              subject = truncateString( subject, app_display_config.getTitleLengthMax() );
             }
             else {
               subject = '\<' + doc_id + '\>';
@@ -314,6 +321,30 @@ var app_geo_map = (function () {
             datetime = '';
           }
           column_0.html( datetime );
+          column_0.on('mouseover', function (event) {
+            // Ignore this event if preventDefault has been called.
+            if (event.defaultPrevented) return;
+
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            event.stopPropagation();
+
+            onPreviewFile( false );
+
+            /*
+            var attr_id = $(this).attr('id');
+            var attr_value = $(this).attr('value');
+            if (attr_id && attr_value) {
+              //console.log('id : "' + attr_id + '" value : "' + attr_value + '" clicked-expand-image!');
+
+              var file_uid = attr_value;
+
+
+            }
+            */
+
+          });
+
 
           var email_view_button_html = $('<button />', {
             style: 'text-align: left; font-size: 95%; min-height: 26px;',
@@ -340,99 +371,83 @@ var app_geo_map = (function () {
                   var marker_map = [geo_email_obj];
                   markMap( marker_map );
                 }
+              },
+              mouseover: function (e) {
+                if (event.defaultPrevented) return;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                event.stopPropagation();
+
+                onPreviewFile( false );
               }
             }
           });
           column_1.append( email_view_button_html );
 
-          var attach_image_url = 'email/attachment/' + encodeURIComponent( file_uid );
-          attach_image_url = newman_data_source.appendDataSource( attach_image_url );
-
-          var image_url_anchor = $('<a />').attr(
-            { "target" : "_blank",
-              "href" : attach_image_url,
-              'data-toggle' : 'tooltip',
-              'rel' : 'tooltip',
-              'data-placement' : 'left',
-              'data-original-title' : file_name,
-              'title' : file_name
-            }
-          );
-
-          image_url_anchor.append( image_icon );
-          column_2.append( image_url_anchor );
 
           if (doc_type == 'image') {
 
-            var image_view_button_html = $('<button />', {
-              style: 'text-align: left; min-height: 26px;',
-              width: '26px',
-              height: '26px',
+            var doc_view_button_html = $('<button />', {
+              style: 'text-align: left;',
               type: 'button',
               class: 'btn btn-small outline',
-              html: "&nbsp;<i class='fa fa-search-plus' aria-hidden='true'></i>&nbsp;",
+              html: image_icon,
               value: file_uid,
               id: 'attach_image_expand_button_' + file_uid,
               on: {
-                click: function () {
+                click: function (e) {
                   if (debug_enabled) {
-                    console.log('selected file-uid : ' + file_uid );
+                    console.log('clicked file-uid : ' + file_uid );
                   }
 
-                  var file_metadata = newman_geo_email_attach.getAttachDocMetadata( file_uid );
-                  if (file_metadata) {
+                  is_preview_modal_locked = true;
+                  onPreviewFile( true, file_uid );
+                  console.log('modal "' + preview_modal_id + '" opened, locked ' + is_preview_modal_locked);
 
-                    var file_name = file_metadata.filename;
-                    var content_type = file_metadata.content_type;
+                },
+                mouseover: function (e) {
+                  e.preventDefault();
+                  e.stopImmediatePropagation();
+                  e.stopPropagation();
 
-                    var doc_type = getDocumentType( file_name, content_type );
-                    var image_icon = newman_email_attach_table.getImageHTML(
-                      file_uid,
-                      doc_type,
-                      newman_email_attach_table.getImageMaxWidth(),
-                      newman_email_attach_table.getImageMaxHeight()
-                    );
-
-                    var attach_url = 'email/attachment/' + encodeURIComponent( file_uid );
-                    attach_url = newman_data_source.appendDataSource( attach_url );
-
-                    var modal_label = $("#geo_doc_modal_label");
-                    var modal_body = $("#geo_doc_modal_body");
-
-                    modal_label.empty();
-                    modal_body.empty();
-
-                    var label_anchor =
-                      $('<a>',
-                        { 'target': '_blank' ,
-                          'href' : attach_url
-                        }
-                      ).html( file_name );
-
-                    modal_label.html( label_anchor );
-                    modal_body.append( image_icon );
-
-                    var modal_options = {
-                      "backdrop": false,
-                      "keyboard": true,
-                    }
-
-                    $('#geo_doc_modal').modal(modal_options);
-
-                    $('.modal-backdrop').appendTo('.modal-container');
-
-                  }
-                  else {
-                    console.warn("Expected document metadata not found '" + file_uid + "' !")
+                  if (debug_enabled) {
+                    console.log('mouse-over file-uid : ' + file_uid );
                   }
 
+                  onPreviewFile( true, file_uid );
+                }, /*
+                mouseleave: function (e) {
+                  e.preventDefault();
+                  e.stopImmediatePropagation();
+                  e.stopPropagation();
 
-                }
+                  onPreviewFile( false );
+                }*/
               }
             });
 
 
-            column_2.append(image_view_button_html);
+            column_2.append( doc_view_button_html );
+          }
+          else {
+
+
+            var attach_image_url = 'email/attachment/' + encodeURIComponent( file_uid );
+            attach_image_url = newman_data_source.appendDataSource( attach_image_url );
+
+            var image_url_anchor = $('<a />').attr(
+              { "target" : "_blank",
+                "href" : attach_image_url,
+                'data-toggle' : 'tooltip',
+                'rel' : 'tooltip',
+                'data-placement' : 'left',
+                'data-original-title' : file_name,
+                'title' : file_name
+              }
+            );
+            image_url_anchor.append( image_icon );
+
+            column_2.append( image_url_anchor );
           }
 
           popup_container.append( row );
@@ -452,7 +467,75 @@ var app_geo_map = (function () {
 
       map.addLayer( map_marker_layer_all_attach );
     }
-  }
+  } // end-of markAllAttachment(...)
+
+  function onPreviewFile( is_shown, file_uid ) {
+    if (debug_enabled) {
+      console.log('onPreviewFile( ' + is_shown + ', ' + file_uid + ' )');
+    }
+
+    if (is_shown === true) {
+      if (file_uid) {
+
+        var file_metadata = newman_geo_email_attach.getAttachDocMetadata(file_uid);
+        if (file_metadata) {
+
+          var file_name = file_metadata.filename;
+          var content_type = file_metadata.content_type;
+
+          var doc_type = getDocumentType(file_name, content_type);
+          var image_icon = newman_email_attach_table.getImageHTML(
+            file_uid,
+            doc_type,
+            newman_email_attach_table.getImageMaxWidth(),
+            newman_email_attach_table.getImageMaxHeight()
+          );
+
+          var attach_url = 'email/attachment/' + encodeURIComponent(file_uid);
+          attach_url = newman_data_source.appendDataSource(attach_url);
+
+          var modal_label = $(preview_modal_label_id);
+          var modal_body = $(preview_modal_body_id);
+
+          modal_label.empty();
+          modal_body.empty();
+
+          var label_anchor =
+            $('<a>',
+              {
+                'target': '_blank',
+                'href': attach_url
+              }
+            ).html(file_name);
+
+          modal_label.html(label_anchor);
+          modal_body.append(image_icon);
+
+          var modal_options = {
+            "backdrop": false,
+            "keyboard": true,
+          };
+
+          $(preview_modal_id).modal(modal_options);
+
+          $('.modal-backdrop').appendTo('.modal-container');
+
+        }
+        else {
+          console.warn("Expected document metadata not found '" + file_uid + "' !")
+        }
+      } // end-of if (file_uid)
+
+    }
+    else {
+
+      if (!is_preview_modal_locked) {
+        if (($(preview_modal_id).data('bs.modal') || {}).isShown) {
+          $(preview_modal_id).modal('hide');
+        }
+      }
+    }
+  } // end-of onPreviewFile(...)
 
   function newTextMarker(text, color) {
 
@@ -597,6 +680,15 @@ var app_geo_map = (function () {
           console.log('contains:no_area_selected');
         }
         setTileCloudDownloadEnabled( false );
+      });
+
+      // close any modal still open when mouse outside of any popup container
+      $("#map").on('mouseleave', '.leaflet-popup', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        e.stopPropagation();
+
+        onPreviewFile( false );
       });
 
     }
@@ -1211,6 +1303,24 @@ var app_geo_map = (function () {
 
     newman_geo_email_sender.initEmailDocGeoLoc();
     newman_geo_email_attach.initAttachDocGeoLoc();
+
+    // dynamically set CSS when opening modal
+    $(preview_modal_id).on('show.bs.modal', function(e) {
+      var modal = $(this);
+
+      modal.css('left', '14%')
+        .css('width', 'auto');
+
+      return this;
+    });
+
+    // reset flag after closing modal
+    $(preview_modal_id).on("hidden.bs.modal", function () {
+      is_preview_modal_locked = false;
+      if (debug_enabled) {
+        console.log('modal "' + preview_modal_id + '" closed, locked ' + is_preview_modal_locked);
+      }
+    });
 
     if (is_visible === true) {
        _is_initialized = true;

@@ -10,6 +10,18 @@
 var app_display_config = (function () {
   var debug_enabled = false;
 
+  var label_length_max = 30;
+
+  function getLabelLengthMax() {
+    return label_length_max;
+  }
+
+  var title_length_max = 40;
+
+  function getTitleLengthMax() {
+    return title_length_max;
+  }
+
   var email_doc_display_map = {};
   var email_table_column_display_map = {};
 
@@ -169,6 +181,8 @@ var app_display_config = (function () {
   }
 
   return {
+    'getLabelLengthMax' : getLabelLengthMax,
+    'getTitleLengthMax' : getTitleLengthMax,
     'getServiceURLBase' : getServiceURLBase,
     'getServiceURL' : getServiceURL,
     'requestDisplayConfig' : requestDisplayConfig,

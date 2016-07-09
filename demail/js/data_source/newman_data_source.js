@@ -6,10 +6,9 @@
  * activity-label related container
  */
 var newman_dataset_label = (function () {
-  var label_length_max = 25;
 
   function formatDatasetLabel( label ) {
-    return truncateString( label, label_length_max );
+    return truncateString( label, app_display_config.getLabelLengthMax() );
   }
 
   function trimDatasetLabel( label ) {
@@ -466,8 +465,9 @@ var newman_data_source = (function () {
 
 
   function getAllLabelAsText( max_length ) {
-    if (max_length < 40) {
-      max_length = 40
+    var text_length = app_display_config.getTitleLengthMax();
+    if (max_length > 1 && max_length < text_length) {
+      text_length = max_length;
     }
     var label_text = "";
     _.each(_data_source_list, function (element) {
@@ -478,7 +478,7 @@ var newman_data_source = (function () {
     label_text = label_text.trim();
     label_text = label_text.replace(/[ \u00A0]/g, ", ");
 
-    label_text = truncateString( label_text, 40 );
+    label_text = truncateString( label_text, text_length );
 
     return label_text;
   }

@@ -190,7 +190,7 @@ var newman_top_email_entity = (function () {
         })
         .text(function (d) {
 
-          var text = truncateString(d.entity_text, 25);
+          var text = truncateString(d.entity_text, app_display_config.getLabelLengthMax());
 
           return text;
 
@@ -809,7 +809,7 @@ var newman_email_entity_search_request = (function () {
 
         // add to work-flow-history
         var entity_set_string = newman_top_email_entity.getAllEntityAsString();
-        entity_set_string = truncateString(entity_set_string, 30);
+        entity_set_string = truncateString(entity_set_string, app_display_config.getLabelLengthMax());
         app_nav_history.appendHist(service_url, field, entity_set_string);
       }
 

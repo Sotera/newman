@@ -149,7 +149,7 @@ var app_text_extract_table = (function () {
 
       var lastSort = "";
       var thead = d3.select(ui_appendable).select("thead").append("tr").selectAll("tr")
-        .data(['Phone Number', 'Document Referenced', page_label, ''])
+        .data(['Numeric Entity', 'Document Referenced', page_label, ''])
         .enter()
         .append("th")
       /*.text( function(d, i) {

@@ -1,6 +1,7 @@
-/*globals tangelo, CryptoJS, $, d3, escape, FileReader, console */
 
-
+/**
+ * graph-view related container
+ */
 var width = 400, height = 500;
 
 var force = d3.layout.force()
