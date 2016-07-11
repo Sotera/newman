@@ -1495,8 +1495,9 @@ var app_geo_map = (function () {
 */
 
     initMapControlDraw();
-    initMapTileButtonGroup();
     initMapMarkerButtonGroup();
+    initMapTileButtonGroup();
+
 
   }
 
