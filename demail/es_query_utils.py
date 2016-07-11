@@ -67,7 +67,7 @@ def _query_email_attachments(index, size, emails_query):
                 "original_alt_ref_id": _source["alt_ref_id"],
                 "original_label": _source["label"],
                 "datetime": _source["datetime"],
-                "from" : _source.get("senders",[""])[0],
+                "from" : ';'.join(_source.get("senders","")),
                 "to" : ';'.join(_source.get("tos","")),
                 "cc" : ';'.join(_source.get("ccs","")),
                 "bcc" : ';'.join(_source.get("bccs","")),

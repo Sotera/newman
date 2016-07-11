@@ -162,8 +162,14 @@ def _format_html(text):
     # Now replace the hacky delimeter tags with HTML
     return ret.replace('#_#HIGHLIGHT_START#_#','<em style="background-color: #ffff99;">').replace('#_#HIGHLIGHT_END#_#','</em>')
 
+
+
+# MAX is 1MB per attachment
+_MAX_CONTENT_TEXT_LENGTH= 1e6
 _OCR_SEP  ="\n\n===============================OCR EXTRACTION=======================================\n"
 _TIKA_SEP ="\n\n===============================TIKA EXTRACTION======================================\n"
+_CONTENT_SIZE_WARN="\n\nWARNING:  Attachment {} size {} exceeded the maximum size of {} Text has been omitted!  Pleas download the attachment to view full content!\n\n"
+
 
 def _format_body_pannel(email_body, attachments):
     '''
@@ -180,7 +186,9 @@ def _format_body_pannel(email_body, attachments):
         if "image_analytics" in attachment and "ocr_output" in attachment["image_analytics"]:
             return _OCR_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["image_analytics"]["ocr_output"] + "\n"
         if "content" in attachment and attachment["content"]:
-            return _TIKA_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["content"] + "\n"
+            attach_text_length = attachment["_size"] if "_size" in attachment else len(attachment["content"])
+            return _TIKA_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["content"][:_MAX_CONTENT_TEXT_LENGTH] + "\n" \
+                   +"" if _CONTENT_SIZE_WARN >=attach_text_length else  _CONTENT_SIZE_WARN.format(attachment["filename"], attach_text_length, _MAX_CONTENT_TEXT_LENGTH)
         return ""
 
 
