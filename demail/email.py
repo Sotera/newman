@@ -259,7 +259,7 @@ def exportStarred(*args, **kwargs):
     email_ids = [hit["num"] for hit in results["hits"]]
     return export_emails_archive(data_set_id, email_ids)
 
-#GET /attachment_content?data_set_id=<dsid>&document_id=<email id>&attachment_id=<attachment id>
+#GET /attachment_content?data_set_id=<dsid>&document_guid=<email id>&attachment_guid=<attachment id>
 # get the content of an attachment by the email and attachment ids
 def get_attachment_content_by_id(*args, **kwargs):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
