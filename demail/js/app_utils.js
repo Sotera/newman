@@ -119,14 +119,13 @@ function getDocumentType(file_name, content_type) {
   if (content_type && content_type.startsWith('image')) {
     file_type = 'image';
   }
-  else {
+  else if (file_name) {
     var file_ext;
     //var file_ext = file_name.split('.')[1];
     var index = file_name.lastIndexOf(".");
     if (index > 0) {
       file_ext = file_name.substr(index + 1);
     }
-
     file_type = getDocumentTypeByExt( file_ext );
   }
 
@@ -138,7 +137,7 @@ function getDocumentType(file_name, content_type) {
  * @param file-extension
  * @returns file-type category of 'image', 'pdf', 'powerpoint', 'word', 'excel', or 'other'
  */
-function getDocumentTypeByExt(extension ) {
+function getDocumentTypeByExt( extension ) {
 
   var contains = (function(ext, file_ext_list) {
     return _.any(file_ext_list, function(file_ext) {

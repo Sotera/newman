@@ -563,6 +563,7 @@ var newman_email_doc_view = (function () {
 
     //console.log('email-body : \n' + JSON.stringify(d.body, null, 2));
 
+    // render email-document text
     if (email_contents.entities && email_contents.entities.length > 0) {
       //sort by index
       var entity_matched_list = _.sortBy(email_contents.entities, function (o) {
@@ -611,8 +612,19 @@ var newman_email_doc_view = (function () {
     else {
       console.log('No entity set provided!');
     }
-
     email_html.append($('<div>').append(contents.body));
+
+    //render extracted text from attachments
+    if (email_contents.attachment_text && email_contents.attachment_text.length > 0) {
+      _.each(email_contents.attachment_text, function(element, index) {
+        var content_html = renderFileContentHTML( element );
+        if (content_html) {
+          email_html.append($('<div>').append( content_html ));
+        }
+
+      });
+
+    }
 
     email_html.find(".mitie").each(function(i,el){
       var jqel = $(el);
@@ -633,6 +645,34 @@ var newman_email_doc_view = (function () {
     }
 
     return email_html;
+  } // end-of renderDocumentHTML(...)
+
+  function renderFileContentHTML( content_obj ) {
+    var html_text;
+    if (content_obj) {
+      var key_list = _.keys(content_obj);
+      _.each(key_list, function(key) {
+        var file_name = key;
+        var extracted_text = content_obj[ key ];
+        if (extracted_text) {
+          var file_type = getDocumentType(file_name);
+
+          html_text = '<p><span class="bold">Attachment : </span>' + file_name + '</p>';
+
+          if (file_type == 'word') {
+            console.log('content extracted:\n\tfile : ' + file_name + '\n' + extracted_text);
+
+            html_text += '<pre>' + extracted_text + '</pre>';
+          }
+          else if (file_type == 'excel') {
+            console.log('content extracted:\n\tfile : ' + file_name + '\n' + extracted_text);
+
+            html_text += '<pre>' + extracted_text + '</pre>';
+          }
+        }
+      });
+    }
+    return html_text;
   }
 
   return {

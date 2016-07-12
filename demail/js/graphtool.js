@@ -1,6 +1,7 @@
-/*globals tangelo, CryptoJS, $, d3, escape, FileReader, console */
 
-
+/**
+ * graph-view related container
+ */
 var width = 400, height = 500;
 
 var force = d3.layout.force()
@@ -22,8 +23,8 @@ var doubleEncodeURIComponent= function(uri){
 
 var bottom_panel= (function(){
 
-  var container = $('#container-bottom-left');
-  var toggle_button = $('#button-toggle-container-bottom-left');
+  var container = $('#container-email-doc-view');
+  var toggle_button = $('#button-toggle-container-email-doc-view');
 
   //var table_panel = $('#bottom-panel-toggle div:first-child div:nth-child(2)').first();
 
@@ -35,7 +36,7 @@ var bottom_panel= (function(){
     show();
 
     toggle_button.find("span").first().switchClass(icon_class_open, icon_class_close);
-    container.css("height", "calc(100% - 160px)").css("bottom", "0px"); // height : 100% - 160px(top-menu)
+    container.css("height", "calc(100% - 140px)").css("bottom", "0px"); // height : 100% - 140px(top-menu)
 
     // hide graph-visual-filter-panel
     newman_graph_email_visual_filter.hide();
@@ -44,7 +45,7 @@ var bottom_panel= (function(){
   var close = function(){
 
     toggle_button.find("span").first().switchClass(icon_class_close, icon_class_open);
-    container.css("bottom", "calc(180px - 100%)"); // offset : 160px(top-menu) + 20px(toggle-button)
+    container.css("bottom", "calc(160px - 100%)"); // offset : 140px(top-menu) + 20px(toggle-button)
 
     // display graph-visual-filter-panel
     newman_graph_email_visual_filter.show();
@@ -602,6 +603,7 @@ function requestSearch(field, search_text, load_on_response, parent_search_uid, 
   }
   else {
     console.log("requesting '" + service_url + "'");
+    app_status_indicator.setStatusConnecting( true );
 
     $.getJSON(service_url, function (search_response) {
 
@@ -617,6 +619,7 @@ function requestSearch(field, search_text, load_on_response, parent_search_uid, 
         clear_cache
       );
 
+      app_status_indicator.setStatusConnecting( false );
     }); // end getJSON(...)
   }
 
@@ -1551,6 +1554,9 @@ $(function () {
 
     // initialize navigation-history
     app_nav_history.initialize();
+
+    // initialize status indicator
+    app_status_indicator.initStatus();
 
     // initialize dashboard domain
     initDashboardDomain();

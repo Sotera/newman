@@ -6,7 +6,7 @@ import mimetypes
 from param_utils import parseParamDatetime, parseParamAttachmentGUID
 from newman.utils.functions import nth
 from es_search import _search_ranked_email_addrs, count, get_cached_email_addr, initialize_email_addr_cache
-from es_queries import _build_filter, email_highlighting_query, _build_email_query, ids_query
+from es_queries import _build_filter, email_highlighting_query, _build_email_query, ids_query, email_attachment_guid
 from es_topic import get_categories
 
 from newman.es_connection import es
@@ -185,15 +185,23 @@ def _format_body_pannel(email_body, attachments):
     def text(attachment):
         if "image_analytics" in attachment and "ocr_output" in attachment["image_analytics"]:
             return _OCR_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["image_analytics"]["ocr_output"] + "\n"
+        '''
         if "content" in attachment and attachment["content"]:
             attach_text_length = attachment["_size"] if "_size" in attachment else len(attachment["content"])
             return _TIKA_SEP + "FileName:  " + attachment["filename"] + "\n" + attachment["content"][:_MAX_CONTENT_TEXT_LENGTH] + "\n" \
                    +"" if _CONTENT_SIZE_WARN >=attach_text_length else  _CONTENT_SIZE_WARN.format(attachment["filename"], attach_text_length, _MAX_CONTENT_TEXT_LENGTH)
+        '''
         return ""
 
 
     body = email_body + "".join(text(attachment) for attachment in attachments)
     return body
+
+def _getAttachmentTextContent(attachments):
+
+    content = [{attachment.get("filename", "") : attachment.get("content", {})} for attachment in attachments]
+    
+    return content
 
 def _getAttachmentOCRContent(attachments):
 
@@ -283,6 +291,7 @@ def get_email(data_set_id, email_id, qs=None):
              {
                "email" : email,
                "entities" : entities,
+               "attachment_text" : _getAttachmentTextContent(attachments),
                "attachment_ocr" : _getAttachmentOCRContent(attachments),
                "attachment_highlighted" : highlighted_attachments,
                "lda_topic_scores" : topic_scores
@@ -313,6 +322,7 @@ def get_email(data_set_id, email_id, qs=None):
         resp["email_contents_translated"] = {
                                              "email" : email_translated,
                                              "entities": entities_translated,
+                                             "attachment_text" : _getAttachmentTextContent(attachments),
                                              "attachment_ocr" : _getAttachmentOCRContent(attachments),
                                              "attachment_highlighted" : highlighted_attachments,
                                              "lda_topic_scores":topic_scores,
@@ -390,8 +400,6 @@ def get_attachment_by_id(*args, **kwargs):
 
     return as_str
 
-
-
 #GET /attachments/<sender>
 # find all attachments for a specific email address
 def get_attachments_by_sender(data_set_id, sender, start_datetime, end_datetime, size):
@@ -424,6 +432,21 @@ def get_attachments_by_sender(data_set_id, sender, start_datetime, end_datetime,
             email_attachments.append(l)
     return {"sender":sender, "email_attachments":email_attachments}
 
+
+def _get_attachment_content_by_id(data_set_id, doc_id, attach_id):
+
+    body = email_attachment_guid(doc_id, attach_id)
+    tangelo.log("get_attachment_content_by_id.Query %s"%body)
+
+    attachments_resp = es().search(index=data_set_id, doc_type="emails", body=body)
+
+    if len(attachments_resp["hits"]["hits"]) > 0:
+        doc = attachments_resp["hits"]["hits"][0]
+        _source = doc["_source"]
+        for attachment in _source["attachments"]:
+            if attachment["guid"] == attach_id:
+                return {"content": attachment["content"]}
+    return {"content": ''}
 
 def dump(bytes, name):
     text_file = open("/tmp/"+name, "wb")

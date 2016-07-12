@@ -47,7 +47,7 @@ function EmailSearchResult(_label,
   function _format_label(label) {
     var new_label = label;
     if (label) {
-      new_label = truncateString( label, 30 );
+      new_label = truncateString( label, app_display_config.getLabelLengthMax() );
     }
     return new_label;
   }

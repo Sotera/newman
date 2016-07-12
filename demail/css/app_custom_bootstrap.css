@@ -119,10 +119,17 @@ input[type="number"]:disabled {
     right: 55% !important;
 }
 
-#attach_doc_modal .modal-dialog,
-#geo_doc_modal .modal-dialog {
-    width: 58% !important;
-    min-width: 468px !important;
+#doc_preview_modal_right .modal-dialog {
+    position: relative;
+    display: table;
+    min-width: 520px !important;
+}
+
+#doc_preview_modal_left .modal-dialog {
+    position: relative;
+    display: table;
+    /*left: 13% !important;*/
+    min-width: 520px !important;
 }
 
 /***********************

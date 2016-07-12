@@ -7,14 +7,20 @@
  * email-attachment-table related container
  */
 var newman_email_attach_table = (function () {
-
   var debug_enabled = false;
+
+  var is_preview_modal_locked = false;
+  var preview_modal_id = '#doc_preview_modal_right';
+  var preview_modal_label_id = '#doc_preview_modal_right_label';
+  var preview_modal_body_id = '#doc_preview_modal_right_body';
+
   var ui_appendable = '#email_attachment_table';
 
   var per_page_display_min = 20, per_page_display_max = 50, per_page_display_count = per_page_display_min;
   var display_start_index = 1, display_end_index = per_page_display_count;
 
-  var image_width_max = 468, image_width_min = 32, image_height_max = 468, image_height_min = 32;
+  var image_width_max = 500, image_width_min = 32, image_height_max = 500, image_height_min = 32;
+
   function getImageMinWidth() {
     return image_width_min;
   }
@@ -138,56 +144,13 @@ var newman_email_attach_table = (function () {
         var attr_id = $(this).attr('id');
         var attr_value = $(this).attr('value');
         if (attr_id && attr_value) {
-          console.log('id : "' + attr_id + '" value : "' + attr_value + '" clicked-expand-image!');
+          //console.log('id : "' + attr_id + '" value : "' + attr_value + '" clicked-expand-image!');
 
           var file_uid = attr_value;
-          var file_metadata = getAttachDocMetadata( file_uid );
-          if (file_metadata) {
 
-            var file_name = file_metadata.filename;
-            var content_type = file_metadata.content_type;
-
-            var doc_type = getDocumentType( file_name, content_type );
-            var image_icon = getImageHTML(
-              file_uid,
-              doc_type,
-              getImageMaxWidth(),
-              getImageMaxHeight()
-            );
-
-            var attach_url = 'email/attachment/' + encodeURIComponent( file_uid );
-            attach_url = newman_data_source.appendDataSource( attach_url );
-
-            var modal_label = $("#attach_doc_modal_label");
-            var modal_body = $("#attach_doc_modal_body");
-
-            modal_label.empty();
-            modal_body.empty();
-
-            var label_anchor =
-              $('<a>',
-                { 'target': '_blank' ,
-                  'href' : attach_url
-                }
-              ).html( file_name );
-
-            modal_label.html( label_anchor );
-            modal_body.append( image_icon );
-
-            var modal_options = {
-              "backdrop": false,
-              "keyboard": true,
-            }
-
-            $('#attach_doc_modal').modal(modal_options);
-
-            $('.modal-backdrop').appendTo('.modal-container');
-
-          }
-          else {
-            console.warn("Expected document metadata not found '" + attr_value + "' !")
-          }
-
+          is_preview_modal_locked = true;
+          onPreviewFile( true, file_uid );
+          console.log('modal "' + preview_modal_id + '" opened, locked ' + is_preview_modal_locked);
         }
 
         event.preventDefault();
@@ -196,8 +159,100 @@ var newman_email_attach_table = (function () {
       });
     } // end-of if (ui_appendable)
 
+    if (preview_modal_id) {
+      // dynamically set CSS when opening modal
+      $(preview_modal_id).on('show.bs.modal', function(e) {
+        var modal = $(this);
+
+        modal.css('width', 'auto');
+
+        return this;
+      });
+
+      // reset flag after closing modal
+      $(preview_modal_id).on("hidden.bs.modal", function () {
+        is_preview_modal_locked = false;
+        if (debug_enabled) {
+          console.log('modal "' + preview_modal_id + '" closed, locked ' + is_preview_modal_locked);
+        }
+      });
+    }
   }
 
+  function onPreviewFile( is_shown, file_uid ) {
+    console.log('onPreviewFile( ' + is_shown + ', ' + file_uid + ' )');
+
+    if (is_shown === true) {
+      if (file_uid) {
+
+        var file_metadata = getAttachDocMetadata(file_uid);
+        if (file_metadata) {
+
+          var file_name = file_metadata.filename;
+          var content_type = file_metadata.content_type;
+
+          var doc_type = getDocumentType(file_name, content_type);
+          var image_icon = getImageHTML(
+            file_uid,
+            doc_type,
+            getImageMaxWidth(),
+            getImageMaxHeight()
+          );
+
+          var attach_url = 'email/attachment/' + encodeURIComponent(file_uid);
+          attach_url = newman_data_source.appendDataSource(attach_url);
+
+          var modal_label = $(preview_modal_label_id);
+          var modal_body = $(preview_modal_body_id);
+
+          modal_label.empty();
+          modal_body.empty();
+
+          var label_anchor =
+            $('<a>',
+              {
+                'target': '_blank',
+                'href': attach_url
+              }
+            ).html(file_name);
+
+          modal_label.html(label_anchor);
+          modal_body.append(image_icon);
+
+          var modal_options = {
+            "backdrop": false,
+            "keyboard": true,
+          }
+
+          //$(preview_modal_id).attr('value', file_uid);
+          $(preview_modal_id).modal(modal_options);
+
+          $('.modal-backdrop').appendTo('.modal-container');
+
+        }
+        else {
+          console.warn("Expected document metadata not found '" + file_uid + "' !")
+        }
+      }// end-of if (file_uid)
+
+    }
+    else {
+
+      //var delay = 1000;
+      //setTimeout( function() {
+        //var modal_value = $(preview_modal_id).attr('value');
+        //console.log("modal value '" + modal_value + "'");
+
+      if (!is_preview_modal_locked) {
+        if (($(preview_modal_id).data('bs.modal') || {}).isShown) {
+          $(preview_modal_id).modal('hide');
+        }
+      }
+
+      //}, delay);
+    }
+
+  } // onPreviewFile( file_uid )
 
 
   function getCacheMaxCount() {
@@ -324,7 +379,7 @@ var newman_email_attach_table = (function () {
           }
 
           if (i == 2) {
-            return "width : 80px; min-width : 80px";
+            return "width : 64px; min-width : 64px";
           }
 
           if (i == 3) {
@@ -388,14 +443,33 @@ var newman_email_attach_table = (function () {
           }
 
         })
-        /*.on("mouseover", function(d, index) {
+        .on("mouseover", function(d, index) {
 
-         if (index == 3) {
-         console.log('mouse-over : index ' + index + '\n' + JSON.stringify(d, null, 2));
+           if (index == 2) {
+             var file_uid = d.attachment_id;
+             var file_name = d.filename;
+             var content_type = d.content_type;
+             console.log('mouse-over : index ' + index + '\n\t' + d.filename);
 
-         }
+             var doc_type = getDocumentType(file_name, content_type);
 
-         })*/
+             if (doc_type == 'image') {
+               onPreviewFile(true, file_uid);
+             }
+          }
+          else {
+             onPreviewFile( false );
+          }
+
+        })
+        .on("mouseout", function(d, index) {
+
+          if (index == 2) {
+            console.log('mouse-out : index ' + index + '\n\t' + d.attachment_id);
+
+          }
+
+        })
         .on("click", function (d, i) {
 
           if (i == 0 || i == 1) {
@@ -424,40 +498,56 @@ var newman_email_attach_table = (function () {
             var file_name = d.filename;
             var content_type = d.content_type;
 
-            var image_view_button_html;
             var doc_type = getDocumentType(file_name, content_type);
+            var image_icon = getImageHTML(file_uid, doc_type);
+
+            var col_row = $('<div>');
 
             if (doc_type == 'image') {
+              /*
               image_view_button_html =
                 "<button type='button' class='btn btn-small outline' value='" + file_uid + "' id='attach_image_expand_button_" + file_uid + "' >" +
                 "&nbsp;<i class='fa fa-search-plus' aria-hidden='true'></i>&nbsp;" +
                 "</button>";
+              */
+
+              var doc_view_button_html =
+                $('<button>',
+                  {
+                    'type': 'button',
+                    'class': 'btn btn-small outline',
+                    'value': file_uid,
+                    'id' : 'attach_image_expand_button_' + file_uid,
+                    'data-toggle': 'tooltip',
+                    'rel': 'tooltip',
+                    'data-placement': 'left',
+                    'data-original-title': file_name,
+                    'title': file_name
+                  }
+                ).html(image_icon);
+
+              col_row.append( doc_view_button_html );
             }
+            else {
 
-            var image_icon = getImageHTML(file_uid, doc_type);
+              var attach_url = 'email/attachment/' + encodeURIComponent(file_uid);
+              attach_url = newman_data_source.appendDataSource(attach_url);
 
-            var attach_url = 'email/attachment/' + encodeURIComponent(file_uid);
-            attach_url = newman_data_source.appendDataSource(attach_url);
+              var doc_link_html =
+                $('<a>',
+                  {
+                    'target': '_blank',
+                    'href': attach_url,
+                    'data-toggle': 'tooltip',
+                    'rel': 'tooltip',
+                    'data-placement': 'left',
+                    'data-original-title': file_name,
+                    'title': file_name
+                  }
+                ).html(image_icon)
 
-
-            var col_row = $('<div>').append(
-              $('<a>',
-                {
-                  'target': '_blank',
-                  'href': attach_url,
-                  'data-toggle': 'tooltip',
-                  'rel': 'tooltip',
-                  'data-placement': 'left',
-                  'data-original-title': file_name,
-                  'title': file_name
-                }
-              ).html(image_icon)
-            );
-
-            if (image_view_button_html) {
-              col_row.append(image_view_button_html);
+              col_row.append( doc_link_html );
             }
-
 
             return col_row.html();
 

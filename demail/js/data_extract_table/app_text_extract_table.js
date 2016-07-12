@@ -149,7 +149,7 @@ var app_text_extract_table = (function () {
 
       var lastSort = "";
       var thead = d3.select(ui_appendable).select("thead").append("tr").selectAll("tr")
-        .data(['Phone Number', 'Document Referenced', page_label, ''])
+        .data(['Numeric Entity', 'Document Referenced', page_label, ''])
         .enter()
         .append("th")
       /*.text( function(d, i) {
@@ -393,12 +393,16 @@ var app_text_extract_table_phone_list_request = (function () {
     }
     else {
 
+      app_status_indicator.setStatusConnecting( true );
+
       $.get(service_url).then(function (response) {
 
         var mapped_response = mapResponse( service_url, data_source_string, response, true, top_count, start_index );
         if (mapped_response) {
           app_text_extract_table.onRequestExtractPhoneList( mapped_response, start_index, response.length );
         }
+
+        app_status_indicator.setStatusConnecting( false );
       });
     }
   }

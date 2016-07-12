@@ -190,7 +190,7 @@ var newman_top_email_entity = (function () {
         })
         .text(function (d) {
 
-          var text = truncateString(d.entity_text, 25);
+          var text = truncateString(d.entity_text, app_display_config.getLabelLengthMax());
 
           return text;
 
@@ -603,9 +603,14 @@ var newman_top_email_entity_list_request = (function () {
     }
     else {
 
-      //$.when($.get( service_url )).done(function (response) {
+      app_status_indicator.setStatusConnecting( true );
+
       $.get(service_url).then(function (response) {
+      //$.when($.get( service_url )).done(function (response) {
+
         setResponse(service_url, data_source_string, response);
+
+        app_status_indicator.setStatusConnecting( false );
       });
     }
   }
@@ -701,8 +706,13 @@ var newman_top_email_entity_list_request = (function () {
         }
         else {
 
+          app_status_indicator.setStatusConnecting( true );
+
           $.get(service_url).then(function (response) {
+
             onRequestTopEmailEntityDataSource(key, response, service_url);
+
+            app_status_indicator.setStatusConnecting( false );
           });
         }
       });
@@ -799,7 +809,7 @@ var newman_email_entity_search_request = (function () {
 
         // add to work-flow-history
         var entity_set_string = newman_top_email_entity.getAllEntityAsString();
-        entity_set_string = truncateString(entity_set_string, 30);
+        entity_set_string = truncateString(entity_set_string, app_display_config.getLabelLengthMax());
         app_nav_history.appendHist(service_url, field, entity_set_string);
       }
 
