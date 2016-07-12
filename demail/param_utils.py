@@ -92,7 +92,6 @@ def parseParamEmailRecipient( **kwargs ):
     
     return [x for x in recipient_list if (x is not '' and x is not None)]
 
-
 def parseParamEmailIds( **kwargs ):
     tangelo.log("parseParamEmailIds(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     value = kwargs.get('email_ids')
@@ -132,7 +131,7 @@ def parseParamTextQuery( **kwargs ):
 
 def parseParamDocumentUID( **kwargs ):
     #tangelo.log("parseParamDocumentUID(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
-    return kwargs.get('document_uid', '')
+    return kwargs.get('document_guid', '')
 
 def parseParamDocumentDatetime( **kwargs ):
     #tangelo.log("parseParamDocumentUID(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))

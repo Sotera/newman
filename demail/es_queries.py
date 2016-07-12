@@ -17,6 +17,28 @@ def ids_query(id):
         }
     }
 
+def email_attachment_guid(doc_id, guid):
+    return {
+        "filter": {
+            "bool": {
+                "filter": [
+                    {
+                        "ids" : {
+                            "values" : [doc_id]
+                        }
+                    },
+                    {
+                        "term" : {
+                            "attachments.guid" : guid
+                        }
+                    }
+
+                ]
+            }
+        }
+    }
+
+
 def _has_phone_number_filter():
     return { "exists": { "field": "phone_numbers"}}
 
