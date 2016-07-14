@@ -411,7 +411,16 @@ var newman_email_doc_view = (function () {
       if (!label) {
         label = 'Email ID'
       }
-      email_html.append( $('<p>').append( $('<span>').addClass('bold').text( label + ": " )).append( _dataset_case_id ));
+      email_html.append( $('<p>').append( $('<span>').addClass('bold').text( label + ": " )).append( _email_doc_uid ));
+    }
+
+    if (app_display_config.isDisplayedEmailIngestID()) {
+      var label = app_display_config.getLabelEmailIngestID();
+      if (!label) {
+        label = 'Dataset ID'
+      }
+      var ingest_id_text = _dataset_label + ' (' + _dataset_uid + ')'
+      email_html.append($('<p>').append($('<span>').addClass('bold').text( label + ": " )).append( ingest_id_text ));
     }
 
     if (app_display_config.isDisplayedEmailCaseID()) {

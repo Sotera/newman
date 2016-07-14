@@ -124,6 +124,22 @@ var app_display_config = (function () {
     return "Case ID";
   }
 
+  function isDisplayedEmailIngestID() {
+    var property = getEmailDocDisplayConfig('dataset_ingest_id');
+    if (property) {
+      return (property.is_displayed === true)
+    }
+    return true;
+  }
+
+  function getLabelEmailIngestID() {
+    var property = getEmailDocDisplayConfig('dataset_ingest_id');
+    if (property) {
+      return property.label;
+    }
+    return "Dataset ID";
+  }
+
   function isDisplayedEmailAltRefID() {
     var property = getEmailDocDisplayConfig('dataset_alt_ref_id');
     if (property) {
@@ -191,6 +207,8 @@ var app_display_config = (function () {
     'getLabelEmailDocID' : getLabelEmailDocID,
     'isDisplayedEmailCaseID' : isDisplayedEmailCaseID,
     'getLabelEmailCaseID' : getLabelEmailCaseID,
+    'isDisplayedEmailIngestID' : isDisplayedEmailIngestID,
+    'getLabelEmailIngestID' : getLabelEmailIngestID,
     'isDisplayedEmailAltRefID' : isDisplayedEmailAltRefID,
     'getLabelEmailAltRefID' : getLabelEmailAltRefID,
     'isDisplayedEmailTableColumnRecipientCount' : isDisplayedEmailTableColumnRecipientCount,
