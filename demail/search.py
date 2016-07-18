@@ -1,7 +1,7 @@
 import tangelo
 import cherrypy
 
-from es_search import es_get_all_email_by_address, get_top_email_by_text_query, es_get_all_email_by_community, es_get_all_email_by_topic, es_get_conversation, es_get_all_email_by_conversation_forward_backward
+from es_search import es_get_all_email_by_community, _search, es_get_all_email_by_topic, es_get_conversation, es_get_all_email_by_conversation_forward_backward
 from newman.es_connection import getDefaultDataSetID
 from param_utils import parseParamDatetime, parseParamIngestIds, parseParamAllSenderAllRecipient, parseParamEmailSender, parseParamEmailRecipient, parseParam_email_addr, parseParamTopic, parseParamTextQuery,\
     parseParamDocumentUID, parseParamDocumentDatetime, parseParamEncrypted
@@ -25,35 +25,11 @@ def search(*path_args, **param_args):
     encrypted = parseParamEncrypted(**param_args)
 
     #re-direct based on field
-    if (path_args[0] == "text") or (path_args[0] == "all") :
-        if len(path_args) == 1:
-            return {"graph":{"nodes":[], "links":[]}, "rows":[]}
-        elif len(path_args) >= 2:
-
-            return get_top_email_by_text_query(data_set_id, ingest_ids, qs, start_datetime, end_datetime, encrypted, size)
+    if path_args[0] == "all" :
+        return _search(data_set_id=data_set_id, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
     elif path_args[0] == "email":
-        if len(path_args) == 1:
-            return {"graph":{"nodes":[], "links":[]}, "rows":[]}
-        elif len(path_args) >= 2:
-            # TODO remove hacky path_args - should come from params
-            email_address=urllib.unquote(nth(path_args, 1, ''))
-            return es_get_all_email_by_address(data_set_id, email_address, qs, start_datetime, end_datetime, encrypted, size)
-    # TODO REMOVEV this call
-    # elif path_args[0] == "entity":
-    #     return get_graph_by_entity(*path_args, **param_args)
-    # TODO clean up this method
-    elif path_args[0] == "topic":
-        if len(path_args) == 1:
-            return {"graph":{"nodes":[], "links":[]}, "rows":[]}
-        elif len(path_args) >= 2:
-            #TODO implement search by topic
-            return {"graph":{"nodes":[], "links":[]}, "rows":[]}
-    elif path_args[0] == "community":
-        if len(path_args) == 1:
-            return {"graph":{"nodes":[], "links":[]}, "rows":[]}
-        elif len(path_args) >= 2:
-            #TODO implement search by community
-            return {"graph":{"nodes":[], "links":[]}, "rows":[]}        
+        email_address=urllib.unquote(nth(path_args, 1, ''))
+        return _search(data_set_id=data_set_id, email_address=email_address, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
     return {"graph":{"nodes":[], "links":[]}, "rows":[]}
 
 #GET <host>:<port>:/search/search_by_conversation_forward_backward?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>&order=prev&sender=<s1,s2...>&recipient=<r1,r2..>
@@ -98,7 +74,7 @@ def search_email_by_conversation(*path_args, **param_args):
     cherrypy.log("\trecipient_list: %s)" % str(recipient_list))
     
     document_uid = parseParamDocumentUID(**param_args)
-    cherrypy.log("\tdocument_uid: %s)" % str(document_uid))
+    cherrypy.log("\tdocument_guid: %s)" % str(document_uid))
     
     document_datetime = parseParamDocumentDatetime(**param_args)
     cherrypy.log("\tdocument_datetime: %s)" % str(document_datetime))
@@ -166,10 +142,12 @@ def search_email_by_topic(*args, **param_args):
 
 actions = {
     "search": search,
-    "search_by_address": es_get_all_email_by_address,
+    # TODO remove
+    # "search_by_address": es_get_all_email_by_address,
     "search_by_conversation": search_email_by_conversation,
     "search_by_conversation_forward_backward": search_email_by_conversation_forward_backward,
-    "search_by_text": get_top_email_by_text_query,
+    # TODO remove
+    # "search_by_text": get_top_email_by_text_query,
     "search_by_community": search_email_by_community,
     "search_by_topic": search_email_by_topic
 }

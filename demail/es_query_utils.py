@@ -1,5 +1,5 @@
 import tangelo
-
+import time
 from newman.es_connection import es
 
 
@@ -86,7 +86,8 @@ def _query_email_attachments(index, size, emails_query):
 
 # returns {"total":n "hits":[]}
 def _query_emails(index, size, emails_query, additional_fields=[]):
+    start = time.time()
     emails_resp = es().search(index=index, doc_type="emails", size=size, fields=get_graph_row_fields() + additional_fields, body=emails_query)
-    tangelo.log("es_query_utils._query_emails(total document hits = %s)" % emails_resp["hits"]["total"])
+    tangelo.log("es_query_utils._query_emails(total document hits = %s, TIME_ELAPSED=%g)" % (emails_resp["hits"]["total"],time.time()-start))
 
     return {"total":emails_resp["hits"]["total"], "hits":[_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]}

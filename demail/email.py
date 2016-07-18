@@ -12,7 +12,7 @@ from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarre
 
 from es_queries import _build_email_query
 from es_query_utils import _query_email_attachments, _query_emails
-from es_search import _build_graph_for_emails, es_get_all_email_by_address, get_top_email_by_text_query
+from es_search import _build_graph_for_emails, _search
 
 #GET <host>:<port>:/email/email/<id>?qs="<query_string>"
 def getEmail(*args, **kwargs):
@@ -106,7 +106,7 @@ def getRankedAddressesWithTextSearch(*args, **kwargs):
     # TODO this needs to come from UI
     size = size if size >500 else 2500
 
-    text_search_graph = get_top_email_by_text_query(data_set_id, qs, start_datetime, end_datetime, size)
+    text_search_graph = _search(data_set_id=data_set_id, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, size=size)
 
     text_search = {
         "text_search_url_path": qs,
@@ -124,7 +124,7 @@ def getRankedAddressesWithTextSearch(*args, **kwargs):
     ranked_addresses = get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size)
     text_search["top_address_list"] = []
     for i, email_address in enumerate(ranked_addresses["emails"]):
-        graph = es_get_all_email_by_address(data_set_id, email_address[0], qs, start_datetime, end_datetime, size )
+        graph = _search(data_set_id=data_set_id, email_address=email_address[0], qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, size=size )
 
         text_search["top_address_list"].append({
             "address_search_url_path" : email_address[0],
@@ -161,7 +161,7 @@ def getRankedAddresses(*args, **kwargs):
     ranked_addresses = get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size)
     top_address_list = []
     for i, email_address in enumerate(ranked_addresses["emails"]):
-        graph = es_get_all_email_by_address(data_set_id, email_address[0], qs, start_datetime, end_datetime, size )
+        graph = _search(data_set_id, email_address[0], qs, start_datetime, end_datetime, size )
 
         top_address_list.append({
             "address_search_url_path" : email_address[0],

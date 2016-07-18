@@ -1,4 +1,5 @@
 import json
+import time
 from threading import Lock
 
 import tangelo
@@ -90,7 +91,8 @@ def get_cached_email_addr(index, addr):
 
 
 # This will generate the graph structure for a emails list provided.
-def _build_graph_for_emails(data_set_id, emails, query_hits):
+def _build_graph_for_emails(data_set_id, docs, query_hits):
+    start = time.time()
     # List of all nodes - will contain duplicate node names for as they are not unique between the datasets
     nodes = []
     # List of edges that map between nodes
@@ -107,7 +109,7 @@ def _build_graph_for_emails(data_set_id, emails, query_hits):
     # Initialize all datasets
     initialize_email_addr_cache(data_set_id)
 
-    for email in emails:
+    for email in docs:
         ingest_id = email["original_ingest_id"]
 
         from_addr = email["from"]
@@ -141,9 +143,33 @@ def _build_graph_for_emails(data_set_id, emails, query_hits):
             else:
                 edge_map[edge_key]["value"]=edge_map[edge_key]["value"]+1
 
-    return {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in emails], "query_hits" : query_hits, "data_set_id" : data_set_id}
+
+    resp = {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in docs], "query_hits" : query_hits, "data_set_id" : data_set_id}
+
+    tangelo.log("es_search._build_graph_for_emails(total document hits = %s, TIME_ELAPSED=%g)" % (len(docs),time.time()-start))
+
+    return resp
+
+
+def _search(data_set_id, email_address, qs, start_datetime, end_datetime, encrypted, size):
+    tangelo.log("es_search.search(email_address=%s, qs=%s)" % ((str(email_address)), qs))
+    email_addrs=[email_address] if email_address else None
+
+    query  = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
+    tangelo.log("es_search.search(query: %s)" % (query))
+
+    results = _query_emails(data_set_id, size, query)
+    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+
+    query = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), attachments_only=True, encrypted=encrypted)
+    tangelo.log("search.search(attachment-query: %s)" % (query))
+    attachments = _query_email_attachments(data_set_id, size, query)
+    graph["attachments"] = attachments
+    graph["data_set_id"] = data_set_id
+    return graph
 
 # Build a graph with rows for a specific email address.
+# TODO deprectated remove this
 def es_get_all_email_by_address(data_set_id, email_address, qs, start_datetime, end_datetime, encrypted, size):
     tangelo.log("es_search.get_graph_for_email_address(%s)" % (str(email_address)))
 
@@ -157,6 +183,31 @@ def es_get_all_email_by_address(data_set_id, email_address, qs, start_datetime, 
     tangelo.log("search.get_graph_by_entity(attachment-query: %s)" % (query))
     attachments = _query_email_attachments(data_set_id, size, query)
     graph["attachments"] = attachments
+    graph["data_set_id"] = data_set_id
+    return graph
+
+# GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
+# build a graph for a specific email address.
+# args should be a list of terms to search for in any document field
+# TODO deprectated remove this
+def get_top_email_by_text_query(data_set_id, ingest_ids, qs, start_datetime, end_datetime, encrypted, size):
+
+    if not qs:
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing search term(s)")
+
+    query  = _build_email_query(ingest_ids=ingest_ids, qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
+    tangelo.log("es_search.get_graph_for_text_query(query: %s)" % (query))
+
+    results = _query_emails(data_set_id, size, query)
+
+    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+
+    # Get attachments for community
+    query = _build_email_query(qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted, attachments_only=True)
+    tangelo.log("es_search.get_top_email_by_text_query(attachment-query: %s)" % (query))
+    attachments = _query_email_attachments(data_set_id, size, query)
+    graph["attachments"] = attachments
+
     graph["data_set_id"] = data_set_id
     return graph
 
@@ -270,30 +321,6 @@ def es_get_all_email_by_topic(data_set_id, topic, email_addrs, qs, start_datetim
     tangelo.log("es_search.es_get_all_email_by_topic(attachment-query: %s)" % (query))
     attachments = _query_email_attachments(data_set_id, size, query)
     graph["attachments"] = attachments
-    graph["data_set_id"] = data_set_id
-    return graph
-
-
-# GET /search/field/<query string>?index=<index name>&start=<start datetime>&end=<end datetime>
-# build a graph for a specific email address.
-# args should be a list of terms to search for in any document field
-def get_top_email_by_text_query(data_set_id, ingest_ids, qs, start_datetime, end_datetime, encrypted, size):
-
-    if not qs:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing search term(s)")
-
-    query  = _build_email_query(ingest_ids=ingest_ids, qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
-    tangelo.log("es_search.get_graph_for_text_query(query: %s)" % (query))
-
-    results = _query_emails(data_set_id, size, query)
-    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
-
-    # Get attachments for community
-    query = _build_email_query(qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted, attachments_only=True)
-    tangelo.log("es_search.get_top_email_by_text_query(attachment-query: %s)" % (query))
-    attachments = _query_email_attachments(data_set_id, size, query)
-    graph["attachments"] = attachments
-
     graph["data_set_id"] = data_set_id
     return graph
 

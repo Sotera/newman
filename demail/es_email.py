@@ -278,7 +278,7 @@ def get_email(data_set_id, email_id, qs=None):
              subject,
              _format_body_pannel(body, attachments),
              # body,
-             [[f["guid"],f["filename"],f["content_encrypted"]] for f in source.get("attachments", [""])],
+             [[f["guid"],f["filename"],f.get("content_encrypted",'')] for f in source.get("attachments", [""])],
              source.get("starred", False)
              ]
 
