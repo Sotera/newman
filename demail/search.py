@@ -4,7 +4,7 @@ import cherrypy
 from es_search import es_get_all_email_by_community, _search, es_get_all_email_by_topic, es_get_conversation, es_get_all_email_by_conversation_forward_backward
 from newman.es_connection import getDefaultDataSetID
 from param_utils import parseParamDatetime, parseParamIngestIds, parseParamAllSenderAllRecipient, parseParamEmailSender, parseParamEmailRecipient, parseParam_email_addr, parseParamTopic, parseParamTextQuery,\
-    parseParamDocumentUID, parseParamDocumentDatetime, parseParamEncrypted
+    parseParamDocumentGUID, parseParamDocumentDatetime, parseParamEncrypted
 import urllib
 from newman.utils.functions import nth
 
@@ -73,9 +73,10 @@ def search_email_by_conversation(*path_args, **param_args):
     recipient_list = parseParamEmailRecipient(**param_args)
     cherrypy.log("\trecipient_list: %s)" % str(recipient_list))
     
-    document_uid = parseParamDocumentUID(**param_args)
-    cherrypy.log("\tdocument_guid: %s)" % str(document_uid))
-    
+
+    document_guid = parseParamDocumentGUID(**param_args)
+    cherrypy.log("\tdocument_guid: %s)" % str(document_guid))
+
     document_datetime = parseParamDocumentDatetime(**param_args)
     cherrypy.log("\tdocument_datetime: %s)" % str(document_datetime))
     if not document_datetime:
@@ -89,7 +90,7 @@ def search_email_by_conversation(*path_args, **param_args):
                                start_datetime,
                                end_datetime,
                                size/2,
-                               document_uid,
+                               document_guid,
                                document_datetime)
 
 

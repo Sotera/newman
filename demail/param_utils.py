@@ -129,14 +129,18 @@ def parseParamTextQuery( **kwargs ):
     tangelo.log("parseParamTextQuery(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     return kwargs.get('qs', '')
 
-def parseParamDocumentUID( **kwargs ):
-    #tangelo.log("parseParamDocumentUID(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
-    return kwargs.get('document_guid', '')
+def parseParamParentGUID( **kwargs ):
+    #tangelo.log("parseParamParentGUID(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    return kwargs.get('parent_guid', '')
 
 def parseParamDocumentDatetime( **kwargs ):
-    #tangelo.log("parseParamDocumentUID(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    #tangelo.log("parseParamDocumentDatetime(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     return kwargs.get('document_datetime', '')
 
+def parseParamDocumentGUID( **kwargs ):
+    #tangelo.log("parseParamDocumentGUID(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    return kwargs.get('document_guid', '')
+
 def parseParamAttachmentGUID( **kwargs ):
-    #tangelo.log("parseParamDocumentUID(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    #tangelo.log("parseParamAttachmentGUID(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     return kwargs.get('attachment_guid', '')

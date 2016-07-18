@@ -8,7 +8,7 @@ from newman.es_connection import getDefaultDataSetID
 
 from es_email import get_ranked_email_address_from_email_addrs_index, get_attachment_by_id, _get_attachment_content_by_id, get_attachments_by_sender, get_email, get_top_domains, get_top_communities, set_starred
 from es_export import export_emails_archive
-from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarred, parseParamTextQuery, parseParamIngestId, parseParamDocumentUID, parseParamAttachmentGUID
+from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarred, parseParamTextQuery, parseParamIngestId, parseParamParentGUID, parseParamAttachmentGUID
 
 from es_queries import _build_email_query
 from es_query_utils import _query_email_attachments, _query_emails
@@ -259,15 +259,15 @@ def exportStarred(*args, **kwargs):
     email_ids = [hit["num"] for hit in results["hits"]]
     return export_emails_archive(data_set_id, email_ids)
 
-#GET /attachment_content?data_set_id=<dsid>&document_guid=<email id>&attachment_guid=<attachment id>
+#GET /attachment_content?data_set_id=<dsid>&parent_guid=<email id>&attachment_guid=<attachment id>
 # get the content of an attachment by the email and attachment ids
 def get_attachment_content_by_id(*args, **kwargs):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
-    doc_id = parseParamDocumentUID(**kwargs)
+    parent_id = parseParamParentGUID(**kwargs)
     attachment_id = parseParamAttachmentGUID(**kwargs)
     tangelo.content_type("application/json")
 
-    return _get_attachment_content_by_id(data_set_id, doc_id, attachment_id)
+    return _get_attachment_content_by_id(data_set_id, parent_id, attachment_id)
 
 # DEPRECATED TODO remove me
 #POST /download
