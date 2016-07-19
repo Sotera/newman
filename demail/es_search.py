@@ -160,6 +160,7 @@ def _search(data_set_id, email_address, qs, start_datetime, end_datetime, encryp
 
     results = _query_emails(data_set_id, size, query)
     graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+    graph["edges_total"] = 
 
     query = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), attachments_only=True, encrypted=encrypted)
     tangelo.log("search._search(attachment-query: %s)" % (query))
@@ -177,7 +178,7 @@ def _pre_search(data_set_id, email_address, qs, start_datetime, end_datetime, en
     query  = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
     tangelo.log("es_search._pre_search(query: %s)" % (query))
 
-    pre_search_results = _count_emails(data_set_id, size, query)
+    pre_search_results = _count_emails(data_set_id, query)
     # graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
 
     # TODO put some guess here
@@ -185,7 +186,7 @@ def _pre_search(data_set_id, email_address, qs, start_datetime, end_datetime, en
 
     query = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), attachments_only=True, encrypted=encrypted)
     tangelo.log("search._pre_search(attachment-query: %s)" % (query))
-    pre_search_results.update(_count_email_attachments(data_set_id, size, query))
+    pre_search_results.update(_count_email_attachments(data_set_id, query))
 
     # graph["attachments"] = attachments
     pre_search_results["data_set_id"] = data_set_id

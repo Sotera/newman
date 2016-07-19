@@ -87,9 +87,9 @@ def _query_email_attachments(index, size, emails_query):
     tangelo.log("es_query_utils._query_email_attachments(total document hits = %s, TIME_ELAPSED=%g)" % (attachments_resp["hits"]["total"], time.time()-start))
     return {"attachments_total": attachments_resp["hits"]["total"], "hits":email_attachments}
 
-def _count_email_attachments(index, size, emails_query):
+def _count_email_attachments(index, emails_query):
     start = time.time()
-    attachments_resp = es().search(index=index, doc_type="emails", size=size, body=emails_query)
+    attachments_resp = es().count(index=index, doc_type="emails", body=emails_query)
     tangelo.log("es_query_utils._count_email_attachments(total document hits = %s, TIME_ELAPSED=%g)" % (attachments_resp["count"],time.time()-start))
     return {"attachment_total" : attachments_resp["count"]}
 
@@ -101,9 +101,9 @@ def _query_emails(index, size, emails_query, additional_fields=[]):
 
     return {"total":emails_resp["hits"]["total"], "hits":[_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]}
 
-def _count_emails(index, size, emails_query, additional_fields=[]):
+def _count_emails(index, emails_query):
     start = time.time()
-    emails_resp = es().count(index=index, doc_type="emails", size=size, fields=get_graph_row_fields() + additional_fields, body=emails_query)
-    tangelo.log("es_query_utils._count_emails(total document hits = %s, TIME_ELAPSED=%g)" % (emails_resp["hits"]["total"],time.time()-start))
+    emails_resp = es().count(index=index, doc_type="emails", body=emails_query)
+    tangelo.log("es_query_utils._count_emails(total document hits = %s, TIME_ELAPSED=%g)" % (emails_resp["count"],time.time()-start))
 
     return {"total":emails_resp["count"]}
