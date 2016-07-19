@@ -88,7 +88,9 @@ def es_get_email_by_phone_numbers(data_set_id, qs='', date_bounds=('1970-01-01',
     query = _build_email_query(qs=qs, phone_numbers=phone_numbers, date_bounds=date_bounds, attachments_only=True)
     tangelo.log("es_phone_numbers.es_get_all_email_by_phone_number(attachment-query: %s)" % (query))
     attachments = _query_email_attachments(data_set_id, size, query)
-    graph["attachments"] = attachments
+    graph["attachments"] = attachments["hits"]
+    graph["attachments_total"] = attachments["attachments_total"]
+
     return graph
 
 

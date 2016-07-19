@@ -79,7 +79,8 @@ def searchStarred(*args, **kwargs):
     query = _build_email_query(email_addrs=email_address_list, qs=query_terms, date_bounds=(start_datetime, end_datetime), attachments_only=True, starred=True)
     tangelo.log("email.searchStarred(attachment-query: %s)" % (query))
     attachments = _query_email_attachments(data_set_id, size, query)
-    graph["attachments"] = attachments
+    graph["attachments"] = attachments["hits"]
+    graph["attachments_total"] = attachments["attachments_total"]
 
     return graph
 

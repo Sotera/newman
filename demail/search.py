@@ -1,7 +1,7 @@
 import tangelo
 import cherrypy
 
-from es_search import es_get_all_email_by_community, _search, es_get_all_email_by_topic, es_get_conversation, es_get_all_email_by_conversation_forward_backward
+from es_search import es_get_all_email_by_community, _search, _pre_search, es_get_all_email_by_topic, es_get_conversation, es_get_all_email_by_conversation_forward_backward
 from newman.es_connection import getDefaultDataSetID
 from param_utils import parseParamDatetime, parseParamIngestIds, parseParamAllSenderAllRecipient, parseParamEmailSender, parseParamEmailRecipient, parseParam_email_addr, parseParamTopic, parseParamTextQuery,\
     parseParamDocumentGUID, parseParamDocumentDatetime, parseParamEncrypted
@@ -32,7 +32,31 @@ def search(*path_args, **param_args):
         return _search(data_set_id=data_set_id, email_address=email_address, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
     return {"graph":{"nodes":[], "links":[]}, "rows":[]}
 
-#GET <host>:<port>:/search/search_by_conversation_forward_backward?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>&order=prev&sender=<s1,s2...>&recipient=<r1,r2..>
+#GET /search/pre_search/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
+def pre_search(*path_args, **param_args):
+    tangelo.content_type("application/json")
+    tangelo.log("search.pre_search(path_args[%s] %s)" % (len(path_args), str(path_args)))
+
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**param_args)
+    ingest_ids = parseParamIngestIds(**param_args)
+
+    # TODO this needs to come from UI
+    size = size if size >500 else 2500
+
+    # TODO make sure that the qs param is put on the query
+    qs = parseParamTextQuery(**param_args)
+    encrypted = parseParamEncrypted(**param_args)
+
+    #re-direct based on field
+    if path_args[0] == "all" :
+        return _pre_search(data_set_id=data_set_id, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+    elif path_args[0] == "email":
+        email_address=urllib.unquote(nth(path_args, 1, ''))
+        return _pre_search(data_set_id=data_set_id, email_address=email_address, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+    return {"graph":{"nodes":[], "links":[]}, "rows":[]}
+
+
+#GET /search/search_by_conversation_forward_backward?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>&order=prev&sender=<s1,s2...>&recipient=<r1,r2..>
 # 'order' param controls if we are paging the next or previous sets of data and can be next or prev, default is next
 def search_email_by_conversation_forward_backward(*path_args, **param_args):
     tangelo.content_type("application/json")
@@ -143,12 +167,9 @@ def search_email_by_topic(*args, **param_args):
 
 actions = {
     "search": search,
-    # TODO remove
-    # "search_by_address": es_get_all_email_by_address,
+    "pre_search": pre_search,
     "search_by_conversation": search_email_by_conversation,
     "search_by_conversation_forward_backward": search_email_by_conversation_forward_backward,
-    # TODO remove
-    # "search_by_text": get_top_email_by_text_query,
     "search_by_community": search_email_by_community,
     "search_by_topic": search_email_by_topic
 }
