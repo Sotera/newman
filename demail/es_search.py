@@ -160,7 +160,7 @@ def _search(data_set_id, email_address, qs, start_datetime, end_datetime, encryp
 
     results = _query_emails(data_set_id, size, query)
     graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
-    graph["edges_total"] = 
+    graph["edges_total"] = len(graph["links"])
 
     query = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), attachments_only=True, encrypted=encrypted)
     tangelo.log("search._search(attachment-query: %s)" % (query))
