@@ -172,6 +172,11 @@ function getDocumentTypeByExt( extension ) {
       return "excel";
     }
 
+    //text
+    if (contains(lower_case_ext, ['txt', 'text'])) {
+      return "text";
+    }
+
     return "other";
   }
   return "other";

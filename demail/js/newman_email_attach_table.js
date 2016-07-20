@@ -19,7 +19,7 @@ var newman_email_attach_table = (function () {
   var per_page_display_min = 20, per_page_display_max = 50, per_page_display_count = per_page_display_min;
   var display_start_index = 1, display_end_index = per_page_display_count;
 
-  var image_width_max = 500, image_width_min = 32, image_height_max = 500, image_height_min = 32;
+  var image_width_max = 507, image_width_min = 32, image_height_max = 507, image_height_min = 32;
 
   function getImageMinWidth() {
     return image_width_min;
@@ -34,24 +34,26 @@ var newman_email_attach_table = (function () {
     return image_height_max;
   }
 
+  // document metadata cache
   var _attach_doc_metadata_map = {};
 
   function clearAllAttachDocumentMetadata() {
     _attach_doc_metadata_map = {};
   }
-  function getAttachDocMetadata( attach_id ) {
+  function getAttachDocMetadata( uid ) {
     var _value;
-    if (attach_id) {
-      _value = clone( _attach_doc_metadata_map[ attach_id ] );
+    if (uid) {
+      _value = clone( _attach_doc_metadata_map[ uid ] );
     }
     return _value;
   }
-  function putAttachDocumentMetadata( attach_id, element ) {
-    if (attach_id && element) {
-      _attach_doc_metadata_map[ attach_id ] = element;
+  function putAttachDocumentMetadata( uid, element ) {
+    if (uid && element) {
+      _attach_doc_metadata_map[ uid ] = element;
     }
   }
 
+  // service response cache
   var _attach_response_cache = [];
 
   function initAttachDocTable() {
@@ -188,48 +190,71 @@ var newman_email_attach_table = (function () {
         var file_metadata = getAttachDocMetadata(file_uid);
         if (file_metadata) {
 
+          var parent_uid = file_metadata.email_id;
           var file_name = file_metadata.filename;
           var content_type = file_metadata.content_type;
-
           var doc_type = getDocumentType(file_name, content_type);
-          var image_icon = getImageHTML(
-            file_uid,
-            doc_type,
-            getImageMaxWidth(),
-            getImageMaxHeight()
-          );
 
-          var attach_url = 'email/attachment/' + encodeURIComponent(file_uid);
-          attach_url = newman_data_source.appendDataSource(attach_url);
+          if (doc_type == 'image' || doc_type == 'word' || doc_type == 'excel') {
 
-          var modal_label = $(preview_modal_label_id);
-          var modal_body = $(preview_modal_body_id);
+            var attach_url = 'email/attachment/' + encodeURIComponent(file_uid);
+            attach_url = newman_data_source.appendDataSource(attach_url);
 
-          modal_label.empty();
-          modal_body.empty();
+            var modal_label = $(preview_modal_label_id);
+            var modal_body = $(preview_modal_body_id);
 
-          var label_anchor =
-            $('<a>',
-              {
-                'target': '_blank',
-                'href': attach_url
+            modal_label.empty();
+            modal_body.empty();
+
+            var label_anchor =
+              $('<a>',
+                {
+                  'target': '_blank',
+                  'href': attach_url
+                }
+              ).html(file_name);
+
+            modal_label.html(label_anchor);
+
+            if (doc_type == 'image') {
+              var image_icon = getImageHTML(
+                file_uid,
+                doc_type,
+                getImageMaxWidth(),
+                getImageMaxHeight()
+              );
+
+              modal_body.append(image_icon);
+
+            }
+            else if (doc_type == 'word' || doc_type == 'excel') {
+              var content_extract = attach_content_extract_request.getFileContentExtract(file_uid);
+              if (content_extract) {
+                //console.log('content_extract :\n' + content_extract.content);
+
+                var content_container_html = $('<pre>');
+                content_container_html
+                  .css('margin', '0')
+                  .css('padding', '0');
+
+                content_container_html.append(content_extract.content);
+
+                modal_body.append(content_container_html);
               }
-            ).html(file_name);
+            }
 
-          modal_label.html(label_anchor);
-          modal_body.append(image_icon);
+            var modal_options = {
+              "backdrop": false,
+              "keyboard": true,
+            }
 
-          var modal_options = {
-            "backdrop": false,
-            "keyboard": true,
-          }
+            //$(preview_modal_id).attr('value', file_uid);
+            $(preview_modal_id).modal(modal_options);
 
-          //$(preview_modal_id).attr('value', file_uid);
-          $(preview_modal_id).modal(modal_options);
+            $('.modal-backdrop').appendTo('.modal-container');
+          } // end-of if (doc_type == 'image' || doc_type == 'word' || doc_type == 'excel')
 
-          $('.modal-backdrop').appendTo('.modal-container');
-
-        }
+        } // end-of if (file_metadata)
         else {
           console.warn("Expected document metadata not found '" + file_uid + "' !")
         }
@@ -277,9 +302,21 @@ var newman_email_attach_table = (function () {
       }
 
       clearAllAttachDocumentMetadata();
-      _response_list = [];
+      attach_content_extract_request.clearAllFileContentExtract();
 
+      _response_list = [];
       _.each(response, function(element, index) {
+
+        var attach_uid = element.attachment_id;
+        var parent_uid = element.email_id;
+        var file_name = element.filename;
+        var content_type = element.content_type;
+        var doc_type = getDocumentType(file_name, content_type);
+        if (doc_type == 'word' || doc_type == 'excel') {
+          console.log('doc_type: ' + doc_type);
+          attach_content_extract_request.requestService( attach_uid, parent_uid );
+        }
+
         putAttachDocumentMetadata( element.attachment_id, clone( element ));
 
         if (index >= _start_index && index < _max_count) {
@@ -446,16 +483,13 @@ var newman_email_attach_table = (function () {
         .on("mouseover", function(d, index) {
 
            if (index == 2) {
+             //console.log(JSON.stringify(d, null, 2));
              var file_uid = d.attachment_id;
              var file_name = d.filename;
              var content_type = d.content_type;
              console.log('mouse-over : index ' + index + '\n\t' + d.filename);
 
-             var doc_type = getDocumentType(file_name, content_type);
-
-             if (doc_type == 'image') {
-               onPreviewFile(true, file_uid);
-             }
+             onPreviewFile(true, file_uid);
           }
           else {
              onPreviewFile( false );
@@ -503,7 +537,7 @@ var newman_email_attach_table = (function () {
 
             var col_row = $('<div>');
 
-            if (doc_type == 'image') {
+            if (doc_type == 'image' || doc_type == 'word' || doc_type == 'excel') {
               /*
               image_view_button_html =
                 "<button type='button' class='btn btn-small outline' value='" + file_uid + "' id='attach_image_expand_button_" + file_uid + "' >" +
@@ -604,8 +638,11 @@ var newman_email_attach_table = (function () {
     else if (file_type == 'excel') {
       image_icon = image_html.attr('src', 'imgs/document-icons/excel-2.png');
     }
-    else {
+    else if (file_type == 'text') {
       image_icon = image_html.attr('src', 'imgs/document-icons/text-2.png');
+    }
+    else {
+      image_icon = image_html.attr('src', 'imgs/document-icons/text-1.png');
     }
 
     return image_icon;
@@ -618,14 +655,16 @@ var newman_email_attach_table = (function () {
     var max_display_count = getPerPageDisplayCount();
     var mapped_response_list;
 
+
+
     if (response_list && response_list.length > 0) {
       max_index = (response_list.length - 1);
 
       mapped_response_list = mapResponse( response_list, true, max_display_count, start_index );
-
     }
     else {
       clearAllAttachDocumentMetadata();
+      attach_content_extract_request.clearAllFileContentExtract();
     }
 
     onRequestPageDisplay(mapped_response_list, start_index, max_index);
