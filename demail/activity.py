@@ -6,7 +6,6 @@ from param_utils import parseParamDatetime, parseParamEmailAddress
 from datetime import timedelta, date
 from series import get_email_activity, get_total_attachment_activity, get_emailer_attachment_activity, attachment_histogram
 
-
 def dateRange(start_datetime, end_datetime):
     for n in range(int ((end_datetime - start_datetime).days)):
         yield start_datetime + timedelta(n)
@@ -105,8 +104,6 @@ actions = {
 
 def unknown(*args):
     return tangelo.HTTPStatusCode(400, "invalid service call")
-
-
 
 @tangelo.restful
 def get(action, *args, **kwargs):

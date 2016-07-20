@@ -7,7 +7,8 @@ from es_email import get_ranked_email_address_from_email_addrs_index
 from series import get_datetime_bounds
 import tangelo
 import urllib
-from param_utils import parseParamDatetime
+from param_utils import parseParamDatetime, parseParam_email_addr, parseParamTextQuery, parseParamEncrypted
+from es_search import _pre_search
 
 def _index_record(index):
     tangelo.log("datasource._index_record(index: %s)" % (str(index)))
@@ -62,12 +63,12 @@ def listAllDataSet():
     }
 
 #GET /all
-def getAll(*args):
+def getAll(*args, **kwargs):
     tangelo.content_type("application/json")
     return listAllDataSet()
 
 #GET /dataset/<id>
-def setSelectedDataSet(*args):
+def setSelectedDataSet(*args, **kwargs):
     tangelo.content_type("application/json")
     data_set_id=urllib.unquote(nth(args, 0, ''))
     if not data_set_id:
@@ -77,14 +78,75 @@ def setSelectedDataSet(*args):
 
     return _index_record(data_set_id)
 
+#GET /stats?data_set_id<ds list>&email_addr=<email_address list>&qs=qs
+def stats(*args, **kwargs):
+    '''
+    Returns a structure based on what fields were queried
+    {
+      "multi": {"search" :{"users"}}
+      "dataset name":
+    }
+    :param args:
+    :param kwargs:
+    :return:
+    '''
+    tangelo.content_type("application/json")
+    tangelo.log("activity.user_stats(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+
+    data_set_ids, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+    qs = parseParamTextQuery(**kwargs)
+    email_addrs = parseParam_email_addr(**kwargs)
+    encrypted = parseParamEncrypted(**kwargs)
+
+
+    def _ds_stat(data_set_id):
+        data_set_stats = {}
+        data_set_stats["all"] = _pre_search(data_set_id=data_set_id, email_address=None, qs='', start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+        # DS with search
+        if qs:
+            data_set_stats['search'] = _pre_search(data_set_id=data_set_id, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+            data_set_stats['search']["qs"] = qs
+        #DS with users
+        if email_addrs:
+            users = {}
+            for email_addr in email_addrs:
+                users[email_addr] = _pre_search(data_set_id=data_set_id, email_address=email_addr, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+            if qs:
+                data_set_stats["search"]["qs"] = qs
+                data_set_stats["search"]["users"] = users
+            else:
+                data_set_stats["users"] = users
+
+        return data_set_stats
+
+    stats = {}
+    # If there is a comma do a multi search first
+    # if ',' in data_set_ids:
+    #     # Top level multi search
+    #     stats["multi"] = _pre_search(data_set_id=data_set_ids, email_address=None, qs='', start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+    #     # DS with search
+    #     if qs:
+    #         stats['multi']['search'] = _pre_search(data_set_id=data_set_ids, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+    # If there is a comma do a multi search first
+    if ',' in data_set_ids:
+        stats["multi"] = _ds_stat(data_set_ids)
+
+    for data_set_id in data_set_ids.split(','):
+        stats[data_set_id] = _ds_stat(data_set_id)
+
+    return stats
+
+
 actions = {
     "dataset" : setSelectedDataSet,
-    "all" : getAll
+    "all" : getAll,
+    "stats" : stats
 }
 
 def unknown(*args):
     return tangelo.HTTPStatusCode(400, "invalid service call")
 
+
 @tangelo.restful
 def get(action, *args, **kwargs):
-    return actions.get(action, unknown)(*args)
+    return actions.get(action, unknown)(*args, **kwargs)

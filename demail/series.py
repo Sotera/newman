@@ -5,7 +5,7 @@ import tangelo
 import csv
 
 from newman.newman_config import default_min_timeline_bound, default_max_timeline_bound, default_timeline_span, default_timeline_interval
-from es_queries import _build_filter, _addrs_filter, _date_filter
+from es_queries import _build_filter, _addrs_filter, _date_filter, _build_email_query
 from dateutil.parser import parse
 from datetime import timedelta
 
@@ -16,6 +16,42 @@ def _date_aggs(date_field="datetime"):
         "avg_date" : { "avg" : { "field" : date_field } },
         "pct_date" : { "percentiles" : { "field" : date_field } }
     }
+
+
+def count_associated_addresses(data_set_id, email_address, qs, start_datetime, end_datetime):
+    '''
+    Function to get an estimate of the number of unique email addresses associated with the query params.  This function
+    can be used to accurately estimate the graph edges from an email_address or other arbitrary query
+    :param data_set_id:
+    :param email_address: starting address or None
+    :param qs: query string
+    :param start_datetime:
+    :param end_datetime:
+    :return: number of unique associated addresses
+    '''
+    tangelo.log("series.count_addresses_by_query(%s)"%(data_set_id))
+    email_addrs=[email_address] if email_address else None
+
+    query  = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime))
+    tangelo.log("es_search.count_associated_addresses(query: %s)" % (query))
+
+    agg = {
+        "query" : query["query"],
+        "aggs" : {
+            "addrs_count" : {
+                "cardinality" : {
+                    "field" : "addrs",
+                    "precision_threshold": 3000
+                }
+            }
+        },
+        "size":0,
+    }
+
+    resp = es().search(index=data_set_id, doc_type="emails", body=agg)
+
+    return resp["aggregations"]["addrs_count"].get("value", "0")
+
 
 def get_datetime_bounds(index, type="emails"):
 

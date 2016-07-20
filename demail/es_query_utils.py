@@ -107,3 +107,4 @@ def _count_emails(index, emails_query):
     tangelo.log("es_query_utils._count_emails(total document hits = %s, TIME_ELAPSED=%g)" % (emails_resp["count"],time.time()-start))
 
     return {"total":emails_resp["count"]}
+

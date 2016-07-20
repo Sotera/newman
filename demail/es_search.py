@@ -7,6 +7,7 @@ import tangelo
 from newman.es_connection import es
 from es_queries import _build_email_query
 from es_query_utils import _query_emails, _count_emails, _query_email_attachments, _count_email_attachments, _map_emails_to_row,_map_node
+from series import count_associated_addresses
 
 # contains a cache of all email_address.addr, email_address
 _EMAIL_ADDR_CACHE = {}
@@ -173,20 +174,33 @@ def _search(data_set_id, email_address, qs, start_datetime, end_datetime, encryp
 
 def _pre_search(data_set_id, email_address, qs, start_datetime, end_datetime, encrypted, size):
     tangelo.log("es_search._pre_search(email_address=%s, qs=%s)" % ((str(email_address)), qs))
+    pre_search_results = {}
+
     email_addrs=[email_address] if email_address else None
 
-    query  = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
-    tangelo.log("es_search._pre_search(query: %s)" % (query))
+    if not email_address:
+        query  = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
+        tangelo.log("es_search._pre_search(query: %s)" % (query))
+        pre_search_results["total"] = _count_emails(data_set_id, query)["total"]
+        pre_search_results["sent_total"] ="N/A"
+        pre_search_results["received_total"] ="N/A"
 
-    pre_search_results = _count_emails(data_set_id, query)
-    # graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+    else:
+        senders_query  = _build_email_query(sender_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
+        tangelo.log("es_search._pre_search(senders query: %s)" % (senders_query))
+        pre_search_results["sent_total"] = _count_emails(data_set_id, senders_query)["total"]
 
-    # TODO put some guess here
-    pre_search_results["edges_total"] = 0
+        rcvr_query  = _build_email_query(recipient_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
+        tangelo.log("es_search._pre_search(rcvr query: %s)" % (rcvr_query))
+        pre_search_results["received_total"] = _count_emails(data_set_id, rcvr_query)["total"]
 
-    query = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), attachments_only=True, encrypted=encrypted)
-    tangelo.log("search._pre_search(attachment-query: %s)" % (query))
-    pre_search_results.update(_count_email_attachments(data_set_id, query))
+        pre_search_results["total"] = pre_search_results["sent_total"] + pre_search_results["received_total"]
+
+    pre_search_results["edges_total"] = count_associated_addresses(data_set_id=data_set_id, email_address=email_addrs, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime)
+
+    attach_query = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), attachments_only=True, encrypted=encrypted)
+    tangelo.log("search._pre_search(attachment-query: %s)" % (attach_query))
+    pre_search_results.update(_count_email_attachments(data_set_id, attach_query))
 
     # graph["attachments"] = attachments
     pre_search_results["data_set_id"] = data_set_id
