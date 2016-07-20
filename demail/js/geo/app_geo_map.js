@@ -1305,14 +1305,13 @@ var app_geo_map = (function () {
     newman_geo_email_attach.initAttachDocGeoLoc();
 
     // dynamically set CSS when opening modal
+    /*
     $(preview_modal_id).on('show.bs.modal', function(e) {
       var modal = $(this);
-
-      modal.css('left', '14%')
-        .css('width', 'auto');
-
+      modal.css('width', 'auto');
       return this;
     });
+    */
 
     // reset flag after closing modal
     $(preview_modal_id).on("hidden.bs.modal", function () {

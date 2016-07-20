@@ -472,7 +472,7 @@ var newman_email_doc_view = (function () {
     _.each(recipients, function(recipient) {
       //console.log('email-recipient : ' + JSON.stringify(recipient, null, 2));
       var tokens_original = tokenize(recipient[1][0]);
-      console.log('email-recipient-tokens(original) : ' + JSON.stringify(tokens_original, null, 2));
+      //console.log('email-recipient-tokens(original) :\n' + JSON.stringify(tokens_original, null, 2));
       var tokens_extracted = tokenize(recipient[1][1]);
       //console.log('email-recipient-tokens(extracted) : ' + JSON.stringify(tokens_extracted, null, 2));
 
@@ -548,11 +548,10 @@ var newman_email_doc_view = (function () {
     });
 
 
-    var items = _.zip(['Subject','Date'], [contents.subject, contents.datetime]);
+    var items = _.zip(['Date', 'Subject'], [contents.datetime, contents.subject]);
 
     _.each(items, function(item){
-      email_html.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': '))
-        .append(item[1]) );
+      email_html.append($('<p>').append($('<span>').addClass('bold').text( item[0]+ ': ')).append(item[1]) );
     });
 
     var attachments = $('<p>').append($('<span>').addClass('bold').text("Attachments: "));

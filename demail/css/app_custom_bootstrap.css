@@ -122,14 +122,14 @@ input[type="number"]:disabled {
 #doc_preview_modal_right .modal-dialog {
     position: relative;
     display: table;
-    min-width: 520px !important;
+    min-width: 500px !important;
 }
 
 #doc_preview_modal_left .modal-dialog {
     position: relative;
     display: table;
-    /*left: 13% !important;*/
-    min-width: 520px !important;
+    left: 5% !important;
+    min-width: 500px !important;
 }
 
 /***********************
