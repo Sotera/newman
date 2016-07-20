@@ -32,6 +32,8 @@ def search(*path_args, **param_args):
         return _search(data_set_id=data_set_id, email_address=email_address, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
     return {"graph":{"nodes":[], "links":[]}, "rows":[]}
 
+# DEPRECATED - use the /datasource/stats call instead
+# TODO remove
 #GET /search/pre_search/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
 def pre_search(*path_args, **param_args):
     tangelo.content_type("application/json")
