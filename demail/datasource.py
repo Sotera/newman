@@ -91,7 +91,7 @@ def stats(*args, **kwargs):
     :return:
     '''
     tangelo.content_type("application/json")
-    tangelo.log("activity.user_stats(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.log("datasource.stats(args: %s kwargs: %s)" % (str(args), str(kwargs)))
 
     data_set_ids, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
     qs = parseParamTextQuery(**kwargs)
@@ -120,14 +120,6 @@ def stats(*args, **kwargs):
         return data_set_stats
 
     stats = {}
-    # If there is a comma do a multi search first
-    # if ',' in data_set_ids:
-    #     # Top level multi search
-    #     stats["multi"] = _pre_search(data_set_id=data_set_ids, email_address=None, qs='', start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
-    #     # DS with search
-    #     if qs:
-    #         stats['multi']['search'] = _pre_search(data_set_id=data_set_ids, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
-    # If there is a comma do a multi search first
     if ',' in data_set_ids:
         stats["multi"] = _ds_stat(data_set_ids)
 
