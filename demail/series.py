@@ -33,7 +33,7 @@ def count_associated_addresses(data_set_id, email_address, qs, start_datetime, e
     email_addrs=[email_address] if email_address else None
 
     query  = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime))
-    tangelo.log("es_search.count_associated_addresses(query: %s)" % (query))
+    tangelo.log("series.count_associated_addresses(query: %s)" % (query))
 
     agg = {
         "query" : query["query"],
@@ -52,6 +52,37 @@ def count_associated_addresses(data_set_id, email_address, qs, start_datetime, e
 
     return resp["aggregations"]["addrs_count"].get("value", "0")
 
+def count_email_attachments(data_set_id, email_address, qs, start_datetime, end_datetime):
+    '''
+    Function to get number of email attachments for a query
+    :param data_set_id:
+    :param email_address: starting address or None
+    :param qs: query string
+    :param start_datetime:
+    :param end_datetime:
+    :return: number of unique associated addresses
+    '''
+    tangelo.log("series.count_email_attachments(%s)"%(data_set_id))
+    email_addrs=[email_address] if email_address else None
+
+    query  = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime))
+    tangelo.log("series.count_email_attachments(query: %s)" % (query))
+
+    agg = {
+        "query" : query["query"],
+        "aggs" : {
+            "attachment_count" : {
+                "value_count" : {
+                    "field" : "attachments.guid"
+                }
+            }
+        },
+        "size":0,
+    }
+
+    resp = es().search(index=data_set_id, doc_type="emails", body=agg)
+
+    return resp["aggregations"]["attachment_count"].get("value", "0")
 
 def get_datetime_bounds(index, type="emails"):
 

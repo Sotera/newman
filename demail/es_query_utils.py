@@ -87,12 +87,6 @@ def _query_email_attachments(index, size, emails_query):
     tangelo.log("es_query_utils._query_email_attachments(total document hits = %s, TIME_ELAPSED=%g)" % (attachments_resp["hits"]["total"], time.time()-start))
     return {"attachments_total": attachments_resp["hits"]["total"], "hits":email_attachments}
 
-def _count_email_attachments(index, emails_query):
-    start = time.time()
-    attachments_resp = es().count(index=index, doc_type="emails", body=emails_query)
-    tangelo.log("es_query_utils._count_email_attachments(total document hits = %s, TIME_ELAPSED=%g)" % (attachments_resp["count"],time.time()-start))
-    return {"attachment_total" : attachments_resp["count"]}
-
 
 def _query_emails(index, size, emails_query, additional_fields=[]):
     start = time.time()

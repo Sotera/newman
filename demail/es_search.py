@@ -6,8 +6,8 @@ import tangelo
 
 from newman.es_connection import es
 from es_queries import _build_email_query
-from es_query_utils import _query_emails, _count_emails, _query_email_attachments, _count_email_attachments, _map_emails_to_row,_map_node
-from series import count_associated_addresses
+from es_query_utils import _query_emails, _count_emails, _query_email_attachments, _map_emails_to_row,_map_node
+from series import count_associated_addresses, count_email_attachments
 
 # contains a cache of all email_address.addr, email_address
 _EMAIL_ADDR_CACHE = {}
@@ -200,7 +200,7 @@ def _pre_search(data_set_id, email_address, qs, start_datetime, end_datetime, en
 
     attach_query = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), attachments_only=True, encrypted=encrypted)
     tangelo.log("search._pre_search(attachment-query: %s)" % (attach_query))
-    pre_search_results.update(_count_email_attachments(data_set_id, attach_query))
+    pre_search_results["total_attachments"] = count_email_attachments(data_set_id=data_set_id, email_address=email_addrs, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime)
 
     # graph["attachments"] = attachments
     pre_search_results["data_set_id"] = data_set_id
