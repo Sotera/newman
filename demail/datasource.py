@@ -83,8 +83,8 @@ def stats(*args, **kwargs):
     '''
     Returns a structure based on what fields were queried
     {
-      "multi": {"search" :{"users"}}
-      "dataset name":
+      "all_dataset": {"search" :{"email_users"}}
+      "<dataset_id>":
     }
     :param args:
     :param kwargs:
@@ -101,27 +101,27 @@ def stats(*args, **kwargs):
 
     def _ds_stat(data_set_id):
         data_set_stats = {}
-        data_set_stats["all"] = _pre_search(data_set_id=data_set_id, email_address=None, qs='', start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+        data_set_stats["summary"] = _pre_search(data_set_id=data_set_id, email_address=None, qs='', start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
         # DS with search
         if qs:
-            data_set_stats['search'] = _pre_search(data_set_id=data_set_id, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
-            data_set_stats['search']["qs"] = qs
+            data_set_stats["search"] = _pre_search(data_set_id=data_set_id, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+            data_set_stats["search"]["query"] = qs
         #DS with users
         if email_addrs:
             users = {}
             for email_addr in email_addrs:
                 users[email_addr] = _pre_search(data_set_id=data_set_id, email_address=email_addr, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
             if qs:
-                data_set_stats["search"]["qs"] = qs
-                data_set_stats["search"]["users"] = users
+                data_set_stats["search"]["query"] = qs
+                data_set_stats["search"]["email_users"] = users
             else:
-                data_set_stats["users"] = users
+                data_set_stats["email_users"] = users
 
         return data_set_stats
 
     stats = {}
     if ',' in data_set_ids:
-        stats["multi"] = _ds_stat(data_set_ids)
+        stats["all_dataset"] = _ds_stat(data_set_ids)
 
     for data_set_id in data_set_ids.split(','):
         stats[data_set_id] = _ds_stat(data_set_id)
