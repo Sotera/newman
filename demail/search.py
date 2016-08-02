@@ -3,7 +3,7 @@ import cherrypy
 
 from es_search import es_get_all_email_by_community, _search, _pre_search, es_get_all_email_by_topic, es_get_conversation, es_get_all_email_by_conversation_forward_backward
 from newman.es_connection import getDefaultDataSetID
-from param_utils import parseParamDatetime, parseParamIngestIds, parseParamAllSenderAllRecipient, parseParamEmailSender, parseParamEmailRecipient, parseParam_email_addr, parseParamTopic, parseParamTextQuery,\
+from param_utils import parseParamDatetime, parseParamIngestIds, parseParamAllSenderAllRecipient, parseParamEmailSender, parseParamEmailRecipient, parseParamEmailAddressList, parseParamTopic, parseParamTextQuery,\
     parseParamDocumentGUID, parseParamDocumentDatetime, parseParamEncrypted
 import urllib
 from newman.utils.functions import nth
@@ -134,14 +134,14 @@ def search_email_by_community(*args, **param_args):
     if not data_set_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing data_set_id")
     if not community:
-        return tangelo.HTTPStatusCode(400, "invalid service call - missing sender")
+        return tangelo.HTTPStatusCode(400, "invalid service call - missing community")
 
-    email_addrs = parseParam_email_addr(**param_args)
+    email_address_list = parseParamEmailAddressList(**param_args)
 
     qs = parseParamTextQuery(**param_args)
     encrypted = parseParamEncrypted(**param_args)
 
-    return es_get_all_email_by_community(data_set_id, community, email_addrs, qs, start_datetime, end_datetime, size, encrypted=encrypted)
+    return es_get_all_email_by_community(data_set_id, community, email_address_list, qs, start_datetime, end_datetime, size, encrypted=encrypted)
 
 #GET <host>:<port>:/search/search_by_topic/?data_set_id=<data_set>&topic_index=1&topic_threshold=0.5&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 def search_email_by_topic(*args, **param_args):
@@ -160,12 +160,12 @@ def search_email_by_topic(*args, **param_args):
         return tangelo.HTTPStatusCode(400, "invalid service call - missing topic_index")
     topic = parseParamTopic(**param_args)
 
-    email_addrs = parseParam_email_addr(**param_args)
+    email_address_list = parseParamEmailAddressList(**param_args)
 
     qs = parseParamTextQuery(**param_args)
     encrypted = parseParamEncrypted(**param_args)
 
-    return es_get_all_email_by_topic(data_set_id, topic=topic, email_addrs=email_addrs, qs=qs, encrypted=encrypted, start_datetime=start_datetime, end_datetime=end_datetime, size=size)
+    return es_get_all_email_by_topic(data_set_id, topic=topic, email_address_list=email_address_list, qs=qs, encrypted=encrypted, start_datetime=start_datetime, end_datetime=end_datetime, size=size)
 
 actions = {
     "search": search,

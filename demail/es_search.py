@@ -286,10 +286,10 @@ def es_get_conversation(data_set_id, sender, recipients, start_datetime, end_dat
 
 
 # Get all rows for a community, sorted by time asc
-def es_get_all_email_by_community(data_set_id, community, email_addrs, qs, start_datetime, end_datetime, encrypted, size):
-    tangelo.log("es_search.es_get_all_email_by_community(community=%s, email_addrs=%s)" % (str(community), str(email_addrs)))
+def es_get_all_email_by_community(data_set_id, community, email_address_list, qs, start_datetime, end_datetime, encrypted, size):
+    tangelo.log("es_search.es_get_all_email_by_community(community=%s, email_address_list=%s)" % (str(community), str(email_addrs)))
 
-    query = _build_email_query(email_addrs=email_addrs, qs='', date_bounds=(start_datetime, end_datetime), community=[community], encrypted=encrypted)
+    query = _build_email_query(email_addrs=email_address_list, qs='', date_bounds=(start_datetime, end_datetime), community=[community], encrypted=encrypted)
     tangelo.log("es_search.es_get_all_email_by_community(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
@@ -297,7 +297,7 @@ def es_get_all_email_by_community(data_set_id, community, email_addrs, qs, start
     graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
 
     # Get attachments for community
-    query = _build_email_query(email_addrs=email_addrs, qs='', date_bounds=(start_datetime, end_datetime), community=[community], attachments_only=True, encrypted=encrypted)
+    query = _build_email_query(email_addrs=email_address_list, qs='', date_bounds=(start_datetime, end_datetime), community=[community], attachments_only=True, encrypted=encrypted)
     tangelo.log("es_search.es_get_all_email_by_community(attachment-query: %s)" % (query))
     attachments = _query_email_attachments(data_set_id, size, query)
     graph["attachments"] = attachments["hits"]
@@ -308,10 +308,10 @@ def es_get_all_email_by_community(data_set_id, community, email_addrs, qs, start
     return graph
 
 # Get all rows for a community, sorted by time asc
-def es_get_all_email_by_topic(data_set_id, topic, email_addrs, qs, start_datetime, end_datetime, encrypted, size):
-    tangelo.log("es_search.es_get_all_email_by_topic(email_addrs=%s, topic=%s)" % ( str(email_addrs), str(topic)))
+def es_get_all_email_by_topic(data_set_id, topic, email_address_list, qs, start_datetime, end_datetime, encrypted, size):
+    tangelo.log("es_search.es_get_all_email_by_topic(email_address_list=%s, topic=%s)" % ( str(email_address_list), str(topic)))
 
-    query  = _build_email_query(email_addrs=email_addrs, qs='', topic=topic, sort_mode="topic", sort_order="desc", date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
+    query  = _build_email_query(email_addrs=email_address_list, qs='', topic=topic, sort_mode="topic", sort_order="desc", date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
     tangelo.log("es_search.es_get_all_email_by_topic(query: %s)" % (query))
 
     # Get emails graph for topics
@@ -319,7 +319,7 @@ def es_get_all_email_by_topic(data_set_id, topic, email_addrs, qs, start_datetim
     graph = _build_graph_for_emails(data_set_id, emails["hits"], emails["total"])
 
     # Get attachments for top score topic
-    query  = _build_email_query(email_addrs=email_addrs, qs='', topic=topic, sort_mode="topic", sort_order="desc", date_bounds=(start_datetime, end_datetime), attachments_only=True, encrypted=encrypted)
+    query  = _build_email_query(email_addrs=email_address_list, qs='', topic=topic, sort_mode="topic", sort_order="desc", date_bounds=(start_datetime, end_datetime), attachments_only=True, encrypted=encrypted)
     tangelo.log("es_search.es_get_all_email_by_topic(attachment-query: %s)" % (query))
     attachments = _query_email_attachments(data_set_id, size, query)
     graph["attachments"] = attachments["hits"]
