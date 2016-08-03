@@ -101,16 +101,16 @@ def stats(*args, **kwargs):
 
     def _ds_stat(data_set_id):
         data_set_stats = {}
-        data_set_stats["summary"] = _pre_search(data_set_id=data_set_id, email_address_list=None, qs='', start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+        data_set_stats["summary"] = _pre_search(data_set_id=data_set_id, email_address=None, qs='', start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
         # DS with search
         if qs:
-            data_set_stats["search"] = _pre_search(data_set_id=data_set_id, email_address_list=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+            data_set_stats["search"] = _pre_search(data_set_id=data_set_id, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
             data_set_stats["search"]["query"] = qs
         #DS with users
         if email_address_list:
             users = {}
             for email_address in email_address_list:
-                users[email_address] = _pre_search(data_set_id=data_set_id, email_address_list=email_address, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+                users[email_address] = _pre_search(data_set_id=data_set_id, email_address=email_address, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
             if qs:
                 data_set_stats["search"]["query"] = qs
                 data_set_stats["search"]["email_users"] = users
