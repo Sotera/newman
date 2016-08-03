@@ -106,12 +106,21 @@ def parseParamCommunityIds( **kwargs ):
 
     return [x for x in community_ids  if (x is not '' and x is not None)]
 
+# DEPRECATED
+# TODO remove
 def parseParamPhoneNumbers( **kwargs ):
     tangelo.log("parseParamPhoneNumbers(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     value = kwargs.get('phone_numbers')
     phone_numbers = value.split(",")
 
     return [x for x in phone_numbers if (x is not '' and x is not None)]
+
+def parseParamNumbers( **kwargs ):
+    tangelo.log("parseParamNumbers(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    value = kwargs.get('numbers')
+    numbers = value.split(",")
+
+    return [x for x in numbers if (x is not '' and x is not None)]
 
 # Parse topic params topic_index and topic_threshold returns as dict
 # {"index", "threshold"}
