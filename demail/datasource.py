@@ -6,7 +6,7 @@ from es_search import initialize_email_addr_cache
 from series import get_datetime_bounds
 import tangelo
 import urllib
-from param_utils import parseParamDatetime, parseParam_email_addr, parseParamTextQuery, parseParamEncrypted
+from param_utils import parseParamDatetime, parseParamEmailAddressList, parseParamTextQuery, parseParamEncrypted
 from es_search import _pre_search
 
 def _index_record(index):
@@ -44,7 +44,6 @@ def listAllDataSet():
     # Find all the indexes that begin with the index loader prefix
     indexes = [_index_record(index) for index in index_list() if index in data_set_names() or index.startswith(index_creator_prefix())]
 
-
     # email_addrs = get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size)["emails"]
     # email_addrs = {email_addr[0]:email_addr for email_addr in email_addrs}
 
@@ -74,7 +73,7 @@ def setSelectedDataSet(*args, **kwargs):
 
     return _index_record(data_set_id)
 
-#GET /stats?data_set_id<ds list>&email_addr=<email_address list>&qs=qs
+#GET /stats?data_set_id<ds list>&email_address=<email_address_list>&qs=qs
 def stats(*args, **kwargs):
     '''
     Returns a structure based on what fields were queried
@@ -91,7 +90,7 @@ def stats(*args, **kwargs):
 
     data_set_ids, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
     qs = parseParamTextQuery(**kwargs)
-    email_addrs = parseParam_email_addr(**kwargs)
+    email_address_list = parseParamEmailAddressList(**kwargs)
     encrypted = parseParamEncrypted(**kwargs)
 
 
@@ -103,10 +102,10 @@ def stats(*args, **kwargs):
             data_set_stats["search"] = _pre_search(data_set_id=data_set_id, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
             data_set_stats["search"]["query"] = qs
         #DS with users
-        if email_addrs:
+        if email_address_list:
             users = {}
-            for email_addr in email_addrs:
-                users[email_addr] = _pre_search(data_set_id=data_set_id, email_address=email_addr, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+            for email_address in email_address_list:
+                users[email_address] = _pre_search(data_set_id=data_set_id, email_address=email_address, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
             if qs:
                 data_set_stats["search"]["query"] = qs
                 data_set_stats["search"]["email_users"] = users
