@@ -28,14 +28,6 @@ def parseParamDatetime( **kwargs ):
     tangelo.log("\tdata_set_index '%s', start_date '%s', end_date '%s', size '%s'" % (data_set_id, start_datetime, end_datetime, size))
     return data_set_id, start_datetime, end_datetime, size
 
-# Deprecated - dont use pathparams
-def parseParamEmailAddress( **kwargs ):
-    tangelo.log("parseParamEmailAddress(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
-    email_regex = re.compile("[^@]+@[^@]+\\.[^@]+")
-    key_list = [k for k in kwargs.keys() if email_regex.match(k)]
-    tangelo.log("\tkey_list[] = %s" % str(key_list))
-    
-    return key_list
 
 def parseParamIngestId( **kwargs ):
     tangelo.log("parseParamIngestId(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
@@ -57,10 +49,18 @@ def parseParamEncrypted( **kwargs ):
 
     return encrypted in ['true', 'True', 1, 'T', 't', 'yes'] if encrypted else None
 
+# Deprecated - DO NOT use path-parameter
+def parseParamEmailAddress( **kwargs ):
+    tangelo.log("parseParamEmailAddress(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    email_regex = re.compile("[^@]+@[^@]+\\.[^@]+")
+    key_list = [k for k in kwargs.keys() if email_regex.match(k)]
+    tangelo.log("\tkey_list[] = %s" % str(key_list))
+    
+    return key_list
 
-def parseParam_email_addr( **kwargs ):
-    tangelo.log("parseParam_email_addr(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
-    email_addrs = kwargs.get('email_addr','').split(",")
+def parseParamEmailAddressList( **kwargs ):
+    tangelo.log("parseParamEmailAddressList(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    email_addrs = kwargs.get('email_address','').split(",")
 
     return [x for x in email_addrs if (x is not '' and x is not None)]
 

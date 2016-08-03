@@ -80,6 +80,10 @@ def _query_email_attachments(index, size, emails_query):
                 attachment_entry["filename"] = attachment["filename"]
                 attachment_entry["content_encrypted"] = attachment["content_encrypted"]
                 attachment_entry["content_type"] = attachment["content_type"]
+                attachment_entry["content_hash"] = attachment.get("content_hash",'')
+                attachment_entry["content_length"] = attachment.get("content_length",-1)
+                attachment_entry["size"] = attachment.get("content_length",-1)
+
                 email_attachments.append(attachment_entry)
     except KeyError as ke:
         tangelo.log("_query_email_attachments.Query FAILED id={0}  - KeyError={1}".format(_source["id"], ke))

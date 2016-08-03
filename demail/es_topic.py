@@ -104,7 +104,7 @@ def get_categories(index):
     cluster_counts = agg_cluster_counts(index)
     categories = [[cluster["idx"], " ".join(cluster["cluster"]),cluster_counts["idx_{0}_agg".format(cluster["idx"])]] for cluster in get_lda_clusters(index)]
     total_docs = float(sum(category[2] for category in categories))
-    categories = [[category[0],category[1],"{0:.2f}".format(round(100.0*category[2]/total_docs,2))] for category in categories]
+    categories = [[category[0],category[1],"{0:.2f}".format(0 if total_docs == 0 else round(100.0*category[2]/total_docs,2))] for category in categories]
     return {"categories":categories}
 
 if __name__ == "__main__":

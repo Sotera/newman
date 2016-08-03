@@ -5,6 +5,10 @@ from es_query_utils import _query_emails
 from es_search import _build_graph_for_emails,_query_email_attachments
 from newman.es_connection import es
 
+# DEPRECATED - use the es_numbers
+# TODO remove this file
+
+
 def phone_numbers_agg(email_address, qs, date_bounds=('1970-01-01', 'now'), size=50):
     return {
         "size": 0,

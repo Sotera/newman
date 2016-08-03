@@ -102,7 +102,6 @@ def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=
     return types
 
 
-
 #GET /rank?data_set_id=<data_set>&start_datetime=<start_datetime>&end_datetime=<end_datetime>&size=<size>
 def get_ranked_email_address(data_set_id, query_terms='', topic_score=None, entity={}, date_bounds=None, num_top_hits=30):
     body = {
