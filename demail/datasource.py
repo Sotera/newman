@@ -73,8 +73,8 @@ def setSelectedDataSet(*args, **kwargs):
 
     return _index_record(data_set_id)
 
-#GET /stats?data_set_id<ds list>&email_address=<email_address_list>&qs=qs
-def stats(*args, **kwargs):
+#GET /summary?data_set_id<ds list>&email_address=<email_address_list>&qs=qs
+def summary(*args, **kwargs):
     '''
     Returns a structure based on what fields were queried
     {
@@ -86,7 +86,7 @@ def stats(*args, **kwargs):
     :return:
     '''
     tangelo.content_type("application/json")
-    tangelo.log("datasource.stats(args: %s kwargs: %s)" % (str(args), str(kwargs)))
+    tangelo.log("datasource.summary(args: %s kwargs: %s)" % (str(args), str(kwargs)))
 
     data_set_ids, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
     qs = parseParamTextQuery(**kwargs)
@@ -95,39 +95,39 @@ def stats(*args, **kwargs):
 
 
     def _ds_stat(data_set_id):
-        data_set_stats = {}
-        data_set_stats["summary"] = _pre_search(data_set_id=data_set_id, email_address=None, qs='', start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+        data_set_summary = {}
+        data_set_summary["summary"] = _pre_search(data_set_id=data_set_id, email_address=None, qs='', start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
         # DS with search
         if qs:
-            data_set_stats["search"] = _pre_search(data_set_id=data_set_id, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
-            data_set_stats["search"]["query"] = qs
+            data_set_summary["search"] = _pre_search(data_set_id=data_set_id, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+            data_set_summary["search"]["query"] = qs
         #DS with users
         if email_address_list:
             users = {}
             for email_address in email_address_list:
                 users[email_address] = _pre_search(data_set_id=data_set_id, email_address=email_address, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
             if qs:
-                data_set_stats["search"]["query"] = qs
-                data_set_stats["search"]["email_users"] = users
+                data_set_summary["search"]["query"] = qs
+                data_set_summary["search"]["email_users"] = users
             else:
-                data_set_stats["email_users"] = users
+                data_set_summary["email_users"] = users
 
-        return data_set_stats
+        return data_set_summary
 
-    stats = {}
+    summary = {}
     if ',' in data_set_ids:
-        stats["all_dataset"] = _ds_stat(data_set_ids)
+        summary["all_dataset"] = _ds_stat(data_set_ids)
 
     for data_set_id in data_set_ids.split(','):
-        stats[data_set_id] = _ds_stat(data_set_id)
+        summary[data_set_id] = _ds_stat(data_set_id)
 
-    return stats
+    return summary
 
 
 actions = {
     "dataset" : setSelectedDataSet,
     "all" : getAll,
-    "stats" : stats
+    "summary" : summary
 }
 
 def unknown(*args):
