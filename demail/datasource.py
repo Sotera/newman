@@ -1,4 +1,4 @@
-from newman.es_connection import es, index_list, getDefaultDataSetID
+from newman.es_connection import es, index_client, index_list, getDefaultDataSetID
 
 from newman.utils.functions import nth
 from newman.newman_config import data_set_names, index_creator_prefix
@@ -16,6 +16,9 @@ def _index_record(index):
     emails_addrs_count = es().count(index=index, doc_type="email_address", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
     emails_attch_count = es().count(index=index, doc_type="attachments", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
 
+    stats = index_client().stats(index=index, human=True, fielddata_fields="docs.*,store.*", fields="docs.*,store.*", completion_fields="docs.*,store.*")
+
+
     # TODO Replace with a single query
     hits = [es().search(index=dataset, doc_type=dataset, body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["hits"]["hits"][0] for dataset in index.split(",")]
 
@@ -32,6 +35,7 @@ def _index_record(index):
             'data_set_attachment_count' : emails_attch_count,
             'data_set_datetime_min' : min_abs,
             'data_set_datetime_max' : max_abs,
+            'data_set_size': stats["indices"][index]["total"]["store"]["size"].upper()
             }
 
 def listAllDataSet():

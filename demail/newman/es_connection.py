@@ -2,7 +2,7 @@ from elasticsearch import Elasticsearch
 from newman_config import elasticsearch_config, _getDefaultDataSetID, index_creator_prefix
 from threading import Lock
 import tangelo
-from elasticsearch.client import IndicesClient
+from elasticsearch.client import IndicesClient, ClusterClient
 
 _ES = None
 _ES_LOCK = Lock()
@@ -29,6 +29,12 @@ def index_list():
     ic = IndicesClient(es())
     stats = ic.stats(index="_all")
     return [index for index in stats["indices"]]
+
+def cluster_client():
+    return ClusterClient(es())
+
+def index_client():
+    return IndicesClient(es())
 
 def getDefaultDataSetID():
     default = _getDefaultDataSetID()
