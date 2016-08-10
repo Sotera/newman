@@ -444,7 +444,7 @@ def _get_attachment_content_by_id(data_set_id, doc_id, attach_id):
         _source = doc["_source"]
         for attachment in _source["attachments"]:
             if attachment["guid"] == attach_id:
-                return {"content": attachment["content"]}
+                return {"content": attachment.get("content","")}
     return {"content": ''}
 
 def dump(bytes, name):
