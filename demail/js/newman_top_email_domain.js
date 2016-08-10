@@ -13,7 +13,7 @@ function getEmailDomainColor(email) {
     var domain = getEmailDomain(email);
     if (domain) {
 
-      var value = newman_domain_email.getDomainColor( domain );
+      var value = newman_top_email_domain.getDomainColor( domain );
       if (value) {
         color = value;
       }
@@ -37,7 +37,7 @@ function getEmailDomainColor(email) {
 /**
  * email-domain related container
  */
-var newman_domain_email = (function () {
+var newman_top_email_domain = (function () {
 
   var chart_bar_ui_id = '#chart_horizontal_bar_domains';
   var chart_donut_ui_id = '#chart_donut_domains';
@@ -57,7 +57,7 @@ var newman_domain_email = (function () {
    * @param count
    */
   function displayUIDomain( count ) {
-    console.log('newman_domain_email.displayUIDomain(' + count + ')');
+    console.log('newman_top_email_domain.displayUIDomain(' + count + ')');
 
     if (chart_bar_ui_id) {
       if (count) {
@@ -67,7 +67,7 @@ var newman_domain_email = (function () {
         _top_count = _top_count_max;
       }
 
-      newman_service_domain_email.requestService(_top_count);
+      newman_top_email_domain_list_request.requestService(_top_count);
 
     }
   }
@@ -86,7 +86,7 @@ var newman_domain_email = (function () {
 
         addDomain(element.domain, element.count, element.total_percent);
       })
-      //console.log('newman_domain_email.mapResponse(...)\n' + JSON.stringify(_domain_map, null, 2));
+      //console.log('newman_top_email_domain.mapResponse(...)\n' + JSON.stringify(_domain_map, null, 2));
 
       return domain_list;
     }
@@ -140,6 +140,7 @@ var newman_domain_email = (function () {
 
       //console.log('\tfiltered_response: ' + JSON.stringify(_domain_list, null, 2));
 
+      _domain_list = _domain_list.sort( descendingPredicatByProperty("count") );
       if (_domain_list.length > _top_count) {
         _domain_list = _domain_list.splice(0, _top_count);
       }
@@ -148,9 +149,12 @@ var newman_domain_email = (function () {
       var colors = getAllColorAsList();
       //console.log('color_list:\n' + JSON.stringify(colors, null, 2));
 
-      var width = 530, height_bar = 13, margin_top = 8, margin_bottom = 2, width_bar_factor = 1;
+      var width = 530, height_bar = 13, margin_top = 8, margin_bottom = 2;
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
       width = width - margin.left - margin.right;
+
+      var max_value = _domain_list[0].count;
+      var width_bar_factor = getAdjustedChartWidthFactor(width, max_value);
 
       var x = d3.scale.linear().range([0, width]);
       var chart = d3.select(chart_bar_ui_id).append('svg')
@@ -169,7 +173,7 @@ var newman_domain_email = (function () {
 
       bar.append("rect")
         .attr("width", function (d) {
-          return x(+d.count * width_bar_factor);
+          return getAdjustedChartWidth(width_bar_factor, d.count);
         })
         .attr("height", height_bar - 1)
         .attr("class", "label highlight clickable")
@@ -188,7 +192,7 @@ var newman_domain_email = (function () {
 
       bar.append("text")
         .attr("x", function (d) {
-          return x(+d.count * width_bar_factor) - 3;
+          return (getAdjustedChartWidth(width_bar_factor, d.count) - 3);
         })
         .attr("y", height_bar / 2)
         .attr("dy", ".35em")
@@ -253,6 +257,42 @@ var newman_domain_email = (function () {
     };
   }
 
+  function getAdjustedChartWidthFactor(width, max_value) {
+    var adjusted_factor = 1.0, adjusted_max = max_value;
+    if (width && max_value) {
+      var done = false;
+      if (adjusted_max >= width) {
+
+        while (!done) {
+          adjusted_max = (adjusted_max * 0.85);
+          done = adjusted_max < width;
+        }
+      }
+      else {
+        done = (adjusted_max * 1.15) > width;
+        var adjusted_max_prev = adjusted_max;
+        while (!done) {
+          adjusted_max_prev = adjusted_max;
+          adjusted_max = (adjusted_max * 1.15);
+          done = adjusted_max > width;
+        }
+        adjusted_max = adjusted_max_prev;
+      }
+      adjusted_factor = (adjusted_max / max_value);
+    }
+    //console.log('getAdjustedChartWidthFactor(' + width + ', ' + max_value + ') : ' + adjusted_factor);
+    return adjusted_factor;
+  }
+
+  function getAdjustedChartWidth(factor, value) {
+    var adjusted_value = value;
+    if (factor && value) {
+      adjusted_value = (factor * value)
+    }
+    //console.log('getAdjustedChartWidth(' + factor + ', ' + value + ') : ' + adjusted_value);
+    return adjusted_value;
+  }
+
   function initUI() {
 
     if (chart_bar_ui_id) {
@@ -308,7 +348,7 @@ var newman_domain_email = (function () {
   }
 
   function getDomainColor( key ) {
-    //console.log('newman_domain_email.getDomainColor(' + key + ')');
+    //console.log('newman_top_email_domain.getDomainColor(' + key + ')');
     var color = 'rgb(225, 225, 225)';
     if (key) {
       var value = getDomainObject( key );
@@ -358,14 +398,14 @@ var newman_domain_email = (function () {
  * email-domain-related service response container
  * @type {{requestService, getResponse}}
  */
-var newman_service_domain_email = (function () {
+var newman_top_email_domain_list_request = (function () {
 
   var _service_url = 'email/domains';
   var _response;
 
   function getServiceURL(top_count) {
     if (!top_count || top_count < 1 ) {
-      top_count = newman_domain_email.getTopCountMax();
+      top_count = newman_top_email_domain.getTopCountMax();
     }
 
     var service_url = newman_data_source.appendDataSource( _service_url );
@@ -376,7 +416,7 @@ var newman_service_domain_email = (function () {
   }
 
   function requestService(top_count) {
-    console.log('newman_service_domain_email.requestService('+top_count+')');
+    console.log('newman_top_email_domain_list_request.requestService('+top_count+')');
 
 
     //$.get(getServiceURL(top_count)).then(function (response) {
@@ -394,7 +434,7 @@ var newman_service_domain_email = (function () {
 
 
     if (response) {
-      console.log('newman_service_domain_email.validateResponse(...)');
+      console.log('newman_top_email_domain_list_request.validateResponse(...)');
 
       if (response.domains) {
         console.log( '\tdomains[' + response.domains.length + ']' );
@@ -439,7 +479,7 @@ var newman_service_domain_email = (function () {
       console.log('received service_response_email_domain[' + response.domains.length + ']');
       //console.log('\tfiltered_response: ' + JSON.stringify(_response, null, 2));
 
-      newman_domain_email.updateUIDomain( _response );
+      newman_top_email_domain.updateUIDomain( _response );
     }
   }
 

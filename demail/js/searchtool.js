@@ -634,156 +634,7 @@ var search_result = (function () {
     }
 }());
 
-
-/**
- * request and display top topic-related charts
- * @param count
- */
-/*
-function drawChartTopic( count ) {
-
-  var chart_ui_id = '#chart_horizontal_bar_topics';
-
-  if (count > 0 && chart_ui_id) {
-
-    var top_count = count;
-
-    $.get('topic/category/all').then(function (response) {
-
-      $(chart_ui_id).empty();
-
-      var categories = _.map(response.categories.splice(0, count), function( element ){
-        var category =  _.object(["index", "topics","score"], element);
-        category.topics = _.take(category.topics.split(' '), 5).join(' ');
-        category.score = parseFloat(category.score);
-        return category;
-      });
-
-      var colors = d3.scale.category20b();
-      var width = 530, height_bar = 15, margin_top = 8, margin_bottom = 2, width_bar_factor = 7;
-      var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
-      width = width - margin.left - margin.right;
-
-      var x = d3.scale.linear().range([0, width]);
-      var chart = d3.select(chart_ui_id).append('svg')
-        .attr('class', 'chart')
-        .attr("width", width + margin.left + margin.right);
-
-      x.domain([0, 100]);
-      chart.attr("height", height_bar * categories.length + margin_top + margin_bottom);
-
-      var bar = chart.selectAll("g")
-        .data(categories).enter()
-        .append("g")
-        .attr("transform", function (d, i) {
-          return "translate(" + margin.left + "," + (+(i * height_bar) + +margin.top) + ")";
-        });
-
-      bar.append("rect")
-        .attr("width", function (d) {
-          return x(+d.score * width_bar_factor);
-        })
-        .attr("height", height_bar - 1)
-        .attr("class", "label highlight clickable")
-        .on("click", function (d) {
-          console.log( 'clicked on \'' + d.topics + '\'');
-          do_search(true, 'topic', d.index, '0.5');
-        })
-        .style("fill", function (d, i) {
-          return colors(i);
-        })
-        .append('title').text(function (d) {
-          return d.score;
-        });
-
-
-      bar.append("text")
-        .attr("x", function (d) {
-          return x(+d.score * width_bar_factor) - 3;
-        })
-        .attr("y", height_bar / 2)
-        .attr("dy", ".35em")
-        .text(function (d) {
-          return +d.score;
-        });
-
-
-      bar.append("text")
-        .attr("x", function (d) {
-          return -margin.left;
-        })
-        .attr("y", height_bar / 2)
-        .attr("class", "label clickable")
-        .on("click", function (d) {
-          console.log( 'clicked on \'' + d.topics + '\'');
-          do_search(true, 'topic', d.index, '0.5');
-        })
-        .text(function (d) {
-          var max_length = 30;
-          if (d.topics.length > max_length) {
-            var text = d.topics.substr(0, max_length);
-            text = text.substr( 0, text.lastIndexOf(' '));
-            return text + " ...";
-          }
-
-          return d.topics;
-        })
-        .append('title').text(function (d) {
-          return d.topics;
-        });
-
-
-      var top_donut_chart_data = [];
-      var top_donut_chart_total = 1;
-
-
-      for( var i = 0; i < categories.length; i++ ){
-        top_donut_chart_total = top_donut_chart_total + categories[i].score;
-      };
-
-      for( var i = 0; i < categories.length; i++ ){
-        var value = Math.round((categories[i].score / top_donut_chart_total) * 100);
-        var entry = {
-          value: value,
-          label: (_.take((categories[i].topics).split(' '), 3).join(' ')),
-          formatted: value + '%'
-        };
-        top_donut_chart_data.push(entry);
-      };
-
-
-      dashboard_donut_chart_topic = Morris.Donut({
-        element: 'chart_donut_topics',
-        colors: colors.range(),
-        data: top_donut_chart_data,
-        formatter: function (x, data) { return data.formatted; }
-      });
-
-      dashboard_donut_chart_topic.select(0);
-
-    });
-
-  }
-}
-*/
-
-
-
-function reloadDashboardSearchResult() {
-  //re-initialize search
-  searchByField();
-}
-
-function clearSearchText() {
-
-  var text_search_field = $("#txt_search");
-  if (text_search_field) {
-    text_search_field.val( '' );
-  }
-
-}
-
-function reloadDashboardActivityTimeline(timeline_init_enabled) {
+function reloadDashboardActivityTimeline( timeline_init_enabled ) {
   /*
   newman_activity_outbound.displayUIActivityOutboundSelected();
   newman_activity_inbound.displayUIActivityInboundSelected();
@@ -794,40 +645,40 @@ function reloadDashboardActivityTimeline(timeline_init_enabled) {
   newman_activity_attachment.displayUIActivityAttachSelected();
 }
 
-function reloadDashboardEntityEmail() {
+function reloadDashboardTopEmailEntities() {
   newman_top_email_entity.requestEmailEntityList();
 }
 
-function reloadDashboardTopicEmail() {
-  newman_topic_email.displayUITopicEmail(10);
+function reloadDashboardTopEmailTopics() {
+  newman_top_email_topic.displayUITopicEmail(10);
 }
 
-function initDashboardDomain() {
-  reloadDashboardDomain();
+function initDashboardTopEmailDomains() {
+  reloadDashboardTopEmailDomains();
 }
 
-function reloadDashboardDomain() {
-  newman_domain_email.displayUIDomain(10);
+function reloadDashboardTopEmailDomains() {
+  newman_top_email_domain.displayUIDomain(10);
 }
 
-function initDashboardCommunity() {
-  reloadDashboardCommunity();
+function initDashboardTopEmailCommunities() {
+  reloadDashboardTopEmailCommunities();
 }
 
-function reloadDashboardCommunity() {
-  newman_community_email.displayUICommunity(10);
+function reloadDashboardTopEmailCommunities() {
+  newman_top_email_community.displayUICommunity(10);
 }
 
-function initDashboardRankEmail() {
-  reloadDashboardRankEmail();
+function initDashboardTopEmailAccounts() {
+  reloadDashboardTopEmailAccounts();
 }
 
-function reloadDashboardRankEmail() {
-  newman_rank_email.requestEmailAccountList();
+function reloadDashboardTopEmailAccounts() {
+  newman_top_email_account.requestEmailAccountList();
 }
 
-function reloadDashboardFileTypeAttachment() {
-  newman_file_type_attach.displayUIFileTypeAttach(10);
+function reloadDashboardTopAttachmentTypes() {
+  newman_top_email_attach_type.displayUIFileTypeAttach(10);
 }
 
 /**
@@ -844,18 +695,18 @@ function initDashboardCharts( is_first_init ) {
   reloadDashboardActivityTimeline( is_first_init );
 
   //re-render entity analytics
-  reloadDashboardEntityEmail();
+  reloadDashboardTopEmailEntities();
   //re-render topic analytics
-  reloadDashboardTopicEmail()
+  reloadDashboardTopEmailTopics()
 
   //re-render domain analytics
-  reloadDashboardDomain();
+  reloadDashboardTopEmailDomains();
   //re-render community analytics
-  reloadDashboardCommunity();
+  reloadDashboardTopEmailCommunities();
   //re-render rank analytics
-  reloadDashboardRankEmail();
+  reloadDashboardTopEmailAccounts();
   //re-render attachment-file analytics
-  reloadDashboardFileTypeAttachment();
+  reloadDashboardTopAttachmentTypes();
 
 }
 

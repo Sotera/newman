@@ -352,7 +352,7 @@ var app_text_extract_table_phone_list_request = (function () {
     // append date-time range
     service_url = newman_datetime_range.appendDatetimeRange(service_url);
     // append query-string
-    //service_url = newman_search_filter.appendURLQuery(service_url);
+    //service_url = newman_search_parameter.appendURLQuery(service_url);
 
     service_url += '&size=' + count;
 
@@ -485,7 +485,7 @@ var app_email_extract_phone_search_request = (function () {
       // append date-time range
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
       // append query-string
-      service_url = newman_search_filter.appendURLQuery(service_url);
+      service_url = newman_search_parameter.appendURLQuery(service_url);
 
       service_url += '&phone_numbers=' + phone_number_list;
 

@@ -511,7 +511,7 @@ var newman_email_doc_table = (function () {
     var email_url = 'email/email/' + encodeURIComponent(email_id);
     email_url = newman_data_source.appendDataSource(email_url);
 
-    email_url = newman_search_filter.appendURLQuery(email_url);
+    email_url = newman_search_parameter.appendURLQuery(email_url);
 
     email_url = appendIngestID( email_url, email_id );
 

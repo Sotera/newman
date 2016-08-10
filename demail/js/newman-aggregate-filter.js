@@ -33,10 +33,10 @@ var newman_aggregate_filter = (function () {
     reloadDashboardActivityTimeline( true );
 
     //trigger entities refresh
-    reloadDashboardEntityEmail();
+    reloadDashboardTopEmailEntities();
 
     //trigger topics refresh
-    reloadDashboardTopicEmail();
+    reloadDashboardTopEmailTopics();
 
   }
 

@@ -491,7 +491,7 @@ var newman_search_result_collection = (function () {
                                       'class="button-dropdown-menu-item" ' +
                                       'id="' + subopen_menu_item_id_top_email + '" ' +
                                       'value="' + data_element.uid + '" >' +
-                                      '<i class="' + newman_search_filter.getFilterIconClassByLabel('email') + '" aria-hidden="true"></i>' + '&nbsp;Accounts Ranked&nbsp;' +
+                                      '<i class="' + newman_search_parameter.getFilterIconClassByLabel('email') + '" aria-hidden="true"></i>' + '&nbsp;Accounts Ranked&nbsp;' +
                               '</button>' +
                               '<input type="number" ' +
                                      'style="font-size: 11px; width: 32px;" ' +
@@ -506,7 +506,7 @@ var newman_search_result_collection = (function () {
                                       'class="button-dropdown-menu-item" ' +
                                       'id="' + subopen_menu_item_id_top_entity + '" ' +
                                       'value="' + data_element.uid + '" >' +
-                                      '<i class="' + newman_search_filter.getFilterIconClassByLabel('entity') + '" aria-hidden="true"></i>' + '&nbsp;Entities Extracted&nbsp;' +
+                                      '<i class="' + newman_search_parameter.getFilterIconClassByLabel('entity') + '" aria-hidden="true"></i>' + '&nbsp;Entities Extracted&nbsp;' +
                               '</button>' +
                               '<input type="number" ' +
                                      'style="font-size: 11px; width: 32px;" ' +
@@ -521,7 +521,7 @@ var newman_search_result_collection = (function () {
                                       'class="button-dropdown-menu-item" ' +
                                       'id="' + subopen_menu_item_id_top_topic + '" ' +
                                       'value="' + data_element.uid + '" disabled>' +
-                                      '<i class="' + newman_search_filter.getFilterIconClassByLabel('topic') + '" aria-hidden="true"></i>' + '&nbsp;Topics  Clustered  &nbsp; ' +
+                                      '<i class="' + newman_search_parameter.getFilterIconClassByLabel('topic') + '" aria-hidden="true"></i>' + '&nbsp;Topics  Clustered  &nbsp; ' +
                               '</button>' +
                               '<input type="number" ' +
                                      'style="font-size: 11px; width: 32px;" ' +
@@ -1203,7 +1203,7 @@ var newman_search_result_collection = (function () {
     }
 
     // reset search-input filter to default (search-all)
-    newman_search_filter.resetSelectedFilter();
+    newman_search_parameter.resetSelectedFilter();
 
     if (is_initial_response) {
       initial_service_url = url_path;
@@ -1286,12 +1286,12 @@ var newman_search_result_collection = (function () {
           associate_count = associate_count - 1; // discounting self from nodes
         }
 
-        var outbound_count = newman_rank_email.getEmailOutboundCount(search_text);
-        var inbound_count = newman_rank_email.getEmailInboundCount(search_text);
-        var attach_count = newman_rank_email.getEmailAttachCount(search_text);
-        var rank = newman_rank_email.getEmailRank(search_text);
+        var outbound_count = newman_top_email_account.getEmailOutboundCount(search_text);
+        var inbound_count = newman_top_email_account.getEmailInboundCount(search_text);
+        var attach_count = newman_top_email_account.getEmailAttachCount(search_text);
+        var rank = newman_top_email_account.getEmailRank(search_text);
 
-        var icon_class = newman_search_filter.getFilterIconClassByLabel( field );
+        var icon_class = newman_search_parameter.getFilterIconClassByLabel( field );
         var parent_node_uid = data_set_id;
 
         if (field == 'all') {
@@ -1302,7 +1302,7 @@ var newman_search_result_collection = (function () {
             //console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~ if (search_text) // result from key-word search ~~~~~~~~~~~~~~~~~~~~~~~');
 
             if (!icon_class) {
-              icon_class = newman_search_filter.getFilterIconClassByLabel( 'all' );
+              icon_class = newman_search_parameter.getFilterIconClassByLabel( 'all' );
             }
 
             var node = search_result_table.appendTextSearchList(
@@ -1412,6 +1412,14 @@ var newman_search_result_collection = (function () {
 
   } // end onSearchResponse(...)
 
+  function onRequestDataSourceSummaryResponse(field, search_text, url_path, search_response, parent_search_uid, clear_all_sibling) {
+    if (debug_enabled) {
+      console.log('newman_search_result_collection.onRequestDataSourceSummaryResponse(' + search_text + ')');
+    }
+
+
+
+  } // end onRequestDataSourceSummaryResponse(...)
 
   function searchByDataSource( _field, _search_text, _clear_buffer, _data_id_list_string ) {
     if (_data_id_list_string) {
@@ -1596,7 +1604,7 @@ var newman_search_result_collection = (function () {
 
 
       //initiate top-ranked email address search
-      var ranked_email_accounts = newman_rank_email.getRankedList();
+      var ranked_email_accounts = newman_top_email_account.getRankedList();
       console.log('\tranked_emails[' + ranked_email_accounts.length + ']');
       //console.log(JSON.stringify(ranked_email_accounts, null, 2));
 
@@ -1605,7 +1613,7 @@ var newman_search_result_collection = (function () {
         requestSearch('email', email_address, false);
         //newman_aggregate_filter.initAggregateFilterSelected( email_address );
       });
-      newman_search_filter.setSelectedFilter();
+      newman_search_parameter.setSelectedFilter();
 
     }
   }

@@ -287,7 +287,7 @@ function setGraphNodeColor(color_category) {
     drawGraphLegendTableCommunity();
     d3.selectAll("circle").style("fill", function(d) {
       //console.log('\tcolor_by_community\n' + JSON.stringify(d, null, 2));
-      return newman_community_email.getCommunityColor( d.community );
+      return newman_top_email_community.getCommunityColor( d.community );
     });
   }
   else if( color_category == 'domain_color' ) {
@@ -468,8 +468,8 @@ function showSearchPopup( search_field, search_text ) {
  */
 function searchByField( search_filter ) {
 
-  var field = newman_search_filter.getSelectedFilter().label;
-  if (search_filter && newman_search_filter.isValidFilter( search_filter )) {
+  var field = newman_search_parameter.getSelectedFilter().label;
+  if (search_filter && newman_search_parameter.isValidFilter( search_filter )) {
     field = search_filter;
   }
 
@@ -574,9 +574,9 @@ function requestSearch(field, search_text, load_on_response, parent_search_uid, 
   }
 
 
-  newman_search_filter.setSelectedFilter(field);
-  service_url = newman_search_filter.appendFilter(service_url, search_text);
-  service_url = newman_search_filter.appendURLQuery(service_url);
+  newman_search_parameter.setSelectedFilter(field);
+  service_url = newman_search_parameter.appendFilter(service_url, search_text);
+  service_url = newman_search_parameter.appendURLQuery(service_url);
 
   if (alt_data_source) {
     service_url = newman_data_source.appendDataSource(service_url, alt_data_source);
@@ -605,16 +605,16 @@ function requestSearch(field, search_text, load_on_response, parent_search_uid, 
     console.log("requesting '" + service_url + "'");
     app_status_indicator.setStatusConnecting( true );
 
-    $.getJSON(service_url, function (search_response) {
-
-      app_graph_search_request.putGraphResponse( service_url, search_response );
+    $.getJSON(service_url, function ( response ) {
+    //$.get( service_url ).then(function ( response ) {
+      app_graph_search_request.putGraphResponse( service_url, response );
 
       newman_search_result_collection.onSearchResponse (
         field,
         search_text,
         load_on_response,
         service_url,
-        search_response,
+        response,
         parent_search_uid,
         clear_cache
       );
@@ -634,11 +634,11 @@ function  propagateSearch( search_text, email_doc_rows, parent_search_uid ) {
       requestSearch( 'email', email_account, false, parent_search_uid );
     }
   });
-  newman_search_filter.resetSelectedFilter();
+  newman_search_parameter.resetSelectedFilter();
 
   // update widgets based on new search-query
-  reloadDashboardEntityEmail();
-  reloadDashboardTopicEmail();
+  reloadDashboardTopEmailEntities();
+  reloadDashboardTopEmailTopics();
 }
 
 function getTopRankedEmailAccountList(email_doc_rows, top_count ) {
@@ -786,7 +786,7 @@ function drawGraph( graph ){
       }
       else if (d3.select("#color_by_community").property("checked")) {
         if(d && d.community) {
-          return newman_community_email.getCommunityColor( d.community );
+          return newman_top_email_community.getCommunityColor( d.community );
         }
       }
       else if (d3.select("#color_by_domain").property("checked")) {
@@ -847,7 +847,7 @@ function drawGraph( graph ){
 
       $('.d3-context-menu')
         .find(".fa-users").first()
-        .css("color", newman_community_email.getCommunityColor( n.community ))
+        .css("color", newman_top_email_community.getCommunityColor( n.community ))
         .css("padding", "4px 0px 0px 8px");
     },
     onClose: function() {
@@ -1368,7 +1368,7 @@ function drawGraphLegendTableCommunity() {
         return $('<div>').append($('<div>').css(
           { 'min-height': '14px',
             'width' : '100%',
-            'background-color' : newman_community_email.getCommunityColor( d )
+            'background-color' : newman_top_email_community.getCommunityColor( d )
           })).html();
       }
       return d;
@@ -1417,10 +1417,10 @@ var dashboard_content = (function () {
 
       reloadDashboardActivityTimeline();
 
-      reloadDashboardEntityEmail();
+      reloadDashboardTopEmailEntities();
 
-      reloadDashboardRankEmail();
-      reloadDashboardFileTypeAttachment();
+      reloadDashboardTopEmailAccounts();
+      reloadDashboardTopAttachmentTypes();
     }
     bottom_panel.hide();
 
@@ -1539,8 +1539,8 @@ var email_analytics_content = (function () {
 $(function () {
   "use strict";
 
-  // initialize data-source
-  newman_data_source.requestAllDataSet();
+  // initialize all data-source
+  newman_data_source.requestDataSourceAll();
 
   setTimeout(function() {
 
@@ -1559,10 +1559,10 @@ $(function () {
     app_status_indicator.initStatus();
 
     // initialize dashboard domain
-    initDashboardDomain();
+    initDashboardTopEmailDomains();
 
     // initialize dashboard community
-    initDashboardCommunity();
+    initDashboardTopEmailCommunities();
 
 
     $("[rel=tooltip]").tooltip();
@@ -1580,22 +1580,22 @@ $(function () {
         app_geo_map.init( true );
       }
       else if (element_ID.endsWith('dashboard_tab_content_topics')) {
-        newman_topic_email.revalidateUITopicEmail();
+        newman_top_email_topic.revalidateUITopicEmail();
       }
       else if (element_ID.endsWith('dashboard_tab_content_domains')) {
-        newman_domain_email.revalidateUIDomain();
+        newman_top_email_domain.revalidateUIDomain();
       }
       else if (element_ID.endsWith('dashboard_tab_content_communities')) {
-        newman_community_email.revalidateUICommunity();
+        newman_top_email_community.revalidateUICommunity();
       }
       else if (element_ID.endsWith('dashboard_tab_content_attach_activities')) {
         newman_activity_attachment.revalidateUIActivityAttach();
       }
       else if (element_ID.endsWith('dashboard_tab_content_attach_types')) {
-        newman_file_type_attach.revalidateUIFileTypeAttach();
+        newman_top_email_attach_type.revalidateUIFileTypeAttach();
       }
       else if (element_ID.endsWith('dashboard_tab_content_ranks')) {
-        newman_rank_email.revalidateUIRankEmail();
+        newman_top_email_account.revalidateUIRankEmail();
       }
       else {
         // default to dashboard
@@ -1607,6 +1607,7 @@ $(function () {
 
     newman_graph_email.initUI();
 
+    /*
     function parseHash(newHash, oldHash) {
       console.log('parseHash( ' + newHash + ', ' + oldHash + ' )');
       crossroads.parse(newHash);
@@ -1645,6 +1646,7 @@ $(function () {
     if (hasher.getHash().length < 1) {
       hasher.setHash(newman_service_email_search_all.getServiceURLBase());
     }
+    */
 
   }, 3000); //end of setTimeout
   //});

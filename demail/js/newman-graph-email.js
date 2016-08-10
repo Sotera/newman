@@ -709,7 +709,7 @@ var newman_graph_email_request_by_address = (function () {
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
 
       // append query-string
-      service_url = newman_search_filter.appendURLQuery(service_url);
+      service_url = newman_search_parameter.appendURLQuery(service_url);
 
       return service_url;
     }
@@ -792,7 +792,7 @@ var newman_graph_email_request_by_conversation_forward_backward = (function () {
     service_url = newman_graph_email.appendAllTargetNodeSelected(service_url);
 
     // append query-string
-    service_url = newman_search_filter.appendURLQuery(service_url);
+    service_url = newman_search_parameter.appendURLQuery(service_url);
 
     return service_url;
   }
@@ -864,7 +864,7 @@ var newman_graph_email_request_by_community = (function () {
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
 
       // append query-string
-      service_url = newman_search_filter.appendURLQuery(service_url);
+      service_url = newman_search_parameter.appendURLQuery(service_url);
 
       return service_url;
     }
@@ -922,10 +922,10 @@ var newman_graph_email_request_by_topic = (function () {
 
     var service_url = newman_data_source.appendDataSource(_service_url);
     service_url = newman_datetime_range.appendDatetimeRange(service_url);
-    service_url = newman_topic_email.appendTopic(service_url);
+    service_url = newman_top_email_topic.appendTopic(service_url);
 
     // append query-string
-    service_url = newman_search_filter.appendURLQuery(service_url);
+    service_url = newman_search_parameter.appendURLQuery(service_url);
 
     return service_url;
   }
@@ -939,7 +939,7 @@ var newman_graph_email_request_by_topic = (function () {
       newman_graph_email.updateUIGraphView( response );
 
       // add to work-flow-history
-      var topic_set_as_string = newman_topic_email.getAllTopicSelectedAsString();
+      var topic_set_as_string = newman_top_email_topic.getAllTopicSelectedAsString();
       app_nav_history.appendHist(service_url, 'topic', topic_set_as_string);
     });
   }
@@ -995,7 +995,7 @@ var newman_graph_email_request_by_conversation = (function () {
     service_url = newman_graph_email.appendAllTargetNodeSelected(service_url);
 
     // append query-string
-    service_url = newman_search_filter.appendURLQuery(service_url);
+    service_url = newman_search_parameter.appendURLQuery(service_url);
 
     if (document_uid) {
       if (service_url.indexOf('?') > 0) {

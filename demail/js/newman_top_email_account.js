@@ -5,7 +5,7 @@
 /**
  * email-rank related container
  */
-var newman_rank_email = (function () {
+var newman_top_email_account = (function () {
   var debug_enabled = false;
 
   var chart_bar_ui_id = '#chart_horizontal_bar_ranks';
@@ -75,9 +75,12 @@ var newman_rank_email = (function () {
     if (ui_display_entity_list.length > 0) {
       //console.log('ui_display_entity_list: ' + JSON.stringify(ui_display_entity_list, null, 2));
 
-      var width = 530, height_bar = 13, margin_top = 8, margin_bottom = 2, width_bar_factor = 100;
+      var width = 530, height_bar = 13, margin_top = 8, margin_bottom = 2;
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
       width = width - margin.left - margin.right;
+
+      var max_value =ui_display_entity_list[0].rank;
+      var width_bar_factor = getAdjustedChartWidthFactor(width, max_value);
 
       var x = d3.scale.linear().range([0, width]);
       var chart = d3.select(chart_bar_ui_id).append('svg')
@@ -96,7 +99,8 @@ var newman_rank_email = (function () {
 
       bar.append("rect")
         .attr("width", function (d) {
-          return x(+d.rank * width_bar_factor);
+          //return x(+d.rank * width_bar_factor);
+          return getAdjustedChartWidth(width_bar_factor, d.rank);
         })
         .attr("height", height_bar - 1)
         .style("fill", function (d, i) {
@@ -114,7 +118,7 @@ var newman_rank_email = (function () {
 
       bar.append("text")
         .attr("x", function (d) {
-          return x(+d.rank * width_bar_factor) - 3;
+          return (getAdjustedChartWidth(width_bar_factor, d.rank) - 3);
         })
         .attr("y", height_bar / 2)
         .attr("dy", ".35em")
@@ -218,6 +222,42 @@ var newman_rank_email = (function () {
     else {
       console.log('ui_display_entity_list: empty');
     }
+  }
+
+  function getAdjustedChartWidthFactor(width, max_value) {
+    var adjusted_factor = 1.0, adjusted_max = max_value;
+    if (width && max_value) {
+      var done = false;
+      if (adjusted_max >= width) {
+
+        while (!done) {
+          adjusted_max = (adjusted_max * 0.85);
+          done = adjusted_max < width;
+        }
+      }
+      else {
+        done = (adjusted_max * 1.15) > width;
+        var adjusted_max_prev = adjusted_max;
+        while (!done) {
+          adjusted_max_prev = adjusted_max;
+          adjusted_max = (adjusted_max * 1.15);
+          done = adjusted_max > width;
+        }
+        adjusted_max = adjusted_max_prev;
+      }
+      adjusted_factor = (adjusted_max / max_value);
+    }
+    //console.log('getAdjustedChartWidthFactor(' + width + ', ' + max_value + ') : ' + adjusted_factor);
+    return adjusted_factor;
+  }
+
+  function getAdjustedChartWidth(factor, value) {
+    var adjusted_value = value;
+    if (factor && value) {
+      adjusted_value = (factor * value)
+    }
+    //console.log('getAdjustedChartWidth(' + factor + ', ' + value + ') : ' + adjusted_value);
+    return adjusted_value;
   }
 
   function initUI() {
@@ -440,7 +480,7 @@ var newman_top_email_account_list_request = (function () {
     if (prev_response && prev_response.emails) {
       console.log("service-response already exists for '" + service_url + "'");
 
-      newman_rank_email.onRequestEmailAccountList( prev_response.emails );
+      newman_top_email_account.onRequestEmailAccountList( prev_response.emails );
 
     }
     else {
@@ -462,7 +502,7 @@ var newman_top_email_account_list_request = (function () {
       var mapped_response = mapResponse( service_url, data_source_string, validateResponseTopEmailAccount( response ));
 
       if (mapped_response.emails) {
-        newman_rank_email.onRequestEmailAccountList( mapped_response.emails );
+        newman_top_email_account.onRequestEmailAccountList( mapped_response.emails );
       }
     }
   }

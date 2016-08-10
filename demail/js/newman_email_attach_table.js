@@ -728,7 +728,7 @@ var newman_email_attach_request_all_by_sender = (function () {
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
 
       // append query-string
-      service_url = newman_search_filter.appendURLQuery(service_url);
+      service_url = newman_search_parameter.appendURLQuery(service_url);
 
       return service_url;
     }

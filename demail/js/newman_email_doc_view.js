@@ -180,7 +180,7 @@ var newman_email_doc_view = (function () {
         .attr("width", barWidth - 1)
         .style("fill", function (d, i) {
 
-          return newman_topic_email.getTopicColor(i);
+          return newman_top_email_topic.getTopicColor(i);
 
         })
         .attr('class', 'clickable')
@@ -189,7 +189,7 @@ var newman_email_doc_view = (function () {
             console.log('clicked mini-topic-chart\n' + JSON.stringify(d, null, 2));
           }
 
-          newman_topic_email.onTopicClicked(d[1], d[2], d[0]);
+          newman_top_email_topic.onTopicClicked(d[1], d[2], d[0]);
         })
         .on("mouseover", function (d, i) {
           //var str = "topic: " + i + "<br/>" + Math.floor(100 * d[2]) + '%';
@@ -668,12 +668,12 @@ var newman_email_doc_view = (function () {
           html_text = '<p><span class="bold">Attachment : </span>' + file_name + '</p>';
 
           if (file_type == 'word') {
-            console.log('content extracted:\n\tfile : ' + file_name + '\n' + extracted_text);
+            //console.log('content extracted:\n\tfile : ' + file_name + '\n' + extracted_text);
 
             html_text += '<pre>' + extracted_text + '</pre>';
           }
           else if (file_type == 'excel') {
-            console.log('content extracted:\n\tfile : ' + file_name + '\n' + extracted_text);
+            //console.log('content extracted:\n\tfile : ' + file_name + '\n' + extracted_text);
 
             html_text += '<pre>' + extracted_text + '</pre>';
           }

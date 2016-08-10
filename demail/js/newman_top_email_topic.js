@@ -5,7 +5,7 @@
 /**
  * email-topic related container
  */
-var newman_topic_email = (function () {
+var newman_top_email_topic = (function () {
 
   var chart_bar_ui_id = 'chart_horizontal_bar_topics';
   var chart_bar_ui_jquery_var = '#' + chart_bar_ui_id;
@@ -41,7 +41,7 @@ var newman_topic_email = (function () {
         _top_count = _top_count_max;
       }
 
-      newman_topic_email_request_category.requestService( _top_count_max );
+      newman_top_email_topic_category_request.requestService( _top_count_max );
     }
   }
 
@@ -63,9 +63,12 @@ var newman_topic_email = (function () {
       });
 
       var colors = d3.scale.category20b();
-      var width = 530, height_bar = 13, margin_top = 8, margin_bottom = 2, width_bar_factor = 7;
+      var width = 530, height_bar = 13, margin_top = 8, margin_bottom = 2;
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
       width = width - margin.left - margin.right;
+
+      var max_value = categories[0].score;
+      var width_bar_factor = getAdjustedChartWidthFactor(width, max_value);
 
       var x = d3.scale.linear().range([0, width]);
       var chart = d3.select(chart_bar_ui_jquery_var).append('svg')
@@ -84,7 +87,7 @@ var newman_topic_email = (function () {
 
       bar.append("rect")
         .attr("width", function (d) {
-          return x(+d.score * width_bar_factor);
+          return getAdjustedChartWidth(width_bar_factor, d.score);
         })
         .attr("height", height_bar - 1)
         .attr("class", "label highlight clickable")
@@ -105,7 +108,7 @@ var newman_topic_email = (function () {
 
       bar.append("text")
         .attr("x", function (d) {
-          return x(+d.score * width_bar_factor) - 3;
+          return (getAdjustedChartWidth(width_bar_factor, d.score) - 3);
         })
         .attr("y", height_bar / 2)
         .attr("dy", ".35em")
@@ -171,6 +174,42 @@ var newman_topic_email = (function () {
       _donut_chart_topic_email.select(0);
 
     }
+  }
+
+  function getAdjustedChartWidthFactor(width, max_value) {
+    var adjusted_factor = 1.0, adjusted_max = max_value;
+    if (width && max_value) {
+      var done = false;
+      if (adjusted_max >= width) {
+
+        while (!done) {
+          adjusted_max = (adjusted_max * 0.85);
+          done = adjusted_max < width;
+        }
+      }
+      else {
+        done = (adjusted_max * 1.15) > width;
+        var adjusted_max_prev = adjusted_max;
+        while (!done) {
+          adjusted_max_prev = adjusted_max;
+          adjusted_max = (adjusted_max * 1.15);
+          done = adjusted_max > width;
+        }
+        adjusted_max = adjusted_max_prev;
+      }
+      adjusted_factor = (adjusted_max / max_value);
+    }
+    //console.log('getAdjustedChartWidthFactor(' + width + ', ' + max_value + ') : ' + adjusted_factor);
+    return adjusted_factor;
+  }
+
+  function getAdjustedChartWidth(factor, value) {
+    var adjusted_value = value;
+    if (factor && value) {
+      adjusted_value = (factor * value)
+    }
+    //console.log('getAdjustedChartWidth(' + factor + ', ' + value + ') : ' + adjusted_value);
+    return adjusted_value;
   }
 
   function initUI() {
@@ -344,7 +383,7 @@ var newman_topic_email = (function () {
  * email-topics-related service response container
  * @type {{requestService, getResponse}}
  */
-var newman_topic_email_request_category = (function () {
+var newman_top_email_topic_category_request = (function () {
 
   var _service_url = 'topic/category/all';
   var _response;
@@ -361,7 +400,7 @@ var newman_topic_email_request_category = (function () {
       service_url = newman_aggregate_filter.appendAggregateFilter(service_url);
 
       // append query-string
-      service_url = newman_search_filter.appendURLQuery(service_url);
+      service_url = newman_search_parameter.appendURLQuery(service_url);
 
       return service_url;
     }
@@ -381,7 +420,7 @@ var newman_topic_email_request_category = (function () {
     $.when($.get( getServiceURL(count) )).done(function (response) {
       //$.get( getServiceURL(account) ).then(function (response) {
       setResponse( response );
-      newman_topic_email.updateUITopicEmail( response );
+      newman_top_email_topic.updateUITopicEmail( response );
     });
   }
 

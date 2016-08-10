@@ -26,28 +26,28 @@ var app_nav_history = (function () {
     }
 
     if(!icon_class) {
-      icon_class = newman_search_filter.getFilterIconClassByLabel( 'all' );
+      icon_class = newman_search_parameter.getFilterIconClassByLabel( 'all' );
 
       if (data_field === 'text') {
-        icon_class = newman_search_filter.getFilterIconClassByLabel( 'text' );
+        icon_class = newman_search_parameter.getFilterIconClassByLabel( 'text' );
       }
       else if (data_field === 'email') {
-        icon_class = newman_search_filter.getFilterIconClassByLabel( 'email' );
+        icon_class = newman_search_parameter.getFilterIconClassByLabel( 'email' );
       }
       else if (data_field === 'attach') {
-        icon_class = newman_search_filter.getFilterIconClassByLabel( 'attach' );
+        icon_class = newman_search_parameter.getFilterIconClassByLabel( 'attach' );
       }
       else if (data_field === 'entity') {
-        icon_class = newman_search_filter.getFilterIconClassByLabel( 'entity' );
+        icon_class = newman_search_parameter.getFilterIconClassByLabel( 'entity' );
       }
       else if (data_field === 'topic') {
-        icon_class = newman_search_filter.getFilterIconClassByLabel( 'topic' );
+        icon_class = newman_search_parameter.getFilterIconClassByLabel( 'topic' );
       }
       else if (data_field === 'community') {
-        icon_class = newman_search_filter.getFilterIconClassByLabel( 'community' );
+        icon_class = newman_search_parameter.getFilterIconClassByLabel( 'community' );
       }
       else if (data_field === 'conversation') {
-        icon_class = newman_search_filter.getFilterIconClassByLabel( 'conversation' );
+        icon_class = newman_search_parameter.getFilterIconClassByLabel( 'conversation' );
       }
     }
 

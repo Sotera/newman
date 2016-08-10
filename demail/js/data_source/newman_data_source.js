@@ -310,26 +310,6 @@ var newman_data_source = (function () {
     return found;
   }
 
-  /* deprecated since v2.11 */
-  /*
-  function getFirst() {
-    if (debug_enabled) {
-      console.log('getFirst()');
-    }
-    return _data_source_list.shift();
-  }
-  */
-
-  /* deprecated since v2.11 */
-  /*
-  function getLast() {
-    if (debug_enabled) {
-      console.log('getLast()');
-    }
-    return _data_source_list.pop();
-  }
-  */
-
   function getAll() {
     return clone(_data_source_list);
   }
@@ -587,8 +567,6 @@ var newman_data_source = (function () {
 
       }
 
-
-
       //console.log( '\t' + html_text );
       $('#data_source_list').append(data_source_item_html);
 
@@ -631,7 +609,7 @@ var newman_data_source = (function () {
       else {
         var selected_id_set = getAllSelectedAsString();
 
-        newman_data_source_service.requestDataSetSelect( selected_id_set, is_forced_override );
+        newman_data_source_service.requestDataSourceDataset( selected_id_set, is_forced_override );
       }
     }
     else {
@@ -689,17 +667,18 @@ var newman_data_source = (function () {
     initDashboardCharts( true );
 
     // clear search text
-    clearSearchText();
+    newman_search_parameter.clearSearchText();
 
     // re-initialize search
     searchByField();
+    //newman_data_source_service.requestDataSourceSummary();
 
     // re-initialize geo components and widgets
     app_geo_map.clearAll();
     app_geo_map.init();
   }
 
-  function requestAllDataSet() {
+  function requestDataSourceAll() {
     /*
      * make the very first service calls to request configurations and all available data-sources
      */
@@ -714,7 +693,7 @@ var newman_data_source = (function () {
     app_geo_config.requestGeoConfig();
 
     /* preceded by service call to load data-source config below */
-    //newman_data_source_service.requestAllDataSet();
+    //newman_data_source_service.requestDataSourceAll();
 
     // forced-loading data-source config prior to requesting all data sets
     app_data_source_config.requestDataSetConfig( newman_data_source );
@@ -724,10 +703,10 @@ var newman_data_source = (function () {
     //console.log( 'onRequestDataSetConfig( response )' );
 
     // request all data sets after forced-loading data-source config
-    newman_data_source_service.requestAllDataSet();
+    newman_data_source_service.requestDataSourceAll();
   }
 
-  function onRequestAllDataSet( response ) {
+  function onRequestDataSourceAll( response ) {
     /*
      * upon receiving all available data-sources, request the one-time start-up (static-data) init services
      */
@@ -780,12 +759,13 @@ var newman_data_source = (function () {
       app_graph_search_request.clearAllGraphResponse();
 
       // initialize search-filter
-      newman_search_filter.initFilter();
+      newman_search_parameter.initFilter();
 
       // initialize map tiles
       app_geo_map.initMapTileLayer();
 
       requestAllSelected();
+
     }
 
   }
@@ -838,55 +818,6 @@ var newman_data_source = (function () {
 
     return selected_map;
   }
-
-  /* deprecated since v2.11 */
-  /*
-  function getSelectedDatetimeBounds() {
-    console.log('getSelectedDatetimeBounds()');
-    if (!_data_source_selected) {
-      _data_source_selected = _data_source_list[1];
-    }
-
-    var min_datetime = _data_source_selected.datetime_min;
-    var max_datetime = _data_source_selected.datetime_max;
-    return min_datetime, max_datetime
-  }
-  */
-
-  /* deprecated since v2.11 */
-  /*
-  function getSelectedDatetimeRange() {
-    console.log('getSelectedDatetimeRange()');
-    if (!_data_source_selected) {
-      _data_source_selected = _data_source_list[1];
-    }
-
-    var start_datetime = _data_source_selected.start_datetime_selected;
-    var end_datetime = _data_source_selected.end_datetime_selected;
-    return start_datetime, end_datetime
-  }
-  */
-
-  /* deprecated since v2.11 */
-  /*
-  function getSelectedTopHits(size) {
-    if (!_data_source_selected) {
-      _data_source_selected = _data_source_list[1];
-    }
-
-    //console.log('data_source_selected : ' + JSON.stringify(data_source_selected, null, 2));
-    var top_hits = _data_source_selected.top_hits.email_addrs;
-    var top_hits_email_address_list = _.values(top_hits);
-    if (size > top_hits_email_address_list.length) {
-      size = top_hits_email_address_list.length;
-    }
-    top_hits_email_address_list.sort(descendingPredicatByIndex(4));
-    top_hits_email_address_list = top_hits_email_address_list.splice(0, size);
-    //console.log('top-hits['+size+'] :\n' + JSON.stringify(top_hits_email_address_list, null, 2));
-
-    return top_hits_email_address_list;
-  }
-  */
 
 
   function appendDataSource( url_path, data_source_override ) {
@@ -956,6 +887,11 @@ var newman_data_source = (function () {
     return _default_data_set_id;
   }
 
+  function requestDataSourceSummary( addresses_csv ) {
+
+    newman_data_source_service.requestDataSourceSummary( addresses_csv );
+  }
+
   return {
     "push" : push,
     "pop" : pop,
@@ -972,8 +908,8 @@ var newman_data_source = (function () {
     "refreshUI" : refreshUI,
     "requestAllSelected" : requestAllSelected,
     'onRequestAllSelected' : onRequestAllSelected,
-    'requestAllDataSet' : requestAllDataSet,
-    'onRequestAllDataSet' : onRequestAllDataSet,
+    'requestDataSourceAll' : requestDataSourceAll,
+    'onRequestDataSourceAll' : onRequestDataSourceAll,
     'getAllSelected' : getAllSelected,
     'getAllSelectedAsList' : getAllSelectedAsList,
     'getAllSelectedAsString' : getAllSelectedAsString,
@@ -995,19 +931,25 @@ var newman_data_source = (function () {
 var newman_data_source_service = (function () {
   var debug_enabled = false;
   var _response = {};
-  var _data_set_map = {};
 
-  function requestAllDataSet() {
-    console.log('newman_data_source_service.requestAllDataSet()');
+  function requestDataSourceAll() {
+    console.log('newman_data_source_service.requestDataSourceAll()');
 
     $.when($.get('datasource/all')).done(function ( response ) {
-      newman_data_source.onRequestAllDataSet( response );
+      newman_data_source.onRequestDataSourceAll( response );
       setResponse( response );
     });
   }
 
-  function requestDataSetSelect(dataset_id_list, is_forced_override) {
-    console.log('newman_data_source_service.requestDataSetSelect('+dataset_id_list+')');
+  function setResponse( response ) {
+    if (response) {
+      _response = response;
+      //console.log(JSON.stringify(_response, null, 2));
+    }
+  }
+
+  function requestDataSourceDataset(dataset_id_list, is_forced_override) {
+    console.log('newman_data_source_service.requestDataSourceDataset('+dataset_id_list+')');
 
     if (dataset_id_list) {
 
@@ -1019,74 +961,94 @@ var newman_data_source_service = (function () {
     }
   }
 
-  function setResponse( response ) {
-    if (response) {
-      _response = response;
-      //console.log(JSON.stringify(_response, null, 2));
-    }
-  }
+  function appendAllDatasetID( url_path, data_ids_as_csv ) {
 
-  /* deprecated since v2.11 */
-  /*
-  function getResponse() {
-    if (_response) {
-      //create a deep-copy, return the copy
-      return clone( _response )
-    }
-    return _response;
-  }
-
-  function getResponseMap() {
-    if (_data_set_map) {
-      //create a deep-copy, return the copy
-      return clone( _data_set_map )
-    }
-    return _data_set_map;
-  }
-
-  function getResponseMapKeys() {
-    if (_data_set_map) {
-      var key_list = _.keys( _data_set_map );
-      //create a deep-copy, return the copy
-      return clone( key_list )
-    }
-    return _data_set_map;
-  }
-
-  function getResponseMapValues() {
-    if (_data_set_map) {
-      var values = _.values( _data_set_map );
-      //create a deep-copy, return the copy
-      return clone( values )
-    }
-    return _data_set_map;
-  }
-
-  function getDataSet(key) {
-    if (_data_set_map) {
-      var data_set = _data_set_map[key];
-      if(data_set) {
-        return clone(data_set)
+    if (url_path && data_ids_as_csv) {
+      if (url_path.endsWith('/')) {
+        url_path = url_path.substring(0, url_path.length - 1);
       }
-      return data_set;
-    }
-    return _data_set_map;
-  }
 
-  function containsDataSet(key) {
-    if (_data_set_map) {
-      var data_set = _data_set_map[key];
-      if(data_set) {
-        return true;
+      var value_as_string = encodeURIComponent( data_ids_as_csv );
+      if (url_path.indexOf('?') > 0) {
+        url_path = url_path + '&data_set_id=' + value_as_string;
+      }
+      else {
+        url_path = url_path + '?data_set_id=' + value_as_string;
       }
     }
-    return false;
+
+    return url_path;
   }
-  */
+
+  function appendAllEmailAddress( url_path, emails_as_csv ) {
+
+    if (url_path && emails_as_csv) {
+      if (url_path.endsWith('/')) {
+        url_path = url_path.substring(0, url_path.length - 1);
+      }
+
+      var value_as_string = encodeURIComponent( emails_as_csv );
+      if (url_path.indexOf('?') > 0) {
+        url_path = url_path + '&email_address=' + value_as_string;
+      }
+      else {
+        url_path = url_path + '?email_address=' + value_as_string;
+      }
+    }
+
+    return url_path;
+  }
+
+  function appendQueryText( url_path, query_string ) {
+
+    if (url_path && query_string) {
+      if (url_path.endsWith('/')) {
+        url_path = url_path.substring(0, url_path.length - 1);
+      }
+
+      var value_as_string = encodeURIComponent( query_string );
+      if (url_path.indexOf('?') > 0) {
+        url_path = url_path + '&qs=' + value_as_string;
+      }
+      else {
+        url_path = url_path + '?qs=' + value_as_string;
+      }
+    }
+
+    return url_path;
+  }
+
+  function requestDataSourceSummary( addresses_csv ) {
+    console.log('newman_data_source_service.requestDataSourceSummary('+ addresses_csv +')');
+
+    var service_url = 'datasource/summary';
+
+    service_url = newman_data_source.appendDataSource( service_url );
+
+    service_url = newman_search_parameter.appendURLQuery( service_url );
+
+    service_url = newman_datetime_range.appendDatetimeRange( service_url );
+
+    if (addresses_csv) {
+      service_url = appendAllEmailAddress( service_url, addresses_csv );
+    }
+
+
+    console.log('service_url: '+ service_url);
+
+    $.get( service_url ).then(function ( response ) {
+        if (debug_enabled) {
+          console.log(JSON.stringify(response, null, 2));
+        }
+
+    });
+
+  }
 
   return {
-    'requestAllDataSet' : requestAllDataSet,
-    'requestDataSetSelect' : requestDataSetSelect
+    'requestDataSourceAll' : requestDataSourceAll,
+    'requestDataSourceDataset' : requestDataSourceDataset,
+    'requestDataSourceSummary' : requestDataSourceSummary
   }
 
 }());

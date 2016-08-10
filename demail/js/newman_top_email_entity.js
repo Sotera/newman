@@ -133,6 +133,9 @@ var newman_top_email_entity = (function () {
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 100};
       width = width - margin.left - margin.right;
 
+      var max_value = ui_display_entity_list[0].entity_ref_count;
+      var width_bar_factor = getAdjustedChartWidthFactor(width, max_value);
+
       var x = d3.scale.linear().range([0, width]);
       var chart = d3.select(chart_bar_ui_id).append('svg')
         .attr('class', 'chart')
@@ -150,7 +153,7 @@ var newman_top_email_entity = (function () {
 
       bar.append("rect")
         .attr("width", function (d) {
-          return x(+d.entity_ref_count);
+          return getAdjustedChartWidth(width_bar_factor, d.entity_ref_count);
         })
         .attr("height", height_bar - 1)
         .attr("class", function (d) {
@@ -168,7 +171,7 @@ var newman_top_email_entity = (function () {
 
       bar.append("text")
         .attr("x", function (d) {
-          return x(+d.entity_ref_count) - 3;
+          return (getAdjustedChartWidth(width_bar_factor, d.entity_ref_count) - 3);
         })
         .attr("y", height_bar / 2)
         .attr("dy", ".35em")
@@ -245,6 +248,42 @@ var newman_top_email_entity = (function () {
     }
 
   } // end-of onRequestEmailEntityList( response )
+
+  function getAdjustedChartWidthFactor(width, max_value) {
+    var adjusted_factor = 1.0, adjusted_max = max_value;
+    if (width && max_value) {
+      var done = false;
+      if (adjusted_max >= width) {
+
+        while (!done) {
+          adjusted_max = (adjusted_max * 0.85);
+          done = adjusted_max < width;
+        }
+      }
+      else {
+        done = (adjusted_max * 1.15) > width;
+        var adjusted_max_prev = adjusted_max;
+        while (!done) {
+          adjusted_max_prev = adjusted_max;
+          adjusted_max = (adjusted_max * 1.15);
+          done = adjusted_max > width;
+        }
+        adjusted_max = adjusted_max_prev;
+      }
+      adjusted_factor = (adjusted_max / max_value);
+    }
+    //console.log('getAdjustedChartWidthFactor(' + width + ', ' + max_value + ') : ' + adjusted_factor);
+    return adjusted_factor;
+  }
+
+  function getAdjustedChartWidth(factor, value) {
+    var adjusted_value = value;
+    if (factor && value) {
+      adjusted_value = (factor * value)
+    }
+    //console.log('getAdjustedChartWidth(' + factor + ', ' + value + ') : ' + adjusted_value);
+    return adjusted_value;
+  }
 
   function initUI() {
 
@@ -572,7 +611,7 @@ var newman_top_email_entity_list_request = (function () {
       var service_url = newman_data_source.appendDataSource(_service_url + '/' + encodeURIComponent(top_count));
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
       service_url = newman_aggregate_filter.appendAggregateFilter(service_url);
-      service_url = newman_search_filter.appendURLQuery(service_url);
+      service_url = newman_search_parameter.appendURLQuery(service_url);
       service_url += '&size=' + top_count;
 
       return service_url;
@@ -680,7 +719,7 @@ var newman_top_email_entity_list_request = (function () {
         var service_url = newman_data_source.appendDataSource(_service_url + '/' + encodeURIComponent(top_count), dataset_id);
         service_url = newman_datetime_range.appendDatetimeRange(service_url);
         service_url = newman_aggregate_filter.appendAggregateFilter(service_url);
-        service_url = newman_search_filter.appendURLQuery(service_url);
+        service_url = newman_search_parameter.appendURLQuery(service_url);
         service_url += '&size=' + top_count;
 
         dataset_url_map[dataset_id] = service_url;
@@ -690,7 +729,7 @@ var newman_top_email_entity_list_request = (function () {
       var service_url = newman_data_source.appendDataSource(_service_url + '/' + encodeURIComponent(top_count), data_id_list_string);
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
       service_url = newman_aggregate_filter.appendAggregateFilter(service_url);
-      service_url = newman_search_filter.appendURLQuery(service_url);
+      service_url = newman_search_parameter.appendURLQuery(service_url);
       service_url += '&size=' + top_count;
       dataset_url_map[data_id_list_string] = service_url;
 
@@ -773,7 +812,7 @@ var newman_email_entity_search_request = (function () {
     service_url = newman_top_email_entity.appendEntity(service_url, entity_text_list);
 
     // append query-string
-    service_url = newman_search_filter.appendURLQuery(service_url);
+    service_url = newman_search_parameter.appendURLQuery(service_url);
 
     return service_url;
   }

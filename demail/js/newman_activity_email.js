@@ -110,6 +110,7 @@ var newman_activity_email = (function () {
               format: '%Y-%m',
               //count: 8,
               fit: true,
+              //culling: true, // default to true for time-series
             }
           },
           grid: {
@@ -418,7 +419,7 @@ var newman_activity_email = (function () {
 
   function applyDatetimeBounds() {
     if (debug_enabled) {
-      console.log('ApplyDatetimeBounds() : ' + activity_datetime_start + ', ' + activity_datetime_end );
+      console.log('applyDatetimeBounds() : ' + activity_datetime_start + ', ' + activity_datetime_end );
     }
 
     newman_datetime_range.setDatetimeMinSelected( activity_datetime_start );
@@ -918,7 +919,7 @@ var newman_activity_email_service = (function () {
       var service_url = newman_data_source.appendDataSource(_service_url + '/' + encodeURIComponent(account_type));
       service_url = newman_datetime_range.appendDatetimeRange(service_url);
       service_url = newman_aggregate_filter.appendAggregateFilter(service_url);
-      service_url = newman_search_filter.appendURLQuery(service_url);
+      service_url = newman_search_parameter.appendURLQuery(service_url);
       return service_url;
     }
   }

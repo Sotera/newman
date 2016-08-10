@@ -2,7 +2,7 @@
  * Created by jlee on 10/26/15.
  */
 
-var newman_search_filter = (function () {
+var newman_search_parameter = (function () {
   var debug_enabled = false;
   var _search_filter_selected_default_label = 'all';
   var _search_filter_max = 20;
@@ -339,7 +339,7 @@ var newman_search_filter = (function () {
         url_path = url_path.substring(0, url_path.length - 1);
       }
 
-      var search_text = getURLQueryPlainText();
+      var search_text = getSearchText();
 
       if (search_text) {
         //search_text = toUnicode( search_text ); //convert text to unicode
@@ -366,10 +366,19 @@ var newman_search_filter = (function () {
     return appendURL(url_path, 'qs');
   }
 
-  function getURLQueryPlainText() {
+  function getSearchText() {
     var search_text = $("#txt_search").val();
 
     return search_text;
+  }
+
+  function clearSearchText() {
+
+    var text_search_field = $("#txt_search");
+    if (text_search_field) {
+      text_search_field.val( '' );
+    }
+
   }
 
   return {
@@ -391,7 +400,8 @@ var newman_search_filter = (function () {
     "isValidFilter" : isValidFilter,
     'appendURL' : appendURL,
     'appendURLQuery' : appendURLQuery,
-    'getURLQueryPlainText' : getURLQueryPlainText
+    'getSearchText' : getSearchText,
+    'clearSearchText' : clearSearchText
   }
 
 }());
