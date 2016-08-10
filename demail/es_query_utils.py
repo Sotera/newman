@@ -88,21 +88,21 @@ def _query_email_attachments(index, size, emails_query):
     except KeyError as ke:
         tangelo.log("_query_email_attachments.Query FAILED id={0}  - KeyError={1}".format(_source["id"], ke))
 
-    tangelo.log("es_query_utils._query_email_attachments(total document hits = %s, TIME_ELAPSED=%g)" % (attachments_resp["hits"]["total"], time.time()-start))
+    tangelo.log("es_query_utils._query_email_attachments(total document hits = %s, TIME_ELAPSED=%g, for index=%s)" % (attachments_resp["hits"]["total"], time.time()-start, index))
     return {"attachments_total": attachments_resp["hits"]["total"], "hits":email_attachments}
 
 
 def _query_emails(index, size, emails_query, additional_fields=[]):
     start = time.time()
     emails_resp = es().search(index=index, doc_type="emails", size=size, fields=get_graph_row_fields() + additional_fields, body=emails_query)
-    tangelo.log("es_query_utils._query_emails(total document hits = %s, TIME_ELAPSED=%g)" % (emails_resp["hits"]["total"],time.time()-start))
+    tangelo.log("es_query_utils._query_emails(total document hits = %s, TIME_ELAPSED=%g, for index=%s)" % (emails_resp["hits"]["total"],time.time()-start, index))
 
     return {"total":emails_resp["hits"]["total"], "hits":[_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]}
 
 def _count_emails(index, emails_query):
     start = time.time()
     emails_resp = es().count(index=index, doc_type="emails", body=emails_query)
-    tangelo.log("es_query_utils._count_emails(total document hits = %s, TIME_ELAPSED=%g)" % (emails_resp["count"],time.time()-start))
+    tangelo.log("es_query_utils._count_emails(total document hits = %s, TIME_ELAPSED=%g, for index=%s)" % (emails_resp["count"],time.time()-start, index))
 
     return {"total":emails_resp["count"]}
 
