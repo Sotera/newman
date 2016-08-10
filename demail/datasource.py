@@ -18,7 +18,6 @@ def _index_record(index):
 
     stats = index_client().stats(index=index, human=True, fielddata_fields="docs.*,store.*", fields="docs.*,store.*", completion_fields="docs.*,store.*")
 
-
     # TODO Replace with a single query
     hits = [es().search(index=dataset, doc_type=dataset, body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["hits"]["hits"][0] for dataset in index.split(",")]
 
@@ -35,7 +34,7 @@ def _index_record(index):
             'data_set_attachment_count' : emails_attch_count,
             'data_set_datetime_min' : min_abs,
             'data_set_datetime_max' : max_abs,
-            'data_set_size': stats["indices"][index]["total"]["store"]["size"].upper()
+            'data_set_size': (stats["indices"][index] if not ',' in index else stats["_all"])["total"]["store"]["size"].upper()
             }
 
 def listAllDataSet():
