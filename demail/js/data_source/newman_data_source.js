@@ -564,7 +564,7 @@ var newman_data_source = (function () {
 
         data_source_item_html.append(checkbox_html);
 
-        var checkbox_label_html = $('<label class=\"checkbox-dropdown-menu-item-label width-150px\" />');
+        var checkbox_label_html = $('<label class=\"checkbox-dropdown-menu-item-label width-175px\" />');
         checkbox_label_html.html( '&nbsp;' + element.label + '&nbsp;' );
 
         data_source_item_html.append(checkbox_label_html);
