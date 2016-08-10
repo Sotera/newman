@@ -117,7 +117,8 @@ var newman_data_source = (function () {
                               end_datetime_selected,
                               is_selected,
                               case_id,
-                              alt_ref_id) {
+                              alt_ref_id,
+                              size ) {
 
     return {
       "uid" : uid,
@@ -132,6 +133,7 @@ var newman_data_source = (function () {
       "end_datetime_selected": end_datetime_selected,
       "case_id" : case_id,
       "alt_ref_id" : alt_ref_id,
+      "size" : size
     }
   }
 
@@ -225,7 +227,8 @@ var newman_data_source = (function () {
                  end_datetime_selected,
                  is_selected,
                  case_id,
-                 alt_ref_id ) {
+                 alt_ref_id,
+                 size ) {
     if (debug_enabled) {
       console.log('push( ' + uid + ', ' + label + ', ' + _is_initialized + ' )');
     }
@@ -247,7 +250,8 @@ var newman_data_source = (function () {
                                       end_datetime_selected,
                                       is_selected,
                                       case_id,
-                                      alt_ref_id);
+                                      alt_ref_id,
+                                      size);
 
     if (!contains(new_data_source)) {
 
@@ -560,10 +564,25 @@ var newman_data_source = (function () {
 
         data_source_item_html.append(checkbox_html);
 
-        var checkbox_label_html = $('<label class=\"checkbox-dropdown-menu-item-label\" />');
+        var checkbox_label_html = $('<label class=\"checkbox-dropdown-menu-item-label width-150px\" />');
         checkbox_label_html.html( '&nbsp;' + element.label + '&nbsp;' );
 
         data_source_item_html.append(checkbox_label_html);
+
+        var dataset_size_label_html = $('<label class=\"checkbox-small-clear-label width-75px\" />');
+        dataset_size_label_html.html( '&nbsp;' + element.size + '&nbsp;' );
+
+        data_source_item_html.append(dataset_size_label_html);
+
+        var doc_count_label_html = $('<label class=\"checkbox-small-clear-label width-75px\" />');
+        doc_count_label_html.html( '<i class="fa fa-file-text-o"></i>&nbsp;' + element.document_count + '&nbsp;' );
+
+        data_source_item_html.append(doc_count_label_html);
+
+        var attach_count_label_html = $('<label class=\"checkbox-small-clear-label width-75px\" />');
+        attach_count_label_html.html( '<i class="fa fa-paperclip"></i>&nbsp;' + element.attach_count + '&nbsp;' );
+
+        data_source_item_html.append(attach_count_label_html);
 
       }
 
@@ -744,7 +763,8 @@ var newman_data_source = (function () {
             element.end_datetime_selected,
             is_selected_default,
             element.data_set_case_id,
-            element.data_set_alt_ref_id
+            element.data_set_alt_ref_id,
+            element.data_set_size
           );
 
         }
