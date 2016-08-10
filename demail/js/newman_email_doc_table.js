@@ -266,7 +266,7 @@ var newman_email_doc_table = (function () {
     console.log('populateDataTable( ' + data_rows.length + ' )');
     //console.log( '\tdata_rows :\n' + JSON.stringify(data_rows, null, 2));
 
-    var tab_label_html = '<i class="fa fa-envelope-o"></i>&nbsp;Email&nbsp;&nbsp;[' + data_rows.length + ']';
+    var tab_label_html = '<i class="fa fa-envelope-o"></i>&nbsp;Emails&nbsp;&nbsp;[' + data_rows.length + ']';
     var tab_label = $('#email_table_tab_label');
     if (tab_label) {
       tab_label.html( tab_label_html );

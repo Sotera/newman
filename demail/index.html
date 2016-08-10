@@ -842,9 +842,15 @@
                 <!-- End-Analytics-Content-Geo -->
 
                 <!-- Start-Analytics-Content-Data-Extract -->
-                <div class="tab-pane" id="dashboard_tab_data_extract" style= "height: 568px; padding: 0; margin: 0; overflow-y: scroll;">
-                  <div id="data_extract_table" class="info-table"
-                       style= "display: table; table-layout: fixed; width: 100%; height: 100%; font-size: 12px;"></div>
+                <div class="tab-pane" id="dashboard_tab_data_extract" style= "height: 568px; padding: 0; margin: 0;">
+                  <div class="row" id="data_extract_control_header" style="margin: 0; padding: 0; height: 32px;">
+                    <div class="col-sm-4" id="data_extract_page_control" style="margin: 0; padding: 4px 10px 0px 10px;">
+                    </div>
+                  </div>
+                  <div style="margin: 0; padding: 0px 15px 0px 0px; width: 100%; height: 536px; overflow-y: scroll;">
+                    <table id="data_extract_table" class="info-table"
+                           style="display: table; table-layout: fixed; width: 100%; font-size: 12px;"></table>
+                  </div>
                 </div>
                 <!-- End-Analytics-Content-Data-Extract -->
 
@@ -916,10 +922,10 @@
                 </div>
                 <ul class="col-sm-8 nav nav-tabs" role="tablist" id="tab-list" style= "margin: 0; padding: 0; font-size: 13px;">
                   <li class="active" style= "height: 30px;">
-                    <a style= "height: 30px;" href="#email-table-tab" role="tab" data-toggle="tab" id="email_table_tab_label"><i class="fa fa-envelope-o"></i>&nbsp;Email&nbsp;</a>
+                    <a style= "height: 30px;" href="#email-table-tab" role="tab" data-toggle="tab" id="email_table_tab_label"><i class="fa fa-envelope-o"></i>&nbsp;Emails&nbsp;</a>
                   </li>
                   <li style= "height: 30px;">
-                    <a style= "height: 30px;" href="#attachment-table-tab" role="tab" data-toggle="tab" id="attachment_table_tab_label"><i class="fa fa-paperclip"></i>&nbsp;Attachment&nbsp;</a>
+                    <a style= "height: 30px;" href="#attachment-table-tab" role="tab" data-toggle="tab" id="attachment_table_tab_label"><i class="fa fa-paperclip"></i>&nbsp;Attachments&nbsp;</a>
                   </li>
                 </ul>
               </div>
@@ -977,9 +983,12 @@
                   <!--End Data-Panel-Tab-Content-Email-->
 
                   <div class="tab-pane" id="attachment-table-tab">
-
+                    <div class="row" id="email_attachment_control_header" style="margin: 0; padding: 0; height: 30px;">
+                      <div class="col-sm-4" id="email_attachment_page_control" style="margin: 0; padding: 4px 10px 0px 10px;">
+                      </div>
+                    </div>
                     <div class="v_scroll_left_container v_scroll_left">
-                      <div class="v_scroll_left_content" style="height: 562px;">
+                      <div class="v_scroll_left_content" style="height: 532px;">
                         <table id="email_attachment_table" class="info-table" style="display: table; table-layout: fixed; width: 100%; font-size: 12px;"></table>
 
                       </div>

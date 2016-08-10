@@ -9,17 +9,17 @@
 var app_text_extract_table = (function () {
   var debug_enabled = false;
 
+  var ui_page_control = '#data_extract_page_control';
   var ui_appendable = '#data_extract_table';
 
-  var per_page_display_min = 22, per_page_display_max = 52, per_page_display_count = per_page_display_min;
+  var per_page_display_min = 20, per_page_display_max = 50, per_page_display_count = per_page_display_min;
   var display_start_index = 1, display_end_index = per_page_display_count;
 
   function initPhoneListTable() {
 
-    if (ui_appendable) {
-      $(ui_appendable).empty();
+    if (ui_page_control) {
 
-      $(ui_appendable).on('click', "th button:nth-of-type(1), input[type='button']", function (event) {
+      $(ui_page_control).on('click', "button:nth-of-type(1), input[type='button']", function (event) {
         // Ignore this event if preventDefault has been called.
         if (event.defaultPrevented) return;
 
@@ -44,7 +44,7 @@ var app_text_extract_table = (function () {
         event.stopPropagation();
       });
 
-      $(ui_appendable).on('click', "th button:nth-of-type(2), input[type='button']", function (event) {
+      $(ui_page_control).on('click', "button:nth-of-type(2), input[type='button']", function (event) {
         // Ignore this event if preventDefault has been called.
         if (event.defaultPrevented) return;
 
@@ -69,7 +69,7 @@ var app_text_extract_table = (function () {
         event.stopPropagation();
       });
 
-      $(ui_appendable).on('change click', "th, input[type='number']", function (event) {
+      $(ui_page_control).on('change click', "input[type='number']", function (event) {
         var attr_id = $(this).attr('id');
         var attr_value = $(this).attr('value');
         var field_value = parseInt( $(this).val() );
@@ -91,7 +91,7 @@ var app_text_extract_table = (function () {
         event.stopImmediatePropagation();
         event.stopPropagation();
       });
-    }
+    } // end-of if(ui_page_control)
 
   }
 
@@ -141,15 +141,19 @@ var app_text_extract_table = (function () {
       }
 
       var per_page_count_button_html = "<input type='number' style='font-size: 11px; width: 38px;' id='attach_page_display_count' step='10' value='" + per_page_display_count + "' />";
-
       var page_label = display_start_index + ' <i class="' + page_direction_icon + '" aria-hidden="true"></i> ' + display_end_index + ' of ' + list_max_index;
+
+      var page_control_html = page_prev_button_html + page_label + page_next_button_html + per_page_count_button_html;
+
+      $(ui_page_control).empty();
+      $(ui_page_control).append( page_control_html );
 
       $(ui_appendable).empty();
       $(ui_appendable).append($('<thead>')).append($('<tbody>'));
 
       var lastSort = "";
       var thead = d3.select(ui_appendable).select("thead").append("tr").selectAll("tr")
-        .data(['Numeric Entity', 'Document Referenced', page_label, ''])
+        .data(['Numeric Entity', 'Document Referenced', '', ''])
         .enter()
         .append("th")
       /*.text( function(d, i) {
@@ -159,17 +163,16 @@ var app_text_extract_table = (function () {
          }) */
         .html(function (d, i) {
           if (i == 2) {
-
             //return d;
             //console.log( 'thead, i == 2, d :\n' + JSON.stringify(d, null, 2) );
 
+            /*
             var header_html = page_prev_button_html + d + page_next_button_html + per_page_count_button_html;
-
-
             var col_2_row = $('<span>').append(header_html);
-
-
             return col_2_row.html();
+            */
+
+            return d;
           }
           else {
             return d;
