@@ -426,7 +426,7 @@ var newman_email_attach_table = (function () {
           }
 
           if (i == 2) {
-            return "width : 64px; min-width : 64px";
+            return "width : 46px; min-width : 46px";
           }
 
           if (i == 3) {

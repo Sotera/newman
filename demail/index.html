@@ -297,7 +297,7 @@
               <!-- End-Search-Aggregate-Search-Filter -->
 
               <!--
-              <button id="temporal_control_toggle" type="button" class="btn navbar-btn button-dropdown-menu" data-toggle="collapse" data-target="#temporal_control_container"
+              <button id="temporal_control_toggle" type="button" class="btn navbar-btn button-dropdown-menu" data-toggle="collapse" data-target="#container_temporal_control"
                       style="font-size: 13px; font-weight: lighter; padding: 0px 2px 0px 2px; margin: 0;">
                 <span class="fa fa-area-chart fa-inverse"></span>
               </button>
@@ -359,8 +359,8 @@
   <!-- End Breadcrumb-Container -->
 
   <!-- Start-Histogram-Container -->
-  <!--<div id="temporal_control_container" class="container-fluid" style="position: fixed; margin-top: 0px; top: 50px; width: 100%;">-->
-  <div id="temporal_control_container" class="container-fluid" style="position: fixed; margin: 0 auto 0 auto; padding: 0 15px 0 5px; top: 32px; width: 100%;">
+  <!--<div id="container_temporal_control" class="container-fluid" style="position: fixed; margin-top: 0px; top: 50px; width: 100%;">-->
+  <div id="container_temporal_control" class="container-fluid" style="position: fixed; margin: 0 auto 0 auto; padding: 0 15px 0 5px; top: 32px; width: 100%;">
     <div class="row box">
 
       <div class="col-xs-1" id="temporal_control_content" style="margin: 0; padding: 0;">
@@ -403,8 +403,8 @@
   <!-- End-Histogram-Container -->
 
   <!--Start Main-Container-->
-  <!--<div class="container-fluid" style="position: fixed; top: 178px; width: 100%; height: 100%; margin: 0; padding: 0; overflow-y: scroll;">-->
-  <div class="container-fluid" style="position: fixed; top: 160px; width: 100%; height: 100%; margin: 0; padding: 0;">
+  <!--<div id="container_main" class="container-fluid" style="position: fixed; top: 178px; width: 100%; height: 100%; margin: 0; padding: 0; overflow-y: scroll;">-->
+  <div id="container_main" class="container-fluid" style="position: fixed; top: 160px; width: 100%; height: 100%; margin: 0; padding: 0;">
     <!--Start Main-Container-Row-->
     <div class="row" style="height: 100%;">
 
@@ -935,25 +935,23 @@
               <div class="row box" style="margin: 2px 0 0 0; padding: 0;">
                 <div class="col-sm-12 tab-content" style= "width: 100%; margin: 0; padding: 0px 0px 0px 15px;">
 
-
                   <!--Start Data-Panel-Tab-Content-Email-->
                   <div class="tab-pane active" id="email-table-tab" style="height: 100%;">
-
-                    <div style="height: 20px; margin: 0; padding: 0 0 0 15px;">
+                    <div class="row" id="email_doc_control_header" style="height: 30px; margin: 0; padding: 0 0 0 15px;">
                       <!-- <div style="float: right;padding-right: 9px;"> -->
                       <!--   <a class="clickable"> -->
                       <!--     <span class="glyphicon glyphicon-folder-open" /> -->
                       <!--   </a> -->
                       <!-- </div> -->
-                      <div style="float: left; margin: 0; padding: 0;">
+                      <div class="col-sm-4" style="margin: 0; padding: 4px 10px 0px 0px;">
                         <span>Documents matched&nbsp;&nbsp;</span><span id="document_count"></span>
                       </div>
-                      <div style="float: right; margin: 0; padding: 0px 10px 0px 0px;">
+                      <div class="col-sm-2" style="margin: 0; padding: 4px 5px 0px 5px;">
                         <a class="clickable" id="email_view_all_starred">
                           <span> View Starred </span>
                         </a>
-                        |
                         <!--
+                        |
                         <a class="clickable" id="email_view_export_all" title="Mark All">
                           <span class="glyphicon glyphicon-plus"> </span>
                         </a>
@@ -971,7 +969,7 @@
 
                     <!-- Start Data-Table-Documents -->
                     <div class="v_scroll_left_container v_scroll_left">
-                      <div class="datatable_container v_scroll_left_content" style="width: 100%; height: 542px;">
+                      <div class="datatable_container v_scroll_left_content" style="width: 100%; height: 532px;">
                         <table id="result_table" class="datatable display" cellspacing="0"
                                style="width: 100%; height: 100%; display: table; table-layout: fixed; vertical-align: top" >
                         </table>
@@ -1141,7 +1139,7 @@
       <div class="col-sm-12" style="height: 100%; margin: 0; padding: 0px 0px 0px 0px;">
         <!-- Start Data-Table-Toggle -->
         <div class="col-sm-offset-10 toggle-button" id="button-toggle-container-email-doc-view">
-          <a><i class="fa fa-files-o"></i> <span class="glyphicon glyphicon-chevron-up"></span></a>
+          <a><i class="fa fa-file-text-o"></i> <span class="glyphicon glyphicon-chevron-up"></span></a>
         </div>
         <!-- End Data-Table-Toggle -->
 
@@ -1195,52 +1193,32 @@
                 <!-- End-Content-Email-Conversation-Button -->
               </div>
             </div>
-            <div class="col-sm-8" style="margin: 0; padding: 0;">
+
+            <div class="col-sm-6" style="margin: 0; padding: 0;">
               <!--Start Data-Panel-Tab-Content-Email-Mini-Topics-Chart -->
-              <div style="border: 1px solid #1e1e5f; border-radius: 3px; padding: 0; margin: 0; float: left; display: inline-block;"
+              <div style="border: 1px solid #50555A; border-radius: 3px; padding: 0; margin: 0; float: left; display: inline-block;"
                    id="topic_mini_chart">
 
               </div>
               <!--End Data-Panel-Tab-Content-Email-Mini-Topics-Chart -->
             </div>
 
-            <!--Start Data-Panel-Tab-Content-Email-Pertinence-Select -->
-            <!--
-            <div style="display: inline-block; float:left; margin: 5px 0px 5px 15px;">
-              <div class="btn-group" style="margin: 0px; font-size: 12px; font-weight: normal;">
-                <a class="btn btn-xs btn-default" href="#level_pertinence_not" data-toggle="dropdown" style="color: #bbbbbb">
-                  <i class="fa fa-flag fa-lg"></i> Not Pertinent
-                </a>
-                <a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#level_pertinence_not">
-                  <span class="fa fa-caret-down"></span>
-                </a>
-                <ul class="dropdown-menu" role="menu" >
-                  <li>
-                    <a href="#level_pertinence_very" role="menuitem" data-toggle="dropdown" style="color: #ff3200">
-                      <i class="fa fa-flag fa-lg"></i> Very Pertinent
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#level_pertinence_pertinent" role="menuitem" data-toggle="dropdown" style="color: #00ff64">
-                      <i class="fa fa-flag fa-lg"></i> Pertinent
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#level_pertinence_not" role="menuitem" data-toggle="dropdown" style="color: #bbbbbb">
-                      <i class="fa fa-flag fa-lg"></i> Not Pertinent
-                    </a>
-                  </li>
-                  <li class="divider"></li>
-                  <li>
-                    <a href="#level_pertinence_irrelevant" role="menuitem" data-toggle="dropdown" style="color: rgb(175, 173, 185)">
-                      <i class="fa fa-square-o fa-lg"></i> Clear Flag
-                    </a>
-                  </li>
-                </ul>
+            <div class="col-sm-1" style="margin: 0; padding: 0;">
+            </div>
+
+            <div class="col-sm-1" style="margin: 0; padding: 0;">
+              <div class="row" style="margin: 0; padding: 0;">
+                <div class="col-sm-12" style="margin: 2px 15px 0px 0px; padding: 0; float: right;">
+                  <button id="toggle_h_expand_panel" class="btn btn-xs btn-default clickable">
+                    <span style="color: #337ab7">
+                      <i class="fa fa-arrows-h"></i>
+                    </span>
+                  </button>
+                </div>
+              </div>
+              <div class="row" style="margin: 0; padding: 0;">
               </div>
             </div>
-            -->
-            <!--End Data-Panel-Tab-Content-Email-Pertinence-Select -->
           </div>
 
           <div class="row" style="width: 100%; height: 90%; margin: 0; padding: 0; overflow: scroll;">
