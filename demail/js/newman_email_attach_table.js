@@ -310,6 +310,8 @@ var newman_email_attach_table = (function () {
       _response_list = [];
       _.each(response, function(element, index) {
 
+        /*
+         // request attachment content for all the elements
         var attach_uid = element.attachment_id;
         var parent_uid = element.email_id;
         var file_name = element.filename;
@@ -319,6 +321,7 @@ var newman_email_attach_table = (function () {
           console.log('doc_type: ' + doc_type);
           attach_content_extract_request.requestService( attach_uid, parent_uid );
         }
+        */
 
         putAttachDocumentMetadata( element.attachment_id, clone( element ));
 
@@ -686,6 +689,22 @@ var newman_email_attach_table = (function () {
   function onRequestPageDisplay( response_list, start_index, max_index ) {
     initAttachDocTable();
     if (response_list) {
+
+      // request attachment content only for the elements being displayed
+      _.each(response_list, function(element, index) {
+
+         var attach_uid = element.attachment_id;
+         var parent_uid = element.email_id;
+         var file_name = element.filename;
+         var content_type = element.content_type;
+         var doc_type = getDocumentType(file_name, content_type);
+         if (doc_type == 'word' || doc_type == 'excel') {
+          console.log('doc_type: ' + doc_type);
+          attach_content_extract_request.requestService( attach_uid, parent_uid );
+         }
+
+      });
+
       populateAttachDocTable( response_list, start_index, max_index );
     }
   }
