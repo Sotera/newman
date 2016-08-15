@@ -1,4 +1,24 @@
 /**
+ * rounds a numeric value to the precision provided
+ * @param value
+ * @param precision
+ * @returns rounded numeric value
+ * usage :
+ * round(12345.6789, 2) // 12345.68
+ * round(12345.6789, 1) // 12345.7
+ * round(12345.6789) // 12346
+ * round(12345.6789, -1) // 12350
+ * round(12345.6789, -2) // 12300
+ * round(-123.45, 1) // -123.4
+ * round(123.45, 1) // 123.5
+ * round(456.7, 2).toFixed(2) // "456.70"
+ */
+function roundNumber(value, precision) {
+  var multiplier = Math.pow(10, precision || 0);
+  return Math.round(value * multiplier) / multiplier;
+}
+
+/**
  * converts a string to an unicode-string
  * @param string
  * @returns unicode-string
@@ -15,6 +35,7 @@ function toUnicode(theString) {
   }
   return unicodeString;
 }
+
 /**
  * returns true if the element is visible or false otherwise
  * @param element-id

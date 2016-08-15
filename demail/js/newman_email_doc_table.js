@@ -314,11 +314,11 @@ var newman_email_doc_table = (function () {
 
         var alt_id_text = truncateString( row.original_alt_ref_id, app_display_config.getLabelLengthMax() );
 
-        return [date_text, from_text, alt_id_text, subject_text, exportable_icon, row.email_id];
+        return [date_text, subject_text, alt_id_text, from_text, exportable_icon, row.email_id];
       }
       else { // default table rows
 
-        return [date_text, from_text, recipient_count, row.bodysize, attach_count, subject_text, exportable_icon, row.email_id];
+        return [date_text, subject_text, row.bodysize, attach_count, from_text, recipient_count, exportable_icon, row.email_id];
       }
 
     });
@@ -346,13 +346,13 @@ var newman_email_doc_table = (function () {
             title: "Date", "width": "16%"
           },
           {
-            title: "From", "width": "20%"
-          },
-          {
-            title: column_header_label, "width": "16%"
-          },
-          {
             title: "Subject", "width": "34%"
+          },
+          {
+            title: column_header_label, "width": "14%"
+          },
+          {
+            title: "From", "width": "22%"
           },
           {
             title: "<i class=\"fa fa-star-o\" rel=\"tooltip\" data-placement=\"left\" title=\"Starred for export\"></i>",
@@ -371,21 +371,21 @@ var newman_email_doc_table = (function () {
             title: "Date", "width": "16%"
           },
           {
-            title: "From", "width": "20%"
-          },
-          {
-            title: "<i class=\"fa fa-envelope-o\" rel=\"tooltip\" data-placement=\"left\" title=\"Recipient(s)\"></i>",
-            "width": "5%"
+            title: "Subject", "width": "34%"
           },
           {
             title: "Size", "width": "6%"
           },
           {
             title: "<i class=\"fa fa-paperclip\" rel=\"tooltip\" data-placement=\"left\" title=\"Attachment(s)\"></i>",
-            "width": "5%"
+            "width": "4%"
           },
           {
-            title: "Subject", "width": "34%"
+            title: "From", "width": "22%"
+          },
+          {
+            title: "<i class=\"fa fa-envelope-o\" rel=\"tooltip\" data-placement=\"left\" title=\"Recipient(s)\"></i>",
+            "width": "4%"
           },
           {
             title: "<i class=\"fa fa-star-o\" rel=\"tooltip\" data-placement=\"left\" title=\"Starred for export\"></i>",
@@ -401,7 +401,7 @@ var newman_email_doc_table = (function () {
 
       data_table_ui = $('#result_table').DataTable({
         destroy: true,
-        "lengthMenu": [[22, 44, 88, -1], [22, 44, 88, "All"]],
+        "lengthMenu": [[20, 40, 80, -1], [20, 40, 80, "All"]],
         "autoWidth": true,
         /*fixedHeader: {
          header: true,

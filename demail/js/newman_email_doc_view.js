@@ -137,7 +137,7 @@ var newman_email_doc_view = (function () {
       $('#topic_mini_chart').empty();
 
       //var width = 200, height = 40, barHeight = 10;
-      var width = 308, height = 44, barHeight = 10;
+      var width = 290, height = 44, barHeight = 10;
 
       var margin = {top: 2, right: 0, bottom: 0, left: 0};
       width = width - margin.left - margin.right;
@@ -278,7 +278,7 @@ var newman_email_doc_view = (function () {
 
         newman_email_starred_request_toggle.requestService(email_uid, exportable);
 
-        newman_email_starred.displayUITab();
+        //newman_email_starred.displayUITab();
 
       };
 

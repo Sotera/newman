@@ -23,8 +23,14 @@ var doubleEncodeURIComponent= function(uri){
 
 var bottom_panel= (function(){
 
+  var parent_container = $('#container_main');
   var container = $('#container-email-doc-view');
-  var toggle_button = $('#button-toggle-container-email-doc-view');
+  var width_as_percent_initial;
+  var width_as_percent_min = 40.4;
+  var width_as_percent_mid = 61.2;
+  var width_as_percent_max = 71.4;
+
+  var toggle_display_button = $('#button-toggle-container-email-doc-view');
 
   //var table_panel = $('#bottom-panel-toggle div:first-child div:nth-child(2)').first();
 
@@ -35,7 +41,7 @@ var bottom_panel= (function(){
 
     show();
 
-    toggle_button.find("span").first().switchClass(icon_class_open, icon_class_close);
+    toggle_display_button.find("span").first().switchClass(icon_class_open, icon_class_close);
     container.css("height", "calc(100% - 140px)").css("bottom", "0px"); // height : 100% - 140px(top-menu)
 
     // hide graph-visual-filter-panel
@@ -44,7 +50,7 @@ var bottom_panel= (function(){
 
   var close = function(){
 
-    toggle_button.find("span").first().switchClass(icon_class_close, icon_class_open);
+    toggle_display_button.find("span").first().switchClass(icon_class_close, icon_class_open);
     container.css("bottom", "calc(160px - 100%)"); // offset : 140px(top-menu) + 20px(toggle-button)
 
     // display graph-visual-filter-panel
@@ -57,6 +63,10 @@ var bottom_panel= (function(){
 
   var show = function(){
     container.css("display", "block");
+
+    if (!width_as_percent_initial) {
+      width_as_percent_initial = getContainerWidthAsPercent();
+    }
   };
 
   var isOpen = function(){
@@ -66,12 +76,43 @@ var bottom_panel= (function(){
   var toggle = function(){
     if (isOpen()){
       close();
-    } else {
+    }
+    else {
       open();
     }
   };
 
-  toggle_button.on('click', toggle);
+  toggle_display_button.on('click', toggle);
+
+  $('#toggle_h_expand_panel').on('click', function() {
+    console.log('clicked toggle_h_expand_panel');
+
+    var width_percent = getContainerWidthAsPercent();
+    if (width_percent == width_as_percent_min || width_percent == width_as_percent_initial) {
+      container.css("width", width_as_percent_mid+"%");
+    }
+    else if (width_percent == width_as_percent_mid || (width_percent > width_as_percent_min && width_percent < width_as_percent_max)) {
+      container.css("width", width_as_percent_max+"%");
+    }
+    else if (width_percent == width_as_percent_max || width_percent > width_as_percent_mid) {
+      container.css("width", width_as_percent_min+"%");
+    }
+    else {
+      console.log('default to min-width : ' + width_as_percent_min + '%');
+      container.css("width", width_as_percent_min+"%");
+    }
+
+  });
+
+  function getContainerWidthAsPercent() {
+    var container_width = container.width();
+    //var parent_width = container.offsetParent().width(); // immediate parent container in the DOM
+    var parent_width = parent_container.width();
+    var percent = roundNumber( (100 * (container_width / parent_width)), 1 );
+
+    console.log('#container-email-doc-view : width : ' + percent + '%');
+    return percent;
+  }
 
   return {
     'open': open,
