@@ -3,7 +3,7 @@ import cherrypy
 
 from es_geo import es_get_sender_locations, es_get_exif_emails
 from newman.es_connection import getDefaultDataSetID
-from param_utils import parseParamDatetime, parseParamEmailIds, parseParamStarred, parseParamTextQuery
+from param_utils import parseParamDatetime, parseParamEmailAddressList, parseParamTextQuery
 
 #GET <host>:<port>/geo/sender_locations?data_set_id=<data_set_id>&qs="<query_string>"
 # deprecated slated for removal
@@ -15,7 +15,9 @@ def sender_locations(*args, **kwargs):
 
     qs = parseParamTextQuery(**kwargs)
 
-    return es_get_sender_locations(data_set_id, size)
+    email_address_list = parseParamEmailAddressList( **kwargs )
+
+    return es_get_sender_locations(data_set_id, email_address_list=email_address_list, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, size=size)
 
 
 #GET <host>:<port>/geo/exif_emails?data_set_id=<data_set_id>&qs="<query_string>"
@@ -28,7 +30,9 @@ def exif_emails(*args, **kwargs):
 
     qs = parseParamTextQuery(**kwargs)
 
-    return es_get_exif_emails(data_set_id, size)
+    email_address_list = parseParamEmailAddressList( **kwargs )
+
+    return es_get_exif_emails(data_set_id, email_address_list=email_address_list, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, size=size)
 
 
 get_actions = {

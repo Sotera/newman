@@ -28,6 +28,7 @@ def search(*path_args, **param_args):
     if path_args[0] == "all" :
         return _search(data_set_id=data_set_id, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
     elif path_args[0] == "email":
+        # TODO Deprecated - DO NOT use path-parameter
         email_address=urllib.unquote(nth(path_args, 1, ''))
         return _search(data_set_id=data_set_id, email_address=email_address, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
     return {"graph":{"nodes":[], "links":[]}, "rows":[]}

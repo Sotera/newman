@@ -49,7 +49,7 @@ def parseParamEncrypted( **kwargs ):
 
     return encrypted in ['true', 'True', 1, 'T', 't', 'yes'] if encrypted else None
 
-# Deprecated - DO NOT use path-parameter
+# TODO remove -- path params deprecated
 def parseParamEmailAddress( **kwargs ):
     tangelo.log("parseParamEmailAddress(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     email_regex = re.compile("[^@]+@[^@]+\\.[^@]+")
@@ -137,6 +137,10 @@ def parseParamStarred( **kwargs ):
 def parseParamTextQuery( **kwargs ):
     tangelo.log("parseParamTextQuery(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
     return kwargs.get('qs', '')
+
+def parseParamNumberType( **kwargs ):
+    tangelo.log("parseParamNumberType(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
+    return kwargs.get('number_type', '')
 
 def parseParamParentGUID( **kwargs ):
     #tangelo.log("parseParamParentGUID(kwargs[%s] %s)" % (len(kwargs), str(kwargs)))
