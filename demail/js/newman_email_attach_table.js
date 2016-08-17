@@ -198,7 +198,7 @@ var newman_email_attach_table = (function () {
           var content_type = file_metadata.content_type;
           var doc_type = getDocumentType(file_name, content_type);
 
-          if (doc_type == 'image' || doc_type == 'word' || doc_type == 'excel') {
+          if (doc_type == 'image' || doc_type == 'word' || doc_type == 'excel' || doc_type == 'pdf' || doc_type == 'text' || doc_type == 'html') {
 
             var attach_url = 'email/attachment/' + encodeURIComponent(file_uid);
             attach_url = newman_data_source.appendDataSource(attach_url);
@@ -230,7 +230,7 @@ var newman_email_attach_table = (function () {
               modal_body.append(image_icon);
 
             }
-            else if (doc_type == 'word' || doc_type == 'excel') {
+            else if (doc_type == 'word' || doc_type == 'excel' || doc_type == 'pdf' || doc_type == 'text' || doc_type == 'html') {
               var content_extract = attach_content_extract_request.getFileContentExtract(file_uid);
               if (content_extract) {
                 //console.log('content_extract :\n' + content_extract.content);
@@ -255,7 +255,7 @@ var newman_email_attach_table = (function () {
             $(preview_modal_id).modal(modal_options);
 
             $('.modal-backdrop').appendTo('.modal-container');
-          } // end-of if (doc_type == 'image' || doc_type == 'word' || doc_type == 'excel')
+          } // end-of if (doc_type == 'image' || doc_type == 'word' || doc_type == 'excel' || doc_type == 'pdf' || doc_type == 'text' || doc_type == 'html')
 
         } // end-of if (file_metadata)
         else {
@@ -317,7 +317,7 @@ var newman_email_attach_table = (function () {
         var file_name = element.filename;
         var content_type = element.content_type;
         var doc_type = getDocumentType(file_name, content_type);
-        if (doc_type == 'word' || doc_type == 'excel') {
+        if (doc_type == 'word' || doc_type == 'excel' || doc_type == 'pdf' || doc_type == 'text' || doc_type == 'html') {
           console.log('doc_type: ' + doc_type);
           attach_content_extract_request.requestService( attach_uid, parent_uid );
         }
@@ -552,7 +552,7 @@ var newman_email_attach_table = (function () {
 
             var col_row = $('<div>');
 
-            if (doc_type == 'image' || doc_type == 'word' || doc_type == 'excel') {
+            if (doc_type == 'image' || doc_type == 'word' || doc_type == 'excel' || doc_type == 'pdf' || doc_type == 'text' || doc_type == 'html') {
               /*
               image_view_button_html =
                 "<button type='button' class='btn btn-small outline' value='" + file_uid + "' id='attach_image_expand_button_" + file_uid + "' >" +
@@ -698,7 +698,7 @@ var newman_email_attach_table = (function () {
          var file_name = element.filename;
          var content_type = element.content_type;
          var doc_type = getDocumentType(file_name, content_type);
-         if (doc_type == 'word' || doc_type == 'excel') {
+         if (doc_type == 'word' || doc_type == 'excel' || doc_type == 'pdf' || doc_type == 'text' || doc_type == 'html') {
           console.log('doc_type: ' + doc_type);
           attach_content_extract_request.requestService( attach_uid, parent_uid );
          }

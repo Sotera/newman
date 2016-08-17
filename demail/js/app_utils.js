@@ -198,6 +198,11 @@ function getDocumentTypeByExt( extension ) {
       return "text";
     }
 
+    //html
+    if (contains(lower_case_ext, ['html', 'htm'])) {
+      return "html";
+    }
+
     return "other";
   }
   return "other";

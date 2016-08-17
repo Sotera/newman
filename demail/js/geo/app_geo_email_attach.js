@@ -226,7 +226,8 @@ var newman_geo_email_attach = (function () {
 var newman_geo_email_attach_request = (function () {
   var debug_enabled = true;
 
-  var _service_url = 'geo/exif_emails';
+  //var _service_url = 'geo/exif_emails';
+  var _service_url = 'geo/exif_emails?size=2500'; // force fixed-doc size for now
   var _response;
 
   function getServiceURLBase() {

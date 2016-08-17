@@ -120,7 +120,8 @@ var newman_geo_email_sender = (function () {
 var newman_geo_email_sender_request = (function () {
   var debug_enabled = false;
 
-  var _service_url = 'geo/sender_locations';
+  //var _service_url = 'geo/sender_locations';
+  var _service_url = 'geo/sender_locations?size=2500'; // force fixed-doc size for now
   var _response;
 
   function getServiceURLBase() {
