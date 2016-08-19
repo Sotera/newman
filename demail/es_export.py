@@ -5,10 +5,12 @@ import tarfile
 import time
 import json
 import csv
+import datetime
 
 import tangelo
 import cherrypy
 from newman.es_connection import es
+from newman.newman_config import _getVersion
 from bs4 import BeautifulSoup
 from es_topic import get_categories
 
@@ -214,6 +216,11 @@ def prettyprint_email_as_html_template(email_json, topics):
         soup.find(text="##ID2##").replace_with(email_json["id"])
         soup.find(text="##ID3##").replace_with(email_json["id"])
 
+        soup.find(text="##LABEL##").replace_with(email_json["label"])
+        soup.find(text="##INGEST_ID##").replace_with(email_json["ingest_id"])
+        soup.find(text="##CASE_ID##").replace_with(email_json["case_id"])
+        soup.find(text="##ALT_REF_ID##").replace_with(email_json["alt_ref_id"])
+
         soup.find(text="##FROM##").replace_with(email_json["senders_line"][0])
         if email_json["ccs_line"]:
             soup.find(text="##TO##").replace_with(email_json["tos_line"][0])
@@ -337,9 +344,7 @@ def export_emails_archive(data_set_id, email_ids=[]):
     emails = es().mget(index=data_set_id, doc_type="emails", body={"docs":[{"_id":id} for id in email_ids]})
     topics = get_categories(data_set_id)
 
-
-    # TODO filename
-    filename= "export.tar.gz"
+    filename= "newman-v{}-export-{}.tar.gz".format(_getVersion(), datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S'))
     tangelo.content_type("application/x-gzip")
     header("Content-Disposition", 'attachment; filename="{}"'.format(filename))
 

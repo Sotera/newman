@@ -257,7 +257,7 @@ def exportStarred(*args, **kwargs):
     tangelo.log("email.exportStarred(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
-    email_ids = [hit["num"] for hit in results["hits"]]
+    email_ids = [hit["email_id"] for hit in results["hits"]]
     return export_emails_archive(data_set_id, email_ids)
 
 #GET /attachment_content?data_set_id=<dsid>&parent_guid=<email id>&attachment_guid=<attachment id>
@@ -285,7 +285,9 @@ get_actions = {
     "ranked_addresses_search" : getRankedAddressesWithTextSearch,
     "exportable" : getExportable,
     "download" : buildExportable,
+    # Get a binary attachment
     "attachment" : get_attachment_by_id,
+    # Get text extracted contents
     "attachment_content" : get_attachment_content_by_id,
     "search_all_attach_by_sender" : getAllAttachmentBySender,
     "export_many" : exportMany,

@@ -4,6 +4,7 @@ import json
 
 def application_properties():
     return {
+        'version': APP_CONFIG.get('version'),
         'default_data_set_id': APP_CONFIG.get('default_data_set_id'),
         'default_min_timeline_bound': APP_CONFIG.get('default_min_timeline_bound'),
         'default_max_timeline_bound': APP_CONFIG.get('default_max_timeline_bound'),
@@ -62,3 +63,5 @@ def default_timeline_interval(data_set_id=None):
 def _getDefaultDataSetID():
     return str(application_properties()["default_data_set_id"])
 
+def _getVersion():
+    return str(application_properties()["version"])

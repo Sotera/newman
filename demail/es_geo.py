@@ -5,36 +5,6 @@ import json
 from newman.es_connection import es
 from es_queries import _build_email_query
 
-# def _geo_xoip_query():
-#     return {
-#         "sort":[{"datetime":{"order":"desc"}}],
-#         "query": {
-#             "filtered": {
-#                 "query": {"bool":{"must":[{"match_all":{}}]}},
-#                 "filter": {
-#                     "bool": {
-#                         "must": [ { "exists": { "field": "originating_locations.geo_coord"}}]
-#                     }
-#                 }
-#             }
-#         }
-#     }
-
-
-# def _geo_exif_query():
-#     return {
-#         "sort":[{"datetime":{"order":"desc"}}],
-#         "query": {
-#             "filtered": {
-#                 "query": {"bool":{"must":[{"match_all":{}}]}},
-#                 "filter": {
-#                     "bool": {
-#                         "must": [ { "exists": { "field": "attachments.exif.gps.coord"}}]
-#                     }
-#                 }
-#             }
-#         }
-#     }
 
 def search_geo_emails():
     return []

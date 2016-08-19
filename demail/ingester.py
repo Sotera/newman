@@ -21,7 +21,7 @@ from newman.newman_config import index_creator_prefix
 webroot = cherrypy.config.get("webroot")
 base_dir = os.path.abspath("{}/../".format(webroot))
 work_dir = os.path.abspath("{}/../work_dir/".format(webroot))
-ingest_parent_dir = "/vagrant"
+ingest_parent_dir = "/newman-ingester/"
 
 _INGESTER_LOCK=threading.Lock()
 _INGESTER_CONDITION=threading.Condition(_INGESTER_LOCK)
@@ -130,14 +130,50 @@ def get_ingest_id():
     str_time = dt.strftime('%Y-%m-%dT%H:%M:%S')
     return {"ingest_id" : str(u), "datetime" : str_time}
 
+def list_cases():
+    path = os.path.normpath(ingest_parent_dir)
+    if not path:
+        return {"message" : "Ensure parent directory exists and is readable by user: " + ingest_parent_dir }
+    contents_cases = os.listdir(path)
+    cases = {}
+    for case in contents_cases:
+        if os.path.isdir(path+"/"+case):
+            contents_datasets = os.listdir(path+"/"+case)
+            datasets = [ds for ds in contents_datasets if os.path.isdir(path+"/"+case+"/"+ds)]
+            cases[case]=datasets
+
+    tangelo.content_type("application/json")
+    return {"cases" : cases}
+
+def list_dirs():
+    path = os.path.normpath(ingest_parent_dir)
+    res = []
+    d= {}
+    for root,dirs,files in os.walk(path, topdown=True):
+        depth = root[len(path) + len(os.path.sep):].count(os.path.sep)
+        cherrypy.log("running ingest: {} {} {}".format(root, str(dirs), str(files)))
+        cherrypy.log("running ingest: {}".format(" ".join(str(depth))))
+        # if depth == 0:
+        #     d[dirs]=[]
+        if depth == 2:
+            # We're currently two directories in, so all subdirs have depth 3
+            res += [os.path.join(root, d) for d in dirs]
+            dirs[:] = [] # Don't recurse any deeper
+    return {"paths":d}
+
 def list():
+    parent_exists = os.path.isdir(ingest_parent_dir)
+    if not parent_exists:
+        return {"message" : "Ensure parent directory exists and is readable by user: " + ingest_parent_dir }
+
     path = "{}/".format(ingest_parent_dir)
     _, dirnames, filenames = os.walk(path).next()
     tangelo.content_type("application/json")
     return { 'items' : filenames }
 
 get_actions = {
-    "list" : list,
+    "list" : list_dirs,
+    "cases" : list_cases,
     "ingest_id" : get_ingest_id,
     "status" : ingest_status
 }

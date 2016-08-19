@@ -14,7 +14,7 @@ LABEL=$7
 FORCE_LANGUAGE=$8
 
 #newman etl extract
-EXTRACTOR_HOME=/srv/software/pst-extraction-master/
+EXTRACTOR_HOME=/QCR/pst-extraction/
 
 echo "Extractor home set to $EXTRACTOR_HOME"
 echo "email_address=$INGEST_ID parent_dir=$PARENT_DIR path=$INGEST_ITEM type=$TYPE"
@@ -26,7 +26,7 @@ INGEST_DIR=${EXTRACTOR_HOME}/pst-extract/$TYPE
 
 mkdir $INGEST_DIR
 
-cp $PARENT_DIR/$INGEST_ITEM $INGEST_DIR
+cp -r $PARENT_DIR/$INGEST_ITEM $INGEST_DIR/
 
 if [ "$TYPE" == "pst" ]; then
     echo "ingest pst"
