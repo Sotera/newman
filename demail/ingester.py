@@ -21,7 +21,7 @@ from newman.newman_config import index_creator_prefix
 webroot = cherrypy.config.get("webroot")
 base_dir = os.path.abspath("{}/../".format(webroot))
 work_dir = os.path.abspath("{}/../work_dir/".format(webroot))
-ingest_parent_dir = "/newman-ingester/"
+ingest_parent_dir = "/vagrant/newman-ingester/"
 
 _INGESTER_LOCK=threading.Lock()
 _INGESTER_CONDITION=threading.Condition(_INGESTER_LOCK)
@@ -41,7 +41,7 @@ alternate-id - product_id or external id reference
 label - user label for ingest
 
 file - name of file to ingest
-type - type of ingest pst|mbox
+type - type of ingest pst|mbox|eml
 {"case_id" : "email@x.y_case", "ingest_id" : "email@x.y", "alt_ref_id" : "email@x.y_ref", "label":"email@x.y_label", "file" : "yipsusan@gmail.com.mbox", "type":"mbox", "force_language":"en"}
 '''
 def extract(*args, **kwargs):
@@ -172,7 +172,7 @@ def list():
     return { 'items' : filenames }
 
 get_actions = {
-    "list" : list_dirs,
+    # "list" : list_dirs,
     "cases" : list_cases,
     "ingest_id" : get_ingest_id,
     "status" : ingest_status
