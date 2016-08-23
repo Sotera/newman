@@ -14,12 +14,12 @@ permalink: /quick-start/
 2. Copy from Download directory to a known location like C:\Users\jsmith\virtualboxvms\
 3. Open a CMD terminal - select Windows **Start** icon, type **cmd**, select **cmd.exe**.
 4. Change directory to **cd virtualboxvms. The prompt should now be **C:\Users\jsmith\virtualboxvms>**.
-5. Type in the following commands:
+5. Type in the following commands at the **C:\Users\jsmith\virtualboxvms\** prompt:
 {% highlight bash %}
-C:\\Users\\jsmith\virtualboxvms\\**vagrant init newman-vm-v2.1.3 newman-vm-v2.1.3.box**
-C:\\Users\\jsmith\\virtualboxvms\\**vagrant up**
-C:\\Users\\jsmith\\virtualboxvms\\**vagrant ssh**
-vagrant@vagrant-ubuntu-trusty-64:/$**tangelo restart**
+vagrant init newman-vm-v2.1.3 newman-vm-v2.1.3.box
+vagrant up
+vagrant ssh
+vagrant@vagrant-ubuntu-trusty-64:/$tangelo restart
 {% endhighlight %}
 6. In Chrome browser, navigate to **http://localhost:8787**
 
