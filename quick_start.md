@@ -13,7 +13,7 @@ permalink: /quick-start/
 1. Download the latest Newman release. Note: The latest version as of 8/23/2016 is [Newman-VM-2.1.3](https://www.dropbox.com/s/h0pyxjj3rlhodv0/newman-vm-v1.1.2.box?dl=0).
 2. Copy from Download directory to a known location like C:\Users\jsmith\virtualboxvms\
 3. Open a CMD terminal - select Windows **Start** icon, type **cmd**, select **cmd.exe**.
-4. Change directory to **cd virtualboxvms. The prompt should now be **C:\Users\jsmith\virtualboxvms>**.
+4. Change directory to **cd virtualboxvms**. The prompt should now be **C:\Users\jsmith\virtualboxvms>**.
 5. Type in the following commands at the **C:\Users\jsmith\virtualboxvms\** prompt:
 {% highlight bash %}
 vagrant init newman-vm-v2.1.3 newman-vm-v2.1.3.box
@@ -34,7 +34,7 @@ Note: if you have already executed a vagrant init, then you will get an error st
 6.	Select **Confirm** to start the process. Currently there is no status on the ingest progress. A status feature is in work that will eventually be located under the Tasks tab. For now, you can check http://localhost:8787/ingester/status. The time it takes to ingest a file is dependent on the system environment and size of file of being ingested. It takes about 10 minutes to ingest a 180MB pst file with an 8GB base memory vm.
 
 ## Creating PST File in Outlook 2010
-You can create a pst file from Outlook 2010 by following these steps:
+You can create a pst file from Outlook 2010 by following these steps:<br />
 1.	On the Home tab, in the New Items group, navigate to More Items | Outlook Data File<br />
 2.	In the Create or Open Outlook Data File dialog box, in the File name box, type the name as you want it to appear in the Outlook Navigation Pane, and then click OK<br />
 3.	In Outlooks Navigation Pane, copy specific emails or entire email folders to the pst folder just created<br />
