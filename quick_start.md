@@ -16,9 +16,9 @@ permalink: /quick-start/
 4. Change directory to **cd virtualboxvms. The prompt should now be **C:\Users\jsmith\virtualboxvms>**.
 5. Type in the following commands:
 {% highlight bash %}
-C:\Users\jsmith\virtualboxvms\**vagrant init newman-vm-v2.1.3 newman-vm-v2.1.3.box**
-C:\Users\jsmith\virtualboxvms\**vagrant up**
-C:\Users\jsmith\virtualboxvms\**vagrant ssh**
+C:\\Users\\jsmith\virtualboxvms\\**vagrant init newman-vm-v2.1.3 newman-vm-v2.1.3.box**
+C:\\Users\\jsmith\\virtualboxvms\\**vagrant up**
+C:\\Users\\jsmith\\virtualboxvms\\**vagrant ssh**
 vagrant@vagrant-ubuntu-trusty-64:/$**tangelo restart**
 {% endhighlight %}
 6. In Chrome browser, navigate to **http://localhost:8787**
@@ -35,10 +35,10 @@ Note: if you have already executed a vagrant init, then you will get an error st
 
 ## Creating PST File in Outlook 2010
 You can create a pst file from Outlook 2010 by following these steps:
-1.	On the Home tab, in the New Items group, navigate to More Items | Outlook Data File
-2.	In the Create or Open Outlook Data File dialog box, in the File name box, type the name as you want it to appear in the Outlook Navigation Pane, and then click OK
-3.	In Outlooks Navigation Pane, copy specific emails or entire email folders to the pst folder just created
-4.	Right-click on pst folder and Close before using ingesting into Newman
+1.	On the Home tab, in the New Items group, navigate to More Items | Outlook Data File<br />
+2.	In the Create or Open Outlook Data File dialog box, in the File name box, type the name as you want it to appear in the Outlook Navigation Pane, and then click OK<br />
+3.	In Outlooks Navigation Pane, copy specific emails or entire email folders to the pst folder just created<br />
+4.	Right-click on pst folder and Close before using ingesting into Newman<br />
 
 # Elastic Search Notes
 •	Elastic Search tool: navigate to http://localhost:9200/_plugin/head to see the metadata and structure of what is being indexed.<br />
