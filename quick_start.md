@@ -21,9 +21,10 @@ vagrant up
 vagrant ssh
 vagrant@vagrant-ubuntu-trusty-64:/$tangelo restart
 {% endhighlight %}
-6. In Chrome browser, navigate to **http://localhost:8787**
 
-Note: if you have already executed a vagrant init, then you will get an error stating a Vagrantfile exists. Just delete or rename the Vagrantfile and the .vagrant folder and all its contents and re-run command. The vagrant up command takes approximately 15 minutes the first time it is initiated.
+Notes: during this setup process, if you get an error stating a Vagrantfile exists. Just delete or rename the Vagrantfile and the .vagrant folder and all its contents and re-run command. The vagrant up command takes approximately 15 minutes the first time it is initiated.
+
+In Chrome browser, navigate to **http://localhost:8787** to initiate Newman.
 
 # Ingest Process
 1.	Select the **Database Icon** and **New Dataset…** to start the ingest process. 
@@ -33,7 +34,7 @@ Note: if you have already executed a vagrant init, then you will get an error st
 5.	Optional: add additional labels for Case ID and Alt Ref ID.
 6.	Select **Confirm** to start the process. Currently there is no status on the ingest progress. A status feature is in work that will eventually be located under the Tasks tab. For now, you can check http://localhost:8787/ingester/status. The time it takes to ingest a file is dependent on the system environment and size of file of being ingested. It takes about 10 minutes to ingest a 180MB pst file with an 8GB base memory vm.
 
-## Creating PST File in Outlook 2010
+### Creating PST File in Outlook 2010
 1.	On the Home tab, in the New Items group, navigate to More Items | Outlook Data File... 
 2.	In the Create or Open Outlook Data File dialog box, in the File name box, type the name as you want it to appear in the Outlook Navigation Pane, and then click OK.
 3.	In Outlook Navigation Pane, copy specific email or entire email folders to the pst folder just created.
