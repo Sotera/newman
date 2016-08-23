@@ -35,10 +35,10 @@ In Chrome browser, navigate to **http://localhost:8787** to initiate Newman.
 6.	Select **Confirm** to start the process. Currently there is no status on the ingest progress. A status feature is in work that will eventually be located under the Tasks tab. For now, you can check http://localhost:8787/ingester/status. The time it takes to ingest a file is dependent on the system environment and size of file of being ingested. It takes about 10 minutes to ingest a 180MB pst file with an 8GB base memory vm.
 
 # Creating PST File in Outlook 2010
-1.  On the Home tab, in the New Items group, navigate to More Items | Outllok Data File.
-2.	In the Create or Open Outlook Data File dialog box, in the File name box, type the name as you want it to appear in the Outlook Navigation Pane, and then click OK.
-3.	In Outlook Navigation Pane, copy specific email or entire email folders to the pst folder just created.
-4.	Right-click on pst folder and Close before ingesting into Newman.
+1. On the Home tab, in the New Items group, navigate to More Items | Outlook Data File.
+2. In the Create or Open Outlook Data File dialog box, in the File name box, type the name as you want it to appear in the Outlook Navigation Pane, and then click OK.
+3. In Outlook Navigation Pane, copy specific email or entire email folders to the pst folder just created.
+4. Right-click on pst folder and Close before ingesting into Newman.
 
 # Elastic Search Notes
 •	Elastic Search tool: navigate to http://localhost:9200/_plugin/head to see the metadata and structure of what is being indexed.<br />
