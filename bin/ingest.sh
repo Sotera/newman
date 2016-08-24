@@ -17,7 +17,7 @@ FORCE_LANGUAGE=$8
 EXTRACTOR_HOME=/QCR/pst-extraction/
 
 echo "Extractor home set to $EXTRACTOR_HOME"
-echo "email_address=$INGEST_ID parent_dir=$PARENT_DIR path=$INGEST_ITEM type=$TYPE"
+echo "email_address=$INGEST_ID parent_dir=$PARENT_DIR path=${CASE_ID}/${LABEL} type=$TYPE"
 
 cd $EXTRACTOR_HOME
 rm -rf $EXTRACTOR_HOME/pst-extract/*
@@ -26,7 +26,7 @@ INGEST_DIR=${EXTRACTOR_HOME}/pst-extract/$TYPE
 
 mkdir $INGEST_DIR
 
-cp -r $PARENT_DIR/$INGEST_ITEM $INGEST_DIR/
+cp -r $PARENT_DIR/${CASE_ID}/${LABEL} $INGEST_DIR/
 
 if [ "$TYPE" == "pst" ]; then
     echo "ingest pst"
