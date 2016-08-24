@@ -516,6 +516,8 @@ function searchByField( search_filter ) {
 
   search_result.clearAll();
 
+  app_pagination_control.hidePageControl();
+
   var text_input = $("#txt_search").val();
   if (text_input) {
     text_input = encodeURIComponent(text_input);
@@ -1612,13 +1614,22 @@ $(function () {
     $('a[data-toggle=\"tab\"]').on('shown.bs.tab', function (e) {
       //var element_ID = $(e.target).html();
       var element_ID = $(e.target).attr("href");
-      console.log('tab_select ' + element_ID);
+      console.log('tab_selected : ' + element_ID);
 
       if (element_ID.endsWith('dashboard_tab_chart_analytics')) {
         initDashboardCharts();
+
+        //app_pagination_control.initPageControl( newman_search_result_collection );
       }
       else if (element_ID.endsWith('dashboard_tab_geo_analytics')) {
         app_geo_map.init( true );
+
+        //app_pagination_control.initPageControl( app_geo_map );
+      }
+      else if (element_ID.endsWith('dashboard_tab_data_extract')) {
+        //app_text_extract_table.requestExtractPhoneList();
+
+        app_pagination_control.initPageControl( app_text_extract_table );
       }
       else if (element_ID.endsWith('dashboard_tab_content_topics')) {
         newman_top_email_topic.revalidateUITopicEmail();
@@ -1641,10 +1652,25 @@ $(function () {
       else {
         // default to dashboard
         initDashboardCharts();
+
+        //app_pagination_control.initPageControl( newman_search_result_collection );
       }
 
+    });
+
+
+    $('a[data-toggle=\"tab\"]').on('hidden.bs.tab', function (e) {
+      var element_ID = $(e.target).attr("href");
+
+      //if (element_ID.endsWith('dashboard_tab_data_extract') || element_ID.endsWith('dashboard_tab_geo_analytics')) {
+      if (element_ID.endsWith('dashboard_tab_data_extract')) {
+        console.log('tab_unselected :' + element_ID);
+
+        app_pagination_control.hidePageControl();
+      }
 
     });
+
 
     newman_graph_email.initUI();
 
