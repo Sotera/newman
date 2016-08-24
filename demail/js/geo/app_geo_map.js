@@ -1559,6 +1559,11 @@ var app_geo_map = (function () {
     setTileExportEnabled( true );
   }
 
+  function requestNewPage( max_per_page, start_index ) {
+
+
+  }
+
   return {
     'init' : init,
     'clearAll' : clearAll,
@@ -1570,7 +1575,8 @@ var app_geo_map = (function () {
     'isMarkedForAllAttachment' : isMarkedForAllAttachment,
     'unmarkAllAttachment' : unmarkAllAttachment,
     'markMap' : markMap,
-    'fireEvent' : fireEvent
+    'fireEvent' : fireEvent,
+    'requestNewPage' : requestNewPage
   }
 
 }());

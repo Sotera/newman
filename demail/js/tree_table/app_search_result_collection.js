@@ -245,12 +245,13 @@ var newman_search_result_collection = (function () {
     var ui_container = $('#'+ui_treetable_id);
     var ui_appendable = $('#'+ui_treetable_body_id);
 
+    /*
     var ui_treetable_copy_id = 'search_result_treetable_copy';
     var ui_treetable_body_copy_id = 'search_result_treetable_body_copy';
 
     var ui_container_copy = $('#'+ui_treetable_copy_id);
     var ui_appendable_copy = $('#'+ui_treetable_body_copy_id);
-
+    */
 
     if (ui_container && ui_appendable) {
 
@@ -305,7 +306,7 @@ var newman_search_result_collection = (function () {
       /**
        *  create a copy of the html tree-table-rows
        */
-
+      /*
       ui_appendable_copy.empty();
       _.each(data_source_list, function (data_source_element, index) {
 
@@ -340,7 +341,7 @@ var newman_search_result_collection = (function () {
         }// end if (data_source_element.hasChild())
 
       });
-
+      */
 
       ui_container.treegrid({
         treeColumn : 0,
@@ -365,6 +366,7 @@ var newman_search_result_collection = (function () {
                 console.log('\tnode_index: ' + node_index);
               }
 
+              /*
               ui_container_copy.treegrid('getAllNodes').each(function() {
                 var node_id = $(this).treegrid('getNodeId');
                 //console.log('\t\tnode_id : ' + node_id);
@@ -373,6 +375,7 @@ var newman_search_result_collection = (function () {
                   $(this).treegrid('collapse');
                 }
               });
+              */
             }
           }
 
@@ -393,6 +396,7 @@ var newman_search_result_collection = (function () {
                 console.log('\tnode_index: ' + node_index);
               }
 
+              /*
               ui_container_copy.treegrid('getAllNodes').each(function() {
                 var node_id = $(this).treegrid('getNodeId');
                 //console.log('\t\tnode_id : ' + node_id);
@@ -403,6 +407,7 @@ var newman_search_result_collection = (function () {
                   $(this).treegrid('expand');
                 }
               });
+              */
             }
           }
 
@@ -412,14 +417,14 @@ var newman_search_result_collection = (function () {
 
       ui_appendable.trigger('treetable_rows_updated');
 
-
+      /*
       ui_container_copy.treegrid({
         treeColumn : 0,
         initialState : 'expanded',
         expanderExpandedClass : 'fa fa-minus-square-o fa-lg',
         expanderCollapsedClass : 'fa fa-plus-square-o fa-lg'
       });
-
+      */
       //collapseAllSearchResultNode(text_search_node_list, ui_container, ui_container_copy);
 
     }
@@ -915,12 +920,14 @@ var newman_search_result_collection = (function () {
 
     });
 
+    /*
     ui_treetable_copy.treegrid('getRootNodes').each(function() {
       var row_id = $(this).attr('id');
       var node_index = $(this).treegrid('getNodeId');
       //console.log('\trow_id: ' + row_id + ', node_index: ' + node_index);
 
     });
+    */
 
   }
 
@@ -942,6 +949,7 @@ var newman_search_result_collection = (function () {
 
       });
 
+      /*
       ui_treetable_copy.treegrid('getAllNodes').each(function() {
         var row_id = $(this).attr('id');
         var node_index = $(this).treegrid('getNodeId');
@@ -952,6 +960,7 @@ var newman_search_result_collection = (function () {
           $(this).treegrid('collapseRecursive');
         }
       });
+      */
 
     });
 
@@ -1698,6 +1707,10 @@ var newman_search_result_collection = (function () {
     }
   }
 
+  function requestNewPage( max_per_page, start_index ) {
+
+
+  }
 
     return {
       'initTreeTableEvent' : initTreeTableEvent,
@@ -1711,7 +1724,8 @@ var newman_search_result_collection = (function () {
       'getAllSelectedCount' : getAllSelectedCount,
       'getAllSelectedAsString' : getAllSelectedAsString,
       'getAllSelectedAsList' : getAllSelectedAsList,
-      'onRequestEmailEntitySearch' : onRequestEmailEntitySearch
+      'onRequestEmailEntitySearch' : onRequestEmailEntitySearch,
+      'requestNewPage' : requestNewPage
     }
 
 }());

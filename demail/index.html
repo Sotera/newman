@@ -531,6 +531,8 @@
 
                     <!--Start Search-Result-Container -->
                     <div class="v_scroll_left_content" id="search_result_container_copy" style="margin: 0 0 0 15px; padding: 0; height: 30px;">
+
+                      <!--
                       <table id="search_result_treetable_copy" class="table tree-2 table-bordered table-striped table-condensed">
 
                         <thead style="font-size: small; display: table-header-group" id="search_result_treetable_header_copy">
@@ -549,6 +551,15 @@
                         </tbody>
 
                       </table>
+                      -->
+
+                      <div class="row" id="search_response_control_header" style="margin: 0; padding: 0; height: 32px;">
+                        <div class="col-sm-6" style="margin: 0; padding: 0px 5px 0px 10px;">
+                        </div>
+                        <div class="col-sm-6" id="search_response_page_control" style="margin: 0; padding: 0px 2px 0px 5px; text-align: right; display: none;">
+                        </div>
+                      </div>
+
                     </div>
 
                     <div class="v_scroll_left_container v_scroll_left">
@@ -557,7 +568,7 @@
 
                         <table id="search_result_treetable" class="table tree-2 table-bordered table-striped table-condensed" >
 
-                          <thead style="font-size: small; visibility: hidden; display: table-footer-group" id="search_result_treetable_header">
+                          <thead style="font-size: small; display: table-header-group" id="search_result_treetable_header">
                           <tr>
                             <th>&nbsp;</th>
                             <th><i class="fa fa-send-o fa-fw" rel="tooltip" data-placement="left" title="Emails Sent"></i></th>
@@ -565,7 +576,7 @@
                             <th><i class="fa fa-paperclip fa-fw" rel="tooltip" data-placement="left" title="File Attachments"></i></th>
                             <th><i class="fa fa-users fa-fw" rel="tooltip" data-placement="left" title="Accounts Associated"></i></th>
                             <th><i class="fa fa-crosshairs fa-fw" rel="tooltip" data-placement="left" title="Search Matched"></i></th>
-                            <th><i class="fa fa-ellipsis-v fa-fw" rel="tooltip" data-placement="left" title="Select/Compare"></i></th>
+                            <th><i class="fa fa-ellipsis-v fa-fw" rel="tooltip" data-placement="left" title="Select / Compare"></i></th>
                           </tr>
                           </thead>
 
@@ -843,11 +854,13 @@
 
                 <!-- Start-Analytics-Content-Data-Extract -->
                 <div class="tab-pane" id="dashboard_tab_data_extract" style= "height: 568px; padding: 0; margin: 0;">
-                  <div class="row" id="data_extract_control_header" style="margin: 0; padding: 0; height: 32px;">
-                    <div class="col-sm-4" id="data_extract_page_control" style="margin: 0; padding: 4px 10px 0px 10px;">
+                  <!--
+                  <div class="row" id="search_response_control_header" style="margin: 0; padding: 0; height: 32px;">
+                    <div class="col-sm-4" id="search_response_page_control" style="margin: 0; padding: 4px 10px 0px 10px;">
                     </div>
                   </div>
-                  <div style="margin: 0; padding: 0px 15px 0px 0px; width: 100%; height: 536px; overflow-y: scroll;">
+                  -->
+                  <div style="margin: 0; padding: 0px 15px 0px 0px; width: 100%; height: 568px; overflow-y: scroll;">
                     <table id="data_extract_table" class="info-table"
                            style="display: table; table-layout: fixed; width: 100%; font-size: 12px;"></table>
                   </div>
@@ -1292,6 +1305,7 @@
     <script src="js/newman_datetime_range.js"></script>
     <script src="js/app_nav_history.js"></script>
     <script src="js/app_status_indicator.js"></script>
+    <script src="js/app_pagination_control.js"></script>
     <script src="js/newman-data-validator.js"></script>
     <script src="js/newman_search_parameter.js"></script>
     <script src="js/newman-aggregate-filter.js"></script>
