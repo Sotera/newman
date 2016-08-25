@@ -137,10 +137,15 @@ def list_cases():
     contents_cases = os.listdir(path)
     cases = {}
     for case in contents_cases:
-        if os.path.isdir(path+"/"+case):
-            contents_datasets = os.listdir(path+"/"+case)
-            datasets = [ds for ds in contents_datasets if os.path.isdir(path+"/"+case+"/"+ds)]
-            cases[case]=datasets
+        contents_types = os.listdir(path+"/"+case)
+        for type in contents_types:
+            type_dir = path+"/"+case+"/"+type
+            if type in ["emls", "mbox", "pst"] and os.path.isdir(type_dir):
+                contents_datasets = os.listdir(type_dir)
+                datasets = [ds for ds in contents_datasets if os.path.isdir(type_dir+"/"+ds)]
+                if not type in cases:
+                    cases[case] = {}
+                cases[case][type]=datasets
 
     tangelo.content_type("application/json")
     return {"cases" : cases}
