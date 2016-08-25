@@ -36,7 +36,7 @@ elif [ "$TYPE" == "mbox" ]; then
     ./bin/mbox_all.sh $INGEST_ID $CASE_ID $ALTERNATE_ID $LABEL $FORCE_LANGUAGE
 elif [ "$TYPE" == "eml" ]; then
     echo "ingest eml"
-    ./bin/emls_all.sh $INGEST_ID $CASE_ID $ALTERNATE_ID $LABEL $FORCE_LANGUAGE
+    ./bin/eml_all.sh $INGEST_ID $CASE_ID $ALTERNATE_ID $LABEL $FORCE_LANGUAGE
 else
     echo "UNKNOWN type encountered ${TYPE} -- Nothing to do"
 fi
