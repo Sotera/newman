@@ -30,7 +30,7 @@ var newman_email_attach = (function () {
     }
 
     var email_attach_list = _.mapcat(response_attachment_list, function(response){
-      var o = _.object(["email_id", "attach_id", "datetime", "from", "tos", "ccs", "bccs", "subject", "attach", "bodysize"], response);
+      var o = _.object(["email_id", "attach_id", "datetime", "from", "tos", "ccs", "bccs", "product_id", "subject", "attach", "bodysize"], response);
       var copy = _.omit(o, "attach");
       var attachments = _.map(o.attach.split(';'), function(attach) {
         return _.extend(_.clone(copy), {'attach': attach });
@@ -48,7 +48,7 @@ var newman_email_attach = (function () {
     var lastSort = "";
     var thead = d3.select("#attach-table").select("thead").append("tr").selectAll("tr")
       //.data(['Date', 'Subject', 'Attachments', 'Type','Email'])
-      .data(['Date', 'Subject', 'Attachments', 'Type'])
+      .data(['Date', 'ProductID', 'Subject', 'Attachments', 'Type'])
       .enter()
       .append("th")
       .text( function(d) {
@@ -67,7 +67,7 @@ var newman_email_attach = (function () {
             var exta = extfn(a), extb = extfn(b);
             return exta.localeCompare(extb) * direction;
           }
-          var fields = ["datetime", "subject", "attach", "datetime", "datetime"];
+          var fields = ["datetime", "product_id", "subject", "attach", "datetime", "datetime"];
           return a[fields[i]].localeCompare(b[fields[i]]) * direction;
         });
       });
@@ -80,7 +80,7 @@ var newman_email_attach = (function () {
     tr.selectAll("td")
       .data(function(d) {
         //return [d.datetime, d.subject, [d.attach_id, d.attach], [d.attach_id, d.attach], d.email_id]
-        return [[d.datetime, d.email_id], [d.subject, d.email_id], [d.attach_id, d.attach, d.email_id], [d.attach_id, d.attach, d.email_id]]
+        return [[d.datetime, d.email_id], [d.product_id, d.email_id], [d.subject, d.email_id], [d.attach_id, d.attach, d.email_id], [d.attach_id, d.attach, d.email_id]]
       })
       .enter()
       .append("td")
@@ -94,12 +94,12 @@ var newman_email_attach = (function () {
       })
       .html(function(d, i){
 
-        if (i == 0 || i == 1) {
+        if (i == 0 || i == 1 || i == 2) {
           var el = $('<div>').append(d[0]);
           return el.html();
         }
 
-        if (i == 2){ // attachment link
+        if (i == 3){ // attachment link
           //console.log( 'attachment under : ' + email_addr + '\n' + JSON.stringify(d, null, 2) );
           var attach_url = 'email/attachment/' + encodeURIComponent(d[0]);
           attach_url = newman_data_source.appendDataSource( attach_url );
@@ -108,7 +108,7 @@ var newman_email_attach = (function () {
           return el.html();
         }
 
-        if (i == 3){
+        if (i == 4){
           var ext = (function(){
             var i = d[1].toLowerCase().lastIndexOf(".");
             var l = d[1].length;

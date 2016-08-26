@@ -167,6 +167,11 @@ def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='
     recipient_addrs = email_addrs if not recipient_addrs else recipient_addrs
 
     query_email_addr =  {
+        "filter": {
+            "exists": {
+                "field": "alt_ref_id"
+            }
+        },
         "query" : {
             "bool":{
                 "must":[
@@ -191,7 +196,10 @@ def _build_email_query(email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='
     }
 
     if attachments_only:
-        query_email_addr ["filter"] = {"exists":{"field":"attachments"}}
+        # query_email_addr["filter"] = {"exists": {"field": "attachments"}}
+        query_email_addr["filter"] = {
+            "and": [{"exists": {"field": "attachments"}}, {"exists": {"field": "alt_ref_id"}}]
+        }
 
     if sort_mode == 'default' and not qs:
         query_email_addr["sort"] = { "datetime": { "order": sort_order }}

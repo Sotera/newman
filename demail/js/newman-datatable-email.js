@@ -12,8 +12,8 @@ var newman_datatable_email = (function () {
   var _current_email_doc_datetime = null;
 
   var current_export = null;
-  var data_column_key_index = 7;
-  var data_column_export_index = 6;
+  var data_column_key_index = 8;
+  var data_column_export_index = 7;
 
   var _starred_html = '<i class="fa fa-star" style="font-size: smaller; color: #4888f3"></i>';
   var _non_starred_html = '';
@@ -274,7 +274,7 @@ var newman_datatable_email = (function () {
 
       //var date_text = row.datetime.substring(0, 10);
       var date_text = row.datetime;
-      return [date_text, row.from, recipient_count, row.bodysize, attach_count, row.subject, exportable_icon, row.num];
+      return [date_text, row.from, recipient_count, row.bodysize, attach_count, row.product_id, row.subject, exportable_icon, row.num];
 
     });
 
@@ -309,7 +309,8 @@ var newman_datatable_email = (function () {
             title: "<i class=\"fa fa-paperclip\" rel=\"tooltip\" data-placement=\"bottom\" title=\"Attachment(s)\"></i>",
             "width": "5%"
           },
-          {title: "Subject", "width": "34%"},
+          {title: "ProductID", "width": "10%"},
+          {title: "Subject", "width": "24%"},
           {
             title: "<i class=\"fa fa-star-o\" rel=\"tooltip\" data-placement=\"bottom\" title=\"Exportable(s)\"></i>",
             "width": "4%"
