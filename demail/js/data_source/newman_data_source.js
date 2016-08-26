@@ -156,6 +156,8 @@ var newman_data_source = (function () {
         }
       }
 
+      app_email_ingest.requestIngestStatus();
+
       /*
        * !!! Important !!!
        * Must stop event propagation beyond this point, or else

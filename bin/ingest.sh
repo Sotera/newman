@@ -26,7 +26,7 @@ INGEST_DIR=${EXTRACTOR_HOME}/pst-extract/$TYPE
 
 mkdir $INGEST_DIR
 
-cp -r $PARENT_DIR/${CASE_ID}/${LABEL} $INGEST_DIR/
+cp -r $PARENT_DIR/${CASE_ID}/$TYPE/${LABEL} $INGEST_DIR/
 
 if [ "$TYPE" == "pst" ]; then
     echo "ingest pst"
@@ -34,8 +34,8 @@ if [ "$TYPE" == "pst" ]; then
 elif [ "$TYPE" == "mbox" ]; then
     echo "ingest mbox"
     ./bin/mbox_all.sh $INGEST_ID $CASE_ID $ALTERNATE_ID $LABEL $FORCE_LANGUAGE
-elif [ "$TYPE" == "eml" ]; then
-    echo "ingest eml"
+elif [ "$TYPE" == "emls" ]; then
+    echo "ingest emls"
     ./bin/eml_all.sh $INGEST_ID $CASE_ID $ALTERNATE_ID $LABEL $FORCE_LANGUAGE
 else
     echo "UNKNOWN type encountered ${TYPE} -- Nothing to do"
