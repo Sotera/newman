@@ -144,6 +144,13 @@ var newman_data_source = (function () {
 
   function init() {
 
+    if (_data_source_list) {
+      _data_source_list.length = 0;
+    }
+
+    var new_data_ingest = data_ingest( _data_ingest_id, _data_ingest_label );
+    _data_source_list.push( new_data_ingest );
+
     $('#data_source_list_dropdown').on('shown.bs.dropdown', function (event) {
       var attr_id = $(this).attr('id');
       var attr_value = $(this).attr('value');
@@ -203,13 +210,6 @@ var newman_data_source = (function () {
       event.stopImmediatePropagation();
       event.stopPropagation();
     });
-
-    if (_data_source_list) {
-      _data_source_list.length = 0;
-    }
-
-    var new_data_ingest = data_ingest( _data_ingest_id, _data_ingest_label );
-    _data_source_list.push( new_data_ingest );
 
     _is_initialized = true;
   }
@@ -737,6 +737,9 @@ var newman_data_source = (function () {
     }
 
     if (_all_dataset_response) {
+      if (!isInitialized()) {
+        init();
+      }
 
       //hack to force-select all available datasets for now
       _default_data_source_max_selected = _all_dataset_response.data_sets.length;
@@ -789,6 +792,7 @@ var newman_data_source = (function () {
       requestAllSelected();
 
     }
+    // end-of if(_all_dataset_response)
 
   }
 
