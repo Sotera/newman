@@ -26,10 +26,16 @@ ingest_parent_dir = "/vagrant/newman-ingester/"
 _INGESTER_LOCK=threading.Lock()
 _INGESTER_CONDITION=threading.Condition(_INGESTER_LOCK)
 
+INGESTER_AVAILABLE=0
+INGESTER_BUSY=1
+
 # TODO need to add an ingest id for monitoring specific ingests
 def ingest_status(*args, **kwargs):
     tangelo.content_type("application/json")
-    return {"status" : "Currently ingesting." if _INGESTER_LOCK.locked() else "Ingester available."}
+    if not _INGESTER_LOCK.locked():
+        return {"status_code" : INGESTER_AVAILABLE, "status_message" : "Ingester available."}
+    return {"status_code" : INGESTER_BUSY, "status_message" : "Currently ingesting, please see logs for detailing information."}
+
 
 def fmtNow():
     return datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')
