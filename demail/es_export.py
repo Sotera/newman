@@ -1,11 +1,15 @@
 import inspect, os
 import base64
 import cStringIO
+import StringIO
 import tarfile
 import time
 import json
 import csv
 import datetime
+import sys, traceback
+import codecs
+
 
 import tangelo
 import cherrypy
@@ -194,16 +198,19 @@ def export_attachments(data_set_id, sender='', attachment_extension='jpg', date_
     tar.close()
 
 def prettyprint_email_as_text(email_json):
-    buffer = cStringIO.StringIO()
-    buffer.write("From: {0}\n".format(email_json["senders_line"][0]))
-    buffer.write("To: {0}\n".format(email_json["tos_line"][0]))
-    if email_json["ccs_line"]:
-        buffer.write("Cc: {0}\n".format(email_json["ccs_line"][0]))
-    buffer.write("Sent: {0}\n".format(email_json["datetime"]))
-    buffer.write("Subject: {0}\n".format(email_json["subject"]))
+    buffer = StringIO.StringIO()
+    wrapper = codecs.getwriter("utf8")(buffer)
 
-    buffer.write(email_json["body"])
-    return buffer.getvalue()
+    wrapper.write(u"From: {0}\n".format(email_json["senders_line"][0]))
+    wrapper.write(u"To: {0}\n".format(email_json["tos_line"][0]))
+    if email_json[u"ccs_line"]:
+        wrapper.write(u"Cc: {0}\n".format(email_json["ccs_line"][0]))
+    wrapper.write(u"Sent: {0}\n".format(email_json["datetime"]))
+
+    wrapper.write(u"Subject: {0}\n".format(email_json["subject"]))
+
+    wrapper.write(u"{}".format(email_json["body"]))
+    return wrapper.getvalue()
 
 def prettyprint_email_as_html_template(email_json, topics):
 
@@ -212,61 +219,47 @@ def prettyprint_email_as_html_template(email_json, topics):
 
     with open(mypath+'/template.html', 'r') as template_html:
         soup = BeautifulSoup(template_html.read())
-        soup.find(text="##ID1##").replace_with(email_json["id"])
-        soup.find(text="##ID2##").replace_with(email_json["id"])
-        soup.find(text="##ID3##").replace_with(email_json["id"])
+        soup.find(text=u"##ID1##").replace_with(u"{}".format(email_json["id"]))
+        soup.find(text=u"##ID2##").replace_with(u"{}".format(email_json["id"]))
+        soup.find(text=u"##ID3##").replace_with(u"{}".format(email_json["id"]))
 
-        soup.find(text="##LABEL##").replace_with(email_json["label"])
-        soup.find(text="##INGEST_ID##").replace_with(email_json["ingest_id"])
-        soup.find(text="##CASE_ID##").replace_with(email_json["case_id"])
-        soup.find(text="##ALT_REF_ID##").replace_with(email_json["alt_ref_id"])
+        soup.find(text=u"##LABEL##").replace_with(u"{}".format(email_json["label"]))
+        soup.find(text=u"##INGEST_ID##").replace_with(u"{}".format(email_json["ingest_id"]))
+        soup.find(text=u"##CASE_ID##").replace_with(u"{}".format(email_json["case_id"]))
+        soup.find(text=u"##ALT_REF_ID##").replace_with(u"{}".format(email_json["alt_ref_id"]))
 
-        soup.find(text="##FROM##").replace_with(email_json["senders_line"][0])
+        soup.find(text=u"##FROM##").replace_with(u"{}".format(email_json["senders_line"][0]))
         if email_json["ccs_line"]:
-            soup.find(text="##TO##").replace_with(email_json["tos_line"][0])
+            soup.find(text=u"##TO##").replace_with(u"{}".format(email_json["tos_line"][0]))
         else:
-            soup.find(text="##TO##").replace_with('')
+            soup.find(text=u"##TO##").replace_with(u'')
         if email_json["ccs_line"]:
-            soup.find(text="##CC##").replace_with(email_json["ccs_line"][0])
+            soup.find(text=u"##CC##").replace_with(u"{}".format(email_json["ccs_line"][0]))
         else:
-            soup.find(text="##CC##").replace_with('')
+            soup.find(text=u"##CC##").replace_with(u'')
 
-        soup.find(text="##DATE##").replace_with(email_json["datetime"])
-        soup.find(text="##SUBJECT##").replace_with(email_json["subject"])
+        soup.find(text=u"##DATE##").replace_with(email_json["datetime"])
+
+        t = soup.find(text=u"##SUBJECT##")
+        t.replace_with(u"{}".format(email_json["subject"]))
 
 
-
-        attachments = soup.find(id="##ATTACHMENTS##")
+        attachments = soup.find(id=u"##ATTACHMENTS##")
         for attch in email_json["attachments"]:
             href = soup.new_tag('a')
-            href['href'] = "./"+attch["filename"]
-            href.string = attch["filename"]
+            href['href'] = u"./"+attch["filename"]
+            href.string = u"{}".format(attch["filename"])
             attachments.append(href)
-            attachments.append(',')
-
-# <span class="mitie mitie-organization" mitie-id="0d41f087333c639f72dbbd431d922810_entity_6" mitie-type="organization" mitie-value="CSOP">CSOP</span>
-        # Enitity Highlighting
-        # raw_body = email_json["body"]
-        # org = 'Edison chief executive'
-        # markup = '<span class="mitie mitie-organization" mitie-id="0d41f087333c639f72dbbd431d922810_entity_6" mitie-type="organization" mitie-value="'+org+'">'+org+'</span>'
-        # raw_body = raw_body.replace(org, markup)
-
-        # pre = soup.new_tag('pre')
-        # code = soup.new_tag('code')
-        #
-        # pre.append(code)
-        # code.append(email_json["body"])
-        # # pre.find(text=org).replace_with(markup)
-        # soup.find(text="##BODY##").replace_with(pre)
+            attachments.append(u',')
 
         # Topics
-        table = soup.find(id="##TOPICS##")
+        table = soup.find(id=u"##TOPICS##")
         for topic in topics["categories"]:
             label = soup.new_tag('td')
             label.string = topic[1]
             score = soup.new_tag('td')
 
-            score.string = "0.0" if not email_json["topic_scores"] else str(email_json["topic_scores"]["idx_"+str(topic[0])])
+            score.string = u"0.0" if not email_json["topic_scores"] else u"{}".format(email_json["topic_scores"]["idx_"+str(topic[0])])
             tr = soup.new_tag('tr')
             tr.append(label)
             tr.append(score)
@@ -275,7 +268,7 @@ def prettyprint_email_as_html_template(email_json, topics):
         # Escape &, <, >
         # Entity highlighting applied on text rather than in template
         # TODO this is a bit of a hack
-        raw_body = email_json.get("body",'').replace('&','&amp;').replace('<','&lt;').replace('<','&gt;')
+        raw_body = email_json.get("body",'').replace(u'&',u'&amp;').replace(u'<',u'&lt;').replace(u'<',u'&gt;')
 
         for org in email_json["entities"]["body_entities"]["entity_organization"]:
             # markup = '<span class="mitie mitie-organization" id="TODO_id" mitie-type="organization" mitie-value="'+org+'">'+org+'</span>'
@@ -291,57 +284,18 @@ def prettyprint_email_as_html_template(email_json, topics):
             markup = '<em style="background-color: #c0c0c0;">'+misc+'</em>'
             raw_body = raw_body.replace(misc, markup)
 
-        return  soup.prettify().replace("##BODY##", raw_body)
-
-def prettyprint_email_as_html(email_json):
-
-    soup = BeautifulSoup()
-    html = soup.new_tag('html')
-    head = soup.new_tag('head')
-    title = soup.new_tag('title')
-    html.append(head)
-    head.append(title)
-    title.append(email_json["id"])
-
-    body = soup.new_tag('body')
-    html.append(body)
-
-    body = soup.new_tag('body')
-    soup.insert(0, body)
-
-    body.append("ID: {0}".format(email_json["id"]))
-    body.append("From: {0}".format(email_json["senders_line"][0]))
-    body.append(soup.new_tag('br'))
-
-    body.append("From: {0}".format(email_json["senders_line"][0]))
-    body.append(soup.new_tag('br'))
-    body.append("To: {0}".format(email_json["tos_line"][0]))
-    body.append(soup.new_tag('br'))
-    if email_json["ccs_line"]:
-        body.append("Cc: {0}".format(email_json["ccs_line"][0]))
-        body.append(soup.new_tag('br'))
-
-    body.append("Sent: {0}".format(email_json["datetime"]))
-    body.append(soup.new_tag('br'))
-
-    body.append("Subject: {0}".format(email_json["subject"]))
-    body.append(soup.new_tag('br'))
-
-    pre = soup.new_tag('pre')
-    pre.append(email_json["body"])
-    body.append(pre)
-
-    return soup.prettify()
-
+        return  soup.prettify().replace(u"##BODY##", raw_body)
 
 # Build a tar.gz file in memory with all emails and attachment binary and export
-def export_emails_archive(data_set_id, email_ids=[]):
-    cherrypy.log("email.get_attachments_sender(index=%s, attachment_id=%s)" % (data_set_id, email_ids))
+def export_emails_archive(data_set_id, email_id_ingest_id__tupples=[]):
+    cherrypy.log("email.get_attachments_sender(index=%s, attachment_id=%s)" % (data_set_id, email_id_ingest_id__tupples))
     if not data_set_id:
         return tangelo.HTTPStatusCode(400, "invalid service call - missing index")
 
     # TODO can implement with multiple doc_types and combine attachments in
-    emails = es().mget(index=data_set_id, doc_type="emails", body={"docs":[{"_id":id} for id in email_ids]})
+    body={"docs":[{"_index" : ingest_id, "_type" : "emails","_id" : email_id} for email_id,ingest_id in email_id_ingest_id__tupples]}
+    cherrypy.log("getting email for:  {}".format(body))
+    emails = es().mget(body=body)
     topics = get_categories(data_set_id)
 
     filename= "newman-v{}-export-{}.tar.gz".format(_getVersion(), datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S'))
@@ -353,7 +307,6 @@ def export_emails_archive(data_set_id, email_ids=[]):
 
     # Add each email to the tar
     for email_source in emails["docs"]:
-
         email = email_source["_source"]
 
         tarinfo_parent= tarfile.TarInfo(name = email["id"])
@@ -362,38 +315,53 @@ def export_emails_archive(data_set_id, email_ids=[]):
         tarinfo_parent.mtime = time.time()
         tar.addfile(tarinfo_parent)
 
-        # Add raw document
+        # Add json raw document
         tarinfo = tarfile.TarInfo(email["id"]+"/"+email["id"]+".json")
-        data_string = json.dumps(email)
-        fobj = cStringIO.StringIO(data_string)
 
-        tarinfo.size = len(data_string)
-        tarinfo.mode = 0644
-        tarinfo.mtime = time.time()
-        tar.addfile(tarinfo, fobj)
+        try:
+            data_string = json.dumps(email)
+            fobj = cStringIO.StringIO(data_string)
+
+            tarinfo.size = len(data_string)
+            tarinfo.mode = 0644
+            tarinfo.mtime = time.time()
+            tar.addfile(tarinfo, fobj)
+        except UnicodeEncodeError as ue:
+            tangelo.log(u"FAILED:  unicode error generating [JSON] export while parsing doc {}".format(email["id"]))
+            tangelo.log(traceback.format_exc())
 
         # Add txt document
         tarinfo = tarfile.TarInfo(email["id"]+"/"+email["id"]+".txt")
+        try:
+            data_string = prettyprint_email_as_text(email)
+            fobj = StringIO.StringIO(data_string)
 
-        data_string = prettyprint_email_as_text(email)
-        fobj = cStringIO.StringIO(data_string)
-
-        tarinfo.size = len(data_string)
-        tarinfo.mode = 0644
-        tarinfo.mtime = time.time()
-        tar.addfile(tarinfo, fobj)
+            tarinfo.size = len(data_string)
+            tarinfo.mode = 0644
+            tarinfo.mtime = time.time()
+            tar.addfile(tarinfo, fobj)
+        except UnicodeEncodeError as ue:
+            tangelo.log(u"FAILED:  unicode error generating [TXT] export while parsing doc {}. {}".format(email["id"], ue))
+            tangelo.log(traceback.format_exc())
 
 
         # Add html document
         tarinfo = tarfile.TarInfo(email["id"]+"/"+email["id"]+".html")
+        try:
+            buffer = StringIO.StringIO()
+            wrapper = codecs.getwriter("utf8")(buffer)
+            wrapper.write(prettyprint_email_as_html_template(email, topics))
 
-        data_string = prettyprint_email_as_html_template(email, topics)
-        fobj = cStringIO.StringIO(data_string)
+            data_string = wrapper.getvalue()
+            fobj = StringIO.StringIO(data_string)
 
-        tarinfo.size = len(data_string)
-        tarinfo.mode = 0644
-        tarinfo.mtime = time.time()
-        tar.addfile(tarinfo, fobj)
+            tarinfo.size = len(data_string)
+            tarinfo.mode = 0644
+            tarinfo.mtime = time.time()
+            tar.addfile(tarinfo, fobj)
+        except UnicodeEncodeError as ue:
+            tangelo.log(u"FAILED:  unicode error generating [HTML] export while parsing doc {}".format(email["id"]))
+            tangelo.log(traceback.format_exc())
 
         # Get the attachments
         if email["attachments"]:
@@ -407,7 +375,13 @@ def export_emails_archive(data_set_id, email_ids=[]):
                 tarinfo_attch.size = len(attch_data)
                 tarinfo_attch.mode = 0644
                 tarinfo_attch.mtime = time.time()
-                tar.addfile(tarinfo_attch, cStringIO.StringIO(attch_data))
+                try:
+                    tar.addfile(tarinfo_attch, cStringIO.StringIO(attch_data))
+                except UnicodeEncodeError as ue:
+                    tangelo.log(u"FAILED:  unicode error generating [attachment binary] export while parsing doc {}".format(email["id"]))
+                    tangelo.log(traceback.format_exc())
+
+
     tar.close()
 
     return string_buffer.getvalue()

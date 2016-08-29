@@ -257,8 +257,8 @@ def exportStarred(*args, **kwargs):
     tangelo.log("email.exportStarred(query: %s)" % (query))
 
     results = _query_emails(data_set_id, size, query)
-    email_ids = [hit["email_id"] for hit in results["hits"]]
-    return export_emails_archive(data_set_id, email_ids)
+    email_id_ingest_id__tupples = [(hit["email_id"], hit["original_ingest_id"]) for hit in results["hits"]]
+    return export_emails_archive(data_set_id, email_id_ingest_id__tupples)
 
 #GET /attachment_content?data_set_id=<dsid>&parent_guid=<email id>&attachment_guid=<attachment id>
 # get the content of an attachment by the email and attachment ids

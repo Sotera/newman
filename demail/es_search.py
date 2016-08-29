@@ -287,7 +287,7 @@ def es_get_conversation(data_set_id, sender, recipients, start_datetime, end_dat
 
 # Get all rows for a community, sorted by time asc
 def es_get_all_email_by_community(data_set_id, community, email_address_list, qs, start_datetime, end_datetime, encrypted, size):
-    tangelo.log("es_search.es_get_all_email_by_community(community=%s, email_address_list=%s)" % (str(community), str(email_addrs)))
+    tangelo.log("es_search.es_get_all_email_by_community(community=%s, email_address_list=%s)" % (str(community), str(email_address_list)))
 
     query = _build_email_query(email_addrs=email_address_list, qs='', date_bounds=(start_datetime, end_datetime), community=[community], encrypted=encrypted)
     tangelo.log("es_search.es_get_all_email_by_community(query: %s)" % (query))

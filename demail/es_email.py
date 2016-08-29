@@ -447,6 +447,22 @@ def _get_attachment_content_by_id(data_set_id, doc_id, attach_id):
                 return {"content": attachment.get("content","")}
     return {"content": ''}
 
+def _get_attachment_content_by_id(data_set_id, doc_id, attach_id):
+
+    body = email_attachment_guid(doc_id, attach_id)
+    tangelo.log("get_attachment_content_by_id.Query %s"%body)
+
+    attachments_resp = es().search(index=data_set_id, doc_type="emails", body=body)
+
+    if len(attachments_resp["hits"]["hits"]) > 0:
+        doc = attachments_resp["hits"]["hits"][0]
+        _source = doc["_source"]
+        for attachment in _source["attachments"]:
+            if attachment["guid"] == attach_id:
+                return {"content": attachment.get("content","")}
+    return {"content": ''}
+
+
 def dump(bytes, name):
     text_file = open("/tmp/"+name, "wb")
     text_file.write(bytes)

@@ -42,7 +42,8 @@ def getDefaultDataSetID():
     if default == '.newman-auto':
         auto_indexes = [index for index in index_list() if index.startswith(index_creator_prefix()) ]
         if not auto_indexes:
-            raise IndexError("Default index was not found.")
+            tangelo.log("Default index was not found.")
+            return []
         return auto_indexes[0]
 
     return default
