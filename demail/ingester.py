@@ -137,15 +137,16 @@ def list_cases():
     contents_cases = os.listdir(path)
     cases = {}
     for case in contents_cases:
-        contents_types = os.listdir(path+"/"+case)
-        for type in contents_types:
+        if not os.path.isdir(path+"/"+case):
+            continue
+        case_dir = os.listdir(path+"/"+case)
+        if not case in cases:
+            cases[case] = {}
+        for type in case_dir:
             type_dir = path+"/"+case+"/"+type
             if type in ["emls", "mbox", "pst"] and os.path.isdir(type_dir):
                 contents_datasets = os.listdir(type_dir)
                 datasets = [ds for ds in contents_datasets if os.path.isdir(type_dir+"/"+ds)]
-                
-                if not case in cases:
-                    cases[case] = {}
                 if not type in cases[case]:
                     cases[case][type] = {}
                 cases[case][type]=datasets
