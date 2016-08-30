@@ -9,26 +9,49 @@
 var app_email_ingest = (function () {
   var debug_enabled = true;
 
-  var status_icon_id = "#data_ingest_modal_status_icon";
-  var status_text_id = "#data_ingest_modal_status_text";
-  var ingest_confirm_id = "#ingest_confirm";
+  var data_ingest_modal_ui_id = "data_ingest_modal";
+  var status_icon_ui_id = "data_ingest_modal_status_icon";
+  var status_text_ui_id = "data_ingest_modal_status_text";
+  var ingest_confirm_ui_id = "ingest_confirm";
+  var ingest_case_list_ui_id = "ingest_case_id_list";
+  var ingest_case_label_ui_id = "ingest_case_id_text"
+  var ingest_dataset_list_ui_id = "ingest_dataset_label_list" ;
+  var ingest_dataset_label_ui_id = "ingest_dataset_label_text";
 
-  var _case_id_list = [];
-  var _dataset_label, _ingest_id;
+  var _case_id_list = [], _dataset_label_list = [];
+  var _dataset_ingest_list = [];
   var _ingest_parameter_map = {};
+  var _ingest_id;
 
-  var _is_ingest_pipeline_available = false;
+  var _is_ingest_pipeline_available = true;
   var _was_ingest_pipeline_available = _is_ingest_pipeline_available;
+  var periodic_status_process_id;
 
   function init() {
 
     initIngestParameters();
 
-    $('#ingest_lang_list li').on('click', function(){
+    $('#'+ingest_case_list_ui_id).on('click', 'li' , function(e) {
+      e.preventDefault();
+
+      var value_selected = $(this).text();
+      console.log('ingest_case_id_text selected : ' + value_selected);
+      $('#'+ingest_case_label_ui_id).val( value_selected );
+    });
+
+    $('#'+ingest_dataset_list_ui_id).on('click', 'li', function(e) {
+      e.preventDefault();
+
+      var value_selected = $(this).text();
+      console.log('ingest_dataset_label_text selected : ' + value_selected);
+      $('#'+ingest_dataset_label_ui_id).val( value_selected );
+    });
+
+    $('#ingest_lang_list li').on('click', function() {
       $('#ingest_lang_selected').val($(this).text());
     });
 
-    $(ingest_confirm_id).off().click(function () {
+    $('#'+ingest_confirm_ui_id).off().click(function () {
       if (debug_enabled) {
         console.log('ingest_confirm clicked');
       }
@@ -38,12 +61,12 @@ var app_email_ingest = (function () {
         setIngestParameterIngestID( ingest_id_text );
       }
 
-      var dataset_file_name = $("#dataset_file_name").val();
+      var dataset_file_name = $("#ingest_dataset_file_name").val();
       if (dataset_file_name) {
         setIngestParameterDatasetFile( dataset_file_name );
       }
 
-      var dataset_label_text = $("#dataset_label_text").val();
+      var dataset_label_text = $("#"+ingest_dataset_label_ui_id).val();
       if (dataset_label_text) {
         setIngestParameterDatasetLabel( dataset_label_text );
 
@@ -66,7 +89,7 @@ var app_email_ingest = (function () {
         setIngestParameterDatasetType( dataset_type );
       }
 
-      var case_id_text = $("#case_id_text").val();
+      var case_id_text = $("#"+ingest_case_label_ui_id).val();
       if (case_id_text) {
         setIngestParameterCaseID( case_id_text );
       }
@@ -74,7 +97,7 @@ var app_email_ingest = (function () {
         setIngestParameterCaseID( 'n/a' );
       }
 
-      var alt_ref_id_text = $("#alt_ref_id_text").val();
+      var alt_ref_id_text = $("#ingest_alt_ref_id_text").val();
       if (alt_ref_id_text) {
         setIngestParameterAltRefID( alt_ref_id_text );
       }
@@ -111,19 +134,19 @@ var app_email_ingest = (function () {
 
   function initIngestModalStatus( status_text ) {
 
-    $(status_icon_id).removeClass('fa-spin fa-fw');
-    $(status_icon_id).addClass('fa fa-cog fa-lg');
+    $('#'+status_icon_ui_id).removeClass('fa-spin fa-fw');
+    $('#'+status_icon_ui_id).addClass('fa fa-cog fa-lg');
 
     if (status_text) {
-      $(status_text_id).html( status_text );
+      $('#'+status_text_ui_id).html( status_text );
     }
     else {
-      $(status_text_id).html('Available');
+      $('#'+status_text_ui_id).html('Available');
     }
 
     showIngestParameters();
 
-    $(ingest_confirm_id).prop('disabled', false);
+    $('#'+ingest_confirm_ui_id).prop('disabled', false);
 
   }
 
@@ -131,18 +154,18 @@ var app_email_ingest = (function () {
 
     if (is_busy === true) {
 
-      $(status_icon_id).addClass('fa fa-cog fa-lg fa-spin fa-fw');
+      $('#'+status_icon_ui_id).addClass('fa fa-cog fa-lg fa-spin fa-fw');
 
       if (status_text) {
-        $(status_text_id).html( status_text );
+        $('#'+status_text_ui_id).html( status_text );
       }
       else {
-        $(status_text_id).html('Processing ...');
+        $('#'+status_text_ui_id).html('Processing ...');
       }
 
       hideIngestParameters();
 
-      $(ingest_confirm_id).prop('disabled', true);
+      $('#'+ingest_confirm_ui_id).prop('disabled', true);
     }
     else {
       initIngestModalStatus();
@@ -159,17 +182,19 @@ var app_email_ingest = (function () {
 
   function initIngestParameters() {
 
-    requestIngestStatus();
 
-    $("#dataset_file_name").val( "" );
-    $("#dataset_label_text").val( "" );
-    $("#case_id_text").val( "" );
-    $("#alt_ref_id_text").val( "" );
+    $("#ingest_dataset_file_name").val( "" );
+    $("#ingest_alt_ref_id_text").val( "" );
 
-    requestAllIngestCase();
-    requestIngestID();
+    if (_is_ingest_pipeline_available) {
+      requestAllIngestCase();
+      requestIngestID();
 
-    setIngestModalStatusBusy( !(_is_ingest_pipeline_available) );
+      setIngestModalStatusBusy( false );
+    }
+    else {
+      setIngestModalStatusBusy( true );
+    }
 
   }
 
@@ -201,34 +226,72 @@ var app_email_ingest = (function () {
       }
 
       _case_id_list.length = 0;
+      _dataset_ingest_list.length = 0;
       _.each(response.cases, function(case_element, case_id) {
-        _.each(case_element, function (dataset_list, dataset_type) {
-          _.each(dataset_list, function (dataset_label, index) {
-            _case_id_list.push(
-              {"case_id": case_id, "dataset_label": dataset_label, "dataset_type": dataset_type}
-            );
+
+        if (!_.contains(_case_id_list, case_id)) {
+          _case_id_list.push(case_id);
+        }
+
+          _.each(case_element, function (dataset_list, dataset_type) {
+
+            if (dataset_list.length > 0) {
+              _.each(dataset_list, function (dataset_label, index) {
+
+                if (!_.contains(_dataset_label_list, dataset_label)) {
+                  _dataset_label_list.push(dataset_label);
+                }
+
+                _dataset_ingest_list.push(
+                  {"dataset_label": dataset_label, "dataset_type": dataset_type, "case_id" : case_id}
+                );
+              });
+            }
           });
-        });
+
       });
 
       //console.log('_case_id_list :\n' + JSON.stringify(_case_id_list, null, 2));
 
-      if (_case_id_list.length > 0) {
-        var _case = _case_id_list[0];
-        $("#case_id_text").val( _case.case_id );
-        $("#dataset_label_text").val( _case.dataset_label );
+      // clear all existing dynamic drop-down-list item
+      $('#'+ingest_case_list_ui_id + ' li').each(function () {
+        $(this).remove();
+      });
 
-        if (_case.dataset_type == 'mbox') {
+      $('#'+ingest_dataset_list_ui_id + ' li').each(function () {
+        $(this).remove();
+      });
+
+      if (_dataset_ingest_list.length > 0) {
+        var default_parameter = _dataset_ingest_list[0];
+
+        _.each(_case_id_list, function( element ) {
+          var case_id_html = $('<li style=\"line-height: 20px; text-align: left\"/>')
+          case_id_html.append( element );
+          $('#'+ingest_case_list_ui_id).append(case_id_html);
+        });
+
+        $("#"+ingest_case_label_ui_id).val( default_parameter.case_id );
+
+        _.each(_dataset_label_list, function( element ) {
+          var dataset_label_html = $('<li style=\"line-height: 20px; text-align: left\"/>')
+          dataset_label_html.append( element );
+          $('#'+ingest_dataset_list_ui_id).append(dataset_label_html);
+        });
+
+        $("#"+ingest_dataset_label_ui_id).val( default_parameter.dataset_label );
+
+        if (default_parameter.dataset_type == 'mbox') {
           $("#ingest_type_mbox").prop("checked", true);
           $("#ingest_type_pst").prop("checked", false);
           $("#ingest_type_eml").prop("checked", false);
         }
-        else if (_case.dataset_type == 'emls') {
+        else if (default_parameter.dataset_type == 'emls') {
           $("#ingest_type_mbox").prop("checked", false);
           $("#ingest_type_pst").prop("checked", false);
           $("#ingest_type_eml").prop("checked", true);
         }
-        else if (_case.dataset_type == 'pst') {
+        else if (default_parameter.dataset_type == 'pst') {
           $("#ingest_type_mbox").prop("checked", false);
           $("#ingest_type_pst").prop("checked", true);
           $("#ingest_type_eml").prop("checked", false);
@@ -277,38 +340,72 @@ var app_email_ingest = (function () {
         setIngestModalStatusBusy(true);
       }
 
-      //$("#data_ingest_modal").modal('hide');
+      requestIngestStatus();
+
+      //$("#"+data_ingest_modal_ui_id).modal('hide');
     }
   }
 
   function requestIngestStatus() {
-    app_ingest_status_request.requestService();
+    if (periodic_status_process_id) {
+      console.log('existing periodic process : ' + periodic_status_process_id);
+      return;
+    }
+
+    periodic_status_process_id = setInterval(
+      function() {
+        app_ingest_status_request.requestService();
+      },
+      2500
+    );
+
+    console.log('new periodic process : ' + periodic_status_process_id);
   }
 
   function onRequestIngestStatus( response ) {
     if( response ) {
-      var status_text = response.status;
-      if (status_text) {
-        status_text = status_text.toLowerCase();
 
-        _was_ingest_pipeline_available = _is_ingest_pipeline_available;
+      var status_text = response.status_message;
+      console.log('status_text : ' + status_text);
 
-        if (status_text.indexOf('available') > -1) {
-          _is_ingest_pipeline_available = true;
+      var status_code = response.status_code;
+      //status_code = parseInt(status_code);
 
-          if (!_was_ingest_pipeline_available) {
-            // new dataset ingested
+      _was_ingest_pipeline_available = _is_ingest_pipeline_available;
 
-
-            console.log('reloading all datasets...');
-
-            newman_data_source.requestDataSourceAll();
-          }
+      //console.log('status_code : ' + status_code);
+      if (status_code === 0) {
+        _is_ingest_pipeline_available = true;
+        if (debug_enabled) {
+          console.log('status_code : available (0)');
         }
-        else {
-          _is_ingest_pipeline_available = false;
+
+        if (periodic_status_process_id) {
+          console.log('clearing periodic process : ' + periodic_status_process_id);
+          clearInterval(periodic_status_process_id);
+          periodic_status_process_id = undefined;
+
+          // close ingest-popup if applicable
+          $("#"+data_ingest_modal_ui_id).modal('hide');
+
+          // new dataset ingested
+          console.log('reloading all datasets...');
+          newman_data_source.requestDataSourceAll();
         }
+
       }
+      else if (status_code === 1) {
+        _is_ingest_pipeline_available = false;
+        if (debug_enabled) {
+          console.log('status_code : busy (1)');
+        }
+
+      }
+      else {
+        _is_ingest_pipeline_available = true;
+        console.log('status_code : unknown');
+      }
+
     }
   }
 

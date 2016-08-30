@@ -93,7 +93,9 @@ var newman_data_source = (function () {
 
     return {
       "uid" : uid,
-      "label": label
+      "label": label,
+      "is_selected" : false,
+      "is_data_source" : false
     }
   }
 
@@ -101,7 +103,9 @@ var newman_data_source = (function () {
 
     return {
       "uid" : uid,
-      "label": label
+      "label": label,
+      "is_selected" : false,
+      "is_data_source" : false
     }
   }
 
@@ -133,7 +137,8 @@ var newman_data_source = (function () {
       "end_datetime_selected": end_datetime_selected,
       "case_id" : case_id,
       "alt_ref_id" : alt_ref_id,
-      "size" : size
+      "size" : size,
+      "is_data_source" : true
     }
   }
 
@@ -162,8 +167,6 @@ var newman_data_source = (function () {
           _prev_all_selected = getAllSelectedAsString();
         }
       }
-
-      app_email_ingest.requestIngestStatus();
 
       /*
        * !!! Important !!!
@@ -196,7 +199,7 @@ var newman_data_source = (function () {
             if (debug_enabled) {
               console.log("data_source_selected : changed!");
             }
-            requestAllSelected(true);
+            requestAllSelected( true );
           }
         }
       }
@@ -789,7 +792,7 @@ var newman_data_source = (function () {
       // initialize map tiles
       app_geo_map.initMapTileLayer();
 
-      requestAllSelected();
+      requestAllSelected( true );
 
     }
     // end-of if(_all_dataset_response)
@@ -836,8 +839,10 @@ var newman_data_source = (function () {
 
     if (_data_source_list && _data_source_list.length > 1) {
       _.each(_data_source_list, function (element) {
-        if (element.is_selected) {
-          selected_map[ element.uid ] = element;
+        if (element.is_data_source === true) {
+          if (element.is_selected === true) {
+            selected_map[element.uid] = element;
+          }
         }
       });
     }

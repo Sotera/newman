@@ -1633,7 +1633,7 @@ $(function () {
       }
       else if (element_ID.endsWith('dashboard_tab_ingest_status')) {
 
-        app_email_ingest.requestIngestStatus();
+        //app_email_ingest.requestIngestStatus();
       }
       else if (element_ID.endsWith('dashboard_tab_content_topics')) {
         newman_top_email_topic.revalidateUITopicEmail();

@@ -109,12 +109,12 @@
                   <span class="label label-primary" style="font-size: 80%; font-weight: normal;"> Dataset File </span>
                 </div>
                 <div class="col-xs-8" style="margin: 0; padding: 0 0 0 2px;" >
-                  <div id="dataset_file">
-                    <input id="dataset_file_name" class="input-medium" type="text" disabled="disabled" style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px; background: #F5F5F5;"/>
+                  <div id="ingest_dataset_file">
+                    <input id="ingest_dataset_file_name" class="input-medium" type="text" disabled="disabled" style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px; background: #F5F5F5;"/>
                   </div>
                 </div>
                 <div class="col-xs-1" style="margin: 0; padding: 0; text-align: left;" >
-                  <button id="dataset_file_select" class="btn btn-small outline"><i class="fa fa-list-ul"></i></button>
+                  <button id="ingest_dataset_file_select" class="btn btn-small outline"><i class="fa fa-list-ul"></i></button>
                 </div>
               </div>
 
@@ -123,9 +123,23 @@
                   <span class="label label-primary" style="font-size: 85%; font-weight: normal;"> Case ID </span>
                 </div>
                 <div class="col-xs-6 col-container" style="padding: 0 0 0 2px;" >
-                  <div id="case_id">
-                    <input id="case_id_text" class="input-medium" type="text" style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px;" />
+
+                  <div class="input-group" style="width: auto; height: auto; position:relative;" >
+                    <input type="text" class="input-medium" type="text" id="ingest_case_id_text" disabled="disabled"
+                           style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px 0px 0px 6px; background: #F5F5F5;" >
+                    <div class="input-group-btn">
+                      <button type="button" class="btn label-primary dropdown-toggle" data-toggle="dropdown"
+                              style="font-weight: normal; font-size: small; color: #FFF; margin: 0; padding: 1px 5px 1px 5px;">
+                        <span class="fa fa-caret-down"></span>
+                      </button>
+                      <ul class="dropdown-menu" style="min-width: 100px; width: auto; padding: 2px 5px 2px 5px; border-radius: 0px 6px 6px 0px;"
+                          id="ingest_case_id_list">
+                      </ul>
+                    </div>
+
                   </div>
+
+
                 </div>
               </div>
 
@@ -134,9 +148,22 @@
                   <span class="label label-primary" style="font-size: 85%; font-weight: normal;"> Dataset Name </span>
                 </div>
                 <div class="col-xs-6 col-container" style="padding: 0 0 0 2px;" >
-                  <div id="dataset_label">
-                    <input id="dataset_label_text" class="input-medium" type="text" style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px;" />
+
+                  <div class="input-group" style="width: auto; height: auto; position:relative;" >
+                    <input type="text" class="input-medium" type="text" id="ingest_dataset_label_text" disabled="disabled"
+                           style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px 0px 0px 6px; background: #F5F5F5;" >
+                    <div class="input-group-btn">
+                      <button type="button" class="btn label-primary dropdown-toggle" data-toggle="dropdown"
+                              style="font-weight: normal; font-size: small; color: #FFF; margin: 0; padding: 1px 5px 1px 5px;">
+                        <span class="fa fa-caret-down"></span>
+                      </button>
+                      <ul class="dropdown-menu" style="min-width: 120px; width: auto; padding: 2px 5px 2px 5px; border-radius: 0px 6px 6px 0px;"
+                          id="ingest_dataset_label_list">
+                      </ul>
+                    </div>
+
                   </div>
+
                 </div>
                 <div class="col-xs-5 col-container" >
                 </div>
@@ -171,13 +198,14 @@
                 </div>
                 <div class="col-xs-6" style="margin: 0; padding: 0 0 0 2px;" >
                   <div id="alt_ref_id">
-                    <input id="alt_ref_id_text" class="input-medium" type="text" style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px;" />
+                    <input id="ingest_alt_ref_id_text" class="input-medium" type="text" style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px;" />
                   </div>
                 </div>
 
                 <div class="col-xs-2 col-container" style="padding: 0px 0px 0px 10px; text-align: left;" >
                   <div class="input-group" style="width: auto; height: auto; position:relative;" >
-                    <input type="TextBox" id="ingest_lang_selected" class="form-control" style="margin: 0; padding: 0px 2px 0px 2px;" value="English">
+                    <input type="text" id="ingest_lang_selected" class="form-control" disabled="disabled" value="English"
+                           style="margin: 0; padding: 0px 2px 0px 2px; background: #F5F5F5;">
                     <div class="input-group-btn">
                       <button type="button" class="btn label-primary dropdown-toggle" data-toggle="dropdown"
                               style="font-weight: normal; font-size: small; color: #FFF; margin: 0; padding: 2px 5px 1px 5px;">
