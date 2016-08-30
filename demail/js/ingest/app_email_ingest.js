@@ -18,7 +18,7 @@ var app_email_ingest = (function () {
   var ingest_dataset_list_ui_id = "ingest_dataset_label_list" ;
   var ingest_dataset_label_ui_id = "ingest_dataset_label_text";
 
-  var _case_id_list = [], _dataset_label_list = [];
+  var _case_id_list = [];
   var _dataset_ingest_list = [];
   var _ingest_parameter_map = {};
   var _ingest_id;
@@ -37,6 +37,8 @@ var app_email_ingest = (function () {
       var value_selected = $(this).text();
       console.log('ingest_case_id_text selected : ' + value_selected);
       $('#'+ingest_case_label_ui_id).val( value_selected );
+
+      onSelectIngestCaseID( value_selected, _dataset_ingest_list );
     });
 
     $('#'+ingest_dataset_list_ui_id).on('click', 'li', function(e) {
@@ -45,6 +47,10 @@ var app_email_ingest = (function () {
       var value_selected = $(this).text();
       console.log('ingest_dataset_label_text selected : ' + value_selected);
       $('#'+ingest_dataset_label_ui_id).val( value_selected );
+
+      var case_id = $('#'+ingest_case_label_ui_id).val();
+
+      onSelectIngestDataset( case_id, value_selected, _dataset_ingest_list );
     });
 
     $('#ingest_lang_list li').on('click', function() {
@@ -56,23 +62,25 @@ var app_email_ingest = (function () {
         console.log('ingest_confirm clicked');
       }
 
-      var ingest_id_text = $("#ingest_id_text").val();
-      if (ingest_id_text) {
-        setIngestParameterIngestID( ingest_id_text );
-      }
-
       var dataset_file_name = $("#ingest_dataset_file_name").val();
       if (dataset_file_name) {
         setIngestParameterDatasetFile( dataset_file_name );
       }
 
+      var case_id_text = $("#"+ingest_case_label_ui_id).val();
+      if (case_id_text) {
+        setIngestParameterCaseID( case_id_text );
+      }
+      else {
+        setIngestParameterCaseID( 'new_case' );
+      }
+
       var dataset_label_text = $("#"+ingest_dataset_label_ui_id).val();
       if (dataset_label_text) {
         setIngestParameterDatasetLabel( dataset_label_text );
-
       }
       else {
-        setIngestParameterDatasetLabel( ingest_id_text )
+        setIngestParameterDatasetLabel( 'new_data_source' )
       }
 
       var dataset_type;
@@ -87,14 +95,6 @@ var app_email_ingest = (function () {
       }
       if (dataset_type) {
         setIngestParameterDatasetType( dataset_type );
-      }
-
-      var case_id_text = $("#"+ingest_case_label_ui_id).val();
-      if (case_id_text) {
-        setIngestParameterCaseID( case_id_text );
-      }
-      else {
-        setIngestParameterCaseID( 'n/a' );
       }
 
       var alt_ref_id_text = $("#ingest_alt_ref_id_text").val();
@@ -121,11 +121,16 @@ var app_email_ingest = (function () {
         setIngestParameterContentLanguage('en');
       }
 
+      var ingest_id_text = $("#ingest_id_text").val();
+      if (ingest_id_text) {
+        setIngestParameterIngestID( ingest_id_text );
+      }
 
       if (debug_enabled) {
         console.log('ingest_parameter_map\n' + JSON.stringify(_ingest_parameter_map, null, 2));
       }
 
+      //initiate ingest service call
       initIngestRequest();
 
     });
@@ -225,33 +230,35 @@ var app_email_ingest = (function () {
         console.log('app_email_ingest.onRequestCaseID(response)\n' + JSON.stringify(response, null, 2));
       }
 
-      _case_id_list.length = 0;
+
       _dataset_ingest_list.length = 0;
       _.each(response.cases, function(case_element, case_id) {
 
-        if (!_.contains(_case_id_list, case_id)) {
-          _case_id_list.push(case_id);
-        }
+        _.each(case_element, function (dataset_list, dataset_type) {
 
-          _.each(case_element, function (dataset_list, dataset_type) {
+          if (dataset_list.length > 0) {
+            _.each(dataset_list, function (dataset_label, index) {
 
-            if (dataset_list.length > 0) {
-              _.each(dataset_list, function (dataset_label, index) {
-
-                if (!_.contains(_dataset_label_list, dataset_label)) {
-                  _dataset_label_list.push(dataset_label);
-                }
-
-                _dataset_ingest_list.push(
-                  {"dataset_label": dataset_label, "dataset_type": dataset_type, "case_id" : case_id}
-                );
-              });
-            }
-          });
+              _dataset_ingest_list.push(
+                {"dataset_label": dataset_label, "dataset_type": dataset_type, "case_id" : case_id}
+              );
+            });
+          }
+        });
 
       });
 
+      // list case_ids with content
+      _case_id_list.length = 0;
+      _.each(_dataset_ingest_list, function( element ) {
+        var case_id = element.case_id;
+        if (!_.contains(_case_id_list, case_id)) {
+          _case_id_list.push(case_id);
+        }
+      });
+
       //console.log('_case_id_list :\n' + JSON.stringify(_case_id_list, null, 2));
+      //console.log('_dataset_ingest_list :\n' + JSON.stringify(_dataset_ingest_list, null, 2));
 
       // clear all existing dynamic drop-down-list item
       $('#'+ingest_case_list_ui_id + ' li').each(function () {
@@ -263,35 +270,84 @@ var app_email_ingest = (function () {
       });
 
       if (_dataset_ingest_list.length > 0) {
-        var default_parameter = _dataset_ingest_list[0];
 
+        var default_case_id;
         _.each(_case_id_list, function( element ) {
           var case_id_html = $('<li style=\"line-height: 20px; text-align: left\"/>')
           case_id_html.append( element );
           $('#'+ingest_case_list_ui_id).append(case_id_html);
+
+          if (!default_case_id) {
+            default_case_id = element;
+          }
         });
 
-        $("#"+ingest_case_label_ui_id).val( default_parameter.case_id );
+        $("#"+ingest_case_label_ui_id).val( default_case_id );
 
-        _.each(_dataset_label_list, function( element ) {
+        onSelectIngestCaseID( default_case_id, _dataset_ingest_list );
+
+      }
+    }
+  }
+
+  function onSelectIngestCaseID(case_id, dataset_ingest_list) {
+
+    if (case_id && dataset_ingest_list && dataset_ingest_list.length > 0) {
+
+      // clear all existing items
+      $('#'+ingest_dataset_list_ui_id + ' li').each(function () {
+        $(this).remove();
+      });
+
+      // populate items to match case_id
+      var default_parameter;
+      _.each(dataset_ingest_list, function( element ) {
+        if (element.case_id == case_id) {
           var dataset_label_html = $('<li style=\"line-height: 20px; text-align: left\"/>')
-          dataset_label_html.append( element );
-          $('#'+ingest_dataset_list_ui_id).append(dataset_label_html);
-        });
+          dataset_label_html.append( element.dataset_label );
+          $('#' + ingest_dataset_list_ui_id).append(dataset_label_html);
 
-        $("#"+ingest_dataset_label_ui_id).val( default_parameter.dataset_label );
+          if (!default_parameter) {
+            default_parameter = element;
+          }
+        }
+      });
 
-        if (default_parameter.dataset_type == 'mbox') {
+      var default_dataset = default_parameter.dataset_label;
+      $("#"+ingest_dataset_label_ui_id).val( default_dataset );
+
+      onSelectIngestDataset(case_id, default_dataset, dataset_ingest_list);
+
+    }
+
+  }
+
+  function onSelectIngestDataset(case_id, dataset_label, dataset_ingest_list) {
+
+    if (case_id && dataset_label && dataset_ingest_list && dataset_ingest_list.length > 0) {
+
+      var dataset_parameter;
+      _.each(dataset_ingest_list, function( element ) {
+        if (element.case_id == case_id && element.dataset_label == dataset_label) {
+          dataset_parameter = element;
+        }
+      });
+
+      if (dataset_parameter) {
+
+        $("#" + ingest_dataset_label_ui_id).val(dataset_parameter.dataset_label);
+
+        if (dataset_parameter.dataset_type == 'mbox') {
           $("#ingest_type_mbox").prop("checked", true);
           $("#ingest_type_pst").prop("checked", false);
           $("#ingest_type_eml").prop("checked", false);
         }
-        else if (default_parameter.dataset_type == 'emls') {
+        else if (dataset_parameter.dataset_type == 'emls') {
           $("#ingest_type_mbox").prop("checked", false);
           $("#ingest_type_pst").prop("checked", false);
           $("#ingest_type_eml").prop("checked", true);
         }
-        else if (default_parameter.dataset_type == 'pst') {
+        else if (dataset_parameter.dataset_type == 'pst') {
           $("#ingest_type_mbox").prop("checked", false);
           $("#ingest_type_pst").prop("checked", true);
           $("#ingest_type_eml").prop("checked", false);
@@ -302,7 +358,11 @@ var app_email_ingest = (function () {
           $("#ingest_type_eml").prop("checked", false);
         }
       }
+      else {
+        console.log('dataset_parameter not found! case_id : ' + case_id + ' dataset : ' + dataset_label);
+      }
     }
+
   }
 
   function initIngestRequest() {
