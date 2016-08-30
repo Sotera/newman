@@ -72,7 +72,7 @@ def extract(*args, **kwargs):
     # Add the prefix for the newman indexes
     ingest_id = index_creator_prefix() + ingest_id
 
-    logname = "{}_{}".format(type, fmtNow())
+    logname = "{}{}{}_{}".format(case_id,type,label, fmtNow())
     ingester_log = "{}/{}.ingester.log".format(work_dir, logname)
     # errfile = "{}/{}.err.log".format(work_dir, logname)
     service_status_log = "{}/{}.status.log".format(work_dir, logname)
