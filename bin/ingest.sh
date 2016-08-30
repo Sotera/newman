@@ -20,7 +20,7 @@ echo "Extractor home set to $EXTRACTOR_HOME"
 echo "email_address=$INGEST_ID parent_dir=$PARENT_DIR path=${CASE_ID}/${LABEL} type=$TYPE"
 
 cd $EXTRACTOR_HOME
-rm -rf $EXTRACTOR_HOME/pst-extract/*
+sudo rm -rf $EXTRACTOR_HOME/pst-extract/*
 
 INGEST_DIR=${EXTRACTOR_HOME}/pst-extract/$TYPE
 
