@@ -365,7 +365,8 @@ def export_emails_archive(data_set_id, email_id_ingest_id__tupples=[]):
 
         # Get the attachments
         if email["attachments"]:
-            attachments = es().mget(index=data_set_id, doc_type="attachments", body={"docs":[{"_id":attch["guid"]} for attch in email["attachments"]]})
+            body={"docs":[ {"_index":email["ingest_id"],"_type":"attachments", "_id":attch["guid"]} for attch in email["attachments"] ]}
+            attachments = es().mget(body)
             for attachment_source in attachments["docs"]:
                 attachment = attachment_source["_source"]
                 filename = attachment["filename"]
