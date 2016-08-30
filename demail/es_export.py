@@ -202,9 +202,9 @@ def prettyprint_email_as_text(email_json):
     wrapper = codecs.getwriter("utf8")(buffer)
 
     wrapper.write(u"From: {0}\n".format(email_json["senders_line"][0]))
-    wrapper.write(u"To: {0}\n".format(email_json["tos_line"][0]))
-    if email_json[u"ccs_line"]:
-        wrapper.write(u"Cc: {0}\n".format(email_json["ccs_line"][0]))
+
+    wrapper.write(u"To: {0}\n".format(email_json.get("tos_line",u"")))
+    wrapper.write(u"Cc: {0}\n".format(email_json.get("ccs_line",u"")))
     wrapper.write(u"Sent: {0}\n".format(email_json["datetime"]))
 
     wrapper.write(u"Subject: {0}\n".format(email_json["subject"]))
@@ -229,14 +229,8 @@ def prettyprint_email_as_html_template(email_json, topics):
         soup.find(text=u"##ALT_REF_ID##").replace_with(u"{}".format(email_json["alt_ref_id"]))
 
         soup.find(text=u"##FROM##").replace_with(u"{}".format(email_json["senders_line"][0]))
-        if email_json["ccs_line"]:
-            soup.find(text=u"##TO##").replace_with(u"{}".format(email_json["tos_line"][0]))
-        else:
-            soup.find(text=u"##TO##").replace_with(u'')
-        if email_json["ccs_line"]:
-            soup.find(text=u"##CC##").replace_with(u"{}".format(email_json["ccs_line"][0]))
-        else:
-            soup.find(text=u"##CC##").replace_with(u'')
+        soup.find(text=u"##TO##").replace_with(u"{}".format(email_json.get("tos_line",u"")))
+        soup.find(text=u"##CC##").replace_with(u"{}".format(email_json.get("ccs_line"u"")))
 
         soup.find(text=u"##DATE##").replace_with(email_json["datetime"])
 
