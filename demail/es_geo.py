@@ -14,8 +14,8 @@ def _map_geo_response(doc):
     #tangelo.log("_map_geo_response(doc)\n%s" % json.dumps(doc, sort_keys=False, indent=2))
     return {
         "id":doc.get("id"),
-        "from":doc.get("senders",[''])[0],
-        "tos":", ".join(doc.get("tos",[''])),
+        "from":"; ".join(doc.get("senders",[''])),
+        "tos":"; ".join(doc.get("tos",[''])),
         "subject":doc.get("subject"),
         "datetime":doc.get("datetime"),
         "originating_locations":doc.get("originating_locations",[])
