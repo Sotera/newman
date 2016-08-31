@@ -129,8 +129,8 @@ var newman_top_email_entity = (function () {
         $(chart_bar_legend_ui_id).append(legend);
       }
 
-      var width = 380, height_bar = 13, margin_top = 8, margin_bottom = 2;
-      var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 100};
+      var width = 490, height_bar = 13, margin_top = 8, margin_bottom = 2;
+      var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
       width = width - margin.left - margin.right;
 
       var max_value = ui_display_entity_list[0].entity_ref_count;
