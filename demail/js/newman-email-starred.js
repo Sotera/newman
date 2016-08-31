@@ -11,6 +11,26 @@ var newman_email_starred = (function () {
   var starred_doc_id_array = [];
 
 
+  function init() {
+
+    initStarredDocumentList();
+
+    $('#export_option_list_all_starred').on("click", function () {
+      console.log("#export_option_list_all_starred clicked");
+
+      // query email documents
+      newman_email_starred_request_all.requestService( newman_graph_email );
+
+      // display email-tab
+      newman_graph_email.displayUITab();
+
+    });
+
+    $("#export_option_save_all_starred_as_file").on("click", function () {
+      newman_email_starred_request_export.requestService();
+    });
+
+  }
 
   function initStarredDocumentList() {
     newman_email_starred_request_all.requestService();
@@ -58,6 +78,7 @@ var newman_email_starred = (function () {
   }
 
   return {
+    'init' : init,
     'initStarredDocumentList' : initStarredDocumentList,
     'getStarredDocumentList' : getStarredDocumentList,
     'setStarredDocumentList' : setStarredDocumentList,

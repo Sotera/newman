@@ -679,7 +679,7 @@ var newman_data_source = (function () {
     newman_aggregate_filter.clearAllAggregateFilter();
 
     // re-initialize starred-documents
-    newman_email_starred.initStarredDocumentList();
+    newman_email_starred.init();
 
     // re-initialize top-ranked email-accounts under each data-source
     newman_top_email_account_list_request.requestTopEmailAccountByDataSource( getAllSelectedAsString() );

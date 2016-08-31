@@ -284,9 +284,9 @@
 
               <div class="col-xs-9" style="padding: 0; margin: 0; text-align: left;" >
                 <div class="dropdown" style="width: 520%; height: 100%; position:relative; display: inline-block;" id="recent_hist_selected">
-              <span class="dropdown-toggle btn navbar-btn button-dropdown-menu" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px">
-                <span class="fa fa-history"> History</span>
-              </span>
+                  <button class="dropdown-toggle btn navbar-btn button-dropdown-menu" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px">
+                    <span class="fa fa-history"> History</span>
+                  </button>
                   <ul class="dropdown-menu" style="width: 100%; padding: 2px 8px 2px 8px; border-radius: 4px;" id="recent_hist_list">
 
                   </ul>
@@ -384,10 +384,30 @@
 
             <div class="col-xs-10 col-sm-1" style="padding: 0px 10px 0px 10px; top: 4px; text-align: right;">
 
-              <button id="export_starred_set" type="button" class="btn navbar-btn button-dropdown-menu" data-toggle="modal" data-target="#export_modal"
-                      style="font-size: 13px; font-weight: lighter; padding: 0px 2px 0px 2px; margin: 0;">
-                <span > Export <i class="fa fa-star fa-inverse"></i></span>
-              </button>
+              <div class="dropdown" style="width: auto; height: 100%; position:relative; display: inline-block;"
+                   id="export_option_list_dropdown" value="data_source_access">
+                <button class="dropdown-toggle btn navbar-btn button-dropdown-menu"
+                        id="export_option_list_toggle"
+                        data-toggle="dropdown"
+                        style="font-weight: normal; font-size: small; margin: 0px">
+                  <span>&nbsp;<i class="fa fa-star fa-inverse"></i>&nbsp;</span>
+                </button>
+                <ul class="dropdown-menu" style="width: 100%; padding: 2px 8px 2px 8px; border-radius: 4px;" id="export_option_list">
+                  <li style="line-height: 20px; text-align: left;">
+                    <button type="button" class="button-dropdown-menu-item" id="export_option_list_all_starred">
+                      <span> List all <i class="fa fa-star-o"></i></span>
+                    </button>
+                  </li>
+                  <li style="line-height: 20px; text-align: left;">
+                    <button type="button" class="button-dropdown-menu-item" id="export_option_save_all_starred_as_file">
+                      <span> Export all as file <i class="fa fa-file-archive-o"></i></span>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+
+
 
             </div>
 
@@ -1037,20 +1057,10 @@
                         <span>Documents matched&nbsp;&nbsp;</span><span id="document_count"></span>
                       </div>
                       <div class="col-sm-2" style="margin: 0; padding: 4px 5px 0px 5px;">
-                        <a class="clickable" id="email_view_all_starred">
-                          <span> View Starred </span>
-                        </a>
-                        <!--
-                        |
-                        <a class="clickable" id="email_view_export_all" title="Mark All">
-                          <span class="glyphicon glyphicon-plus"> </span>
-                        </a>
-                        |
-                        <a class="clickable" id="email_view_export_all_remove" title="Unmark All">
-                          <span class="glyphicon glyphicon-minus"> </span>
-                        </a>
-                        |
-                        -->
+                        <button type="button" class="btn btn-small outline" id="email_view_list_all_starred">
+                          <span> List all <i class="fa fa-star-o"></i></span>
+                        </button>
+
                         <!-- <a class="clickable" id="email_group_conversation" title="Conversations"> -->
                         <!--   <span class="glyphicon glyphicon-tasks"></span> -->
                         <!-- </a> -->
