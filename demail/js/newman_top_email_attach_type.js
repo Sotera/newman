@@ -47,15 +47,15 @@ var newman_top_email_attach_type = (function () {
         acct_id = '* (' + data_set_id + ')';
       }
 
-      var file_type_list = _.map(response.types, function( element ){
+      var file_type_ui_display_list = _.map(response.types, function( element ){
         var file_type =  _.object(["file_type", "count"], element);
         return file_type;
       });
 
-      file_type_list = file_type_list.sort( descendingPredicatByProperty("count"));
+      file_type_ui_display_list = file_type_ui_display_list.sort( descendingPredicatByProperty("count"));
 
-      if (file_type_list.length > _top_count) {
-        file_type_list = file_type_list.splice(0, _top_count);
+      if (file_type_ui_display_list.length > _top_count) {
+        file_type_ui_display_list = file_type_ui_display_list.splice(0, _top_count);
       }
       //console.log('file_types: ' + JSON.stringify(file_type_list, null, 2));
 
@@ -76,8 +76,8 @@ var newman_top_email_attach_type = (function () {
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
       width = width - margin.left - margin.right;
 
-      var max_value =file_type_list[0].count;
-      var width_bar_factor = getAdjustedChartWidthFactor(width, max_value);
+      var max_value =file_type_ui_display_list[0].count;
+      var adjusted_width_factor = getAdjustedChartWidthFactor(width, max_value);
 
       var x = d3.scale.linear().range([0, width]);
       var chart = d3.select(chart_bar_ui_id).append('svg')
@@ -85,10 +85,10 @@ var newman_top_email_attach_type = (function () {
         .attr("width", width + margin.left + margin.right);
 
       x.domain([0, 100]);
-      chart.attr("height", height_bar * file_type_list.length + margin_top + margin_bottom);
+      chart.attr("height", height_bar * file_type_ui_display_list.length + margin_top + margin_bottom);
 
       var bar = chart.selectAll("g")
-        .data(file_type_list).enter()
+        .data(file_type_ui_display_list).enter()
         .append("g")
         .attr("transform", function (d, i) {
           return "translate(" + margin.left + "," + (+(i * height_bar) + +margin.top) + ")";
@@ -96,7 +96,7 @@ var newman_top_email_attach_type = (function () {
 
       bar.append("rect")
         .attr("width", function (d) {
-          return getAdjustedChartWidth(width_bar_factor, d.count);
+          return getAdjustedChartWidth(adjusted_width_factor, d.count);
         })
         .attr("height", height_bar - 1)
         .attr("class", "label highlight clickable")
@@ -114,7 +114,7 @@ var newman_top_email_attach_type = (function () {
 
       bar.append("text")
         .attr("x", function (d) {
-          return (getAdjustedChartWidth(width_bar_factor, d.count) - 3);
+          return (getAdjustedChartWidth(adjusted_width_factor, d.count) - 3);
         })
         .attr("y", height_bar / 2)
         .attr("dy", ".35em")
@@ -147,24 +147,34 @@ var newman_top_email_attach_type = (function () {
         return d.file_type;
       });
 
+      //console.log('adjusted_width_factor : ' + adjusted_width_factor);
+      //console.log('ui_display_list :\n' + JSON.stringify(file_type_ui_display_list, null, 2));
+
+      var top_donut_chart_sum = 0;
+
+      _.each(file_type_ui_display_list, function (element, index) {
+        var adjusted_value = getAdjustedChartWidth(adjusted_width_factor, element.count) / width * 100;
+        //console.log('adjusted_value : ' + adjusted_value);
+        top_donut_chart_sum = top_donut_chart_sum + adjusted_value;
+
+      });
 
       var top_donut_chart_data = [];
-      var top_donut_chart_total = 1;
 
+      _.each(file_type_ui_display_list, function (element, index) {
+        var adjusted_value = getAdjustedChartWidth(adjusted_width_factor, element.count) / width * 100;
+        //console.log('adjusted_value : ' + adjusted_value);
 
-      for( var i = 0; i < file_type_list.length; i++ ){
-        top_donut_chart_total = top_donut_chart_total + file_type_list[i].count;
-      };
+        var percent_value = (adjusted_value / top_donut_chart_sum * 100);
+        //console.log('percent_value : ' + percent_value);
 
-      for( var i = 0; i < file_type_list.length; i++ ){
-        var value = Math.round((file_type_list[i].count / top_donut_chart_total) * 100);
         var entry = {
-          value: value,
-          label: file_type_list[i].file_type,
-          formatted: value + '%'
+          value: percent_value,
+          label: element.file_type,
+          formatted: Math.round(percent_value) + '%'
         };
         top_donut_chart_data.push(entry);
-      };
+      });
 
 
       _donut_chart_file_type_attach = Morris.Donut({
@@ -179,7 +189,7 @@ var newman_top_email_attach_type = (function () {
   }
 
   function getAdjustedChartWidthFactor(width, max_value) {
-    var adjusted_factor = 1.0, adjusted_max = max_value;
+    var adjusted_factor = 1.0, adjusted_max = parseFloat(max_value);
     if (width && max_value) {
       var done = false;
       if (adjusted_max >= width) {
@@ -206,7 +216,7 @@ var newman_top_email_attach_type = (function () {
   }
 
   function getAdjustedChartWidth(factor, value) {
-    var adjusted_value = value;
+    var adjusted_value = parseFloat(value);
     if (factor && value) {
       adjusted_value = (factor * value)
     }

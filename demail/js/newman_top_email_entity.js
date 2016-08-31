@@ -134,7 +134,7 @@ var newman_top_email_entity = (function () {
       width = width - margin.left - margin.right;
 
       var max_value = ui_display_entity_list[0].entity_ref_count;
-      var width_bar_factor = getAdjustedChartWidthFactor(width, max_value);
+      var adjusted_width_factor = getAdjustedChartWidthFactor(width, max_value);
 
       var x = d3.scale.linear().range([0, width]);
       var chart = d3.select(chart_bar_ui_id).append('svg')
@@ -153,7 +153,7 @@ var newman_top_email_entity = (function () {
 
       bar.append("rect")
         .attr("width", function (d) {
-          return getAdjustedChartWidth(width_bar_factor, d.entity_ref_count);
+          return getAdjustedChartWidth(adjusted_width_factor, d.entity_ref_count);
         })
         .attr("height", height_bar - 1)
         .attr("class", function (d) {
@@ -171,7 +171,7 @@ var newman_top_email_entity = (function () {
 
       bar.append("text")
         .attr("x", function (d) {
-          return (getAdjustedChartWidth(width_bar_factor, d.entity_ref_count) - 3);
+          return (getAdjustedChartWidth(adjusted_width_factor, d.entity_ref_count) - 3);
         })
         .attr("y", height_bar / 2)
         .attr("dy", ".35em")
@@ -202,32 +202,39 @@ var newman_top_email_entity = (function () {
         return d.entity_text;
       });
 
+      //console.log('adjusted_width_factor : ' + adjusted_width_factor);
+      //console.log('ui_display_list :\n' + JSON.stringify(ui_display_entity_list, null, 2));
 
-      var top_donut_chart_data = [];
-      var top_donut_chart_total = 1;
+      var top_donut_chart_sum = 0;
       var top_donut_chart_colors = [];
 
 
-      for (var i = 0; i < ui_display_entity_list.length; i++) {
-        top_donut_chart_total = top_donut_chart_total + ui_display_entity_list[i].entity_ref_count;
-        var entity_type = ui_display_entity_list[i].entity_type;
-        var entity_color = getEntityTypeColor(entity_type);
+      _.each(ui_display_entity_list, function (element, index) {
+        var adjusted_value = getAdjustedChartWidth(adjusted_width_factor, element.entity_ref_count) / width * 100;
+        //console.log('adjusted_value : ' + adjusted_value);
+        top_donut_chart_sum = top_donut_chart_sum + adjusted_value;
 
+        var entity_color = getEntityTypeColor(element.entity_type);
         top_donut_chart_colors.push(entity_color);
-      }
-      ;
+      });
 
-      for (var i = 0; i < ui_display_entity_list.length; i++) {
 
-        var value = Math.round((ui_display_entity_list[i].entity_ref_count / top_donut_chart_total) * 100);
+      var top_donut_chart_data = [];
+
+      _.each(ui_display_entity_list, function (element, index) {
+        var adjusted_value = getAdjustedChartWidth(adjusted_width_factor, element.entity_ref_count) / width * 100;
+        //console.log('adjusted_value : ' + adjusted_value);
+
+        var percent_value = (adjusted_value / top_donut_chart_sum * 100);
+        //console.log('percent_value : ' + percent_value);
+
         var entry = {
-          value: value,
-          label: ui_display_entity_list[i].entity_text,
-          formatted: value + '%'
+          value: percent_value,
+          label: element.entity_text,
+          formatted: Math.round(percent_value) + '%'
         };
         top_donut_chart_data.push(entry);
-      }
-      ;
+      });
 
 
       _donut_chart_entity_email = Morris.Donut({
@@ -250,7 +257,7 @@ var newman_top_email_entity = (function () {
   } // end-of onRequestEmailEntityList( response )
 
   function getAdjustedChartWidthFactor(width, max_value) {
-    var adjusted_factor = 1.0, adjusted_max = max_value;
+    var adjusted_factor = 1.0, adjusted_max = parseFloat(max_value);
     if (width && max_value) {
       var done = false;
       if (adjusted_max >= width) {
@@ -277,7 +284,7 @@ var newman_top_email_entity = (function () {
   }
 
   function getAdjustedChartWidth(factor, value) {
-    var adjusted_value = value;
+    var adjusted_value = parseFloat(value);
     if (factor && value) {
       adjusted_value = (factor * value)
     }

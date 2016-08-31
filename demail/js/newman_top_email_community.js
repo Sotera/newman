@@ -95,17 +95,17 @@ var newman_top_email_community = (function () {
    */
   function updateUICommunity( service_response ) {
 
-    var _community_list = mapResponse( service_response );
+    var community_ui_display_list = mapResponse( service_response );
 
-    if (_community_list) {
+    if (community_ui_display_list) {
       initUI();
 
       //console.log('\tfiltered_response: ' + JSON.stringify(_community_list, null, 2));
 
-      _community_list = _community_list.sort( descendingPredicatByProperty("count"));
+      community_ui_display_list = community_ui_display_list.sort( descendingPredicatByProperty("count"));
 
-      if (_community_list.length > _top_count) {
-        _community_list = _community_list.splice(0, _top_count);
+      if (community_ui_display_list.length > _top_count) {
+        community_ui_display_list = community_ui_display_list.splice(0, _top_count);
       }
       //console.log('community_list:\n' + JSON.stringify(_community_list, null, 2));
 
@@ -117,8 +117,8 @@ var newman_top_email_community = (function () {
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
       width = width - margin.left - margin.right;
 
-      var max_value =_community_list[0].count;
-      var width_bar_factor = getAdjustedChartWidthFactor(width, max_value);
+      var max_value =community_ui_display_list[0].count;
+      var adjusted_width_factor = getAdjustedChartWidthFactor(width, max_value);
 
       var x = d3.scale.linear().range([0, width]);
       var chart = d3.select(chart_bar_ui_id).append('svg')
@@ -126,10 +126,10 @@ var newman_top_email_community = (function () {
         .attr("width", width + margin.left + margin.right);
 
       x.domain([0, 100]);
-      chart.attr("height", height_bar * _community_list.length + margin_top + margin_bottom);
+      chart.attr("height", height_bar * community_ui_display_list.length + margin_top + margin_bottom);
 
       var bar = chart.selectAll("g")
-        .data(_community_list).enter()
+        .data(community_ui_display_list).enter()
         .append("g")
         .attr("transform", function (d, i) {
           return "translate(" + margin.left + "," + (+(i * height_bar) + +margin.top) + ")";
@@ -137,7 +137,7 @@ var newman_top_email_community = (function () {
 
       bar.append("rect")
         .attr("width", function (d) {
-          return getAdjustedChartWidth(width_bar_factor, d.count);
+          return getAdjustedChartWidth(adjusted_width_factor, d.count);
         })
         .attr("height", height_bar - 1)
         .attr("class", "label highlight clickable")
@@ -156,7 +156,7 @@ var newman_top_email_community = (function () {
 
       bar.append("text")
         .attr("x", function (d) {
-          return (getAdjustedChartWidth(width_bar_factor, d.count) - 3);
+          return (getAdjustedChartWidth(adjusted_width_factor, d.count) - 3);
         })
         .attr("y", height_bar / 2)
         .attr("dy", ".35em")
@@ -189,24 +189,35 @@ var newman_top_email_community = (function () {
         return d.community;
       });
 
+      //console.log('adjusted_width_factor : ' + adjusted_width_factor);
+      //console.log('ui_display_list :\n' + JSON.stringify(_community_list, null, 2));
+
+      var top_donut_chart_sum = 0;
+
+      _.each( community_ui_display_list, function (element, index) {
+        var adjusted_value = getAdjustedChartWidth(adjusted_width_factor, element.count) / width * 100;
+        //console.log('adjusted_value : ' + adjusted_value);
+        top_donut_chart_sum = top_donut_chart_sum + adjusted_value;
+
+      });
 
       var top_donut_chart_data = [];
-      var top_donut_chart_total = 1;
 
+      _.each( community_ui_display_list, function (element, index) {
+        var adjusted_value = getAdjustedChartWidth(adjusted_width_factor, element.count) / width * 100;
+        //console.log('adjusted_value : ' + adjusted_value);
+        top_donut_chart_sum = top_donut_chart_sum + adjusted_value;
 
-      for( var i = 0; i < _community_list.length; i++ ){
-        top_donut_chart_total = top_donut_chart_total + _community_list[i].count;
-      };
+        var percent_value = (adjusted_value / top_donut_chart_sum * 100);
+        //console.log('percent_value : ' + percent_value);
 
-      for( var i = 0; i < _community_list.length; i++ ){
-        var value = Math.round((_community_list[i].count / top_donut_chart_total) * 100);
         var entry = {
-          value: value,
-          label: (_.take((_community_list[i].community).split(' '), 3).join(' ')),
-          formatted: value + '%'
+          value: percent_value,
+          label: (_.take((element.community).split(' '), 3).join(' ')),
+          formatted: Math.round(percent_value) + '%'
         };
         top_donut_chart_data.push(entry);
-      };
+      });
 
 
       _donut_chart_community_email = Morris.Donut({
@@ -222,7 +233,7 @@ var newman_top_email_community = (function () {
   }
 
   function getAdjustedChartWidthFactor(width, max_value) {
-    var adjusted_factor = 1.0, adjusted_max = max_value;
+    var adjusted_factor = 1.0, adjusted_max = parseFloat(max_value);
     if (width && max_value) {
       var done = false;
       if (adjusted_max >= width) {
@@ -249,7 +260,7 @@ var newman_top_email_community = (function () {
   }
 
   function getAdjustedChartWidth(factor, value) {
-    var adjusted_value = value;
+    var adjusted_value = parseFloat(value);
     if (factor && value) {
       adjusted_value = (factor * value)
     }
