@@ -27,12 +27,8 @@ Notes: during this setup process, if you get an error stating a Vagrantfile exis
 In Chrome browser, navigate to **http://localhost:8787** to initiate Newman.
 
 # Ingest Process
-1.	Select the **Database Icon** and **New Dataset…** to start the ingest process. 
-2.	Enter the name of the pst file or mbox file. Note: the pst or mbox file needs to be located in the vagrant root directory. If you followed the setup steps above, this would be C:\Users\jsmith\virtualboxvms. Eventually, the file picker will be activated and you would then just navigate to the file.
-3.	Enter a label. The label does not have to be the same name as the file being ingested.
-4.	Select the dataset type. Note: Only pst and mbox files are supported at this time; eventually, eml files/directories will be supported.
-5.	Optional: add additional labels for Case ID and Alt Ref ID.
-6.	Select **Confirm** to start the process. Currently there is no status on the ingest progress. A status feature is in work that will eventually be located under the Tasks tab. For now, you can check http://localhost:8787/ingester/status. The time it takes to ingest a file is dependent on the system environment and size of file of being ingested. It takes about 10 minutes to ingest a 180MB pst file with an 8GB base memory vm.
+1.	See [Features](http://sotera.github.io/newman/features/) for the steps to ingest data.  
+2.	A progress indicator for ingest is in work that will eventually be located under the Tasks tab. For now, you can check http://localhost:8787/ingester/status. The time it takes to ingest a file is dependent on the system environment and size of file of being ingested. It takes about 10 minutes to ingest a 180MB pst file with an 8GB base memory vm.
 
 # Creating PST File in Outlook 2010
 1. On the Home tab, in the New Items group, navigate to More Items | Outlook Data File.
