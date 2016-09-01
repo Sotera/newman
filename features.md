@@ -26,7 +26,7 @@ Below are some example steps (end-to-end) to ingest a pst file on an existing Vi
 
 1. Open a cmd terminal. On Windows, select Start icon, type in cmd, and select cmd.exe.
 2. SSH into the VirtualBox, C:\Users\jsmith\virtualboxvms\Newman\vagrant ssh
-3. Create the 3 nested directories and then copy the dataset. May have to create newman-ingester directory to if it does not exist.
+3. Create the 3 nested directories and then copy the dataset. May have to create newman-ingester directory if it does not exist.
 
 vagrant@vagrant-ubuntu-trusty-64:/vagrant$ mkdir newman-ingester<br />
 vagrant@vagrant-ubuntu-trusty-64:/vagrant$ cd newman-ingester/<br />
@@ -141,29 +141,27 @@ Multiple terms or clauses can be grouped together with parenthesis to form sub q
 
 ### Filtering
 
-By default, the only active filter is the Date range control. The initial dates picked are maximized to include as many emails as possible. 
+By default, the only active filter is the Date range control. The initial dates picked are maximized to include as many emails as possible. This control also provides a bar graph of email traffic distribution.
 
-![Date Filter](../img/date_filter.png)
-
-The filter dropdown is defaulted to ![All filter](../img/all_filter.png) which means nothing is filtered and searches are against all the data in the dataset selected. This includes all email sections (from, to, cc, bcc, subject, body) and all attachments. The dropdown list includes an option to filter the search to return just the search text and its results ![Test filter](../img/text_filter.png) and an option to search just the email address (from, to, cc, bcc) ![Email filter](../img/email_filter.png) .
+![Date Filter](../img/DateRangePicker.JPG)
 
 ### Search Results
 
-![Search Results](../img/search_results.png)
+![Search Results](../img/SearchResults.JPG)
 
-Each search populates the dashboard list that includes the search term and the top 20 email addresses that contain email/attachments containing the search term. Counts are provided for the number of Emails Sent, Emails Received, File Attachments, Search Matched, and Accounts Associated. Note: the Search Matched count will often not equal all the values added below because the Date range filter control has filtered out some emails from Search Matched and only the top 20 emails are included.
+Each search updates the dashboard to include the number of accounts associated and the number of emails the search matched. Selecting the search term populates a social graph and email/attachments list.
 
-Each Search performed also updates the Analysis widgets in the right hand panel. By default this includes all email addresses but can be filtered by using the last column in this view named Aggregate. Selecting the checkboxes in this column will filter the data sent to the analysis widgets which updates the display.
+The most relevant Accounts Ranked or Entities Extracted can be displayed in the Search Results list by selecting the arrow to the right of the dataset. The analyst can then select the number they like to view with a mazximum of 50. 
 
-Selecting the search term or a specific email address populates a social graph and email/attachments list. 
+![Search Results Ranked](../img/SearchResultsTop.JPG)
+
+If a search has been initiated as in this example, then the top Accounts Ranked displayed are those that include the search term. 
+
+![Search Results List](../img/SearchResultsTopAccounts.JPG)
+
+From Search Results list, the analyst can select/deselect checkboxes to filter the data sent to the analysis widgets. Selecting an email address populates a social graph and email/attachments list for that email address.
 
 ## Analysis Widgets
-
-### Email Distribution
-
-This widget shows the distribution of emails and attachments sent and received. The email addresses shown are selected by the analyst or include the top four email addresses with the most traffic if no email addresses have been selected.
-
-![Email Distribution](../img/email_distribution.png)
 
 ### Entities/Topics
 
@@ -171,29 +169,33 @@ The entities tab shows the highest occurring entities extracted by
 [MITIE](https://github.com/mitll/MITIE) . Clicking on one of the
 entities will requery for emails which contain that entity.
 
-![Entities](../img/entities.png)
+![Entities](../img/Entities.JPG)
 
 The topics tab shows the topics among all of the emails. Clicking on one of the topics will re-query for all of the emails that score greater than 75% on that topic.
 
-![Topics](../img/topics_tab.png)
+![Topics](../img/Topics.JPG)
 
-### Ranks/Domains/Communities/Attach Types
+### Top Addresses/Domains/Communities
 
-Rank uses a custom algorithm to determine _important_ email addresses in the data set. Clicking on one of the Ranks will re-query for all the emails for that email address.
+Top Addresses uses a custom algorithm to determine _important_ email addresses in the data set. Clicking on one of the email addresses will re-query for all the emails for that email address.
 
-![Rank](../img/rank.png)
+![Rank](../img/TopAddresses.JPG)
 
 Domains listed are the top 10 domains of all the emails in the dataset selected. 
 
-![Email Domains](../img/domains.png)
+![Email Domains](../img/Dommains.JPG)
 
 Communities listed are the top 10 communities in the dataset selected. A community is determined by an algorithm run on the server. Currently, the Community is arbitrarily named by one of the email addresses. A better name will be provided in the future with either the top topic in that community and/or number of entities in that community.
 
-![Email Communities](../img/communities.png)
+![Email Communities](../img/Communities.JPG)
 
-Attach Types provides the top 10 types of attachments for the dataset selected.
+### Attachments/File Types
 
-![Attach Types](../img/attach_types.png)
+this widget shows the distribution of attachment sent and received. File Types provides the top 10 types of attachements for the dataset selected. 
+
+![Attach Types](../img/AttachmentWidget.JPG)
+
+![File Types](../img/FileTypes.JPG)
 
 ## Graph
 
@@ -208,7 +210,7 @@ of the analysis widgets.
 
 The graph can be colored by Domain or Community. The display can also show the Rank and Labels by toggling them on/off. Toggle the dropdown arrow for Legend to show a list of all of the visible Communities (or Domains) on the screen with the count for each along with the color. Hovering over one of the rows will highlight all of the emails for that Community (or Domain) in the graph. Hovering over a node will provide a count for Inbound and Outbound for that email address.
 
-![Community Graph](../img/graph_community.png)
+![Community Graph](../img/graph.JPG)
 
 ## Geo Display
 
@@ -216,7 +218,13 @@ The geo display (map) shows all of the emails and attachments that have location
 
 The analyst can pan the map, zoom in, zoom out, and plot all the email that have location data. Selecting a location pin provides a list of emails associated with that location. The analyst can scroll through this list and display the email contents.
 
-![Geo Display](../img/geo_display.png)
+![Geo Display](../img/Map.JPG)
+
+## Extract
+
+The Extract tab lists all the numeric data extracted during ingest. Currently, this is limited to phone numbers but in the future will include SSNs, DLs, credit card numbers and other well formed numeric entities.
+
+![Extract](../img/Extract.JPG)
 
 ## Email Table
 
@@ -224,13 +232,13 @@ The email table is populated by the same actions that populate the graph (select
 
 Selecting View Starred will list all the emails that have been marked as pertinent.
 
-![Email Table](../img/email_table_01.png)
+![Email Table](../img/EmailList.JPG)
 
 ## Attachments
 
 The attachments table is populated by the same actions that populate the graph and email table (selecting search term, email address, or record in analysis widget). This table is populated with all of the attachments ever sent or received by that email address. Images are shown as previews and clicking on the title of the attachment will allow you to download it. You can also click the record to take you to that email.
 
-![Attachments](../img/attachments.png)
+![Attachments](../img/AttachmentsList.JPG)
 
 ## Email View
 
@@ -241,7 +249,7 @@ Each email has entities extracted by
 text.  Clicking on one of the tagged entities will requery for all of
 the emails that contain that entity. The terms highlighted in yellow italics are not entities but the search term used. If a search term is also an entity then the entity highlighting takes precedence. 
 
-![Email Entities](../img/email_entities.png)
+![Email Entities](../img/Email.JPG)
 
 ### Mark Pertinent
 
@@ -262,13 +270,13 @@ each bar shows the percentage the current email scored in that topic.
 Mouse over each bar to see the top 10 terms that make up that topic. 
 Clicking on one of the bars will re-query the dataset for that topic. 
 
-![Email Topics](../img/email_topics.png)
+![Email Topics](../img/TopicScoresCombined.JPG)
 
 ### Email Conversation Intersection
 
 For any email displayed, the analyst can get all the emails to a particular recipient. First select the recipient (from the To, Cc, or Bcc line) and then the Conversation button. This action updates the Email list to include only those emails from/to the selected addresses from that point forward or backward in time.
 
-![Conversation](../img/conversation.png)
+![Conversation](../img/Conversation.JPG)
 
 ### Email Translation
 
@@ -278,9 +286,9 @@ Email translation is provided for emails in another language using the ![Transla
 
 Export creates an export.tar.gz file in the Download folder of all the emails that the user marked as pertinent (starred). The analyst can see a list of emails that have been marked by selecting View Starred in the Email View pane.  The zipped file contains a separate folder for each email selected for export that contains a Chrome HTML Document with a summary of the email, a text information with the same information but without the graphics, the raw data in JSON file format and all the attachments.
 
-![Export](../img/export.png)
+![Export](../img/ExportFileName.JPG)
 ![Export](../img/export_files.png)
 
 Below is an example of the HTML summary.
 
-![Export](../img/export_html_summary.png)
+![Export](../img/ExportHTML.JPG)
