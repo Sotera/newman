@@ -26,7 +26,7 @@ to show the top 20 email addresses based on traffic (sent/received email).
 
 ### Search Criteria
 
-![Free Text Search](../img/search_free_text.png)
+![Free Text Search](../img/SearchBox.JPG)
 
 The search text box is backed by [elasticsearch](http://www.elasticsearch.org) 
 and will return results for all the emails and attachments ingested. For a detailed 
