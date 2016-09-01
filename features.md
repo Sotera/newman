@@ -227,7 +227,7 @@ Selecting View Starred will list all the emails that have been marked as pertine
 
 ![Email Table](../img/EmailList.JPG)
 
-## Attachments
+## Attachments Table
 
 The attachments table is populated by the same actions that populate the graph and email table (selecting search term, email address, or record in analysis widget). This table is populated with all of the attachments ever sent or received by that email address. Images are shown as previews and clicking on the title of the attachment will allow you to download it. You can also click the record to take you to that email.
 
