@@ -13,6 +13,38 @@ Currently, all the analyst has to do is navigate to the instance
 (IP address and port). Future revisions may require a 
 username/password combination.
 
+## Ingest Process
+
+Before an investigation can start, the dataset(s) need to be ingested. Newman can ingest multiple pst, mbox, and eml datasets. The datasets must be placed in a specific location before the ingester will work. You must have 3 nested directories for each dataset.
+
+1. The top level must be the case name and is user definable.  [no spaces]
+2. The second level is the eml archive type and must be one of [pst, mbox, emls]
+3. The third level is the data_set label (which will appear in the UI) and is user definable [no spaces]
+4. Under that dir you can put any data files or directories you have and they will be ingested
+
+Below are some example steps (end-to-end) to ingest a pst file on an existing VirtualBox (see Quick Start Guide for steps to setup a VirtualBox with Newman).
+
+1. Open a cmd terminal. On Windows, select Start icon, type in cmd, and select cmd.exe.
+2. SSH into the VirtualBox, C:\Users\jsmith\virtualboxvms\Newman\vagrant ssh
+3. Create the 3 nested directories and then copy the dataset. May have to create newman-ingester directory to if it does not exist.
+
+vagrant@vagrant-ubuntu-trusty-64:/vagrant$ mkdir newman-ingester
+vagrant@vagrant-ubuntu-trusty-64:/vagrant$ cd newman-ingester/
+vagrant@vagrant-ubuntu-trusty-64:/vagrant/newman-ingester$ mkdir TestPST
+vagrant@vagrant-ubuntu-trusty-64:/vagrant/newman-ingester$ mkdir TestPST/pst
+vagrant@vagrant-ubuntu-trusty-64:/vagrant/newman-ingester$ mkdir TestPST/pst/TestPST1
+vagrant@vagrant-ubuntu-trusty-64:/vagrant/newman-ingester$ mv TestPST.pst TestPST/pst/TestPST1/
+
+Now that the dataset is in the correct location, select Database icon and then New Dataset…
+
+![Date Filter](../img/NewDatasetMenuOption.JPG)
+
+![Date Filter](../img/NewDatasetDialog.JPG)
+
+Add a Alt Reference ID if desired and then the Confirm button. A status dialog will be presented which will disappear when the ingest is completed. In the future, the status will be displayed in a Tasks tab so the user can work on other datasets while new ones are being ingested.
+
+![Date Filter](../img/NewDatasetStatus.JPG)
+
 ## Search
 
 The first step in an investigation is usually to initiate a search. 
