@@ -47,14 +47,7 @@ Add a Alt Reference ID if desired and then the Confirm button. A status dialog w
 
 ## Search
 
-The first step in an investigation is usually to initiate a search. 
-Before that can happen, the data must be loaded into Newman and is 
-currently done outside of the Newman GUI. Multiple data sets (mailboxes, 
-mbox, pst files) can be loaded; however, at this time only one dataset 
-can be searched against. So, the analyst has to choose which dataset to 
-search against to begin. In this example, the shiavo dataset was 
-selected from the dropdown list. After selection, the Newman GUI updates 
-to show the top 20 email addresses based on traffic (sent/received email).
+The first step in an investigation is usually to initiate a search. By default, all datasets that have been ingested are searched. The analyst has the choice to de-select datasets to only search specific datasets. 
 
 ### Search Criteria
 
