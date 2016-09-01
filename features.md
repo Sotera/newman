@@ -5,7 +5,7 @@ permalink: /features/
 ---
 
 
-![Newman Home Page](../img/Dashboard.png)
+![Newman Home Page](../img/Dashboard.PNG)
 
 ## Login
 
