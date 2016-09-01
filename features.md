@@ -28,14 +28,12 @@ Below are some example steps (end-to-end) to ingest a pst file on an existing Vi
 2. SSH into the VirtualBox, C:\Users\jsmith\virtualboxvms\Newman\vagrant ssh
 3. Create the 3 nested directories and then copy the dataset. May have to create newman-ingester directory to if it does not exist.
 
-'''
 vagrant@vagrant-ubuntu-trusty-64:/vagrant$ mkdir newman-ingester<br />
 vagrant@vagrant-ubuntu-trusty-64:/vagrant$ cd newman-ingester/<br />
 vagrant@vagrant-ubuntu-trusty-64:/vagrant/newman-ingester$ mkdir TestPST<br />
 vagrant@vagrant-ubuntu-trusty-64:/vagrant/newman-ingester$ mkdir TestPST/pst<br />
 vagrant@vagrant-ubuntu-trusty-64:/vagrant/newman-ingester$ mkdir TestPST/pst/TestPST1<br />
 vagrant@vagrant-ubuntu-trusty-64:/vagrant/newman-ingester$ mv TestPST.pst TestPST/pst/TestPST1/<br />
-'''
 
 Now that the dataset is in the correct location, select Database icon and then New Dataset…
 
