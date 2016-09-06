@@ -12,7 +12,7 @@ L.TileLayer.addInitHook(function() {
 	this.local_tile_db_name = app_geo_config.getLocalTileDBName();
 	this.remote_tile_db_name = app_geo_config.getRemoteTileDBName();
 
-	this._local_db = new PouchDB( this.local_tile_db_name );
+	this._local_db = new PouchDB(this.remote_tile_db_name, {adapter : "http"});
 	//this._remote_db = new PouchDB( this.remote_tile_db_name );
 	this._seed_cache_handler = {"is_cancelled" : false};
 	this._download_handler = null;
