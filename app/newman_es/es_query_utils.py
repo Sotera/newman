@@ -9,7 +9,7 @@ def get_graph_row_fields():
 def _map_emails(fields):
     row = {}
     row["email_id"] =  fields["id"][0]
-    row["from"] = fields.get("senders",[""])[0]
+    row["from"] = ";".join(fields.get("senders",[""]))
     row["to"] = fields.get("tos", [])
     row["cc"] = fields.get("ccs", [])
     row["bcc"] = fields.get("bccs", [])

@@ -9,8 +9,6 @@ from newman_es.config.newman_config import data_set_names, index_creator_prefix
 from newman_es.es_search import initialize_email_addr_cache, _pre_search
 from newman_es.es_series import get_datetime_bounds
 
-from utils.functions import nth
-
 from param_utils import parseParamDatetime, parseParamEmailAddressList, parseParamTextQuery, parseParamEncrypted
 
 # TODO
@@ -130,13 +128,5 @@ def summary():
         summary[data_set_id] = _ds_stat(data_set_id)
 
     return jsonify(summary)
-
-
-actions = {
-    "all" : getAll,
-    "dataset" : setSelectedDataSet,
-    "summary" : summary
-}
-
 
 

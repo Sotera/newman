@@ -23,6 +23,7 @@ SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 json_url = os.path.join(SITE_ROOT, "conf", "newman_app.json")
 data = json.load(open(json_url))
 app.config["newman"] = data
+app.config["site_root"] = SITE_ROOT
 
 app.logger.debug('Newman config: {}'.format(data))
 app.logger.info('Newman config loaded.')
@@ -34,3 +35,4 @@ from app import views
 from app import datasource
 from app import app_config
 from app import ingester
+from app import email_services
