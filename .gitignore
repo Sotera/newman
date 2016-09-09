@@ -1,0 +1,9 @@
+
+*.pyc
+*.zip
+.DS_Store
+work_dir
+!work_dir/.keep
+
+tmp/
+!tmp/.keep

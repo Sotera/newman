@@ -1,0 +1,94 @@
+{
+  "version" : "3.0.0",
+  "default_data_set_id" : ".newman-auto",
+  "default_min_timeline_bound": "2001-01-01",
+  "default_max_timeline_bound": "2014-01-01",
+  "default_timeline_interval": "weeks",
+  "default_timeline_span": 200,
+
+  "elasticsearch_config": {
+    "hosts" : [{"host" : "localhost", "port" : 9200}],
+    "maxsize" : 25,
+    "timeout" : 3600
+  },
+
+  "tile_cache_config": {
+    "host" : "newman-tile-server",
+    "port" : 5984,
+    "database" : "offline-tiles",
+    "cache_only" : false,
+    "advance_mode" : false
+  },
+
+  "index_creator_defaults" : {
+    "prefix" : "newman-",
+    "default_timeline_interval": "weeks",
+    "default_timeline_span": 200,
+    "default_min_timeline_bound": "2001-01-01",
+    "default_max_timeline_bound": "2014-01-01"
+  },
+
+  "data_set_defaults" : {
+    "newman-sample" : {
+      "default_timeline_interval": "weeks",
+      "default_timeline_span": 200,
+      "default_min_timeline_bound": "2001-01-01",
+      "default_max_timeline_bound": "2014-01-01",
+      "excluded" : true
+    }
+  },
+
+  "validation_config" : {
+    "email_search_response" : true
+  },
+
+  "display_config" : {
+    "email_doc_display" : {
+      "dataset_alt_ref_id" : {
+        "is_displayed" : false,
+        "label" : "Product ID" 
+      },
+      "dataset_case_id" : {
+        "is_displayed" : true,
+        "label" : "Case ID"
+      },
+      "dataset_ingest_id" : {
+        "is_displayed" : true,
+        "label" : "Dataset ID"
+      },
+      "email_id" : {
+        "is_displayed" : true,
+        "label" : "Email ID"
+      }
+    },
+    "email_table_display" : {
+      "table_column" : {
+        "email_date_time" : {
+          "is_displayed" : true,
+          "header_label" : "Date"
+        },
+        "email_from" : {
+          "is_displayed" : true,
+          "label" : "From"
+        },
+        "email_recipient_count" : {
+          "is_displayed" : true 
+        },
+        "email_content_size" : {
+          "is_displayed" : true
+        },
+        "email_attachment_count" : {
+          "is_displayed" : true
+        },
+        "email_alt_ref_id" : {
+          "is_displayed" : false,
+          "label" : "Product ID"
+        },
+        "email_subject" : {
+          "is_displayed" : false,
+          "label" : "Subject"
+        }
+      } 
+    }
+  }
+}

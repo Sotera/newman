@@ -1,0 +1,22 @@
+[
+  {
+    "start_date": "2014-08-06",
+    "top_tag": "tag-1",
+    "top_assoc": "assoc-1"
+  },
+  {
+    "start_date": "2014-08-20",
+    "top_tag": "tag-2",
+    "top_assoc": "assoc-2"
+  },
+  {
+    "start_date": "2014-08-27",
+    "top_tag": "tag-2",
+    "top_assoc": "assoc-1"
+  },
+  {
+    "start_date": "2014-09-03",
+    "top_tag": "tag-1",
+    "top_assoc": "assoc-3"
+  }
+]
