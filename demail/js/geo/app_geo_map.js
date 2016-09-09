@@ -752,39 +752,41 @@ var app_geo_map = (function () {
 
           if (app_geo_config.enableOnlyTileCache()) {
 
-            map_tile_cache_import_button = L.easyButton({
-              states: [
-                {
-                  stateName: 'init-tile-caching',
-                  icon: 'fa-download',
-                  title: 'Initiate downloading map tiles',
-                  onClick: function (control) {
+            if (app_geo_config.enableSeparateLocalDB()) {
+              map_tile_cache_import_button = L.easyButton({
+                states: [
+                  {
+                    stateName: 'init-tile-caching',
+                    icon: 'fa-download',
+                    title: 'Initiate downloading map tiles',
+                    onClick: function (control) {
 
-                    setTileExportEnabled(false);
-                    control.state('tile-caching');
+                      setTileExportEnabled(false);
+                      control.state('tile-caching');
 
-                    map_tile_layer.downloadTileCache( map );
+                      map_tile_layer.downloadTileCache(map);
 
-                    control._map.on('download:complete', function (e) {
-                      //console.log('control._map.on("download:complete")');
-                      setTileExportEnabled(true);
+                      control._map.on('download:complete', function (e) {
+                        //console.log('control._map.on("download:complete")');
+                        setTileExportEnabled(true);
+                        control.state('init-tile-caching');
+                      });
+                    }
+                  },
+                  {
+                    stateName: 'tile-caching',
+                    icon: 'fa-spinner fa-spin',
+                    title: 'Downloading tiles...',
+                    onClick: function (control) {
+                      cancelAllDownload();
                       control.state('init-tile-caching');
-                    });
+                    }
                   }
-                },
-                {
-                  stateName: 'tile-caching',
-                  icon: 'fa-spinner fa-spin',
-                  title: 'Downloading tiles...',
-                  onClick: function (control) {
-                    cancelAllDownload();
-                    control.state('init-tile-caching');
-                  }
-                }
-              ]
-            });
+                ]
+              });
 
-            map_tile_cache_import_button.enable();
+              map_tile_cache_import_button.enable();
+            } // end-of if (app_geo_config.enableSeparateLocalDB())
           }
           else {
 
@@ -823,57 +825,74 @@ var app_geo_map = (function () {
             map_tile_cache_import_button.disable();
           }
 
-        }
+        } // end-of if (!map_tile_cache_import_button)
+
 
         if (!map_tile_cache_export_button) {
+          if (app_geo_config.enableSeparateLocalDB()) {
 
-          map_tile_cache_export_button = L.easyButton({
-            states: [
-              {
-                stateName: 'init-tile-upload',
-                icon: 'fa-upload',
-                title: 'Initiate uploading map tiles',
-                onClick: function (control) {
+            map_tile_cache_export_button = L.easyButton({
+              states: [
+                {
+                  stateName: 'init-tile-upload',
+                  icon: 'fa-upload',
+                  title: 'Initiate uploading map tiles',
+                  onClick: function (control) {
 
-                  setTileCloudDownloadEnabled( false );
-                  control.state('tile-upload');
+                    setTileCloudDownloadEnabled(false);
+                    control.state('tile-upload');
 
-                  map_tile_layer.uploadTileCache( map );
+                    map_tile_layer.uploadTileCache(map);
 
-                  control._map.on('upload:complete', function (e) {
-                    //console.log('control._map.on("upload:complete")');
+                    control._map.on('upload:complete', function (e) {
+                      //console.log('control._map.on("upload:complete")');
 
-                    setTileCloudDownloadEnabled( true );
+                      setTileCloudDownloadEnabled(true);
+                      control.state('init-tile-upload');
+                    });
+                  }
+                },
+                {
+                  stateName: 'tile-upload',
+                  icon: 'fa-spinner fa-spin',
+                  title: 'Uploading tiles...',
+                  onClick: function (control) {
+                    cancelAllUpload();
                     control.state('init-tile-upload');
-                  });
+                  }
                 }
-              },
-              {
-                stateName: 'tile-upload',
-                icon: 'fa-spinner fa-spin',
-                title: 'Uploading tiles...',
-                onClick: function (control) {
-                  cancelAllUpload();
-                  control.state('init-tile-upload');
-                }
-              }
-            ]
-          });
+              ]
+            });
 
-          //map_tile_cache_export_button.disable();
-          map_tile_cache_export_button.enable();
+            //map_tile_cache_export_button.disable();
+            map_tile_cache_export_button.enable();
+          } // end-of if (app_geo_config.enableSeparateLocalDB())
+        } // end-of if (!map_tile_cache_export_button)
+
+
+        if (map_tile_cache_import_button && map_tile_cache_export_button) {
+          var button_group = [
+            map_tile_cache_import_button,
+            map_tile_cache_export_button
+          ];
+
+          // build a toolbar with them
+          L.easyBar(
+            button_group,
+            { position: 'bottomleft'}
+          ).addTo(map);
         }
+        else if (map_tile_cache_import_button) {
+          var button_group = [
+            map_tile_cache_import_button
+          ];
 
-
-        var button_group = [
-          map_tile_cache_import_button,
-          map_tile_cache_export_button
-        ];
-        // build a toolbar with them
-        L.easyBar(
-          button_group,
-          { position: 'bottomleft'}
-        ).addTo(map);
+          // build a toolbar with them
+          L.easyBar(
+            button_group,
+            { position: 'bottomleft'}
+          ).addTo(map);
+        }
 
       } // end of if (map)
     } // end of if (app_geo_config.enableAdvanceMode())

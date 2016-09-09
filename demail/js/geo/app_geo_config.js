@@ -11,6 +11,7 @@ var app_geo_config = (function () {
   var debug_enabled = false;
 
   var tile_cache_advance_mode = false;
+  var tile_cache_separate_local_db = false;
   var tile_cache_intranet_only = false;
   var tile_cache_remote_host = "localhost";
   var tile_cache_remote_port = 5984;
@@ -53,11 +54,23 @@ var app_geo_config = (function () {
       if (debug_enabled) {
         console.log('onRequestGeoConfig() : response:\n' + JSON.stringify(_response, null, 2));
       }
-      tile_cache_advance_mode = response.advance_mode;
-      tile_cache_intranet_only = response.cache_only;
-      tile_cache_remote_host = response.host;
-      tile_cache_remote_port = response.port;
-      tile_cache_database = response.database;
+
+
+      tile_cache_advance_mode = (response.advance_mode === true);
+      tile_cache_intranet_only = (response.cache_only === true);
+      tile_cache_separate_local_db = (response.separate_local_db === true);
+
+      if (response.host) {
+        tile_cache_remote_host = response.host.toLocaleLowerCase();
+      }
+
+      if (response.port > 0) {
+        tile_cache_remote_port = response.port;
+      }
+
+      if (response.database) {
+        tile_cache_database = response.database;
+      }
     }
   }
 
@@ -73,8 +86,21 @@ var app_geo_config = (function () {
     return tile_cache_intranet_only;
   }
 
+  function enableSeparateLocalDB() {
+    return tile_cache_separate_local_db;
+  }
+
   function getLocalTileDBName() {
     return tile_cache_database;
+  }
+
+  function getRemoteTileDBHost() {
+    return tile_cache_remote_host;
+  }
+
+  function isRemoteTileDBHostLocal() {
+    var host_text = getRemoteTileDBHost();
+    return ('localhost' == host_text || '127.0.0.1' == host_text);
   }
 
   function getRemoteTileDBName() {
@@ -89,7 +115,10 @@ var app_geo_config = (function () {
     'getResponse' : getResponse,
     "enableAdvanceMode" : enableAdvanceMode,
     "enableOnlyTileCache" : enableOnlyTileCache,
+    'enableSeparateLocalDB' : enableSeparateLocalDB,
     'getLocalTileDBName' : getLocalTileDBName,
+    'getRemoteTileDBHost' : getRemoteTileDBHost,
+    'isRemoteTileDBHostLocal' : isRemoteTileDBHostLocal,
     'getRemoteTileDBName' : getRemoteTileDBName
   }
 
