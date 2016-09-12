@@ -384,11 +384,11 @@ def get_attachment_by_id(*args, **kwargs):
     mime_type = mimetypes.guess_type(filename)[0]
 
     if not mime_type:
-        tangelo.content_type("application/x-download")
-        header("Content-Disposition", 'attachment; filename="{}"'.format(filename))
+        tangelo.content_type(u"application/x-download")
+        header(u"Content-Disposition", u'attachment; filename="{}"'.format(filename))
     else:
         tangelo.content_type(mime_type)
-        header("Content-Disposition", 'inline; filename="{}"'.format(filename))
+        header(u"Content-Disposition", u'inline; filename="{}"'.format(filename))
 
     content = attachment["contents64"]
     bytes = base64.b64decode(content)
