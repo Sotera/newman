@@ -3,10 +3,13 @@
 *.zip
 .DS_Store
 
-
 .idea
 
 flask/
 !flask/.keep
+log/
+!log/.keep
 work_dir/
 !work_dir/.keep
+tmp/
+!tmp/.keep
