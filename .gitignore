@@ -3,11 +3,6 @@
 *.zip
 .DS_Store
 
-log/
-!log/.keep
-
-tmp/
-!tmp/.keep
 
 .idea
 
