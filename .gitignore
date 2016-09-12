@@ -5,5 +5,13 @@
 work_dir
 !work_dir/.keep
 
+log/
+!log/.keep
+
 tmp/
 !tmp/.keep
+
+.idea
+
+flask/
+!flask/.keep

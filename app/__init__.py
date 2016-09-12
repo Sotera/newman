@@ -11,7 +11,7 @@ app = Flask(__name__, static_url_path='')
 # Configure some logging
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s -[%(filename)s:%(lineno)s - %(funcName)20s() ]- %(message)s")
 
-handler = RotatingFileHandler('flask-newman.log', maxBytes=1000000, backupCount=10)
+handler = RotatingFileHandler('log/flask-newman.log', maxBytes=1000000, backupCount=10)
 handler.setFormatter(formatter)
 logging.getLogger().setLevel(logging.INFO)
 app.logger.addHandler(handler)

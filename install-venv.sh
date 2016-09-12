@@ -21,5 +21,7 @@ flask/bin/pip install flipflop
 flask/bin/pip install coverage
 
 #Dependencies for Newman  app
+flask/bin/pip install elasticsearch
 flask/bin/pip install beautifulsoup4
+flask/bin/pip install python-dateutil
 
