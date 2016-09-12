@@ -2,8 +2,6 @@
 *.pyc
 *.zip
 .DS_Store
-work_dir
-!work_dir/.keep
 
 log/
 !log/.keep
