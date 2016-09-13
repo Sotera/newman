@@ -52,3 +52,4 @@ from app import ingester
 from app import email
 from app import export_services
 from app import tag_services
+from app import aggregations
