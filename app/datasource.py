@@ -6,7 +6,7 @@ import urllib
 
 from newman_es.es_connection import es, index_client, index_list
 from newman_es.config.newman_config import data_set_names, index_creator_prefix
-from newman_es.es_search import initialize_email_addr_cache, _pre_search
+from newman_es.es_search import initialize_email_addr_cache, _search_summary
 from newman_es.es_series import get_datetime_bounds
 
 from param_utils import parseParamDatetime, parseParamEmailAddressList, parseParamTextQuery, parseParamEncrypted
@@ -102,16 +102,16 @@ def summary():
 
     def _ds_stat(data_set_id):
         data_set_summary = {}
-        data_set_summary["summary"] = _pre_search(data_set_id=data_set_id, email_address=None, qs='', start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+        data_set_summary["summary"] = _search_summary(data_set_id=data_set_id, email_address=None, qs='', start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
         # DS with search
         if qs:
-            data_set_summary["search"] = _pre_search(data_set_id=data_set_id, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+            data_set_summary["search"] = _search_summary(data_set_id=data_set_id, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
             data_set_summary["search"]["query"] = qs
         #DS with users
         if email_address_list:
             users = {}
             for email_address in email_address_list:
-                users[email_address] = _pre_search(data_set_id=data_set_id, email_address=email_address, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
+                users[email_address] = _search_summary(data_set_id=data_set_id, email_address=email_address, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size)
             if qs:
                 data_set_summary["search"]["query"] = qs
                 data_set_summary["search"]["email_users"] = users

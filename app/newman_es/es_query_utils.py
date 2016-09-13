@@ -58,8 +58,8 @@ def _query_email_attachments(index, size, emails_query):
     attachments_resp = es().search(index=index, doc_type="emails", size=size, body=emails_query)
 
     email_attachments = []
-    try:
-        for attachment_item in attachments_resp["hits"]["hits"]:
+    for attachment_item in attachments_resp["hits"]["hits"]:
+        try:
             _source = attachment_item["_source"]
             email_entry = {
                 "email_id" : _source["id"],
@@ -85,8 +85,8 @@ def _query_email_attachments(index, size, emails_query):
                 attachment_entry["size"] = attachment.get("content_length",-1)
 
                 email_attachments.append(attachment_entry)
-    except KeyError as ke:
-        app.logger.error("Query FAILED id={0}  - KeyError={1}".format(_source["id"], ke))
+        except KeyError as ke:
+            app.logger.error("Query FAILED id={0}  - KeyError={1}".format(_source["id"], ke))
 
     app.logger.debug("total document hits = %s, TIME_ELAPSED=%g, for index=%s" % (attachments_resp["hits"]["total"], time.time()-start, index))
     return {"attachments_total": attachments_resp["hits"]["total"], "hits":email_attachments}

@@ -57,6 +57,7 @@ def initialize_email_addr_cache(ingest_ids, update=False):
     :param update:
     :return:
     '''
+    global _EMAIL_ADDR_CACHE
     _email_addr_cache_fields= ["community", "community_id", "addr", "received_count", "sent_count", "attachments_count", "ingest_id"]
 
     for ingest_id in ingest_ids.split(","):
@@ -67,7 +68,6 @@ def initialize_email_addr_cache(ingest_ids, update=False):
         _EMAIL_ADDR_CACHE_LOCK.acquire()
         try:
             app.logger.info("INITIALIZING CACHE -- index=%s"% ingest_id)
-            global _EMAIL_ADDR_CACHE
 
             body={"query" : {"match_all" : {}}}
 
@@ -168,7 +168,7 @@ def _search(data_set_id, email_address, qs, start_datetime, end_datetime, encryp
     graph["data_set_id"] = data_set_id
     return graph
 
-def _pre_search(data_set_id, email_address, qs, start_datetime, end_datetime, encrypted, size):
+def _search_summary(data_set_id, email_address, qs, start_datetime, end_datetime, encrypted, size):
     app.logger.debug("email_address=%s, qs=%s" % ((str(email_address)), qs))
     pre_search_results = {}
 

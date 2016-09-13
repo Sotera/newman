@@ -11,7 +11,8 @@ from newman_es.es_search import _build_graph_for_emails
 # <host>:<port>:/email/set_starred/<email_id>?ingest_id=<single ingest id>&starred=<True|False>
 # Defaults to True
 
-@app.route('/tag/set_email_starred/<string:email_id>')
+# TODO change service root
+@app.route('/email/set_email_starred/<string:email_id>')
 def setStarred(email_id):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
     ingest_id = parseParamIngestId(request.args)
@@ -26,9 +27,10 @@ def setStarred(email_id):
 
     return jsonify(set_starred(ingest_id, [email_id], starred))
 
+# TODO change service root
 # <host>:<port>:/email/search_all_starred?data_set_id=<data_set_id>
 # common URL params apply, date, size, etc
-@app.route('/tag/search_all_starred')
+@app.route('/email/search_all_starred')
 def searchStarred():
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
     ingest_id = parseParamIngestId(request.args)
