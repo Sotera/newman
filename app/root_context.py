@@ -1,5 +1,5 @@
 from app import app
-from flask import request, send_from_directory
+from flask import send_from_directory
 
 @app.route('/')
 def root():

@@ -72,7 +72,6 @@ def initialize_email_addr_cache(ingest_ids, update=False):
             body={"query" : {"match_all" : {}}}
 
             num = count(ingest_id,"email_address")
-            print num
             addrs = es().search(index=ingest_id, doc_type="email_address", size=num, fields=_email_addr_cache_fields, body=body)
             addr_index = {f["addr"][0] : f for f in [hit["fields"] for hit in addrs["hits"]["hits"]]}
             _EMAIL_ADDR_CACHE[ingest_id] = addr_index
@@ -103,7 +102,6 @@ def _build_graph_for_emails(data_set_id, docs, query_hits):
     addr_to_ingest_ids = {}
 
     total = count(data_set_id, "email_address")
-    print total
 
     # Initialize all datasets
     initialize_email_addr_cache(data_set_id)

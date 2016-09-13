@@ -1,5 +1,5 @@
 from app import app
-from flask import jsonify, request
+from flask import request
 from werkzeug.exceptions import BadRequest, NotFound
 
 from newman_es.es_export import export_emails_archive
