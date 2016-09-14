@@ -10,7 +10,7 @@ permalink: /quick-start/
 3. Install SSH client - If you have Git, just add it to your Path System variable. Select **Start** button , right-click on Computer, select **Properties**, select **Advanced system settings** link, select **Environment Variables…** button, scroll to System Variables **Path** and then select it, select the **Edit…** button, scroll to the end of the text field and add **C:\Program Files (x86)\Git;C:\Program Files (x86)\Git\bin**. Git is not required but a SSH client is. Other options include installing Cygwin, MinGW or your personal favorite SSH client.
 
 # Newman Setup
-1. Download the latest Newman release. Note: The latest version as of 8/23/2016 is [Newman-VM-2.1.3](https://www.dropbox.com/s/wznndytprotn9xr/newman-vm-v2.1.3.box?dl=0).
+1. Download the latest Newman release. Note: The latest version as of 8/23/2016 is [Newman-VM-2.1.3](https://www.dropbox.com/s/8680d2fjtu96tgw/newman-vm-v2.1.3.box?dl=0).
 2. Copy from Download directory to a known location like C:\Users\jsmith\virtualboxvms\
 3. Open a CMD terminal - select Windows **Start** icon, type **cmd**, select **cmd.exe**.
 4. Change directory to **cd virtualboxvms**. The prompt should now be **C:\Users\jsmith\virtualboxvms>**.
