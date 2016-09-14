@@ -48,9 +48,10 @@ app.logger.info('Newman config loaded.')
 from app import root_context
 from app import datasource
 from app import app_config
+from app import search
 from app import ingester
 from app import email
 from app import export_services
 from app import tag_services
 from app import aggregations
-from app import search
+from app import geo
