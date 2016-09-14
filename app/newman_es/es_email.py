@@ -62,10 +62,12 @@ def get_top_communities(index, query_terms='', topic_score=None, entity={}, date
     communities_agg = es().search(index=index, doc_type='email_address', size=0, body=query)
     # total_other = communities_agg["aggregations"]["community_agg"]["doc_count_error_upper_bound"]
     communities = [[community["key"], int(community["doc_count"])] for community in communities_agg["aggregations"]["community_filtered_agg"]["community_agg"]["buckets"]]
-    total = sum(domain[1] for domain in communities)
-    communities = [[community[0],community[1], "{0:.2f}".format(round(100.0*community[1]/total,2))] for community in communities]
-    return communities
-
+    try:
+        total = sum(domain[1] for domain in communities)
+        communities = [[community[0],community[1], "{0:.2f}".format(round(100.0*community[1]/total,2))] for community in communities]
+        return communities
+    except KeyError:
+        return []
 
 # GET domains for email_address index
 def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, encrypted=None, num_domains=20):
@@ -79,10 +81,13 @@ def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, ent
 
     domains_agg = es().search(index=index, doc_type='email_address', size=0, body=query)
     # total_other = domains_agg["aggregations"]["domain_agg"]["doc_count_error_upper_bound"]
-    domains = [[domain["key"], int(domain["doc_count"])] for domain in domains_agg["aggregations"]["domain_filtered_agg"]["domain_agg"]["buckets"]]
-    total = sum(domain[1] for domain in domains)
-    domains = [[domain[0],domain[1], "{0:.2f}".format(round(100.0*domain[1]/total,2))] for domain in domains]
-    return domains
+    try:
+        domains = [[domain["key"], int(domain["doc_count"])] for domain in domains_agg["aggregations"]["domain_filtered_agg"]["domain_agg"]["buckets"]]
+        total = sum(domain[1] for domain in domains)
+        domains = [[domain[0],domain[1], "{0:.2f}".format(round(100.0*domain[1]/total,2))] for domain in domains]
+        return domains
+    except KeyError:
+        return []
 
 # GET top 10 Attchment types for index
 def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, encrypted=None, num_top_attachments=20):
