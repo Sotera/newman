@@ -13,7 +13,7 @@ def exportMany():
     email_ids = parseParamEmailIds(request.args)
     return export_emails_archive(data_set_id, email_ids)
 
-@app.route('/email/exportStarred')
+@app.route('/email/export_all_starred')
 def exportStarred():
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
 

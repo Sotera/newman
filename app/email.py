@@ -2,6 +2,7 @@ from app import app
 from flask import jsonify, request, send_file
 from werkzeug.exceptions import BadRequest, NotFound
 
+import cStringIO
 import base64
 import mimetypes
 
@@ -81,27 +82,26 @@ def get_attachment_by_id(attachment_id):
         raise NotFound("Attachment not found for (index=%s, attachment_id=%s)" % (data_set_id, attachment_id))
     attachment = attachments["hits"]["hits"][0]["_source"]
 
-    ext = attachment["extension"]
     filename = attachment["filename"]
 
     content = attachment["contents64"]
     bytes = base64.b64decode(content)
     # dump(bytes, filename)
-
     mime_type = mimetypes.guess_type(filename)[0]
 
-    # as_str = str(bytes)
-    # tangelo.log(str(len(as_str)), "Uploading Attachment - length = ")
+    buffer = cStringIO.StringIO(str(bytes))
 
+    app.logger.debug(u"Uploading Attachment: data_set ={}, guid= {}, filename= {}, length = {}".format(data_set_id, attachment_id, filename, str(buffer.tell())))
+
+    buffer.reset()
     if not mime_type:
         # tangelo.content_type(u"application/x-download")
         # header(u"Content-Disposition", u'attachment; filename="{}"'.format(filename))
-        return send_file(str(bytes), mimetype=u"application/x-download", as_attachment=True, attachment_filename=filename)
+        return send_file(buffer, mimetype=u"application/x-download", as_attachment=True, attachment_filename=filename)
     else:
         # tangelo.content_type(mime_type)
         # header(u"Content-Disposition", u'inline; filename="{}"'.format(filename))
-        return send_file(str(bytes), mimetype=mime_type, as_attachment=False, attachment_filename=filename)
-
+        return send_file(buffer, mimetype=mime_type, as_attachment=False, attachment_filename=filename)
 
 # TODO is this deprecated????
 #GET <host>:<port>:/email/search_all_attach_by_sender/<sender>?data_set_id=<data_set>

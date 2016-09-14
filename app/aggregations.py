@@ -14,6 +14,7 @@ from newman_es.es_search import _build_graph_for_emails, _query_email_attachment
 from newman_es.es_email import get_top_attachment_types
 from newman_es.es_series import get_email_activity, get_total_attachment_activity, get_emailer_attachment_activity, attachment_histogram
 from newman_es.es_topic import get_categories, get_dynamic_clusters
+from newman_es.es_numeric_aggregations import get_top_phone_numbers
 
 #GET <host>:<port>:/entity/entity?entities.entity_person=mike,joe&entities.entity_location=paris,los angeles
 @app.route('/entity/entity')
@@ -217,3 +218,14 @@ def get_topics_by_query():
 def topic_list(num_topics):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
     return jsonify(get_categories(data_set_id))
+
+
+#GET <host>:<port>/profile/top_phone_numbers?qs="<query_string>"
+@app.route('/profile/top_phone_numbers')
+def top_phone_numbers():
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+
+    qs = parseParamTextQuery(request.args)
+
+    return jsonify(get_top_phone_numbers(data_set_id, email_address='', qs=qs, date_bounds=(start_datetime, end_datetime), size=size))
+

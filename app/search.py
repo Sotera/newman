@@ -29,14 +29,13 @@ def search(request, mode, email_address=''):
 
 
 # GET <host>:<port>:/search/search/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
-@app.route('/search/search/<string:mode>/string:<email_address>')
-def search_emails(mode, email_address):
-    return search(request, mode, email_address)
+@app.route('/search/search/email/<string:email_address>')
+def search_emails(email_address):
+    return search(request, 'email', email_address)
 
-@app.route('/search/search/<string:mode>')
-def search_all(mode):
-    return search(request, mode)
-
+@app.route('/search/search/all')
+def search_all():
+    return search(request, 'all')
 
 
 #GET /search/search_by_conversation_forward_backward?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>&order=prev&sender=<s1,s2...>&recipient=<r1,r2..>
