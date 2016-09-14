@@ -61,8 +61,8 @@ def get_top_communities(index, query_terms='', topic_score=None, entity={}, date
 
     communities_agg = es().search(index=index, doc_type='email_address', size=0, body=query)
     # total_other = communities_agg["aggregations"]["community_agg"]["doc_count_error_upper_bound"]
-    communities = [[community["key"], int(community["doc_count"])] for community in communities_agg["aggregations"]["community_filtered_agg"]["community_agg"]["buckets"]]
     try:
+        communities = [[community["key"], int(community["doc_count"])] for community in communities_agg["aggregations"]["community_filtered_agg"]["community_agg"]["buckets"]]
         total = sum(domain[1] for domain in communities)
         communities = [[community[0],community[1], "{0:.2f}".format(round(100.0*community[1]/total,2))] for community in communities]
         return communities
