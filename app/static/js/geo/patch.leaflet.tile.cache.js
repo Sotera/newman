@@ -1,9 +1,11 @@
 
 L.TileLayer.addInitHook(function() {
 
+	this._cache_db_url = null;
+	this._remote_cache = null;
+	this._canvas = null;
+
 	if (!this.options.useCache) {
-		this._local_db = null;
-		this._canvas = null;
 		return;
 	}
 
@@ -12,7 +14,15 @@ L.TileLayer.addInitHook(function() {
 	this.local_tile_db_name = app_geo_config.getLocalTileDBName();
 	this.remote_tile_db_name = app_geo_config.getRemoteTileDBName();
 
-	this._local_db = new PouchDB( this.local_tile_db_name );
+	if (app_geo_config.enableSeparateLocalDB()) {
+		this._cache_db_url = this.local_tile_db_name;
+	}
+	else {
+		this._cache_db_url = this.remote_tile_db_name
+	}
+	this._remote_cache = new PouchDB( this._cache_db_url, {adapter: "http"} );
+
+
 	//this._remote_db = new PouchDB( this.remote_tile_db_name );
 	this._seed_cache_handler = {"is_cancelled" : false};
 	this._download_handler = null;
@@ -55,8 +65,9 @@ L.TileLayer.include({
 		var tileUrl = this.getTileUrl(coords);
 
 		if (this.options.useCache && this._canvas) {
-			this._local_db.get(tileUrl, {revs_info: true}, this._onCacheLookup(tile, tileUrl, done));
-		} else {
+			this._remote_cache.get( tileUrl, {revs_info: true}, this._onCacheLookup(tile, tileUrl, done) );
+		}
+		else {
 			// Fall back to standard behaviour
 			tile.onload = L.bind(this._tileOnLoad, this, done, tile);
 		}
@@ -65,55 +76,61 @@ L.TileLayer.include({
 		return tile;
 	},
 
-	// Returns a callback (closure over tile/key/originalSrc) to be run when the DB
-	//   backend is finished with a fetch operation.
+	/*
+	 * Returns a callback (closure over tile/key/originalSrc) to be run
+	 * when the DB-backend is finished with a fetch operation.
+	 */
 	_onCacheLookup: function(tile, tileUrl, done) {
 		this.options.useOnlyCache = app_geo_config.enableOnlyTileCache();
 
 		return function(err, data) {
 			if (data) {
-				this.fire('tile_cache:hit', {
-					tile: tile,
-					url: tileUrl
-				});
+				this.fire( 'tile_cache:hit', { tile: tile, url: tileUrl } ); // tile found in cache
+
 				if (Date.now() > data.timestamp + this.options.cacheMaxAge && !this.options.useOnlyCache) {
 					// Tile is too old, try to refresh it
-					console.warn('Tile is too old: ' + tileUrl);
+					console.log('tile is too old: ' + tileUrl);
 
 					if (this.options.saveToCache) {
 						tile.onload = L.bind(this._saveTile, this, tile, tileUrl, data._revs_info[0].rev, done);
 					}
+
 					tile.crossOrigin = 'Anonymous';
 					tile.src = tileUrl;
 					tile.onerror = function(ev) {
 						// If the tile is too old but couldn't be fetched from the network,
-						//   serve the one still in cache.
+						// serve the one still in cache.
 						this.src = data.dataUrl;
 					}
-				} else {
+				}
+				else {
 					// Serve tile from cached data
 					//console.log('Tile is cached: ', tileUrl);
 					tile.onload = L.bind(this._tileOnLoad, this, done, tile);
 					tile.src = data.dataUrl;    // data.dataUrl is already a base64-encoded PNG image.
 				}
-			} else {
-				this.fire('tile_cache:miss', {
-					tile: tile,
-					url: tileUrl
-				});
+
+			}
+			else {
+				this.fire( 'tile_cache:miss', { tile: tile, url: tileUrl } ); // tile not found in cache
+
 				if (this.options.useOnlyCache) {
 					// Offline, not cached
-// 					console.log('Tile not in cache', tileUrl);
+					//console.log('Tile not in cache', tileUrl);
 					tile.onload = L.Util.falseFn;
 					tile.src = L.Util.emptyImageUrl;
-				} else {
+				}
+				else {
 					//Online, not cached, request the tile normally
-// 					console.log('Requesting tile normally', tileUrl);
+					//console.log('Requesting tile normally', tileUrl);
+
 					if (this.options.saveToCache) {
 						tile.onload = L.bind(this._saveTile, this, tile, tileUrl, null, done);
-					} else {
+					}
+					else {
 						tile.onload = L.bind(this._tileOnLoad, this, done, tile);
 					}
+
 					tile.crossOrigin = 'Anonymous';
 					tile.src = tileUrl;
 				}
@@ -121,10 +138,11 @@ L.TileLayer.include({
 		}.bind(this);
 	},
 
-	// Returns an event handler (closure over DB key), which runs
-	//   when the tile (which is an <img>) is ready.
-	// The handler will delete the document from pouchDB if an existing revision is passed.
-	//   This will keep just the latest valid copy of the image in the cache.
+	/*
+	 * Returns an event handler (closure over DB key), which runs when the tile (which is an <img>) is ready.
+	 * The handler will delete the document from pouchDB if an existing revision is passed.
+	 * This will keep just the latest valid copy of the image in the cache.
+	 */
 	_saveTile: function(tile, tileUrl, existingRevision, done) {
 		if (this._canvas === null) return;
 		this._canvas.width  = tile.naturalWidth  || tile.width;
@@ -137,19 +155,25 @@ L.TileLayer.include({
 		var doc = {dataUrl: dataUrl, timestamp: Date.now()};
 
 		if (existingRevision) {
-			this._local_db.remove(tileUrl, existingRevision);
+			this._remote_cache.remove(tileUrl, existingRevision);
 		}
-		this._local_db.put(doc, tileUrl, doc.timestamp);
+		this._remote_cache.put(doc, tileUrl, doc.timestamp);
 
 		if (done) { done(); }
 	},
 
 
-	// Seeds the cache given a bounding box (latLngBounds), and
-	//   the minimum and maximum zoom levels
-	// Use with care! This can spawn thousands of requests and
-	//   flood tileservers!
+	/*
+	 * Seeds the cache given a bounding box (latLngBounds), and
+	 *  the minimum and maximum zoom levels.
+	 *  Use with care! This can spawn thousands of requests and flood tile-server!
+	 */
 	seed: function(bbox, minZoom, maxZoom) {
+		if (!app_geo_config.enableAdvanceMode()) {
+			console.log('Must enable advance mode!');
+			return;
+		}
+
 		if (!this.options.useCache) return;
 		if (minZoom > maxZoom) return;
 		if (!this._map) return;
@@ -202,8 +226,10 @@ L.TileLayer.include({
 		return document.createElement('img');
 	},
 
-	// Modified L.TileLayer.getTileUrl, this will use the zoom given by the parameter coords
-	//  instead of the maps current zoomlevel.
+	/*
+	 * Modified L.TileLayer.getTileUrl, this will use the zoom given by the parameter coords
+	 * instead of the maps current zoomlevel.
+	 */
 	_getTileUrl: function (coords) {
 		var zoom = coords.z;
 		if (this.options.zoomReverse) {
@@ -219,9 +245,10 @@ L.TileLayer.include({
 		}, this.options));
 	},
 
-	// Uses a defined tile to eat through one item in the queue and
-	//   asynchronously recursively call itself when the tile has
-	//   finished loading.
+	/*
+	 * Uses a defined tile to eat through one item in the queue and
+	 * asynchronously recursively call itself when the tile has finished loading.
+	 */
 	_seedOneTile: function(tile, remaining, seedData) {
 		if (this._seed_cache_handler.is_cancelled) {
 			this.fire('seed:end', seedData);
@@ -241,7 +268,7 @@ L.TileLayer.include({
 
 		var url = remaining.pop();
 
-		this._local_db.get(url, function(err, data) {
+		this._remote_cache.get(url, function(err, data) {
 			if (!data) {
 				/// FIXME: Do something on tile error!!
 				tile.onload = function(ev) {
@@ -250,7 +277,8 @@ L.TileLayer.include({
 				}.bind(this);
 				tile.crossOrigin = 'Anonymous';
 				tile.src = url;
-			} else {
+			}
+			else {
 				this._seedOneTile(tile, remaining, seedData);
 			}
 		}.bind(this));
@@ -272,8 +300,9 @@ L.TileLayer.include({
 		console.log('\toptions.useOnlyCache : ' + this.options.useOnlyCache);
 		console.log('\tlocal_tile_db_name : ' + this.local_tile_db_name);
 		console.log('\tremote_tile_db_name : ' + this.remote_tile_db_name);
+		console.log('\tseparate_local_db : ' + app_geo_config.enableSeparateLocalDB());
 
-		if (this._local_db) {
+		if (this._cache_db_url == this.local_tile_db_name) {
 			/*
 			function newMapEvent(event_type, event_obj) {
 				if (map) {
@@ -317,7 +346,6 @@ L.TileLayer.include({
 	},
 
   downloadTileCache : function( map ) {
-
 		this.options.useOnlyCache = app_geo_config.enableOnlyTileCache();
 		this.local_tile_db_name = app_geo_config.getLocalTileDBName();
 		this.remote_tile_db_name = app_geo_config.getRemoteTileDBName();
@@ -326,8 +354,11 @@ L.TileLayer.include({
 		console.log('\toptions.useOnlyCache : ' + this.options.useOnlyCache);
 		console.log('\tlocal_tile_db_name : ' + this.local_tile_db_name);
 		console.log('\tremote_tile_db_name : ' + this.remote_tile_db_name);
+    console.log('\tseparate_local_db : ' + app_geo_config.enableSeparateLocalDB());
 
-		if (this._local_db) {
+
+
+		if (this._cache_db_url == this.local_tile_db_name) {
 
 			this._download_handler = PouchDB.replicate(this.remote_tile_db_name, this.local_tile_db_name,
 					{retry: false}

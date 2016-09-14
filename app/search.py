@@ -37,6 +37,10 @@ def search_emails(email_address):
 def search_all():
     return search(request, 'all')
 
+@app.route('/search/search/all/<string:noop>')
+def search_all_qs(noop):
+    return search(request, 'all')
+
 
 #GET /search/search_by_conversation_forward_backward?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>&order=prev&sender=<s1,s2...>&recipient=<r1,r2..>
 # 'order' param controls if we are paging the next or previous sets of data and can be next or prev, default is next
@@ -93,7 +97,7 @@ def search_email_by_conversation():
 
 
 #GET <host>:<port>:/search/search_by_community/<community_name>?data_set_id=<data_set>&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
-@app.route('/search/search_email_by_community/string:<community>')
+@app.route('/search/search_email_by_community/<string:community>')
 def search_email_by_community(community):
     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
     size = size if size >500 else 2500

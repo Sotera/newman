@@ -529,3 +529,31 @@ input.fa_toggle.disabled {
     width: 200px;
     display: inline-block;
 }
+
+.row-container {
+    margin: 0px 0px 0px 0px;
+    padding: 0px 0px 0px 0px;
+}
+
+
+.col-container {
+    margin: 0px 0px 0px 0px;
+    padding: 0px 0px 0px 0px;
+}
+
+.no-margin-no-padding {
+    width: 100%;
+    margin: 0px 0px 0px 0px !important;
+    padding: 0px 0px 0px 0px !important;
+}
+
+.bordered-container {
+    border: 1px solid #BBBBBB;
+    border-radius: 4px;
+}
+
+.bordered-grayed-out-container {
+    border: 1px solid #BBBBBB;
+    border-radius: 4px;
+    background: #F5F5F5;"
+}

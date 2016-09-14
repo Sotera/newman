@@ -13,11 +13,12 @@
   },
 
   "tile_cache_config": {
-    "host" : "newman-tile-server",
+    "host" : "localhost",
     "port" : 5984,
     "database" : "offline-tiles",
     "cache_only" : false,
-    "advance_mode" : false
+    "advance_mode" : false,
+    "separate_local_db" : false
   },
 
   "index_creator_defaults" : {

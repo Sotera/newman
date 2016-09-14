@@ -574,8 +574,8 @@ var newman_email_doc_table = (function () {
 
   function initEvents() {
 
-    $('#email_view_all_starred').off().click(function () {
-      console.log("clicked #email_view_all_starred");
+    $('#email_view_list_all_starred').off().click(function () {
+      console.log("#email_view_list_all_starred clicked");
 
       var email_id = _current_email_doc_id;
 

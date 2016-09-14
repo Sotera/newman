@@ -93,7 +93,9 @@ var newman_data_source = (function () {
 
     return {
       "uid" : uid,
-      "label": label
+      "label": label,
+      "is_selected" : false,
+      "is_data_source" : false
     }
   }
 
@@ -101,7 +103,9 @@ var newman_data_source = (function () {
 
     return {
       "uid" : uid,
-      "label": label
+      "label": label,
+      "is_selected" : false,
+      "is_data_source" : false
     }
   }
 
@@ -133,7 +137,8 @@ var newman_data_source = (function () {
       "end_datetime_selected": end_datetime_selected,
       "case_id" : case_id,
       "alt_ref_id" : alt_ref_id,
-      "size" : size
+      "size" : size,
+      "is_data_source" : true
     }
   }
 
@@ -143,6 +148,13 @@ var newman_data_source = (function () {
   }
 
   function init() {
+
+    if (_data_source_list) {
+      _data_source_list.length = 0;
+    }
+
+    var new_data_ingest = data_ingest( _data_ingest_id, _data_ingest_label );
+    _data_source_list.push( new_data_ingest );
 
     $('#data_source_list_dropdown').on('shown.bs.dropdown', function (event) {
       var attr_id = $(this).attr('id');
@@ -187,7 +199,7 @@ var newman_data_source = (function () {
             if (debug_enabled) {
               console.log("data_source_selected : changed!");
             }
-            requestAllSelected(true);
+            requestAllSelected( true );
           }
         }
       }
@@ -201,13 +213,6 @@ var newman_data_source = (function () {
       event.stopImmediatePropagation();
       event.stopPropagation();
     });
-
-    if (_data_source_list) {
-      _data_source_list.length = 0;
-    }
-
-    var new_data_ingest = data_ingest( _data_ingest_id, _data_ingest_label );
-    _data_source_list.push( new_data_ingest );
 
     _is_initialized = true;
   }
@@ -674,7 +679,7 @@ var newman_data_source = (function () {
     newman_aggregate_filter.clearAllAggregateFilter();
 
     // re-initialize starred-documents
-    newman_email_starred.initStarredDocumentList();
+    newman_email_starred.init();
 
     // re-initialize top-ranked email-accounts under each data-source
     newman_top_email_account_list_request.requestTopEmailAccountByDataSource( getAllSelectedAsString() );
@@ -735,6 +740,9 @@ var newman_data_source = (function () {
     }
 
     if (_all_dataset_response) {
+      if (!isInitialized()) {
+        init();
+      }
 
       //hack to force-select all available datasets for now
       _default_data_source_max_selected = _all_dataset_response.data_sets.length;
@@ -784,9 +792,10 @@ var newman_data_source = (function () {
       // initialize map tiles
       app_geo_map.initMapTileLayer();
 
-      requestAllSelected();
+      requestAllSelected( true );
 
     }
+    // end-of if(_all_dataset_response)
 
   }
 
@@ -830,8 +839,10 @@ var newman_data_source = (function () {
 
     if (_data_source_list && _data_source_list.length > 1) {
       _.each(_data_source_list, function (element) {
-        if (element.is_selected) {
-          selected_map[ element.uid ] = element;
+        if (element.is_data_source === true) {
+          if (element.is_selected === true) {
+            selected_map[element.uid] = element;
+          }
         }
       });
     }

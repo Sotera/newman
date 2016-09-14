@@ -133,16 +133,16 @@ var newman_top_email_domain = (function () {
    */
   function updateUIDomain( service_response ) {
 
-    var _domain_list = mapResponse( service_response );
+    var domain_ui_display_list = mapResponse( service_response );
 
-    if (_domain_list) {
+    if (domain_ui_display_list) {
       initUI();
 
       //console.log('\tfiltered_response: ' + JSON.stringify(_domain_list, null, 2));
 
-      _domain_list = _domain_list.sort( descendingPredicatByProperty("count") );
-      if (_domain_list.length > _top_count) {
-        _domain_list = _domain_list.splice(0, _top_count);
+      domain_ui_display_list = domain_ui_display_list.sort( descendingPredicatByProperty("count") );
+      if (domain_ui_display_list.length > _top_count) {
+        domain_ui_display_list = domain_ui_display_list.splice(0, _top_count);
       }
 
       //var colors = d3.scale.category20b();
@@ -153,8 +153,8 @@ var newman_top_email_domain = (function () {
       var margin = {top: margin_top, right: 10, bottom: margin_bottom, left: 150};
       width = width - margin.left - margin.right;
 
-      var max_value = _domain_list[0].count;
-      var width_bar_factor = getAdjustedChartWidthFactor(width, max_value);
+      var max_value = domain_ui_display_list[0].count;
+      var adjusted_width_factor = getAdjustedChartWidthFactor(width, max_value);
 
       var x = d3.scale.linear().range([0, width]);
       var chart = d3.select(chart_bar_ui_id).append('svg')
@@ -162,10 +162,10 @@ var newman_top_email_domain = (function () {
         .attr("width", width + margin.left + margin.right);
 
       x.domain([0, 100]);
-      chart.attr("height", height_bar * _domain_list.length + margin_top + margin_bottom);
+      chart.attr("height", height_bar * domain_ui_display_list.length + margin_top + margin_bottom);
 
       var bar = chart.selectAll("g")
-        .data(_domain_list).enter()
+        .data(domain_ui_display_list).enter()
         .append("g")
         .attr("transform", function (d, i) {
           return "translate(" + margin.left + "," + (+(i * height_bar) + +margin.top) + ")";
@@ -173,7 +173,7 @@ var newman_top_email_domain = (function () {
 
       bar.append("rect")
         .attr("width", function (d) {
-          return getAdjustedChartWidth(width_bar_factor, d.count);
+          return getAdjustedChartWidth(adjusted_width_factor, d.count);
         })
         .attr("height", height_bar - 1)
         .attr("class", "label highlight clickable")
@@ -192,7 +192,7 @@ var newman_top_email_domain = (function () {
 
       bar.append("text")
         .attr("x", function (d) {
-          return (getAdjustedChartWidth(width_bar_factor, d.count) - 3);
+          return (getAdjustedChartWidth(adjusted_width_factor, d.count) - 3);
         })
         .attr("y", height_bar / 2)
         .attr("dy", ".35em")
@@ -225,24 +225,33 @@ var newman_top_email_domain = (function () {
         return d.domain;
       });
 
+      //console.log('adjusted_width_factor : ' + adjusted_width_factor);
+      //console.log('ui_display_list :\n' + JSON.stringify(domain_ui_display_list, null, 2));
+
+      var top_donut_chart_sum = 0;
+
+      _.each(domain_ui_display_list, function (element, index) {
+        var adjusted_value = getAdjustedChartWidth(adjusted_width_factor, element.count) / width * 100;
+        //console.log('adjusted_value : ' + adjusted_value);
+        top_donut_chart_sum = top_donut_chart_sum + adjusted_value;
+      });
 
       var top_donut_chart_data = [];
-      var top_donut_chart_total = 1;
 
+      _.each(domain_ui_display_list, function (element, index) {
+        var adjusted_value = getAdjustedChartWidth(adjusted_width_factor, element.count) / width * 100;
+        //console.log('adjusted_value : ' + adjusted_value);
 
-      for( var i = 0; i < _domain_list.length; i++ ){
-        top_donut_chart_total = top_donut_chart_total + _domain_list[i].count;
-      };
+        var percent_value = (adjusted_value / top_donut_chart_sum * 100);
+        //console.log('percent_value : ' + percent_value);
 
-      for( var i = 0; i < _domain_list.length; i++ ){
-        var value = Math.round((_domain_list[i].count / top_donut_chart_total) * 100);
         var entry = {
-          value: value,
-          label: (_.take((_domain_list[i].domain).split(' '), 3).join(' ')),
-          formatted: value + '%'
+          value: percent_value,
+          label: (_.take((element.domain).split(' '), 3).join(' ')),
+          formatted: Math.round(percent_value) + '%'
         };
         top_donut_chart_data.push(entry);
-      };
+      });
 
 
       _donut_chart_domain_email = Morris.Donut({
@@ -258,7 +267,7 @@ var newman_top_email_domain = (function () {
   }
 
   function getAdjustedChartWidthFactor(width, max_value) {
-    var adjusted_factor = 1.0, adjusted_max = max_value;
+    var adjusted_factor = 1.0, adjusted_max = parseFloat(max_value);
     if (width && max_value) {
       var done = false;
       if (adjusted_max >= width) {
@@ -285,7 +294,7 @@ var newman_top_email_domain = (function () {
   }
 
   function getAdjustedChartWidth(factor, value) {
-    var adjusted_value = value;
+    var adjusted_value = parseFloat(value);
     if (factor && value) {
       adjusted_value = (factor * value)
     }

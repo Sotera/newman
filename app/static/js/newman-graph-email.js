@@ -259,11 +259,6 @@ var newman_graph_email = (function () {
       $('#export_download_link').hide();
     });
 
-
-    $("#export_starred_set").click(function () {
-      newman_email_starred_request_export.requestService();
-    });
-
     $("#color_by_dataset").click(function () {
       setGraphNodeColor('dataset_color');
     });

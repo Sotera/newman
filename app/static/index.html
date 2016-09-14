@@ -75,98 +75,175 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header" style="padding: 5px;">
-          <div class="row" style="margin: 0; padding: 0;" >
-            <div class="col-xs-4" style="margin: 0; padding: 0;" >
+          <div class="row row-container" >
+            <div class="col-xs-3 col-container" >
             </div>
-            <div class="col-xs-7" style="margin: 0; padding: 0; text-align: left;" >
+            <div class="col-xs-4 col-container" style="text-align: left;" >
               <h4 class="modal-title" style="font-family: 'Lucida Grande','Lucida Sans','Lucida Sans Unicode','Segoe UI','Verdana','sans-serif'; color: #0080AB;"
-                  id="data_ingest_modal_label">New Dataset</h4>
+                  id="data_ingest_modal_label">New Dataset Ingest</h4>
             </div>
-            <div class="col-xs-1" style="margin: 0; padding: 0; text-align: right;" >
+
+            <div class="col-xs-1 col-container" style="text-align: center; color: #0080AB;" id="data_ingest_modal_status_icon_container">
+              <i id="data_ingest_modal_status_icon" class="fa fa-cog fa-lg"></i>
+            </div>
+            <div class="col-xs-3 col-container bordered-grayed-out-container" style="text-align: left;" id="data_ingest_modal_status_text_container" >
+              <span id="data_ingest_modal_status_text" style="line-height: 20px; font-size: 13px; padding: 2px 5px 2px 5px;">Available</span>
+            </div>
+
+            <div class="col-xs-1 col-container" style="text-align: right;" >
               <button type="button" class="fa fa-times" data-dismiss="modal" aria-hidden="true"></button>
             </div>
           </div>
         </div>
         <div class="modal-body" style="padding: 5px;">
-          <div class="row" style="margin: 0; padding: 6px 0px 6px 0px;" >
-            <div class="col-xs-3" style="margin: 0; padding: 0; text-align: right;" >
-              <span class="label label-primary" style="font-size: 80%; font-weight: normal;"> Dataset File </span>
-            </div>
-            <div class="col-xs-8" style="margin: 0; padding: 0 0 0 2px;" >
-              <div id="dataset_file">
-                <input id="dataset_file_name" class="input-medium" type="text" style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px;"/>
-              </div>
-            </div>
-            <div class="col-xs-1" style="margin: 0; padding: 0; text-align: left;" >
-              <button id="dataset_file_select" class="btn btn-small outline"><i class="fa fa-list-ul"></i></button>
-            </div>
+          <!--
+          <div class="row row-container" id="data_ingest_modal_status_row" >
+
           </div>
-          <div class="row" style="margin: 0; padding: 6px 0px 6px 0px;" >
-            <div class="col-xs-3" style="margin: 0; padding: 0; text-align: right;" >
-              <span class="label label-primary" style="font-size: 85%; font-weight: normal;"> Dataset Label </span>
-            </div>
-            <div class="col-xs-4" style="margin: 0; padding: 0 0 0 2px;" >
-              <div id="dataset_label">
-                <input id="dataset_label_text" class="input-medium" type="text" style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px;" />
+          -->
+
+          <!--<div class="row row-container" id="data_ingest_modal_parameter_row" >-->
+            <div class="container no-margin-no-padding" id="data_ingest_modal_parameter_container">
+              <div class="row" style="margin: 0; padding: 6px 0px 6px 0px;" >
+                <div class="col-xs-3" style="margin: 0; padding: 0; text-align: right;" >
+                  <span class="label label-primary" style="font-size: 80%; font-weight: normal;"> Dataset File </span>
+                </div>
+                <div class="col-xs-8" style="margin: 0; padding: 0 0 0 2px;" >
+                  <div id="ingest_dataset_file">
+                    <input id="ingest_dataset_file_name" class="input-medium" type="text" disabled="disabled" style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px; background: #F5F5F5;"/>
+                  </div>
+                </div>
+                <div class="col-xs-1" style="margin: 0; padding: 0; text-align: left;" >
+                  <button id="ingest_dataset_file_select" class="btn btn-small outline"><i class="fa fa-list-ul"></i></button>
+                </div>
               </div>
-            </div>
-            <div class="col-xs-5" style="margin: 0; padding: 0;" >
-            </div>
-          </div>
-          <div class="row" style="margin: 0; padding: 6px 0px 6px 0px;" >
-            <div class="col-xs-3" style="margin: 0; padding: 0; text-align: right;" >
-              <span class="label label-primary" style="font-size: 85%; font-weight: normal;"> Dataset Type </span>
-            </div>
-            <div class="col-xs-2" style="margin: 0; padding: 0 0 0 6px; text-align: right;" >
-              <label class="radio-inline" >
-                <input type="radio" name="ingest_type_radios" id="ingest_type_pst" value="ingest_type_pst" style="margin: 4px 0 0 -18px;" checked="checked"/> pst
-              </label>
-            </div>
-            <div class="col-xs-2" style="margin: 0; padding: 0; text-align: right;" >
-              <label class="radio-inline" >
-                <input type="radio" name="ingest_type_radios" id="ingest_type_mbox" value="ingest_type_mbox" style="margin: 4px 0 0 -18px;" /> mbox
-              </label>
-            </div>
-            <div class="col-xs-2" style="margin: 0; padding: 0; text-align: right;" >
-              <label class="radio-inline" style="color: #BBBBBB;" >
-                <input type="radio" disabled="disabled" name="ingest_type_radios" id="ingest_type_eml" value="ingest_type_eml" style="margin: 4px 0 0 -18px;" /> eml
-              </label>
-            </div>
-            <div class="col-xs-3" style="margin: 0; padding: 0;" >
-            </div>
-          </div>
-          <div class="row" style="margin: 0; padding: 6px 0px 6px 0px;" >
-            <div class="col-xs-3" style="margin: 0; padding: 0; text-align: right;" >
-              <span class="label label-primary" style="font-size: 85%; font-weight: normal;"> Dataset Ingest ID </span>
-            </div>
-            <div class="col-xs-8" style="margin: 0; padding: 0 0 0 2px;" >
-              <div id="ingest_id">
-                <input id="ingest_id_text" class="input-medium" type="text" disabled="disabled" style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px; background: #F5F5F5;" />
+
+              <div class="row row-container" style="padding: 6px 0px 6px 0px;" >
+                <div class="col-xs-3 col-container" style="text-align: right;" >
+                  <span class="label label-primary" style="font-size: 85%; font-weight: normal;"> Case ID </span>
+                </div>
+                <div class="col-xs-6 col-container" style="padding: 0 0 0 2px;" >
+
+                  <div class="input-group" style="width: auto; height: auto; position:relative;" >
+                    <input type="text" class="input-medium" type="text" id="ingest_case_id_text" disabled="disabled"
+                           style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px 0px 0px 6px; background: #F5F5F5;" >
+                    <div class="input-group-btn">
+                      <button type="button" class="btn label-primary dropdown-toggle" data-toggle="dropdown"
+                              style="font-weight: normal; font-size: small; color: #FFF; margin: 0; padding: 1px 5px 1px 5px;">
+                        <span class="fa fa-caret-down"></span>
+                      </button>
+                      <ul class="dropdown-menu" style="min-width: 100px; width: auto; padding: 2px 5px 2px 5px; border-radius: 0px 6px 6px 0px;"
+                          id="ingest_case_id_list">
+                      </ul>
+                    </div>
+
+                  </div>
+
+
+                </div>
               </div>
-            </div>
-            <div class="col-xs-1" style="margin: 0; padding: 0;" >
-            </div>
-          </div>
-          <div class="row" style="margin: 0; padding: 6px 0px 6px 0px;" >
-            <div class="col-xs-3" style="margin: 0; padding: 0; text-align: right;" >
-              <span class="label label-primary" style="font-size: 85%; font-weight: normal;"> Case ID </span>
-            </div>
-            <div class="col-xs-3" style="margin: 0; padding: 0 0 0 2px;" >
-              <div id="case_id">
-                <input id="case_id_text" class="input-medium" type="text" style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px;" />
+
+              <div class="row row-container" style="padding: 6px 0px 6px 0px;" >
+                <div class="col-xs-3 col-container" style="text-align: right;" >
+                  <span class="label label-primary" style="font-size: 85%; font-weight: normal;"> Dataset Name </span>
+                </div>
+                <div class="col-xs-6 col-container" style="padding: 0 0 0 2px;" >
+
+                  <div class="input-group" style="width: auto; height: auto; position:relative;" >
+                    <input type="text" class="input-medium" type="text" id="ingest_dataset_label_text" disabled="disabled"
+                           style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px 0px 0px 6px; background: #F5F5F5;" >
+                    <div class="input-group-btn">
+                      <button type="button" class="btn label-primary dropdown-toggle" data-toggle="dropdown"
+                              style="font-weight: normal; font-size: small; color: #FFF; margin: 0; padding: 1px 5px 1px 5px;">
+                        <span class="fa fa-caret-down"></span>
+                      </button>
+                      <ul class="dropdown-menu" style="min-width: 120px; width: auto; padding: 2px 5px 2px 5px; border-radius: 0px 6px 6px 0px;"
+                          id="ingest_dataset_label_list">
+                      </ul>
+                    </div>
+
+                  </div>
+
+                </div>
+                <div class="col-xs-5 col-container" >
+                </div>
               </div>
-            </div>
-            <div class="col-xs-2" style="margin: 0; padding: 0; text-align: right;" >
-              <span class="label label-primary" style="font-size: 85%; font-weight: normal;"> Alt Ref ID </span>
-            </div>
-            <div class="col-xs-3" style="margin: 0; padding: 0 0 0 2px;" >
-              <div id="alt_ref_id">
-                <input id="alt_ref_id_text" class="input-medium" type="text" style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px;" />
+              <div class="row row-container" style="padding: 6px 0px 6px 0px;" >
+                <div class="col-xs-3 col-container" style="text-align: right;" >
+                  <span class="label label-primary" style="font-size: 85%; font-weight: normal;"> Dataset Type </span>
+                </div>
+                <div class="col-xs-2 col-container" style="padding: 0 0 0 6px; text-align: right;" >
+                  <label class="radio-inline" >
+                    <input type="radio" name="ingest_type_radios" id="ingest_type_pst" value="ingest_type_pst" style="margin: 4px 0 0 -18px;" checked="checked"/> pst
+                  </label>
+                </div>
+                <div class="col-xs-2 col-container" style="text-align: right;" >
+                  <label class="radio-inline" >
+                    <input type="radio" name="ingest_type_radios" id="ingest_type_mbox" value="ingest_type_mbox" style="margin: 4px 0 0 -18px;" /> mbox
+                  </label>
+                </div>
+                <div class="col-xs-2 col-container" style="text-align: right;" >
+                  <!--<label class="radio-inline" style="color: #BBBBBB;" >-->
+                  <label class="radio-inline" >
+                    <input type="radio" name="ingest_type_radios" id="ingest_type_eml" value="ingest_type_eml" style="margin: 4px 0 0 -18px;" /> eml
+                  </label>
+                </div>
+                <div class="col-xs-3 col-container" >
+                </div>
               </div>
+
+              <div class="row row-container" style="padding: 6px 0px 6px 0px;" >
+                <div class="col-xs-3 col-container" style="text-align: right;" >
+                  <span class="label label-primary" style="font-size: 85%; font-weight: normal;"> Alt Reference ID </span>
+                </div>
+                <div class="col-xs-6" style="margin: 0; padding: 0 0 0 2px;" >
+                  <div id="alt_ref_id">
+                    <input id="ingest_alt_ref_id_text" class="input-medium" type="text" style="width: 100%; border: 1px solid #BBBBBB; border-radius: 6px;" />
+                  </div>
+                </div>
+
+                <div class="col-xs-2 col-container" style="padding: 0px 0px 0px 10px; text-align: left;" >
+                  <div class="input-group" style="width: auto; height: auto; position:relative;" >
+                    <input type="text" id="ingest_lang_selected" class="form-control" disabled="disabled" value="English"
+                           style="margin: 0; padding: 0px 2px 0px 2px; background: #F5F5F5;">
+                    <div class="input-group-btn">
+                      <button type="button" class="btn label-primary dropdown-toggle" data-toggle="dropdown"
+                              style="font-weight: normal; font-size: small; color: #FFF; margin: 0; padding: 2px 5px 1px 5px;">
+                        <span class="fa fa-language"></span>
+                      </button>
+                      <ul class="dropdown-menu"
+                          style="min-width: 100px; width: auto; padding: 2px 5px 2px 5px; border-radius: 4px;" id="ingest_lang_list">
+                        <li>English</li>
+                        <li>Spanish</li>
+                      </ul>
+                    </div>
+
+                  </div>
+                </div>
+
+                <div class="col-xs-1 col-container" >
+
+                </div>
+
+              </div>
+
+              <div class="row" style="margin: 0; padding: 6px 0px 6px 0px;" >
+                <div class="col-xs-3" style="margin: 0; padding: 0; text-align: right;" >
+                  <span class="label label-primary" style="font-size: 85%; font-weight: normal;"> Dataset Ingest ID </span>
+                </div>
+                <div class="col-xs-8" style="margin: 0; padding: 0 0 0 2px;" >
+                  <div id="ingest_id" >
+                    <input id="ingest_id_text" class="input-medium bordered-grayed-out-container" style="width: 100%;" type="text" disabled="disabled" />
+                  </div>
+                </div>
+                <div class="col-xs-1" style="margin: 0; padding: 0;" >
+                </div>
+              </div>
+
             </div>
-            <div class="col-xs-1" style="margin: 0; padding: 0;" >
-            </div>
-          </div>
+            <!-- end-of dataset-ingest-modal-parameter-container -->
+          <!--</div>-->
+          <!-- end-of data_ingest_modal_parameter_row -->
         </div>
         <div class="modal-footer" style="padding: 5px;">
           <div class="row" style="margin: 0; padding: 0;" >
@@ -176,7 +253,7 @@
               <button type="button" id="ingest_confirm" class="btn btn-default outline"><i class="fa fa-check-circle"></i> Confirm </button>
             </div>
             <div class="col-xs-2" style="margin: 0; padding: 0; text-align: left;" >
-              <button type="button" class="btn btn-default outline" data-dismiss="modal"><i class="fa fa-times-circle"></i> Cancel </button>
+              <button type="button" class="btn btn-default outline" data-dismiss="modal"><i class="fa fa-times-circle"></i> Dismiss </button>
             </div>
             <div class="col-xs-4" style="margin: 0; padding: 0;" >
             </div>
@@ -207,9 +284,9 @@
 
               <div class="col-xs-9" style="padding: 0; margin: 0; text-align: left;" >
                 <div class="dropdown" style="width: 520%; height: 100%; position:relative; display: inline-block;" id="recent_hist_selected">
-              <span class="dropdown-toggle btn navbar-btn button-dropdown-menu" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px">
-                <span class="fa fa-history"> History</span>
-              </span>
+                  <button class="dropdown-toggle btn navbar-btn button-dropdown-menu" data-toggle="dropdown" style="font-weight: normal; font-size: small; margin: 0px">
+                    <span class="fa fa-history"> History</span>
+                  </button>
                   <ul class="dropdown-menu" style="width: 100%; padding: 2px 8px 2px 8px; border-radius: 4px;" id="recent_hist_list">
 
                   </ul>
@@ -307,10 +384,30 @@
 
             <div class="col-xs-10 col-sm-1" style="padding: 0px 10px 0px 10px; top: 4px; text-align: right;">
 
-              <button id="export_starred_set" type="button" class="btn navbar-btn button-dropdown-menu" data-toggle="modal" data-target="#export_modal"
-                      style="font-size: 13px; font-weight: lighter; padding: 0px 2px 0px 2px; margin: 0;">
-                <span > Export <i class="fa fa-star fa-inverse"></i></span>
-              </button>
+              <div class="dropdown" style="width: auto; height: 100%; position:relative; display: inline-block;"
+                   id="export_option_list_dropdown" value="data_source_access">
+                <button class="dropdown-toggle btn navbar-btn button-dropdown-menu"
+                        id="export_option_list_toggle"
+                        data-toggle="dropdown"
+                        style="font-weight: normal; font-size: small; margin: 0px">
+                  <span>&nbsp;<i class="fa fa-star fa-inverse"></i>&nbsp;</span>
+                </button>
+                <ul class="dropdown-menu" style="width: 100%; padding: 2px 8px 2px 8px; border-radius: 4px;" id="export_option_list">
+                  <li style="line-height: 20px; text-align: left;">
+                    <button type="button" class="button-dropdown-menu-item" id="export_option_list_all_starred">
+                      <span> List all <i class="fa fa-star-o"></i></span>
+                    </button>
+                  </li>
+                  <li style="line-height: 20px; text-align: left;">
+                    <button type="button" class="button-dropdown-menu-item" id="export_option_save_all_starred_as_file">
+                      <span> Export all as file <i class="fa fa-file-archive-o"></i></span>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+
+
 
             </div>
 
@@ -319,7 +416,7 @@
               <div class="dropdown" style="width: 100%; position:relative; display: inline-block;" id="logo_dropdown_selected">
                 <span class="dropdown-toggle btn navbar-btn button-dropdown-menu" style="padding: 0px 2px 0px 2px; margin: 0;" data-toggle="dropdown">
                   <span style="font-size: 13px; font-weight: lighter;" >
-                    Newman 2.1.2 <i class="fa fa-user-secret fa-inverse"></i>
+                    Newman 2.1.3 <i class="fa fa-user-secret fa-inverse"></i>
                   </span>
                 </span>
                 <ul class="dropdown-menu" style="width: 100%; padding: 2px 0px 2px 0px; border-radius: 4px;" id="logo_dropdown_list">
@@ -531,6 +628,8 @@
 
                     <!--Start Search-Result-Container -->
                     <div class="v_scroll_left_content" id="search_result_container_copy" style="margin: 0 0 0 15px; padding: 0; height: 30px;">
+
+                      <!--
                       <table id="search_result_treetable_copy" class="table tree-2 table-bordered table-striped table-condensed">
 
                         <thead style="font-size: small; display: table-header-group" id="search_result_treetable_header_copy">
@@ -549,6 +648,15 @@
                         </tbody>
 
                       </table>
+                      -->
+
+                      <div class="row" id="search_response_control_header" style="margin: 0; padding: 0; height: 32px;">
+                        <div class="col-sm-6" style="margin: 0; padding: 0px 5px 0px 10px;">
+                        </div>
+                        <div class="col-sm-6" id="search_response_page_control" style="margin: 0; padding: 0px 2px 0px 5px; text-align: right; display: none;">
+                        </div>
+                      </div>
+
                     </div>
 
                     <div class="v_scroll_left_container v_scroll_left">
@@ -557,7 +665,7 @@
 
                         <table id="search_result_treetable" class="table tree-2 table-bordered table-striped table-condensed" >
 
-                          <thead style="font-size: small; visibility: hidden; display: table-footer-group" id="search_result_treetable_header">
+                          <thead style="font-size: small; display: table-header-group" id="search_result_treetable_header">
                           <tr>
                             <th>&nbsp;</th>
                             <th><i class="fa fa-send-o fa-fw" rel="tooltip" data-placement="left" title="Emails Sent"></i></th>
@@ -565,7 +673,7 @@
                             <th><i class="fa fa-paperclip fa-fw" rel="tooltip" data-placement="left" title="File Attachments"></i></th>
                             <th><i class="fa fa-users fa-fw" rel="tooltip" data-placement="left" title="Accounts Associated"></i></th>
                             <th><i class="fa fa-crosshairs fa-fw" rel="tooltip" data-placement="left" title="Search Matched"></i></th>
-                            <th><i class="fa fa-ellipsis-v fa-fw" rel="tooltip" data-placement="left" title="Select/Compare"></i></th>
+                            <th><i class="fa fa-ellipsis-v fa-fw" rel="tooltip" data-placement="left" title="Select / Compare"></i></th>
                           </tr>
                           </thead>
 
@@ -843,11 +951,13 @@
 
                 <!-- Start-Analytics-Content-Data-Extract -->
                 <div class="tab-pane" id="dashboard_tab_data_extract" style= "height: 568px; padding: 0; margin: 0;">
-                  <div class="row" id="data_extract_control_header" style="margin: 0; padding: 0; height: 32px;">
-                    <div class="col-sm-4" id="data_extract_page_control" style="margin: 0; padding: 4px 10px 0px 10px;">
+                  <!--
+                  <div class="row" id="search_response_control_header" style="margin: 0; padding: 0; height: 32px;">
+                    <div class="col-sm-4" id="search_response_page_control" style="margin: 0; padding: 4px 10px 0px 10px;">
                     </div>
                   </div>
-                  <div style="margin: 0; padding: 0px 15px 0px 0px; width: 100%; height: 536px; overflow-y: scroll;">
+                  -->
+                  <div style="margin: 0; padding: 0px 15px 0px 0px; width: 100%; height: 568px; overflow-y: scroll;">
                     <table id="data_extract_table" class="info-table"
                            style="display: table; table-layout: fixed; width: 100%; font-size: 12px;"></table>
                   </div>
@@ -947,20 +1057,10 @@
                         <span>Documents matched&nbsp;&nbsp;</span><span id="document_count"></span>
                       </div>
                       <div class="col-sm-2" style="margin: 0; padding: 4px 5px 0px 5px;">
-                        <a class="clickable" id="email_view_all_starred">
-                          <span> View Starred </span>
-                        </a>
-                        <!--
-                        |
-                        <a class="clickable" id="email_view_export_all" title="Mark All">
-                          <span class="glyphicon glyphicon-plus"> </span>
-                        </a>
-                        |
-                        <a class="clickable" id="email_view_export_all_remove" title="Unmark All">
-                          <span class="glyphicon glyphicon-minus"> </span>
-                        </a>
-                        |
-                        -->
+                        <button type="button" class="btn btn-small outline" id="email_view_list_all_starred">
+                          <span> List all <i class="fa fa-star-o"></i></span>
+                        </button>
+
                         <!-- <a class="clickable" id="email_group_conversation" title="Conversations"> -->
                         <!--   <span class="glyphicon glyphicon-tasks"></span> -->
                         <!-- </a> -->
@@ -1276,9 +1376,9 @@
     <!--<script src="plugins/leaflet-tilelayer-cache/L.TileLayer.PouchDBCached.js"></script>--><!-- patched by patch.leaflet.tile.cache.js -->
     <!--<script src="plugins/leaflet-draw/leaflet.draw.js"></script>--><!-- patched by patch.leaflet.draw.js -->
     <script src="plugins/leaflet-easy-button/leaflet-easy-button.js"></script>
-    <!--<script src="plugins/pouchdb/pouchdb-5.2.1.min.js"></script>-->
-    <script src="plugins/es6-promise/es6-promise.min.js"></script><!-- EcmaSript-6 implementation patch for Pouch-DB -->
-    <script src="plugins/pouchdb/pouchdb-5.3.1.min.js"></script>
+    <!--<script src="plugins/es6-promise/es6-promise.min.js"></script>--><!-- EcmaSript-6 implementation patch for Pouch-DB -->
+    <!--<script src="plugins/pouchdb/pouchdb-5.3.1.min.js"></script>-->
+    <script src="plugins/pouchdb/pouchdb-6.0.4.min.js"></script>
 
     <!--<script src="plugins/user-ale/userale.js"></script>-->
 
@@ -1292,6 +1392,7 @@
     <script src="js/newman_datetime_range.js"></script>
     <script src="js/app_nav_history.js"></script>
     <script src="js/app_status_indicator.js"></script>
+    <script src="js/app_pagination_control.js"></script>
     <script src="js/newman-data-validator.js"></script>
     <script src="js/newman_search_parameter.js"></script>
     <script src="js/newman-aggregate-filter.js"></script>
