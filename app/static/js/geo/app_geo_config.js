@@ -16,6 +16,7 @@ var app_geo_config = (function () {
   var tile_cache_remote_host = "localhost";
   var tile_cache_remote_port = 5984;
   var tile_cache_database = "offline-tiles";
+  var tile_cache_database_available = false;
 
   var _service_url = 'app_config/tile_cache_config';
   var _response;
@@ -107,6 +108,19 @@ var app_geo_config = (function () {
     return 'http://' + tile_cache_remote_host + ':' + tile_cache_remote_port +'/' + tile_cache_database;
   }
 
+  function isRemoteTileDBConnected() {
+    return tile_cache_database_available;
+  }
+
+  function setRemoteTileDBConnected(connected) {
+    if (connected === true) {
+      tile_cache_database_available = true;
+    }
+    else {
+      tile_cache_database_available = false;
+    }
+  }
+
   return {
     'getServiceURLBase' : getServiceURLBase,
     'getServiceURL' : getServiceURL,
@@ -119,7 +133,9 @@ var app_geo_config = (function () {
     'getLocalTileDBName' : getLocalTileDBName,
     'getRemoteTileDBHost' : getRemoteTileDBHost,
     'isRemoteTileDBHostLocal' : isRemoteTileDBHostLocal,
-    'getRemoteTileDBName' : getRemoteTileDBName
+    'getRemoteTileDBName' : getRemoteTileDBName,
+    'isRemoteTileDBConnected' : isRemoteTileDBConnected,
+    'setRemoteTileDBConnected' : setRemoteTileDBConnected
   }
 
 }());

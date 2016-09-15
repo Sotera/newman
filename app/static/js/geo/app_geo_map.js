@@ -28,7 +28,7 @@ var app_geo_map = (function () {
   var world_bounds = L.latLngBounds(south_west_max, north_east_max);
 
   var area_draw_control_layer;
-  var map_tile_cache_import_button, map_tile_cache_export_button;
+  var map_tile_cache_toggle_button, map_tile_cache_import_button, map_tile_cache_export_button;
 
   var area_drawn_id_list = [];
 
@@ -748,49 +748,13 @@ var app_geo_map = (function () {
 
       if (map) {
 
-        if (!map_tile_cache_import_button) {
+        var button_group = [];
 
-          if (app_geo_config.enableOnlyTileCache()) {
+        if (!map_tile_cache_toggle_button) {
 
-            if (app_geo_config.enableSeparateLocalDB()) {
-              map_tile_cache_import_button = L.easyButton({
-                states: [
-                  {
-                    stateName: 'init-tile-caching',
-                    icon: 'fa-download',
-                    title: 'Initiate downloading map tiles',
-                    onClick: function (control) {
+          if (!app_geo_config.enableOnlyTileCache()) {
 
-                      setTileExportEnabled(false);
-                      control.state('tile-caching');
-
-                      map_tile_layer.downloadTileCache(map);
-
-                      control._map.on('download:complete', function (e) {
-                        //console.log('control._map.on("download:complete")');
-                        setTileExportEnabled(true);
-                        control.state('init-tile-caching');
-                      });
-                    }
-                  },
-                  {
-                    stateName: 'tile-caching',
-                    icon: 'fa-spinner fa-spin',
-                    title: 'Downloading tiles...',
-                    onClick: function (control) {
-                      cancelAllDownload();
-                      control.state('init-tile-caching');
-                    }
-                  }
-                ]
-              });
-
-              map_tile_cache_import_button.enable();
-            } // end-of if (app_geo_config.enableSeparateLocalDB())
-          }
-          else {
-
-            map_tile_cache_import_button = L.easyButton({
+            map_tile_cache_toggle_button = L.easyButton({
               states: [
                 {
                   stateName: 'init-tile-caching',
@@ -798,6 +762,7 @@ var app_geo_map = (function () {
                   title: 'Initiate caching map tiles',
                   onClick: function (control) {
 
+                    setTileImportEnabled(false);
                     setTileExportEnabled(false);
                     control.state('tile-caching');
 
@@ -805,6 +770,7 @@ var app_geo_map = (function () {
 
                     control._map.on('caching:end', function (e) {
                       //console.log('control._map.on("caching:end")');
+                      setTileImportEnabled(true);
                       setTileExportEnabled(true);
                       control.state('init-tile-caching');
                     });
@@ -822,13 +788,63 @@ var app_geo_map = (function () {
               ]
             });
 
-            map_tile_cache_import_button.disable();
+            map_tile_cache_toggle_button.disable();
           }
+
+        } // end-of if (!map_tile_cache_toggle_button)
+
+        if (map_tile_cache_toggle_button) {
+          button_group.push(map_tile_cache_toggle_button);
+        }
+
+        if (!map_tile_cache_import_button) {
+
+          if (app_geo_config.enableSeparateLocalDB()) {
+            map_tile_cache_import_button = L.easyButton({
+              states: [
+                {
+                  stateName: 'init-tile-caching',
+                  icon: 'fa-download',
+                  title: 'Initiate downloading map tiles',
+                  onClick: function (control) {
+
+                    setTileCloudDownloadEnabled(false);
+                    setTileExportEnabled(false);
+                    control.state('tile-caching');
+
+                    map_tile_layer.downloadTileCache(map);
+
+                    control._map.on('download:complete', function (e) {
+                      //console.log('control._map.on("download:complete")');
+                      setTileCloudDownloadEnabled(true);
+                      setTileExportEnabled(true);
+                      control.state('init-tile-caching');
+                    });
+                  }
+                },
+                {
+                  stateName: 'tile-caching',
+                  icon: 'fa-spinner fa-spin',
+                  title: 'Downloading tiles...',
+                  onClick: function (control) {
+                    cancelAllDownload();
+                    control.state('init-tile-caching');
+                  }
+                }
+              ]
+            });
+
+            map_tile_cache_import_button.enable();
+          } // end-of if (app_geo_config.enableSeparateLocalDB())
 
         } // end-of if (!map_tile_cache_import_button)
 
+        if (map_tile_cache_import_button) {
+          button_group.push(map_tile_cache_import_button);
+        }
 
         if (!map_tile_cache_export_button) {
+
           if (app_geo_config.enableSeparateLocalDB()) {
 
             map_tile_cache_export_button = L.easyButton({
@@ -840,14 +856,15 @@ var app_geo_map = (function () {
                   onClick: function (control) {
 
                     setTileCloudDownloadEnabled(false);
+                    setTileImportEnabled(false);
                     control.state('tile-upload');
 
                     map_tile_layer.uploadTileCache(map);
 
                     control._map.on('upload:complete', function (e) {
                       //console.log('control._map.on("upload:complete")');
-
                       setTileCloudDownloadEnabled(true);
+                      setTileImportEnabled(true);
                       control.state('init-tile-upload');
                     });
                   }
@@ -867,27 +884,16 @@ var app_geo_map = (function () {
             //map_tile_cache_export_button.disable();
             map_tile_cache_export_button.enable();
           } // end-of if (app_geo_config.enableSeparateLocalDB())
+
         } // end-of if (!map_tile_cache_export_button)
 
-
-        if (map_tile_cache_import_button && map_tile_cache_export_button) {
-          var button_group = [
-            map_tile_cache_import_button,
-            map_tile_cache_export_button
-          ];
-
-          // build a toolbar with them
-          L.easyBar(
-            button_group,
-            { position: 'bottomleft'}
-          ).addTo(map);
+        if (map_tile_cache_export_button) {
+          button_group.push(map_tile_cache_export_button);
         }
-        else if (map_tile_cache_import_button) {
-          var button_group = [
-            map_tile_cache_import_button
-          ];
 
-          // build a toolbar with them
+        if (button_group.length > 0) {
+
+          // build a toolbar with the buttons
           L.easyBar(
             button_group,
             { position: 'bottomleft'}
@@ -919,15 +925,23 @@ var app_geo_map = (function () {
   }
 
   function setTileCloudDownloadEnabled( enabled ) {
-    if (app_geo_config.enableOnlyTileCache()) {
-      setTileImportEnabled( enabled );
-    }
-    else {
+    if (!app_geo_config.enableOnlyTileCache()) {
       if (enabled === true && containsAreaDrawn()) {
-        setTileImportEnabled( true );
+        setTileCacheToggleEnabled( true );
       }
       else {
-        setTileImportEnabled( false );
+        setTileCacheToggleEnabled( false );
+      }
+    }
+  }
+
+  function setTileCacheToggleEnabled( enabled ) {
+    if (map_tile_cache_toggle_button) {
+      if (enabled === true) {
+        map_tile_cache_toggle_button.enable();
+      }
+      else {
+        map_tile_cache_toggle_button.disable();
       }
     }
   }
