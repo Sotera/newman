@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #Install virtualenv
-sudo apt-get install python-virtualenv
+sudo apt-get -y install python-virtualenv
 
 #create a venv for flask
 virtualenv flask
@@ -25,3 +25,5 @@ flask/bin/pip install elasticsearch
 flask/bin/pip install beautifulsoup4
 flask/bin/pip install python-dateutil
 
+#Supervisor application which will be used to manage newman process
+flask/bin/pip install supervisor

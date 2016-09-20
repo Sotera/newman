@@ -9,7 +9,9 @@ flask/
 !flask/.keep
 log/
 !log/.keep
-work_dir/
-!work_dir/.keep
+pids/
+!pids/.keep
 tmp/
 !tmp/.keep
+work_dir/
+!work_dir/.keep
