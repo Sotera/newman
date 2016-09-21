@@ -183,7 +183,7 @@ var newman_activity_email = (function () {
             activity_data_color_map[inbound_acct_id] = newman_activity_color.getChartColor( account_index, true );
             activity_data_set_keys.push( inbound_acct_id );
 
-            var trimed_activity_list = _trimEmptyListValue(account_activity.activities);
+            var trimed_activity_list = account_activity.activities;
 
             _.each(trimed_activity_list, function (activity) {
               //console.log('acct_activity :\n' + JSON.stringify(activity, null, 2));

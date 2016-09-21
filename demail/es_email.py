@@ -1,7 +1,7 @@
-import base64
 
 import tangelo
 import cherrypy
+import base64
 import mimetypes
 from param_utils import parseParamDatetime, parseParamAttachmentGUID
 from newman.utils.functions import nth
@@ -277,7 +277,7 @@ def get_email(data_set_id, email_id, qs=None):
              subject,
              _format_body_pannel(body, attachments),
              # body,
-             [[f["guid"],f["filename"],f.get("content_encrypted",'')] for f in source.get("attachments", [""])],
+             [[f["guid"],f["filename"],f.get("content_encrypted",'')] for f in source.get("attachments", [])],
              source.get("starred", False)
              ]
 
@@ -430,22 +430,6 @@ def get_attachments_by_sender(data_set_id, sender, start_datetime, end_datetime,
             l.append(0)
             email_attachments.append(l)
     return {"sender":sender, "email_attachments":email_attachments}
-
-
-def _get_attachment_content_by_id(data_set_id, doc_id, attach_id):
-
-    body = email_attachment_guid(doc_id, attach_id)
-    tangelo.log("get_attachment_content_by_id.Query %s"%body)
-
-    attachments_resp = es().search(index=data_set_id, doc_type="emails", body=body)
-
-    if len(attachments_resp["hits"]["hits"]) > 0:
-        doc = attachments_resp["hits"]["hits"][0]
-        _source = doc["_source"]
-        for attachment in _source["attachments"]:
-            if attachment["guid"] == attach_id:
-                return {"content": attachment.get("content","")}
-    return {"content": ''}
 
 def _get_attachment_content_by_id(data_set_id, doc_id, attach_id):
 
