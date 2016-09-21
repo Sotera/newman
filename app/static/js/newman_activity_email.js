@@ -54,8 +54,8 @@ var newman_activity_email = (function () {
   var activity_datetime_end = newman_config_datetime.getDatetimeEnd();
 
   function initUIActivity( timeline, data_set_1, data_set_2, data_set_value_max, data_group, data_color_collection ) {
-    console.log('initUIActivity(...)');
-    //console.log('timeline :\n' + JSON.stringify(timeline, null, 2));
+    console.log('initUIActivity( ... )');
+    console.log('timeline :\n' + JSON.stringify(timeline, null, 2));
     //console.log('data_set_1 :\n' + JSON.stringify(data_set_1, null, 2));
     //console.log('data_set_2 :\n' + JSON.stringify(data_set_2, null, 2));
     //console.log('data_set_value_max : ' + data_set_value_max);
@@ -183,7 +183,8 @@ var newman_activity_email = (function () {
             activity_data_color_map[inbound_acct_id] = newman_activity_color.getChartColor( account_index, true );
             activity_data_set_keys.push( inbound_acct_id );
 
-            var trimed_activity_list = _trimEmptyListValue(account_activity.activities);
+            //var trimed_activity_list = _trimEmptyListValue(account_activity.activities);
+            var trimed_activity_list = account_activity.activities;
 
             _.each(trimed_activity_list, function (activity) {
               //console.log('acct_activity :\n' + JSON.stringify(activity, null, 2));
@@ -260,9 +261,11 @@ var newman_activity_email = (function () {
       }
       i++;
     }
+    /*
     if (done && start_index > 10 ) {
       start_index = start_index - 10;
     }
+    */
 
     done = false;
     var j = (activity_list.length - 1);
@@ -277,9 +280,11 @@ var newman_activity_email = (function () {
       }
       j--;
     }
+    /*
     if (done && end_index + 10 < activity_list.length) {
       end_index = end_index + 10;
     }
+    */
 
     //console.log('array.length : ' + activity_list.length + ' trim_start_index : ' + start_index + ' trim_end_index : ' + end_index);
 
