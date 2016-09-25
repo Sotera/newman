@@ -13,9 +13,9 @@ LABEL=$6
 FORCE_LANGUAGE=$7
 
 #newman etl extract dir
-#EXTRACTOR_HOME=/srv/software/pst-extraction-master/
+#EXTRACTOR_HOME=/srv/software/newman-etl/
 #TODO REMOVE this!
-EXTRACTOR_HOME=/QCR/pst-extraction/
+EXTRACTOR_HOME=/srv/software/newman-etl/
 
 
 echo "Extractor home set to ${EXTRACTOR_HOME}"
@@ -32,7 +32,7 @@ INGEST_DIR=${EXTRACTOR_HOME}/pst-extract/$TYPE
 mkdir $INGEST_DIR
 
 echo "Copying email files from ${PARENT_DIR}/${CASE_ID}/${LABEL} ==to==>  $INGEST_DIR/"
-cp -r $PARENT_DIR/${CASE_ID}/${LABEL} $INGEST_DIR/
+cp -r $PARENT_DIR/${CASE_ID}/${TYPE}/${LABEL} $INGEST_DIR/
 
 
 if [ "$TYPE" == "pst" ]; then
