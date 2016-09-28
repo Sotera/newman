@@ -159,11 +159,13 @@ L.TileLayer.include({
 			}
 
 			//this._cache_db.get( tileUrl, {revs_info: true} ).then(
-			this._cache_db.get( tileUrl ).then( function(data) {
+			this._cache_db.get( tileUrl ).then( function(doc) {
+				var data = doc.data;
 
 				if (data) {
 					// tile found in cache
 					console.log('tile_cache found: ' + tileUrl);
+					//console.log('data :\n' + JSON.stringify(data, null, 2));
 					this.fire('tile_cache:hit', {tile: tile, url: tileUrl});
 
 					if (Date.now() > data.timestamp + this.options.cacheMaxAge && !this.options.useOnlyCache) {
@@ -178,7 +180,7 @@ L.TileLayer.include({
 						}
 						else {
 
-							if (this.options.saveToCache && this.remote_cache_db_connected) {
+							if (this.options.saveToCache) {
 								//tile.onload = L.bind(this._saveTile, this, tile, tileUrl, data._revs_info[0].rev, done);
 								tile.onload = L.bind(this._saveTile, this, tile, tileUrl, data._rev, done);
 							}
@@ -186,16 +188,18 @@ L.TileLayer.include({
 							tile.crossOrigin = 'Anonymous';
 							tile.src = tileUrl;
 							tile.onerror = function (ev) {
+								console.log("tile.onerror");
 								// If the tile is too old but couldn't be fetched from the network,
 								// serve the one still in cache.
 								this.src = data.dataUrl;
-							}
+							}.bind(this);
 
 						}
 					}
 					else {
 						// Serve tile from cached data
-						//console.log('tile is cached: ', tileUrl);
+						//console.log('tile is cached : ' + tileUrl);
+						//console.log('data.dataUrl : ' + data.dataUrl);
 						tile.onload = L.bind(this._tileOnLoad, this, done, tile);
 						tile.src = data.dataUrl;    // data.dataUrl is already a base64-encoded PNG image.
 					}
@@ -253,7 +257,7 @@ L.TileLayer.include({
 					// Tile is too old, try to refresh it
 					console.log('tile is too old: ' + tileUrl);
 
-					if (this.options.saveToCache && this.remote_cache_db_connected) {
+					if (this.options.saveToCache) {
 						//tile.onload = L.bind(this._saveTile, this, tile, tileUrl, data._revs_info[0].rev, done);
 						tile.onload = L.bind(this._saveTile, this, tile, tileUrl, data._rev, done);
 					}
@@ -286,7 +290,7 @@ L.TileLayer.include({
 	_onCacheNotFound: function (tile, tileUrl, done) {
 		this.options.useOnlyCache = app_geo_config.enableOnlyTileCache();
 
-		//console.log('tile_cache not found: ' + tileUrl);
+		console.log('tile_cache not found: ' + tileUrl);
 		this.fire( 'tile_cache:miss', { tile: tile, url: tileUrl } );
 
 		if (this.options.useOnlyCache) {
@@ -299,7 +303,7 @@ L.TileLayer.include({
 			//Online, not cached, request the tile normally
 			//console.log('Requesting tile normally', tileUrl);
 
-			if (this.options.saveToCache && this.remote_cache_db_connected) {
+			if (this.options.saveToCache) {
 				tile.onload = L.bind(this._saveTile, this, tile, tileUrl, null, done);
 			}
 			else {
@@ -402,7 +406,7 @@ L.TileLayer.include({
 			}).then( function(response) {
 
 				if (response) {
-					console.log(JSON.stringify(response, null, 2));
+					//console.log(JSON.stringify(response, null, 2));
 					if (response.ok === true) {
 						console.log('cached tile "' + response.id + '", OK');
 					}
@@ -419,7 +423,8 @@ L.TileLayer.include({
 
 							return doc;
 					}).then(function (response) {
-						console.log('up-sert('+tileUrl+') success, \n' + JSON.stringify(response, null, 2));
+						//console.log(JSON.stringify(response, null, 2));
+						console.log('up-sert('+tileUrl+') success!');
 
 					}).catch(function (err) {
 						console.warn(err);
@@ -564,8 +569,8 @@ L.TileLayer.include({
 
 
 
-		this._cache_db.get(url, function(err, data) {
-			if (!data) {
+		this._cache_db.get(url, function(err, doc) {
+			if (!doc) {
 				/// FIXME: Do something on tile error!!
 				tile.onload = function(ev) {
 					this._saveTile(tile, url, null); //(ev)
