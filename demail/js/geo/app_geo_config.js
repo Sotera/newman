@@ -11,11 +11,12 @@ var app_geo_config = (function () {
   var debug_enabled = false;
 
   var tile_cache_advance_mode = false;
-  var tile_cache_separate_local_db = false;
+  var tile_cache_override_on = false;
   var tile_cache_intranet_only = false;
   var tile_cache_remote_host = "localhost";
   var tile_cache_remote_port = 5984;
   var tile_cache_database = "offline-tiles";
+  var tile_cache_database_available = false;
 
   var _service_url = 'app_config/tile_cache_config';
   var _response;
@@ -58,7 +59,7 @@ var app_geo_config = (function () {
 
       tile_cache_advance_mode = (response.advance_mode === true);
       tile_cache_intranet_only = (response.cache_only === true);
-      tile_cache_separate_local_db = (response.separate_local_db === true);
+      tile_cache_override_on = (response.cache_override === true);
 
       if (response.host) {
         tile_cache_remote_host = response.host.toLocaleLowerCase();
@@ -86,8 +87,8 @@ var app_geo_config = (function () {
     return tile_cache_intranet_only;
   }
 
-  function enableSeparateLocalDB() {
-    return tile_cache_separate_local_db;
+  function canOverrideRemoteTileDB() {
+    return tile_cache_override_on;
   }
 
   function getLocalTileDBName() {
@@ -107,6 +108,19 @@ var app_geo_config = (function () {
     return 'http://' + tile_cache_remote_host + ':' + tile_cache_remote_port +'/' + tile_cache_database;
   }
 
+  function isRemoteTileDBConnected() {
+    return tile_cache_database_available;
+  }
+
+  function setRemoteTileDBConnected(connected) {
+    if (connected === true) {
+      tile_cache_database_available = true;
+    }
+    else {
+      tile_cache_database_available = false;
+    }
+  }
+
   return {
     'getServiceURLBase' : getServiceURLBase,
     'getServiceURL' : getServiceURL,
@@ -115,11 +129,13 @@ var app_geo_config = (function () {
     'getResponse' : getResponse,
     "enableAdvanceMode" : enableAdvanceMode,
     "enableOnlyTileCache" : enableOnlyTileCache,
-    'enableSeparateLocalDB' : enableSeparateLocalDB,
+    'canOverrideRemoteTileDB' : canOverrideRemoteTileDB,
     'getLocalTileDBName' : getLocalTileDBName,
     'getRemoteTileDBHost' : getRemoteTileDBHost,
     'isRemoteTileDBHostLocal' : isRemoteTileDBHostLocal,
-    'getRemoteTileDBName' : getRemoteTileDBName
+    'getRemoteTileDBName' : getRemoteTileDBName,
+    'isRemoteTileDBConnected' : isRemoteTileDBConnected,
+    'setRemoteTileDBConnected' : setRemoteTileDBConnected
   }
 
 }());

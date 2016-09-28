@@ -14,7 +14,7 @@ LABEL=$7
 FORCE_LANGUAGE=$8
 
 #newman etl extract
-EXTRACTOR_HOME=/srv/software/pst-extraction-master/
+EXTRACTOR_HOME=/srv/software/newman-etl/
 
 echo "Extractor home set to $EXTRACTOR_HOME"
 echo "email_address=$INGEST_ID parent_dir=$PARENT_DIR path=${CASE_ID}/${LABEL} type=$TYPE"
