@@ -10,6 +10,7 @@
 var app_geo_config = (function () {
   var debug_enabled = false;
 
+  var tile_cache_debug_mode = false;
   var tile_cache_advance_mode = false;
   var tile_cache_override_on = false;
   var tile_cache_intranet_only = false;
@@ -79,6 +80,10 @@ var app_geo_config = (function () {
     return _response;
   }
 
+  function enableDebugMode() {
+    return tile_cache_debug_mode;
+  }
+
   function enableAdvanceMode() {
     return tile_cache_advance_mode;
   }
@@ -127,6 +132,7 @@ var app_geo_config = (function () {
     'requestGeoConfig' : requestGeoConfig,
     'onRequestGeoConfig' : onRequestGeoConfig,
     'getResponse' : getResponse,
+    'enableDebugMode' : enableDebugMode,
     "enableAdvanceMode" : enableAdvanceMode,
     "enableOnlyTileCache" : enableOnlyTileCache,
     'canOverrideRemoteTileDB' : canOverrideRemoteTileDB,
