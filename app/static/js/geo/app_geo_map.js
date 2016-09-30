@@ -799,43 +799,48 @@ var app_geo_map = (function () {
 
         if (!map_tile_cache_import_button) {
 
-          if (app_geo_config.enableSeparateLocalDB()) {
-            map_tile_cache_import_button = L.easyButton({
-              states: [
-                {
-                  stateName: 'init-tile-caching',
-                  icon: 'fa-download',
-                  title: 'Initiate downloading map tiles',
-                  onClick: function (control) {
+          map_tile_cache_import_button = L.easyButton({
+            states: [
+              {
+                stateName: 'init-tile-caching',
+                icon: 'fa-download',
+                title: 'Initiate downloading map tiles',
+                onClick: function (control) {
 
-                    setTileCloudDownloadEnabled(false);
-                    setTileExportEnabled(false);
-                    control.state('tile-caching');
+                  setTileCloudDownloadEnabled(false);
+                  setTileExportEnabled(false);
+                  control.state('tile-caching');
 
-                    map_tile_layer.downloadTileCache(map);
+                  map_tile_layer.downloadTileCache(map);
 
-                    control._map.on('download:complete', function (e) {
-                      //console.log('control._map.on("download:complete")');
-                      setTileCloudDownloadEnabled(true);
-                      setTileExportEnabled(true);
-                      control.state('init-tile-caching');
-                    });
-                  }
-                },
-                {
-                  stateName: 'tile-caching',
-                  icon: 'fa-spinner fa-spin',
-                  title: 'Downloading tiles...',
-                  onClick: function (control) {
-                    cancelAllDownload();
+                  control._map.on('download:complete', function (e) {
+                    //console.log('control._map.on("download:complete")');
+                    setTileCloudDownloadEnabled(true);
+                    setTileExportEnabled(true);
                     control.state('init-tile-caching');
-                  }
-                }
-              ]
-            });
+                  });
 
-            map_tile_cache_import_button.enable();
-          } // end-of if (app_geo_config.enableSeparateLocalDB())
+                  control._map.on('download:error', function (e) {
+                    //console.log('control._map.on("download:error")');
+                    setTileCloudDownloadEnabled(true);
+                    setTileExportEnabled(true);
+                    control.state('init-tile-caching');
+                  });
+                }
+              },
+              {
+                stateName: 'tile-caching',
+                icon: 'fa-spinner fa-spin',
+                title: 'Downloading tiles...',
+                onClick: function (control) {
+                  cancelAllDownload();
+                  control.state('init-tile-caching');
+                }
+              }
+            ]
+          });
+
+          map_tile_cache_import_button.enable();
 
         } // end-of if (!map_tile_cache_import_button)
 
@@ -845,45 +850,49 @@ var app_geo_map = (function () {
 
         if (!map_tile_cache_export_button) {
 
-          if (app_geo_config.enableSeparateLocalDB()) {
+          map_tile_cache_export_button = L.easyButton({
+            states: [
+              {
+                stateName: 'init-tile-upload',
+                icon: 'fa-upload',
+                title: 'Initiate uploading map tiles',
+                onClick: function (control) {
 
-            map_tile_cache_export_button = L.easyButton({
-              states: [
-                {
-                  stateName: 'init-tile-upload',
-                  icon: 'fa-upload',
-                  title: 'Initiate uploading map tiles',
-                  onClick: function (control) {
+                  setTileCloudDownloadEnabled(false);
+                  setTileImportEnabled(false);
+                  control.state('tile-upload');
 
-                    setTileCloudDownloadEnabled(false);
-                    setTileImportEnabled(false);
-                    control.state('tile-upload');
+                  map_tile_layer.uploadTileCache(map);
 
-                    map_tile_layer.uploadTileCache(map);
-
-                    control._map.on('upload:complete', function (e) {
-                      //console.log('control._map.on("upload:complete")');
-                      setTileCloudDownloadEnabled(true);
-                      setTileImportEnabled(true);
-                      control.state('init-tile-upload');
-                    });
-                  }
-                },
-                {
-                  stateName: 'tile-upload',
-                  icon: 'fa-spinner fa-spin',
-                  title: 'Uploading tiles...',
-                  onClick: function (control) {
-                    cancelAllUpload();
+                  control._map.on('upload:complete', function (e) {
+                    //console.log('control._map.on("upload:complete")');
+                    setTileCloudDownloadEnabled(true);
+                    setTileImportEnabled(true);
                     control.state('init-tile-upload');
-                  }
-                }
-              ]
-            });
+                  });
 
-            //map_tile_cache_export_button.disable();
-            map_tile_cache_export_button.enable();
-          } // end-of if (app_geo_config.enableSeparateLocalDB())
+                  control._map.on('upload:error', function (e) {
+                    //console.log('control._map.on("upload:error")');
+                    setTileCloudDownloadEnabled(true);
+                    setTileImportEnabled(true);
+                    control.state('init-tile-upload');
+                  });
+                }
+              },
+              {
+                stateName: 'tile-upload',
+                icon: 'fa-spinner fa-spin',
+                title: 'Uploading tiles...',
+                onClick: function (control) {
+                  cancelAllUpload();
+                  control.state('init-tile-upload');
+                }
+              }
+            ]
+          });
+
+          //map_tile_cache_export_button.disable();
+          map_tile_cache_export_button.enable();
 
         } // end-of if (!map_tile_cache_export_button)
 

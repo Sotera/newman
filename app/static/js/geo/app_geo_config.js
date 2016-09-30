@@ -10,8 +10,9 @@
 var app_geo_config = (function () {
   var debug_enabled = false;
 
+  var tile_cache_debug_mode = false;
   var tile_cache_advance_mode = false;
-  var tile_cache_separate_local_db = false;
+  var tile_cache_override_on = false;
   var tile_cache_intranet_only = false;
   var tile_cache_remote_host = "localhost";
   var tile_cache_remote_port = 5984;
@@ -59,7 +60,7 @@ var app_geo_config = (function () {
 
       tile_cache_advance_mode = (response.advance_mode === true);
       tile_cache_intranet_only = (response.cache_only === true);
-      tile_cache_separate_local_db = (response.separate_local_db === true);
+      tile_cache_override_on = (response.cache_override === true);
 
       if (response.host) {
         tile_cache_remote_host = response.host.toLocaleLowerCase();
@@ -79,6 +80,10 @@ var app_geo_config = (function () {
     return _response;
   }
 
+  function enableDebugMode() {
+    return tile_cache_debug_mode;
+  }
+
   function enableAdvanceMode() {
     return tile_cache_advance_mode;
   }
@@ -87,8 +92,8 @@ var app_geo_config = (function () {
     return tile_cache_intranet_only;
   }
 
-  function enableSeparateLocalDB() {
-    return tile_cache_separate_local_db;
+  function canOverrideRemoteTileDB() {
+    return tile_cache_override_on;
   }
 
   function getLocalTileDBName() {
@@ -127,9 +132,10 @@ var app_geo_config = (function () {
     'requestGeoConfig' : requestGeoConfig,
     'onRequestGeoConfig' : onRequestGeoConfig,
     'getResponse' : getResponse,
+    'enableDebugMode' : enableDebugMode,
     "enableAdvanceMode" : enableAdvanceMode,
     "enableOnlyTileCache" : enableOnlyTileCache,
-    'enableSeparateLocalDB' : enableSeparateLocalDB,
+    'canOverrideRemoteTileDB' : canOverrideRemoteTileDB,
     'getLocalTileDBName' : getLocalTileDBName,
     'getRemoteTileDBHost' : getRemoteTileDBHost,
     'isRemoteTileDBHostLocal' : isRemoteTileDBHostLocal,

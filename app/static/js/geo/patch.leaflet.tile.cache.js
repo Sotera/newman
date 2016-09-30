@@ -1,14 +1,25 @@
 
-L.TileLayer.prototype.cache_db_connected = false;
+L.TileLayer.prototype.local_cache_db_connected = false;
+L.TileLayer.prototype.remote_cache_db_connected = false;
 L.TileLayer.prototype.options.useCache     = true;
 L.TileLayer.prototype.options.saveToCache  = true;
 L.TileLayer.prototype.options.useOnlyCache = false;
+L.TileLayer.prototype.options.advance_mode_on = true;
 L.TileLayer.prototype.options.cacheFormat = 'image/png';
-L.TileLayer.prototype.options.cacheMaxAge  = 6*30*24*3600*1000; // 6*30-days
+L.TileLayer.prototype.options.cacheMaxAge  = 12*30*(24*3600*1000); // 12*30-days
 
 L.TileLayer.addInitHook(function() {
 
-	this._cache_db_url = null;
+	//initialize from external config
+	this.options.debug_mode_on = app_geo_config.enableDebugMode();
+	this.options.advance_mode_on = app_geo_config.enableAdvanceMode();
+	this.options.can_override_remote_cache_db = app_geo_config.canOverrideRemoteTileDB();
+	this.options.useOnlyCache = app_geo_config.enableOnlyTileCache();
+	this.local_cache_db_url = app_geo_config.getLocalTileDBName();
+	this.remote_cache_db_url = app_geo_config.getRemoteTileDBName();
+
+	this._local_cache_db = null;
+	this._remote_cache_db = null;
 	this._cache_db = null;
 	this._canvas = null;
 
@@ -16,108 +27,96 @@ L.TileLayer.addInitHook(function() {
 		return;
 	}
 
-	//initialize from external config
-	this.options.useOnlyCache = app_geo_config.enableOnlyTileCache();
-	this.local_tile_db_name = app_geo_config.getLocalTileDBName();
-	this.remote_tile_db_name = app_geo_config.getRemoteTileDBName();
+	//PouchDB.debug.enable('*');
 
-	if (app_geo_config.enableSeparateLocalDB()) {
+	this._local_cache_db = new PouchDB( this.local_cache_db_url, {revs_limit: 1} );
+	this._remote_cache_db = new PouchDB( this.remote_cache_db_url, {adapter: "http", revs_limit: 1} );
 
-		// initialize remote cache_db
-		var _remote_cache_db = new PouchDB( this.remote_tile_db_name, {adapter: "http", revs_limit: 1} );
-		var _remote_cache_db_connected = false;
-		_remote_cache_db.info(function(db_error, db_info) {
-			if (db_error) {
-				console.log(JSON.stringify(db_error, null, 2));
-				_remote_cache_db_connected = false;
-				console.warn( db_error )
-			}
+	// initialize local cache_db
+	this._local_cache_db.info(function(db_error, db_info) {
+		if (db_error) {
+			//console.log(JSON.stringify(db_error, null, 2));
+			this.local_cache_db_connected = false;
 
-			if (db_info) {
-				console.log(JSON.stringify(db_info, null, 2));
-				if (db_info.error) {
-					_remote_cache_db_connected = false;
-				}
-				else {
-					_remote_cache_db_connected = true;
-				}
-			}
+			console.warn( db_error )
+		}
 
-			if (_remote_cache_db_connected) {
-				console.log("remote tile_cache database '" + app_geo_config.getRemoteTileDBName() + "' connected!");
+		if (db_info) {
+			console.log(JSON.stringify(db_info, null, 2));
+			if (db_info.error) {
+				this.local_cache_db_connected = false;
 			}
 			else {
-				console.log("remote tile_cache database '" + app_geo_config.getRemoteTileDBName() + "' NOT connected!");
+				this.local_cache_db_connected = true;
 			}
-			app_geo_config.setRemoteTileDBConnected( _remote_cache_db_connected );
-		});
+		}
 
+		if (this.local_cache_db_connected) {
+			console.log("local tile_cache database '" + this.local_cache_db_url + "' connected!");
 
-		// initialize local cache_db
-		this._cache_db_url = this.local_tile_db_name;
-		this._cache_db = new PouchDB( this._cache_db_url, {revs_limit: 1} );
-		//console.log("local cache_db adapter : " + this._cache_db.adapter);
-
-		this._cache_db.info(function(db_error, db_info) {
-			if (db_error) {
-				console.log(JSON.stringify(db_error, null, 2));
-				L.TileLayer.prototype.cache_db_connected = false;
-
-				console.warn( db_error )
+			if (this.options.useOnlyCache) {
+				this._cache_db = this._remote_cache_db;
+				console.log("tile_cache database : " + this.remote_cache_db_url);
 			}
-
-			if (db_info) {
-				console.log(JSON.stringify(db_info, null, 2));
-				if (db_info.error) {
-					L.TileLayer.prototype.cache_db_connected = false;
-				}
-				else {
-					L.TileLayer.prototype.cache_db_connected = true;
-				}
-			}
-
-			if (L.TileLayer.prototype.cache_db_connected) {
-				console.log("tile_cache database '" + app_geo_config.getLocalTileDBName() + "' connected!");
+			else if (this.options.can_override_remote_cache_db) {
+				this._cache_db = this._remote_cache_db;
+				console.log("tile_cache database : " + this.remote_cache_db_url);
 			}
 			else {
-				console.log("tile_cache database '" + app_geo_config.getLocalTileDBName() + "' NOT connected!");
-			}
-		});
-
-	}
-	else {
-
-		// initialize local remote_db
-		this._cache_db_url = this.remote_tile_db_name
-		this._cache_db = new PouchDB( this._cache_db_url, {adapter: "http", revs_limit: 1} );
-
-		this._cache_db.info(function(db_error, db_info) {
-			if (db_error) {
-				console.log(JSON.stringify(db_error, null, 2));
-				L.TileLayer.prototype.cache_db_connected = false;
-
-				console.warn( db_error )
+				this._cache_db = this._local_cache_db;
+				console.log("tile_cache database : " + this.local_cache_db_url);
 			}
 
-			if (db_info) {
-				console.log(JSON.stringify(db_info, null, 2));
-				if (db_info.error) {
-					L.TileLayer.prototype.cache_db_connected = false;
-				}
-				else {
-					L.TileLayer.prototype.cache_db_connected = true;
-				}
-			}
+		}
+		else {
+			console.log("local tile_cache database '" + this.local_cache_db_url + "' NOT connected!");
+		}
+	}.bind(this));
 
-			if (L.TileLayer.prototype.cache_db_connected) {
-				console.log("tile_cache database '" + app_geo_config.getRemoteTileDBName() + "' connected!");
+
+	// initialize remote cache_db
+	this._remote_cache_db.info(function(db_error, db_info) {
+		if (db_error) {
+			//console.log(JSON.stringify(db_error, null, 2));
+			this.remote_cache_db_connected = false;
+
+			console.warn( db_error )
+		}
+
+		if (db_info) {
+			console.log(JSON.stringify(db_info, null, 2));
+			if (db_info.error) {
+				this.remote_cache_db_connected = false;
 			}
 			else {
-				console.log("tile_cache database '" + app_geo_config.getRemoteTileDBName() + "' NOT connected!");
+				this.remote_cache_db_connected = true;
 			}
-			app_geo_config.setRemoteTileDBConnected( L.TileLayer.prototype.cache_db_connected );
-		});
-	}
+		}
+
+		if (this.remote_cache_db_connected) {
+			console.log("remote tile_cache database '" + this.remote_cache_db_url + "' connected!");
+
+			if (this.options.useOnlyCache) {
+				this._cache_db = this._remote_cache_db;
+				console.log("tile_cache database : " + this.remote_cache_db_url);
+			}
+			else if (this.options.can_override_remote_cache_db) {
+				this._cache_db = this._remote_cache_db;
+				console.log("tile_cache database : " + this.remote_cache_db_url);
+			}
+			else {
+				this._cache_db = this._local_cache_db;
+				console.log("tile_cache database : " + this.local_cache_db_url);
+			}
+
+
+		}
+		else {
+			console.log("remote tile_cache database '" + this.remote_cache_db_url + "' NOT connected!");
+		}
+		app_geo_config.setRemoteTileDBConnected( this.remote_cache_db_connected );
+	}.bind(this));
+
 
 	this._seed_cache_handler = {"is_cancelled" : false};
 	this._download_handler = null;
@@ -131,6 +130,7 @@ L.TileLayer.addInitHook(function() {
 		this._canvas = null;
 	}
 });
+
 
 L.TileLayer.include({
 
@@ -153,16 +153,86 @@ L.TileLayer.include({
 		var tileUrl = this.getTileUrl(coords);
 
 		if (this.options.useCache && this._canvas) {
-			//console.log('this.cache_db_connected : ' + this.cache_db_connected);
-			if (this.cache_db_connected) { // tile_cache_db available
-				this._cache_db.get(tileUrl, {rev: true}, this._onCacheLookup(tile, tileUrl, done));
-				//this._cache_db.get(tileUrl, this._onCacheLookup(tile, tileUrl, done));
+
+			if (!this._cache_db) {
+				console.warn("_cache_db undefined!");
+				return;
 			}
-			else { // fall back to standard behaviour
-				tile.onload = L.bind(this._tileOnLoad, this, done, tile);
-			}
+
+			//this._cache_db.get( tileUrl, {revs_info: true} ).then(
+			this._cache_db.get( tileUrl ).then( function(doc) {
+
+				if (doc) {
+					// tile found in cache
+					if (this.options.debug_mode_on) {
+						console.log('tile_cache found: ' + tileUrl);
+						//console.log('doc :\n' + JSON.stringify(doc, null, 2));
+					}
+					this.fire('tile_cache:hit', {tile: tile, url: tileUrl});
+
+					if (Date.now() > doc.timestamp + this.options.cacheMaxAge && !this.options.useOnlyCache) {
+						// Tile is too old, try to refresh it
+						console.log("tile '" + tileUrl + "' is too old, updating...");
+
+						if (this._cache_db === this._remote_cache_db) {
+							console.log("\tremote tile_cache override disabled at this time!");
+							// Serve tile from cached data
+							tile.onload = L.bind(this._tileOnLoad, this, done, tile);
+							tile.src = doc.dataUrl;
+						}
+						else {
+
+							if (this.options.saveToCache) {
+								//tile.onload = L.bind(this._saveTile, this, tile, tileUrl, data._revs_info[0].rev, done);
+								tile.onload = L.bind(this._saveTile, this, tile, tileUrl, doc._rev, done);
+							}
+
+							tile.crossOrigin = 'Anonymous';
+							tile.src = tileUrl;
+							tile.onerror = function (ev) {
+								console.log("tile.onerror()");
+								// If the tile is too old but couldn't be fetched from the network,
+								// serve the one still in cache.
+								this.src = doc.dataUrl;
+							}.bind(this);
+
+						}
+					}
+					else {
+						// Serve tile from cached data
+						//console.log('tile is cached : ' + tileUrl);
+						//console.log('data.dataUrl : ' + data.dataUrl);
+						tile.onload = L.bind(this._tileOnLoad, this, done, tile);
+						tile.src = doc.dataUrl;    // data.dataUrl is already a base64-encoded PNG image.
+					}
+
+				}
+				else {
+					this._onCacheNotFound(tile, tileUrl, done);
+				}
+
+				//this._onCacheLookup(tile, tileUrl, done)
+
+			}.bind(this)).catch(function (err) {
+				if (err) {
+					if (err.name == "not_found" || err.status == 404) {
+						//data not found, perfectly normal...
+					}
+					else if (err.name == "unknown_error" || err.status == 500) {
+						//database offline most likely, ok...
+					}
+					else {
+						console.log("tile_cache '" + tileUrl + "' lookup : " + err.name + " (" + err.status + ")");
+						//console.warn(JSON.stringify(err, null, 2));
+					}
+				}
+
+				this._onCacheNotFound(tile, tileUrl, done);
+
+			}.bind(this));
 		}
-		else { // fall back to standard behaviour
+		else {
+			// Fall back to standard behaviour
 			tile.onload = L.bind(this._tileOnLoad, this, done, tile);
 		}
 
@@ -174,36 +244,29 @@ L.TileLayer.include({
 	 * Returns a callback (closure over tile/key/originalSrc) to be run
 	 * when the DB-backend is finished with a fetch operation.
 	 */
+	/*
 	_onCacheLookup: function(tile, tileUrl, done) {
 		this.options.useOnlyCache = app_geo_config.enableOnlyTileCache();
 
-		return function(err, data) {
-			if (err) {
-				if (err.status == 404 || err.name == "not_found") {
-					//do nothing, data not found, perfectly normal...
-				}
-				else {
-					console.log("tile_cache '" + tileUrl + "' lookup error");
-					console.warn(JSON.stringify(err, null, 2));
-				}
-			}
+		return function(data) {
 
 			if (data) {
 				// tile found in cache
 				console.log('tile_cache found: ' + tileUrl);
-				this.fire( 'tile_cache:hit', { tile: tile, url: tileUrl } );
+				this.fire('tile_cache:hit', {tile: tile, url: tileUrl});
 
-				if ((Date.now() > data.timestamp + this.options.cacheMaxAge) && (!this.options.useOnlyCache)) {
+				if (Date.now() > data.timestamp + this.options.cacheMaxAge && !this.options.useOnlyCache) {
 					// Tile is too old, try to refresh it
 					console.log('tile is too old: ' + tileUrl);
 
 					if (this.options.saveToCache) {
+						//tile.onload = L.bind(this._saveTile, this, tile, tileUrl, data._revs_info[0].rev, done);
 						tile.onload = L.bind(this._saveTile, this, tile, tileUrl, data._rev, done);
 					}
 
 					tile.crossOrigin = 'Anonymous';
 					tile.src = tileUrl;
-					tile.onerror = function(ev) {
+					tile.onerror = function (ev) {
 						// If the tile is too old but couldn't be fetched from the network,
 						// serve the one still in cache.
 						this.src = data.dataUrl;
@@ -211,39 +274,49 @@ L.TileLayer.include({
 				}
 				else {
 					// Serve tile from cached data
-					//console.log('Tile is cached: ', tileUrl);
+					console.log('tile is cached: ', tileUrl);
 					tile.onload = L.bind(this._tileOnLoad, this, done, tile);
 					tile.src = data.dataUrl;    // data.dataUrl is already a base64-encoded PNG image.
 				}
 
 			}
 			else {
-				// tile not found in cache
-				//console.log('tile_cache found: ' + tileUrl);
-				this.fire( 'tile_cache:miss', { tile: tile, url: tileUrl } );
-
-				if (this.options.useOnlyCache) {
-					// Offline, not cached
-					//console.log('Tile not in cache', tileUrl);
-					tile.onload = L.Util.falseFn;
-					tile.src = L.Util.emptyImageUrl;
-				}
-				else {
-					//Online, not cached, request the tile normally
-					//console.log('Requesting tile normally', tileUrl);
-
-					if (this.options.saveToCache) {
-						tile.onload = L.bind(this._saveTile, this, tile, tileUrl, null, done);
-					}
-					else {
-						tile.onload = L.bind(this._tileOnLoad, this, done, tile);
-					}
-
-					tile.crossOrigin = 'Anonymous';
-					tile.src = tileUrl;
-				}
+				this._onCacheNotFound(tile, tileUrl, done);
 			}
-		}.bind(this);
+
+		}
+		//}.bind(this);
+	},
+  */
+
+	_onCacheNotFound: function (tile, tileUrl, done) {
+		this.options.useOnlyCache = app_geo_config.enableOnlyTileCache();
+
+		if (this.options.debug_mode_on) {
+			console.log('tile_cache not found: ' + tileUrl);
+		}
+		this.fire( 'tile_cache:miss', { tile: tile, url: tileUrl } );
+
+		if (this.options.useOnlyCache) {
+			// Offline, not cached
+			//console.log('Tile not in cache', tileUrl);
+			tile.onload = L.Util.falseFn;
+			tile.src = L.Util.emptyImageUrl;
+		}
+		else {
+			//Online, not cached, request the tile normally
+			//console.log('Requesting tile normally', tileUrl);
+
+			if (this.options.saveToCache) {
+				tile.onload = L.bind(this._saveTile, this, tile, tileUrl, null, done);
+			}
+			else {
+				tile.onload = L.bind(this._tileOnLoad, this, done, tile);
+			}
+
+			tile.crossOrigin = 'Anonymous';
+			tile.src = tileUrl;
+		}
 	},
 
 	/*
@@ -252,6 +325,19 @@ L.TileLayer.include({
 	 * This will keep just the latest valid copy of the image in the cache.
 	 */
 	_saveTile: function(tile, tileUrl, existingRevision, done) {
+		if (this._cache_db) {
+			if (this._cache_db === this._remote_cache_db) {
+				console.log("\tremote tile_cache override disabled at this time!");
+				if (done) { done(); }
+				return;
+			}
+		}
+		else {
+			console.warn("_cache_db undefined!");
+			if (done) { done(); }
+			return;
+		}
+
 		if (this._canvas === null) return;
 		this._canvas.width  = tile.naturalWidth  || tile.width;
 		this._canvas.height = tile.naturalHeight || tile.height;
@@ -260,73 +346,107 @@ L.TileLayer.include({
 		context.drawImage(tile, 0, 0);
 
 		var dataUrl = this._canvas.toDataURL(this.options.cacheFormat);
-		var doc = {"dataUrl" : dataUrl, "timestamp" : Date.now()};
 
-		console.log("_saveTile() :");
-		console.log("\tcache_db_connected : " + this._cache_db_url + ", " + this.cache_db_connected);
-		console.log("\ttileUrl : " + tileUrl);
-		//console.log("\tdoc :\n" + JSON.stringify(doc, null, 2));
-
-		if (this.cache_db_connected) {
-
-			if (existingRevision) {
-				console.log("\texistingRevision : " + existingRevision);
-
-				this._cache_db.put({
-					"_id": tileUrl,
-					"_rev" : existingRevision,
-					"data": doc
-				}, function (err, response) {
-					if (err) {
-						console.warn(err);
-
-						if (err.status == 409 || err.name === 'conflict') {
-							console.log("attempting to clear document with revision " + existingRevision);
-
-							this._cache_db.remove(tileUrl, existingRevision, function(err, response) {
-								if (err) {
-									console.warn(err);
-								}
-								if (response) {
-									console.log(JSON.stringify(response, null, 2));
-
-									if (response.ok === true || response.ok === "true") {
-										console.log("attempting to save doc '" + tileUrl + "' as new");
-										this._saveTile(tile, tileUrl, null, done);
-									}
-
-								}
-							}.bind(this));
-						} // end-of if (err.status == 409 || err.name === 'conflict')
-					}
-				}.bind(this));
-			}
-			else {
-
-				this._cache_db.put({
-					"_id": tileUrl,
-					"data": doc
-				}, function (err, response) {
-					if (err) {
-						console.warn(err);
-
-						if (err.status == 409 || err.name === 'conflict') {
-							console.log("attempting to resolve conflict '" + tileUrl + "' ...");
-
-							this._cache_db.get(tileUrl, function(err, data) {
-								if (data) {
-									this._saveTile(tile, tileUrl, data._rev, done);
-								}
-							}.bind(this));
-						} // end-of if (err.status == 409 || err.name === 'conflict')
-					}
-				}.bind(this));
+		if (existingRevision) {
+			if (this.options.debug_mode_on) {
+				console.log("saveTile(" + tileUrl + "), existingRevision : " + existingRevision);
 			}
 
-		} // end-of if (this.cache_db_connected)
+			var doc = {
+				_id : tileUrl,
+				_rev : existingRevision,
+				dataUrl : dataUrl,
+				timestamp : Date.now()
+			};
+
+			this._cache_db.put( doc ).then( function (response) {
+
+				if (response) {
+					//console.log(JSON.stringify(response, null, 2));
+					if (response.ok === true) {
+						if (this.options.debug_mode_on) {
+							console.log('cached tile "' + response.id + ' rev "' + response.rev + '", OK');
+						}
+					}
+					else {
+						console.log(JSON.stringify(response, null, 2));
+					}
+				}
+			}.bind(this)).catch(function (err) {
+
+				if (err.name === 'conflict' || err.status == 409) {
+					console.log("attempting to resolve conflict ...");
+
+					this._cache_db.upsert(tileUrl, function (doc) {
+
+						return doc;
+
+					}).then(function (response) {
+						//console.log(JSON.stringify(response, null, 2));
+						console.log('up-sert('+tileUrl+', '+existingRevision+') success!');
+
+					}).catch(function (err) {
+						console.log('up-sert('+tileUrl+', '+existingRevision+') failed!');
+						console.warn(err);
+					});
+				}
+				else {
+					console.log('put('+tileUrl+', '+existingRevision+') failed!');
+					console.log(err);
+				}
+
+			}.bind(this));
+
+		}
+		else {// no existing revision
+
+			var doc = {
+				_id : tileUrl,
+				dataUrl : dataUrl,
+				timestamp : Date.now()
+			};
+
+			this._cache_db.put( doc ).then( function(response) {
+
+				if (response) {
+					//console.log(JSON.stringify(response, null, 2));
+					if (response.ok === true) {
+						if (this.options.debug_mode_on) {
+							console.log('cached tile "' + response.id + '", OK');
+						}
+					}
+					else {
+						console.log(JSON.stringify(response, null, 2));
+					}
+				}
+			}.bind(this)).catch( function(err) {
+
+				if (err.name === 'conflict' || err.status == 409) {
+					console.log("attempting to resolve conflict ...");
+
+					this._cache_db.upsert(tileUrl, function (doc) {
+
+							return doc;
+					}).then(function (response) {
+						//console.log(JSON.stringify(response, null, 2));
+						console.log('up-sert('+tileUrl+') success!');
+
+					}).catch(function (err) {
+						console.warn(err);
+					});
+				}
+				else {
+					console.log('up-sert('+tileUrl+') failed!');
+					console.log(JSON.stringify(err, null, 2));
+				}
+
+			}.bind(this));
+
+		} // end-of no existing revision
 
 		if (done) { done(); }
 	},
+
 
 	/*
 	 * Seeds the cache given a bounding box (latLngBounds), and
@@ -339,23 +459,9 @@ L.TileLayer.include({
 			return;
 		}
 
-		//console.log('this.cache_db_connected : ' + this.cache_db_connected);
-		if (!this.cache_db_connected) {
-			console.log("tile_cache database '" + this._cache_db_url + "' NOT connected!");
-			return;
-		}
-
-		if (!this.options.useCache) {
-			return;
-		}
-
-		if (minZoom > maxZoom) {
-			return;
-		}
-
-		if (!this._map) {
-			return;
-		}
+		if (!this.options.useCache) return;
+		if (minZoom > maxZoom) return;
+		if (!this._map) return;
 
 		this._seed_cache_handler.is_cancelled = false;
 
@@ -425,21 +531,22 @@ L.TileLayer.include({
 	},
 
 	/*
-	 * Uses a defined tile to ingest through one item in the queue and
+	 * Uses a defined tile to eat through one item in the queue and
 	 * asynchronously recursively call itself when the tile has finished loading.
 	 */
 	_seedOneTile: function(tile, remaining, seedData) {
-		if (!this.cache_db_connected) {
-			console.log("tile_cache database '" + this._cache_db_url + "' NOT connected!");
-			return;
-		}
-
 		if (this._seed_cache_handler.is_cancelled) {
 			this.fire('seed:end', seedData);
 			return;
 		}
 
 		if (!remaining.length) {
+			this.fire('seed:end', seedData);
+			return;
+		}
+
+		if (!this._cache_db) {
+			console.warn("_cache_db undefined!");
 			this.fire('seed:end', seedData);
 			return;
 		}
@@ -454,8 +561,9 @@ L.TileLayer.include({
 
 		var url = remaining.pop();
 
-		this._cache_db.get(url, function(err, data) {
-			if (!data) {
+
+		this._cache_db.get(url, function(err, doc) {
+			if (!doc) {
 				/// FIXME: Do something on tile error!!
 				tile.onload = function(ev) {
 					this._saveTile(tile, url, null); //(ev)
@@ -479,35 +587,40 @@ L.TileLayer.include({
 
 	uploadTileCache : function( map ) {
 		this.options.useOnlyCache = app_geo_config.enableOnlyTileCache();
-		this.local_tile_db_name = app_geo_config.getLocalTileDBName();
-		this.remote_tile_db_name = app_geo_config.getRemoteTileDBName();
+		this.local_cache_db_url = app_geo_config.getLocalTileDBName();
+		this.remote_cache_db_url = app_geo_config.getRemoteTileDBName();
 
 		console.log('uploadTileCache()');
 		console.log('\toptions.useOnlyCache : ' + this.options.useOnlyCache);
-		console.log('\tlocal_tile_db_name : ' + this.local_tile_db_name);
-		console.log('\tremote_tile_db_name : ' + this.remote_tile_db_name);
-		console.log('\tseparate_local_db : ' + app_geo_config.enableSeparateLocalDB());
+		console.log('\tlocal_cache_db_url : ' + this.local_cache_db_url);
+		console.log('\tremote_cache_db_url : ' + this.remote_cache_db_url);
+		console.log('\tremote_tile_db_override : ' + app_geo_config.canOverrideRemoteTileDB());
 		console.log('\tremote_tile_db_connected : ' + app_geo_config.isRemoteTileDBConnected());
 
-		if (!this.cache_db_connected) {
-			console.log("tile_cache database '" + this._cache_db_url + "' NOT connected!");
+		if (!this.local_cache_db_connected) {
+			console.log("tile_cache database '" + this.local_cache_db_url + "' NOT connected!");
+
+			if (map) {
+				map.fireEvent('up:error', null);
+			}
 			return;
 		}
 
-		if (app_geo_config.isRemoteTileDBConnected()) {
-			/*
-			function newMapEvent(event_type, event_obj) {
-				if (map) {
-					//console.log('fireMapEvent(' + event_type + ')');
-					//console.log('\n' + JSON.stringify(event_obj, null, 2));
-					map.fireMapEvent(event_type, event_obj);
-				}
-			}
-			*/
+		if (!this.remote_cache_db_connected) {
+			console.log("tile_cache database '" + this.remote_cache_db_url + "' NOT connected!");
 
-			this._upload_handler = PouchDB.replicate(this.local_tile_db_name, this.remote_tile_db_name,
-			//PouchDB.sync(this.local_tile_db_name, this.remote_tile_db_name,
-					{retry: false}
+			if (map) {
+				map.fireEvent('upload:error', null);
+			}
+			return;
+		}
+
+		if (this.remote_cache_db_url != this.local_cache_db_url) {
+
+			this._upload_handler = PouchDB.replicate(
+					this.local_cache_db_url,
+					this.remote_cache_db_url,
+					{retry: true}
 			).on('change', function (info) { // handle change
 			}).on('paused', function (err) { // replication paused (e.g. replication up to date, user went offline)
 				//this._fireMapEvent('upload:paused', err);
@@ -523,11 +636,18 @@ L.TileLayer.include({
 				map.fireEvent('upload:complete', info);
 			}).on('error', function (err) { // handle error
 				console.warn(err);
-				//this._fireMapEvent('upload:error', err);
-				//this.fire('upload:error', {'error':err});
+				if (map) {
+					map.fireEvent('upload:error', err);
+				}
 			});
 
 		}
+		else {
+			if (map) {
+				map.fireEvent('upload:error', null);
+			}
+		}
+
 	}, // end of uploadTileCache()
 
 	cancelUploadTileCache : function() {
@@ -539,25 +659,40 @@ L.TileLayer.include({
 
   downloadTileCache : function( map ) {
 		this.options.useOnlyCache = app_geo_config.enableOnlyTileCache();
-		this.local_tile_db_name = app_geo_config.getLocalTileDBName();
-		this.remote_tile_db_name = app_geo_config.getRemoteTileDBName();
+		this.local_cache_db_url = app_geo_config.getLocalTileDBName();
+		this.remote_cache_db_url = app_geo_config.getRemoteTileDBName();
 
 		console.log('downloadTileCache()');
 		console.log('\toptions.useOnlyCache : ' + this.options.useOnlyCache);
-		console.log('\tlocal_tile_db_name : ' + this.local_tile_db_name);
-		console.log('\tremote_tile_db_name : ' + this.remote_tile_db_name);
-    console.log('\tseparate_local_db : ' + app_geo_config.enableSeparateLocalDB());
+		console.log('\tlocal_cache_db_url : ' + this.local_cache_db_url);
+		console.log('\tremote_cache_db_url : ' + this.remote_cache_db_url);
+		console.log('\tremote_tile_db_override : ' + app_geo_config.canOverrideRemoteTileDB());
 		console.log('\tremote_tile_db_connected : ' + app_geo_config.isRemoteTileDBConnected());
 
-		if (!this.cache_db_connected) {
-			console.log("tile_cache database '" + this._cache_db_url + "' NOT connected!");
+		if (!this.local_cache_db_connected) {
+			console.log("tile_cache database '" + this.local_cache_db_url + "' NOT connected!");
+
+			if (map) {
+				map.fireEvent('download:error', null);
+			}
 			return;
 		}
 
-		if (app_geo_config.isRemoteTileDBConnected()) {
+		if (!this.remote_cache_db_connected) {
+			console.log("tile_cache database '" + this.remote_cache_db_url + "' NOT connected!");
 
-			this._download_handler = PouchDB.replicate(this.remote_tile_db_name, this.local_tile_db_name,
-					{retry: false}
+			if (map) {
+				map.fireEvent('download:error', null);
+			}
+			return;
+		}
+
+		if (this.remote_cache_db_url != this.local_cache_db_url) {
+
+			this._download_handler = PouchDB.replicate(
+					this.remote_cache_db_url,
+					this.local_cache_db_url,
+					{retry: true}
 			).on('change', function (info) {
 				// handle change
 			}).on('paused', function (err) {
@@ -589,6 +724,12 @@ L.TileLayer.include({
 			});
 
 		}
+		else {
+			if (map) {
+				map.fireEvent('download:error', null);
+			}
+		}
+
 	}, // end of downloadTileCache()
 
 	cancelDownloadTileCache : function() {
