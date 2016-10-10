@@ -14,6 +14,7 @@ L.TileLayer.addInitHook(function() {
 	this.options.debug_mode_on = app_geo_config.enableDebugMode();
 	this.options.advance_mode_on = app_geo_config.enableAdvanceMode();
 	this.options.can_override_remote_cache_db = app_geo_config.canOverrideRemoteTileDB();
+	this.options.disable_override_remote_cache_db = app_geo_config.disableOverrideRemoteTileDB();
 	this.options.useOnlyCache = app_geo_config.enableOnlyTileCache();
 	this.local_cache_db_url = app_geo_config.getLocalTileDBName();
 	this.remote_cache_db_url = app_geo_config.getRemoteTileDBName();
@@ -174,7 +175,7 @@ L.TileLayer.include({
 						// Tile is too old, try to refresh it
 						console.log("tile '" + tileUrl + "' is too old, updating...");
 
-						if (this._cache_db === this._remote_cache_db) {
+						if (this._cache_db === this._remote_cache_db && this.options.disable_override_remote_cache_db) {
 							console.log("\tremote tile_cache override disabled at this time!");
 							// Serve tile from cached data
 							tile.onload = L.bind(this._tileOnLoad, this, done, tile);
@@ -324,9 +325,9 @@ L.TileLayer.include({
 	 * The handler will delete the document from pouchDB if an existing revision is passed.
 	 * This will keep just the latest valid copy of the image in the cache.
 	 */
-	_saveTile: function(tile, tileUrl, existingRevision, done) {
+	_saveTile: function(tile, tileUrl, existingRevision, done, cachingSeed) {
 		if (this._cache_db) {
-			if (this._cache_db === this._remote_cache_db) {
+			if (this._cache_db === this._remote_cache_db && this.options.disable_override_remote_cache_db) {
 				console.log("\tremote tile_cache override disabled at this time!");
 				if (done) { done(); }
 				return;
@@ -388,11 +389,19 @@ L.TileLayer.include({
 					}).catch(function (err) {
 						console.log('up-sert('+tileUrl+', '+existingRevision+') failed!');
 						console.warn(err);
+
+						if (cachingSeed) {
+							this.fire('seed:error', {bounding_box_label: cachingSeed.bounding_box_label, message: err});
+						}
 					});
 				}
 				else {
 					console.log('put('+tileUrl+', '+existingRevision+') failed!');
 					console.log(err);
+
+					if (cachingSeed) {
+						this.fire('seed:error', {bounding_box_label: cachingSeed.bounding_box_label, message: err});
+					}
 				}
 
 			}.bind(this));
@@ -432,12 +441,21 @@ L.TileLayer.include({
 						console.log('up-sert('+tileUrl+') success!');
 
 					}).catch(function (err) {
+						console.log('up-sert('+tileUrl+') failed!');
 						console.warn(err);
+
+						if (cachingSeed) {
+							this.fire('seed:error', {bounding_box_label: cachingSeed.bounding_box_label, message: err});
+						}
 					});
 				}
 				else {
 					console.log('up-sert('+tileUrl+') failed!');
 					console.log(JSON.stringify(err, null, 2));
+
+					if (cachingSeed) {
+						this.fire('seed:error', {bounding_box_label: cachingSeed.bounding_box_label, message: err});
+					}
 				}
 
 			}.bind(this));
@@ -453,9 +471,36 @@ L.TileLayer.include({
 	 *  the minimum and maximum zoom levels.
 	 *  Use with care! This can spawn thousands of requests and flood tile-server!
 	 */
-	seed: function(bbox, minZoom, maxZoom) {
+	seed: function(bounding_box, minZoom, maxZoom, box_label) {
+		if (!bounding_box) {
+			var error_message = 'argument "bounding_box" cannot be null!'
+			console.log(error_message);
+			this.fire('seed:error', {bounding_box_label : 'unknown bounding_box', message: error_message});
+			return;
+		}
+
+		var sw_lat = bounding_box.sw_latitude, sw_lon = bounding_box.sw_longitude;
+		var ne_lat = bounding_box.ne_latitude, ne_lon = bounding_box.ne_longitude;
+
+		/*
+		 // backward-support multiple formats, bounding box object under Leaflet lib
+		 // var bounding_box = new L.LatLngBounds( new L.LatLng(sw_lat, sw_lon), new L.LatLng(ne_lat, ne_lon) );
+
+		if (bounding_box instanceof L.LatLngBounds) {
+			sw_lat = bounding_box.getSouthWest().lat, sw_lon = bounding_box.getSouthWest().lng;
+			ne_lat = bounding_box.getNorthEast().lat, ne_lon = bounding_box.getNorthEast().lng;
+		}
+		*/
+
+		var bounding_box_geo_id = generateBoundingBoxGeoID( sw_lat, sw_lon, ne_lat, ne_lon );
+		var label = bounding_box_geo_id;
+		if (box_label) {
+			label = box_label;
+		}
+
 		if (!app_geo_config.enableAdvanceMode()) {
 			console.log('Must enable advance mode!');
+			this.fire('seed:error', {bounding_box_label : label, message: "advance mode not enabled!"});
 			return;
 		}
 
@@ -469,8 +514,8 @@ L.TileLayer.include({
 
 		for (var z = minZoom; z<=maxZoom; z++) {
 
-			var northEastPoint = this._map.project(bbox.getNorthEast(),z);
-			var southWestPoint = this._map.project(bbox.getSouthWest(),z);
+			var northEastPoint = this._map.project(new L.LatLng(ne_lat, ne_lon),z);
+			var southWestPoint = this._map.project(new L.LatLng(sw_lat, sw_lon),z);
 
 			// Calculate tile indexes as per L.TileLayer._update and
 			//   L.TileLayer._addTilesFromCenterOut
@@ -488,16 +533,20 @@ L.TileLayer.include({
 			}
 		}
 
-		var seedData = {
-			bbox: bbox,
+		var cachingSeed = {
+			bounding_box: bounding_box,
 			minZoom: minZoom,
 			maxZoom: maxZoom,
-			queueLength: queue.length
+			queueLength: queue.length,
+			bounding_box_geo_id: bounding_box_geo_id,
+			bounding_box_label : label
 		}
-		this.fire('seed:start', seedData);
+
+		this.fire('seed:start', cachingSeed);
+
 		var tile = this._createTile();
 		tile._layer = this;
-		this._seedOneTile(tile, queue, seedData);
+		this._seedOneTile(tile, queue, cachingSeed);
 	},
 
 	cancelSeedTileCache : function() {
@@ -534,28 +583,30 @@ L.TileLayer.include({
 	 * Uses a defined tile to eat through one item in the queue and
 	 * asynchronously recursively call itself when the tile has finished loading.
 	 */
-	_seedOneTile: function(tile, remaining, seedData) {
+	_seedOneTile: function(tile, remaining, cachingSeed) {
 		if (this._seed_cache_handler.is_cancelled) {
-			this.fire('seed:end', seedData);
+			this.fire('seed:cancel', cachingSeed);
 			return;
 		}
 
 		if (!remaining.length) {
-			this.fire('seed:end', seedData);
+			this.fire('seed:end', cachingSeed);
 			return;
 		}
 
 		if (!this._cache_db) {
 			console.warn("_cache_db undefined!");
-			this.fire('seed:end', seedData);
+			this.fire('seed:cancel', cachingSeed);
 			return;
 		}
 
 		this.fire('seed:progress', {
-			bbox:    seedData.bbox,
-			minZoom: seedData.minZoom,
-			maxZoom: seedData.maxZoom,
-			queueLength: seedData.queueLength,
+			bounding_box:    cachingSeed.bounding_box,
+			minZoom: cachingSeed.minZoom,
+			maxZoom: cachingSeed.maxZoom,
+			queueLength: cachingSeed.queueLength,
+			bounding_box_geo_id: cachingSeed.bounding_box_geo_id,
+			bounding_box_label : cachingSeed.bounding_box_label,
 			remainingLength: remaining.length
 		});
 
@@ -566,14 +617,14 @@ L.TileLayer.include({
 			if (!doc) {
 				/// FIXME: Do something on tile error!!
 				tile.onload = function(ev) {
-					this._saveTile(tile, url, null); //(ev)
-					this._seedOneTile(tile, remaining, seedData);
+					this._saveTile(tile, url, null, null, cachingSeed); //(ev)
+					this._seedOneTile(tile, remaining, cachingSeed);
 				}.bind(this);
 				tile.crossOrigin = 'Anonymous';
 				tile.src = url;
 			}
 			else {
-				this._seedOneTile(tile, remaining, seedData);
+				this._seedOneTile(tile, remaining, cachingSeed);
 			}
 		}.bind(this));
 
@@ -594,7 +645,7 @@ L.TileLayer.include({
 		console.log('\toptions.useOnlyCache : ' + this.options.useOnlyCache);
 		console.log('\tlocal_cache_db_url : ' + this.local_cache_db_url);
 		console.log('\tremote_cache_db_url : ' + this.remote_cache_db_url);
-		console.log('\tremote_tile_db_override : ' + app_geo_config.canOverrideRemoteTileDB());
+		console.log('\tremote_tile_db_can_override : ' + app_geo_config.canOverrideRemoteTileDB());
 		console.log('\tremote_tile_db_connected : ' + app_geo_config.isRemoteTileDBConnected());
 
 		if (!this.local_cache_db_connected) {
@@ -666,7 +717,7 @@ L.TileLayer.include({
 		console.log('\toptions.useOnlyCache : ' + this.options.useOnlyCache);
 		console.log('\tlocal_cache_db_url : ' + this.local_cache_db_url);
 		console.log('\tremote_cache_db_url : ' + this.remote_cache_db_url);
-		console.log('\tremote_tile_db_override : ' + app_geo_config.canOverrideRemoteTileDB());
+		console.log('\tremote_tile_db_can_override : ' + app_geo_config.canOverrideRemoteTileDB());
 		console.log('\tremote_tile_db_connected : ' + app_geo_config.isRemoteTileDBConnected());
 
 		if (!this.local_cache_db_connected) {

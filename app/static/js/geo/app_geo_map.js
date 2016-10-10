@@ -15,7 +15,7 @@ var app_geo_map = (function () {
   var _is_initialized = false;
 
   var default_view_center = new L.LatLng(31.7964452, 35.1051469), default_view_zoom = 2;
-  var min_zoom = 2, max_zoom = 16;
+  var map_zoom_absolute_min_level = 2, map_zoom_absolute_max_level = 16;
 
   var map;
   var map_tile_layer;
@@ -28,12 +28,17 @@ var app_geo_map = (function () {
   var world_bounds = L.latLngBounds(south_west_max, north_east_max);
 
   var area_draw_control_layer;
-  var map_tile_cache_toggle_button, map_tile_cache_import_button, map_tile_cache_export_button;
+  var map_tile_cache_toggle_button, map_tile_cache_toggle_busy = false,
+      map_tile_cache_import_button, map_tile_cache_import_busy = false,
+      map_tile_cache_export_button, map_tile_cache_export_busy = false,
+      predefined_tile_cache_toggle_button, predefined_tile_cache_toggle_busy = false;
 
-  var area_drawn_id_list = [];
+  var bounding_box_map = {},
+      predefined_bounding_box_list = [];
 
   function containsAreaDrawn() {
-    if (area_drawn_id_list && area_drawn_id_list.length > 0) {
+    var size = _.size(bounding_box_map);
+    if (size > 0) {
       return true;
     }
     return false;
@@ -43,8 +48,28 @@ var app_geo_map = (function () {
     if (area_draw_control_layer) {
       area_draw_control_layer.clearLayers();
     }
-    if (area_drawn_id_list) {
-      area_drawn_id_list.length = 0;
+
+    if (bounding_box_map) {
+      bounding_box_map = {};
+    }
+  }
+
+  function removeAreaDrawn(layer_id_list) {
+    if (layer_id_list && layer_id_list.length > 0) {
+      layer_id_list = _.unique( layer_id_list );
+      var target_layer_list = [];
+      area_draw_control_layer.eachLayer(function (layer) {
+        if (layer_id_list.indexOf( layer._leaflet_id ) > -1) {
+          target_layer_list.push( layer );
+        }
+      });
+
+      if (target_layer_list.length > 0) {
+        _.each(target_layer_list, function(target_layer, index) {
+          console.log('removing layer_id : ' + target_layer._leaflet_id + ' ...');
+          area_draw_control_layer.removeLayer( target_layer );
+        });
+      }
     }
   }
 
@@ -599,61 +624,255 @@ var app_geo_map = (function () {
     }
   }
 
-  function initCacheSeeding(new_zoom_level, world_map_enabled) {
-    if (map && map_tile_layer) {
+  function initTileCaching( new_bounding_box_list ) {
+    if (map && map_tile_layer && area_draw_control_layer) {
 
-      if (area_draw_control_layer && area_drawn_id_list.length > 0) {
-        var target_layer_id = area_drawn_id_list[area_drawn_id_list.length -1];
-        var target_layer;
-        area_draw_control_layer.eachLayer(function (layer) {
-          if (layer._leaflet_id == target_layer_id) {
-            console.log('layer: ' + target_layer_id + ' selected for caching');
-            target_layer = layer;
-          }
-        });
-
-        if (target_layer) {
-
-          // Seed the map-tile layer, for a given rectangular area, for zoom levels 0 through 4.
-          //var bounds = L.latLngBounds(L.latLng(5,-165), L.latLng(65,-50));
-
-          var bounds = target_layer.getBounds(), current_zoom_level = map.getZoom(), target_zoom_level = 9;
-          if (new_zoom_level && new_zoom_level >= min_zoom && new_zoom_level <= max_zoom ) {
-            target_zoom_level = new_zoom_level;
-          }
-          if (current_zoom_level > target_zoom_level) {
-            target_zoom_level = current_zoom_level;
-          }
-          console.log('current_zoom_level: ' + current_zoom_level + ' target_zoom_level: ' + target_zoom_level);
-
-          if (world_map_enabled === true) {
-            bounds = world_bounds;
-          }
-
-          map_tile_layer.seed(bounds, 0, target_zoom_level);
+      var cache_bounding_box_map, cache_bounding_box_list, cache_bound_box_max = 0;
+      if (new_bounding_box_list && new_bounding_box_list.length > 0) {
+        cache_bound_box_max = new_bounding_box_list.length;
+        console.log('Bounding boxes loaded.. (' + cache_bound_box_max + ')');
+        cache_bound_box_max = new_bounding_box_list.length;
+        cache_bounding_box_list = new_bounding_box_list;
+      }
+      else {
+        cache_bound_box_max = _.size(bounding_box_map);
+        if (cache_bound_box_max > 0) {
+          console.log('Bounding boxes created.. (' + cache_bound_box_max + ')');
+          cache_bounding_box_map = _.clone(bounding_box_map);
+          cache_bounding_box_list = _.values(cache_bounding_box_map);
+        }
+        else {
+          console.log('No bounding boxes created or loaded!');
+          return;
+        }
+      }
+      console.log(JSON.stringify(cache_bounding_box_list, null, 2));
 
 
-          // Display seeding progress on console
-          map_tile_layer.on('seed:progress', function (seedData) {
-            var percent = 100 - Math.floor(seedData.remainingLength / seedData.queueLength * 100);
-            console.log('Cache-seeding-map-tiles : ' + percent + '% done');
-          });
-          map_tile_layer.on('seed:start', function (seedData) {
-            console.log('Cache-seeding-map-tiles (' + seedData.queueLength + ') : Starting...');
-          });
-          map_tile_layer.on('seed:end', function (seedData) {
-            console.log('Cache-seeding-map-tiles : Completed!');
+      /*
+       var bounding_box_key_list = _.keys(cache_bounding_box_map);
+       var target_layer_id = bounding_box_key_list[0];
+       var target_layer;
+       area_draw_control_layer.eachLayer(function (layer) {
+       if (layer._leaflet_id == target_layer_id) {
+       console.log('layer: ' + target_layer_id + ' selected for caching');
+       target_layer = layer;
+       }
+       });
 
-            map.fire('caching:end', {"seedData": seedData});
-          });
+       if (target_layer) {
 
+       // Seed the map-tile layer, for a given rectangular area, for zoom levels 0 through 4.
+       //var bounds = L.latLngBounds(L.latLng(5,-165), L.latLng(65,-50));
+
+       var bounds = target_layer.getBounds();
+       */
+
+
+      console.log('Bounding boxes to be cached : ' + cache_bounding_box_list.length);
+      var bounding_box = cache_bounding_box_list.shift();
+      _seedCachingBoundingBox( bounding_box );
+
+      // Receive events and display seeding progress on console
+      var prev_bounding_box_label;
+      var prev_percent_value = -1;
+      map_tile_layer.on('seed:progress', function (cachingSeed) {
+        var percent = 100 - Math.floor(cachingSeed.remainingLength / cachingSeed.queueLength * 100);
+        if (prev_percent_value != percent) {
+          console.log('Caching-map-tiles ' + cachingSeed.bounding_box_label + ' : ' + percent + '% done');
+
+          map.fire('caching:progress',
+                   {"caching_area_label": cachingSeed.bounding_box_label, "caching_status": "processing", "caching_progress": percent});
+        }
+        prev_percent_value = percent;
+
+      });
+
+      var is_started = false;
+      map_tile_layer.on('seed:start', function (cachingSeed) {
+        if (!is_started) {
+          console.log('Caching-map-tiles [' + cachingSeed.queueLength + '] ' + cachingSeed.bounding_box_label + ' : Starting...');
+          is_started = true;
+
+          map.fire('caching:start', {"caching_area_label": cachingSeed.bounding_box_label, "caching_status": "started"});
         }
 
-      }
+      });
+
+      var is_completed = false;
+      map_tile_layer.on('seed:end', function (cachingSeed) {
+        if (!is_completed) {
+          console.log('Caching-map-tiles ' + cachingSeed.bounding_box_label + ' : Completed!');
+          is_completed = true;
+
+          if (cachingSeed.bounding_box.map_layer_uid) {
+            removeAreaDrawn([cachingSeed.bounding_box.map_layer_uid]);
+          }
+
+          map.fire('caching:end', {"caching_area_label": cachingSeed.bounding_box_label, "caching_status": "completed"});
+
+          if (cache_bounding_box_list.length > 0) {
+            prev_percent_value = -1;
+            is_started = false;
+            is_completed = false;
+
+            console.log('Bounding boxes to be cached : ' + cache_bounding_box_list.length);
+            bounding_box = cache_bounding_box_list.shift();
+            _seedCachingBoundingBox( bounding_box );
+          }
+          else {
+            console.log('All-caching-map-tiles : Completed! ');
+
+            map.fire('all_caching:end', {"caching_status": "completed"});
+          }
+
+          prev_bounding_box_label = cachingSeed.bounding_box_label;
+        }
+
+      });
 
 
+      map_tile_layer.on('seed:error', function (error) {
+
+        if (error) {
+          console.log('Caching-map-tiles ' + error.bounding_box_label + ' : Error!\n' + JSON.stringify(error, null, 2));
+        }
+        else {
+          console.log('Caching-map-tiles ' + error.bounding_box_label + ' : Unknown error!');
+        }
+
+        map.fire('caching:error', error);
+        map.fire('predefined_caching:error', error);
+      });
+
+      map_tile_layer.on('seed:cancel', function (cachingSeed) {
+
+        console.log('Caching-map-tiles ' + cachingSeed.bounding_box_label + ' : Cancelled!');
+
+        if (cache_bounding_box_list.length > 0) {
+          console.log('Bounding boxes cleared : ' + cache_bounding_box_list.length);
+          cache_bounding_box_list.length = 0;
+        }
+
+        map.fire('caching:cancel', cachingSeed);
+        map.fire('predefined_caching:cancel', cachingSeed);
+      });
+
+    } // end-of if (map && map_tile_layer)
+
+  } // end-of function initTileCaching(new_bounding_box_list)
+
+  function _seedCachingBoundingBox( bounding_box ) {
+    if (!bounding_box) { return; }
+    console.log(JSON.stringify(bounding_box, null, 2));
+
+    var min_zoom = map_zoom_absolute_min_level, max_zoom = map.getZoom() + 4;
+    if (bounding_box.zoom_level) {
+      max_zoom = bounding_box.zoom_level;
     }
+    if (max_zoom > map_zoom_absolute_max_level) {
+      max_zoom = map_zoom_absolute_max_level;
+    }
+    console.log('min_zoom_level : ' + min_zoom + ' max_zoom_level: ' + max_zoom);
+
+    var bounding_box_label;
+    if (bounding_box.label) {
+      bounding_box_label = bounding_box.label;
+    }
+
+    map_tile_layer.seed(bounding_box, min_zoom, max_zoom, bounding_box_label);
   }
+
+  function initPredefinedCoverageCaching() {
+    if (predefined_bounding_box_list) {
+      predefined_bounding_box_list.length = 0;
+    }
+
+    loadJSON('js/geo/data_geo_predefined_coverage.json', function (response) {
+      // Parse JSON string into object
+      var json_object = JSON.parse(response);
+      predefined_bounding_box_list = json_object;
+
+      if (predefined_bounding_box_list.length > 0) {
+
+        _.each(predefined_bounding_box_list, function(bounding_box, index) {
+
+          var display_box = new L.LatLngBounds(
+            new L.LatLng(bounding_box.sw_latitude, bounding_box.sw_longitude),
+            new L.LatLng(bounding_box.ne_latitude, bounding_box.ne_longitude)
+          );
+
+          var display_options = {
+            stroke: true,
+            color: '#FFFFFF',
+            weight: 0.6,
+            opacity: 0.8,
+            fill: true,
+            fillColor: '#0080AB', //if null, it's the same as the color defined above by default
+            fillOpacity: 0.2,
+            clickable: true
+          }
+
+          var display_layer = new L.Rectangle(display_box, display_options);
+          var display_layer_id = L.Util.stamp(display_layer);
+
+          area_draw_control_layer.addLayer( display_layer );
+
+          bounding_box['map_layer_uid'] = display_layer_id;
+        });
+
+
+        initTileCaching( predefined_bounding_box_list );
+
+      } // if (predefined_bounding_box_list.length > 0)
+
+    });
+
+  } // end-of function initPredefinedCoverageCaching()
+
+  function newBoundingBox( zoom_level, sw_lat, sw_lon, ne_lat, ne_lon ) {
+    var max_zoom;
+    if (zoom_level) {
+      max_zoom = zoom_level + 4
+    }
+    else {
+      max_zoom = map.getZoom() + 4
+    }
+
+    var western_hemisphere = false,
+        eastern_hemisphere = false,
+        northern_hemisphere = false,
+        southern_hemisphere = false;
+
+    if (sw_lon >= -180 && ne_lon <= 0) {
+      western_hemisphere = true;
+    }
+    else if (sw_lon >= 0 && ne_lon <= 180) {
+      eastern_hemisphere = true;
+    }
+
+    if (sw_lat >= 0 && ne_lat <= 90) {
+      northern_hemisphere = true;
+    }
+    else if (sw_lat >= -90 && ne_lat <= 0) {
+      southern_hemisphere = true;
+    }
+
+
+    var bounding_box = {
+      "zoom_level" : max_zoom,
+      "sw_latitude" : sw_lat,
+      "sw_longitude" : sw_lon,
+      "ne_latitude" : ne_lat,
+      "ne_longitude" : ne_lon,
+      "western_hemisphere" : western_hemisphere,
+      "eastern_hemisphere" : eastern_hemisphere,
+      "northern_hemisphere" : northern_hemisphere,
+      "southern_hemisphere" : southern_hemisphere
+    };
+
+    return bounding_box;
+  } // end-of function newBoundingBox(
 
   function initMap() {
     if (!map) {
@@ -765,14 +984,35 @@ var app_geo_map = (function () {
                     setTileImportEnabled(false);
                     setTileExportEnabled(false);
                     control.state('tile-caching');
+                    map_tile_cache_toggle_busy = true;
 
-                    initCacheSeeding(map.getZoom() + 4);
+                    initTileCaching();
 
                     control._map.on('caching:end', function (e) {
+                      //on done one selected area - bounding box, do nothing
                       //console.log('control._map.on("caching:end")');
+                    });
+
+                    control._map.on('all_caching:end', function (e) {
+                      //console.log('control._map.on("all_caching:end")');
                       setTileImportEnabled(true);
                       setTileExportEnabled(true);
                       control.state('init-tile-caching');
+                      map_tile_cache_toggle_busy = false;
+                    });
+
+                    control._map.on('caching:error', function (e) {
+                      setTileImportEnabled(true);
+                      setTileExportEnabled(true);
+                      control.state('init-tile-caching');
+                      map_tile_cache_toggle_busy = false;
+                    });
+
+                    control._map.on('caching:cancel', function (e) {
+                      setTileImportEnabled(true);
+                      setTileExportEnabled(true);
+                      control.state('init-tile-caching');
+                      map_tile_cache_toggle_busy = false;
                     });
                   }
                 },
@@ -783,6 +1023,11 @@ var app_geo_map = (function () {
                   onClick: function (control) {
                     cancelTileCaching();
                     control.state('init-tile-caching');
+                    map_tile_cache_toggle_busy = false;
+
+                    if (!containsAreaDrawn()) {
+                      setTileCloudDownloadEnabled(false);
+                    }
                   }
                 }
               ]
@@ -795,6 +1040,88 @@ var app_geo_map = (function () {
 
         if (map_tile_cache_toggle_button) {
           button_group.push(map_tile_cache_toggle_button);
+        }
+
+        if (!predefined_tile_cache_toggle_button) {
+
+          if (app_geo_config.enablePredefinedTileCaching()) {
+
+            predefined_tile_cache_toggle_button = L.easyButton({
+              states: [
+                {
+                  stateName: 'init-predefined-tile-caching',
+                  icon: 'fa-globe fa-lg',
+                  title: 'Initiate caching tiles of predefined areas',
+                  onClick: function (control) {
+
+                    setTileCloudDownloadEnabled(false);
+                    setTileImportEnabled(false);
+                    setTileExportEnabled(false);
+                    control.state('predefined-tile-caching');
+                    predefined_tile_cache_toggle_busy = true;
+
+                    initPredefinedCoverageCaching();
+
+                    control._map.on('all_caching:end', function (e) {
+                      //console.log('control._map.on("all_caching:end")');
+                      setTileCloudDownloadEnabled(true);
+                      setTileImportEnabled(true);
+                      setTileExportEnabled(true);
+                      control.state('init-predefined-tile-caching');
+                      predefined_tile_cache_toggle_busy = false;
+                    });
+
+                    control._map.on('predefined_caching:error', function (e) {
+                      setTileCloudDownloadEnabled(true);
+                      setTileImportEnabled(true);
+                      setTileExportEnabled(true);
+                      control.state('init-predefined-tile-caching');
+                      predefined_tile_cache_toggle_busy = false;
+                    });
+
+                    control._map.on('predefined_caching:cancel', function (event) {
+                      setTileCloudDownloadEnabled(true);
+                      setTileImportEnabled(true);
+                      setTileExportEnabled(true);
+                      control.state('init-predefined-tile-caching');
+                      predefined_tile_cache_toggle_busy = false;
+
+                      if (event && event.bounding_box.map_layer_uid) {
+                        removeAreaDrawn([event.bounding_box.map_layer_uid]);
+                      }
+                    });
+
+
+                  }
+                },
+                {
+                  stateName: 'predefined-tile-caching',
+                  icon: 'fa-spinner fa-spin',
+                  title: 'Caching tiles...',
+                  onClick: function (control) {
+                    cancelTileCaching();
+                    control.state('init-predefined-tile-caching');
+                    predefined_tile_cache_toggle_busy = false;
+
+                    var map_layer_id_list = [];
+                    _.each(predefined_bounding_box_list, function(bounding_box, index) {
+                      if (bounding_box.map_layer_uid) {
+                        map_layer_id_list.push( bounding_box.map_layer_uid );
+                      }
+                    });
+                    removeAreaDrawn( map_layer_id_list );
+                  }
+                }
+              ]
+            });
+
+            //predefined_tile_cache_toggle_button.disable();
+          }
+
+        } // end-of if (!predefined_tile_cache_toggle_button)
+
+        if (predefined_tile_cache_toggle_button) {
+          button_group.push(predefined_tile_cache_toggle_button);
         }
 
         if (!map_tile_cache_import_button) {
@@ -934,12 +1261,14 @@ var app_geo_map = (function () {
   }
 
   function setTileCloudDownloadEnabled( enabled ) {
-    if (!app_geo_config.enableOnlyTileCache()) {
-      if (enabled === true && containsAreaDrawn()) {
-        setTileCacheToggleEnabled( true );
+    if (enabled === true) {
+      if (containsAreaDrawn()) {
+        setTileCacheToggleEnabled(true);
       }
-      else {
-        setTileCacheToggleEnabled( false );
+    }
+    else {
+      if (!map_tile_cache_toggle_busy) {
+        setTileCacheToggleEnabled(false);
       }
     }
   }
@@ -977,14 +1306,14 @@ var app_geo_map = (function () {
     }
   }
 
-  function initCacheSeedingButton() {
+  function initTileCachingButton() {
 
     if (map) {
       if (!map_tile_cache_import_button) {
 
         /*
          area_caching_button = L.easyButton('fa-cloud-download', function() {
-         initCacheSeeding();
+         initTileCaching();
          });
          */
         map_tile_cache_import_button = L.easyButton({
@@ -994,7 +1323,7 @@ var app_geo_map = (function () {
               icon: 'fa-cloud-download',
               title: 'Initiate tile caching',
               onClick: function (control) {
-                initCacheSeeding(map.getZoom() + 4);
+                initTileCaching();
                 control.state('tile-caching');
                 control._map.on('caching:end', function (e) {
                   //console.log('control._map.on("caching:end")');
@@ -1017,7 +1346,7 @@ var app_geo_map = (function () {
       /*
        var _readyState = function(e){
        if (map) {
-       map.addControl(new initCacheSeedingControl());
+       map.addControl(new initTileCachingControl());
        }
        }
        window.addEventListener('DOMContentLoaded', _readyState);
@@ -1177,9 +1506,11 @@ var app_geo_map = (function () {
             position: 'topleft',
             rectangle: {
               shapeOptions: {
-                color: "#69ACFF",
-                opacity: 0.5,
-                weight: 1
+                color: "#FFFFFF",
+                opacity: 0.8,
+                weight: 0.6,
+                fill: true,
+                fillColor: '#69ACFF',
               }
             },
             polyline: false,
@@ -1205,8 +1536,8 @@ var app_geo_map = (function () {
             featureGroup: area_draw_control_layer,
             edit: {
               selectedPathOptions: {
-                opacity: 0.5,
-                weight: 1,
+                opacity: 0.8,
+                weight: 0.6,
                 dashArray: 'none',
                 maintainColor: true
               }
@@ -1231,14 +1562,23 @@ var app_geo_map = (function () {
             var bounds = layer.getBounds();
             var sw_lat = bounds.getSouthWest().lat, sw_lng = bounds.getSouthWest().lng;
             var ne_lat = bounds.getNorthEast().lat, ne_lng = bounds.getNorthEast().lng;
-            console.log('rectangle-bounds: SW[' + sw_lat + ', ' + sw_lng + '], NE[' + ne_lat + ', ' + ne_lng + ']');
+            var bounding_box_geo_id = generateBoundingBoxGeoID( sw_lat, sw_lng, ne_lat, ne_lng );
+            console.log('rectangle-bounds : ' + bounding_box_geo_id);
 
 
-            var id = L.Util.stamp(layer);
-            area_drawn_id_list.push(id);
-            console.log('area_select_id_list[' + id + ']');
+            var layer_id = L.Util.stamp(layer);
 
-            fireEvent('contains:area_selected', {'area_select_id' : id});
+            var bounding_box = newBoundingBox(
+              map.getZoom(),
+              sw_lat,
+              sw_lng,
+              ne_lat,
+              ne_lng
+            );
+            bounding_box_map[ layer_id ] = bounding_box;
+            console.log('area_select_id_list[' + layer_id + ']');
+
+            fireEvent('contains:area_selected', {'area_select_id' : layer_id});
           }
 
           area_draw_control_layer.addLayer(layer);
@@ -1259,14 +1599,26 @@ var app_geo_map = (function () {
           layers.eachLayer(function (layer) {
             var layer_id = layer._leaflet_id;
 
-            _.each(area_drawn_id_list, function (element) {
-              if (element == layer_id) {
-                console.log('layer_id: ' + layer_id);
+            var key_list = _.keys(bounding_box_map);
+            _.each(key_list, function (key) {
+              if (layer_id == key) {
+                console.log('layer_id found : ' + layer_id);
 
                 var bounds = layer.getBounds();
                 var sw_lat = bounds.getSouthWest().lat, sw_lng = bounds.getSouthWest().lng;
                 var ne_lat = bounds.getNorthEast().lat, ne_lng = bounds.getNorthEast().lng;
-                console.log('rectangle-bounds: SW[' + sw_lat + ', ' + sw_lng + '], NE[' + ne_lat + ', ' + ne_lng + ']');
+                var bounding_box_geo_id = generateBoundingBoxGeoID( sw_lat, sw_lng, ne_lat, ne_lng );
+                console.log('rectangle-bounds : ' + bounding_box_geo_id);
+
+                var bounding_box = newBoundingBox(
+                  map.getZoom(),
+                  sw_lat,
+                  sw_lng,
+                  ne_lat,
+                  ne_lng
+                );
+                bounding_box_map[ layer_id ] = bounding_box;
+                console.log('bounding_box_map[' + layer_id + '] edited!');
 
                 fireEvent('contains:area_selected', {'area_select_id' : layer_id});
               }
@@ -1285,19 +1637,20 @@ var app_geo_map = (function () {
             var layer_id = layer._leaflet_id;
             console.log('layer: ' + layer_id + ' removed!');
 
-            var target_index = -1;
-            _.each(area_drawn_id_list, function (element, index) {
-              if (element == layer_id) {
-                target_index = index;
-              }
-            });
-            if (target_index > -1) {
-              area_drawn_id_list.splice(target_index, 1);
-              console.log('area_select_id_list[' + target_index + ']!');
+            if (debug_enabled) {
+              var bounds = layer.getBounds();
+              var sw_lat = bounds.getSouthWest().lat, sw_lng = bounds.getSouthWest().lng;
+              var ne_lat = bounds.getNorthEast().lat, ne_lng = bounds.getNorthEast().lng;
+              var bounding_box_geo_id = generateBoundingBoxGeoID( sw_lat, sw_lng, ne_lat, ne_lng );
+              console.log('rectangle-bounds : ' + bounding_box_geo_id);
+            }
 
-              if (area_drawn_id_list.length == 0) {
-                fireEvent('contains:no_area_selected', {'area_select_id_removed' : layer_id});
-              }
+            delete bounding_box_map[ layer_id ];
+
+            console.log('bounding_box_map[' + layer_id + '] removed!');
+
+            if (_.size(bounding_box_map) == 0) {
+              fireEvent('contains:no_area_selected', {'area_select_id_removed' : layer_id});
             }
 
           });
@@ -1601,6 +1954,30 @@ var app_geo_map = (function () {
     setTileExportEnabled( true );
   }
 
+  function appendURLRectangleBounds(service_url) {
+    var size = _.size(bounding_box_map);
+    if (area_draw_control_layer && size > 0) {
+      var box_key_list = _.keys(bounding_box_map);
+      var target_layer_id = box_key_list[0];
+
+      var target_layer;
+      area_draw_control_layer.eachLayer(function (layer) {
+        if (layer._leaflet_id == target_layer_id) {
+          console.log('layer: ' + target_layer_id + ' selected for caching');
+          target_layer = layer;
+        }
+      });
+
+      if (target_layer) {
+
+        var bounds = target_layer.getBounds();
+        console.log(JSON.stringify(bounds, null, 2));
+      }
+
+    }
+
+  }
+
   function requestNewPage( max_per_page, start_index ) {
 
 
@@ -1611,7 +1988,7 @@ var app_geo_map = (function () {
     'clearAll' : clearAll,
     'initMap' : initMap,
     'initMapTileLayer' : initMapTileLayer,
-    'initCacheSeeding' : initCacheSeeding,
+    'initTileCaching' : initTileCaching,
     'isMarkedForAllSender' : isMarkedForAllSender,
     'unmarkAllSender' : unmarkAllSender,
     'isMarkedForAllAttachment' : isMarkedForAllAttachment,
