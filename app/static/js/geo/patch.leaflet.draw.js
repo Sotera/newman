@@ -907,7 +907,8 @@ L.Draw.Circle = L.Draw.SimpleShape.extend({
 
 	_drawShape: function (latlng) {
 		if (!this._shape) {
-			this._shape = new L.Circle(this._startLatLng, this._startLatLng.distanceTo(latlng), this.options.shapeOptions);
+			this.options.shapeOptions.radius = this._startLatLng.distanceTo(latlng);
+			this._shape = new L.Circle(this._startLatLng, this.options.shapeOptions);
 			this._map.addLayer(this._shape);
 		} else {
 			this._shape.setRadius(this._startLatLng.distanceTo(latlng));
@@ -915,7 +916,8 @@ L.Draw.Circle = L.Draw.SimpleShape.extend({
 	},
 
 	_fireCreatedEvent: function () {
-		var circle = new L.Circle(this._startLatLng, this._shape.getRadius(), this.options.shapeOptions);
+		this.options.shapeOptions.radius = this._shape.getRadius();
+		var circle = new L.Circle(this._startLatLng, this.options.shapeOptions);
 		L.Draw.SimpleShape.prototype._fireCreatedEvent.call(this, circle);
 	},
 

@@ -34,7 +34,8 @@ var app_geo_map = (function () {
       predefined_tile_cache_toggle_button, predefined_tile_cache_toggle_busy = false;
 
   var bounding_box_map = {},
-      predefined_bounding_box_list = [];
+      bounding_box,
+      predefined_bounding_box_queue = [];
 
   function containsAreaDrawn() {
     var size = _.size(bounding_box_map);
@@ -52,6 +53,9 @@ var app_geo_map = (function () {
     if (bounding_box_map) {
       bounding_box_map = {};
     }
+
+    bounding_box = null;
+
   }
 
   function removeAreaDrawn(layer_id_list) {
@@ -670,7 +674,7 @@ var app_geo_map = (function () {
 
 
       console.log('Bounding boxes to be cached : ' + cache_bounding_box_list.length);
-      var bounding_box = cache_bounding_box_list.shift();
+      bounding_box = cache_bounding_box_list.shift();
       _seedCachingBoundingBox( bounding_box );
 
       // Receive events and display seeding progress on console
@@ -784,18 +788,18 @@ var app_geo_map = (function () {
   }
 
   function initPredefinedCoverageCaching() {
-    if (predefined_bounding_box_list) {
-      predefined_bounding_box_list.length = 0;
+    if (predefined_bounding_box_queue) {
+      predefined_bounding_box_queue.length = 0;
     }
 
     loadJSON('js/geo/data_geo_predefined_coverage.json', function (response) {
       // Parse JSON string into object
       var json_object = JSON.parse(response);
-      predefined_bounding_box_list = json_object;
+      predefined_bounding_box_queue = json_object;
 
-      if (predefined_bounding_box_list.length > 0) {
+      if (predefined_bounding_box_queue.length > 0) {
 
-        _.each(predefined_bounding_box_list, function(bounding_box, index) {
+        _.each(predefined_bounding_box_queue, function(bounding_box, index) {
 
           var display_box = new L.LatLngBounds(
             new L.LatLng(bounding_box.sw_latitude, bounding_box.sw_longitude),
@@ -822,7 +826,7 @@ var app_geo_map = (function () {
         });
 
 
-        initTileCaching( predefined_bounding_box_list );
+        initTileCaching( predefined_bounding_box_queue );
 
       } // if (predefined_bounding_box_list.length > 0)
 
@@ -887,16 +891,16 @@ var app_geo_map = (function () {
         console.log('map_zoom_level: ' + map.getZoom());
       });
 
-      map.on('contains:area_selected', function (e) {
+      map.on('map_layer:area_created', function (e) {
         if (debug_enabled) {
-          console.log('contains:area_selected');
+          console.log('map_layer:area_created');
         }
         setTileCloudDownloadEnabled( true );
       });
 
-      map.on('contains:no_area_selected', function (e) {
+      map.on('map_layer:area_deleted', function (e) {
         if (debug_enabled) {
-          console.log('contains:no_area_selected');
+          console.log('map_layer:area_deleted');
         }
         setTileCloudDownloadEnabled( false );
       });
@@ -1072,6 +1076,7 @@ var app_geo_map = (function () {
                     });
 
                     control._map.on('predefined_caching:error', function (e) {
+                      //console.log('control._map.on("predefined_caching:error")');
                       setTileCloudDownloadEnabled(true);
                       setTileImportEnabled(true);
                       setTileExportEnabled(true);
@@ -1080,6 +1085,7 @@ var app_geo_map = (function () {
                     });
 
                     control._map.on('predefined_caching:cancel', function (event) {
+                      //console.log('control._map.on("predefined_caching:cancel")');
                       setTileCloudDownloadEnabled(true);
                       setTileImportEnabled(true);
                       setTileExportEnabled(true);
@@ -1087,6 +1093,7 @@ var app_geo_map = (function () {
                       predefined_tile_cache_toggle_busy = false;
 
                       if (event && event.bounding_box.map_layer_uid) {
+                        //console.log('caching cancelled, event.bounding_box\n' + JSON.stringify(event.bounding_box, null, 2));
                         removeAreaDrawn([event.bounding_box.map_layer_uid]);
                       }
                     });
@@ -1103,13 +1110,26 @@ var app_geo_map = (function () {
                     control.state('init-predefined-tile-caching');
                     predefined_tile_cache_toggle_busy = false;
 
+                    // cleanup all map displays
+
+                    // collect all remaining bounding boxes yet to be processed, still being displayed
                     var map_layer_id_list = [];
-                    _.each(predefined_bounding_box_list, function(bounding_box, index) {
+                    _.each(predefined_bounding_box_queue, function(bounding_box, index) {
                       if (bounding_box.map_layer_uid) {
                         map_layer_id_list.push( bounding_box.map_layer_uid );
                       }
                     });
+
+                    // collect the current bounding box being processed and being displayed
+                    if (bounding_box && bounding_box.map_layer_uid) {
+                      if (!bounding_box_map[bounding_box.map_layer_uid]) {
+                        map_layer_id_list.push( bounding_box.map_layer_uid )
+                      }
+                    }
+
+                    // cleanup all by map layer-ids
                     removeAreaDrawn( map_layer_id_list );
+
                   }
                 }
               ]
@@ -1529,7 +1549,19 @@ var app_geo_map = (function () {
              weight: 1
              }
              },*/
-            circle: false,
+            circle: {
+              shapeOptions: {
+                stroke: true,
+                color: "#FFFFFF",
+                weight: 0.6,
+                opacity: 0.8,
+                fill: true,
+                fillColor: '#69ACFF',
+              },
+              showRadius: true,
+              metric: true, // Whether to use the metric measurement system or imperial
+              feet: true // When not metric, use feet instead of yards for display
+            },
             marker: false
           },
           edit: {
@@ -1576,9 +1608,41 @@ var app_geo_map = (function () {
               ne_lng
             );
             bounding_box_map[ layer_id ] = bounding_box;
-            console.log('area_select_id_list[' + layer_id + ']');
+            console.log('map_layer_id_list[' + layer_id + ']');
 
-            fireEvent('contains:area_selected', {'area_select_id' : layer_id});
+            fireEvent('map_layer:area_created', {'map_layer_id' : layer_id, "type" : "rectangle"});
+          }
+          else if (type === 'circle') {
+
+            var layer_id = L.Util.stamp(layer);
+            var center = layer.getLatLng();
+            var radius = layer.getRadius();
+
+
+            console.log('center : ' + center + ', radius : ' + radius);
+            /*
+            var bounds = layer.getBounds();
+            var sw_lat = bounds.getSouthWest().lat, sw_lng = bounds.getSouthWest().lng;
+            var ne_lat = bounds.getNorthEast().lat, ne_lng = bounds.getNorthEast().lng;
+            var bounding_box_geo_id = generateBoundingBoxGeoID( sw_lat, sw_lng, ne_lat, ne_lng );
+            console.log('rectangle-bounds : ' + bounding_box_geo_id);
+
+
+
+
+            var bounding_box = newBoundingBox(
+              map.getZoom(),
+              sw_lat,
+              sw_lng,
+              ne_lat,
+              ne_lng
+            );
+            bounding_box_map[ layer_id ] = bounding_box;
+            console.log('map_layer_id_list[' + layer_id + ']');
+*/
+
+            fireEvent('map_layer:area_created', {'map_layer_id' : layer_id, "type" : "circle"});
+
           }
 
           area_draw_control_layer.addLayer(layer);
@@ -1620,7 +1684,7 @@ var app_geo_map = (function () {
                 bounding_box_map[ layer_id ] = bounding_box;
                 console.log('bounding_box_map[' + layer_id + '] edited!');
 
-                fireEvent('contains:area_selected', {'area_select_id' : layer_id});
+                fireEvent('map_layer:area_updated', {'map_layer_id' : layer_id});
               }
             });
 
@@ -1650,7 +1714,7 @@ var app_geo_map = (function () {
             console.log('bounding_box_map[' + layer_id + '] removed!');
 
             if (_.size(bounding_box_map) == 0) {
-              fireEvent('contains:no_area_selected', {'area_select_id_removed' : layer_id});
+              fireEvent('map_layer:area_deleted', {'map_layer_id' : layer_id});
             }
 
           });
@@ -1963,7 +2027,7 @@ var app_geo_map = (function () {
       var target_layer;
       area_draw_control_layer.eachLayer(function (layer) {
         if (layer._leaflet_id == target_layer_id) {
-          console.log('layer: ' + target_layer_id + ' selected for caching');
+          console.log('layer: ' + target_layer_id + ' added for caching');
           target_layer = layer;
         }
       });
