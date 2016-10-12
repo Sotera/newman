@@ -1076,7 +1076,7 @@ var app_geo_map = (function () {
                     });
 
                     control._map.on('predefined_caching:error', function (e) {
-                      //console.log('control._map.on("predefined_caching:error")');
+                      console.log('control._map.on("predefined_caching:error")');
                       setTileCloudDownloadEnabled(true);
                       setTileImportEnabled(true);
                       setTileExportEnabled(true);
@@ -1099,7 +1099,7 @@ var app_geo_map = (function () {
                     });
 
 
-                  }
+                  } // end-of onClick:
                 },
                 {
                   stateName: 'predefined-tile-caching',
@@ -1345,8 +1345,8 @@ var app_geo_map = (function () {
               onClick: function (control) {
                 initTileCaching();
                 control.state('tile-caching');
-                control._map.on('caching:end', function (e) {
-                  //console.log('control._map.on("caching:end")');
+                control._map.on('all_caching:end', function (e) {
+                  //console.log('control._map.on("all_caching:end")');
                   control.state('init-tile-caching');
                 });
               }
