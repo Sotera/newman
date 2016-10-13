@@ -420,7 +420,7 @@
     "label": "Central Western Russia, Ukraine, Belarus, the Baltic states"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 9,
     "sw_latitude": 59.93300042374631,
     "sw_longitude": 20.456542968750004,
     "ne_latitude": 72.28906720017675,
@@ -432,7 +432,7 @@
     "label": "North Western Russia & Finland"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 9,
     "sw_latitude": 35.67514743608467,
     "sw_longitude": 72.46582031250001,
     "ne_latitude": 54.67383096593114,
@@ -456,7 +456,7 @@
     "label": "North Eastern China"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 9,
     "sw_latitude": 20.2209657795223,
     "sw_longitude": 72.46582031250001,
     "ne_latitude": 35.746512259918504,
@@ -490,18 +490,6 @@
     "northern_hemisphere": false,
     "southern_hemisphere": false,
     "label": "Afghanistan, Pakistan, India, Sri Lanka, Bangladesh, Myanmar"
-  },
-  {
-    "zoom_level": 10,
-    "sw_latitude": -36.42128244364948,
-    "sw_longitude": 9.536132812500002,
-    "ne_latitude": -20.67390526467283,
-    "ne_longitude": 41.66015625000001,
-    "western_hemisphere": false,
-    "eastern_hemisphere": true,
-    "northern_hemisphere": false,
-    "southern_hemisphere": true,
-    "label": "South Africa"
   }
 ]
 
