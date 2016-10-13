@@ -15,6 +15,12 @@ var app_geo_map = (function () {
   var _is_initialized = false;
 
   var default_view_center = new L.LatLng(31.7964452, 35.1051469), default_view_zoom = 2;
+  var default_fill_color = "#69ACFF",
+      default_fill_opacity = 0.25,
+      default_weight = 0.6,
+      default_stroke_color = "#FFFFFF",
+      default_opacity = 0.8;
+
   var map_zoom_absolute_min_level = 2, map_zoom_absolute_max_level = 16;
 
   var map;
@@ -37,10 +43,19 @@ var app_geo_map = (function () {
       bounding_box,
       predefined_bounding_box_queue = [];
 
-  function containsAreaDrawn() {
+  function containsAreaDefined() {
     var size = _.size(bounding_box_map);
     if (size > 0) {
       return true;
+    }
+    return false;
+  }
+
+  function containsAreaDrawn() {
+    if (area_draw_control_layer) {
+      if (area_draw_control_layer.getLayers().length > 0) {
+        return true;
+      }
     }
     return false;
   }
@@ -55,7 +70,6 @@ var app_geo_map = (function () {
     }
 
     bounding_box = null;
-
   }
 
   function removeAreaDrawn(layer_id_list) {
@@ -75,6 +89,63 @@ var app_geo_map = (function () {
         });
       }
     }
+  }
+
+  function _updateAreaDrawn(layer_id, progress_percent) {
+    area_draw_control_layer.eachLayer(function (layer) {
+      if (layer_id === layer._leaflet_id) {
+        if (progress_percent > 0 && progress_percent <= 100) {
+          var new_opacity = default_fill_opacity;
+          if (progress_percent == 100) {
+            new_opacity = 0.0;
+          }
+          else {
+            new_opacity = default_fill_opacity * (1 - progress_percent/100);
+          }
+          //console.log('new opacity : ' + new_opacity);
+
+          layer.setStyle(
+            {
+              //fillColor: '#0080AB',
+              fillOpacity: new_opacity,
+            }
+          );
+        }
+      }
+    });
+  }
+
+  function _isOutOfBoundaryAreaDrawn(latitude, longitude) {
+
+    if (containsAreaDrawn()) {
+      var is_out_of_boundary = true;
+
+      area_draw_control_layer.eachLayer(function (layer) {
+        if (layer instanceof L.Rectangle) {
+          if (layer.getBounds().contains(new L.LatLng(latitude, longitude))) {
+            is_out_of_boundary = false;
+            //console.log('Coordinate(' + latitude + ',' + longitude + ') is within bounds of drawn rectangle ' + layer._leaflet_id);
+          }
+        }
+        else if (layer instanceof L.Circle) {
+          var center = layer.getLatLng();
+          var radius = layer.getRadius();
+          var range = center.distanceTo(new L.LatLng(latitude, longitude));
+          if (radius >= range) {
+            is_out_of_boundary = false;
+            //console.log('Coordinate(' + latitude + ',' + longitude + ') is within bounds of drawn circle ' + layer._leaflet_id);
+          }
+        }
+        else {
+          console.log('Unknown layer type!');
+        }
+
+      });
+
+      return is_out_of_boundary;
+    }
+
+    return false;
   }
 
   var marker_list = [];
@@ -155,6 +226,12 @@ var app_geo_map = (function () {
         var key_array = key.split(',');
         var latitude = parseFloat(key_array[0]).toFixed(5);
         var longitude = parseFloat(key_array[1]).toFixed(5);
+
+        //filter by drawn areas
+        if (_isOutOfBoundaryAreaDrawn(latitude, longitude)) {
+          //console.log('Coordinate(' + latitude + ',' + longitude + ') is not within any bounds of drawn area.');
+          return;
+        }
 
         var marker_icon = marker_icon_map['fa-paper-plane-o'];
         //marker_icon = marker_icon_map['fa-paperclip'];
@@ -286,10 +363,14 @@ var app_geo_map = (function () {
       _.each(coord_marker_map, function(marker_content_list, key) {
         //console.log('marker_content_list:\n' + JSON.stringify(marker_content_list, null, 2));
         var key_array = key.split(',');
-        var latitude = parseFloat(key_array[0]).toFixed(5);
-        var adjusted_latitude = applyGeoOffset(latitude).toFixed(5);
-        var longitude = parseFloat(key_array[1]).toFixed(5);
-        var adjusted_longitude = applyGeoOffset(longitude).toFixed(5);
+        var latitude = parseFloat(key_array[0]).toFixed(5), adjusted_latitude = applyGeoOffset(latitude).toFixed(5);
+        var longitude = parseFloat(key_array[1]).toFixed(5), adjusted_longitude = applyGeoOffset(longitude).toFixed(5);
+
+        //filter by drawn areas
+        if (_isOutOfBoundaryAreaDrawn(latitude, longitude)) {
+          //console.log('Coordinate(' + latitude + ',' + longitude + ') is not within any bounds of drawn area.');
+          return;
+        }
 
         var marker_icon = marker_icon_map['fa-paperclip'];
         if (marker_content_list.length > 1) {
@@ -685,6 +766,10 @@ var app_geo_map = (function () {
         if (prev_percent_value != percent) {
           console.log('Caching-map-tiles ' + cachingSeed.bounding_box_label + ' : ' + percent + '% done');
 
+          if (cachingSeed.bounding_box.map_layer_uid) {
+            _updateAreaDrawn(cachingSeed.bounding_box.map_layer_uid, percent);
+          }
+
           map.fire('caching:progress',
                    {"caching_area_label": cachingSeed.bounding_box_label, "caching_status": "processing", "caching_progress": percent});
         }
@@ -808,13 +893,12 @@ var app_geo_map = (function () {
 
           var display_options = {
             stroke: true,
-            color: '#FFFFFF',
-            weight: 0.6,
-            opacity: 0.8,
+            color: default_stroke_color,
+            weight: default_weight,
+            opacity: default_opacity,
             fill: true,
-            fillColor: '#0080AB', //if null, it's the same as the color defined above by default
-            fillOpacity: 0.2,
-            clickable: true
+            fillColor: default_fill_color, //'#0080AB', //if null, it's the same as the color defined above by default
+            fillOpacity: default_fill_opacity,
           }
 
           var display_layer = new L.Rectangle(display_box, display_options);
@@ -1526,11 +1610,12 @@ var app_geo_map = (function () {
             position: 'topleft',
             rectangle: {
               shapeOptions: {
-                color: "#FFFFFF",
-                opacity: 0.8,
-                weight: 0.6,
+                stroke: true,
+                color: default_stroke_color,
+                weight: default_weight,
+                opacity: default_opacity,
                 fill: true,
-                fillColor: '#69ACFF',
+                fillColor: default_fill_color,
               }
             },
             polyline: false,
@@ -1552,11 +1637,11 @@ var app_geo_map = (function () {
             circle: {
               shapeOptions: {
                 stroke: true,
-                color: "#FFFFFF",
-                weight: 0.6,
-                opacity: 0.8,
+                color: default_stroke_color,
+                weight: default_weight,
+                opacity: default_opacity,
                 fill: true,
-                fillColor: '#69ACFF',
+                fillColor: default_fill_color,
               },
               showRadius: true,
               metric: true, // Whether to use the metric measurement system or imperial
@@ -1568,8 +1653,8 @@ var app_geo_map = (function () {
             featureGroup: area_draw_control_layer,
             edit: {
               selectedPathOptions: {
-                opacity: 0.8,
-                weight: 0.6,
+                weight: default_weight,
+                opacity: default_opacity,
                 dashArray: 'none',
                 maintainColor: true
               }
@@ -1620,26 +1705,7 @@ var app_geo_map = (function () {
 
 
             console.log('center : ' + center + ', radius : ' + radius);
-            /*
-            var bounds = layer.getBounds();
-            var sw_lat = bounds.getSouthWest().lat, sw_lng = bounds.getSouthWest().lng;
-            var ne_lat = bounds.getNorthEast().lat, ne_lng = bounds.getNorthEast().lng;
-            var bounding_box_geo_id = generateBoundingBoxGeoID( sw_lat, sw_lng, ne_lat, ne_lng );
-            console.log('rectangle-bounds : ' + bounding_box_geo_id);
 
-
-
-
-            var bounding_box = newBoundingBox(
-              map.getZoom(),
-              sw_lat,
-              sw_lng,
-              ne_lat,
-              ne_lng
-            );
-            bounding_box_map[ layer_id ] = bounding_box;
-            console.log('map_layer_id_list[' + layer_id + ']');
-*/
 
             fireEvent('map_layer:area_created', {'map_layer_id' : layer_id, "type" : "circle"});
 

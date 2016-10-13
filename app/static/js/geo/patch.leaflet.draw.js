@@ -631,7 +631,7 @@ L.Draw.Polygon = L.Draw.Polyline.extend({
 			opacity: 0.5,
 			fill: true,
 			fillColor: null, //same as color by default
-			fillOpacity: 0.2,
+			fillOpacity: 0.25,
 			clickable: true
 		}
 	},
@@ -828,7 +828,7 @@ L.Draw.Rectangle = L.Draw.SimpleShape.extend({
 			opacity: 0.5,
 			fill: true,
 			fillColor: null, //same as color by default
-			fillOpacity: 0.2,
+			fillOpacity: 0.25,
 			clickable: true
 		},
 		metric: true // Whether to use the metric meaurement system or imperial
@@ -889,7 +889,7 @@ L.Draw.Circle = L.Draw.SimpleShape.extend({
 			opacity: 0.5,
 			fill: true,
 			fillColor: null, //same as color by default
-			fillOpacity: 0.2,
+			fillOpacity: 0.25,
 			clickable: true
 		},
 		showRadius: true,
@@ -2512,7 +2512,7 @@ L.EditToolbar = L.Toolbar.extend({
 
 				fill: true,
 				fillColor: '#fe57a1',
-				fillOpacity: 0.1,
+				fillOpacity: 0.25,
 
 				// Whether to user the existing layers color
 				maintainColor: false
