@@ -1,3 +1,117 @@
+
+/**
+ * returns all permutations of an argument array using Heap's Permutation Algorithm
+ * @param array
+ * @param optional map to store all resulting permutations
+ * @returns each permutation of the array elements
+ */
+function getAllPermutationArray( input_array, output_map ) {
+
+  function swap(array, pos1, pos2) {
+    var temp = array[pos1];
+    array[pos1] = array[pos2];
+    array[pos2] = temp;
+  }
+
+  function heapsPermute(array, output, n) {
+    n = n || array.length; // set n default to array.length
+    if (n === 1) {
+      output(array);
+    }
+    else {
+      for (var i = 1; i <= n; i += 1) {
+        heapsPermute(array, output, n - 1);
+        if (n % 2) {
+          var j = 1;
+        }
+        else {
+          var j = i;
+        }
+        swap(array, j - 1, n - 1); // -1 to account for javascript zero-indexing
+      }
+    }
+  }
+
+
+  // callback - save each output
+  function onResult(output_array) {
+    //console.log(JSON.stringify(output_array, null, 2));
+
+    if (output_map) {
+      var permutation_as_text = arrayToString( output_array );
+      if (permutation_as_text) {
+        output_map[ permutation_as_text ] = true;
+      }
+    }
+
+  }
+
+
+  heapsPermute(input_array, onResult);
+  //example: heapsPermute(['a', 'b', 'c', 'd'])
+}
+
+/**
+ * returns text/string representation of elements in an array
+ * @param array
+ * @param optional element separator in the text representation
+ * @returns an string representing the elements in the array
+ */
+function arrayToString( array, separator ) {
+  var array_as_text = '', array_separator = ','
+  if (array && array.constructor === Array && array.length > 0) {
+    if (separator) {
+      array_separator = separator;
+    }
+    _.each(array, function (value, index) {
+      array_as_text += (value.trim() + ' ');
+    });
+    array_as_text = array_as_text.trim();
+    array_as_text = array_as_text.replace(/\s/g, array_separator);
+    //console.log('array_as_text : ' + array_as_text);
+  }
+  return array_as_text;
+}
+
+/**
+ * returns all permutations of a string characters
+ * @param text string
+ * @returns an array of all permutations of string characters
+ */
+function getAllPermutationString( text ) {
+  //Enclosed data to be used by the internal recursive function permutate():
+  var permutation_array = [],  //generated permutations stored here
+    nextWord = [],      //next word builds up in here
+    chars = []          //collection for each recursion level
+    ;
+
+  //split words or numbers into an array of characters
+  if (typeof text === 'string') chars = text.split('');
+  else if (typeof text === 'number') {
+    text = text + ""; //convert number to string
+    chars = text.split('');//convert string into char array
+  }
+
+  //============TWO Declaratives========
+  permutate(chars);
+  return permutation_array;
+
+  //===========UNDER THE HOOD===========
+  function permutate(chars) { //recursive: generates the permutations
+    if(chars.length === 0) {
+      permutation_array.push(nextWord.join(''));
+    }
+
+    for (var i=0; i < chars.length; i++){
+      chars.push(chars.shift());  //rotate the characters
+      nextWord.push(chars[0]);    //use the first char in the array
+      permutate(chars.slice(1));  //Recurse: array-less-one-char
+      nextWord.pop();             //clear for nextWord (multiple pops)
+    }
+  }
+}// end-of getAllPermutationString( text )
+
+
 /**
  * rounds a numeric value to the precision provided
  * @param value
