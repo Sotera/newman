@@ -1186,10 +1186,6 @@ function drawGraphLegendTableDataset() {
         }
       });
 
-      //debug only
-      if (dataset_id_list.length > 1) {
-        //console.log('drawGraphLegendTableDataset() : node "' + node.name + '"\n' + JSON.stringify(node, null, 2));
-      }
       return dataset_list_string;
     }
   });
