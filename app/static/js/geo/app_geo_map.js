@@ -45,6 +45,8 @@ var app_geo_map = (function () {
 
   function containsAreaDefined() {
     var size = _.size(bounding_box_map);
+    //console.log('containsAreaDefined() : ' + size);
+
     if (size > 0) {
       return true;
     }
@@ -53,7 +55,15 @@ var app_geo_map = (function () {
 
   function containsAreaDrawn() {
     if (area_draw_control_layer) {
-      if (area_draw_control_layer.getLayers().length > 0) {
+      var layer_list = area_draw_control_layer.getLayers();
+      //console.log('containsAreaDrawn() : ' + layer_list.length);
+      /*
+      _.each(layer_list, function(layer, index) {
+        console.log('\tlayer_id : ' + layer._leaflet_id + ', index : ' + index);
+      });
+      */
+
+      if (layer_list.length > 0) {
         return true;
       }
     }
@@ -1695,6 +1705,7 @@ var app_geo_map = (function () {
             bounding_box_map[ layer_id ] = bounding_box;
             console.log('map_layer_id_list[' + layer_id + ']');
 
+            area_draw_control_layer.addLayer(layer);
             fireEvent('map_layer:area_created', {'map_layer_id' : layer_id, "type" : "rectangle"});
           }
           else if (type === 'circle') {
@@ -1706,12 +1717,9 @@ var app_geo_map = (function () {
 
             console.log('center : ' + center + ', radius : ' + radius);
 
-
+            area_draw_control_layer.addLayer(layer);
             fireEvent('map_layer:area_created', {'map_layer_id' : layer_id, "type" : "circle"});
-
           }
-
-          area_draw_control_layer.addLayer(layer);
 
           if (debug_enabled) {
             area_draw_control_layer.eachLayer(function (layer) {
@@ -1729,30 +1737,33 @@ var app_geo_map = (function () {
           layers.eachLayer(function (layer) {
             var layer_id = layer._leaflet_id;
 
-            var key_list = _.keys(bounding_box_map);
-            _.each(key_list, function (key) {
-              if (layer_id == key) {
-                console.log('layer_id found : ' + layer_id);
+            if (layer instanceof L.Rectangle) {
 
-                var bounds = layer.getBounds();
-                var sw_lat = bounds.getSouthWest().lat, sw_lng = bounds.getSouthWest().lng;
-                var ne_lat = bounds.getNorthEast().lat, ne_lng = bounds.getNorthEast().lng;
-                var bounding_box_geo_id = generateBoundingBoxGeoID( sw_lat, sw_lng, ne_lat, ne_lng );
-                console.log('rectangle-bounds : ' + bounding_box_geo_id);
+              var key_list = _.keys(bounding_box_map);
+              _.each(key_list, function (key) {
+                if (layer_id == key) {
+                  console.log('layer_id found : ' + layer_id);
 
-                var bounding_box = newBoundingBox(
-                  map.getZoom(),
-                  sw_lat,
-                  sw_lng,
-                  ne_lat,
-                  ne_lng
-                );
-                bounding_box_map[ layer_id ] = bounding_box;
-                console.log('bounding_box_map[' + layer_id + '] edited!');
+                  var bounds = layer.getBounds();
+                  var sw_lat = bounds.getSouthWest().lat, sw_lng = bounds.getSouthWest().lng;
+                  var ne_lat = bounds.getNorthEast().lat, ne_lng = bounds.getNorthEast().lng;
+                  var bounding_box_geo_id = generateBoundingBoxGeoID(sw_lat, sw_lng, ne_lat, ne_lng);
+                  console.log('rectangle-bounds : ' + bounding_box_geo_id);
 
-                fireEvent('map_layer:area_updated', {'map_layer_id' : layer_id});
-              }
-            });
+                  var bounding_box = newBoundingBox(
+                    map.getZoom(),
+                    sw_lat,
+                    sw_lng,
+                    ne_lat,
+                    ne_lng
+                  );
+                  bounding_box_map[layer_id] = bounding_box;
+                  console.log('bounding_box_map[' + layer_id + '] edited!');
+
+                  fireEvent('map_layer:area_updated', {'map_layer_id': layer_id});
+                }
+              });
+            } // end-of if (layer instanceof L.Rectangle)
 
           });
         });
@@ -1767,21 +1778,23 @@ var app_geo_map = (function () {
             var layer_id = layer._leaflet_id;
             console.log('layer: ' + layer_id + ' removed!');
 
-            if (debug_enabled) {
-              var bounds = layer.getBounds();
-              var sw_lat = bounds.getSouthWest().lat, sw_lng = bounds.getSouthWest().lng;
-              var ne_lat = bounds.getNorthEast().lat, ne_lng = bounds.getNorthEast().lng;
-              var bounding_box_geo_id = generateBoundingBoxGeoID( sw_lat, sw_lng, ne_lat, ne_lng );
-              console.log('rectangle-bounds : ' + bounding_box_geo_id);
-            }
+            if (layer instanceof L.Rectangle) {
+              if (debug_enabled) {
+                var bounds = layer.getBounds();
+                var sw_lat = bounds.getSouthWest().lat, sw_lng = bounds.getSouthWest().lng;
+                var ne_lat = bounds.getNorthEast().lat, ne_lng = bounds.getNorthEast().lng;
+                var bounding_box_geo_id = generateBoundingBoxGeoID(sw_lat, sw_lng, ne_lat, ne_lng);
+                console.log('rectangle-bounds : ' + bounding_box_geo_id);
+              }
 
-            delete bounding_box_map[ layer_id ];
+              delete bounding_box_map[layer_id];
 
-            console.log('bounding_box_map[' + layer_id + '] removed!');
+              console.log('bounding_box_map[' + layer_id + '] removed!');
 
-            if (_.size(bounding_box_map) == 0) {
-              fireEvent('map_layer:area_deleted', {'map_layer_id' : layer_id});
-            }
+              if (_.size(bounding_box_map) == 0) {
+                fireEvent('map_layer:area_deleted', {'map_layer_id': layer_id});
+              }
+            } // end-of if (layer instanceof L.Rectangle)
 
           });
 
@@ -2099,9 +2112,10 @@ var app_geo_map = (function () {
       });
 
       if (target_layer) {
-
-        var bounds = target_layer.getBounds();
-        console.log(JSON.stringify(bounds, null, 2));
+        if (target_layer instanceof L.Rectangle) {
+          var bounds = target_layer.getBounds();
+          console.log(JSON.stringify(bounds, null, 2));
+        }
       }
 
     }
