@@ -39,9 +39,9 @@ var app_geo_map = (function () {
       map_tile_cache_export_button, map_tile_cache_export_busy = false,
       predefined_tile_cache_toggle_button, predefined_tile_cache_toggle_busy = false;
 
-  var bounding_box_map = {},
-      bounding_box,
-      predefined_bounding_box_queue = [];
+  var bounding_box_map = {}, bounding_box,
+      predefined_bounding_box_map = {},
+      geo_task_queue = [];
 
   function containsAreaDefined() {
     var size = _.size(bounding_box_map);
@@ -722,54 +722,31 @@ var app_geo_map = (function () {
   function initTileCaching( new_bounding_box_list ) {
     if (map && map_tile_layer && area_draw_control_layer) {
 
-      var cache_bounding_box_map, cache_bounding_box_list, cache_bound_box_max = 0;
+      var cache_bound_box_max = 0;
       if (new_bounding_box_list && new_bounding_box_list.length > 0) {
         cache_bound_box_max = new_bounding_box_list.length;
         console.log('Bounding boxes loaded.. (' + cache_bound_box_max + ')');
         cache_bound_box_max = new_bounding_box_list.length;
-        cache_bounding_box_list = new_bounding_box_list;
+        geo_task_queue = new_bounding_box_list;
       }
       else {
         cache_bound_box_max = _.size(bounding_box_map);
         if (cache_bound_box_max > 0) {
           console.log('Bounding boxes created.. (' + cache_bound_box_max + ')');
-          cache_bounding_box_map = _.clone(bounding_box_map);
-          cache_bounding_box_list = _.values(cache_bounding_box_map);
+          geo_task_queue = clone(_.values(bounding_box_map));
         }
         else {
           console.log('No bounding boxes created or loaded!');
           return;
         }
       }
-      console.log(JSON.stringify(cache_bounding_box_list, null, 2));
+      console.log(JSON.stringify(geo_task_queue, null, 2));
 
-
-      /*
-       var bounding_box_key_list = _.keys(cache_bounding_box_map);
-       var target_layer_id = bounding_box_key_list[0];
-       var target_layer;
-       area_draw_control_layer.eachLayer(function (layer) {
-       if (layer._leaflet_id == target_layer_id) {
-       console.log('layer: ' + target_layer_id + ' selected for caching');
-       target_layer = layer;
-       }
-       });
-
-       if (target_layer) {
-
-       // Seed the map-tile layer, for a given rectangular area, for zoom levels 0 through 4.
-       //var bounds = L.latLngBounds(L.latLng(5,-165), L.latLng(65,-50));
-
-       var bounds = target_layer.getBounds();
-       */
-
-
-      console.log('Bounding boxes to be cached : ' + cache_bounding_box_list.length);
-      bounding_box = cache_bounding_box_list.shift();
+      console.log('Bounding boxes to be cached : ' + geo_task_queue.length);
+      bounding_box = geo_task_queue.shift();
       _seedCachingBoundingBox( bounding_box );
 
       // Receive events and display seeding progress on console
-      var prev_bounding_box_label;
       var prev_percent_value = -1;
       map_tile_layer.on('seed:progress', function (cachingSeed) {
         var percent = 100 - Math.floor(cachingSeed.remainingLength / cachingSeed.queueLength * 100);
@@ -804,29 +781,40 @@ var app_geo_map = (function () {
           console.log('Caching-map-tiles ' + cachingSeed.bounding_box_label + ' : Completed!');
           is_completed = true;
 
-          if (cachingSeed.bounding_box.map_layer_uid) {
-            removeAreaDrawn([cachingSeed.bounding_box.map_layer_uid]);
+          var layer_id = cachingSeed.bounding_box.map_layer_uid;
+          if (layer_id) {
+
+            // remove from map
+            removeAreaDrawn([layer_id]);
+
+            // mark off from map
+            var bounding_box = predefined_bounding_box_map[ layer_id ];
+            if (bounding_box) {
+              bounding_box['is_processed'] = true;
+              //predefined_bounding_box_map[ layer_id ] = bounding_box;
+            }
           }
 
           map.fire('caching:end', {"caching_area_label": cachingSeed.bounding_box_label, "caching_status": "completed"});
 
-          if (cache_bounding_box_list.length > 0) {
+          if (geo_task_queue.length > 0) {
             prev_percent_value = -1;
             is_started = false;
             is_completed = false;
 
-            console.log('Bounding boxes to be cached : ' + cache_bounding_box_list.length);
-            bounding_box = cache_bounding_box_list.shift();
+            console.log('Bounding boxes to be cached : ' + geo_task_queue.length);
+            bounding_box = geo_task_queue.shift();
             _seedCachingBoundingBox( bounding_box );
           }
           else {
             console.log('All-caching-map-tiles : Completed! ');
 
             map.fire('all_caching:end', {"caching_status": "completed"});
+            //console.log('bounding_box_map :\n' + JSON.stringify(bounding_box_map, null, 2));
+            //console.log('predefined_bounding_box_map :\n' + JSON.stringify(predefined_bounding_box_map, null, 2));
           }
 
-          prev_bounding_box_label = cachingSeed.bounding_box_label;
-        }
+        } // end-of if (!is_completed)
 
       });
 
@@ -848,9 +836,9 @@ var app_geo_map = (function () {
 
         console.log('Caching-map-tiles ' + cachingSeed.bounding_box_label + ' : Cancelled!');
 
-        if (cache_bounding_box_list.length > 0) {
-          console.log('Bounding boxes cleared : ' + cache_bounding_box_list.length);
-          cache_bounding_box_list.length = 0;
+        if (geo_task_queue.length > 0) {
+          console.log('Bounding boxes cleared : ' + geo_task_queue.length);
+          geo_task_queue.length = 0;
         }
 
         map.fire('caching:cancel', cachingSeed);
@@ -863,7 +851,14 @@ var app_geo_map = (function () {
 
   function _seedCachingBoundingBox( bounding_box ) {
     if (!bounding_box) { return; }
-    console.log(JSON.stringify(bounding_box, null, 2));
+
+    if (bounding_box.is_processed === true) {
+      console.log('bounding-box already processed!\n' + JSON.stringify(bounding_box, null, 2));
+      return;
+    }
+    else {
+      console.log('processing bounding-box ...\n' + JSON.stringify(bounding_box, null, 2));
+    }
 
     var min_zoom = map_zoom_absolute_min_level, max_zoom = map.getZoom() + 4;
     if (bounding_box.zoom_level) {
@@ -883,18 +878,18 @@ var app_geo_map = (function () {
   }
 
   function initPredefinedCoverageCaching() {
-    if (predefined_bounding_box_queue) {
-      predefined_bounding_box_queue.length = 0;
+    if (predefined_bounding_box_map) {
+      predefined_bounding_box_map = {};
     }
 
     loadJSON('js/geo/data_geo_predefined_coverage.json', function (response) {
       // Parse JSON string into object
       var json_object = JSON.parse(response);
-      predefined_bounding_box_queue = json_object;
+      var predefined_bounding_box_list = json_object;
 
-      if (predefined_bounding_box_queue.length > 0) {
+      if (predefined_bounding_box_list.length > 0) {
 
-        _.each(predefined_bounding_box_queue, function(bounding_box, index) {
+        _.each(predefined_bounding_box_list, function(bounding_box) {
 
           var display_box = new L.LatLngBounds(
             new L.LatLng(bounding_box.sw_latitude, bounding_box.sw_longitude),
@@ -907,7 +902,7 @@ var app_geo_map = (function () {
             weight: default_weight,
             opacity: default_opacity,
             fill: true,
-            fillColor: default_fill_color, //'#0080AB', //if null, it's the same as the color defined above by default
+            fillColor: default_fill_color, //if null, it's the same as the color defined above by default
             fillOpacity: default_fill_opacity,
           }
 
@@ -917,10 +912,13 @@ var app_geo_map = (function () {
           area_draw_control_layer.addLayer( display_layer );
 
           bounding_box['map_layer_uid'] = display_layer_id;
+          bounding_box['is_processed'] = false;
+
+          predefined_bounding_box_map[ display_layer_id ] = bounding_box;
         });
 
 
-        initTileCaching( predefined_bounding_box_queue );
+        initTileCaching( predefined_bounding_box_list );
 
       } // if (predefined_bounding_box_list.length > 0)
 
@@ -1207,19 +1205,10 @@ var app_geo_map = (function () {
                     // cleanup all map displays
 
                     // collect all remaining bounding boxes yet to be processed, still being displayed
-                    var map_layer_id_list = [];
-                    _.each(predefined_bounding_box_queue, function(bounding_box, index) {
-                      if (bounding_box.map_layer_uid) {
-                        map_layer_id_list.push( bounding_box.map_layer_uid );
-                      }
-                    });
-
-                    // collect the current bounding box being processed and being displayed
-                    if (bounding_box && bounding_box.map_layer_uid) {
-                      if (!bounding_box_map[bounding_box.map_layer_uid]) {
-                        map_layer_id_list.push( bounding_box.map_layer_uid )
-                      }
-                    }
+                    //console.log('predefined_bounding_box_map :\n' + JSON.stringify(predefined_bounding_box_map, null, 2));
+                    var map_layer_id_list = _.keys( predefined_bounding_box_map );
+                    map_layer_id_list = map_layer_id_list.map(Number);
+                    //console.log('map_layer_id_list :\n' + JSON.stringify(map_layer_id_list, null, 2));
 
                     // cleanup all by map layer-ids
                     removeAreaDrawn( map_layer_id_list );
@@ -1773,9 +1762,13 @@ var app_geo_map = (function () {
             console.log('draw:deleted');
           }
 
+          var map_layer_id_map = {};
           var layers = e.layers;
           layers.eachLayer(function (layer) {
             var layer_id = layer._leaflet_id;
+
+            // collect all layer_id deleted
+            map_layer_id_map[ layer_id ] = true;
             console.log('layer: ' + layer_id + ' removed!');
 
             if (layer instanceof L.Rectangle) {
@@ -1791,12 +1784,32 @@ var app_geo_map = (function () {
 
               console.log('bounding_box_map[' + layer_id + '] removed!');
 
+
               if (_.size(bounding_box_map) == 0) {
                 fireEvent('map_layer:area_deleted', {'map_layer_id': layer_id});
               }
             } // end-of if (layer instanceof L.Rectangle)
 
           });
+
+          // clean up pending task from queue
+
+          var new_task_queue = [];
+          console.log('updating geo-task-queue [' + geo_task_queue.length + '] ...');
+          _.each(geo_task_queue, function(bounding_box) {
+            var layer_id = bounding_box.map_layer_uid;
+            if (layer_id) {
+              if (!(layer_id in map_layer_id_map)) {
+                new_task_queue.push( bounding_box );
+              }
+            }
+          });
+
+          geo_task_queue.length = 0;
+          if (new_task_queue.length > 0) {
+            geo_task_queue = new_task_queue;
+            console.log('remaining geo_task_queue [' + new_task_queue.length + '] :\n' + JSON.stringify(geo_task_queue, null, 2));
+          }
 
         });
 
