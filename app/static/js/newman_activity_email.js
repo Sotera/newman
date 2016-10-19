@@ -1012,7 +1012,7 @@ var newman_activity_attachment = (function () {
 
       var attach_activities_as_json =
       {
-        bindto: '#chart_line_attach_activities',
+        bindto: '#' + chart_ui_id_text,
         data: {
           x: 'x',
           columns: [

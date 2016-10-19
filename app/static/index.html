@@ -778,8 +778,33 @@
           <!--Start Dashboard-Right-->
           <div class="col-sm-7" style= "height: 100%; padding: 0; margin: 0">
             <!-- Start-Analytics-Tab-Container -->
-            <div class="tabbable tabs-below" style= "padding: 0; margin: 0;">
+            <!--<div class="tabbable tabs-below" style= "padding: 0; margin: 0;">-->
+            <div class="tabbable" style= "padding: 0; margin: 0;">
 
+              <!-- Start-Analytics-Tab -->
+              <ul class="nav nav-tabs" style= "padding: 0; margin: 0;">
+                <li class="active" >
+                  <a href="#dashboard_tab_chart_analytics" data-toggle="tab">
+                    <i class="fa fa-tachometer fa-lg" rel="tooltip" data-placement="left" title="Dashboard"></i>
+                  </a>
+                </li>
+                <li >
+                  <a href="#dashboard_tab_geo_analytics" data-toggle="tab">
+                    <i class="fa fa-globe fa-lg" rel="tooltip" data-placement="left" title="Geo"></i>
+                  </a>
+                </li>
+                <li >
+                  <a href="#dashboard_tab_data_extract" data-toggle="tab">
+                    <i class="fa fa-table fa-lg" rel="tooltip" data-placement="left" title="Extract"></i>
+                  </a>
+                </li>
+                <li>
+                  <a href="#dashboard_tab_ingest_status" data-toggle="tab">
+                    <i class="fa fa-tasks fa-lg" rel="tooltip" data-placement="right" title="Tasks"></i>
+                  </a>
+                </li>
+              </ul>
+              <!-- End-Analytics-Tab -->
 
               <!-- Start-Analytics-Tab-Content -->
               <div id="analytics_tab_content" class="tab-content" style= "height: 100%; padding: 0; margin: 0;">
@@ -847,6 +872,7 @@
                       <li style="height: inherit;">
                         <a href="#dashboard_tab_content_communities" style="height: inherit;" role="tab" data-toggle="tab">Communities</a>
                       </li>
+
                     </ul>
                     <!--End Dashboard-Right-Center-Panel-Nav-Tabs-->
 
@@ -868,7 +894,7 @@
 
                       <div class="tab-pane" id="dashboard_tab_content_domains">
                         <div class="box-content">
-                          <div class="row box" style="margin: 0; padding: 0;">
+                          <div class="row" style="margin: 0; padding: 0;">
                             <div class="col-xs-3" style="margin: 0; padding: 0;">
                               <div id="chart_donut_domains" style="width: 150px; height: 150px;"></div>
                             </div>
@@ -918,7 +944,7 @@
 
                       <div class="tab-pane active" id="dashboard_tab_content_attach_activities">
                         <div class="box-content" style="padding: 0; width: 100%; height: 150px;">
-                          <div id="chart_line_attach_activities" style="width: 100%; height: 150px;"></div>
+                          <div class="c3" id="chart_line_attach_activities" style="width: calc(100% - 25px); height: 150px;"></div>
                         </div>
                       </div>
 
@@ -972,32 +998,6 @@
 
               </div>
               <!-- End-Analytics-Tab-Content -->
-
-              <!-- Start-Analytics-Tab -->
-              <!--<ul class="nav nav-tabs" style= "padding: 0; margin: 0;">-->
-              <ul class="nav nav-tabs" style= "padding: 0; margin: 0;">
-                <li class="active" >
-                  <a href="#dashboard_tab_chart_analytics" data-toggle="tab">
-                    <i class="fa fa-tachometer fa-lg" rel="tooltip" data-placement="left" title="Dashboard"></i>
-                  </a>
-                </li>
-                <li >
-                  <a href="#dashboard_tab_geo_analytics" data-toggle="tab">
-                    <i class="fa fa-globe fa-lg" rel="tooltip" data-placement="left" title="Geo"></i>
-                  </a>
-                </li>
-                <li >
-                  <a href="#dashboard_tab_data_extract" data-toggle="tab">
-                    <i class="fa fa-table fa-lg" rel="tooltip" data-placement="left" title="Extract"></i>
-                  </a>
-                </li>
-                <li>
-                  <a href="#dashboard_tab_ingest_status" data-toggle="tab">
-                    <i class="fa fa-tasks fa-lg" rel="tooltip" data-placement="right" title="Tasks"></i>
-                  </a>
-                </li>
-              </ul>
-              <!-- End-Analytics-Tab -->
 
             </div>
             <!-- End-Analytics-Tab-Container -->
