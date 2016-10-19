@@ -1730,8 +1730,14 @@ $(function () {
 
         //app_email_ingest.requestIngestStatus();
       }
+      else if (element_ID.endsWith('dashboard_tab_content_entities')) {
+        newman_top_email_entity.revalidateUIEntityEmail();
+      }
       else if (element_ID.endsWith('dashboard_tab_content_topics')) {
         newman_top_email_topic.revalidateUITopicEmail();
+      }
+      else if (element_ID.endsWith('dashboard_tab_content_ranks')) {
+        newman_top_email_account.revalidateUIRankEmail();
       }
       else if (element_ID.endsWith('dashboard_tab_content_domains')) {
         newman_top_email_domain.revalidateUIDomain();
@@ -1744,9 +1750,6 @@ $(function () {
       }
       else if (element_ID.endsWith('dashboard_tab_content_attach_types')) {
         newman_top_email_attach_type.revalidateUIFileTypeAttach();
-      }
-      else if (element_ID.endsWith('dashboard_tab_content_ranks')) {
-        newman_top_email_account.revalidateUIRankEmail();
       }
       else {
         // default to dashboard
