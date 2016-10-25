@@ -775,47 +775,54 @@ var app_geo_map = (function () {
 
       });
 
-      var is_completed = false;
+      var is_completed = false, prev_bounding_box_label;
       map_tile_layer.on('seed:end', function (cachingSeed) {
-        if (!is_completed) {
-          console.log('Caching-map-tiles ' + cachingSeed.bounding_box_label + ' : Completed!');
-          is_completed = true;
+        var bounding_box_label = cachingSeed.bounding_box_label;
+        if (!prev_bounding_box_label || prev_bounding_box_label != bounding_box_label) {
+          console.log('Caching-map-tiles ' + bounding_box_label + ' : Completed!');
+          if (!is_completed) {
+            is_completed = true;
 
-          var layer_id = cachingSeed.bounding_box.map_layer_uid;
-          if (layer_id) {
+            var layer_id = cachingSeed.bounding_box.map_layer_uid;
+            if (layer_id) {
 
-            // remove from map
-            removeAreaDrawn([layer_id]);
+              // remove from map
+              removeAreaDrawn([layer_id]);
 
-            // mark off from map
-            var bounding_box = predefined_bounding_box_map[ layer_id ];
-            if (bounding_box) {
-              bounding_box['is_processed'] = true;
-              //predefined_bounding_box_map[ layer_id ] = bounding_box;
+              // mark off from map
+              var bounding_box = predefined_bounding_box_map[layer_id];
+              if (bounding_box) {
+                bounding_box['is_processed'] = true;
+                //predefined_bounding_box_map[ layer_id ] = bounding_box;
+              }
             }
-          }
 
-          map.fire('caching:end', {"caching_area_label": cachingSeed.bounding_box_label, "caching_status": "completed"});
+            map.fire('caching:end', {
+              "caching_area_label": cachingSeed.bounding_box_label,
+              "caching_status": "completed"
+            });
 
-          if (geo_task_queue.length > 0) {
-            prev_percent_value = -1;
-            is_started = false;
-            is_completed = false;
+            if (geo_task_queue.length > 0) {
+              prev_percent_value = -1;
+              is_started = false;
+              is_completed = false;
 
-            console.log('Bounding boxes to be cached : ' + geo_task_queue.length);
-            bounding_box = geo_task_queue.shift();
-            _seedCachingBoundingBox( bounding_box );
-          }
-          else {
-            console.log('All-caching-map-tiles : Completed! ');
+              console.log('Bounding boxes to be cached : ' + geo_task_queue.length);
+              bounding_box = geo_task_queue.shift();
+              _seedCachingBoundingBox(bounding_box);
+            }
+            else {
+              console.log('All-caching-map-tiles : Completed! ');
 
-            map.fire('all_caching:end', {"caching_status": "completed"});
-            //console.log('bounding_box_map :\n' + JSON.stringify(bounding_box_map, null, 2));
-            //console.log('predefined_bounding_box_map :\n' + JSON.stringify(predefined_bounding_box_map, null, 2));
-          }
+              map.fire('all_caching:end', {"caching_status": "completed"});
+              //console.log('bounding_box_map :\n' + JSON.stringify(bounding_box_map, null, 2));
+              //console.log('predefined_bounding_box_map :\n' + JSON.stringify(predefined_bounding_box_map, null, 2));
+            }
 
-        } // end-of if (!is_completed)
+          } // end-of if (!is_completed)
 
+          prev_bounding_box_label = bounding_box_label;
+        } // end-of if (!prev_bounding_box_label || prev_bounding_box_label != bounding_box_label)
       });
 
 
@@ -838,6 +845,21 @@ var app_geo_map = (function () {
 
         if (geo_task_queue.length > 0) {
           console.log('Bounding boxes cleared : ' + geo_task_queue.length);
+
+
+          // clear map layer
+          /* redundant
+          var layer_id_list = [];
+          _.each(geo_task_queue, function(bounding_box) {
+            var layer_id = bounding_box.map_layer_uid;
+            if (layer_id && layer_id in predefined_bounding_box_map) { // only clear predefined layers
+              layer_id_list.push( layer_id );
+            }
+          });
+          removeAreaDrawn( layer_id_list );
+          */
+
+          // clear geo-task queue
           geo_task_queue.length = 0;
         }
 
@@ -1212,7 +1234,6 @@ var app_geo_map = (function () {
 
                     // cleanup all by map layer-ids
                     removeAreaDrawn( map_layer_id_list );
-
                   }
                 }
               ]
