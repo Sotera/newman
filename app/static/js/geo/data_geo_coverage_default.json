@@ -490,6 +490,102 @@
     "northern_hemisphere": false,
     "southern_hemisphere": false,
     "label": "Afghanistan, Pakistan, India, Sri Lanka, Bangladesh, Myanmar"
+  },
+  {
+    "zoom_level": 14,
+    "sw_latitude": 40.483515047963024,
+    "sw_longitude": -74.49142456054689,
+    "ne_latitude": 41.062786068733026,
+    "ne_longitude": -73.05084228515626,
+    "western_hemisphere": true,
+    "eastern_hemisphere": false,
+    "northern_hemisphere": true,
+    "southern_hemisphere": false,
+    "label": "New York"
+  },
+  {
+    "zoom_level": 14,
+    "sw_latitude": 38.70373101742003,
+    "sw_longitude": -77.76123046875001,
+    "ne_latitude": 39.30454987014581,
+    "ne_longitude": -76.31927490234376,
+    "western_hemisphere": true,
+    "eastern_hemisphere": false,
+    "northern_hemisphere": true,
+    "southern_hemisphere": false,
+    "label": "Washington, D.C."
+  },
+  {
+    "zoom_level": 14,
+    "sw_latitude": 37.112145754751516,
+    "sw_longitude": -123.21990966796876,
+    "ne_latitude": 38.33303882235456,
+    "ne_longitude": -120.44586181640626,
+    "western_hemisphere": true,
+    "eastern_hemisphere": false,
+    "northern_hemisphere": true,
+    "southern_hemisphere": false,
+    "label": "San Francisco"
+  },
+  {
+    "zoom_level": 14,
+    "sw_latitude": 33.08003537299405,
+    "sw_longitude": -119.2291259765625,
+    "ne_latitude": 34.359308974793564,
+    "ne_longitude": -116.33972167968751,
+    "western_hemisphere": true,
+    "eastern_hemisphere": false,
+    "northern_hemisphere": true,
+    "southern_hemisphere": false,
+    "label": "Los Angeles"
+  },
+  {
+    "zoom_level": 14,
+    "sw_latitude": 19.06990562064469,
+    "sw_longitude": -99.90142822265626,
+    "ne_latitude": 19.731805658115228,
+    "ne_longitude": -98.75335693359376,
+    "western_hemisphere": true,
+    "eastern_hemisphere": false,
+    "northern_hemisphere": true,
+    "southern_hemisphere": false,
+    "label": "Mexico City"
+  },
+  {
+    "zoom_level": 14,
+    "sw_latitude": 51.01721046364217,
+    "sw_longitude": -1.3705444335937502,
+    "ne_latitude": 51.97642166216334,
+    "ne_longitude": 1.483154296875,
+    "western_hemisphere": false,
+    "eastern_hemisphere": false,
+    "northern_hemisphere": true,
+    "southern_hemisphere": false,
+    "label": "London"
+  },
+  {
+    "zoom_level": 14,
+    "sw_latitude": 48.334343174592014,
+    "sw_longitude": 1.3128662109375002,
+    "ne_latitude": 49.335861591104106,
+    "ne_longitude": 3.40576171875,
+    "western_hemisphere": false,
+    "eastern_hemisphere": true,
+    "northern_hemisphere": true,
+    "southern_hemisphere": false,
+    "label": "Paris"
+  },
+  {
+    "zoom_level": 14,
+    "sw_latitude": 22.034729817044195,
+    "sw_longitude": 113.26354980468751,
+    "ne_latitude": 22.72172372713302,
+    "ne_longitude": 114.59289550781251,
+    "western_hemisphere": false,
+    "eastern_hemisphere": true,
+    "northern_hemisphere": true,
+    "southern_hemisphere": false,
+    "label": "Hong Kong"
   }
 ]
 
