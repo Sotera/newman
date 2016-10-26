@@ -892,8 +892,8 @@ var app_geo_map = (function () {
     console.log('min_zoom_level : ' + min_zoom + ' max_zoom_level: ' + max_zoom);
 
     var bounding_box_label;
-    if (bounding_box.label) {
-      bounding_box_label = bounding_box.label;
+    if (bounding_box.area_label) {
+      bounding_box_label = bounding_box.area_label;
     }
 
     map_tile_layer.seed(bounding_box, min_zoom, max_zoom, bounding_box_label);

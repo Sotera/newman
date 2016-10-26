@@ -1,6 +1,6 @@
 [
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 36.527294814546245,
     "sw_longitude": -84.81445312500001,
     "ne_latitude": 49.33944093715549,
@@ -9,10 +9,10 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "US North East Coast"
+    "area_label": "US North East Coast"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 23.58412603264412,
     "sw_longitude": -84.81445312500001,
     "ne_latitude": 36.59788913307022,
@@ -21,10 +21,10 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "US South East Coast"
+    "area_label": "US South East Coast"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 36.527294814546245,
     "sw_longitude": -103.21277618408205,
     "ne_latitude": 49.33944093715549,
@@ -33,10 +33,10 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "US North Central"
+    "area_label": "US North Central"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 25.264568475331583,
     "sw_longitude": -103.21277618408205,
     "ne_latitude": 36.50963615733049,
@@ -45,10 +45,10 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "US South Central"
+    "area_label": "US South Central"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 36.527294814546245,
     "sw_longitude": -129.88037109375003,
     "ne_latitude": 49.33944093715549,
@@ -57,10 +57,10 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "US North West Coast"
+    "area_label": "US North West Coast"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 25.264568475331583,
     "sw_longitude": -122.76844024658205,
     "ne_latitude": 36.50963615733049,
@@ -69,10 +69,10 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "US South West Coast"
+    "area_label": "US South West Coast"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 11.974844752931832,
     "sw_longitude": -116.26453399658205,
     "ne_latitude": 25.3241665257384,
@@ -81,10 +81,10 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Mexico South"
+    "area_label": "Mexico South"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 7.841615185204699,
     "sw_longitude": -84.81445312500001,
     "ne_latitude": 23.624394569716923,
@@ -93,10 +93,10 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Caribbean"
+    "area_label": "Caribbean"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 49.48240137826932,
     "sw_longitude": -14.260253906250002,
     "ne_latitude": 61.18562468142283,
@@ -105,10 +105,10 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "UK & Ireland"
+    "area_label": "UK & Ireland"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 41.22824901518532,
     "sw_longitude": -5.756835937500001,
     "ne_latitude": 51.45400691005982,
@@ -117,10 +117,10 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "France"
+    "area_label": "France"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 35.08395557927643,
     "sw_longitude": -10.641975402832033,
     "ne_latitude": 44.465151013519645,
@@ -129,10 +129,10 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Spain"
+    "area_label": "Spain"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 57.97315745102812,
     "sw_longitude": 3.0322265625000004,
     "ne_latitude": 72.28906720017675,
@@ -141,10 +141,10 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Norway & Sweden"
+    "area_label": "Norway & Sweden"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 47.05515408550348,
     "sw_longitude": 3.0322265625000004,
     "ne_latitude": 57.97315745102812,
@@ -153,10 +153,10 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Germany, Poland, Denmark, Netherlands, Belgium, Luxembourg, Czech, Slovakia"
+    "area_label": "Germany, Poland, Denmark, Netherlands, Belgium, Luxembourg, Czech, Slovakia"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 35.08395557927643,
     "sw_longitude": 5.646972656250001,
     "ne_latitude": 49.15296965617042,
@@ -165,10 +165,10 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Italy, Switzerland, Austria, Hungary, Balkans"
+    "area_label": "Italy, Switzerland, Austria, Hungary, Balkans"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 34.288991865037524,
     "sw_longitude": 19.028320312500004,
     "ne_latitude": 49.15296965617042,
@@ -177,10 +177,10 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Romania, Moldova, Bulgaria, Greece, Western Turkey"
+    "area_label": "Romania, Moldova, Bulgaria, Greece, Western Turkey"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 34.288991865037524,
     "sw_longitude": 30.893554687500004,
     "ne_latitude": 49.15296965617042,
@@ -189,10 +189,10 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "South Western Russia & Eastern Turkey"
+    "area_label": "South Western Russia & Eastern Turkey"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 49.081062364320736,
     "sw_longitude": 20.456542968750004,
     "ne_latitude": 60.02095215374804,
@@ -201,10 +201,10 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Central Western Russia, Ukraine, Belarus, the Baltic states"
+    "area_label": "Central Western Russia, Ukraine, Belarus, the Baltic states"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 59.93300042374631,
     "sw_longitude": 20.456542968750004,
     "ne_latitude": 72.28906720017675,
@@ -213,10 +213,10 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "North Western Russia & Finland"
+    "area_label": "North Western Russia & Finland"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 35.67514743608467,
     "sw_longitude": 72.46582031250001,
     "ne_latitude": 54.67383096593114,
@@ -225,10 +225,10 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "North Western China"
+    "area_label": "North Western China"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 35.67514743608467,
     "sw_longitude": 103.97460937500001,
     "ne_latitude": 54.67383096593114,
@@ -237,10 +237,10 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "North Eastern China"
+    "area_label": "North Eastern China"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 20.2209657795223,
     "sw_longitude": 72.46582031250001,
     "ne_latitude": 35.746512259918504,
@@ -249,10 +249,10 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "South Western China"
+    "area_label": "South Western China"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": 0.26367094433665017,
     "sw_longitude": 96.32812500000001,
     "ne_latitude": 35.746512259918504,
@@ -261,10 +261,10 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "South Eastern China & Southeast Asia"
+    "area_label": "South Eastern China & Southeast Asia"
   },
   {
-    "zoom_level": 10,
+    "zoom_level": 7,
     "sw_latitude": -2.7235830833483856,
     "sw_longitude": 60.02929687500001,
     "ne_latitude": 39.57182223734374,
@@ -273,19 +273,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": false,
     "southern_hemisphere": false,
-    "label": "Afghanistan, Pakistan, India, Sri Lanka, Bangladesh, Myanmar"
-  },
-  {
-    "zoom_level": 10,
-    "sw_latitude": -36.42128244364948,
-    "sw_longitude": 9.536132812500002,
-    "ne_latitude": -20.67390526467283,
-    "ne_longitude": 41.66015625000001,
-    "western_hemisphere": false,
-    "eastern_hemisphere": true,
-    "northern_hemisphere": false,
-    "southern_hemisphere": true,
-    "label": "South Africa"
+    "area_label": "Afghanistan, Pakistan, India, Sri Lanka, Bangladesh, Myanmar"
   }
 ]
 

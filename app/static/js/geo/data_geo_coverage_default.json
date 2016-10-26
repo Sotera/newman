@@ -9,7 +9,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Alaska, Canada, & Arctic Ocean"
+    "area_label": "Alaska, Canada, & Arctic Ocean"
   },
   {
     "zoom_level": 6,
@@ -21,7 +21,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Greenland, Iceland, & Arctic Ocean"
+    "area_label": "Greenland, Iceland, & Arctic Ocean"
   },
   {
     "zoom_level": 6,
@@ -33,7 +33,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "USA, Mexico, & Central America"
+    "area_label": "USA, Mexico, & Central America"
   },
   {
     "zoom_level": 6,
@@ -45,7 +45,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "North Atlantic Ocean"
+    "area_label": "North Atlantic Ocean"
   },
   {
     "zoom_level": 6,
@@ -57,7 +57,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": false,
     "southern_hemisphere": false,
-    "label": "South America"
+    "area_label": "South America"
   },
   {
     "zoom_level": 6,
@@ -69,7 +69,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": false,
     "southern_hemisphere": true,
-    "label": "Antarctic Peninsula"
+    "area_label": "Antarctic Peninsula"
   },
   {
     "zoom_level": 6,
@@ -81,7 +81,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Europe & Western Russia"
+    "area_label": "Europe & Western Russia"
   },
   {
     "zoom_level": 6,
@@ -93,7 +93,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Svalbard & Arctic Ocean"
+    "area_label": "Svalbard & Arctic Ocean"
   },
   {
     "zoom_level": 6,
@@ -105,7 +105,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Central Russia & Arctic Ocean"
+    "area_label": "Central Russia & Arctic Ocean"
   },
   {
     "zoom_level": 6,
@@ -117,7 +117,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Far East Russia"
+    "area_label": "Far East Russia"
   },
   {
     "zoom_level": 6,
@@ -129,7 +129,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": false,
     "southern_hemisphere": false,
-    "label": "Africa & Middle East"
+    "area_label": "Africa & Middle East"
   },
   {
     "zoom_level": 6,
@@ -141,7 +141,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Middle East & Central Asia"
+    "area_label": "Middle East & Central Asia"
   },
   {
     "zoom_level": 6,
@@ -153,7 +153,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": false,
     "southern_hemisphere": false,
-    "label": "China, India, Japan & South East Asia"
+    "area_label": "China, India, Japan & South East Asia"
   },
   {
     "zoom_level": 6,
@@ -165,7 +165,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": false,
     "southern_hemisphere": false,
-    "label": "Indian Ocean & Antarctic"
+    "area_label": "Indian Ocean & Antarctic"
   },
   {
     "zoom_level": 6,
@@ -177,7 +177,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": false,
     "southern_hemisphere": true,
-    "label": "Australia & New Zealand"
+    "area_label": "Australia & New Zealand"
   },
   {
     "zoom_level": 6,
@@ -189,7 +189,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Hawaii & East Pacific Ocean"
+    "area_label": "Hawaii & East Pacific Ocean"
   },
   {
     "zoom_level": 6,
@@ -201,7 +201,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": false,
     "southern_hemisphere": false,
-    "label": "South Pacific Ocean & Islands"
+    "area_label": "South Pacific Ocean & Islands"
   },
   {
     "zoom_level": 6,
@@ -213,7 +213,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": false,
     "southern_hemisphere": false,
-    "label": "West Pacific Ocean & Islands"
+    "area_label": "West Pacific Ocean & Islands"
   },
   {
     "zoom_level": 10,
@@ -225,7 +225,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "US North East Coast"
+    "area_label": "US North East Coast"
   },
   {
     "zoom_level": 10,
@@ -237,7 +237,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "US South East Coast"
+    "area_label": "US South East Coast"
   },
   {
     "zoom_level": 10,
@@ -249,7 +249,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "US North Central"
+    "area_label": "US North Central"
   },
   {
     "zoom_level": 10,
@@ -261,7 +261,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "US South Central"
+    "area_label": "US South Central"
   },
   {
     "zoom_level": 10,
@@ -273,7 +273,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "US North West Coast"
+    "area_label": "US North West Coast"
   },
   {
     "zoom_level": 10,
@@ -285,7 +285,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "US South West Coast"
+    "area_label": "US South West Coast"
   },
   {
     "zoom_level": 10,
@@ -297,7 +297,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Mexico South"
+    "area_label": "Mexico South"
   },
   {
     "zoom_level": 10,
@@ -309,7 +309,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Caribbean"
+    "area_label": "Caribbean"
   },
   {
     "zoom_level": 10,
@@ -321,7 +321,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "UK & Ireland"
+    "area_label": "UK & Ireland"
   },
   {
     "zoom_level": 10,
@@ -333,7 +333,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "France"
+    "area_label": "France"
   },
   {
     "zoom_level": 10,
@@ -345,7 +345,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Spain"
+    "area_label": "Spain"
   },
   {
     "zoom_level": 10,
@@ -357,7 +357,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Norway & Sweden"
+    "area_label": "Norway & Sweden"
   },
   {
     "zoom_level": 10,
@@ -369,7 +369,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Germany, Poland, Denmark, Netherlands, Belgium, Luxembourg, Czech, Slovakia"
+    "area_label": "Germany, Poland, Denmark, Netherlands, Belgium, Luxembourg, Czech, Slovakia"
   },
   {
     "zoom_level": 10,
@@ -381,7 +381,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Italy, Switzerland, Austria, Hungary, Balkans"
+    "area_label": "Italy, Switzerland, Austria, Hungary, Balkans"
   },
   {
     "zoom_level": 10,
@@ -393,7 +393,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Romania, Moldova, Bulgaria, Greece, Western Turkey"
+    "area_label": "Romania, Moldova, Bulgaria, Greece, Western Turkey"
   },
   {
     "zoom_level": 10,
@@ -405,7 +405,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "South Western Russia & Eastern Turkey"
+    "area_label": "South Western Russia & Eastern Turkey"
   },
   {
     "zoom_level": 10,
@@ -417,7 +417,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Central Western Russia, Ukraine, Belarus, the Baltic states"
+    "area_label": "Central Western Russia, Ukraine, Belarus, the Baltic states"
   },
   {
     "zoom_level": 9,
@@ -429,7 +429,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "North Western Russia & Finland"
+    "area_label": "North Western Russia & Finland"
   },
   {
     "zoom_level": 9,
@@ -441,7 +441,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "North Western China"
+    "area_label": "North Western China"
   },
   {
     "zoom_level": 10,
@@ -453,7 +453,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "North Eastern China"
+    "area_label": "North Eastern China"
   },
   {
     "zoom_level": 9,
@@ -465,7 +465,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "South Western China"
+    "area_label": "South Western China"
   },
   {
     "zoom_level": 10,
@@ -477,7 +477,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "South Eastern China & Southeast Asia"
+    "area_label": "South Eastern China & Southeast Asia"
   },
   {
     "zoom_level": 10,
@@ -489,7 +489,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": false,
     "southern_hemisphere": false,
-    "label": "Afghanistan, Pakistan, India, Sri Lanka, Bangladesh, Myanmar"
+    "area_label": "Afghanistan, Pakistan, India, Sri Lanka, Bangladesh, Myanmar"
   },
   {
     "zoom_level": 14,
@@ -501,7 +501,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "New York"
+    "area_label": "New York"
   },
   {
     "zoom_level": 14,
@@ -513,7 +513,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Washington, D.C."
+    "area_label": "Washington, D.C."
   },
   {
     "zoom_level": 14,
@@ -525,7 +525,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "San Francisco"
+    "area_label": "San Francisco"
   },
   {
     "zoom_level": 14,
@@ -537,7 +537,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Los Angeles"
+    "area_label": "Los Angeles"
   },
   {
     "zoom_level": 14,
@@ -549,7 +549,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Mexico City"
+    "area_label": "Mexico City"
   },
   {
     "zoom_level": 14,
@@ -561,7 +561,7 @@
     "eastern_hemisphere": false,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "London"
+    "area_label": "London"
   },
   {
     "zoom_level": 14,
@@ -573,7 +573,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Paris"
+    "area_label": "Paris"
   },
   {
     "zoom_level": 14,
@@ -585,7 +585,7 @@
     "eastern_hemisphere": true,
     "northern_hemisphere": true,
     "southern_hemisphere": false,
-    "label": "Hong Kong"
+    "area_label": "Hong Kong"
   }
 ]
 
