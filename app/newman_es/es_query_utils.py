@@ -78,7 +78,7 @@ def _query_email_attachments(index, size, emails_query):
                 attachment_entry = email_entry.copy()
                 attachment_entry["attachment_id"] = attachment["guid"]
                 attachment_entry["filename"] = attachment["filename"]
-                attachment_entry["content_encrypted"] = attachment["content_encrypted"]
+                attachment_entry["content_encrypted"] = attachment.get("content_encrypted","false")
                 attachment_entry["content_type"] = attachment["content_type"]
                 attachment_entry["content_hash"] = attachment.get("content_hash",'')
                 attachment_entry["content_length"] = attachment.get("content_length",-1)
