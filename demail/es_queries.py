@@ -1,5 +1,7 @@
 import itertools
 import re
+import datetime
+import dateutil.parser
 
 STRIP_NON_DIGITS_REGEXP= re.compile(r'[^\d.]+')
 
@@ -136,7 +138,16 @@ def _entity_filter(entity_dict=[]):
     return list(itertools.chain(*[_terms_filter(k,v) for k,v in entity_dict.iteritems()]))
 
 def _date_filter(date_bounds=None):
-    return [] if not date_bounds else [{"range" : {"datetime" : { "gte": str(date_bounds[0]), "lte": str(date_bounds[1])}}}]
+    if not date_bounds:
+        return []
+
+    # We need to add +1 to days, this is because the UI is passing yyyy-mm-dd and when performing ES query this gives us a timerange of zero
+    # i.e 2000-01-01 <= x <=2000-01-01 will only return values at exactly 2000-01-01T00:00:00.000Z  which is not what is expected
+    end_date = dateutil.parser.parse(date_bounds[1])
+    end_date = end_date + datetime.timedelta(days=1)
+
+    return [{"range" : {"datetime" : { "gte": str(date_bounds[0]), "lt": end_date.strftime('%Y-%m-%d')}}}]
+
 
 def _date_filter_not_equal(date_bounds=None):
     return [] if not date_bounds else [{"range" : {"datetime" : { "gt": str(date_bounds[0]), "lt": str(date_bounds[1])}}}]
