@@ -1166,37 +1166,103 @@ function drawGraphLegendTableDataset() {
       });
     });
 
+
+  var multi_dataset_keys = {};
+
   var dataset_group = _.groupBy(d3.selectAll("circle").data(), function(node) {
     if (node && node.original_ingest_id) {
+
       var dataset_id_list = node.original_ingest_id;
+      //console.log('drawGraphLegendTableDataset() : dataset_id_list\n' + JSON.stringify(dataset_id_list, null, 2));
+
       var dataset_list_string = '';
       _.each(dataset_id_list, function(dataset_id, index) {
+        var dataset_id_string = dataset_id.trim();
         if (index == (dataset_id_list.length - 1)) {
-          dataset_list_string += dataset_id;
+          dataset_list_string += dataset_id_string;
         }
         else {
-          dataset_list_string += dataset_id + ','
+          dataset_list_string += (dataset_id_string + ',');
         }
       });
+
       return dataset_list_string;
     }
   });
-  //console.log('\tdataset_group: ' + JSON.stringify(dataset_group, null, 2));
+  //console.log('drawGraphLegendTableDataset() : dataset_group\n' + JSON.stringify(dataset_group, null, 2));
+
+
+  // for multiple datasets, keep 1 permutation and filter all others
+  var marked_dataset_keys = {}, merged_group_map = {};
+  var dataset_group_keys = _.keys(dataset_group);
+  //console.log('drawGraphLegendTableDataset() : dataset_group_keys\n' + JSON.stringify(dataset_group_keys, null, 2));
+
+  _.each(dataset_group_keys, function( dataset_key ) {
+    var dataset_id_list = dataset_key.split(',');
+    if (dataset_id_list.length > 1) {
+      _.each(dataset_id_list, function( dataset_id ) {
+        if (dataset_id in marked_dataset_keys) {
+          var group_element_list = dataset_group[ dataset_key ];
+
+          //merge other permutations, in effect
+          var merged_group_key = marked_dataset_keys[ dataset_id ];
+          var merged_group_element_map = merged_group_map[ merged_group_key ];
+          if (merged_group_element_map) {
+            _.each(group_element_list, function (element) {
+              merged_group_element_map[ element.name ] = clone(element);
+            });
+            merged_group_map[ merged_group_key ] = merged_group_element_map; // really not needed, object passed by reference
+          }
+
+          delete dataset_group[ dataset_key ];
+
+        }
+        else {
+          //keep only 1 permutation
+          _.each(dataset_id_list, function(dataset_id) {
+            marked_dataset_keys[dataset_id] = dataset_key;
+          });
+
+          var merged_group_key = dataset_key;
+          var group_element_list = dataset_group[ merged_group_key ];
+          _.each(group_element_list, function( element ) {
+            var element_map = {};
+            element_map[ element.name ] = clone(element);
+            merged_group_map[ merged_group_key ] = element_map;
+          });
+
+        }
+      });
+    } // end-of if (dataset_id_list.length > 1)
+
+  });
+  //console.log('drawGraphLegendTableDataset() : marked_dataset_keys\n' + JSON.stringify(marked_dataset_keys, null, 2));
+
+  //re-insert merged permutations
+  if (_.size(merged_group_map) > 0) {
+    //console.log('drawGraphLegendTableDataset() : merged_group_map\n' + JSON.stringify(merged_group_map, null, 2));
+    _.each(merged_group_map, function( merged_group_element_map, merged_key ) {
+      var merged_group_element_list = _.values( merged_group_element_map )
+      dataset_group[ merged_key ] = merged_group_element_list;
+    });
+  }
 
   var color_label_by_dataset = _.map(dataset_group, function(value, key) {
     if(value && key) {
 
       var dataset_list_string = key;
       var dataset_id_list = dataset_list_string.split(',');
+      //console.log('drawGraphLegendTableDataset() : dataset_id_list\n' + JSON.stringify(dataset_id_list, null, 2));
 
       var dataset_color = newman_graph_email.getDatasetColor( dataset_id_list );
       var dataset_label = '';
       _.each(dataset_id_list, function(dataset_id, index) {
+        var label_string = newman_data_source.getLabelByID( dataset_id );
         if (index == (dataset_id_list.length - 1)) {
-          dataset_label += newman_data_source.getLabelByID( dataset_id );
+          dataset_label += label_string;
         }
         else {
-          dataset_label += newman_data_source.getLabelByID( dataset_id ) + ', '
+          dataset_label += (label_string + ', ');
         }
       });
 
@@ -1214,18 +1280,47 @@ function drawGraphLegendTableDataset() {
     .on("click", function(d, i){
       console.log(d);
     })
-    .on("mouseover", function(d, i){
-      var dataset_hovered = d[0]; // use color as the key
+    .on("mouseover", function(d, i) {
+      var dataset_id_label = d[2];
+      var dataset_id_list = dataset_id_label.split(', ');
+      var dataset_id_map = {};
+      if (dataset_id_list.length > 1) {
+        _.each(dataset_id_list, function(data_id) {
+          dataset_id_map[ data_id ] = dataset_id_label;
+        });
+      }
+      var data_id_map_size = _.size(dataset_id_map);
+
       d3.selectAll("circle").style("stroke","#ffff00");
       d3.selectAll("circle").each(function(d, i){
         if(d) {
-          //console.log('node' + JSON.stringify(d, null, 2));
-          if (dataset_hovered.localeCompare(newman_graph_email.getDatasetColor( d.original_ingest_id )) == 0) {
-            d3.select(this).style("stroke-width", function (d) {
-              return 5;
-            });
+          //console.log('node :\n' + JSON.stringify(d, null, 2));
+
+          var ingest_id_list = d.original_ingest_id;
+          var dataset_label = newman_data_source.getLabelByID( ingest_id_list[0] ); // pick the first or only dataset label
+          //console.log('d.original_ingest_id[0] : ' + ingest_id_list[0] + ' dataset_label : ' + dataset_label);
+
+          if (data_id_map_size > 1) {
+            //console.log('dataset_id_list :\n' + JSON.stringify(dataset_id_list, null, 2));
+
+            if (ingest_id_list.length > 1 && dataset_label in dataset_id_map) {
+              d3.select(this).style("stroke-width", function (d) {
+                //console.log('node :\n' + JSON.stringify(d, null, 2)); // d is the node-object
+                return 5;
+              });
+            }
           }
-        }
+          else {
+
+            if (dataset_id_list[0] == dataset_label) {
+              d3.select(this).style("stroke-width", function (d) {
+                return 5;
+              });
+            }
+
+          }
+
+        }// end-of if(d)
       });
     })
     .on("mouseout", function(d, i){
@@ -1635,8 +1730,14 @@ $(function () {
 
         //app_email_ingest.requestIngestStatus();
       }
+      else if (element_ID.endsWith('dashboard_tab_content_entities')) {
+        newman_top_email_entity.revalidateUIEntityEmail();
+      }
       else if (element_ID.endsWith('dashboard_tab_content_topics')) {
         newman_top_email_topic.revalidateUITopicEmail();
+      }
+      else if (element_ID.endsWith('dashboard_tab_content_ranks')) {
+        newman_top_email_account.revalidateUIRankEmail();
       }
       else if (element_ID.endsWith('dashboard_tab_content_domains')) {
         newman_top_email_domain.revalidateUIDomain();
@@ -1649,9 +1750,6 @@ $(function () {
       }
       else if (element_ID.endsWith('dashboard_tab_content_attach_types')) {
         newman_top_email_attach_type.revalidateUIFileTypeAttach();
-      }
-      else if (element_ID.endsWith('dashboard_tab_content_ranks')) {
-        newman_top_email_account.revalidateUIRankEmail();
       }
       else {
         // default to dashboard

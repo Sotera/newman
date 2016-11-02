@@ -677,6 +677,10 @@ function reloadDashboardTopEmailAccounts() {
   newman_top_email_account.requestEmailAccountList();
 }
 
+function reloadDashboardActivityAttachments() {
+  newman_activity_attachment.revalidateUIActivityAttach();
+}
+
 function reloadDashboardTopAttachmentTypes() {
   newman_top_email_attach_type.displayUIFileTypeAttach(10);
 }
@@ -699,12 +703,15 @@ function initDashboardCharts( is_first_init ) {
   //re-render topic analytics
   reloadDashboardTopEmailTopics()
 
+  //re-render rank analytics
+  reloadDashboardTopEmailAccounts();
   //re-render domain analytics
   reloadDashboardTopEmailDomains();
   //re-render community analytics
   reloadDashboardTopEmailCommunities();
-  //re-render rank analytics
-  reloadDashboardTopEmailAccounts();
+
+  //re-render attachment-activity-time-series
+  reloadDashboardActivityAttachments();
   //re-render attachment-file analytics
   reloadDashboardTopAttachmentTypes();
 
