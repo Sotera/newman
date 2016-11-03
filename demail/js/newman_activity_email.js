@@ -2,6 +2,129 @@
  * Created by jlee on 10/23/15.
  */
 
+var newman_temporal_filter = (function() {
+
+  function filterEmailActivity( activity_list ) {
+    if (activity_list.length == 0) {
+      return activity_list;
+    }
+
+    var new_activity_list = [];
+    var start_index = -1, end_index = activity_list.length;
+
+    var done = false;
+    var i = 0;
+    while (!done && i < activity_list.length ) {
+      if ( activity_list[i].interval_outbound_count == 0 &&
+        activity_list[i].interval_inbound_count == 0 ) {
+        start_index = i;
+      }
+      else {
+        done = true;
+      }
+      i++;
+    }
+    if (done && start_index > 10 ) {
+      start_index = start_index - 10;
+    }
+
+    done = false;
+    var j = (activity_list.length - 1);
+    while (!done && j >= 0) {
+      if ( activity_list[j].interval_outbound_count == 0 &&
+        activity_list[j].interval_inbound_count == 0 ) {
+        end_index = j;
+      }
+      else {
+        done = true;
+      }
+      j--;
+    }
+    if (done && end_index + 10 < activity_list.length) {
+      end_index = end_index + 10;
+    }
+
+    //console.log('array.length : ' + activity_list.length + ' trim_start_index : ' + start_index + ' trim_end_index : ' + end_index);
+
+    if ((start_index >= 0) && (end_index < activity_list.length)) {
+      new_activity_list = activity_list.slice( start_index, end_index );
+    }
+    else if (start_index >= 0) {
+      new_activity_list = activity_list.slice( start_index, activity_list.length );
+    }
+    else {
+      new_activity_list = activity_list.slice( 0, end_index );
+    }
+
+    //console.log('new_activity_list :\n' + JSON.stringify(new_activity_list, null, 2));
+    //console.log('filterEmailActivity(activity_list) : start_datetime ' + start_datetime + ', end_datetime ' + end_datetime);
+
+    return new_activity_list;
+  }
+
+  function filterAttachmentActivity( activity_list ) {
+    if (activity_list.length == 0) {
+      return activity_list;
+    }
+
+    var new_activity_list = [];
+    var start_index = -1, end_index = activity_list.length;
+
+    var done = false;
+    var i = 0;
+    while (!done && i < activity_list.length ) {
+      if ( activity_list[i].interval_attach_count == 0 ) {
+        start_index = i;
+      }
+      else {
+        done = true;
+      }
+      i++;
+    }
+    if (done && start_index > 10 ) {
+      start_index = start_index - 10;
+    }
+
+    done = false;
+    var j = (activity_list.length - 1);
+    while (!done && j >= 0) {
+      if ( activity_list[j].interval_attach_count == 0 ) {
+        end_index = j;
+      }
+      else {
+        done = true;
+      }
+      j--;
+    }
+    if (done && end_index + 10 < activity_list.length) {
+      end_index = end_index + 10;
+    }
+
+    //console.log('array.length : ' + activity_list.length + ' trim_start_index : ' + start_index + ' trim_end_index : ' + end_index);
+
+    if ((start_index >= 0) && (end_index < activity_list.length)) {
+      new_activity_list = activity_list.slice( start_index, end_index );
+    }
+    else if (start_index >= 0) {
+      new_activity_list = activity_list.slice( start_index, activity_list.length );
+    }
+    else {
+      new_activity_list = activity_list.slice( 0, end_index );
+    }
+
+    //console.log('new_activity_list :\n' + JSON.stringify(new_activity_list, null, 2));
+    //console.log('filterAttachmentActivity(activity_list) : start_datetime ' + start_datetime + ', end_datetime ' + end_datetime);
+
+    return new_activity_list;
+  }
+
+  return {
+    'filterEmailActivity' : filterEmailActivity,
+    'filterAttachmentActivity' : filterAttachmentActivity
+  }
+
+}());
+
 /**
  * activity-color related container
  */
@@ -24,8 +147,7 @@ var newman_activity_color = (function () {
   }
 
   return {
-    'getChartColor' : getChartColor,
-
+    'getChartColor' : getChartColor
   }
 
 }());
@@ -153,12 +275,17 @@ var newman_activity_email = (function () {
       //console.log('updateUIActivityOutbound('+responseaccount_activity_list[0].data_set_id + ')');
       //console.log('response :\n' + JSON.stringify(response, null, 2));
 
+      var start_datetime, end_datetime;
+
       activity_data_value_max = 0;
 
       _.each(response.account_activity_list, function (account_activity, account_index) {
         if (account_index < chart_element_index_max) {
 
           if (chart_ui_id_element) {
+
+            start_datetime = account_activity.account_start_datetime;
+            end_datetime = account_activity.account_end_datetime;
 
             var data_set_id = account_activity.data_set_id;
             var acct_id = account_activity.account_id;
@@ -183,10 +310,10 @@ var newman_activity_email = (function () {
             activity_data_color_map[inbound_acct_id] = newman_activity_color.getChartColor( account_index, true );
             activity_data_set_keys.push( inbound_acct_id );
 
-            //var trimed_activity_list = _trimEmptyListValue(account_activity.activities);
-            var trimed_activity_list = account_activity.activities;
+            var filtered_activity_list = newman_temporal_filter.filterEmailActivity( account_activity.activities );
+            //var filtered_activity_list = account_activity.activities;
 
-            _.each(trimed_activity_list, function (activity) {
+            _.each(filtered_activity_list, function (activity, index) {
               //console.log('acct_activity :\n' + JSON.stringify(activity, null, 2));
 
               var outbound_value = activity.interval_outbound_count;
@@ -195,6 +322,9 @@ var newman_activity_email = (function () {
               inbound_data_set.push((-1) * inbound_value);
 
               timeline_dates.push(activity.interval_start_datetime);
+              if (index == 0) {
+                start_datetime = activity.interval_start_datetime;
+              }
 
               activity_data_value_max = _getMaxValue(activity_data_value_max, outbound_value, inbound_value);
               //console.log('activity_data_value_max = ' + activity_data_value_max);
@@ -203,7 +333,7 @@ var newman_activity_email = (function () {
             //console.log( 'account : ' + account_activity.account_id + ' activities : ' + account_activity.activities.length  );
 
 
-            if (account_index == 0 || !activity_chart) {
+            if (!activity_chart) {
 
               /*
               var timeline_dates = ['x'];
@@ -218,6 +348,8 @@ var newman_activity_email = (function () {
                               activity_data_value_max,
                               activity_data_set_keys,
                               activity_data_color_map );
+
+              setDatetimeBounds( start_datetime, end_datetime );
             }
             else {
 
@@ -237,69 +369,6 @@ var newman_activity_email = (function () {
 
       revalidateUIActivity();
     }
-  }
-
-  function _trimEmptyListValue( activity_list ) {
-    if (activity_list.length == 0) {
-      return activity_list;
-    }
-
-    var new_activity_list = [];
-    var start_index = -1, end_index = activity_list.length;
-    var start_datetime, end_datetime;
-
-    var done = false;
-    var i = 0;
-    while (!done && i < activity_list.length ) {
-      if ( activity_list[i].interval_outbound_count == 0 &&
-           activity_list[i].interval_inbound_count == 0 ) {
-        start_index = i;
-      }
-      else {
-        done = true;
-        start_datetime = activity_list[i].interval_start_datetime;
-      }
-      i++;
-    }
-    if (done && start_index > 10 ) {
-      start_index = start_index - 10;
-    }
-
-    done = false;
-    var j = (activity_list.length - 1);
-    while (!done && j >= 0) {
-      if ( activity_list[j].interval_outbound_count == 0 &&
-           activity_list[j].interval_inbound_count == 0 ) {
-        end_index = j;
-      }
-      else {
-        done = true;
-        end_datetime = activity_list[j].interval_start_datetime;
-      }
-      j--;
-    }
-    if (done && end_index + 10 < activity_list.length) {
-      end_index = end_index + 10;
-    }
-
-    //console.log('array.length : ' + activity_list.length + ' trim_start_index : ' + start_index + ' trim_end_index : ' + end_index);
-
-    if ((start_index >= 0) && (end_index < activity_list.length)) {
-      new_activity_list = activity_list.slice( start_index, end_index );
-    }
-    else if (start_index >= 0) {
-      new_activity_list = activity_list.slice( start_index, activity_list.length );
-    }
-    else {
-      new_activity_list = activity_list.slice( 0, end_index );
-    }
-
-    //console.log('new_activity_list :\n' + JSON.stringify(new_activity_list, null, 2));
-    //console.log('_trimEmptyListValue(activity_list) : start_datetime ' + start_datetime + ', end_datetime ' + end_datetime);
-
-    setDatetimeBounds( start_datetime, end_datetime );
-
-    return new_activity_list;
   }
 
   function _getMaxValue( current_max, value_1, value_2 ) {
@@ -1075,9 +1144,9 @@ var newman_activity_attachment = (function () {
             attach_data_set_keys = [];
             var attach_data_color_map = {};
 
-            var trimed_activity_list = _trimEmptyListValue( account_activity.activities );
+            var filtered_activity_list = newman_temporal_filter.filterAttachmentActivity( account_activity.activities );
 
-            _.each(trimed_activity_list, function (activity) {
+            _.each(filtered_activity_list, function (activity) {
               //console.log('activity :\n' + JSON.stringify(activity, null, 2));
               var attach_count = activity.interval_attach_count;
               attach_data_set.push(attach_count);
@@ -1092,7 +1161,7 @@ var newman_activity_attachment = (function () {
             attach_data_set_keys.push(acct_id);
             attach_data_color_map[acct_id] = acct_color;
 
-            if (account_index == 0 || !attach_chart) {
+            if (!attach_chart) {
 
               var timeline_dates = ['x'];
               _.each(account_activity.activities, function (activity) {
@@ -1118,64 +1187,6 @@ var newman_activity_attachment = (function () {
       });
       revalidateUIActivityAttach();
     }
-  }
-
-  function _trimEmptyListValue( activity_list ) {
-    if (activity_list.length == 0) {
-      return activity_list;
-    }
-
-    var new_activity_list = [];
-    var start_index = -1, end_index = activity_list.length;
-    var start_datetime, end_datetime;
-
-    var done = false;
-    var i = 0;
-    while (!done && i < activity_list.length ) {
-      if ( activity_list[i].interval_attach_count == 0 ) {
-        start_index = i;
-      }
-      else {
-        done = true;
-        start_datetime = activity_list[i].interval_start_datetime;
-      }
-      i++;
-    }
-    if (done && start_index > 10 ) {
-      start_index = start_index - 10;
-    }
-
-    done = false;
-    var j = (activity_list.length - 1);
-    while (!done && j >= 0) {
-      if ( activity_list[j].interval_attach_count == 0 ) {
-        end_index = j;
-      }
-      else {
-        done = true;
-        end_datetime = activity_list[j].interval_start_datetime;
-      }
-      j--;
-    }
-    if (done && end_index + 10 < activity_list.length) {
-      end_index = end_index + 10;
-    }
-
-    //console.log('array.length : ' + activity_list.length + ' trim_start_index : ' + start_index + ' trim_end_index : ' + end_index);
-
-    if ((start_index >= 0) && (end_index < activity_list.length)) {
-      new_activity_list = activity_list.slice( start_index, end_index );
-    }
-    else if (start_index >= 0) {
-      new_activity_list = activity_list.slice( start_index, activity_list.length );
-    }
-    else {
-      new_activity_list = activity_list.slice( 0, end_index );
-    }
-
-    //console.log('new_activity_list :\n' + JSON.stringify(new_activity_list, null, 2));
-
-    return new_activity_list;
   }
 
   function revalidateUIActivityAttach() {
