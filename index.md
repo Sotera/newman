@@ -7,7 +7,7 @@ Newman is a tool to quickly analyze and explore email using advanced analytics a
 
 This work was funded by [DARPA's XDATA](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx) program and leverages several technologies from [DARPA's Open Catalog](http://www.darpa.mil/opencatalog/).
 
-<iframe src="http://www.youtube.com/embed/E9zAR9Uoo3Q" width="964" height="723" allowfullscreen="" frameborder="0"></iframe>
+<iframe src="https://www.youtube.com/embed/E1Gc2vYZmKc" width="964" height="723" allowfullscreen frameborder="0"></iframe>
 
 # Get Newman for Your GMail
 [Click here](quick-start) to get started with Newman.
