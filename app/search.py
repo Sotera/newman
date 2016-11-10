@@ -2,9 +2,9 @@ from app import app
 from flask import jsonify, request
 from werkzeug.exceptions import BadRequest, NotFound
 
-from newman_es.es_search import es_get_all_email_by_community, _search, es_get_all_email_by_topic, es_get_conversation, es_get_all_email_by_conversation_forward_backward
+from newman_es.es_search import es_get_all_email_by_community, _search, es_get_all_email_by_topic, es_get_conversation, es_get_all_email_by_conversation_forward_backward, _es_get_all_attachment_hash
 from param_utils import parseParamDatetime, parseParamIngestIds, parseParamAllSenderAllRecipient, parseParamEmailSender, parseParamEmailRecipient, parseParamEmailAddressList, parseParamTopic, parseParamTextQuery,\
-    parseParamDocumentGUID, parseParamDocumentDatetime, parseParamEncrypted
+    parseParamDocumentGUID, parseParamDocumentDatetime, parseParamEncrypted, parseParamAttachmentHash
 
 # import urllib
 # from newman.utils.functions import nth
@@ -128,3 +128,20 @@ def search_email_by_topic():
     encrypted = parseParamEncrypted(request.args)
 
     return es_get_all_email_by_topic(data_set_id, topic=topic, email_address_list=email_address_list, qs=qs, encrypted=encrypted, start_datetime=start_datetime, end_datetime=end_datetime, size=size)
+
+@app.route('/search/search_email_by_attachment_hash')
+def es_get_all_attachment_hash():
+    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+
+    size = size if size >500 else 2500
+
+    if not request.args.get("attachment_hash"):
+        raise BadRequest("invalid service call - missing attachment_hash path param")
+    attachment_hash = parseParamAttachmentHash(request.args)
+
+    qs = parseParamTextQuery(request.args)
+
+    resp =  _es_get_all_attachment_hash(data_set_id, attachment_hash, qs, start_datetime, end_datetime, size)
+    return jsonify(resp)
+
+

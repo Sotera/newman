@@ -198,15 +198,15 @@ def _format_body_pannel(email_body, attachments):
     return body
 
 def _getAttachmentTextContent(attachments):
-
     content = [{attachment.get("filename", "") : attachment.get("content", {})} for attachment in attachments]
-    
     return content
 
 def _getAttachmentOCRContent(attachments):
-
     content = [{attachment.get("filename", "") : attachment.get("image_analytics", {})} for attachment in attachments]
-    
+    return content
+
+def _getAttachmentBytesHash(attachments):
+    content = [{attachment.get("filename", "") : attachment.get("content_hash", '')} for attachment in attachments]
     return content
 
 
@@ -288,46 +288,48 @@ def get_email(data_set_id, email_id, qs=None):
             entities += [ [source["id"][0]+"_entity_"+str(i), type,     i, val] for i,val in enumerate(source["entities"]["body_entities"].get("entity_"+type, []), len(entities))]
 
     resp = {"email_contents" :
-             {
-               "email" : email,
-               "entities" : entities,
-               "attachment_text" : _getAttachmentTextContent(attachments),
-               "attachment_ocr" : _getAttachmentOCRContent(attachments),
-               "attachment_highlighted" : highlighted_attachments,
-               "lda_topic_scores" : topic_scores
-             }
-           }
+        {
+            "email" : email,
+            "entities" : entities,
+            "attachment_text" : _getAttachmentTextContent(attachments),
+            "attachment_ocr" : _getAttachmentOCRContent(attachments),
+            "attachment_content_hash" : _getAttachmentBytesHash(attachments),
+            "attachment_highlighted" : highlighted_attachments,
+            "lda_topic_scores" : topic_scores
+        }
+    }
 
     # only add translated text if the language is not english
     if body_lang and not body_lang == 'en':
         email_translated = [source["id"],
-                 # TODO REMOVE unused fields
-                 "DEPRECATED",
-                 source.get("datetime",""),
-                 "false",
-                 "".join(source["senders"]),
-                 ["".join(source["tos_line"]), ";".join(source["tos"])],
-                 ["".join(source["ccs_line"]), ";".join(source["ccs"])],
-                 ["".join(source["bccs_line"]), ";".join(source["bccs"])],
-                 subject_translated,
-                 body_translated,
-                 [[f["guid"],f["filename"]] for f in source.get("attachments", [""])],
-                 source.get("starred", False),
-                 ]
+                            # TODO REMOVE unused fields
+                            "DEPRECATED",
+                            source.get("datetime",""),
+                            "false",
+                            "".join(source["senders"]),
+                            ["".join(source["tos_line"]), ";".join(source["tos"])],
+                            ["".join(source["ccs_line"]), ";".join(source["ccs"])],
+                            ["".join(source["bccs_line"]), ";".join(source["bccs"])],
+                            subject_translated,
+                            body_translated,
+                            [[f["guid"],f["filename"]] for f in source.get("attachments", [""])],
+                            source.get("starred", False),
+                            ]
         entities_translated = []
         for type in ["person","location","organization","misc"]:
             if "body_entities_translated" in source["entities"] and ("entity_"+type) in source["entities"]["body_entities_translated"]:
                 entities_translated += [ [source["id"][0]+"_entity_"+str(i), type, i, val] for i,val in enumerate(source["entities"]["body_entities_translated"].get("entity_"+type, []), len(entities_translated))]
 
         resp["email_contents_translated"] = {
-                                             "email" : email_translated,
-                                             "entities": entities_translated,
-                                             "attachment_text" : _getAttachmentTextContent(attachments),
-                                             "attachment_ocr" : _getAttachmentOCRContent(attachments),
-                                             "attachment_highlighted" : highlighted_attachments,
-                                             "lda_topic_scores":topic_scores,
-                                             "original_lang": body_lang
-                                            }
+            "email" : email_translated,
+            "entities": entities_translated,
+            "attachment_text" : _getAttachmentTextContent(attachments),
+            "attachment_ocr" : _getAttachmentOCRContent(attachments),
+            "attachment_content_hash" : _getAttachmentBytesHash(attachments),
+            "attachment_highlighted" : highlighted_attachments,
+            "lda_topic_scores":topic_scores,
+            "original_lang": body_lang
+        }
 
     # Data source related metadata
     resp["dataset_case_id"] = source["case_id"]
@@ -399,7 +401,7 @@ def dump(bytes, name):
     text_file.close()
 
 def _get_attachment_by_id(data_set_id, attachment_id):
-      # TODO fix this call, should be a get but the UI is sending in multiple indexes
+    # TODO fix this call, should be a get but the UI is sending in multiple indexes
     # attachment = es().get(index=data_set_id, doc_type="attachments", id=attachment_id)
     query = ids_query(attachment_id)
     return es().search(index=data_set_id, doc_type='attachments', body=query)

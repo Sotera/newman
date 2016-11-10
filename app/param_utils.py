@@ -114,6 +114,9 @@ def parseParamStarred( params ):
 def parseParamTextQuery( params):
     return params.get('qs', '')
 
+def parseParamAttachmentHash( params):
+    return params.get('attachment_hash', '')
+
 def parseParamNumberType( params ):
     return params.get('number_type', '')
 

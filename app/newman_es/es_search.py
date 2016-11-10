@@ -203,6 +203,26 @@ def _search_summary(data_set_id, email_address, qs, start_datetime, end_datetime
     return pre_search_results
 
 
+
+def _es_get_all_attachment_hash(data_set_id, attachment_hash, qs, start_datetime, end_datetime, size):
+    app.logger.debug("attachment_hash=%s, qs=%s" % ((str(attachment_hash)), qs))
+
+    query  = _build_email_query(attachment_hash=attachment_hash, qs=qs, date_bounds=(start_datetime, end_datetime))
+    app.logger.debug("query: %s" % (query))
+
+    results = _query_emails(data_set_id, size, query)
+    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+    graph["edge_total"] = len(graph["graph"]["links"])
+
+    query = _build_email_query(attachment_hash=attachment_hash, qs=qs, date_bounds=(start_datetime, end_datetime), attachments_only=True)
+    app.logger.debug("attachment-query: %s" % (query))
+    attachments = _query_email_attachments(data_set_id, size, query)
+    graph["attachments"] = attachments["hits"]
+    graph["attachments_total"] = attachments["attachments_total"]
+
+    graph["data_set_id"] = data_set_id
+    return graph
+
 # Get all rows for two or more email addresses, results will be sorted by time asc
 def es_get_all_email_by_conversation_forward_backward(data_set_id, sender, recipients, start_datetime, end_datetime, size, sort_order="asc"):
     app.logger.debug("sender=%s, recipients=%s" % (str(sender),str(recipients)))

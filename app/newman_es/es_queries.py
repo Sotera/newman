@@ -153,7 +153,7 @@ def _date_filter_not_equal(date_bounds=None):
 
 # TODO how do we apply the query_terms as a filter?  Seems that it makes sense to do this as a query only but
 # TODO it is possible we will want to use a term filter on "_all"
-def _build_filter(ingest_ids=[], email_senders=[], email_rcvrs=[], qs='', topic=None, entity_dict={}, date_bounds=None, community=[], date_mode_inclusive=True, address_filter_mode="union", starred=None, numbers=[], number_type='', phone_numbers=[], has_phone_number_filter=False, has_exif_geo_filter=False, has_geo_xoip_filter=False, encrypted=None):
+def _build_filter(ingest_ids=[], email_senders=[], email_rcvrs=[], qs='', topic=None, entity_dict={}, date_bounds=None, community=[], date_mode_inclusive=True, address_filter_mode="union", starred=None, numbers=[], number_type='', phone_numbers=[], has_phone_number_filter=False, has_exif_geo_filter=False, has_geo_xoip_filter=False, encrypted=None, attachment_hash=None):
 
     ingest_ids_filter = [] if not ingest_ids else _ingest_id_filter(ingest_ids)
 
@@ -177,6 +177,8 @@ def _build_filter(ingest_ids=[], email_senders=[], email_rcvrs=[], qs='', topic=
 
     numbers_filter = [] if not numbers else _numbers_filter("numbers.normalized", numbers, number_type)
 
+    attachment_hash_filter = [] if not attachment_hash else _term_filter("attachments.content_hash", attachment_hash)
+
     filter =  {
         "bool":{
             "should":[],
@@ -196,6 +198,7 @@ def _build_filter(ingest_ids=[], email_senders=[], email_rcvrs=[], qs='', topic=
     bool_filter["must"] += phone_numbers_filter
     bool_filter["must"] += numbers_filter
     bool_filter["must"] += starred_filter
+    bool_filter["must"] += attachment_hash_filter
 
     if has_phone_number_filter:
         bool_filter["must"] += _has_phone_number_filter()
@@ -224,7 +227,7 @@ def _build_filter(ingest_ids=[], email_senders=[], email_rcvrs=[], qs='', topic=
 # address_filter_mode - see address_filter
 # sort_mode
 # attachments_only - set to true will only return emails with attachments
-def _build_email_query(ingest_ids=[], email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='', topic=None, entity={}, date_bounds=None, community=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True, address_filter_mode="union", attachments_only=False, encrypted=None, starred=None, numbers=[], number_type='', phone_numbers=[], has_phone_number_filter=False, has_exif_geo_filter=False, has_geo_xoip_filter=False):
+def _build_email_query(ingest_ids=[], email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='', topic=None, entity={}, date_bounds=None, community=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True, address_filter_mode="union", attachments_only=False, encrypted=None, starred=None, numbers=[], number_type='', phone_numbers=[], has_phone_number_filter=False, has_exif_geo_filter=False, has_geo_xoip_filter=False, attachment_hash=None):
 
     # This checks if the query text is a simple term or a query string and sets the correct portion
     term_query = { "match_all" : {} }
@@ -243,7 +246,7 @@ def _build_email_query(ingest_ids=[], email_addrs=[], sender_addrs=[], recipient
                     {
                         "filtered" : {
                             "query" : term_query,
-                            "filter" : _build_filter(ingest_ids=ingest_ids, email_senders=sender_addrs, email_rcvrs=recipient_addrs, topic=topic, entity_dict=entity, date_bounds=date_bounds, community=community, date_mode_inclusive=date_mode_inclusive, address_filter_mode=address_filter_mode, encrypted=encrypted, starred=starred, numbers=numbers, number_type=number_type, phone_numbers=phone_numbers, has_phone_number_filter=has_phone_number_filter, has_exif_geo_filter=has_exif_geo_filter, has_geo_xoip_filter=has_geo_xoip_filter)
+                            "filter" : _build_filter(ingest_ids=ingest_ids, email_senders=sender_addrs, email_rcvrs=recipient_addrs, topic=topic, entity_dict=entity, date_bounds=date_bounds, community=community, date_mode_inclusive=date_mode_inclusive, address_filter_mode=address_filter_mode, encrypted=encrypted, starred=starred, numbers=numbers, number_type=number_type, phone_numbers=phone_numbers, has_phone_number_filter=has_phone_number_filter, has_exif_geo_filter=has_exif_geo_filter, has_geo_xoip_filter=has_geo_xoip_filter, attachment_hash=attachment_hash)
                         }
                     }
                 ]
