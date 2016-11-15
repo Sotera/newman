@@ -5,5 +5,5 @@ from app import app
 # ref. http://stackoverflow.com/questions/25504149/why-does-running-the-flask-dev-server-run-itself-twice
 # app.run(port=5000, debug=True, host='0.0.0.0', use_reloader=False)
 
-app.run(port=5000, debug=True, host='0.0.0.0', use_reloader=False)
+app.run(host='127.0.0.1', port=5000, debug=True, use_evalex=False, use_reloader=False)
 

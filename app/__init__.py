@@ -8,6 +8,7 @@ from logging.handlers import RotatingFileHandler
 app = Flask(__name__, static_url_path='')
 
 
+print 'Newman flask application starting...'
 # Configure root logging which effects console - dont want newman debug to go to console
 # TODO not exactly correct - need to control console and files seperately
 for handler in app.logger.handlers:
@@ -23,6 +24,7 @@ newmanlog_handler.setLevel(logging.DEBUG)
 app.logger.addHandler(newmanlog_handler)
 
 app.logger.info('Newman flask application starting.')
+
 
 # Configure Flask WSGI server access logging
 accesslogger = logging.getLogger('werkzeug')

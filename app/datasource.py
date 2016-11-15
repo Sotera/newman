@@ -65,6 +65,7 @@ def listAllDataSet():
 #GET /all
 @app.route('/datasource/all')
 def getAll():
+    app.logger.info("Request headers: {}".format(request.headers.environ))
     return jsonify(listAllDataSet())
 
 #GET /dataset/<id>
@@ -91,7 +92,6 @@ def summary():
     :param kwargs:
     :return:
     '''
-
     data_set_ids, start_datetime, end_datetime, size = parseParamDatetime(request.args)
 
 
