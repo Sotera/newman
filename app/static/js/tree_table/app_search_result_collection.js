@@ -649,19 +649,25 @@ var newman_search_result_collection = (function () {
             email_attach_count = '';
           }
 
-          /*
-          var combined_icon_html = '<span class="fa-stack">' +
-                                     '<i class="fa fa-file-o fa-stack-2x"></i>' +
-                                     '<i class="fa fa-share-alt fa-rotate-180 fa-stack-1x"></i>' +
-                                   '</span> ';
-          */
 
-          var combined_icon_html = '<i class="fa fa-file-text fa-lg"></i>';
+
+
+
+          var row_icon_html = '<i class="' + data_element.icon_class + '"></i>';
+          /*
+          if (data_element.search_field === 'all') {
+            row_icon_html = '<span class="fa-stack fa-lg">' +
+                              '<i class="fa fa-file-o fa-stack-2x"></i>' +
+                              '<i class="fa fa-asterisk fa-stack-1x"></i>' +
+                            '</span>';
+          }
+          */
 
           table_row =
             $('<tr class=\"treegrid-' + node_index + ' treegrid-parent-' + parent_node_index + '\" id=\"' + row_id + '\" />')
               .append(
-                "<td><i class='" + data_element.icon_class + "'></i> " + button_html + "</td>" +
+                //"<td><i class='" + data_element.icon_class + "'></i> " + button_html + "</td>" +
+                "<td>" + row_icon_html + '&nbsp;' + button_html + "</td>" +
                 "<td>" + email_outbound_count + "</td>" +
                 "<td>" + email_inbound_count + "</td>" +
                 "<td>" + email_attach_count + "</td>" +

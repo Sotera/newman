@@ -1,3 +1,31 @@
+/**
+ * loads JSON formatted data from file referenced by the file-path, and pass the data into the argument callback function
+ * @param file_path
+ * @param callback
+ *
+ * USAGE:
+ *
+ * loadJSON('js/sample_markers.json', function (response) {
+ *   // Parse JSON string into object
+ *   var json_object = JSON.parse(response);
+ *   //do something with markers
+ *   doSomething( json_object );
+ * });
+ */
+function loadJSON(file_path, callback) {
+
+  var xobj = new XMLHttpRequest();
+  xobj.overrideMimeType("application/json");
+  xobj.open('GET', file_path, true);
+  xobj.onreadystatechange = function () {
+    if (xobj.readyState == 4 && xobj.status == "200") {
+      // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+      callback(xobj.responseText);
+    }
+  };
+  xobj.send(null);
+}
+
 
 /**
  * returns all permutations of an argument array using Heap's Permutation Algorithm
@@ -204,10 +232,15 @@ function getObjectKeysAsString(map, separator) {
  * @param string
  * @returns truncated string within max-length and ending with '..'
  */
-function truncateString( text, max_length ) {
+function truncateString( text, max_length, is_descending ) {
   if (text) {
     if (text.length > max_length) {
-      text = text.substring(0, (max_length-2)) + '..';
+      if (is_descending === true) {
+        text = '..' + text.substring(text.length - max_length + 2);
+      }
+      else {
+        text = text.substring(0, (max_length - 2)) + '..';
+      }
     }
   }
   return text;

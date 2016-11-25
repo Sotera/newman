@@ -1,0 +1,88 @@
+[
+  {
+    "uid": "advanced_profile",
+    "label": "Advanced Profile",
+    "role" : "user",
+    "datetime_min": "",
+    "datetime_max": "",
+    "data_source_list": [
+
+    ],
+    "case_list": [
+
+    ],
+    "search_text": "",
+    "geo_area_list": [
+      {
+        "sw_latitude": 36.527294814546245,
+        "sw_longitude": -84.81445312500001,
+        "ne_latitude": 49.33944093715549,
+        "ne_longitude": -62.58533477783204,
+        "area_label": "US North East Coast"
+      },
+      {
+        "sw_latitude": 23.58412603264412,
+        "sw_longitude": -84.81445312500001,
+        "ne_latitude": 36.59788913307022,
+        "ne_longitude": -74.06982421875001,
+        "area_label": "US South East Coast"
+      },
+      {
+        "sw_latitude": 36.527294814546245,
+        "sw_longitude": -103.21277618408205,
+        "ne_latitude": 49.33944093715549,
+        "ne_longitude": -84.63867187500001,
+        "area_label": "US North Central"
+      },
+      {
+        "sw_latitude": 25.264568475331583,
+        "sw_longitude": -103.21277618408205,
+        "ne_latitude": 36.50963615733049,
+        "ne_longitude": -84.63867187500001,
+        "area_label": "US South Central"
+      },
+      {
+        "sw_latitude": 36.527294814546245,
+        "sw_longitude": -129.88037109375003,
+        "ne_latitude": 49.33944093715549,
+        "ne_longitude": -103.13964843750001,
+        "area_label": "US North West Coast"
+      },
+      {
+        "sw_latitude": 25.264568475331583,
+        "sw_longitude": -122.76844024658205,
+        "ne_latitude": 36.50963615733049,
+        "ne_longitude": -103.13964843750001,
+        "area_label": "US South West Coast"
+      },
+      {
+        "sw_latitude": 11.974844752931832,
+        "sw_longitude": -116.26453399658205,
+        "ne_latitude": 25.3241665257384,
+        "ne_longitude": -84.63867187500001,
+        "area_label": "Mexico South"
+      },
+      {
+        "sw_latitude": 49.48240137826932,
+        "sw_longitude": -14.260253906250002,
+        "ne_latitude": 61.18562468142283,
+        "ne_longitude": 3.0322265625000004,
+        "area_label": "UK & Ireland"
+      },
+      {
+        "sw_latitude": 41.22824901518532,
+        "sw_longitude": -5.756835937500001,
+        "ne_latitude": 51.45400691005982,
+        "ne_longitude": 9.997558593750002,
+        "area_label": "France"
+      },
+      {
+        "sw_latitude": 47.05515408550348,
+        "sw_longitude": 3.0322265625000004,
+        "ne_latitude": 57.97315745102812,
+        "ne_longitude": 24.125976562500004,
+        "area_label": "Germany, Poland, Denmark, Netherlands, Belgium, Luxembourg, Czech, Slovakia"
+      }
+    ]
+  }
+]

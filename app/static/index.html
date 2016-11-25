@@ -306,7 +306,7 @@
                       id="data_source_list_toggle"
                       data-toggle="dropdown"
                       style="font-weight: normal; font-size: small; margin: 0px">
-                <span class="fa fa-database"> ...</span>
+                <span class="fa fa-database"> []</span>
               </button>
               <ul class="dropdown-menu" style="width: 100%; padding: 2px 8px 2px 8px; border-radius: 4px;" id="data_source_list">
 
@@ -315,6 +315,25 @@
 
           </div>
           <!-- End-Data-Set-Select -->
+
+          <!-- Start-Setting-Profile -->
+          <div class="col-xs-1 col-sm-1" style="padding: 0px 10px 0px 0px; top: 2px;">
+
+            <div class="dropdown" style="min-width: 470px; height: 100%; position:relative; display: inline-block;"
+                 id="setting_profile_list_dropdown" value="setting_profile_access">
+              <button class="dropdown-toggle btn navbar-btn button-dropdown-menu"
+                      id="setting_profile_list_toggle"
+                      data-toggle="dropdown"
+                      style="font-weight: normal; font-size: small; margin: 0px">
+                <span class="fa fa-sliders"> []</span>
+              </button>
+              <ul class="dropdown-menu" style="width: 100%; padding: 2px 8px 2px 8px; border-radius: 4px;" id="setting_profile_list">
+
+              </ul>
+            </div>
+
+          </div>
+          <!-- End-Setting-Profile -->
 
           <!-- start search -->
           <div class="col-xs-12 col-sm-2" style="padding: 0px 5px 0px 0px; top: 2px; text-align: right;">
@@ -345,7 +364,7 @@
           </div>
           <!-- End-Debug-Toggle-Container -->
 
-          <div class="col-xs-2 col-sm-2" style="margin: 0px 0px 0px 0px; padding: 0; top: 4px;">
+          <div class="col-xs-1 col-sm-1" style="margin: 0px 0px 0px 0px; padding: 0; top: 4px;">
 
           </div>
 
@@ -1108,7 +1127,7 @@
           <div class="col-sm-5 modal-container" id="data_visual_container"  style= "height: 100%; margin: 0; padding: 0;">
             <div id="graph_email"  style= "height: 100%;"></div>
 
-            <!-- Start Attachment-Enlarged-View-Modal -->
+            <!-- Start Attachment-Enlarged-View-Modal-Right -->
             <div class="modal fade" id="doc_preview_modal_right" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
               <div class="modal-dialog">
                 <div class="modal-content" style="max-width: 575px; max-height: 565px;">
@@ -1131,15 +1150,21 @@
 
                   <div class="modal-footer" style="margin: 0; padding: 0;">
                     <div class="row" style="margin: 0; padding: 0;" >
-                      <div class="col-xs-4" style="margin: 0; padding: 0; text-align: left;" >
+                      <div class="col-xs-2" style="margin: 0; padding: 0; text-align: left;" >
                         <button type="button" id="doc_preview_modal_right_open_prev" class="btn btn-default outline" disabled><i class="fa fa-chevron-left fa-lg"></i></button>
                       </div>
-                      <div class="col-xs-4" style="margin: 0; padding: 0; text-align: center;" >
+                      <div class="col-xs-2" style="margin: 0; padding: 0; text-align: center;">
                         <!--
                         <button type="button" id="doc_preview_modal_right_ok" class="btn btn-default outline" data-dismiss="modal"><i class="fa fa-check-circle"></i> OK </button>
                         -->
                       </div>
-                      <div class="col-xs-4" style="margin: 0; padding: 0; text-align: right;" >
+                      <div class="col-xs-2" style="margin: 0; padding: 0; text-align: center;">
+
+                      </div>
+                      <div class="col-xs-4" style="margin: 0; padding: 0; text-align: center;" >
+                        <span class="fa fa-globe" id="doc_preview_modal_geo_coord" style="line-height: 16px; padding: 0px 5px 0px 5px;"></span>
+                      </div>
+                      <div class="col-xs-2" style="margin: 0; padding: 0; text-align: right;" >
                         <button type="button" id="doc_preview_modal_right_open_next" class="btn btn-default outline" disabled><i class="fa fa-chevron-right fa-lg"></i></button>
                       </div>
                     </div>
@@ -1147,7 +1172,7 @@
                 </div>
               </div>
             </div>
-            <!--End Attachment-Enlarged-View-Modal -->
+            <!--End Attachment-Enlarged-View-Modal-Right -->
           </div>
           <!--End Data-Visual-Right-->
 
@@ -1391,6 +1416,7 @@
     <script src="js/config/newman_config.js"></script>
     <script src="js/data_extract_table/app_text_extract_table.js"></script>
     <script src="js/content_extract/attach_content_extract.js"></script>
+    <script src="js/content_extract/attach_content_hash.js"></script>
     <script src="js/app_utils.js"></script>
     <script src="js/newman_datetime_range.js"></script>
     <script src="js/app_nav_history.js"></script>
@@ -1410,6 +1436,7 @@
     <script src="js/newman_top_email_attach_type.js"></script>
     <script src="js/data_source/app_data_source_config.js"></script>
     <script src="js/data_source/newman_data_source.js"></script>
+    <script src="js/profile/app_setting_profile.js"></script>
     <script src="js/newman-service.js"></script>
     <script src="js/newman_email_doc_table.js"></script>
     <script src="js/newman_email_doc_view.js"></script>

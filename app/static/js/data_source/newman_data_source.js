@@ -81,6 +81,14 @@ var newman_data_source = (function () {
   var _data_ingest_label = 'New Dataset...', _data_ingest_id = 'new_data_ingest';
   var _case_group_label = 'New Case...', _case_group_id = 'new_case';
 
+  var _dropdown_ui_id = 'data_source_list_dropdown';
+  var _dropdown_ui_jquery_id = '#'+_dropdown_ui_id;
+  var _dropdown_ui_value = 'data_source_access';
+  var _dropdown_menu_ui_id = 'data_source_list';
+  var _dropdown_menu_ui_jquery_id = '#'+_dropdown_menu_ui_id;
+  var _modal_ui_id = 'data_ingest_modal';
+  var _modal_ui_jquery_id = '#'+_modal_ui_id;
+
   var _default_data_source_max_selected = 6;
   var _data_source_max = 20;
   var _data_source_list = [];
@@ -156,13 +164,13 @@ var newman_data_source = (function () {
     var new_data_ingest = data_ingest( _data_ingest_id, _data_ingest_label );
     _data_source_list.push( new_data_ingest );
 
-    $('#data_source_list_dropdown').on('shown.bs.dropdown', function (event) {
+    $(_dropdown_ui_jquery_id).on('shown.bs.dropdown', function (event) {
       var attr_id = $(this).attr('id');
       var attr_value = $(this).attr('value');
       if (attr_id && attr_value) {
-        if (attr_value == 'data_source_access') {
+        if (attr_value == _dropdown_ui_value) {
           if (debug_enabled) {
-            console.log("Opened 'data_source_list_dropdown'");
+            console.log("Opened '" + _dropdown_ui_id + "'");
           }
           _prev_all_selected = getAllSelectedAsString();
         }
@@ -178,13 +186,13 @@ var newman_data_source = (function () {
       event.stopPropagation();
     });
 
-    $('#data_source_list_dropdown').on('hidden.bs.dropdown', function (event) {
+    $(_dropdown_ui_jquery_id).on('hidden.bs.dropdown', function (event) {
       var attr_id = $(this).attr('id');
       var attr_value = $(this).attr('value');
       if (attr_id && attr_value) {
-        if (attr_value == 'data_source_access') {
+        if (attr_value == _dropdown_ui_value) {
           if (debug_enabled) {
-            console.log("Closed 'data_source_list_dropdown'");
+            console.log("Closed '" + _dropdown_ui_id + "'");
           }
 
           refreshUI();
@@ -503,7 +511,7 @@ var newman_data_source = (function () {
                 "backdrop" : "static",
                 "keyboard" : true,
               }
-              $('#data_ingest_modal').modal( modal_options );
+              $(_modal_ui_jquery_id).modal( modal_options );
 
             }
           }
@@ -569,8 +577,9 @@ var newman_data_source = (function () {
 
         data_source_item_html.append(checkbox_html);
 
+        var checkbox_label_text = truncateString(element.label, 25);
         var checkbox_label_html = $('<label class=\"checkbox-dropdown-menu-item-label width-175px\" />');
-        checkbox_label_html.html( '&nbsp;' + element.label + '&nbsp;' );
+        checkbox_label_html.html( '&nbsp;' + checkbox_label_text + '&nbsp;' );
 
         data_source_item_html.append(checkbox_label_html);
 
@@ -592,20 +601,20 @@ var newman_data_source = (function () {
       }
 
       //console.log( '\t' + html_text );
-      $('#data_source_list').append(data_source_item_html);
+      $(_dropdown_menu_ui_jquery_id).append(data_source_item_html);
 
     });
 
   } // end of refreshUI()
 
   function clearUI() {
-    $('#data_source_list li').each(function () {
+    $(_dropdown_menu_ui_jquery_id + ' li').each(function () {
       $(this).remove();
     });
   }
 
   function removeLast() {
-    var last_item = $('#data_source_list li:last-child');
+    var last_item = $(_dropdown_menu_ui_jquery_id + ' li:last-child');
     if(last_item) {
       last_item.remove();
     }
@@ -615,32 +624,36 @@ var newman_data_source = (function () {
     return _data_source_list.length - 1;
   }
 
-  function requestAllSelected(is_forced_override) {
-    //console.log( 'requestAllSelected()' );
+  function refreshDropdownButton() {
+    //console.log( 'refreshDropdownButton()' );
 
     var dataset_count = getDatasetCount();
     if (dataset_count > 0) {
-      $('#data_source_list_dropdown').find('.dropdown-toggle').html('<span class=\"fa fa-database\"> [' + dataset_count + '] </span>');
-
-      var selected_dataset_map = getAllSelected();
-      if (debug_enabled) {
-        console.log('selected_dataset_map : ' + JSON.stringify(selected_dataset_map, null, 2));
-      }
-
-      if (_.isEmpty(selected_dataset_map)) {
-        console.log('selected_dataset_map : empty');
-      }
-      else {
-        var selected_id_set = getAllSelectedAsString();
-
-        newman_data_source_service.requestDataSourceDataset( selected_id_set, is_forced_override );
-      }
+      $(_dropdown_ui_jquery_id).find('.dropdown-toggle').html('<span class=\"fa fa-database\"> [' + dataset_count + '] </span>');
     }
     else {
-      $('#data_source_list_dropdown').find('.dropdown-toggle').html('<span class=\"fa fa-database\" />');
+      $(_dropdown_ui_jquery_id).find('.dropdown-toggle').html('<span class=\"fa fa-database\" />');
     }
   }
 
+  function requestAllSelected(is_forced_override) {
+
+    var selected_dataset_map = getAllSelected();
+    if (debug_enabled) {
+      console.log('selected_dataset_map : ' + JSON.stringify(selected_dataset_map, null, 2));
+    }
+
+    if (_.isEmpty(selected_dataset_map)) {
+      console.log('selected_dataset_map : empty');
+    }
+    else {
+      var selected_id_set = getAllSelectedAsString();
+
+      newman_data_source_service.requestDataSourceDataset( selected_id_set, is_forced_override );
+    }
+
+    refreshDropdownButton();
+  }
 
   function onRequestAllSelected( response, is_forced_override ) {
     /*
@@ -700,6 +713,9 @@ var newman_data_source = (function () {
     // re-initialize geo components and widgets
     app_geo_map.clearAll();
     app_geo_map.init();
+
+    // initialize profiles
+    app_setting_profile.init();
   }
 
   function requestDataSourceAll() {

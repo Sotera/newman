@@ -18,7 +18,7 @@ var newman_search_parameter = (function () {
   };
 
   var initFilter = function() {
-    pushFilter('search_filter_all', 'all', 'fa fa-file-text-o fa-lg');
+    pushFilter('search_filter_all', 'all', 'fa fa-asterisk');
     pushFilter('search_filter_text', 'text', 'fa fa-file-text-o fa-lg');
     pushFilter('search_filter_email', 'email', 'fa fa-user fa-lg');
     pushFilter('search_filter_attach', 'attach', 'fa fa-paperclip fa-lg');

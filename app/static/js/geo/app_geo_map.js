@@ -2097,6 +2097,8 @@ var app_geo_map = (function () {
    });
 
    **/
+
+  /*
   function loadJSON(file_path, callback) {
 
     var xobj = new XMLHttpRequest();
@@ -2110,6 +2112,9 @@ var app_geo_map = (function () {
     };
     xobj.send(null);
   }
+  */
+
+
 
   function fireEvent(event_type, event_object) {
     if (debug_enabled) {

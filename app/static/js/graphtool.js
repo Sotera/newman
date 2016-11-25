@@ -755,7 +755,7 @@ function loadSearchResult( service_url, search_response ) {
 }
 
 // Draw a graph for a component
-function drawGraph( graph ){
+function drawGraph( graph ) {
 
   svg.remove();
   svg = d3.select("#graph_email").append("svg")
