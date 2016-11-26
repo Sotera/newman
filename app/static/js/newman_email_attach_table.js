@@ -472,7 +472,8 @@ var newman_email_attach_table = (function () {
       $(page_control_ui_jquery_id).append( page_control_html );
 
       var file_attach_label = '<i class="fa fa-paperclip fa-lg" aria-hidden="true"></i>';
-      var search_by_hash_label = '<i class="fa fa-users fa-lg" aria-hidden="true"></i>';
+      var file_attach_hash_search_label = '<i class="fa fa-users" aria-hidden="true"></i>';
+      var file_attach_encrypted_label = '<i class="fa fa-unlock" aria-hidden="true"></i>';
       var geo_coord_label = '<i class="fa fa-globe" aria-hidden="true"></i>';
 
 
@@ -483,7 +484,7 @@ var newman_email_attach_table = (function () {
       var lastSort = "";
       var thead = d3.select(attachment_table_ui_jquery_id).select("thead").append("tr").selectAll("tr")
         //.data(['Date', 'Subject', 'Attachment', 'Type','Email'])
-        .data(['Date', 'Subject', file_attach_label, search_by_hash_label])
+        .data(['Date', 'Subject', file_attach_label, file_attach_hash_search_label, file_attach_encrypted_label, ''])
         .enter()
         .append("th")
         /*.text( function(d) {
@@ -499,20 +500,24 @@ var newman_email_attach_table = (function () {
           }
 
           if (i == 2) {
-            return "width : 46px; min-width : 46px";
+            return "width : 42px; min-width : 42px";
           }
 
           if (i == 3) {
-            return "min-width : 46px";
+            return "width : 42px; min-width : 42px";
           }
 
           if (i == 4) {
-            return "min-width : 210px";
+            return "width : 28px; min-width : 28px";
+          }
+
+          if (i == 5) {
+            return "min-width : 190px";
           }
 
         })
         .html(function (d, i) {
-          if (i == 3) {
+          if (i == 5) {
 
             /*
             var header_html = page_prev_button_html + d + page_next_button_html + per_page_count_button_html;
@@ -558,13 +563,17 @@ var newman_email_attach_table = (function () {
       tr.selectAll("td")
         .data(function (d) {
 
-          return [d, d, d, d];
+          return [d, d, d, d, d, d];
         })
         .enter()
         .append("td")
         .attr('style', function (d, i) {
           if (i == 3) {
             return "text-align : left";
+          }
+
+          if (i == 4) {
+            return "text-align : center";
           }
 
         })
@@ -685,13 +694,6 @@ var newman_email_attach_table = (function () {
               var content_is_encrypted = d.content_encrypted;
 
               /*
-              var graph_by_doc_hash = attach_content_hash.getSearchByContentHash(content_hash);
-              if (graph_by_doc_hash) {
-                button_label = graph_by_doc_hash.graph.nodes.length;
-              }
-              */
-
-              /*
               var search_by_content_hash_button_html =
                 "<button type='button' class='btn btn-small outline' value='" + content_hash + "' id='" + content_hash + "' >" +
                 "&nbsp;<i class='fa fa-code-fork fa-rotate-90 fa-lg' aria-hidden='true'></i>&nbsp;" +
@@ -704,6 +706,23 @@ var newman_email_attach_table = (function () {
                 "</button>";
 
               col_row.append( search_by_content_hash_button_html );
+
+              return col_row.html();
+            }
+          }
+
+          if (i == 4) {
+            if (d) {
+              var col_row = $('<div>');
+              var file_is_encrypted_icon_html = '&nbsp;';
+
+              var file_name = d.filename;
+              var content_is_encrypted = d.content_encrypted;
+              if (content_is_encrypted === true) {
+                file_is_encrypted_icon_html = '<i class="fa fa-lock fa-lg" aria-hidden="true"></i>';
+              }
+
+              col_row.append( file_is_encrypted_icon_html );
 
               return col_row.html();
             }
