@@ -1297,9 +1297,9 @@ var newman_search_result_collection = (function () {
 
         var doc_count = filtered_response.query_hits;
         var associate_count = filtered_response.graph.nodes.length ;
-        if (associate_count > 0) {
-          associate_count = associate_count - 1; // discounting self from nodes
-        }
+        //if (associate_count > 0) {
+        //  associate_count = associate_count - 1; // discounting self from nodes
+        //}
 
         var outbound_count = newman_top_email_account.getEmailOutboundCount(search_text);
         var inbound_count = newman_top_email_account.getEmailInboundCount(search_text);
