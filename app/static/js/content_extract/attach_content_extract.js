@@ -2,6 +2,7 @@
  * service container for file attachment content
  */
 var attach_content_extract = (function () {
+  var debug_enabled = false;
 
   var _service_url = 'email/attachment_content';
 
@@ -9,8 +10,12 @@ var attach_content_extract = (function () {
   var _file_content_extract_map = {};
 
   function clearAllFileContentExtract() {
+    if (debug_enabled) {
+      console.log('attach_content_extract.clearAllFileContentExtract()');
+    }
     _file_content_extract_map = {};
   }
+
   function getFileContentExtract( uid ) {
     var _value;
     if (uid) {
@@ -18,6 +23,7 @@ var attach_content_extract = (function () {
     }
     return _value;
   }
+
   function putFileContentExtract( uid, element ) {
     if (uid && element) {
       _file_content_extract_map[ uid ] = element;
@@ -57,7 +63,9 @@ var attach_content_extract = (function () {
   }
 
   function getServiceURL(attach_uid, parent_uid) {
-    console.log('attach_content_extract.getServiceURL( ' + attach_uid + ', ' + parent_uid + ' )');
+    if (debug_enabled) {
+      console.log('attach_content_extract.getServiceURL( ' + attach_uid + ', ' + parent_uid + ' )');
+    }
 
     if (attach_uid) {
 
@@ -72,8 +80,9 @@ var attach_content_extract = (function () {
   }
 
   function requestService(attach_uid, parent_uid) {
-
-    console.log('attach_content_extract.requestService( ' + attach_uid + ', ' + parent_uid + ' )');
+    if (debug_enabled) {
+      console.log('attach_content_extract.requestService( ' + attach_uid + ', ' + parent_uid + ' )');
+    }
 
     var service_url = getServiceURL(attach_uid, parent_uid);
     $.get( service_url ).then(function (response) {

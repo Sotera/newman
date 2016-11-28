@@ -2,6 +2,7 @@
  * service container for file attachment content
  */
 var attach_content_hash = (function () {
+  var debug_enabled = false;
 
   var _service_url = 'search/search_email_by_attachment_hash';
 
@@ -9,6 +10,10 @@ var attach_content_hash = (function () {
   var _file_content_hash_map = {};
 
   function clearAllSearchByContentHash() {
+    if (debug_enabled) {
+      console.log('attach_content_hash.clearAllSearchByContentHash()');
+    }
+
     _file_content_hash_map = {};
   }
 
@@ -54,7 +59,9 @@ var attach_content_hash = (function () {
   }
 
   function getServiceURL(doc_hash) {
-    console.log('attach_content_hash.getServiceURL( ' + doc_hash + ' )');
+    if (debug_enabled) {
+      console.log('attach_content_hash.getServiceURL( ' + doc_hash + ' )');
+    }
 
     if (doc_hash) {
 
@@ -69,8 +76,9 @@ var attach_content_hash = (function () {
   }
 
   function requestService(doc_hash) {
-
-    console.log('attach_content_hash.requestService( ' + doc_hash + ' )');
+    if (debug_enabled) {
+      console.log('attach_content_hash.requestService( ' + doc_hash + ' )');
+    }
 
     var service_url = getServiceURL(doc_hash);
     $.get( service_url ).then(function (response) {
@@ -100,13 +108,13 @@ var attach_content_hash = (function () {
           "content_hash" : doc_hash,
           "search_response" : response
         };
-        console.log('search_label: ' + search_label);
+        //console.log('search_label: ' + search_label);
 
         putSearchByContentHash( service_url, value );
 
         //update button label
         var label = response.graph.nodes.length;
-        newman_email_attach_table.setButtonLabel("attach_hash_search_button_" + doc_hash, label);
+        newman_email_attach_table.setButtonLabel(doc_hash, label);
       }
     }
   }

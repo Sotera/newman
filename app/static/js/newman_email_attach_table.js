@@ -21,8 +21,11 @@ var newman_email_attach_table = (function () {
 
   var page_control_ui_id = 'email_attachment_page_control';
   var page_control_ui_jquery_id = '#'+page_control_ui_id;
+
   var attachment_table_ui_id = 'email_attachment_table';
   var attachment_table_ui_jquery_id = '#'+attachment_table_ui_id;
+  var attachment_table_button_prefix_image_enlarge = 'attach_image_expand_button_';
+  var attachment_table_button_prefix_file_hash_search = 'attach_hash_search_button_';
 
   var per_page_display_min = 20, per_page_display_max = 50, per_page_display_count = per_page_display_min;
   var display_start_index = 1, display_end_index = per_page_display_count;
@@ -239,11 +242,13 @@ var newman_email_attach_table = (function () {
     }
   }
 
-  function setButtonLabel(ui_id, ui_label_text) {
-    console.log('setButtonLabel( ' + ui_id + ', ' + ui_label_text + ' )');
+  function setButtonLabel(uid, ui_label_text) {
+    //console.log('setButtonLabel( ' + uid + ', ' + ui_label_text + ' )');
 
-    $(attachment_table_ui_jquery_id).find('#'+ui_id).text( ui_label_text );
-
+    if (uid && ui_label_text) {
+      var ui_id = attachment_table_button_prefix_file_hash_search + uid;
+      $(attachment_table_ui_jquery_id).find('#' + ui_id).text(ui_label_text);
+    }
   }
 
   function onPreviewFile( is_shown, file_uid ) {
@@ -642,13 +647,15 @@ var newman_email_attach_table = (function () {
                 "</button>";
               */
 
+              var button_id = attachment_table_button_prefix_image_enlarge + file_uid;
+
               var doc_view_button_html =
                 $('<button>',
                   {
                     'type': 'button',
                     'class': 'btn btn-small outline',
                     'value': file_uid,
-                    'id' : 'attach_image_expand_button_' + file_uid,
+                    'id' : button_id,
                     'data-toggle': 'tooltip',
                     'rel': 'tooltip',
                     'data-placement': 'left',
@@ -693,15 +700,16 @@ var newman_email_attach_table = (function () {
               var content_hash = d.content_hash;
               var content_is_encrypted = d.content_encrypted;
 
+              var button_id = attachment_table_button_prefix_file_hash_search + content_hash;
               /*
               var search_by_content_hash_button_html =
-                "<button type='button' class='btn btn-small outline' value='" + content_hash + "' id='" + content_hash + "' >" +
+                "<button type='button' class='btn btn-small outline' value='" + content_hash + "' id='" + button_id + "' >" +
                 "&nbsp;<i class='fa fa-code-fork fa-rotate-90 fa-lg' aria-hidden='true'></i>&nbsp;" +
                 "</button>";
               */
 
               var search_by_content_hash_button_html =
-                "<button type='button' class='btn btn-small outline' value='" + content_hash + "' id='attach_hash_search_button_" + content_hash + "' >" +
+                "<button type='button' class='btn btn-small outline' value='" + content_hash + "' id='" + button_id + "' >" +
                 button_label +
                 "</button>";
 
@@ -807,6 +815,7 @@ var newman_email_attach_table = (function () {
 
   function onRequestPageDisplay( response_list, start_index, max_index ) {
     initAttachDocTable();
+
     if (response_list) {
 
       // request attachment content only for the elements being displayed
