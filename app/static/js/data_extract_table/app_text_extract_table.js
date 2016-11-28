@@ -11,35 +11,31 @@ var app_text_extract_table = (function () {
 
   //var ui_page_control = '#search_response_page_control';
 
-  var ui_appendable = '#data_extract_table';
+  var text_extract_table_button_prefix_entity_search = 'data_extract_table_row_';
+
+  var text_extract_table_ui_id = 'data_extract_table';
+  var text_extract_table_ui_jquery_id = '#' + text_extract_table_ui_id;
 
   var per_page_display_min = 20, per_page_display_max = 50, per_page_display_count = per_page_display_min;
   var display_start_index = 1, display_end_index = per_page_display_count;
 
-  // to be deprecated ASAP
-  /*
-  function initPhoneListTable() {
 
-    if (ui_page_control) {
+  function initNumericEntityExtractTable() {
 
-      $(ui_page_control).on('click', "button:nth-of-type(1), input[type='button']", function (event) {
+    if (text_extract_table_ui_jquery_id) {
+
+      $(text_extract_table_ui_jquery_id).on('click', "tr td:nth-of-type(3) button, input[type='button']", function (event) {
         // Ignore this event if preventDefault has been called.
         if (event.defaultPrevented) return;
 
         var attr_id = $(this).attr('id');
         var attr_value = $(this).attr('value');
         if (attr_id && attr_value) {
-          console.log('id : "' + attr_id + '" value : "' + attr_value + '" clicked-prev-page!');
-          console.log( '\tdisplay_start_index = ' + display_start_index + ', display_end_index = ' + display_end_index );
+          console.log('id : "' + attr_id + '" value : "' + attr_value + '" clicked-numeric-entity-search!');
 
-          var max_count = per_page_display_count;
-          var start_index = (display_start_index - 1) - per_page_display_count;
-          if (start_index < 0) {
-            start_index = 0;
-          }
-          console.log( '\max_count = ' + max_count + ', start_index = ' + start_index );
+          var file_hash = attr_value;
+          searchByNumericEntity( file_hash );
 
-          requestExtractPhoneList(max_count, start_index);
         }
 
         event.preventDefault();
@@ -47,61 +43,14 @@ var app_text_extract_table = (function () {
         event.stopPropagation();
       });
 
-      $(ui_page_control).on('click', "button:nth-of-type(2), input[type='button']", function (event) {
-        // Ignore this event if preventDefault has been called.
-        if (event.defaultPrevented) return;
+    } // end-of if(text_extract_table_ui_jquery_id)
 
-        var attr_id = $(this).attr('id');
-        var attr_value = $(this).attr('value');
-        if (attr_id && attr_value) {
-          console.log('id : "' + attr_id + '" value : "' + attr_value + '" clicked-next-page!');
-          console.log( '\tdisplay_start_index = ' + display_start_index + ', display_end_index = ' + display_end_index );
+  } // end-of initNumericEntityExtractTable()
 
-          var max_count = per_page_display_count;
-          var start_index = (display_start_index - 1) + per_page_display_count;
-          if (start_index > app_text_extract_table_phone_list_request.getCacheMaxCount()) {
-            start_index = start_index - per_page_display_count
-          }
-          console.log( '\max_count = ' + max_count + ', start_index = ' + start_index );
 
-          requestExtractPhoneList(max_count, start_index);
-        }
-
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        event.stopPropagation();
-      });
-
-      $(ui_page_control).on('change click', "input[type='number']", function (event) {
-        var attr_id = $(this).attr('id');
-        var attr_value = $(this).attr('value');
-        var field_value = parseInt( $(this).val() );
-        if (attr_id && attr_value && field_value) {
-
-          if ( field_value < per_page_display_min || field_value > per_page_display_max ) {
-            field_value = parseInt( $(this).val( per_page_display_min ) );
-          }
-          else {
-
-            per_page_display_count = field_value;
-
-            if (debug_enabled) {
-              console.log("Clicked id = '" + attr_id + "' value = '" + attr_value + "' per_page_display_count = '" + per_page_display_count + "'");
-            }
-          }
-        }
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        event.stopPropagation();
-      });
-    } // end-of if(ui_page_control)
-
-  }
-  */
-
-  function populatePhoneListTable( response_list, start_index, max_index ) {
+  function populateNumericEntityExtractTable( response_list, start_index, max_index ) {
     if (debug_enabled) {
-      console.log( 'populatePhoneListTable(...) : response_list[' + response_list.length + ']\n' + JSON.stringify(response_list, null, 2));
+      console.log( 'populateNumericEntityExtractTable(...) : response_list[' + response_list.length + ']\n' + JSON.stringify(response_list, null, 2));
     }
 
     if (response_list && response_list.length > 0) {
@@ -157,12 +106,14 @@ var app_text_extract_table = (function () {
 
       */
 
-      $(ui_appendable).empty();
-      $(ui_appendable).append($('<thead>')).append($('<tbody>'));
+      $(text_extract_table_ui_jquery_id).empty();
+      $(text_extract_table_ui_jquery_id).append($('<thead>')).append($('<tbody>'));
+
+      var entity_search_label = '<i class="fa fa-users" aria-hidden="true"></i>';
 
       var lastSort = "";
-      var thead = d3.select(ui_appendable).select("thead").append("tr").selectAll("tr")
-        .data(['Numeric Entity', 'Document Referenced', '', ''])
+      var thead = d3.select(text_extract_table_ui_jquery_id).select("thead").append("tr").selectAll("tr")
+        .data(['Numeric Entity', 'Doc Referenced', entity_search_label, ''])
         .enter()
         .append("th")
       /*.text( function(d, i) {
@@ -170,6 +121,16 @@ var app_text_extract_table = (function () {
              return d;
            }
          }) */
+        .attr('style', function (d, i) {
+          if (i == 1) {
+            return "width : 128px; min-width : 128px";
+          }
+
+          if (i == 2) {
+            return "width : 42px; min-width : 42px";
+          }
+
+        })
         .html(function (d, i) {
           if (i == 2) {
             //return d;
@@ -187,22 +148,13 @@ var app_text_extract_table = (function () {
             return d;
           }
         })
-        .attr('style', function (d, i) {
-          if (i == 2) {
-            return "width : 256px; min-width : 256px";
-          }
-          if (i == 3) {
-            return "width : 64px;";
-          }
-
-        })
         .attr('class', 'clickable').on("click", function (k, i) {
 
           if (i == 0 || i == 1) { //sort by column
 
             var direction = (lastSort == k) ? -1 : 1;
             lastSort = (direction == -1) ? "" : k; //toggle
-            d3.select(ui_appendable).select("tbody").selectAll("tr").sort(function (a, b) {
+            d3.select(text_extract_table_ui_jquery_id).select("tbody").selectAll("tr").sort(function (a, b) {
 
               if (i == 0) {
                 //console.log( 'i == 0 : ' + JSON.stringify(a, null, 2) );
@@ -224,7 +176,7 @@ var app_text_extract_table = (function () {
         });
 
 
-      var tr = d3.select(ui_appendable).select("tbody")
+      var tr = d3.select(text_extract_table_ui_jquery_id).select("tbody")
         .selectAll("tr")
         .data(response_list).enter().append("tr");
 
@@ -238,15 +190,21 @@ var app_text_extract_table = (function () {
         })
         .enter()
         .append("td")
+        .attr('style', function (d, i) {
+          if (i == 2) {
+            return "text-align : left";
+          }
+
+        })
         .on("click", function (t_column_value, t_column_index, t_row_index) {
 
-
           console.log('clicked : ' + JSON.stringify(t_column_value, null, 2));
-
+          /*
           if (t_column_index == 2) {
             console.log('value : ' + t_column_value + ', column_index : ' + t_column_index + ', row_index : ' + t_row_index);
 
           }
+          */
 
 
         })
@@ -256,8 +214,9 @@ var app_text_extract_table = (function () {
           if (t_column_index == 2) { // search-phone-link
             //console.log( 'attachment under : ' + email_addr + '\n' + JSON.stringify(d, null, 2) );
 
-
-            var button_html = "<button type=\"button\" class=\"btn btn-small outline\" value=\"phone_number_search\" id=\"" + t_column_value + "\">" + t_column_value + "</button>";
+            var button_id = text_extract_table_button_prefix_entity_search + t_column_value;
+            var button_label = '&nbsp;';
+            var button_html = "<button type='button' class='btn btn-small outline' value='" + t_column_value + "' id='" + button_id + "'>" + button_label + "</button>";
 
 
             var col_2_row = $('<div>').append(button_html);
@@ -269,7 +228,7 @@ var app_text_extract_table = (function () {
           return t_column_value;
         });
     } // end-of if (response_list && response_list.length > 0)
-  } // end-of populatePhoneListTable
+  } // end-of populateNumericEntityExtractTable
 
   function requestNewPage( max_per_page, start_index ) {
     requestExtractPhoneList( max_per_page, start_index );
@@ -286,19 +245,23 @@ var app_text_extract_table = (function () {
   }
 
   function onRequestExtractPhoneList( response_list, start_index, max_index ) {
+    initNumericEntityExtractTable();
+
     if (response_list && response_list.length > 0) {
-      populatePhoneListTable( response_list, start_index, max_index );
+
+      _.each(response_list, function(element, index) {
+        //console.log(JSON.stringify(element, null, 2));
+
+        var numeric_entity = element.key;
+        numeric_entity_extract.requestService( numeric_entity );
+      });
+
+      populateNumericEntityExtractTable( response_list, start_index, max_index );
     }
   }
 
   function getPerPageDisplayCount() {
     return per_page_display_count;
-  }
-
-  function requestExtractPhoneSearch( phone_number_list ) {
-
-
-
   }
 
   function onRequestExtractPhoneSearch(response) {
@@ -307,12 +270,49 @@ var app_text_extract_table = (function () {
     }
   }
 
+  /**
+   * search or load by numeric entity
+   */
+  function searchByNumericEntity( numeric_entity ) {
+    if (numeric_entity) {
+
+      var url_key = numeric_entity_extract.getServiceURL( numeric_entity );
+      var value = numeric_entity_extract.getSearchByNumericEntity( url_key );
+      if (value) {
+        var search_label = value.search_label;
+        var search_field = value.search_field;
+        var search_field_icon_class = value.search_filed_icon_class;
+        var search_response = value.search_response;
+
+
+        app_nav_history.appendHist(url_key, search_field, search_label);
+
+        newman_graph_email.setHeaderLabelEmailAnalytics(search_label, search_field_icon_class);
+        newman_graph_email.updateUIGraphView(search_response);
+      }
+      else {
+        console.log("search-response NOT found...\nre-requesting '" + url_key + "'");
+
+      }
+
+    }
+  }
+
+  function setButtonLabel(uid, ui_label_text) {
+    //console.log('setButtonLabel( ' + uid + ', ' + ui_label_text + ' )');
+
+    if (uid && ui_label_text) {
+      var ui_id = text_extract_table_button_prefix_entity_search + uid;
+      $(text_extract_table_ui_jquery_id).find('#' + ui_id).text(ui_label_text);
+    }
+  }
+
   return {
     'requestExtractPhoneList' : requestExtractPhoneList,
     'onRequestExtractPhoneList' : onRequestExtractPhoneList,
     'getPerPageDisplayCount' : getPerPageDisplayCount,
-    'requestExtractPhoneSearch' : requestExtractPhoneSearch,
     'onRequestExtractPhoneSearch' : onRequestExtractPhoneSearch,
+    'setButtonLabel' : setButtonLabel,
     'requestNewPage' : requestNewPage
   }
 
@@ -437,6 +437,7 @@ var app_text_extract_table_phone_list_request = (function () {
     console.log("\tstart_index = " + _start_index + ", top_count = " + top_count );
 
     clearAllResponseCache();
+    numeric_entity_extract.clearAllSearchByNumericEntity();
 
     if (response && response.length > 0) {
       if (cache_enabled === true) {
