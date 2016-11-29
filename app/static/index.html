@@ -1180,47 +1180,48 @@
           <div class="col-sm-offset-7" id="graph-visual-filter-email" style="position: fixed; right: 15px; background-color: rgba(210, 210, 210, 0.5); z-index: 999; font-size: 11px;
              border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; display: none;">
 
-            <div class="row" style="margin: 0;">
-              <div class="col-sm-2">
-                <div style="padding: 0;">Color</div>
+            <div class="row row-container" >
+              <div class="col-sm-1 col-container" style="text-align: center;">
+                <i class="fa fa-paint-brush" aria-hidden="true"></i>
               </div>
-              <div class="col-sm-2" style="padding: 0;" >
+              <div class="col-sm-2 col-container" >
                 <label class="radio-inline" >
                   <input type="radio" name="optionRadios" id="color_by_dataset" value="dataset_color" style="margin: 2px 0 0 -15px;" /> Dataset
                 </label>
               </div>
-              <div class="col-sm-2" style="padding: 0;" >
+              <div class="col-sm-2 col-container" >
                 <label class="radio-inline" >
                   <input type="radio" name="optionRadios" id="color_by_community" value="community" style="margin: 2px 0 0 -15px;" checked="checked"/> Community
                 </label>
               </div>
-              <div class="col-sm-3" style="padding: 0; border-right: 1px solid rgba(255, 255, 255, 0.5);">
+              <div class="col-sm-3 col-container" style="border-right: 2px solid rgba(255, 255, 255, 0.5);">
                 <label class="radio-inline" >
                   <input type="radio" name="optionRadios" id="color_by_domain" value="domain" style="margin: 2px 0 0 -15px;" /> Domain
                 </label>
               </div>
-              <div class="col-sm-3" style="padding: 0 0 0 2px;">
-                <span class="fa fa-envelope-o" id="doc_count_inbound" style="padding: 0;"> Inbound </span>
+              <div class="col-sm-4 col-container" style="padding: 0 0 0 5px;">
+                <span class="fa fa-envelope-o" id="doc_count_inbound" > Inbound </span>
               </div>
             </div>
-            <div class="row" style="margin: 0;">
-              <div class="col-sm-2">
-                <div style="padding: 0;">Display</div>
+            <div class="row row-container" >
+              <div class="col-sm-1 col-container" style="text-align: center;">
+                <i class="fa fa-tags fa-flip-horizontal" aria-hidden="true"></i>
               </div>
-              <div class="col-sm-2" style="padding: 0;">
+              <div class="col-sm-2 col-container" >
                 <label class="checkbox-inline" >
-                  <input type="checkbox" name="optionrank" id="rankval" value="rank" style="margin: 2px 0 0 -15px;" /> Rank
+                  <input type="checkbox" name="optionrank" id="rankval" value="rank" style="margin: 2px 0 0 -15px;" /> Ranks
                 </label>
               </div>
-              <div class="col-sm-2" style="padding: 0;">
+              <div class="col-sm-2 col-container" >
                 <label class="checkbox-inline" >
                   <input type="checkbox" id="usetext" style="margin: 2px 0 0 -15px;" /> Labels
                 </label>
               </div>
-              <div class="col-sm-3" style="padding: 0; border-right: 1px solid rgba(255, 255, 255, 0.5);">
+              <div class="col-sm-3 col-container" style="border-right: 2px solid rgba(255, 255, 255, 0.5);">
+                &nbsp;
               </div>
-              <div class="col-sm-3" style="padding: 0 0 0 2px;">
-                <span class="fa fa-envelope-o" id="doc_count_outbound" style="padding: 0;"> Outbound </span>
+              <div class="col-sm-4 col-container" style="padding: 0 0 0 5px;">
+                <span class="fa fa fa-paper-plane-o" id="doc_count_outbound" > Outbound </span>
               </div>
             </div>
 
