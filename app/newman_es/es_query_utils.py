@@ -26,7 +26,7 @@ def _map_emails(fields, score=1.0):
     row["starred"] = fields.get("starred", [False])[0]
     row["attach"] =  str(len(fields.get("attachments.guid",[])))
     row["bodysize"] = len(fields.get("body",[""])[0])
-    row["sort"] = score
+    row["relevance_score"] = score
 
     for name, val in fields.items():
         if name.startswith("topic"):
