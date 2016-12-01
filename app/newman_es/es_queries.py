@@ -263,8 +263,14 @@ def _build_email_query(ingest_ids=[], email_addrs=[], sender_addrs=[], recipient
     if attachments_only:
         query_email_addr ["filter"] = {"exists":{"field":"attachments"}}
 
-    if sort_mode == 'default' and not qs:
-        query_email_addr["sort"] = { "datetime": { "order": sort_order }}
+    # Removed the 'and not qs' because the request is to always sort by the datetime field
+    # if sort_mode == 'default' and not qs:
+    #     query_email_addr["sort"] = { "datetime": { "order": sort_order }}
+    if sort_mode == 'default':
+        query_email_addr["sort"] = [
+            { "datetime": { "order": "desc" }},
+            { "_score": { "order": "desc" }}
+        ]
     elif sort_mode == "topic":
         query_email_addr["sort"] = {"topic_scores.idx_"+topic["idx"]:{"order": sort_order }}
     return query_email_addr
