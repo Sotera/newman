@@ -12,7 +12,7 @@ from param_utils import parseParamDatetime, parseParamTextQuery, parseParamParen
 #GET <host>:<port>:/email/email/<id>?qs="<query_string>"
 @app.route('/email/email/<string:email_id>')
 def getEmail(email_id):
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     qs = parseParamTextQuery(request.args)
     if not email_id:
         raise BadRequest("Invalid service call - missing email_id")
@@ -23,7 +23,7 @@ def getEmail(email_id):
 #GET <host>:<port>:/email/domains?data_set_id=<data_set>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 @app.route('/email/domains/')
 def getDomains():
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     qs = parseParamTextQuery(request.args)
 
     top_count = int(size);
@@ -34,7 +34,7 @@ def getDomains():
 #GET <host>:<port>:/email/communities?data_set_id=<data_set>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 @app.route('/email/communities')
 def getCommunities():
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     qs = parseParamTextQuery(request.args)
 
     top_count = int(size);
@@ -45,7 +45,7 @@ def getCommunities():
 #GET <host>:<port>:/email/rank
 @app.route('/email/rank')
 def getRankedEmails():
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     qs = parseParamTextQuery(request.args)
 
     return jsonify(get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size))
@@ -54,7 +54,7 @@ def getRankedEmails():
 #GET /attachment_content?data_set_id=<dsid>&parent_guid=<email id>&attachment_guid=<attachment id>
 @app.route('/email/attachment_content')
 def get_attachment_content_by_id():
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     parent_id = parseParamParentGUID(request.args)
     attachment_id = parseParamAttachmentGUID(request.args)
 
@@ -66,7 +66,7 @@ def get_attachment_content_by_id():
 @app.route('/email/attachment/<string:attachment_id>')
 def get_attachment_by_id(attachment_id):
 
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
 
     if not attachment_id:
         attachment_id = parseParamAttachmentGUID(request.args)
@@ -107,7 +107,7 @@ def get_attachment_by_id(attachment_id):
 #GET <host>:<port>:/email/search_all_attach_by_sender/<sender>?data_set_id=<data_set>
 # def getAllAttachmentBySender(*args, **kwargs):
 #     tangelo.log("getAttachmentsSender(args: %s kwargs: %s)" % (str(args), str(kwargs)))
-#     data_set_id, start_datetime, end_datetime, size = parseParamDatetime(**kwargs)
+#     data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(**kwargs)
 #     sender=nth(args, 0, '')
 #     if not data_set_id:
 #         return tangelo.HTTPStatusCode(400, "invalid service call - missing data_set_id")

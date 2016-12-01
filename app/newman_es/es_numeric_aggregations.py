@@ -66,14 +66,14 @@ def es_get_email_by_phone_numbers(data_set_id, qs='', date_bounds=('1970-01-01',
     query  = _build_email_query(qs=qs, phone_numbers=phone_numbers, date_bounds=date_bounds)
     app.logger.debug("query: %s" % (query))
 
-    results = _query_emails(data_set_id, size, query)
-    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+    results = _query_emails(data_set_id, query, size)
+    graph = _build_graph_for_emails(data_set_id, results["hits"])
 
     # Get attachments for community
     query = _build_email_query(qs=qs, phone_numbers=phone_numbers, date_bounds=date_bounds, attachments_only=True)
     app.logger.debug("attachment-query: %s  " % (query))
-    attachments = _query_email_attachments(data_set_id, size, query)
+    attachments = _query_email_attachments(data_set_id, query, size)
     graph["attachments"] = attachments["hits"]
     graph["attachments_total"] = attachments["attachments_total"]
-
+    graph["query_hits"] = results["total"]
     return graph

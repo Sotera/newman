@@ -14,7 +14,7 @@ from newman_es.es_search import _build_graph_for_emails
 # TODO change service root
 @app.route('/email/set_email_starred/<string:email_id>')
 def setStarred(email_id):
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     ingest_id = parseParamIngestId(request.args)
 
     if ',' in ingest_id:
@@ -32,7 +32,7 @@ def setStarred(email_id):
 # common URL params apply, date, size, etc
 @app.route('/email/search_all_starred')
 def searchStarred():
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     ingest_id = parseParamIngestId(request.args)
 
     size = size if size >500 else 2500
@@ -43,15 +43,16 @@ def searchStarred():
 
     query = _build_email_query(email_addrs=email_address_list, qs=query_terms, date_bounds=(start_datetime, end_datetime), starred=True)
 
-    results = _query_emails(data_set_id, size, query)
-    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+    results = _query_emails(data_set_id, query, size)
+    graph = _build_graph_for_emails(data_set_id, results["hits"])
 
     # Get attachments for community
     query = _build_email_query(email_addrs=email_address_list, qs=query_terms, date_bounds=(start_datetime, end_datetime), attachments_only=True, starred=True)
 
-    attachments = _query_email_attachments(data_set_id, size, query)
+    attachments = _query_email_attachments(data_set_id, query, size)
     graph["attachments"] = attachments["hits"]
     graph["attachments_total"] = attachments["attachments_total"]
+    graph["query_hits"] = results["total"]
 
     return jsonify(graph)
 

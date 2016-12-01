@@ -11,7 +11,7 @@ from param_utils import parseParamDatetime, parseParamIngestIds, parseParamAllSe
 
 
 def search(request, mode, email_address=''):
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     qs = parseParamTextQuery(request.args)
 
     ingest_ids = parseParamIngestIds(request.args)
@@ -22,9 +22,9 @@ def search(request, mode, email_address=''):
 
     #re-direct based on field
     if mode == "all" :
-        return jsonify(_search(data_set_id=data_set_id, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size))
+        return jsonify(_search(data_set_id=data_set_id, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size, _from=_from))
     elif mode == "email":
-        return jsonify(_search(data_set_id=data_set_id, email_address=email_address, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size))
+        return jsonify(_search(data_set_id=data_set_id, email_address=email_address, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size, _from=_from))
     return jsonify({"graph":{"nodes":[], "links":[]}, "rows":[]})
 
 
@@ -47,7 +47,7 @@ def search_all_qs(noop):
 @app.route('/search/search_by_conversation_forward_backward')
 def search_email_by_conversation_forward_backward():
 
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
 
     # TODO this needs to come from UI
     size = size if size >500 else 2500
@@ -70,7 +70,7 @@ def search_email_by_conversation_forward_backward():
 #GET <host>:<port>:/search/conversation/?data_set_id=<id>&start_datetime=<datetime>&sender=<s1,s2...>&recipient=<r1,r2..>
 @app.route('/search/search_by_conversation')
 def search_email_by_conversation():
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     size = size if size >500 else 2500
 
     # parse the sender address and the recipient address
@@ -99,7 +99,7 @@ def search_email_by_conversation():
 #GET <host>:<port>:/search/search_by_community/<community_name>?data_set_id=<data_set>&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 @app.route('/search/search_email_by_community/<string:community>')
 def search_email_by_community(community):
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     size = size if size >500 else 2500
 
     if not community:
@@ -115,7 +115,7 @@ def search_email_by_community(community):
 #GET <host>:<port>:/search/search_by_topic/?data_set_id=<data_set>&topic_index=1&topic_threshold=0.5&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 @app.route('/search/search_email_by_topic')
 def search_email_by_topic():
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     size = size if size >500 else 2500
 
     if not request.args.get("topic_index"):
@@ -131,7 +131,7 @@ def search_email_by_topic():
 
 @app.route('/search/search_email_by_attachment_hash')
 def es_get_all_attachment_hash():
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
 
     size = size if size >500 else 2500
 

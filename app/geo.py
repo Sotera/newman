@@ -9,7 +9,7 @@ from param_utils import parseParamDatetime, parseParamEmailAddressList, parsePar
 # deprecated slated for removal
 @app.route('/geo/sender_locations')
 def sender_locations():
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
 
     qs = parseParamTextQuery(request.args)
 
@@ -22,7 +22,7 @@ def sender_locations():
 # deprecated slated for removal
 @app.route('/geo/exif_emails')
 def exif_emails(*args, **kwargs):
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
 
     qs = parseParamTextQuery(request.args)
 

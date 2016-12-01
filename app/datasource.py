@@ -83,6 +83,7 @@ def setSelectedDataSet(datasetname):
 @app.route('/datasource/summary')
 def summary():
     '''
+    Populate the main page of the dashboard with stats for users, search, etc
     Returns a structure based on what fields were queried
     {
       "all_dataset": {"search" :{"email_users"}}
@@ -92,7 +93,7 @@ def summary():
     :param kwargs:
     :return:
     '''
-    data_set_ids, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_ids, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
 
 
     qs = parseParamTextQuery(request.args)

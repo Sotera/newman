@@ -12,6 +12,7 @@ def parseParamDatetime( params ):
     start_datetime = str(params.get('start_datetime', default_min_timeline_bound()))
     end_datetime = str(params.get('end_datetime', default_max_timeline_bound()))
     size = params.get('size', 20)
+    _from = params.get('from', 0)
 
     if data_set_id == 'default_data_set':
         data_set_id = getDefaultDataSetID()
@@ -21,7 +22,7 @@ def parseParamDatetime( params ):
     if end_datetime == 'now':
         end_datetime = default_max_timeline_bound()
 
-    return data_set_id, start_datetime, end_datetime, size
+    return data_set_id, start_datetime, end_datetime, size, _from
 
 
 def parseParamIngestId( params ):
@@ -131,3 +132,6 @@ def parseParamDocumentGUID( params ):
 
 def parseParamAttachmentGUID( params ):
     return params.get('attachment_guid', '')
+
+def parseParamFrom( params ):
+    return params.get('from', 0)

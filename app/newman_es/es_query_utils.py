@@ -6,7 +6,15 @@ from es_connection import es
 def get_graph_row_fields():
     return ["id","tos","senders","ccs","bccs","datetime","subject","body","attachments.guid","starred","case_id","ingest_id","alt_ref_id","label"]
 
-def _map_emails(fields):
+def _map_emails(fields, score=1.0):
+    '''
+    Map the fields to UI fields
+    :param fields:
+    :param score: query score as a float or int depending on if there was a search query performed.  If there was no
+                  query ES will not provide a score and the max_score will be null in which case results will be given
+                  an int index value
+    :return:
+    '''
     row = {}
     row["email_id"] =  fields["id"][0]
     row["from"] = ";".join(fields.get("senders",[""]))
@@ -18,6 +26,7 @@ def _map_emails(fields):
     row["starred"] = fields.get("starred", [False])[0]
     row["attach"] =  str(len(fields.get("attachments.guid",[])))
     row["bodysize"] = len(fields.get("body",[""])[0])
+    row["sort"] = score
 
     for name, val in fields.items():
         if name.startswith("topic"):
@@ -51,11 +60,11 @@ def _map_node(email_addr, total_docs, ingest_set):
     node["original_ingest_id"] = ingest_set
     return node
 
-def _query_email_attachments(index, size, emails_query):
+def _query_email_attachments(index, emails_query, size, _from=0):
     start = time.time()
-    app.logger.info(emails_query)
+    app.logger.debug(emails_query)
 
-    attachments_resp = es().search(index=index, doc_type="emails", size=size, body=emails_query)
+    attachments_resp = es().search(index=index, doc_type="emails", size=size, from_=_from, body=emails_query)
 
     email_attachments = []
     for attachment_item in attachments_resp["hits"]["hits"]:
@@ -92,12 +101,28 @@ def _query_email_attachments(index, size, emails_query):
     return {"attachments_total": attachments_resp["hits"]["total"], "hits":email_attachments}
 
 
-def _query_emails(index, size, emails_query, additional_fields=[]):
+def _query_emails(index, emails_query, size, _from=0, additional_fields=[]):
+    '''
+    return value will contain a 'max_score' field only if there was a search query performed otherwise this field will be null
+    :param index:
+    :param size:
+    :param emails_query:
+    :param additional_fields:
+    :return:
+    '''
+    app.logger.info(emails_query)
     start = time.time()
-    emails_resp = es().search(index=index, doc_type="emails", size=size, fields=get_graph_row_fields() + additional_fields, body=emails_query)
-    app.logger.debug("total document hits = %s, TIME_ELAPSED=%g, for index=%s" % (emails_resp["hits"]["total"],time.time()-start, index))
+    emails_resp = es().search(index=index, doc_type="emails", size=size, from_=_from, fields=get_graph_row_fields() + additional_fields, body=emails_query)
+    app.logger.debug("total document hits = %s, TIME_ELAPSED=%g, for index=%s" % (emails_resp["hits"]["total"], time.time()-start, index))
+    app.logger.debug("DOC 0:" + str(emails_resp["hits"]["hits"][0] if emails_resp["hits"]["hits"] else None))
 
-    return {"total":emails_resp["hits"]["total"], "hits":[_map_emails(hit["fields"])for hit in emails_resp["hits"]["hits"]]}
+    return {
+        "total" : emails_resp["hits"]["total"],
+        "max_score" : emails_resp["hits"],
+        "from" : _from,
+        "size" : len(emails_resp["hits"]["hits"]),
+        "hits" : [_map_emails(hit["fields"], hit["_score"] or i) for i, hit in enumerate(emails_resp["hits"]["hits"])]
+    }
 
 def _count_emails(index, emails_query):
     start = time.time()

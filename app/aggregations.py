@@ -19,7 +19,7 @@ from newman_es.es_numeric_aggregations import get_top_phone_numbers
 #GET <host>:<port>:/entity/entity?entities.entity_person=mike,joe&entities.entity_location=paris,los angeles
 @app.route('/entity/entity')
 def get_graph_for_entity():
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     email_address_list = parseParamEmailAddress(request.args);
     entity_dict = parseParamEntity(request.args)
     qs = parseParamTextQuery(request.args)
@@ -30,15 +30,17 @@ def get_graph_for_entity():
     query = _build_email_query(email_addrs=email_address_list, qs=qs, entity=entity_dict, date_bounds=(start_datetime, end_datetime))
     app.logger.debug("query: %s" % (query))
 
-    results = _query_emails(data_set_id, size, query)
-    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+    results = _query_emails(data_set_id, query, size)
+    graph = _build_graph_for_emails(data_set_id, results["hits"])
 
     # Get attachments for community
     query = _build_email_query(email_addrs=email_address_list, qs=qs, entity=entity_dict, date_bounds=(start_datetime, end_datetime), attachments_only=True)
     app.logger.debug("attachment-query: %s" % (query))
-    attachments = _query_email_attachments(data_set_id, size, query)
+    attachments = _query_email_attachments(data_set_id, query, size)
     graph["attachments"] = attachments["hits"]
     graph["attachments_total"] = attachments["attachments_total"]
+    graph["query_hits"] = results["total"]
+
 
     return jsonify(graph)
 
@@ -46,7 +48,7 @@ def get_graph_for_entity():
 #GET /top/<count>
 @app.route('/entity/top/<int:top_count>')
 def get_top_entities(top_count=20):
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     email_address_list = parseParamEmailAddress(request.args);
 
     # TODO
@@ -86,7 +88,7 @@ def get_top_entities(top_count=20):
 #GET attachment/types/<file_type>?data_set_id=<data_set>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 @app.route('/attachment/types')
 def getAttachFileType():
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
 
     top_count = int(size)
 
@@ -117,7 +119,7 @@ def dateRange(start_datetime, end_datetime):
 #GET /account/<account_type>?user0@gbc.com=1&user1@abc.com=1&...&data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
 @app.route('/activity/account/all')
 def getAccountActivity():
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
 
     email_address_list = parseParamEmailAddress(request.args);
 
@@ -154,7 +156,7 @@ def getAccountActivity():
 #GET /attach/<attach_type>?user0@gbc.com=1&user1@abc.com=1&...&data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
 @app.route('/activity/attach/all')
 def getAttachCount(*args, **kwargs):
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
 
     email_address_list = parseParamEmailAddress(request.args);
 
@@ -193,7 +195,7 @@ def getAttachCount(*args, **kwargs):
 @app.route('/topic/topic')
 def get_topics_by_query():
     algorithm = request.args.get('algorithm', 'lingo')
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     email_address_list = parseParamEmailAddress(request.args)
 
     community = parseParamCommunityIds(request.args)
@@ -216,14 +218,14 @@ def get_topics_by_query():
 # returns topic in sorted order by the idx
 @app.route('/topic/category/all/<int:num_topics>')
 def topic_list(num_topics):
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     return jsonify(get_categories(data_set_id))
 
 
 #GET <host>:<port>/profile/top_phone_numbers?qs="<query_string>"
 @app.route('/profile/top_phone_numbers')
 def top_phone_numbers():
-    data_set_id, start_datetime, end_datetime, size = parseParamDatetime(request.args)
+    data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
 
     qs = parseParamTextQuery(request.args)
 

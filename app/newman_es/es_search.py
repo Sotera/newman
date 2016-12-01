@@ -89,7 +89,7 @@ def get_cached_email_addr(index, addr):
 
 
 # This will generate the graph structure for a emails list provided.
-def _build_graph_for_emails(data_set_id, docs, query_hits):
+def _build_graph_for_emails(data_set_id, docs):
     start = time.time()
     # List of all nodes - will contain duplicate node names for as they are not unique between the datasets
     nodes = []
@@ -141,31 +141,34 @@ def _build_graph_for_emails(data_set_id, docs, query_hits):
                 edge_map[edge_key]["value"]=edge_map[edge_key]["value"]+1
 
 
-    resp = {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in docs], "query_hits" : query_hits, "data_set_id" : data_set_id}
+    resp = {"graph":{"nodes":nodes, "links":edge_map.values()}, "rows": [_map_emails_to_row(email) for email in docs], "data_set_id" : data_set_id}
 
     app.logger.info("TIMING:  total document hits = %s, TIME_ELAPSED=%g" % (len(docs),time.time()-start))
 
     return resp
 
 
-def _search(data_set_id, email_address, qs, start_datetime, end_datetime, encrypted, size):
+def _search(data_set_id, email_address, qs, start_datetime, end_datetime, encrypted, size, _from=0):
     app.logger.debug("email_address=%s, qs=%s" % ((str(email_address)), qs))
     email_addrs=[email_address] if email_address else None
 
-    query  = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
+    query = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
     app.logger.debug("query: %s" % (query))
 
-    results = _query_emails(data_set_id, size, query)
-    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+    results = _query_emails(data_set_id, query, size, _from)
+    graph = _build_graph_for_emails(data_set_id, results["hits"])
     graph["edge_total"] = len(graph["graph"]["links"])
 
     query = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), attachments_only=True, encrypted=encrypted)
     app.logger.debug("attachment-query: %s" % (query))
-    attachments = _query_email_attachments(data_set_id, size, query)
+    attachments = _query_email_attachments(data_set_id, query, size, _from)
     graph["attachments"] = attachments["hits"]
     graph["attachments_total"] = attachments["attachments_total"]
 
     graph["data_set_id"] = data_set_id
+    graph["query_hits"] = results["total"]
+
+    graph["from"] = _from
     return graph
 
 def _search_summary(data_set_id, email_address, qs, start_datetime, end_datetime, encrypted, size):
@@ -210,17 +213,19 @@ def _es_get_all_attachment_hash(data_set_id, attachment_hash, qs, start_datetime
     query  = _build_email_query(attachment_hash=attachment_hash, qs=qs, date_bounds=(start_datetime, end_datetime))
     app.logger.debug("query: %s" % (query))
 
-    results = _query_emails(data_set_id, size, query)
-    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+    results = _query_emails(data_set_id, query, size)
+    graph = _build_graph_for_emails(data_set_id, results["hits"])
     graph["edge_total"] = len(graph["graph"]["links"])
 
     query = _build_email_query(attachment_hash=attachment_hash, qs=qs, date_bounds=(start_datetime, end_datetime), attachments_only=True)
     app.logger.debug("attachment-query: %s" % (query))
-    attachments = _query_email_attachments(data_set_id, size, query)
+    attachments = _query_email_attachments(data_set_id, query, size)
     graph["attachments"] = attachments["hits"]
     graph["attachments_total"] = attachments["attachments_total"]
 
     graph["data_set_id"] = data_set_id
+    graph["query_hits"] = results["total"]
+
     return graph
 
 # Get all rows for two or more email addresses, results will be sorted by time asc
@@ -231,21 +236,22 @@ def es_get_all_email_by_conversation_forward_backward(data_set_id, sender, recip
     query  = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, qs='', date_bounds=(start_datetime, end_datetime), sort_order=sort_order, date_mode_inclusive=False, address_filter_mode="conversation")
     app.logger.debug("query: %s" % (query))
 
-    results = _query_emails(data_set_id, size, query)
+    results = _query_emails(data_set_id, query, size)
     # If you do not want to generate a graph each time this is called use this code
     # return {"graph":{"nodes":[], "links":[]}, "rows": [_map_emails_to_row(email) for email in results["hits"]], "query_hits" : results["total"]}
 
-    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+    graph = _build_graph_for_emails(data_set_id, results["hits"])
 
     # Get attachments for community
     query = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, qs='', date_bounds=(start_datetime, end_datetime), sort_order=sort_order, date_mode_inclusive=False, address_filter_mode="conversation", attachments_only=True)
     app.logger.debug("attachment-query: %s" % (query))
-    attachments = _query_email_attachments(data_set_id, size, query)
+    attachments = _query_email_attachments(data_set_id, query, size)
     graph["attachments"] = attachments["hits"]
     graph["attachments_total"] = attachments["attachments_total"]
 
-
     graph["data_set_id"] = data_set_id
+    graph["query_hits"] = results["total"]
+
     return graph
 
 # Get all rows , graph, attachments for two or more email addresses attempt to center around the start_date
@@ -258,11 +264,11 @@ def es_get_conversation(data_set_id, sender, recipients, start_datetime, end_dat
     # apply query with address intersection behavior
     query  = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, qs='', date_bounds=(current_datetime, end_datetime), sort_order='acs', date_mode_inclusive=True, address_filter_mode="conversation")
     app.logger.debug("query-after: %s" % (query))
-    emails_asc = _query_emails(data_set_id, size, query)
+    emails_asc = _query_emails(data_set_id, query, size)
 
     query  = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, qs='', date_bounds=(start_datetime, current_datetime), sort_order='desc', date_mode_inclusive=False, address_filter_mode="conversation")
     app.logger.debug("query-before: %s" % (query))
-    emails_desc = _query_emails(data_set_id, size, query)
+    emails_desc = _query_emails(data_set_id, query, size)
     total = emails_asc["total"] + emails_desc["total"]
 
     emails_desc = emails_desc['hits']
@@ -271,17 +277,17 @@ def es_get_conversation(data_set_id, sender, recipients, start_datetime, end_dat
     emails = emails_desc + emails_asc['hits']
 
     # return {"graph":{"nodes":[], "links":[]}, "rows": [ascw(email)results["totaldesc+ results["total"] for email in results["hits"]], "query_hits" : results["total"]}
-    graph = _build_graph_for_emails(data_set_id, emails, total)
+    graph = _build_graph_for_emails(data_set_id, emails)
     graph['current_index'] = current_index
 
     # Get attachments for community
     query = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, qs='', date_bounds=(current_datetime, end_datetime), sort_order='asc', date_mode_inclusive=True, address_filter_mode="conversation", attachments_only=True)
     app.logger.debug("attachment-query-after: %s" % (query))
-    attachments_asc = _query_email_attachments(data_set_id, size, query)
+    attachments_asc = _query_email_attachments(data_set_id, query, size)
 
     query = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, qs='', date_bounds=(start_datetime, current_datetime), sort_order='desc', date_mode_inclusive=False, address_filter_mode="conversation", attachments_only=True)
     app.logger.debug("attachment-query-after: %s)"% (query))
-    attachments_desc = _query_email_attachments(data_set_id, size, query)
+    attachments_desc = _query_email_attachments(data_set_id, query, size)
     attachments_desc["hits"].reverse()
 
     # Find the first index in the attachment array where the current emails attachments start or -1
@@ -298,6 +304,8 @@ def es_get_conversation(data_set_id, sender, recipients, start_datetime, end_dat
     graph["attachments_index"] = find_attch()
 
     graph["data_set_id"] = data_set_id
+    graph["query_hits"] = total
+
     return graph
 
 
@@ -308,18 +316,20 @@ def es_get_all_email_by_community(data_set_id, community, email_address_list, qs
     query = _build_email_query(email_addrs=email_address_list, qs='', date_bounds=(start_datetime, end_datetime), community=[community], encrypted=encrypted)
     app.logger.debug("es_search.es_get_all_email_by_community(query: %s)" % (query))
 
-    results = _query_emails(data_set_id, size, query)
+    results = _query_emails(data_set_id, query, size)
 
-    graph = _build_graph_for_emails(data_set_id, results["hits"], results["total"])
+    graph = _build_graph_for_emails(data_set_id, results["hits"])
 
     # Get attachments for community
     query = _build_email_query(email_addrs=email_address_list, qs='', date_bounds=(start_datetime, end_datetime), community=[community], attachments_only=True, encrypted=encrypted)
     app.logger.debug("attachment-query: %s" % (query))
-    attachments = _query_email_attachments(data_set_id, size, query)
+    attachments = _query_email_attachments(data_set_id, query, size)
     graph["attachments"] = attachments["hits"]
     graph["attachments_total"] = attachments["attachments_total"]
 
     graph["data_set_id"] = data_set_id
+    graph["query_hits"] = results["total"]
+
 
     return graph
 
@@ -331,15 +341,17 @@ def es_get_all_email_by_topic(data_set_id, topic, email_address_list, qs, start_
     app.logger.debug("query: %s" % (query))
 
     # Get emails graph for topics
-    emails = _query_emails(data_set_id, size, query, additional_fields=["topic_scores.idx_"+str(topic["idx"])])
-    graph = _build_graph_for_emails(data_set_id, emails["hits"], emails["total"])
+    emails = _query_emails(data_set_id, query, size, additional_fields=["topic_scores.idx_"+str(topic["idx"])])
+    graph = _build_graph_for_emails(data_set_id, emails["hits"])
 
     # Get attachments for top score topic
     query  = _build_email_query(email_addrs=email_address_list, qs='', topic=topic, sort_mode="topic", sort_order="desc", date_bounds=(start_datetime, end_datetime), attachments_only=True, encrypted=encrypted)
     app.logger.debug("attachment-query: %s" % (query))
-    attachments = _query_email_attachments(data_set_id, size, query)
+    attachments = _query_email_attachments(data_set_id, query, size)
     graph["attachments"] = attachments["hits"]
     graph["attachments_total"] = attachments["attachments_total"]
 
     graph["data_set_id"] = data_set_id
+    graph["query_hits"] = emails["total"]
+
     return graph
