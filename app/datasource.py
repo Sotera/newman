@@ -5,7 +5,7 @@ from werkzeug.exceptions import BadRequest
 import urllib
 
 from newman_es.es_connection import es, index_client, index_list
-from newman_es.config.newman_config import data_set_names, index_creator_prefix
+from newman_es.config.newman_config import active_dataset, index_creator_prefix
 from newman_es.es_search import initialize_email_addr_cache, _search_summary
 from newman_es.es_series import get_datetime_bounds
 
@@ -47,7 +47,8 @@ def _index_record(index):
 def listAllDataSet():
     # Ignore index keys in ES that are not in the newman_app.conf
     # Find all the indexes that begin with the index loader prefix
-    indexes = [_index_record(index) for index in index_list() if index in data_set_names() or index.startswith(index_creator_prefix())]
+
+    indexes = [ _index_record(index) for index in index_list() if active_dataset(index) ]
 
     # email_addrs = get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size)["emails"]
     # email_addrs = {email_addr[0]:email_addr for email_addr in email_addrs}

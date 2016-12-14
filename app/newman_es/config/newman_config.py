@@ -32,8 +32,8 @@ def elasticsearch_config():
 def getDataSetDefaults():
     return application_properties()["data_set_defaults"]
 
-def data_set_names():
-    return application_properties()["data_set_defaults"].keys()
+def active_dataset(dataset):
+    return dataset.startswith(index_creator_prefix()) and dataset not in application_properties()["data_set_defaults"] or not application_properties()["data_set_defaults"].get(dataset, {"excluded" : True}).get("excluded", True)
 
 def index_creator_defaults():
     return application_properties()["index_creator_defaults"]

@@ -48,4 +48,3 @@ def getDefaultDataSetID():
         return auto_indexes[0]
 
     return default
-
