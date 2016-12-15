@@ -1,4 +1,55 @@
 /**
+ * returns JSON string representation of an object with circular reference handling
+ * @param object
+ * @param optional custom replacer circular reference
+ * @param optional JSON indentation
+ * @returns JSON string
+ */
+function stringifyOnce(obj, replacer, indent) {
+  var printedObjects = [];
+  var printedObjectKeys = [];
+
+  function printOnceReplacer(key, value) {
+    if (printedObjects.length > 2000) { // browsers will not print more than 20K, I don't see the point to allow 2K.. algorithm will not be fast anyway if we have too many objects
+      return 'object too long';
+    }
+    var printedObjIndex = false;
+    printedObjects.forEach(function (obj, index) {
+      if (obj === value) {
+        printedObjIndex = index;
+      }
+    });
+
+    if (key == '') { //root element
+      printedObjects.push(obj);
+      printedObjectKeys.push("root");
+      return value;
+    }
+
+    else if (printedObjIndex + "" != "false" && typeof(value) == "object") {
+      if (printedObjectKeys[printedObjIndex] == "root") {
+        return "(pointer to root)";
+      } else {
+        return "(see " + ((!!value && !!value.constructor) ? value.constructor.name.toLowerCase() : typeof(value)) + " with key " + printedObjectKeys[printedObjIndex] + ")";
+      }
+    } else {
+
+      var qualifiedKey = key || "(empty key)";
+      printedObjects.push(value);
+      printedObjectKeys.push(qualifiedKey);
+      if (replacer) {
+        return replacer(key, value);
+      } else {
+        return value;
+      }
+    }
+  }
+
+  return JSON.stringify(obj, printOnceReplacer, indent);
+}
+
+
+/**
  * loads JSON formatted data from file referenced by the file-path, and pass the data into the argument callback function
  * @param file_path
  * @param callback
@@ -364,7 +415,17 @@ function removeAllWhitespace(text) {
 }
 
 /**
- * sort predicate based on property in descending order
+ * sort array of objects based on an object property in descending order
+ */
+function sortArrayDescending( array, obj_property ) {
+  if (array && array.length > 0) {
+    array.sort( descendingPredicatByProperty( obj_property ) );
+  }
+  return array;
+}
+
+/**
+ * sort-predicate based on property in descending order
  */
 function descendingPredicatByProperty(property){
   return function (a, b) {
@@ -382,7 +443,17 @@ function descendingPredicatByProperty(property){
 }
 
 /**
- * sort predicate based on property in ascending order
+ * sort array of objects based on an object property in ascending order
+ */
+function sortArrayAscending( array, obj_property ) {
+  if (array && array.length > 0) {
+    array.sort( ascendingPredicatByProperty( obj_property ) );
+  }
+  return array;
+}
+
+/**
+ * sort-predicate based on property in ascending order
  */
 function ascendingPredicatByProperty(property){
   return function (a, b) {
@@ -400,7 +471,7 @@ function ascendingPredicatByProperty(property){
 }
 
 /**
- * sort predicate based on index in descending order
+ * sort-predicate based on index in descending order
  */
 function descendingPredicatByIndex(index){
   return function(a, b) {
@@ -418,7 +489,7 @@ function descendingPredicatByIndex(index){
 }
 
 /**
- * sort predicate based on index in ascending order
+ * sort-predicate based on index in ascending order
  */
 function ascendingPredicatByIndex(index){
   return function(a, b) {
@@ -481,6 +552,57 @@ function clone( source ) {
   }
   return source;
 }
+
+/**
+ *  return an object of concatenated the contents from two objects.
+ * @param source object to be merged
+ * @param source object to be merged
+ * @returns deep-copy target object
+ */
+function mergeObject( source_1, source_2 ) {
+  var target;
+  if (source_1 && source_2) {
+    target = jQuery.extend(true, {}, source_1, source_2);
+  }
+  return target;
+}
+
+/**
+ *  merge content of objects into the first object.
+ * @param source object to be merged
+ * @param source object to be merged
+ */
+function mergeObjectTo( source_1, source_2 ) {
+  if (source_1 && source_2) {
+    jQuery.extend(true, source_1, source_2);
+  }
+}
+
+/**
+ *  return an array of concatenated the contents from two array.
+ * @param source array to be merged
+ * @param source array to be merged
+ * @returns deep-copy target array
+ */
+function mergeArray( source_1, source_2 ) {
+  var target;
+  if (source_1 && source_2) {
+    target = jQuery.merge(true, [], source_1, source_2);
+  }
+}
+
+/**
+ *  merge content of arrays into the first array.
+ * @param source array to be merged
+ * @param source array to be merged
+ */
+/* TODO: not working, need to fix
+function mergeArrayTo( source_1, source_2 ) {
+  if (source_1 && source_2) {
+    jQuery.merge(true, source_1, source_2);
+  }
+}
+*/
 
 /**
  * return a parameter-value from a valid url

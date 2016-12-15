@@ -20,7 +20,7 @@
     <link href="plugins/d3-context-menu/css/d3-context-menu.css" rel="stylesheet" type="text/css">
     <link href="plugins/d3-tip/d3-tip.css" rel="stylesheet" type="text/css">
     <link href="plugins/c3/c3.css" rel="stylesheet" type="text/css">
-    <link href="plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="plugins/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link href="plugins/fancybox/jquery.fancybox.css" rel="stylesheet" type="text/css">
     <link href="plugins/fullcalendar/fullcalendar.css" rel="stylesheet" type="text/css">
     <link href="plugins/xcharts/xcharts.min.css" rel="stylesheet" type="text/css">
@@ -41,6 +41,7 @@
     <link href="css/newman_default.css" rel="stylesheet" type="text/css">
     <!--<link href="css/newman_profile_chart.css" rel="stylesheet" type="text/css">-->
     <link href="css/newman_help.css" rel="stylesheet" type="text/css">
+    <link href="js/tree/app_tree_ui.css" rel="stylesheet" type="text/css">
 
 
   </head>
@@ -1124,8 +1125,9 @@
           <!--End Data-Panel-Left-->
 
           <!--Start Data-Visual-Right-->
-          <div class="col-sm-5 modal-container" id="data_visual_container"  style= "height: 100%; margin: 0; padding: 0;">
+          <div class="col-sm-5 col-container modal-container" id="data_visual_container"  style= "height: 100%;">
             <div id="graph_email"  style= "height: 100%;"></div>
+            <div id="tree_email"  style= "height: 100%;"></div>
 
             <!-- Start Attachment-Enlarged-View-Modal-Right -->
             <div class="modal fade" id="doc_preview_modal_right" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
@@ -1203,6 +1205,7 @@
                 <span class="fa fa-envelope-o" id="doc_count_inbound" > Inbound </span>
               </div>
             </div>
+
             <div class="row row-container" >
               <div class="col-sm-1 col-container" style="text-align: center;">
                 <i class="fa fa-tags fa-flip-horizontal" aria-hidden="true"></i>
@@ -1222,6 +1225,27 @@
               </div>
               <div class="col-sm-4 col-container" style="padding: 0 0 0 5px;">
                 <span class="fa fa fa-paper-plane-o" id="doc_count_outbound" > Outbound </span>
+              </div>
+            </div>
+
+            <div class="row" style="border-top: 1px solid rgba(255, 255, 255, 0.5); text-align: center; margin: 0; background-color: rgba(245, 245, 245, 0.2);" >
+              <div class="col-sm-1 col-container" style="text-align: center;">
+                <button id="tree_apply_button" type="button" class="btn btn-small outline" >
+                  <i class="fa fa-code-fork fa-rotate-90" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="col-sm-2 col-container" style="text-align: left;">
+                <input type="checkbox" class="fa_toggle" id="tree_view_checkbox" value="tree_view" style="margin-left: 5px;" />
+              </div>
+              <div class="col-sm-2 col-container" >
+                &nbsp;
+              </div>
+              <div class="col-sm-3 col-container" style="border-right: 2px solid rgba(255, 255, 255, 0.5);">
+                &nbsp;
+              </div>
+              <div class="col-sm-4 col-container" style="padding: 0 0 0 5px; text-align: left;">
+                <i id="tree_view_status_icon" class="fa" ></i>
+                <span id="tree_view_status_text" ></span>
               </div>
             </div>
 
@@ -1396,7 +1420,7 @@
     <script src="plugins/tinymce/jquery.tinymce.min.js"></script>
     <script src="plugins/morris/morris.min.js"></script>
     <script src="plugins/raphael/raphael-min.js"></script>
-    <script src="plugins/font-awesome/font-awesome-unicode-map.js"></script>
+    <script src="plugins/font-awesome-4.7.0/font-awesome-unicode-map.js"></script>
     <script src="plugins/leaflet/leaflet.js"></script>
     <!--<script src="plugins/leaflet/eu-countries.js"></script>-->
     <script src="plugins/leaflet/us-states.js"></script>
@@ -1443,6 +1467,9 @@
     <script src="js/newman_email_doc_table.js"></script>
     <script src="js/newman_email_doc_view.js"></script>
     <script src="js/newman-graph-email.js"></script>
+    <script src="js/tree/app_tree_email.js"></script>
+    <script src="js/tree/app_tree_ui_radial.js"></script>
+    <script src="js/tree/app_tree_process_indicator.js"></script>
     <script src="js/tree_table/app_search_result.js"></script>
     <script src="js/tree_table/app_search_result_tree_table.js"></script>
     <script src="js/tree_table/app_search_result_collection.js"></script>
@@ -1458,6 +1485,7 @@
     <script src="js/geo/sample_markers.json"></script>
     <script src="js/searchtool.js"></script>
     <script src="js/graphtool.js"></script>
+    <script src="js/graph/app_graph_ui.js"></script>
 
   </body>
 </html>

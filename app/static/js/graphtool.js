@@ -757,6 +757,8 @@ function loadSearchResult( service_url, search_response ) {
 // Draw a graph for a component
 function drawGraph( graph ) {
 
+  app_graph_ui.open();
+
   svg.remove();
   svg = d3.select("#graph_email").append("svg")
     .attr("height", "100%")
@@ -765,6 +767,10 @@ function drawGraph( graph ) {
     .attr("preserveAspectRatio", "xMidYMid meet")
     .attr("pointer-events", "all")
     .call(d3.behavior.zoom().on("zoom", redraw));
+
+  _.each(graph.nodes, function(element, index) {
+    element['is_selected'] = false;
+  });
 
   vis = svg.append('svg:g');
 
@@ -874,14 +880,14 @@ function drawGraph( graph ) {
   });
 
   node.on('contextmenu', d3.contextMenu(node_context_menu, {
-    onOpen: function(n) {
+    onOpen: function(d) {
       //console.log('context_menu_opened!');
       $('.d3-context-menu li:first')
         .addClass('context-menu-title');
 
       $('.d3-context-menu')
         .find(".fa-envelope").first()
-        .css("color", getEmailDomainColor(n.name))
+        .css("color", getEmailDomainColor(d.name))
         .css("padding", "4px 0px 0px 8px");
 
       $('.d3-context-menu')
@@ -890,17 +896,28 @@ function drawGraph( graph ) {
 
       $('.d3-context-menu')
         .find(".fa-users").first()
-        .css("color", newman_top_email_community.getCommunityColor( n.community ))
+        .css("color", newman_top_email_community.getCommunityColor( d.community ))
+        .css("padding", "4px 0px 0px 8px");
+
+      $('.d3-context-menu')
+        .find(".fa-square-o").first()
+        .css("padding", "4px 0px 0px 8px");
+
+      $('.d3-context-menu')
+        .find(".fa-check-square-o").first()
         .css("padding", "4px 0px 0px 8px");
     },
     onClose: function() {
       //console.log('context_menu_closed!');
+
+      //onAllNodeSelected();
+
     }
   }));
 
   node.on("mouseover", function(n) {
 
-    node_label_on(this);
+    nodeLabelOn(this);
 
     updateUIInboundCount( n.email_received );
     updateUIOutboundCount( n.email_sent );
@@ -908,7 +925,7 @@ function drawGraph( graph ) {
 
   node.on("mouseout", function() {
 
-    node_label_off(this);
+    nodeLabelOff(this);
 
     updateUIInboundCount();
     updateUIOutboundCount();
@@ -947,7 +964,7 @@ function drawGraph( graph ) {
     .attr('dominant-baseline', 'central')
     .attr('font-family', 'FontAwesome')
     .text(function(d) {
-      return FONT_AWESOME_ICON_UNICODE['user'];
+      return getNodeIcon( d );
     })
     .attr("fill", function() {
       return 'white';
@@ -955,8 +972,8 @@ function drawGraph( graph ) {
     .attr("stroke", function() {
       return 'black';
     })
-    .attr("font-size", function() {
-      return '6pt';
+    .attr("font-size", function(d) {
+      return toggleNodeSelect(d, "font-size");
     })
     .attr("stroke-width","0.5px")
     .style("opacity",function() {
@@ -978,30 +995,151 @@ function drawGraph( graph ) {
   drawGraphLegend();
 }
 
-function redraw() {
-  vis.attr("transform",
-           "translate(" + d3.event.translate + ")" +
-           " scale(" + d3.event.scale + ")");
+// handle node selected based on style property
+function toggleNodeSelect(d, style_property) {
+
+  if (style_property) {
+
+    if (d.is_selected === true) {
+
+      if (style_property == 'font-size') {
+        return '12pt';
+      }
+
+      /*
+       if (style_property == 'stroke') {
+       //return "#FF0000";
+       return "#FFD900";
+       }
+
+       if (style_property == 'stroke-width') {
+       //return "1.0px";
+       return "1.5px";
+       }
+
+       if (style_property == 'stroke-opacity') {
+       return "1.0";
+       //return "0.5";
+       }
+       */
+
+    }
+    else {
+
+      if (style_property == 'font-size') {
+        return '6pt';
+      }
+
+      /*
+       if (style_property == 'stroke') {
+       return "#4682B4";
+       }
+
+       if (style_property == 'stroke-width') {
+       return "1.0px";
+       }
+
+       if (style_property == 'stroke-opacity') {
+       return "0.7";
+       //return "1.0";
+       }
+       */
+    }
+
+  }// end-of if (style_property)
 }
 
-function toggle_labels() {
+function redraw() {
+  vis.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
+}
+
+function toggleLabels() {
   if (node_label_enabled) {
-    all_node_label_off();
+    allNodeLabelOff();
   }
   else {
-    all_node_label_on();
+    allNodeLabelOn();
   }
 }
 
-function all_node_label_off() {
-  node_label_enabled = false;
+function getNodeIcon( node_element ) {
+  if (node_element && node_element.is_selected === true) {
+    //return FONT_AWESOME_ICON_UNICODE['flag'];
+    return (FONT_AWESOME_ICON_UNICODE['flag']);
+  }
+  //return FONT_AWESOME_ICON_UNICODE['user'];
+  return (FONT_AWESOME_ICON_UNICODE['user']);
+}
+
+function setNodeSelected( node_key, is_selected ) {
+  if (node_key) {
+
+    d3.selectAll("#graph_email svg text")
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'central')
+      .attr('font-family', 'FontAwesome')
+      .text(function(d) {
+        if (node_key == d.name) {
+          if (is_selected === true) {
+            d.is_selected = true;
+          }
+          else {
+            d.is_selected = false;
+          }
+        }
+        return getNodeIcon( d );
+      })
+      .attr("fill", function() {
+        return 'white';
+      })
+      .attr("stroke", function() {
+        return 'black';
+      })
+      .attr("font-size", function(d) {
+        return toggleNodeSelect(d, "font-size");
+      })
+      .attr("stroke-width","0.5px")
+      .style("opacity",function() {
+        return 100;
+      });
+  }
+}
+
+function clearNodeSelected() {
+
+    d3.selectAll("#graph_email svg text")
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'central')
+      .attr('font-family', 'FontAwesome')
+      .text(function(d) {
+
+        d.is_selected = false;
+
+        return getNodeIcon( d );
+      })
+      .attr("fill", function() {
+        return 'white';
+      })
+      .attr("stroke", function() {
+        return 'black';
+      })
+      .attr("font-size", function(d) {
+        return toggleNodeSelect(d, "font-size");
+      })
+      .attr("stroke-width","0.5px")
+      .style("opacity",function() {
+        return 100;
+      });
+}
+
+function onAllNodeSelected() {
 
   d3.selectAll("#graph_email svg text")
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'central')
     .attr('font-family', 'FontAwesome')
     .text(function(d) {
-      return FONT_AWESOME_ICON_UNICODE['user'];
+      return getNodeIcon( d );
     })
     .attr("fill", function() {
       return 'white';
@@ -1009,8 +1147,8 @@ function all_node_label_off() {
     .attr("stroke", function() {
       return 'black';
     })
-    .attr("font-size", function() {
-      return '6pt';
+    .attr("font-size", function(d) {
+      return toggleNodeSelect(d, "font-size");
     })
     .attr("stroke-width","0.5px")
     .style("opacity",function() {
@@ -1018,14 +1156,39 @@ function all_node_label_off() {
     });
 }
 
-function node_label_off( node ) {
+function allNodeLabelOff() {
+  node_label_enabled = false;
+
+  d3.selectAll("#graph_email svg text")
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'central')
+    .attr('font-family', 'FontAwesome')
+    .text(function(d) {
+      return getNodeIcon( d );
+    })
+    .attr("fill", function() {
+      return 'white';
+    })
+    .attr("stroke", function() {
+      return 'black';
+    })
+    .attr("font-size", function(d) {
+      return toggleNodeSelect(d, "font-size");
+    })
+    .attr("stroke-width","0.5px")
+    .style("opacity",function() {
+      return 100;
+    });
+}
+
+function nodeLabelOff( node ) {
   if (node) {
     d3.select(node).select("svg text")
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'central')
       .attr('font-family', 'FontAwesome')
       .text(function (d) {
-        return FONT_AWESOME_ICON_UNICODE['user'];
+        return getNodeIcon( d );
       })
       .attr("fill", function () {
         return 'white';
@@ -1033,8 +1196,8 @@ function node_label_off( node ) {
       .attr("stroke", function () {
         return 'black';
       })
-      .attr("font-size", function () {
-        return '6pt';
+      .attr("font-size", function (d) {
+        return toggleNodeSelect(d, "font-size");
       })
       .attr("stroke-width", "0.5px")
       .style("opacity", function () {
@@ -1043,7 +1206,7 @@ function node_label_off( node ) {
   }
 }
 
-function all_node_label_on() {
+function allNodeLabelOn() {
   node_label_enabled = true;
 
   d3.selectAll("#graph_email svg text")
@@ -1067,7 +1230,7 @@ function all_node_label_on() {
     });
 }
 
-function node_label_on(node) {
+function nodeLabelOn(node) {
   if (node) {
 
     d3.select(node).select("svg text")
@@ -1093,10 +1256,10 @@ function node_label_on(node) {
 }
 
 
-function node_highlight(email){
+function setNodeHighlight( email ) {
   var group_ID;
   if (email) {
-    console.log('node_highlight(' + email + ')');
+    console.log('setNodeHighlight(' + email + ')');
     var node_list = d3.selectAll("circle").filter(function (d) {
       //console.log('\td: ' + JSON.stringify(d, null, 2));
       return (d && d.name == email);
@@ -1775,6 +1938,7 @@ $(function () {
 
 
     newman_graph_email.initUI();
+    app_tree_email.initUI();
 
     /*
     function parseHash(newHash, oldHash) {

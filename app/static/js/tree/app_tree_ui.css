@@ -1,0 +1,61 @@
+.tree-overlay {
+    /*background-color: #B5D0D0;*/
+    background-color: #CDE6F0;
+    opacity: 0.9;
+}
+
+.tree-node {
+    cursor: pointer;
+}
+
+.tree-node circle {
+    fill: #FFFFFF;
+    stroke: steelblue;
+    stroke-width: 1.0px;
+}
+
+.tree-node text {
+    font: 10px sans-serif;
+    /*fill: steelblue;*/
+}
+
+.tree-link {
+    cursor: pointer;
+    fill: none;
+    /*stroke: #FFFFFF;*/ /* white */
+    stroke: rgba(70, 130, 180, 0.50); /* stealblue at 0.5 alpha */
+    stroke-width: 1.0px;
+}
+
+.tree-link:hover {
+    stroke-width: 3.0px;
+}
+
+.tree-link-highlight {
+    cursor: pointer;
+    fill: none;
+    /*stroke: #FF0000;*/
+    /*stroke: #FFEC00;*/ /* default text highlight */
+    stroke: #FFD900;
+    stroke-width: 1.0px;
+}
+
+.tree-link-highlight:hover {
+    stroke-width: 3.0px;
+}
+
+.tree-temp-link {
+    fill: none;
+    stroke: red;
+    stroke-width: 1.25px;
+}
+
+.tree-ghost-circle.show {
+    display:block;
+}
+
+.tree-ghost-circle,
+.tree-active-drag
+.tree-ghost-circle {
+    display: none;
+}
