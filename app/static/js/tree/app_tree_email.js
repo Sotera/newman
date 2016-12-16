@@ -67,6 +67,18 @@ var app_tree_email = (function () {
     clearAllTree();
   }
 
+  function printNode( node ) {
+    var max_descendant_size = 0;
+    if (node) {
+      if (node.descendant_size > max_descendant_size) {
+        max_descendant_size = node.descendant_size;
+        console.log('descendant_size : ' + max_descendant_size);
+      }
+
+      app_tree_process_indicator.getStatusProcessingDuration();
+    }
+  }
+
   function getInterval( index ) {
     var _value;
     if (index >= 0) {
@@ -351,7 +363,7 @@ var app_tree_email = (function () {
     } // end-of if (doc_list && doc_list.length > 0)
 
     if (root) {
-      //console.log('descendant_size : ' + root.descendant_size);
+      printNode( root );
     }
 
     return root;
@@ -667,7 +679,7 @@ var app_tree_email = (function () {
   }
 
   function initHistoTreeMapping(callback) {
-    //setTimeout(function() {
+    setTimeout(function() {
       var node_id_list = newman_graph_email.getAllMarkedNodeID();
       if (node_id_list) {
         console.log('all_node_selected_list[' + node_id_list.length + ']\n' + JSON.stringify(node_id_list, null, 2));
@@ -683,7 +695,7 @@ var app_tree_email = (function () {
           }
         }
       }
-    //}, 6000);
+    }, 1000);
   }
 
   function initUI() {

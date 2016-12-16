@@ -30,6 +30,7 @@ var app_tree_ui_radial = (function () {
     var totalNodes = 0;
     var maxLabelLength = 0;
     // variables for drag/drop
+    var dragging = 0, dragX = 0, dragY = 0;
     var selectedNode = null;
     var draggingNode = null;
     // panning variables
@@ -46,10 +47,15 @@ var app_tree_ui_radial = (function () {
     var height = ui_max_height;
 
     var diameter = width;
+    var center_x = width / 2, center_y = height / 2;
 
     var tree = d3.layout.tree()
       .size([360, diameter / 2 - 120])
       .separation(function(a, b) {
+        if (a.depth == 0) { // if there is only root node
+          return 1;
+        }
+
         if (a.link_artifact_datetime == b.link_artifact_datetime) {
           return (a.parent == b.parent ? 1 : 2) / a.depth;
         }
@@ -63,8 +69,11 @@ var app_tree_ui_radial = (function () {
 
     // define the root
     root = tree_data;
-    root.x0 = height / 2;
-    root.y0 = 0;
+    //root.x0 = height / 2;
+    //root.y0 = 0;
+    root.x0 = center_x;
+    root.y0 = center_y;
+
 
     // Call visit function to establish maxLabelLength
     visit(tree_data, function(d) {
@@ -77,17 +86,40 @@ var app_tree_ui_radial = (function () {
     // Sort the tree initially incase the JSON isn't in a sorted order.
     sortTree();
 
+
+
+    var dragListener = d3.behavior.drag()
+      .on("drag", function() {
+        dragX = d3.event.dx;
+        dragY = d3.event.dy;
+      })
+      .on("dragstart", function() {
+        dragging = 1;
+      })
+      .on("dragend", function() {
+        dragging = 0;
+        dragX = 0;
+        dragY = 0;
+      });
+
     // define the zoomListener which calls the zoom function on the "zoom" event constrained within the scaleExtents
-    var zoomListener = d3.behavior.zoom().scaleExtent([0.1, 3]).on("zoom", zoom);
+    var zoomListener = d3.behavior.zoom()
+      .center([center_x, center_y])
+      .scaleExtent([0.1, 10])
+      .on("zoom", zoom);
+    zoomListener.translate([center_x, center_y]);
 
     // define the baseSvg, attaching a class for styling
     baseSVG = d3.select( tree_ui_jquery_id ).append("svg")
       .attr("width", width )
       .attr("height", height )
-      .call( zoomListener );
+      //.call( zoomListener );
+      .call( dragListener );
+
+    zoomListener( baseSVG );
 
     // Append a group which holds all nodes and which the zoom Listener can act upon.
-    var svgGroup = baseSVG.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+    var svgGroup = baseSVG.append("g").attr("transform", "translate(" + center_x + "," + center_y + ")");
 
     // Collapse all children of root's children before rendering.
     if (root.children) {
@@ -330,11 +362,11 @@ var app_tree_ui_radial = (function () {
 
     // Function to center node when clicked/dropped so node doesn't get lost when collapsing/moving with large amount of children.
     function centerNode(source) {
-      scale = zoomListener.scale();
+      var scale = zoomListener.scale();
       x = -source.y0;
       y = -source.x0;
-      x = x * scale + width / 2;
-      y = y * scale + height / 2;
+      x = x * scale + center_x;
+      y = y * scale + center_y;
       d3.select('g').transition()
         .duration(duration)
         .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
@@ -464,7 +496,59 @@ var app_tree_ui_radial = (function () {
 
     // Define the zoom function for the zoomable tree
     function zoom() {
-      svgGroup.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
+      //svgGroup.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
+
+      var zoom_level = zoomListener.scale();
+
+      var position = d3.event.translate;
+      var new_translate_x = position[0];
+      var new_translate_y = position[1];
+      if (debug_enabled) {
+        console.log('position[0] : ' + new_translate_x + ', position[1] : ' + new_translate_y + ', zoom : ' + zoom_level);
+      }
+      //var diff_x = new_translate_x - center_x, diff_y = new_translate_y - center_y;
+      //var distance = Math.sqrt(diff_x * diff_x + diff_y * diff_y); // distance formula
+
+      if (Number.isNaN( new_translate_x ) || Number.isNaN( new_translate_y )) {
+        new_translate_x = position[center_x];
+        new_translate_y = position[center_y];
+
+        console.log('adjusted position[0] : ' + new_translate_x + ', adjusted position[1] : ' + new_translate_y);
+      }
+
+      svgGroup.attr("transform", "translate(" + position + ") scale(" + d3.event.scale + ")");
+
+      /*
+      if (distance > 100) {
+
+        position = d3.mouse(this);
+        zoom_level = d3.event.scale;
+
+        var d3_transform = d3.transform(svgGroup.attr("transform"));
+        var d3_transform_translate = d3_transform.translate;
+        var d3_transform_scale = d3_transform.scale;
+        console.log('d3_transform_scale[0] : ' + d3_transform_scale[0] + ', d3_transform_scale[1] : ' + d3_transform_scale[1]);
+
+        var transform_x = d3_transform_translate[0];
+        var transform_y = d3_transform_translate[1];
+
+        var mx = position[0] - center_x;
+        var my = position[1] - center_y;
+        console.log('mx : ' + mx + ', my : ' + my);
+
+        var dx = (mx - transform_x - dragX) / d3_transform_scale[0];
+        var dy = (my - transform_y - dragY) / d3_transform_scale[1];
+
+        var dx2 = (mx - dx) / zoom_level - dx;
+        var dy2 = (my - dy) / zoom_level - dy;
+
+        console.log('dx : ' + dx + ', dy : ' + dy);
+
+        var transform = "translate(" + dx + "," + dy + ")scale(" + zoom_level + ")translate(" + dx2 + "," + dy2 + ")"
+        svgGroup.attr("transform", transform);
+      }
+      */
+
     }
 
     // visit recursively all nodes and perform based on callback functions
