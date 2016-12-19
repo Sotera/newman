@@ -1,5 +1,6 @@
 {
-  "version" : "3.0.0",
+  "version" : "3.0.1",
+  "root_context" : "newman",
   "default_data_set_id" : ".newman-auto",
   "default_min_timeline_bound": "2001-01-01",
   "default_max_timeline_bound": "2014-01-01",
@@ -16,7 +17,7 @@
     "host" : "localhost",
     "port" : 5984,
     "database" : "offline-tiles",
-    "cache_only" : true,
+    "cache_only" : false,
     "advance_mode" : false,
     "cache_override" : false 
   },
@@ -36,9 +37,9 @@
       "default_min_timeline_bound": "2001-01-01",
       "default_max_timeline_bound": "2014-01-01",
       "excluded" : true
-    }
+    },
+    "newman-test" : { "excluded" : false }
   },
-
   "validation_config" : {
     "email_search_response" : false
   },

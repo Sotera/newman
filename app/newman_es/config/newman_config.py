@@ -3,18 +3,18 @@ from app import app
 
 def application_properties():
     return {
-        'version': app.config["newman"].get('version'),
-        'default_data_set_id': app.config["newman"].get('default_data_set_id'),
-        'default_min_timeline_bound': app.config["newman"].get('default_min_timeline_bound'),
-        'default_max_timeline_bound': app.config["newman"].get('default_max_timeline_bound'),
-        'default_timeline_interval': app.config["newman"].get('default_timeline_interval'),
-        'default_timeline_span' : app.config["newman"].get('default_timeline_span'),
-        'elasticsearch_config' : app.config["newman"].get('elasticsearch_config'),
-        'data_set_defaults' : app.config["newman"].get('data_set_defaults'),
-        'index_creator_defaults' : app.config["newman"].get('index_creator_defaults'),
-        'tile_cache_config' : app.config["newman"].get('tile_cache_config'),
-        'validation_config' : app.config["newman"].get('validation_config'),
-        'display_config' : app.config["newman"].get('display_config')
+        'version': app.config["root_context"].get('version'),
+        'default_data_set_id': app.config["root_context"].get('default_data_set_id'),
+        'default_min_timeline_bound': app.config["root_context"].get('default_min_timeline_bound'),
+        'default_max_timeline_bound': app.config["root_context"].get('default_max_timeline_bound'),
+        'default_timeline_interval': app.config["root_context"].get('default_timeline_interval'),
+        'default_timeline_span' : app.config["root_context"].get('default_timeline_span'),
+        'elasticsearch_config' : app.config["root_context"].get('elasticsearch_config'),
+        'data_set_defaults' : app.config["root_context"].get('data_set_defaults'),
+        'index_creator_defaults' : app.config["root_context"].get('index_creator_defaults'),
+        'tile_cache_config' : app.config["root_context"].get('tile_cache_config'),
+        'validation_config' : app.config["root_context"].get('validation_config'),
+        'display_config' : app.config["root_context"].get('display_config')
     }
 
 def getDisplayConfig():
