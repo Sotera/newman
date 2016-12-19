@@ -6,16 +6,50 @@
 var node_context_menu = [
 
   {
-    title: function(element, d, i) {
-      return element.name;
+    title: function(element) {
+      //console.log('element:\n' + JSON.stringify(element, null, 2));
+
+      if (element.is_selected === true) {
+        return '<i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;' + element.name;
+      }
+      return '<i class="fa fa-square-o" aria-hidden="true"></i>&nbsp;' + element.name;
     },
     action: function(element, d, i) {
-      //console.log('node-clicked search-by-email');
+
+      console.log('node-selected  "' + d.name + '" ' + d.is_selected);
+
+      //toggle select
+      if (d.is_selected === true) {
+        d.is_selected = false;
+
+        newman_graph_email.removeMarkedNode( d );
+        setNodeSelected( d.name, false );
+
+      }
+      else {
+        d.is_selected = true;
+
+        /*
+        var prev_node_of_interest = newman_graph_email.getAllNodeSelected();
+        if (prev_node_of_interest && (prev_node_of_interest.name != d.name)) {
+          prev_node_of_interest.is_selected = false;
+
+          setNodeSelected(prev_node_of_interest.name, false);
+        }
+        */
+
+        newman_graph_email.addMarkedNode( d );
+        setNodeSelected( d.name, true );
+
+      }
+
       //console.log('element:\n' + JSON.stringify(element, null, 2));
+      //console.log('d:\n' + JSON.stringify(d, null, 2));
+
     }
   },
   {
-    title: function(element, d, i) {
+    title: function(element) {
       return '<i class="fa fa-envelope"></i> Search Emails';
     },
     action: function(element, d, i) {
@@ -31,7 +65,7 @@ var node_context_menu = [
     }
   },
   {
-    title: function(element, d, i) {
+    title: function(element) {
       return '<i class="fa fa-paperclip"></i> Search Attachments';
     },
     action: function(element, d, i) {
@@ -48,7 +82,7 @@ var node_context_menu = [
     }
   },
   {
-    title: function(element, d, i) {
+    title: function(element) {
       return '<i class="fa fa-users"></i> Search Community';
     },
     action: function(element, d, i) {
@@ -76,6 +110,8 @@ var newman_graph_email = (function () {
 
   var _top_count;
 
+  var _node_marked_map = {};
+
   var _all_source_node = {};
   var _all_source_node_selected = {};
   var _all_target_node = {};
@@ -86,6 +122,67 @@ var newman_graph_email = (function () {
   var _dataset_color_map = {};
   var _color_scale_0 = d3.scale.category20c();
   var _color_scale_1 = d3.scale.category20b();
+
+  function getAllMarkedNodeID() {
+    var key_list, value_list;
+    if(_.size(_node_marked_map) > 0) {
+      key_list = [];
+      value_list = _.values(_node_marked_map);
+      value_list = sortArrayAscending( value_list, 'time_stamp' );
+
+      //remove time stamp
+      _.each(value_list, function(value, index) {
+        key_list.push( value.name );
+        delete value.time_stamp;
+      });
+    }
+    return key_list;
+  }
+
+  function getAllMarkedNode() {
+    var value_list;
+    if(_.size(_node_marked_map) > 0) {
+      value_list = _.values(_node_marked_map);
+      value_list = sortArrayAscending( value_list, 'time_stamp' );
+
+      //remove time stamp
+      _.each(value_list, function(value, index) {
+        delete value.time_stamp;
+      });
+    }
+    return value_list;
+  }
+
+  function clearAllMarkedNode() {
+    console.log('clearAllMarkedNode()');
+
+    clearNodeSelected();
+    app_tree_email.toggleTreeButtonEnabled( false );
+    _node_marked_map = {};
+  }
+
+  function removeMarkedNode( node ) {
+    delete _node_marked_map[ node.name ];
+
+    if (_.isEmpty(_node_marked_map)) { // removed the last element
+      app_tree_email.toggleTreeButtonEnabled( false );
+    }
+  }
+
+  function addMarkedNode( node ) {
+    if (node) {
+      console.log('addNodeSelected( ' + node.name + ' )');
+      var local_copy = clone( node );
+      local_copy['time_stamp'] = Date.now();
+      //console.log(JSON.stringify(local_copy, null, 2));
+
+      if (_.isEmpty(_node_marked_map)) { // adding the first element
+        app_tree_email.toggleTreeButtonEnabled( true );
+      }
+
+      _node_marked_map[local_copy.name] = local_copy;
+    }
+  }
 
   function getNodeDataset( node_id ) {
     var element = _node_dataset_map[node_id];
@@ -274,7 +371,7 @@ var newman_graph_email = (function () {
     });
 
     $("#usetext").on("change", function () {
-      toggle_labels();
+      toggleLabels();
     });
 
     $("#rankval").click(function () {
@@ -614,15 +711,16 @@ var newman_graph_email = (function () {
 
     // populate data-table
     $('#document_count').text(filtered_response.query_hits);
-    console.log('email_docs[ ' + search_response.rows.length + ' ]');
+    console.log('email_docs[ ' + filtered_response.rows.length + ' ]');
     newman_email_doc_table.populateDataTable( filtered_response.rows );
+    app_tree_email.loadDocument( filtered_response.rows );
 
     if (starred_email_doc_list ) {
       newman_email_doc_table.setStarredEmailDocumentList( starred_email_doc_list );
     }
 
     // populate attachment-table
-    console.log('attachment_docs[ ' + search_response.attachments.length + ' ]');
+    console.log('attachment_docs[ ' + filtered_response.attachments.length + ' ]');
     newman_email_attach_table.onRequestEmailAttachList( filtered_response.attachments );
 
     // initialize to blank
@@ -673,7 +771,12 @@ var newman_graph_email = (function () {
     'appendAllTargetNodeSelected' : appendAllTargetNodeSelected,
     'displayUITab' : displayUITab,
     'getNodeDatasetColor' : getNodeDatasetColor,
-    'getDatasetColor' : getDatasetColor
+    'getDatasetColor' : getDatasetColor,
+    'getAllMarkedNode' : getAllMarkedNode,
+    'getAllMarkedNodeID' : getAllMarkedNodeID,
+    'clearAllMarkedNode' : clearAllMarkedNode,
+    'removeMarkedNode' : removeMarkedNode,
+    'addMarkedNode' : addMarkedNode
   }
 
 }());

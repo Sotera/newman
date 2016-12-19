@@ -4,7 +4,18 @@
 			d3.contextMenu = factory(d3);
 			return d3.contextMenu;
 		};
-	} else {
+	} else if(typeof define === 'function' && define.amd) {
+		try {
+			var d3 = require('d3');
+		} catch (e) {
+			d3 = root.d3;
+		}
+
+		d3.contextMenu = factory(d3);
+		define([], function() {
+			return d3.contextMenu;
+		});
+	} else if(root.d3) {
 		root.d3.contextMenu = factory(root.d3);
 	}
 }(	this, 
@@ -41,13 +52,40 @@
 				var elm = this;
 
 				d3.selectAll('.d3-context-menu').html('');
-				var list = d3.selectAll('.d3-context-menu').append('ul');
+				var list = d3.selectAll('.d3-context-menu')
+					.on('contextmenu', function(d) {
+						d3.select('.d3-context-menu').style('display', 'none'); 
+		  				d3.event.preventDefault();
+						d3.event.stopPropagation();
+					})
+					.append('ul');
 				list.selectAll('li').data(typeof menu === 'function' ? menu(data) : menu).enter()
 					.append('li')
+					.attr('class', function(d) {
+						var ret = '';
+						if (d.divider) {
+							ret += ' is-divider';
+						}
+						if (d.disabled) {
+							ret += ' is-disabled';
+						}
+						if (!d.action) {
+							ret += ' is-header';
+						}
+						return ret;
+					})
 					.html(function(d) {
+						if (d.divider) {
+							return '<hr>';
+						}
+						if (!d.title) {
+							console.error('No title attribute set. Check the spelling of your options.');
+						}
 						return (typeof d.title === 'string') ? d.title : d.title(data);
 					})
 					.on('click', function(d, i) {
+						if (d.disabled) return; // do nothing if disabled
+						if (!d.action) return; // headers have no "action"
 						d.action(elm, data, index);
 						d3.select('.d3-context-menu').style('display', 'none');
 

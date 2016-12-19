@@ -458,7 +458,7 @@ var newman_email_doc_view = (function () {
     sender_anchor.append( sender_checkbox );
 
 
-    var from_hover = node_highlight(contents.from);
+    var from_hover = setNodeHighlight(contents.from);
     sender_anchor.on('mouseover', from_hover.highlight);
     sender_anchor.on('mouseout', from_hover.unhighlight);
 
@@ -480,7 +480,7 @@ var newman_email_doc_view = (function () {
       email_html.append($('<p>').append($('<span>').addClass('bold').text( recipient[0]+ ': '))
         .append(
           _.map(emails, function(address_text){
-            var hover = node_highlight(address_text);
+            var hover = setNodeHighlight(address_text);
             var span = $('<span>').text(address_text);
             //var address_extracted = extractEmailAddress( address_text );
             var address_extracted = address_text;
