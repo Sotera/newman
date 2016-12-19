@@ -21,7 +21,7 @@ def getEmail(email_id):
 
 #TODO email aggregation
 #GET <host>:<port>:/email/domains?data_set_id=<data_set>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
-@app.route('/email/domains/')
+@app.route('/email/domains')
 def getDomains():
     data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     qs = parseParamTextQuery(request.args)
