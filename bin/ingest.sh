@@ -17,6 +17,7 @@ FORCE_LANGUAGE=$7
 #TODO REMOVE this!
 EXTRACTOR_HOME=/srv/software/newman-etl/
 
+export SPARK_HOME=/usr/lib/spark/
 
 echo "Extractor home set to ${EXTRACTOR_HOME}"
 echo "INGEST_ID=${INGEST_ID}"
