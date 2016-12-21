@@ -1,6 +1,7 @@
 from app import app
 from flask import jsonify, request
 from werkzeug.exceptions import BadRequest, NotFound
+from urllib import unquote
 
 from newman_es.es_search import es_get_all_email_by_community, _search, es_get_all_email_by_topic, es_get_conversation, es_get_all_email_by_conversation_forward_backward, _es_get_all_attachment_hash
 from param_utils import parseParamDatetime, parseParamIngestIds, parseParamAllSenderAllRecipient, parseParamEmailSender, parseParamEmailRecipient, parseParamEmailAddressList, parseParamTopic, parseParamTextQuery,\
@@ -22,15 +23,21 @@ def search(request, mode, email_address=''):
 
     #re-direct based on field
     if mode == "all" :
-        return jsonify(_search(data_set_id=data_set_id, email_address=None, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size, _from=_from))
+        return jsonify(_search(data_set_id=data_set_id, email_address=None,          qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size, _from=_from))
     elif mode == "email":
         return jsonify(_search(data_set_id=data_set_id, email_address=email_address, qs=qs, start_datetime=start_datetime, end_datetime=end_datetime, encrypted=encrypted, size=size, _from=_from))
     return jsonify({"graph":{"nodes":[], "links":[]}, "rows":[]})
 
 
+# TODO remove path param!
 # GET <host>:<port>:/search/search/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
 @app.route('/search/search/email/<string:email_address>')
 def search_emails(email_address):
+    email_address = unquote(email_address)
+    if not email_address:
+        email_addrs = parseParamEmailAddressList(request.args)
+        # Should only be 1 in here
+        email_address = email_addrs[0]
     return search(request, 'email', email_address)
 
 @app.route('/search/search/all')
@@ -99,6 +106,7 @@ def search_email_by_conversation():
 #GET <host>:<port>:/search/search_by_community/<community_name>?data_set_id=<data_set>&sender=<>&recipients=<>&start_datetime=<yyyy-mm-dd>&end_datetime=<yyyy-mm-dd>&size=<top_count>
 @app.route('/search/search_email_by_community/<string:community>')
 def search_email_by_community(community):
+    community = unquote(community)
     data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
     size = size if size >500 else 2500
 

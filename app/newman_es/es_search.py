@@ -1,6 +1,10 @@
 from app import app
+from flask import request, url_for
 from threading import Lock
+from urllib import quote
+
 import time
+
 
 from es_connection import es
 from es_queries import _build_email_query
@@ -148,6 +152,43 @@ def _build_graph_for_emails(data_set_id, docs):
     return resp
 
 
+def _search_url(data_set_id, email_address, qs, start_datetime, end_datetime, encrypted, size, _from=0):
+    '''
+    Generate a `
+    :param data_set_id:
+    :param email_address:
+    :param qs:
+    :param start_datetime:
+    :param end_datetime:
+    :param encrypted:
+    :param size:
+    :param _from:
+    :return: escaped search url string
+    '''
+    root_context=''
+    if 'HTTP_X_FORWARDED_HOST' in request.headers.environ:
+        host = request.headers.environ.get('HTTP_X_FORWARDED_HOST')
+        host_tokens = host.split(":")
+        if host_tokens[1] == '443':
+            base_url = "https://"+ host_tokens[0] + ("/" + root_context if root_context else '')
+    else:
+        base_url = "http://" + request.headers.environ.get('HTTP_HOST') + ("/" + root_context if root_context else '')
+
+    service_path = "search/search/email/void" if email_address else "search/search/all"
+
+    return u"{0}/{1}?data_set_id={2}&qs={3}&email_address={4}&encrypted={5}&size={6}&from={7}&start_datetime={8}&end_datetime={9}".format(
+        base_url,
+        service_path,
+        data_set_id,
+        quote(qs.encode("utf-8")) if qs else '',
+        quote(email_address.encode("utf-8")) if email_address else '',
+        encrypted if encrypted else '',
+        size,
+        _from,
+        start_datetime,
+        end_datetime
+    )
+
 def _search(data_set_id, email_address, qs, start_datetime, end_datetime, encrypted, size, _from=0):
     app.logger.debug("email_address=%s, qs=%s" % ((str(email_address)), qs))
     email_addrs=[email_address] if email_address else None
@@ -171,16 +212,24 @@ def _search(data_set_id, email_address, qs, start_datetime, end_datetime, encryp
     graph["from"] = _from
     return graph
 
-def _search_summary(data_set_id, email_address, qs, start_datetime, end_datetime, encrypted, size):
+def _search_summary(data_set_id, email_address, qs, start_datetime, end_datetime, encrypted, size,_from=0):
     app.logger.debug("email_address=%s, qs=%s" % ((str(email_address)), qs))
     pre_search_results = {}
 
     email_addrs=[email_address] if email_address else None
 
+    url = _search_url(data_set_id,email_address,qs,start_datetime,end_datetime,encrypted,size,_from)
+    # app.logger.debug("graph url: %s" % (url))
+    # url = quote(url.encode('utf-8'))
+    # app.logger.debug("graph url quotes: %s" % (url))
+
+
     if not email_address:
         query  = _build_email_query(email_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
         app.logger.debug("query: %s" % (query))
+
         pre_search_results["emails_total"] = _count_emails(data_set_id, query)["total"]
+        pre_search_results["url"] = url
         pre_search_results["emails_sent"] =""
         pre_search_results["emails_received"] =""
 
@@ -188,6 +237,7 @@ def _search_summary(data_set_id, email_address, qs, start_datetime, end_datetime
         senders_query  = _build_email_query(sender_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
         app.logger.debug("senders query: %s" % (senders_query))
         pre_search_results["emails_sent"] = _count_emails(data_set_id, senders_query)["total"]
+        pre_search_results["url"] = url
 
         rcvr_query  = _build_email_query(recipient_addrs=email_addrs, qs=qs, date_bounds=(start_datetime, end_datetime), encrypted=encrypted)
         app.logger.debug("rcvr query: %s" % (rcvr_query))
