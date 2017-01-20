@@ -16,6 +16,27 @@ from newman_es.es_series import get_email_activity, get_total_attachment_activit
 from newman_es.es_topic import get_categories, get_dynamic_clusters
 from newman_es.es_numeric_aggregations import get_top_phone_numbers
 
+
+from datetime import datetime
+from dateutil import relativedelta
+
+
+def _interval_bounds(str_date1, str_date2, max_minor_ticks=200):
+    # dates must be in format 'yyyy-mm-dd'
+    date1 = datetime.strptime(str_date1, '%Y-%m-%d')
+    date2 = datetime.strptime(str_date2, '%Y-%m-%d')
+    r = relativedelta.relativedelta(date2, date1)
+    if(r.days > max_minor_ticks):
+        return "day"
+    elif(r.days / 7 > max_minor_ticks):
+        return 'week'
+    elif(r.months > max_minor_ticks):
+        return 'month'
+    elif(r.years/4 > max_minor_ticks):
+        return 'quarter'
+    else:
+        return 'year'
+
 #GET <host>:<port>:/entity/entity?entities.entity_person=mike,joe&entities.entity_location=paris,los angeles
 @app.route('/entity/entity')
 def get_graph_for_entity():
@@ -123,6 +144,12 @@ def getAccountActivity():
 
     email_address_list = parseParamEmailAddress(request.args);
 
+    # TODO set from UI based on rendering area
+    max_minor_ticks=200
+
+    interval = _interval_bounds(start_datetime, end_datetime, max_minor_ticks)
+    # interval = 'week'
+    
     if not email_address_list :
         result = {"account_activity_list" :
                   [
@@ -131,7 +158,7 @@ def getAccountActivity():
                     "data_set_id" : data_set_id,
                     "account_start_datetime" : start_datetime,
                     "account_end_datetime" : end_datetime,
-                    "activities" : get_email_activity(data_set_id, data_set_id, date_bounds=(start_datetime, end_datetime), interval="week")
+                    "activities" : get_email_activity(data_set_id, data_set_id, date_bounds=(start_datetime, end_datetime), interval=interval)
                    }
                   ]
                  }
@@ -143,7 +170,7 @@ def getAccountActivity():
                     "data_set_id" : data_set_id,
                     "account_start_datetime" : start_datetime,
                     "account_end_datetime" : end_datetime,
-                    "activities" : get_email_activity(data_set_id, data_set_id, account_id, date_bounds=(start_datetime, end_datetime), interval="week")
+                    "activities" : get_email_activity(data_set_id, data_set_id, account_id, date_bounds=(start_datetime, end_datetime), interval=interval)
                    } for account_id in email_address_list
                   ]
                  }
