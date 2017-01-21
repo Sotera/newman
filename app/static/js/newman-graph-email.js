@@ -156,7 +156,7 @@ var newman_graph_email = (function () {
   function clearAllMarkedNode() {
     console.log('clearAllMarkedNode()');
 
-    clearNodeSelected();
+    app_graph_ui.clearAllNodeSelected();
     app_tree_email.toggleTreeButtonEnabled( false );
     _node_marked_map = {};
   }
@@ -329,8 +329,9 @@ var newman_graph_email = (function () {
     $('#txt_search').keyup(function (event) {
 
       if (event.keyCode === 13) {
-        newman_datetime_range.setDatetimeBounds( newman_activity_email.getDatetimeBounds() );
-        searchByField();
+        //newman_datetime_range.setDatetimeBounds( newman_activity_email.getDatetimeBounds() );
+
+        app_graph_model.searchByField();
       }
       event.preventDefault();
     });
@@ -339,15 +340,14 @@ var newman_graph_email = (function () {
       return false;
     });
 
-    $('#email_group_conversation').on('click', group_email_conversation);
+    $('#email_group_conversation').on('click', onGroupConversation);
     //$('#email_view_export_all').on('click', add_view_to_export);
     //$('#email_view_export_all_remove').on('click', remove_view_from_export);
 
-    $('#top-entities').append(waiting_bar);
-
     $("#txt_search_submit").click(function () {
-      newman_datetime_range.setDatetimeBounds( newman_activity_email.getDatetimeBounds() );
-      searchByField();
+      //newman_datetime_range.setDatetimeBounds( newman_activity_email.getDatetimeBounds() );
+
+      app_graph_model.searchByField();
     });
 
     //on modal close event
@@ -357,38 +357,17 @@ var newman_graph_email = (function () {
     });
 
     $("#color_by_dataset").click(function () {
-      setGraphNodeColor('dataset_color');
+      app_graph_ui.switchGraphColorBy('dataset_color');
     });
 
     $("#color_by_community").click(function () {
       //console.log($("#color_by_community").val());
-      setGraphNodeColor('community_color');
+      app_graph_ui.switchGraphColorBy('community_color');
     });
 
     $("#color_by_domain").click(function () {
       //console.log($("#color_by_domain").val());
-      setGraphNodeColor('domain_color');
-    });
-
-    $("#usetext").on("change", function () {
-      toggleLabels();
-    });
-
-    $("#rankval").click(function () {
-      console.log(d3.select("#rankval").property("checked"));
-      if (d3.select("#rankval").property("checked")) {
-        d3.selectAll("circle").style("opacity", function (d) {
-          return 0.2 + (d.rank);
-        });
-        d3.selectAll("circle").style("stroke-width", function (d) {
-          return 5 * (d.rank);
-        });
-      }
-      else {
-        d3.selectAll("circle").style("opacity", "100");
-        d3.selectAll("circle").style("stroke-width", "0");
-      }
-      //setGraphNodeColor('rank');
+      app_graph_ui.switchGraphColorBy('domain_color');
     });
 
     $("#email_analytics_prev_button").on("click", function(e) {
@@ -422,53 +401,6 @@ var newman_graph_email = (function () {
       }
     }
   }
-
-  /* deprecated since v2.11 */
-  /*
-  var highlight_target = (function () {
-    var groupId = data_source_selected_map.group;
-    var rank = data_source_selected_map.rank;
-    var highlight = function () {
-      //graph
-      d3.select("#g_circle_" + groupId).style("stroke", "#ffff00");
-      d3.select("#g_circle_" + groupId).style("stroke-width", function (d) {
-        return 10;
-      });
-      //email-table
-      $('#result_table tbody tr td:nth-child(2)').each(function (i, el) {
-        if (data_source_selected_map.email.localeCompare(el.innerText.trim()) == 0) {
-          $(el).addClass('highlight-td');
-        }
-      });
-    }
-
-    var unhighlight = function () {
-      //graph
-      d3.select("#g_circle_" + groupId).style("stroke", "#ff0000");
-      if (d3.select("#rankval").property("checked")) {
-        d3.select("#g_circle_" + groupId).style("opacity", function (d) {
-          return 0.2 + (rank);
-        });
-        d3.select("#g_circle_" + groupId).style("stroke-width", function (d) {
-          return 5 * (rank);
-        });
-      }
-      else {
-        d3.select("#g_circle_" + groupId).style("opacity", "100");
-        d3.select("#g_circle_" + groupId).style("stroke-width", "0");
-      }
-      //email-table
-      $('#result_table tbody tr td:nth-child(2)').each(function (i, el) {
-        $(el).removeClass('highlight-td');
-      });
-    };
-
-    return {
-      'highlight': highlight,
-      'unhighlight': unhighlight
-    }
-  }());
-  */
 
 
   function getTopCount() {
@@ -723,33 +655,84 @@ var newman_graph_email = (function () {
     console.log('attachment_docs[ ' + filtered_response.attachments.length + ' ]');
     newman_email_attach_table.onRequestEmailAttachList( filtered_response.attachments );
 
-    // initialize to blank
-    updateUIInboundCount();
-    updateUIOutboundCount();
-
     // assign node color by data-source
     assignNodeColorByDataset( filtered_response.graph );
 
     // render graph display
-    drawGraph( filtered_response.graph );
+    app_graph_ui.initGraph( filtered_response.graph );
 
     // automatically highlight a document if applicable
     if (auto_display_doc_uid) {
       console.log( 'auto_display-document : ' + auto_display_doc_uid );
       // make email-document-content-view visible and open
-      bottom_panel.open();
+      email_doc_view_panel.open();
 
       newman_email_doc_table.highlightDataTableRow( auto_display_doc_uid );
     }
     else {
       // make email-document-content-view visible but closed
-      bottom_panel.close();
+      email_doc_view_panel.close();
 
       // clear existing content if any
       newman_email_doc_view.clearDocument();
     }
   }
 
+
+  function onGroupConversation() {
+
+    var arr= d3.select("#result_table").select("tbody").selectAll("tr").data();
+
+    var conv = function(s){
+      return s.toLowerCase().replace(/fw[d]?:/g,"").replace(/re:/g,"").trim();
+    };
+    var grouped = _.groupBy(arr, function(d){
+      return conv(d.subject);
+    });
+
+    var group_color = d3.scale.category20();
+    var c=0;
+
+    var conv_sorted = _.map(grouped, function(v, k){
+      var values = v.sort(function(a,b){
+        return a.datetime.localeCompare(b.datetime) * -1;
+      });
+      return [values[0].datetime, values, group_color(++c)];
+    });
+
+    var conv_reverse_sort = conv_sorted.sort(function(a,b){
+      return a[0].localeCompare(b[0]) * -1;
+    });
+
+    console.log(conv_reverse_sort);
+
+    //assign mapping of key to conversation_index;
+    var i=0;
+    var map = {};
+    _.each(conv_reverse_sort, function(values){
+      _.each(values[1], function(v){
+        map[v.num] = { idx: ++i, color: values[2] };
+      });
+    });
+
+    d3.select("#result_table").select("tbody").selectAll("tr").sort(function(a,b){
+      return map[a.num].idx - map[b.num].idx;
+    });
+
+    d3.select("#result_table").select("tbody").selectAll("tr").each(function(d){
+      var jqel = $(d3.select(this)[0]).find("td:first-child").first();
+      // if this was already tagged removed it
+      jqel.find(".conversation-group").remove();
+      jqel.prepend($("<div>")
+        .height(15)
+        .width(8)
+        .addClass("conversation-group")
+        .css("float","left")
+        .css("margin-right", "2px")
+        .css("background-color", map[d.num].color));
+    });
+
+  }
 
   return {
     'initUI' : initUI,

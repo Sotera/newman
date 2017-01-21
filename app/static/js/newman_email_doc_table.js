@@ -505,7 +505,7 @@ var newman_email_doc_table = (function () {
     newman_graph_email.clearAllNodeSelected();
 
     // make email-document-content-view visible and open
-    bottom_panel.open();
+    email_doc_view_panel.open();
 
 
     var email_url = 'email/email/' + encodeURIComponent(email_id);
