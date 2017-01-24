@@ -23,7 +23,7 @@ var node_context_menu = [
         d.is_selected = false;
 
         newman_graph_email.removeMarkedNode( d );
-        setNodeSelected( d.name, false );
+        app_graph_ui.setNodeSelected( d.name, false );
 
       }
       else {
@@ -34,12 +34,12 @@ var node_context_menu = [
         if (prev_node_of_interest && (prev_node_of_interest.name != d.name)) {
           prev_node_of_interest.is_selected = false;
 
-          setNodeSelected(prev_node_of_interest.name, false);
+         app_graph_ui.setNodeSelected(prev_node_of_interest.name, false);
         }
         */
 
         newman_graph_email.addMarkedNode( d );
-        setNodeSelected( d.name, true );
+        app_graph_ui.setNodeSelected( d.name, true );
 
       }
 
@@ -512,7 +512,7 @@ var newman_graph_email = (function () {
     }
   }
 
-  function setNodeSelected(key, role, value, is_selected, refresh_ui) {
+  function setEmailAccountSelected(key, role, value, is_selected, refresh_ui) {
     if (role) {
       if (key && role && value) {
 
@@ -739,7 +739,7 @@ var newman_graph_email = (function () {
     'setHeaderLabelEmailAnalytics' : setHeaderLabelEmailAnalytics,
     'updateUIGraphView' : updateUIGraphView,
     'getTopCount' : getTopCount,
-    'setNodeSelected' : setNodeSelected,
+    'setEmailAccountSelected' : setEmailAccountSelected,
     'onNodeClicked' : onNodeClicked,
     'clearAllSourceNodeSelected' : clearAllSourceNodeSelected,
     'clearAllTargetNodeSelected' : clearAllTargetNodeSelected,

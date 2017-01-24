@@ -462,7 +462,7 @@ var newman_email_doc_view = (function () {
       'style': 'margin: 2px 2px 2px 2px;'
     });
     console.log('sender_checkbox : checked,  id : ' + sender_checkbox.prop('id') + ', value : ' + sender_checkbox.prop('value'));
-    newman_graph_email.setNodeSelected(sender_checkbox.prop('value'), 'source', sender_checkbox.prop('id'), true, false);
+    newman_graph_email.setEmailAccountSelected(sender_checkbox.prop('value'), 'source', sender_checkbox.prop('id'), true, false);
     sender_anchor.append( sender_checkbox );
 
     sender_anchor.on('mouseover', app_graph_ui.toggleNodeHighlight( true, contents.from ));
@@ -515,12 +515,12 @@ var newman_email_doc_view = (function () {
                     newman_graph_email.clearAllTargetNodeSelected();
                   }
 
-                  newman_graph_email.setNodeSelected(attr_value, 'target', attr_id, true, false);
+                  newman_graph_email.setEmailAccountSelected(attr_value, 'target', attr_id, true, false);
                 }
                 else { //unchecked
                   console.log('checkbox : unchecked, id : ' + attr_id + ', value : ' + attr_value);
 
-                  newman_graph_email.setNodeSelected(attr_value, 'target', attr_id, false, false);
+                  newman_graph_email.setEmailAccountSelected(attr_value, 'target', attr_id, false, false);
 
                   // for now, only allow one email recipient
                   newman_graph_email.clearAllTargetNodeSelected();

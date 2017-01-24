@@ -6,7 +6,7 @@
 var app_graph_ui = (function () {
   var debug_enabled = false;
 
-  var is_graph_highlight_by_rank_on = false, is_graph_node_label_on = false;
+  var is_graph_node_label_on = false, is_graph_highlight_by_rank_on = false;
 
   var graph_ui_id = 'graph_email';
   var graph_ui_jquery_id = '#' + graph_ui_id;
@@ -1082,7 +1082,8 @@ var app_graph_ui = (function () {
 
     if (isHidden()) {
 
-      app_tree_ui_radial.close();
+      //app_tree_ui_radial.close();
+      app_tree_ui.close();
 
       //graph_ui_jquery_id.fadeToggle('fast');
       graph_ui_jquery.show();
