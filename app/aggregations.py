@@ -18,21 +18,20 @@ from newman_es.es_numeric_aggregations import get_top_phone_numbers
 
 
 from datetime import datetime
-from dateutil import relativedelta
 
 
 def _interval_bounds(str_date1, str_date2, max_minor_ticks=200):
     # dates must be in format 'yyyy-mm-dd'
     date1 = datetime.strptime(str_date1, '%Y-%m-%d')
     date2 = datetime.strptime(str_date2, '%Y-%m-%d')
-    r = relativedelta.relativedelta(date2, date1)
-    if(r.days > max_minor_ticks):
+    delta_days = (date2 - date1).days
+    if(delta_days < max_minor_ticks):
         return "day"
-    elif(r.days / 7 > max_minor_ticks):
+    elif(delta_days / 7 < max_minor_ticks):
         return 'week'
-    elif(r.months > max_minor_ticks):
+    elif(delta_days / 30 < max_minor_ticks):
         return 'month'
-    elif(r.years/4 > max_minor_ticks):
+    elif(delta_days / (365.0/4.0) < max_minor_ticks):
         return 'quarter'
     else:
         return 'year'
@@ -145,11 +144,11 @@ def getAccountActivity():
     email_address_list = parseParamEmailAddress(request.args);
 
     # TODO set from UI based on rendering area
-    max_minor_ticks=200
+    max_minor_ticks=800
 
     interval = _interval_bounds(start_datetime, end_datetime, max_minor_ticks)
     # interval = 'week'
-    
+
     if not email_address_list :
         result = {"account_activity_list" :
                   [
