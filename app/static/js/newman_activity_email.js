@@ -322,9 +322,11 @@ var newman_activity_email = (function () {
               inbound_data_set.push((-1) * inbound_value);
 
               timeline_dates.push(activity.interval_start_datetime);
+              /*
               if (index == 0) {
                 start_datetime = activity.interval_start_datetime;
               }
+              */
 
               activity_data_value_max = _getMaxValue(activity_data_value_max, outbound_value, inbound_value);
               //console.log('activity_data_value_max = ' + activity_data_value_max);
@@ -466,7 +468,7 @@ var newman_activity_email = (function () {
     }
 
     if (debug_enabled) {
-      //console.log('setDatetimeBounds(' + activity_datetime_start + ', ' + activity_datetime_end + ')');
+      console.log('setDatetimeBounds(' + activity_datetime_start + ', ' + activity_datetime_end + ')');
     }
 
     if (!is_initialized) {
@@ -496,10 +498,10 @@ var newman_activity_email = (function () {
     newman_datetime_range.setDatetimeMaxSelected( activity_datetime_end );
 
     // re-initialize dashboard components and widgets
-    initDashboardCharts();
+    app_dashboard.initDashboardCharts();
 
     // re-initialize search
-    searchByField();
+    app_graph_model.searchByField();
   }
 
   function applyAllDefault() {

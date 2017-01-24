@@ -148,11 +148,9 @@ var newman_top_email_account = (function () {
           return d.email;
         })
         .on("click", function (d) {
-          console.log('clicked on \'' + d.rank + '\'');
+          console.log('clicked on \'' + d.email + ', ' + d.rank + '\'');
 
-          //setSearchType('email');
-          //$("#txt_search").val(d.email);
-          do_search(true, 'email', d.email);
+          app_graph_model.requestSearch( 'email', d.email, true );
 
         })
         .on("mouseover", function (d) {
@@ -163,7 +161,7 @@ var newman_top_email_account = (function () {
         })
         .on("mouseout", function (d) {
           d3.select("#g_circle_" + d.groupId).style("stroke", "#ff0000");
-          if (d3.select("#rankval").property("checked")) {
+          if (d3.select("#rank_highlight_checkbox").property("checked")) {
             d3.select("#g_circle_" + d.groupId).style("opacity", function (d) {
               return 0.2 + (d.rank);
             });

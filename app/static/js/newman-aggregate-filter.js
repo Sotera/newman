@@ -30,13 +30,13 @@ var newman_aggregate_filter = (function () {
   function refreshUI() { // update/reload UI components
 
     //trigger activities-overtime refresh
-    reloadDashboardActivityTimeline( true );
+    app_dashboard.reloadDashboardActivityTimeline( true );
 
     //trigger entities refresh
-    reloadDashboardTopEmailEntities();
+    app_dashboard.reloadDashboardTopEmailEntities();
 
     //trigger topics refresh
-    reloadDashboardTopEmailTopics();
+    app_dashboard.reloadDashboardTopEmailTopics();
 
   }
 

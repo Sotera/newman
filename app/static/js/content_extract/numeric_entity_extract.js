@@ -9,6 +9,10 @@ var numeric_entity_extract = (function () {
   // search result cache
   var _numeric_entity_search_map = {};
 
+  function getAllSearchByNumericEntityKey() {
+    return _.keys(_numeric_entity_search_map);
+  }
+
   function clearAllSearchByNumericEntity() {
     if (debug_enabled) {
       console.log('numeric_entity_extract.clearAllSearchByNumericEntity()');
@@ -121,6 +125,7 @@ var numeric_entity_extract = (function () {
     'getServiceURL' : getServiceURL,
     'requestService' : requestService,
     'clearAllSearchByNumericEntity' : clearAllSearchByNumericEntity,
+    'getAllSearchByNumericEntityKey' : getAllSearchByNumericEntityKey,
     'getSearchByNumericEntity' : getSearchByNumericEntity
   }
 

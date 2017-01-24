@@ -445,11 +445,14 @@ var app_tree_email = (function () {
 
     if (tree_root) {
       // for debug purpose only
+      /*
       if (tree_root.descendant_size <= _doc_interval_min_size) {
         console.log('tree:\n' + JSON.stringify(tree_root, null, 2));
       }
+      */
 
-      app_tree_ui_radial.initRadialTree( tree_root );
+      //app_tree_ui_radial.initRadialTree( tree_root );
+      app_tree_ui.initTree( tree_root );
     }
     else {
       console.log('tree_root undefined or null!');
@@ -700,7 +703,8 @@ var app_tree_email = (function () {
 
   function initUI() {
 
-    app_tree_ui_radial.clearAll();
+    //app_tree_ui_radial.clearAll();
+    app_tree_ui.clearAll();
 
     $(toggle_view_ui_jquery_id).change(function () {
       if (this.checked) {
@@ -709,7 +713,9 @@ var app_tree_email = (function () {
         }
 
         app_graph_ui.close();
-        app_tree_ui_radial.open();
+
+        //app_tree_ui_radial.open();
+        app_tree_ui.open();
 
         app_tree_process_indicator.setStatusProcessing( true );
 
@@ -723,7 +729,9 @@ var app_tree_email = (function () {
 
         cancelNewTree();
 
-        app_tree_ui_radial.close();
+        //app_tree_ui_radial.close();
+        app_tree_ui.close();
+
         app_graph_ui.open();
 
       }

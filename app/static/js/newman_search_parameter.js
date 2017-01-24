@@ -181,7 +181,9 @@ var newman_search_parameter = (function () {
 
     if(_search_filter_selected && label) {
       if(_search_filter_selected.label === label) {
-        //console.log( 'search-filter \'' + label + '\' already selected!' );
+        if (debug_enabled) {
+          console.log( 'search-filter \'' + label + '\' already selected!' );
+        }
         return;
       }
     }
@@ -196,25 +198,9 @@ var newman_search_parameter = (function () {
       $('#search_filter_selected').find('.dropdown-toggle').html( '<i class=\"fa fa-check-square-o\"></i> ' +
                                                                   '<i class=\"' + _search_filter_selected.icon_class + '\"></i> ' + label );
 
-      // TODO: depreciated logic to be clean up
-      /*
-      var search_result_root = search_result.getRoot();
-      if (search_result_root) {
-        search_result.setRoot(search_result_root.label,
-                              search_result_root.search_text,
-                              search_result_root.search_field,
-                              search_result_root.description,
-                              search_result_root.url,
-                              search_result_root.data_source_id,
-                              search_result_root.data_source_category,
-                              search_result_root.document_count,
-                              search_result_root.associate_count,
-                              search_result_root.attach_count,
-                              _search_filter_selected.icon_class);
-      }
-      */
 
-      if (propagate_enabled) {
+
+      if (propagate_enabled === true) {
         //TODO: propagate other events, e.g. make service call if needed
       }
 
@@ -229,12 +215,14 @@ var newman_search_parameter = (function () {
     return clone(_search_filter_selected);
   }
 
-  function appendFilter( url_path, search_text ) {
+  function appendURLField( url_path, search_field, search_text ) {
 
     if (url_path) {
       if (url_path.endsWith('/')) {
         url_path = url_path.substring(0, url_path.length - 1);
       }
+
+      setSelectedFilter( search_field );
 
       var search_filter_label = _search_filter_selected_default_label;
       var search_filter = getSelectedFilter();
@@ -242,7 +230,7 @@ var newman_search_parameter = (function () {
         search_filter_label = search_filter.label;
       }
       else {
-        console.log( 'No search-filter selected! Defaulting to \'' + search_filter_label + '\'' );
+        console.log( 'No search-filter selected! Defaulting to \'' + _search_filter_selected_default_label + '\'' );
       }
 
       url_path = trimURLPath( url_path );
@@ -254,9 +242,12 @@ var newman_search_parameter = (function () {
         url_path += '/' + search_filter_label;
       }
 
+      // to be deprecated; no search query should be part of the url
+      /*
       if (search_text) {
         url_path += '/' + search_text;
       }
+      */
     }
 
     return url_path;
@@ -331,7 +322,7 @@ var newman_search_parameter = (function () {
     return _search_filter_selected_default_label;
   }
 
-  function appendURL(url_path, param_key) {
+  function appendURL(url_path, param_key, query_override) {
 
     if (url_path) {
 
@@ -340,6 +331,10 @@ var newman_search_parameter = (function () {
       }
 
       var search_text = getSearchText();
+
+      if (query_override) {
+        search_text = query_override;
+      }
 
       if (search_text) {
         //search_text = toUnicode( search_text ); //convert text to unicode
@@ -362,8 +357,12 @@ var newman_search_parameter = (function () {
     return url_path;
   }
 
-  function appendURLQuery(url_path) {
-    return appendURL(url_path, 'qs');
+  function appendURLQuery(url_path, query_override) {
+    var filter = getSelectedFilter();
+    if (filter.label === 'email') {
+      return appendURL(url_path, 'email_address', encodeURIComponent(query_override));
+    }
+    return appendURL(url_path, 'qs', query_override);
   }
 
   function getSearchText() {
@@ -391,7 +390,7 @@ var newman_search_parameter = (function () {
     "resetSelectedFilter" : resetSelectedFilter,
     "setSelectedFilter" : setSelectedFilter,
     "getSelectedFilter" : getSelectedFilter,
-    "appendFilter" : appendFilter,
+    "appendURLField" : appendURLField,
     "getFilterDefaultID" : getFilterDefaultID,
     "initFilter" : initFilter,
     "parseFilter" : parseFilter,

@@ -26,6 +26,10 @@ var app_tree_ui_radial = (function () {
       return;
     }
 
+    // size of the diagram
+    var width = ui_max_width;
+    var height = ui_max_height;
+
     // calculate total nodes, max label length
     var totalNodes = 0;
     var maxLabelLength = 0;
@@ -41,10 +45,6 @@ var app_tree_ui_radial = (function () {
     //var duration = 750;
     var duration = 350;
     var root;
-
-    // size of the diagram
-    var width = ui_max_width;
-    var height = ui_max_height;
 
     var diameter = width;
     var center_x = width / 2, center_y = height / 2;

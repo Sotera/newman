@@ -6,7 +6,7 @@
  * date-time range related container
  */
 var newman_datetime_range = (function () {
-  var debug_enabled = true;
+  var debug_enabled = false;
 
   var _datetime_min;
   var _datetime_max;
@@ -17,11 +17,16 @@ var newman_datetime_range = (function () {
   var _datetime_max_default = newman_config_datetime.getDatetimeEnd();
 
   var setDatetimeMinSelected = function (new_min_text) {
+    if (debug_enabled) {
+      console.log('setDatetimeMinSelected( ' + new_min_text + ' )');
+    }
     _datetime_min_selected = new_min_text;
   };
 
   var setDatetimeMaxSelected = function (new_max_text) {
-
+    if (debug_enabled) {
+      console.log('setDatetimeMaxSelected( ' + new_max_text + ' )');
+    }
     _datetime_max_selected = new_max_text;
   };
 
@@ -130,10 +135,10 @@ var newman_datetime_range = (function () {
         //console.log("date-range {" +  getDatetimeMinText() + ', ' + getDatetimeMinText() + "}");
 
         //re-initialize search
-        searchByField();
+        app_graph_model.searchByField();
 
         // re-initialize dashboard components and widgets
-        initDashboardCharts();
+        app_dashboard.initDashboardCharts();
 
       });
 

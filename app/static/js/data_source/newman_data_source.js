@@ -680,8 +680,6 @@ var newman_data_source = (function () {
     // initialize data-extract-tables
     app_text_extract_table.requestExtractPhoneList();
 
-    // initialize search-result UI
-    search_result.setUI($('#search_result_container'));
     // initialize data tree-table events
     newman_search_result_collection.initTreeTableEvent();
     // build data tree-table nodes
@@ -701,13 +699,13 @@ var newman_data_source = (function () {
     newman_top_email_entity_list_request.requestTopEmailEntityByDataSource( getAllSelectedAsString() );
 
     // re-initialize dashboard components and widgets
-    initDashboardCharts( true );
+    app_dashboard.initDashboardCharts( true );
 
     // clear search text
     newman_search_parameter.clearSearchText();
 
     // re-initialize search
-    searchByField();
+    app_graph_model.searchByField();
     //newman_data_source_service.requestDataSourceSummary();
 
     // re-initialize geo components and widgets
@@ -800,7 +798,7 @@ var newman_data_source = (function () {
       //console.log('_response_map: ' + JSON.stringify(_response_map, null, 2));
 
       // clear all graph-search cache if any
-      app_graph_search_request.clearAllGraphResponse();
+      app_graph_model_service.clearAllServiceResponse();
 
       // initialize search-filter
       newman_search_parameter.initFilter();

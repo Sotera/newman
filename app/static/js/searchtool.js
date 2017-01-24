@@ -350,7 +350,7 @@ var search_result = (function () {
     if (element) {
       app_nav_history.appendHist(element.url, element.search_field, element.label);
 
-      loadSearchResult(element.url);
+      app_graph_model.loadSearchResult(element.url);
     }
   }
 
@@ -511,65 +511,7 @@ var search_result = (function () {
 
     newUI( _current_list );
 
-    /*
-    if (ui_appendable) {
-      console.log('result_set[' + result_set.length + ']');
 
-      clearUI();
-
-      //sort by ranking
-      result_set.sort( descendingPredicatByProperty( 'rank' ) );
-
-      _.each(result_set, function (element) {
-        //console.log('\t' + element.label + ', ' + element.url );
-
-        var button = $('<button />', {
-          type: 'button',
-          class: 'btn btn-small outline',
-          html: element.label,
-          value: element.key,
-          id: element.key,
-          on: {
-            click: function () {
-              console.log( 'search-item-selected : ' + this.id);
-
-              var label = ' all';
-              if(element.search_text) {
-                label = ' ' + decodeURIComponent(element.search_text);
-              }
-              var id = decodeURIComponent( element.url ).replace(/\s/g, '_').replace(/\\/g, '_').replace(/\//g, '_').replace(',','_');
-
-              app_nav_history.push(id,
-                               label,
-                               '',
-                               element.url,
-                               element.search_field);
-
-              showSearchPopup( element.search_field, element.search_text );
-              loadSearchResult( element.url );
-            }
-          }
-        });
-
-        var div = $( '<div class=\"one-result\" />' )
-          .append( button )
-          .append(
-          "<a href=\"" + element.url + "\" class=\"txt-primary\">" +
-          "<p class=\"txt-primary\">" + "    " +
-          "<i class=\"fa fa-envelope-o \"></i>" + "  document  " + element.document_count + "  " +
-          "<i class=\"fa fa-expand \"></i>" + "  sent  " + element.document_sent + "  " +
-          "<i class=\"fa fa-compress \"></i>" + "  received  " + element.document_received + "  " +
-          "<i class=\"fa fa-user \"></i>" + "  account  " + element.associate_count + "  " +
-          "</p>" +
-          "</a>"
-          );
-
-        ui_appendable.append( div );
-
-      }); // end of _.each
-
-    }
-    */
 
 
   };

@@ -316,8 +316,8 @@ function dragended(d){
   d3.select(this).classed("fixed", d.fixed = true);
 }
 
-function setGraphNodeColor(color_category) {
-  console.log('setGraphNodeColor(' + color_category + ')');
+function switchGraphColorBy(color_category) {
+  console.log('switchGraphColorBy(' + color_category + ')');
   if (color_category == 'dataset_color') {
     drawGraphLegendTableDataset();
     d3.selectAll("circle").style("fill", function(d) {
@@ -370,12 +370,12 @@ function searchByEntity(entityid, type, value){
     });
 }
 
-
+// see newman_email_doc_view.js:600
 function onEntityClicked(entity_key, entity_type) {
   newman_top_email_entity.onEntityClicked(entity_key, entity_type);
 }
 
-
+// see newman-graph-email.js:342
 function group_email_conversation(){
 
   var arr= d3.select("#result_table").select("tbody").selectAll("tr").data();
@@ -618,7 +618,7 @@ function requestSearch(field, search_text, load_on_response, parent_search_uid, 
 
 
   newman_search_parameter.setSelectedFilter(field);
-  service_url = newman_search_parameter.appendFilter(service_url, search_text);
+  service_url = newman_search_parameter.appendURLField(service_url, search_text);
   service_url = newman_search_parameter.appendURLQuery(service_url);
 
   if (alt_data_source) {
@@ -847,7 +847,7 @@ function drawGraph( graph ) {
     })
     .style("stroke","red")
     .style("stroke-width", function(d) {
-      if (d3.select("#rankval").property("checked")) {
+      if (d3.select("#rank_highlight_checkbox").property("checked")) {
         return 4 * d.rank;
       } else {
         return 0;
@@ -855,7 +855,7 @@ function drawGraph( graph ) {
     })
     .call(force.drag)
     .style("opacity", function(d) {
-      if (d3.select("#rankval").property("checked")) {
+      if (d3.select("#rank_highlight_checkbox").property("checked")) {
         return 0.2 + (d.rank);
       } else {
         return "1";
@@ -992,7 +992,7 @@ function drawGraph( graph ) {
     });
   });
 
-  drawGraphLegend();
+  drawGraphLegendTable();
 }
 
 // handle node selected based on style property
@@ -1286,7 +1286,7 @@ function setNodeHighlight( email ) {
     if(group_ID) {
       //graph
       d3.select("#g_circle_" + group_ID).style("stroke", "#ff0000");
-      if (d3.select("#rankval").property("checked")) {
+      if (d3.select("#rank_highlight_checkbox").property("checked")) {
         d3.select("#g_circle_" + group_ID).style("opacity", function (d) {
           return 0.2 + (d.rank);
         });
@@ -1488,7 +1488,7 @@ function drawGraphLegendTableDataset() {
     })
     .on("mouseout", function(d, i){
       d3.selectAll("circle").style("stroke","#ff0000");
-      if (d3.select("#rankval").property("checked")) {
+      if (d3.select("#rank_highlight_checkbox").property("checked")) {
         d3.selectAll("circle").each(function(d, i){
           d3.select(this).style("opacity",function(d) { return 0.2 + (d.rank); });
           d3.select(this).style("stroke-width",function(d) { return 5 * (d.rank); });
@@ -1572,7 +1572,7 @@ function drawGraphLegendTableDomain() {
     })
     .on("mouseout", function(d, i){
       d3.selectAll("circle").style("stroke","#ff0000");
-      if (d3.select("#rankval").property("checked")) {
+      if (d3.select("#rank_highlight_checkbox").property("checked")) {
         d3.selectAll("circle").each(function(d, i){
           d3.select(this).style("opacity",function(d) { return 0.2 + (d.rank); });
           d3.select(this).style("stroke-width",function(d) { return 5 * (d.rank); });
@@ -1648,7 +1648,7 @@ function drawGraphLegendTableCommunity() {
     })
     .on("mouseout", function(d, i){
       d3.selectAll("circle").style("stroke","#ff0000");
-      if (d3.select("#rankval").property("checked")) {
+      if (d3.select("#rank_highlight_checkbox").property("checked")) {
         d3.selectAll("circle").each(function(d, i){
           d3.select(this).style("opacity",function(d) { return 0.2 + (d.rank); });
           d3.select(this).style("stroke-width",function(d) { return 5 * (d.rank); });
@@ -1676,7 +1676,7 @@ function drawGraphLegendTableCommunity() {
     });
 } // end-of drawGraphLegendTableCommunity
 
-function drawGraphLegend() {
+function drawGraphLegendTable() {
 
   if ($('#color_by_dataset').prop('checked')) {
     drawGraphLegendTableDataset();
@@ -1785,7 +1785,7 @@ var email_analytics_content = (function () {
         dashboard_content.close();
       }
 
-      //bottom_panel.show();
+      //email_doc_view_panel.show();
 
       //email_container.fadeToggle('fast');
       email_container.show();
@@ -1850,7 +1850,7 @@ $(function () {
     email_analytics_content.close();
 
     // close existing data-table displays if applicable
-    //bottom_panel.close();
+    //email_doc_view_panel.close();
     bottom_panel.hide();
 
     // initialize navigation-history

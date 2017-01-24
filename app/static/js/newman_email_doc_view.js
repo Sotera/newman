@@ -6,6 +6,15 @@ var newman_email_doc_view = (function () {
 
   var _document_id = null, _document_datetime = null;
 
+  var waiting_bar = $(
+    '<img>',
+    {
+      'src': 'imgs/loading-cylon.svg',
+      'width': 256,
+      'height': 32
+    })
+    .css('padding-top', 10);
+
   function setDocumentID( doc_id ) {
     _document_id = doc_id;
   }
@@ -264,7 +273,6 @@ var newman_email_doc_view = (function () {
 
   function initEvents() {
 
-
     $("#toggle_mark_for_export").off().click(function () {
       console.log("clicked toggle_mark_for_export");
       if (!_document_id) {
@@ -454,13 +462,11 @@ var newman_email_doc_view = (function () {
       'style': 'margin: 2px 2px 2px 2px;'
     });
     console.log('sender_checkbox : checked,  id : ' + sender_checkbox.prop('id') + ', value : ' + sender_checkbox.prop('value'));
-    newman_graph_email.setNodeSelected(sender_checkbox.prop('value'), 'source', sender_checkbox.prop('id'), true, false);
+    newman_graph_email.setEmailAccountSelected(sender_checkbox.prop('value'), 'source', sender_checkbox.prop('id'), true, false);
     sender_anchor.append( sender_checkbox );
 
-
-    var from_hover = setNodeHighlight(contents.from);
-    sender_anchor.on('mouseover', from_hover.highlight);
-    sender_anchor.on('mouseout', from_hover.unhighlight);
+    sender_anchor.on('mouseover', app_graph_ui.toggleNodeHighlight( true, contents.from ));
+    sender_anchor.on('mouseout',  app_graph_ui.toggleNodeHighlight( false, contents.from ));
 
     email_html.append(
       $('<p>')
@@ -480,8 +486,8 @@ var newman_email_doc_view = (function () {
       email_html.append($('<p>').append($('<span>').addClass('bold').text( recipient[0]+ ': '))
         .append(
           _.map(emails, function(address_text){
-            var hover = setNodeHighlight(address_text);
-            var span = $('<span>').text(address_text);
+
+            var span = $('<span>').text( address_text );
             //var address_extracted = extractEmailAddress( address_text );
             var address_extracted = address_text;
 
@@ -509,12 +515,12 @@ var newman_email_doc_view = (function () {
                     newman_graph_email.clearAllTargetNodeSelected();
                   }
 
-                  newman_graph_email.setNodeSelected(attr_value, 'target', attr_id, true, false);
+                  newman_graph_email.setEmailAccountSelected(attr_value, 'target', attr_id, true, false);
                 }
                 else { //unchecked
                   console.log('checkbox : unchecked, id : ' + attr_id + ', value : ' + attr_value);
 
-                  newman_graph_email.setNodeSelected(attr_value, 'target', attr_id, false, false);
+                  newman_graph_email.setEmailAccountSelected(attr_value, 'target', attr_id, false, false);
 
                   // for now, only allow one email recipient
                   newman_graph_email.clearAllTargetNodeSelected();
@@ -540,8 +546,8 @@ var newman_email_doc_view = (function () {
               span.append(checkbox);
             }
 
-            span.on('mouseover', hover.highlight);
-            span.on('mouseout', hover.unhighlight);
+            span.on('mouseover', app_graph_ui.toggleNodeHighlight( true, address_text ));
+            span.on('mouseout', app_graph_ui.toggleNodeHighlight( false, address_text ));
             return span;
           })
         ));
@@ -634,14 +640,14 @@ var newman_email_doc_view = (function () {
 
     }
 
-    email_html.find(".mitie").each(function(i,el){
+    email_html.find(".mitie").each(function(i,el) {
       var jqel = $(el);
       jqel.on('click', _.partial(searchByEntity, jqel.attr('mitie-id'), jqel.attr('mitie-type'), jqel.attr('mitie-value')));
     });
 
     //highlight searched text
-    if (searchType() == 'all'){
-      email_html.highlight($('#txt_search').val());
+    if (newman_search_parameter.getSearchText()) {
+      email_html.highlight( newman_search_parameter.getSearchText() );
     }
 
     // exportable text (when email is initially loaded)
@@ -683,6 +689,11 @@ var newman_email_doc_view = (function () {
     return html_text;
   }
 
+
+  function onEntityClicked(entity_key, entity_type) {
+    newman_top_email_entity.onEntityClicked(entity_key, entity_type);
+  }
+
   return {
     'getDocumentID' : getDocumentID,
     'setDocumentID' : setDocumentID,
@@ -701,3 +712,143 @@ var newman_email_doc_view = (function () {
 }());
 
 
+/**
+ * email document view panel container
+ */
+
+var email_doc_view_panel= (function(){
+
+  var parent_container = $('#container_main');
+  var container_ui_id = 'container-email-doc-view';
+  var container = $('#'+container_ui_id);
+  var width_as_percent_initial;
+  var width_as_percent_min = 40.4;
+  var width_as_percent_mid = 61.2;
+  var width_as_percent_max = 71.4;
+
+  var toggle_display_button_ui_id = 'button-toggle-container-email-doc-view';
+  var toggle_display_button = $('#' + toggle_display_button_ui_id);
+  var h_panel_expand_button_ui_id = 'toggle_h_expand_panel';
+  var h_panel_expand_button = $('#' + h_panel_expand_button_ui_id);
+
+  //var table_panel = $('#bottom-panel-toggle div:first-child div:nth-child(2)').first();
+
+  var icon_class_open = "glyphicon-chevron-up";
+  var icon_class_close = "glyphicon-chevron-down";
+
+  var is_panel_visible = false;
+
+  var open = function() {
+    is_panel_visible = true;
+    show();
+
+    toggle_display_button.find("span").first().switchClass(icon_class_open, icon_class_close);
+    container.css("height", "calc(100% - 140px)").css("bottom", "0px"); // height : 100% - 140px(top-menu)
+
+    // hide graph-visual-filter-panel
+    newman_graph_email_visual_filter.hide();
+  };
+
+  var close = function() {
+    is_panel_visible = false;
+
+    toggle_display_button.find("span").first().switchClass(icon_class_close, icon_class_open);
+    container.css("bottom", "calc(160px - 100%)"); // offset : 140px(top-menu) + 20px(toggle-button)
+
+    // display graph-visual-filter-panel
+    newman_graph_email_visual_filter.show();
+  }
+
+  var hide = function(){
+    container.css("display", "none");
+
+    is_panel_visible = false;
+  }
+
+  var show = function(){
+    container.css("display", "block");
+
+    if (!width_as_percent_initial) {
+      width_as_percent_initial = getContainerWidthAsPercent();
+    }
+
+    is_panel_visible = true;
+  }
+
+  function isOpen() {
+    return is_panel_visible;
+    //return _.contains(container.find("span").first().attr('class').split(/\s+/), icon_class_close);
+  };
+
+  function toggle (){
+    if (isOpen()) {
+      //console.log('\tcurrently visible');
+      close();
+    }
+    else {
+      //console.log('\tcurrently not visible');
+      open();
+    }
+  }
+
+  function getContainerWidthAsPercent() {
+    var container_width = container.width();
+    //var parent_width = container.offsetParent().width(); // immediate parent container in the DOM
+    var parent_width = parent_container.width();
+    var percent = roundNumber( (100 * (container_width / parent_width)), 1 );
+
+    console.log('#' + container_ui_id + ' : width : ' + percent + '%');
+    return percent;
+  }
+
+  function init() {
+    initEvents();
+    hide();
+  }
+  function initEvents() {
+
+    toggle_display_button.on('click', function(event) {
+      console.log('clicked ' + toggle_display_button_ui_id);
+
+      toggle();
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      event.stopPropagation();
+    });
+
+    h_panel_expand_button.on('click', function(event) {
+      console.log('clicked ' + h_panel_expand_button_ui_id);
+
+      var width_percent = getContainerWidthAsPercent();
+      if (width_percent == width_as_percent_min || width_percent == width_as_percent_initial) {
+        container.css("width", width_as_percent_mid+"%");
+      }
+      else if (width_percent == width_as_percent_mid || (width_percent > width_as_percent_min && width_percent < width_as_percent_max)) {
+        container.css("width", width_as_percent_max+"%");
+      }
+      else if (width_percent == width_as_percent_max || width_percent > width_as_percent_mid) {
+        container.css("width", width_as_percent_min+"%");
+      }
+      else {
+        console.log('default to min-width : ' + width_as_percent_min + '%');
+        container.css("width", width_as_percent_min+"%");
+      }
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      event.stopPropagation();
+    });
+
+  }
+
+  return {
+    'init' : init,
+    'open' : open,
+    'close' : close,
+    'toggle' : toggle,
+    'isOpen' : isOpen,
+    'hide' : hide,
+    'show' : show
+  };
+}());

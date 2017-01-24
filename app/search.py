@@ -29,16 +29,29 @@ def search(request, mode, email_address=''):
     return jsonify({"graph":{"nodes":[], "links":[]}, "rows":[]})
 
 
-# TODO remove path param!
-# GET <host>:<port>:/search/search/<fields>/<arg>/<arg>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
+# Deprecated; TODO remove path param!
+# GET <host>:<port>:/search/search/<fields>/<email_address>/?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
 @app.route('/search/search/email/<string:email_address>')
 def search_emails(email_address):
+        
     email_address = unquote(email_address)
-    if not email_address:
-        email_addrs = parseParamEmailAddressList(request.args)
-        # Should only be 1 in here
-        email_address = email_addrs[0]
+    
+    #app.logger.info('EMAIL_ADDRESS: ' + email_address)
     return search(request, 'email', email_address)
+
+# TODO remove path param!
+# GET <host>:<port>:/search/search/<fields>?data_set_id=<id>&start_datetime=<datetime>&end_datetime=<datetime>
+@app.route('/search/search/email')
+def search_by_emails():
+    
+    email_addrs = parseParamEmailAddressList(request.args)
+    # Should only be 1 in here
+    email_address = email_addrs[0]
+    email_address = unquote(email_address)
+    
+    #app.logger.info('EMAIL_ADDRESS: ' + email_address)
+    return search(request, 'email', email_address)
+
 
 @app.route('/search/search/all')
 def search_all():

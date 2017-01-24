@@ -293,6 +293,9 @@ var app_text_extract_table = (function () {
       else {
         console.log("search-response NOT found...\nre-requesting '" + url_key + "'");
 
+        var keys = numeric_entity_extract.getAllSearchByNumericEntityKey();
+        console.log(JSON.stringify(keys, null, 2));
+
       }
 
     }
