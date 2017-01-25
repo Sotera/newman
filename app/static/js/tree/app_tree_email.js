@@ -4,9 +4,6 @@
 var app_tree_email = (function () {
   var debug_enabled = true;
 
-  var _service_url = 'search/search/all';
-
-
   var toggle_view_ui_id = 'tree_view_checkbox';
   var toggle_view_ui_jquery_id = '#' + toggle_view_ui_id;
 
@@ -61,6 +58,7 @@ var app_tree_email = (function () {
     if (_doc_interval_list.length > 0) {
       _doc_interval_list.length = 0;
     }
+
     _node_interval_index_map = {};
 
     clearAllNodeSelected();
@@ -194,25 +192,26 @@ var app_tree_email = (function () {
     return root;
   }
 
-  function getEmailRecipientMap( email_document ) {
+  function getEmailRecipientMap( element ) {
     var recipient_map = {};
 
-    if (email_document) {
-      var sender = email_document.from;
-      if (email_document.to) {
-        var to_recipient_text  = email_document.to;
+    if (element) {
+      var email_doc = element.doc;
+      var sender = email_doc.from;
+      if (email_doc.to) {
+        var to_recipient_text  = email_doc.to;
         if (to_recipient_text) {
           var to_recipient_list = to_recipient_text.split(';');
           _.each(to_recipient_list, function (recipient) {
 
-            recipient_map[recipient] = email_document;
+            recipient_map[recipient] = element;
 
           });
         }
       }
 
-      if (email_document.cc) {
-        var cc_recipient_text = email_document.cc;
+      if (email_doc.cc) {
+        var cc_recipient_text = email_doc.cc;
         if (cc_recipient_text) {
           var cc_recipient_list = cc_recipient_text.split(';');
           _.each(cc_recipient_list, function (recipient) {
@@ -220,12 +219,13 @@ var app_tree_email = (function () {
 
             }
             else {
-              recipient_map[recipient] = email_document;
+              recipient_map[recipient] = element;
             }
           });
         }
       }
 
+      /*
       if (email_document.bcc) {
         var bcc_recipient_text = email_document.bcc;
         if (bcc_recipient_text) {
@@ -235,11 +235,12 @@ var app_tree_email = (function () {
 
             }
             else {
-              recipient_map[recipient] = email_document;
+              recipient_map[recipient] = element;
             }
           });
         }
       }
+      */
 
     }
 
@@ -299,8 +300,8 @@ var app_tree_email = (function () {
     return node;
   }
 
-  function newSubTree( node_id, doc_list, start_index ) {
-    //console.log('newSubTree( ' + node_id + ', ' + start_index + ' )');
+  function newSubTree( node_id, doc_list, start_index, start_datetime_value ) {
+    console.log('newSubTree( ' + node_id + ', ' + start_index + ',' + start_datetime_value + ' )');
 
     var root;
 
@@ -310,41 +311,65 @@ var app_tree_email = (function () {
 
     if (!start_index || start_index < 0) {
       start_index = 0;
+      start_datetime_value = doc_list[start_index].doc_datetime_value;
     }
+
+    if (start_datetime_value == 0) {
+      start_datetime_value = doc_list[start_index].doc_datetime_value;
+    }
+
 
     if (doc_list && doc_list.length > 0) {
 
-      var recipient_map = {};
+      var recipient_list = [];
 
       _.each(doc_list, function (element, element_index) {
+
         if (element_index >= start_index) {
-          if (element.from && element.from == node_id) {
+          if (element.doc_datetime_value >= start_datetime_value) {
 
-            if (!root) {
-              root = newNode(node_id, element_index);
-            }
+            var doc = element.doc;
+            if (doc.from == node_id) {
+              //console.log('element_index : ' + element_index + ', doc:\n' + JSON.stringify(element, null, 2));
 
-            mergeObjectTo( recipient_map, getEmailRecipientMap( element ) );
+              if (!root) {
+                root = newNode(node_id, element_index);
+              }
 
-          } // end-of if (element.from && element.from == node_id)
+              var recipient_map = getEmailRecipientMap(element);
+              _.each(recipient_map, function (element, recipient_id) {
+                var child_element = element;
+                child_element['child_node_id'] = recipient_id;
+                recipient_list.push( child_element );
+              });
+
+            } // end-of if (doc.from == node_id)
+          }
         }// end-of if (element_index >= start_index)
       });
 
       if (root) {
 
-        var recipient_count = _.size( recipient_map), descendant_count = 0;
-        //console.log('recipient_map[ ' + recipient_count + ' ]');
+        var recipient_count = _.size(recipient_list), descendant_count = 0;
+        console.log('recipient_map[ ' + recipient_count + ' ]');
         //console.log(JSON.stringify(recipient_map, null, 2));
 
         if (recipient_count > 0) { // node contains children
 
-          _.each(recipient_map, function (link_artifact, recipient_id) {
+          recipient_list = sortArrayAscending( recipient_list, 'doc_datetime_value' );
 
-            var sub_tree_root = newSubTree(recipient_id, doc_list, (root.node_index + 1));
+          _.each(recipient_list, function (recipient_element, index) {
+            var link_artifact = recipient_element.doc;
+            var recipient_id = recipient_element.child_node_id;
+            var start_datetime_value = recipient_element.doc_datetime_value;
+
+            var sub_tree_root = newSubTree(recipient_id, doc_list, root.node_index, start_datetime_value);
             if (sub_tree_root) {
 
               attachChildNode(root, sub_tree_root, link_artifact);
               descendant_count += sub_tree_root.descendant_size + 1;
+
+              //console.log('recipient_id : ' + recipient_id + ', doc:\n' + JSON.stringify(recipient_element, null, 2));
             }
 
           });
@@ -352,7 +377,7 @@ var app_tree_email = (function () {
 
           root = newDatetimeRangeFactor( root );
 
-          recipient_map = {};
+          recipient_list = {};
         } // end-of if (recipient_map.length > 0)
         else {
           root.descendant_size = 0;
@@ -384,14 +409,16 @@ var app_tree_email = (function () {
       var found = false;
       _.each(doc_list, function (element, element_index) {
         if (!found && element_index >= start_index) {
+          var doc = element.doc;
           if (is_parent_node === true) {
-            if (node_id == element.from) {
+            if (node_id == doc.from) {
               node_index = element_index;
               found = true;
             }
           }
           else {
-            if (node_id == element.to || node_id == element.cc || node_id == element.bcc) {
+            //if (node_id == doc.to || node_id == doc.cc || node_id == doc.bcc) {
+            if (node_id == doc.to || node_id == doc.cc) {
               node_index = element_index;
               found = true;
             }
@@ -420,7 +447,8 @@ var app_tree_email = (function () {
 
     _.each(_doc_interval_list, function(interval, interval_index) {
       _.each(interval, function(element, element_index) {
-        var node_id = element.from;
+        var doc = element.doc;
+        var node_id = doc.from;
         if (node_id) {
           var existing_interval_index = _node_interval_index_map[ node_id ];
           if (!existing_interval_index) {
@@ -490,7 +518,10 @@ var app_tree_email = (function () {
             console.log('root-node-index[' + node_index + ']');
           }
           if (node_index >= 0) {
-            tree_root = newSubTree(root_node_id, interval, node_index);
+            var doc = interval[node_index];
+            console.log('first_doc:\n' + JSON.stringify(doc, null, 2));
+
+            tree_root = newSubTree(root_node_id, interval, node_index, 0);
             //console.log('tree:\n' + JSON.stringify(tree_root, null, 2));
 
 
@@ -602,13 +633,17 @@ var app_tree_email = (function () {
       var current_partition;
 
       _.each(element_list, function(element, index) {
+        var item = {
+          'doc' : clone(element),
+          'doc_datetime_value' : getDatetimeValue( element.datetime ),
+        }
 
         if (current_size_count < size) {
 
           if (!current_partition) {
             current_partition = [];
           }
-          current_partition.push( clone(element) );
+          current_partition.push( item );
 
           current_size_count++;
         }
@@ -617,7 +652,7 @@ var app_tree_email = (function () {
           partition_list.push( current_partition );
 
           current_partition = [];
-          current_partition.push( clone(element) );
+          current_partition.push( item );
 
           current_size_count = 1;
         }
@@ -642,9 +677,27 @@ var app_tree_email = (function () {
     return partition_list;
   }
 
+  function validateAllDocument( doc_list ) {
+    var validated_doc_list = [];
+    if (doc_list && doc_list.length > 0) {
+
+      _.each(doc_list, function (element, index) {
+
+        if (element.from && (element.to || element.cc) && element.datetime) {
+
+          validated_doc_list.push( element );
+        }
+
+      });
+
+    }
+    return validated_doc_list;
+  }
+
   function loadDocument( document_list ) {
     clearAllInterval();
 
+    document_list = validateAllDocument( document_list );
     var partition_list = partitionBySize( document_list, _doc_interval_default_size );
 
     _doc_interval_list = partition_list;
