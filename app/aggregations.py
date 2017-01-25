@@ -144,7 +144,7 @@ def getAccountActivity():
     email_address_list = parseParamEmailAddress(request.args);
 
     # TODO set from UI based on rendering area
-    max_minor_ticks=800
+    max_minor_ticks=812
 
     interval = _interval_bounds(start_datetime, end_datetime, max_minor_ticks)
     # interval = 'week'
