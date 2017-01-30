@@ -16,6 +16,15 @@ var app_tree_ui = (function () {
 
   var baseSVG, svgGroup;
 
+  var last_known_x, last_known_y;
+
+  function getNodeIcon( node_element ) {
+    if (node_element && node_element.is_selected === true) {
+      return (FONT_AWESOME_ICON_UNICODE['flag']);
+    }
+
+    return (FONT_AWESOME_ICON_UNICODE['user']);
+  }
 
   function toggleAllNodeLabel( label_on ) {
     if (baseSVG) {
@@ -70,7 +79,9 @@ var app_tree_ui = (function () {
     clearTree();
     initEvents();
 
+    var original_tree;
     if (tree_data) {
+      original_tree = clone(tree_data);
       if (debug_enabled) {
         console.log('tree:\n' + JSON.stringify(tree_data, null, 2));
       }
@@ -102,7 +113,8 @@ var app_tree_ui = (function () {
     var root;
 
     var diameter = width;
-    var center_x = width / 2, center_y = height / 2;
+    var center_x = (width / 2), center_y = (height / 2);
+    var init_x = (width / 4), init_y = (height / 4);
 
     var tree = d3.layout.tree()
       .size([height, width]);
@@ -115,10 +127,10 @@ var app_tree_ui = (function () {
 
     // define the root
     root = tree_data;
-    //root.x0 = height / 2;
-    //root.y0 = 0;
-    root.x0 = center_x;
-    root.y0 = center_y;
+    //root.x0 = center_x;
+    //root.y0 = center_y;
+    root.x0 = center_y;
+    root.y0 = 0;
 
     // Layout the tree initially and center on the root node.
     tree.nodes(root).forEach(function(d) {
@@ -144,114 +156,58 @@ var app_tree_ui = (function () {
     // Sort the tree initially incase the JSON isn't in a sorted order.
     sortTree();
 
-
-
     var dragListener = d3.behavior.drag()
-      .on("drag", function(d) {
-        if (d == root) {
-          return;
-        }
-        if (dragStarted) {
-          domNode = this;
-          initiateDrag(d, domNode);
-        }
+      .on("drag", function() {
 
-        // get coords of mouseEvent relative to svg container to allow for panning
-        relCoords = d3.mouse($('svg').get(0));
-        if (relCoords[0] < panBoundary) {
-          panTimer = true;
-          pan(this, 'left');
-        }
-        else if (relCoords[0] > ($('svg').width() - panBoundary)) {
-
-          panTimer = true;
-          pan(this, 'right');
-        }
-        else if (relCoords[1] < panBoundary) {
-          panTimer = true;
-          pan(this, 'up');
-        }
-        else if (relCoords[1] > ($('svg').height() - panBoundary)) {
-          panTimer = true;
-          pan(this, 'down');
-        }
-        else {
-          try {
-            clearTimeout(panTimer);
-          } catch (e) {
-
-          }
-        }
-
-        d.x0 += d3.event.dy;
-        d.y0 += d3.event.dx;
-        var node = d3.select(this);
-        node.attr("transform", "translate(" + d.y0 + "," + d.x0 + ")");
-        updateTempConnector();
+        dragX = d3.event.dx;
+        dragY = d3.event.dy;
       })
-      .on("dragstart", function(d) {
-        if (d == root) {
-          return;
-        }
-        dragStarted = true;
-        nodes = tree.nodes(d);
-        d3.event.sourceEvent.stopPropagation();
+      .on("dragstart", function() {
+
+        dragging = 1;
       })
-      .on("dragend", function(d) {
-        if (d == root) {
-          return;
-        }
-        domNode = this;
-        if (selectedNode) {
-          // now remove the element from the parent, and insert it into the new elements children
-          var index = draggingNode.parent.children.indexOf(draggingNode);
-          if (index > -1) {
-            draggingNode.parent.children.splice(index, 1);
-          }
-          if (typeof selectedNode.children !== 'undefined' || typeof selectedNode._children !== 'undefined') {
-            if (typeof selectedNode.children !== 'undefined') {
-              selectedNode.children.push(draggingNode);
-            }
-            else {
-              selectedNode._children.push(draggingNode);
-            }
-          }
-          else {
-            selectedNode.children = [];
-            selectedNode.children.push(draggingNode);
-          }
-          // Make sure that the node being added to is expanded so user can see added node is correctly moved
-          expand(selectedNode);
-          sortTree();
-          endDrag();
-        }
-        else {
-          endDrag();
-        }
+      .on("dragend", function() {
+
+        dragging = 0;
+        dragX = 0;
+        dragY = 0;
       });
 
     // define the zoomListener which calls the zoom function on the "zoom" event constrained within the scaleExtents
-    var zoomListener = d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", zoom);
+    var zoomListener = d3.behavior.zoom()
+      //.center([center_x, center_y])
+      //.center([init_x, init_y])
+      .scaleExtent([0.1, 10])
+      .on("zoom", zoom);
+
+    //zoomListener.translate([center_x, center_y]);
+    zoomListener.translate([init_x, init_y]);
 
     // define the baseSvg, attaching a class for styling
     baseSVG = d3.select( tree_ui_jquery_id ).append("svg")
       .attr("width", width )
       .attr("height", height )
-      .call( zoomListener );
+      //.call( zoomListener );
+      .call( dragListener );
+
+    zoomListener( baseSVG );
 
     // Append a group which holds all nodes and which the zoom Listener can act upon.
-    svgGroup = baseSVG.append("g").attr("transform", "translate(" + center_x + "," + center_y + ")");
+    //svgGroup = baseSVG.append("g").attr("transform", "translate(" + center_x + "," + center_y + ")");
+    svgGroup = baseSVG.append("g").attr("transform", "translate(" + init_x + "," + init_y + ")");
 
     // Collapse all children of root's children before rendering.
+    /*
     if (root.children) {
       root.children.forEach(function (child) {
         collapse(child);
       });
     }
+    */
     //root.children.forEach(collapse); // start with all children collapsed
 
+    expandAll(); // start with all children expanded
     // layout the tree initially and center on the root node
-    update(root);
     d3.select(self.frameElement).style("height", width + 'px');
 
     function update(source) {
@@ -259,6 +215,7 @@ var app_tree_ui = (function () {
       // This prevents the layout looking squashed when new nodes are made visible or looking sparse when nodes are removed
       // This makes the layout more consistent.
       var levelWidth = [1];
+
       var childCount = function(level, n) {
 
         if (n.children && n.children.length > 0) {
@@ -296,6 +253,7 @@ var app_tree_ui = (function () {
         // Normalize for fixed-depth by commenting out below line
         // d.y = (d.depth * 500); //500px per level.
         //console.log('nodes:forEach\n' + stringifyOnce(d, null, 2));
+
       });
 
       // Update the nodes…
@@ -335,9 +293,9 @@ var app_tree_ui = (function () {
       // Enter any new nodes at the parent's previous position.
       var nodeEnter = node.enter().append("g")
         .attr("class", "tree-node")
-        .attr("transform", function(d) {
+     /*   .attr("transform", function(d) {
           return "translate(" + source.y0 + "," + source.x0 + ")";
-        })
+        }) */
         .on("click", onClickNode)
         .on('mouseover', onMouseOver)
         .on('mouseout', onMouseOut);
@@ -354,9 +312,29 @@ var app_tree_ui = (function () {
         })
         .style("fill", function(d) {
           if (d.node_is_selected === true) {
-            return d._children ? "#FFEBAF" : "#FFFFFF";
+            //return d._children ? "#FFEBAF" : "#FFFFFF";
+
+            if (d.children) {
+              return "#FFFFFF";
+            }
+            else if (d._children) {
+              return "#FFEBAF";
+            }
+            else {
+              return d.node_is_expandable ? "#E7E7E7" : "#FFFFFF";
+            }
           }
-          return d._children ? "lightsteelblue" : "#FFFFFF";
+
+          //return d._children ? "lightsteelblue" : "#FFFFFF";
+          if (d.children) {
+            return "#FFFFFF";
+          }
+          else if (d._children) {
+            return "lightsteelblue";
+          }
+          else {
+            return d.node_is_expandable ? "#E7E7E7" : "#FFFFFF";
+          }
         })
         .style("stroke", function(d) {
           return toggleNodeHighLight(d, "stroke");
@@ -381,7 +359,7 @@ var app_tree_ui = (function () {
         .attr("x", function(d) {
           //return d.children || d._children ? -10 : 10;
 
-          if (d.parent_id) {
+          if (d.ancestors) {
             return d.children || d._children ? 0 : 12;
           }
           else { // root node
@@ -390,7 +368,7 @@ var app_tree_ui = (function () {
         })
         .attr("y", function(d) {
 
-          if (d.parent_id) {
+          if (d.ancestors) {
             return d.children || d._children ? -14 : 0;
           }
           else { // root node
@@ -399,24 +377,29 @@ var app_tree_ui = (function () {
         })
         .attr("dy", ".35em")
         .attr('class', 'tree-nodeText')
+        .attr("alignment-baseline", function(d) {
+          return 'alphabetic';
+        })
         .attr("text-anchor", function(d) {
           //return d.children || d._children ? "end" : "start";
           //console.log('node : ' + stringifyOnce(d, null, 2));
 
-          if (d.parent_id) {
+          if (d.ancestors) {
             return d.children || d._children ? "middle" : "start";
           }
           else { // root node
             return "end";
           }
-
         })
         .text(function(d) {
           //return d.name;
+
           if (d.node_is_selected === true) {
             return d.name;
           }
           return '';
+
+
         })
         //.style("font", "8px serif")
         //.style("opacity", 0.9)
@@ -440,9 +423,29 @@ var app_tree_ui = (function () {
         })
         .style("fill", function(d) {
           if (d.node_is_selected === true) {
-            return d._children ? "#FFEBAF" : "#FFFFFF";
+            //return d._children ? "#FFEBAF" : "#FFFFFF";
+
+            if (d.children) {
+              return "#FFFFFF";
+            }
+            else if (d._children) {
+              return "#FFEBAF";
+            }
+            else {
+              return d.node_is_expandable ? "#E7E7E7" : "#FFFFFF";
+            }
           }
-          return d._children ? "lightsteelblue" : "#FFFFFF";
+
+          //return d._children ? "lightsteelblue" : "#FFFFFF";
+          if (d.children) {
+            return "#FFFFFF";
+          }
+          else if (d._children) {
+            return "lightsteelblue";
+          }
+          else {
+            return d.node_is_expandable ? "#E7E7E7" : "#FFFFFF";
+          }
         });
 
       // Fade the text in
@@ -583,26 +586,41 @@ var app_tree_ui = (function () {
 
     // Function to center node when clicked/dropped so node doesn't get lost when collapsing/moving with large amount of children.
     function centerNode(source) {
+
       var scale = zoomListener.scale();
       var x = -source.y0;
       var y = -source.x0;
-      x = x * scale + center_x;
-      y = y * scale + center_y;
-      d3.select('g').transition()
+
+      //console.log('centerNode(): x = ' + x + ' y = ' + y + ' scale = ' + scale);
+
+      x = x * scale + init_x;
+      y = y * scale + init_y;
+
+      //console.log('centerNode(): x = ' + x + ' y = ' + y + ' scale = ' + scale);
+
+
+      baseSVG.select('g').transition()
         .duration(duration)
         .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
+
       zoomListener.scale(scale);
       zoomListener.translate([x, y]);
     }
 
     function leftAlignNode(source) {
+
       var scale = zoomListener.scale();
       var x = -source.y0;
       var y = -source.x0;
-      x = (x * scale) + 100;
-      y = y * scale + center_y;
 
-      d3.select('g').transition()
+      //console.log('leftAlignNode(): x = ' + x + ' y = ' + y + ' scale = ' + scale);
+
+      x = x * scale + init_x + 100;
+      y = y * scale + init_y;
+
+      //console.log('leftAlignNode(): x = ' + x + ' y = ' + y + ' scale = ' + scale);
+
+      baseSVG.select('g').transition()
         .duration(duration)
         .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
 
@@ -627,22 +645,41 @@ var app_tree_ui = (function () {
 
     // handle event on click node
     function onClickNode(d) {
-      if (d3.event.defaultPrevented) return; // click suppressed
+      d3.event.preventDefault();
+      d3.event.stopImmediatePropagation();
+      d3.event.stopPropagation();
+      //if (d3.event.defaultPrevented) return; // click suppressed
 
-      var isCollapsed = false;
-      if (d._children != null){
-        isCollapsed = true
-      }
 
-      d = toggleChildren(d);
-      update(d);
+      if (d.children || d._children) {
+        // contains child element, expanded or collapsed
 
-      if (isCollapsed){
-        leftAlignNode(d);
+        var is_collapsed = false;
+        if (d._children != null) {
+          is_collapsed = true
+        }
+        //console.log('node ' + d.node_uid + ' : collapsed : ' + is_collapsed);
+
+
+        d = toggleChildren(d);
+        update(d);
+
       }
       else {
-        centerNode(d);
+
+        var path;
+        if (d.ancestors) {
+          path = clone(d.ancestors);
+        }
+        else { // root
+          path = [];
+        }
+        path.push(d.node_uid);
+
+        app_tree_email.onAddSubTree(original_tree, path);
       }
+
+
     }
 
     // handle node highlight based on style property
@@ -688,6 +725,9 @@ var app_tree_ui = (function () {
 
     // handle event on click link
     function onClickLink(d) {
+      d3.event.preventDefault();
+      d3.event.stopImmediatePropagation();
+      d3.event.stopPropagation();
       //if (d3.event.defaultPrevented) return; // click suppressed
 
       d = d.target;
@@ -785,105 +825,12 @@ var app_tree_ui = (function () {
 
     // Define the zoom function for the zoomable tree
     function zoom() {
+
       svgGroup.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 
     }
 
-    // Define init-drag function
-    function initiateDrag(d, domNode) {
-      draggingNode = d;
-      d3.select(domNode).select('.tree-ghost-circle').attr('pointer-events', 'none');
-      d3.selectAll('.tree-ghost-circle').attr('class', 'tree-ghost-circle show');
-      d3.select(domNode).attr('class', 'tree-node tree-active-drag');
 
-      svgGroup.selectAll("g.tree-node").sort(function(a, b) { // select the parent and sort the path's
-        if (a.id != draggingNode.id) return 1; // a is not the hovered element, send "a" to the back
-        else return -1; // a is the hovered element, bring "a" to the front
-      });
-      // if nodes has children, remove the links and nodes
-      if (nodes.length > 1) {
-        // remove link paths
-        links = tree.links(nodes);
-        nodePaths = svgGroup.selectAll("path.tree-link")
-          .data(links, function(d) {
-            return d.target.id;
-          }).remove();
-        // remove child nodes
-        nodesExit = svgGroup.selectAll("g.tree-node")
-          .data(nodes, function(d) {
-            return d.id;
-          }).filter(function(d, i) {
-            if (d.id == draggingNode.id) {
-              return false;
-            }
-            return true;
-          }).remove();
-      }
-
-      // remove parent link
-      parentLink = tree.links(tree.nodes(draggingNode.parent));
-      svgGroup.selectAll('path.tree-link').filter(function(d, i) {
-        if (d.target.id == draggingNode.id) {
-          return true;
-        }
-        return false;
-      }).remove();
-
-      dragStarted = null;
-    }
-
-    // Define init-end function
-    function endDrag() {
-      selectedNode = null;
-      d3.selectAll('.tree-ghost-circle').attr('class', 'tree-ghost-circle');
-      d3.select(domNode).attr('class', 'tree-node');
-      // now restore the mouseover event or we won't be able to drag a 2nd time
-      d3.select(domNode).select('.tree-ghost-circle').attr('pointer-events', '');
-      updateTempConnector();
-      if (draggingNode !== null) {
-        update(root);
-        centerNode(draggingNode);
-        draggingNode = null;
-      }
-    }
-
-    function overCircle(d) {
-      selectedNode = d;
-      updateTempConnector();
-    }
-
-    function outCircle(d) {
-      selectedNode = null;
-      updateTempConnector();
-    }
-
-    // Function to update the temporary connector indicating dragging affiliation
-    function updateTempConnector() {
-      var data = [];
-      if (draggingNode !== null && selectedNode !== null) {
-        // have to flip the source coordinates since we did this for the existing connectors on the original tree
-        data = [{
-          source: {
-            x: selectedNode.y0,
-            y: selectedNode.x0
-          },
-          target: {
-            x: draggingNode.y0,
-            y: draggingNode.x0
-          }
-        }];
-      }
-      var link = svgGroup.selectAll(".tree-temp-link").data(data);
-
-      link.enter().append("path")
-        .attr("class", "tree-temp-link")
-        .attr("d", d3.svg.diagonal())
-        .attr('pointer-events', 'none');
-
-      link.attr("d", d3.svg.diagonal());
-
-      link.exit().remove();
-    }
 
     // visit recursively all nodes and perform based on callback functions
     function visit(parent, visitFn, childrenFn) {
@@ -899,6 +846,8 @@ var app_tree_ui = (function () {
         }
       }
     }
+
+
 
   } // end-of function initTree()
 
