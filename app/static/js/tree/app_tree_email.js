@@ -4,16 +4,13 @@
 var app_tree_email = (function () {
   var debug_enabled = true;
 
-  var _service_url = 'search/search/all';
-
-
   var toggle_view_ui_id = 'tree_view_checkbox';
   var toggle_view_ui_jquery_id = '#' + toggle_view_ui_id;
 
-  var _doc_interval_list = [];
+  var _artifact_list = [];
+
   var _doc_interval_min_size = 25, _doc_interval_default_size = 100;
 
-  var _node_interval_index_map = {};
   var _node_tree_map = {};
 
   var _prev_node_id;
@@ -53,15 +50,14 @@ var app_tree_email = (function () {
     }
   }
 
-  function clearAllInterval() {
+  function clearAll() {
     if (debug_enabled) {
-      console.log('app_tree_email.clearAllInterval()');
+      console.log('app_tree_email.clearAll()');
     }
 
-    if (_doc_interval_list.length > 0) {
-      _doc_interval_list.length = 0;
+    if (_artifact_list.length > 0) {
+      _artifact_list.length = 0;
     }
-    _node_interval_index_map = {};
 
     clearAllNodeSelected();
     clearAllTree();
@@ -79,31 +75,80 @@ var app_tree_email = (function () {
     }
   }
 
-  function getInterval( index ) {
-    var _value;
-    if (index >= 0) {
-      //console.log('_doc_interval_list[ ' + _doc_interval_list.length + ' ]');
-      //console.log(stringifyOnce(_doc_interval_list, null, 2));
+  /*
+   * traverse the tree based on a node-path, returns the leaf-node JSON-object
+   */
+  function getLeafNode(parent_node, target_node_path, path_index) {
+    var leaf_node;
+    if (parent_node && target_node_path) {
 
-      _value = clone( _doc_interval_list[ index ] );
-    }
+      if (path_index >= target_node_path.length) {
+        return leaf_node;
+      }
 
-    if (debug_enabled) {
-      if (_value) {
-        console.log('getInterval(' + index + ') : interval[' + _value.length + ']');
-        //console.log(JSON.stringify(_value, null, 2));
+      if (parent_node.children) {
+        var node_uid = target_node_path[path_index];
+        var children = parent_node.children;
+        leaf_node = _.find(children, function (child) {
+          return (child.node_uid == node_uid)
+        });
+
+        if (leaf_node) {
+          if (debug_enabled) {
+            console.log('Found node ' + node_uid + '\n' + stringifyOnce(leaf_node, null, 2));
+          }
+
+          if (path_index < target_node_path.length) {
+            var child_node = getLeafNode(leaf_node, target_node_path, path_index + 1);
+            if (child_node) {
+              leaf_node = child_node;
+            }
+          }
+        }
+        else {
+          console.warn('Expected node '+ node_uid +' not found at ' + path_index + '');
+        }
       }
       else {
-        console.log('getInterval(' + index + ') : undefined');
+        // parent_node is leaf node;
       }
+
     }
-    return _value;
+    return leaf_node;
   }
 
-  function pushInterval( element ) {
-    if (element) {
-      _doc_interval_list.push( element );
+  /*
+   * expand a leaf-node by searching/build a sub-tree, attach the sub-tree if applicable to the leaf-node, returns the updated tree
+   */
+  function onAddSubTree( tree_root, node_path ) {
+    if (tree_root && node_path) {
+
+      if (debug_enabled) {
+        console.log('onAddSubTree( ' + tree_root.node_id + ', node_path[' + node_path.length + '] )');
+        console.log('node_path[' + node_path.length + ']\n' + JSON.stringify(node_path, null, 2));
+      }
+
+
+      var leaf_node = getLeafNode(tree_root, node_path, 1);
+      //console.log('leaf_node:\n' + stringifyOnce(leaf_node, null, 2));
+      if (leaf_node) {
+        leaf_node = newChildren(leaf_node, _artifact_list, leaf_node.link_artifact_index, leaf_node.link_artifact_datetime);
+        if (leaf_node.children) {
+          if (debug_enabled) {
+            console.log('leaf_node:\n' + stringifyOnce(leaf_node, null, 2));
+          }
+
+        }
+        else {
+
+          leaf_node.node_is_expandable = false;
+        }
+
+        app_tree_ui.initTree( tree_root );
+
+      } // end-of if (leaf_node)
     }
+    //return tree_root;
   }
 
   function isNodeSelected( node_id ) {
@@ -116,6 +161,9 @@ var app_tree_email = (function () {
     return is_selected;
   }
 
+  /*
+   * returns the numeric value of a datetime text
+   */
   function getDatetimeValue( datetime_as_text ) {
     var datetime_value = -1;
     if (datetime_as_text) {
@@ -194,25 +242,29 @@ var app_tree_email = (function () {
     return root;
   }
 
-  function getEmailRecipientMap( email_document ) {
+  /*
+   * returns a map of recipients based on a artifact/doc
+   */
+  function getEmailRecipientMap( element ) {
     var recipient_map = {};
 
-    if (email_document) {
-      var sender = email_document.from;
-      if (email_document.to) {
-        var to_recipient_text  = email_document.to;
+    if (element) {
+      var email_doc = element.doc;
+      var sender = email_doc.from;
+      if (email_doc.to) {
+        var to_recipient_text  = email_doc.to;
         if (to_recipient_text) {
           var to_recipient_list = to_recipient_text.split(';');
           _.each(to_recipient_list, function (recipient) {
 
-            recipient_map[recipient] = email_document;
+            recipient_map[recipient] = element;
 
           });
         }
       }
 
-      if (email_document.cc) {
-        var cc_recipient_text = email_document.cc;
+      if (email_doc.cc) {
+        var cc_recipient_text = email_doc.cc;
         if (cc_recipient_text) {
           var cc_recipient_list = cc_recipient_text.split(';');
           _.each(cc_recipient_list, function (recipient) {
@@ -220,12 +272,13 @@ var app_tree_email = (function () {
 
             }
             else {
-              recipient_map[recipient] = email_document;
+              recipient_map[recipient] = element;
             }
           });
         }
       }
 
+      /*
       if (email_document.bcc) {
         var bcc_recipient_text = email_document.bcc;
         if (bcc_recipient_text) {
@@ -235,11 +288,12 @@ var app_tree_email = (function () {
 
             }
             else {
-              recipient_map[recipient] = email_document;
+              recipient_map[recipient] = element;
             }
           });
         }
       }
+      */
 
     }
 
@@ -257,12 +311,25 @@ var app_tree_email = (function () {
     return recipient_map;
   }
 
+  /*
+   * attach a child-node to a parent-node based on a link_artifact/doc
+   */
   function attachChildNode( parent_node, child_node, link_artifact ) {
     if (parent_node && child_node && link_artifact) {
 
-      child_node['parent_id'] = parent_node.node_id;
+      child_node['parent_node_id'] = parent_node.node_id;
       child_node['link_artifact'] = link_artifact;
       child_node['link_artifact_datetime'] = getDatetimeValue( link_artifact.datetime );
+
+      var ancestors;
+      if (parent_node.ancestors) {
+        ancestors = clone(parent_node.ancestors);
+      }
+      else { // parent is root
+        ancestors = [];
+      }
+      ancestors.push( parent_node.node_uid );
+      child_node['ancestors'] = ancestors;
 
       var children = parent_node.children;
       if (!children) {
@@ -276,22 +343,29 @@ var app_tree_email = (function () {
     return parent_node;
   }
 
-  function newNode( node_id, node_index ) {
+  /*
+   * returns a new node JSON-object
+   */
+  function newNode( node_id, link_artifact_index, link_artifact_datetime ) {
     var node;
-    if (node_id && node_index >= 0) {
+    if (node_id && link_artifact_index >= 0) {
       var is_selected = isNodeSelected( node_id );
 
       var name = truncateString(node_id, 40);
+      var node_uid = node_id + '-' + link_artifact_datetime;
 
       node = {
-        "node_index" : node_index,
         "node_id" : node_id,
+        "node_uid" : node_uid,
         "node_is_selected" : is_selected,
+        "node_is_expandable" : true,
         "name" : name,
         "children" : null,
-        "parent_id" : null,
+        "parent_node_id" : null,
+        "ancestors" : null,
         "link_artifact" : null,
-        "link_artifact_datetime" : -1,
+        "link_artifact_index" : link_artifact_index,
+        "link_artifact_datetime" : link_artifact_datetime,
         "datetime_range_factor" : 0,
         "descendant_size" : 0
       };
@@ -299,146 +373,125 @@ var app_tree_email = (function () {
     return node;
   }
 
-  function newSubTree( node_id, doc_list, start_index ) {
-    //console.log('newSubTree( ' + node_id + ', ' + start_index + ' )');
+  /*
+   * search artifact/doc and attach child-nodes to the parent-node based on a sender-recipient relationship
+   */
+  function newChildren( parent_node, doc_list, start_index, start_datetime_value ) {
 
-    var root;
-
-    if (!node_id) {
-      return root;
+    if (!parent_node) {
+      return parent_node;
     }
+    console.log('newChildren( ' + parent_node.node_id + ', ' + start_index + ',' + start_datetime_value + ' )');
+
 
     if (!start_index || start_index < 0) {
       start_index = 0;
+      start_datetime_value = doc_list[start_index].doc_datetime_value;
     }
+
+    if (start_datetime_value == 0) {
+      start_datetime_value = doc_list[start_index].doc_datetime_value;
+    }
+
 
     if (doc_list && doc_list.length > 0) {
 
-      var recipient_map = {};
+
+      var recipient_list = [];
 
       _.each(doc_list, function (element, element_index) {
+
         if (element_index >= start_index) {
-          if (element.from && element.from == node_id) {
+          if (element.doc_datetime_value >= start_datetime_value) {
 
-            if (!root) {
-              root = newNode(node_id, element_index);
-            }
+            var doc = element.doc;
+            if (doc.from == parent_node.node_id) {
+              //console.log('element_index : ' + element_index + ', doc:\n' + JSON.stringify(element, null, 2));
 
-            mergeObjectTo( recipient_map, getEmailRecipientMap( element ) );
+              var recipient_map = getEmailRecipientMap(element);
+              _.each(recipient_map, function (element, recipient_id) {
+                var child_element = element;
+                child_element['node_id'] = recipient_id;
+                child_element['link_artifact_index'] = element_index;
+                recipient_list.push( child_element );
+              });
 
-          } // end-of if (element.from && element.from == node_id)
+            } // end-of if (doc.from == node_id)
+          }
         }// end-of if (element_index >= start_index)
       });
 
-      if (root) {
+      if (parent_node) {
 
-        var recipient_count = _.size( recipient_map), descendant_count = 0;
-        //console.log('recipient_map[ ' + recipient_count + ' ]');
+        var recipient_count = _.size(recipient_list), descendant_count = 0;
+        console.log('recipient_list[ ' + recipient_count + ' ]');
         //console.log(JSON.stringify(recipient_map, null, 2));
 
         if (recipient_count > 0) { // node contains children
 
-          _.each(recipient_map, function (link_artifact, recipient_id) {
+          recipient_list = sortArrayAscending( recipient_list, 'doc_datetime_value' );
 
-            var sub_tree_root = newSubTree(recipient_id, doc_list, (root.node_index + 1));
-            if (sub_tree_root) {
+          _.each(recipient_list, function (recipient_element, index) {
+            var recipient_id = recipient_element.node_id;
+            var link_artifact = recipient_element.doc;
+            var link_artifact_index = recipient_element.link_artifact_index;
+            var start_datetime_value = recipient_element.doc_datetime_value;
 
-              attachChildNode(root, sub_tree_root, link_artifact);
-              descendant_count += sub_tree_root.descendant_size + 1;
-            }
+            var child_node = newNode(recipient_id, link_artifact_index, start_datetime_value);
+
+            parent_node = attachChildNode(parent_node, child_node, link_artifact);
+
+            //console.log('recipient_id : ' + recipient_id + ', doc:\n' + JSON.stringify(recipient_element, null, 2));
 
           });
-          root.descendant_size = descendant_count;
 
-          root = newDatetimeRangeFactor( root );
+          parent_node = newDatetimeRangeFactor( parent_node );
 
-          recipient_map = {};
+          recipient_list.length = 0;
         } // end-of if (recipient_map.length > 0)
-        else {
-          root.descendant_size = 0;
+        else { // no child found
+          //parent_node.node_is_expandable = false;
+          parent_node.descendant_size = 0;
         }
 
       } // end-of if (root)
 
     } // end-of if (doc_list && doc_list.length > 0)
 
-    if (root) {
-      printNode( root );
+    /*
+    if (parent_node) {
+      printNode( parent_node );
     }
+    */
 
-    return root;
-  }
+    return parent_node;
+  } // end-of newChildren()
+
 
   /*
-   * return the first index (first occurrence) of a node after a given index
+   * return the first index (first occurrence) of the artifact/doc based on the node_id/doc_from
    */
-  function getFirstNodeIndex( node_id, doc_list, start_index, is_parent_node ) {
-    if (debug_enabled) {
-      console.log('getFirstNodeIndex( ' + node_id + ', node_id_list[' + doc_list.length + '], ' + start_index + ', ' + is_parent_node + ' )');
-    }
-
-    var node_index = -1;
-
-    if (node_id && doc_list && doc_list.length > 0 && start_index >= 0) {
-
-      var found = false;
-      _.each(doc_list, function (element, element_index) {
-        if (!found && element_index >= start_index) {
-          if (is_parent_node === true) {
-            if (node_id == element.from) {
-              node_index = element_index;
-              found = true;
-            }
-          }
-          else {
-            if (node_id == element.to || node_id == element.cc || node_id == element.bcc) {
-              node_index = element_index;
-              found = true;
-            }
+  function getFirstIndex( node_id ) {
+    var first_index = -1;
+    var is_found = false;
+    if (node_id) {
+      _.each(_artifact_list, function (artifact, artifact_index) {
+        if (!is_found) {
+          if (artifact.doc_from == node_id) {
+            first_index = artifact_index;
+            is_found = true;
           }
         }
       });
-
-    } // end-of if (node_id && doc_list && doc_list.length > 0 && start_index >= -1)
-
-    return node_index;
-  }
-
-  function getFirstIntervalIndex( node_id ) {
-    var first_index = -1;
-    if (node_id) {
-      first_index = _node_interval_index_map[node_id];
     }
 
     return first_index;
   }
 
-  /*
-   * map the interval index of the first occurrence of all nodes
-   */
-  function mapAllIntervalIndex() {
-
-    _.each(_doc_interval_list, function(interval, interval_index) {
-      _.each(interval, function(element, element_index) {
-        var node_id = element.from;
-        if (node_id) {
-          var existing_interval_index = _node_interval_index_map[ node_id ];
-          if (!existing_interval_index) {
-            _node_interval_index_map[ node_id ] = interval_index;
-          }
-        }
-      });
-
-    });
-
-    if (debug_enabled) {
-      console.log('node_interval_index_map[' + _.size(_node_interval_index_map) + ']');
-      //console.log(JSON.stringify(_node_interval_index_map, null, 2));
-    }
-  }
-
   function cancelNewTree() {
-    clearTimeout( new_tree_timeout_id );
+    if (new_tree_timeout_id) {
+      clearTimeout(new_tree_timeout_id);
+    }
   }
 
   function onNewTree( tree_root ) {
@@ -461,46 +514,39 @@ var app_tree_email = (function () {
     app_tree_process_indicator.setStatusProcessing( false );
   }
 
-  function newTree( node_id_list, interval_index, callback ) {
+  function newTree( node_id_list, artifact_index, callback ) {
     if (node_id_list && node_id_list.length > 1) {
-      console.log('newTree( node_id_list[' + node_id_list.length + '], ' + interval_index + ' )');
+      console.log('newTree( node_id_list[' + node_id_list.length + '], ' + artifact_index + ' )');
       //console.log('node_id_list[' + node_id_list.length + ']\n' + JSON.stringify(node_id_list, null, 2));
     }
     else {
       return;
     }
 
-    new_tree_timeout_id = setTimeout( function() {
+    //new_tree_timeout_id = setTimeout( function() {
 
       var starttime = Date.now(), endtime, duration;
       var tree_root;
       clearAllNodeSelected();
 
-      if (interval_index >= 0 && interval_index < _doc_interval_list.length) {
+      if (artifact_index >= 0 && artifact_index < _artifact_list.length) {
+        var artifact_datetime_value = _artifact_list[artifact_index].doc_datetime_value;
         _node_id_selected_list = node_id_list;
         //console.log('_node_id_selected_list[' + _node_id_selected_list.length + ']\n' + JSON.stringify(_node_id_selected_list, null, 2));
 
         var root_node_id = _node_id_selected_list[0];
 
+        tree_root = newNode(root_node_id, artifact_index, artifact_datetime_value);
 
-        var interval = getInterval(interval_index);
-        if (interval) {
-          var node_index = getFirstNodeIndex(root_node_id, interval, 0, true);
-          if (debug_enabled) {
-            console.log('root-node-index[' + node_index + ']');
-          }
-          if (node_index >= 0) {
-            tree_root = newSubTree(root_node_id, interval, node_index);
-            //console.log('tree:\n' + JSON.stringify(tree_root, null, 2));
+        tree_root = newChildren(tree_root, _artifact_list, artifact_index, artifact_datetime_value);
 
 
-            if (tree_root) {
-              clearAllTree();
-              putTree(root_node_id, tree_root);
-              _prev_node_id = root_node_id;
-            }
-          }
+        if (tree_root) {
+          clearAllTree();
+          putTree(root_node_id, tree_root);
+          _prev_node_id = root_node_id;
         }
+
       } // end-of if (node_id_list && node_id_list.length > 0)
 
       endtime = Date.now();
@@ -516,7 +562,7 @@ var app_tree_email = (function () {
         callback( getTree( root_node_id ) );
       }
 
-    }, 7000);
+    //}, 1000);
   }
 
 
@@ -602,13 +648,17 @@ var app_tree_email = (function () {
       var current_partition;
 
       _.each(element_list, function(element, index) {
+        var item = {
+          'doc' : clone(element),
+          'doc_datetime_value' : getDatetimeValue( element.datetime ),
+        }
 
         if (current_size_count < size) {
 
           if (!current_partition) {
             current_partition = [];
           }
-          current_partition.push( clone(element) );
+          current_partition.push( item );
 
           current_size_count++;
         }
@@ -617,7 +667,7 @@ var app_tree_email = (function () {
           partition_list.push( current_partition );
 
           current_partition = [];
-          current_partition.push( clone(element) );
+          current_partition.push( item );
 
           current_size_count = 1;
         }
@@ -642,16 +692,44 @@ var app_tree_email = (function () {
     return partition_list;
   }
 
+  function validateAllDocument( doc_list ) {
+    var validated_doc_list = [];
+    if (doc_list && doc_list.length > 0) {
+
+      _.each(doc_list, function (element, index) {
+
+        if (element.from && (element.to || element.cc) && element.datetime) {
+
+          var item = {
+            'doc' : clone(element),
+            'doc_datetime_value' : getDatetimeValue( element.datetime ),
+            'doc_from' : element.from
+          }
+
+          validated_doc_list.push( item );
+        }
+
+      });
+
+      if (validated_doc_list.length > 0) {
+        validated_doc_list = sortArrayAscending(validated_doc_list, 'doc_datetime_value');
+      }
+    }
+
+    if (debug_enabled) {
+      console.log('validated_doc_list[ ' + validated_doc_list.length + ' ]');
+    }
+
+    return validated_doc_list;
+  }
+
   function loadDocument( document_list ) {
-    clearAllInterval();
+    clearAll();
 
-    var partition_list = partitionBySize( document_list, _doc_interval_default_size );
+    _artifact_list = validateAllDocument( document_list );
 
-    _doc_interval_list = partition_list;
-    console.log('_doc_interval_list[ ' + _doc_interval_list.length + ' ]');
+    console.log('artifact_list[ ' + _artifact_list.length + ' ]');
     //console.log(stringifyOnce(_doc_interval_list, null, 2));
-
-    mapAllIntervalIndex();
 
   }
 
@@ -675,30 +753,37 @@ var app_tree_email = (function () {
 
   }
 
-  function onInitHistoTreeMapping(node_id_list, interval_index) {
+  function onInitHistoTreeMapping(node_id_list, doc_index) {
 
-    newTree( node_id_list, interval_index, onNewTree);
+    newTree( node_id_list, doc_index, onNewTree);
 
   }
 
   function initHistoTreeMapping(callback) {
-    setTimeout(function() {
+    //setTimeout(function() {
+
       var node_id_list = newman_graph_email.getAllMarkedNodeID();
       if (node_id_list) {
         console.log('all_node_selected_list[' + node_id_list.length + ']\n' + JSON.stringify(node_id_list, null, 2));
 
         if (node_id_list.length > 1) {
+          var node_id = node_id_list[0];
 
-          var interval_index_default = getFirstIntervalIndex( node_id_list[0] );
-          console.log('interval-index[' + interval_index_default + ']');
+          var first_doc_index = getFirstIndex( node_id );
+          if (first_doc_index >= 0) {
+            console.log('doc-index[' + first_doc_index + ']');
 
-          if (callback) {
-            console.log('initHistoTreeMapping{ callback(node_id_list, interval_index_default);}');
-            callback(node_id_list, interval_index_default);
+            if (callback) {
+              console.log('initHistoTreeMapping{ callback(node_id_list, doc_index);}');
+              callback(node_id_list, first_doc_index);
+            }
+          } // end-of if (first_doc_index)
+          else {
+            console.log('No artifact index found for ' + node_id);
           }
         }
       }
-    }, 1000);
+    //}, 1000);
   }
 
   function initUI() {
@@ -739,15 +824,14 @@ var app_tree_email = (function () {
   } // end-of init
 
   return {
-    'clearAllDocByInterval' : clearAllInterval,
-    'getSearchByNumericEntity' : getInterval,
+    'clearAll' : clearAll,
     'loadDocument' : loadDocument,
     'newTree' : newTree,
     'getTree' : getTree,
     'initUI' : initUI,
     'toggleTreeButtonEnabled' : toggleTreeButtonEnabled,
     'toggleTreeButtonChecked' : toggleTreeButtonChecked,
-    'getFirstIntervalIndex' : getFirstIntervalIndex
+    'onAddSubTree' : onAddSubTree
   }
 
 }());
