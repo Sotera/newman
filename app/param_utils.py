@@ -135,3 +135,7 @@ def parseParamAttachmentGUID( params ):
 
 def parseParamFrom( params ):
     return params.get('from', 0)
+
+def parseParamHistogramMaxMinorTicks( params ):
+    max_minor_ticks = params.get('max_minor_ticks', 400)
+    return max_minor_ticks

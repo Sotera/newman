@@ -263,7 +263,7 @@ def get_email(data_set_id, email_id, qs=None):
     subject_translated = _format_html(subject_translated)
 
     topic_scores=[]
-    if source["topic_scores"]:
+    if "topic_scores" in source and source["topic_scores"]:
         topic_scores = [ [topic[0], topic[1], str(source["topic_scores"]["idx_"+str(topic[0])])] for topic in get_categories(data_set_id)["categories"]]
 
     email = [source["id"],
@@ -284,7 +284,7 @@ def get_email(data_set_id, email_id, qs=None):
 
     entities = []
     for type in ["person","location","organization","misc"]:
-        if "body_entities" in source["entities"] and ("entity_"+type) in source["entities"]["body_entities"]:
+        if "entities" in source and "body_entities" in source["entities"] and ("entity_"+type) in source["entities"]["body_entities"]:
             entities += [ [source["id"][0]+"_entity_"+str(i), type,     i, val] for i,val in enumerate(source["entities"]["body_entities"].get("entity_"+type, []), len(entities))]
 
     resp = {"email_contents" :

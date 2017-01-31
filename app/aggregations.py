@@ -5,7 +5,7 @@ from werkzeug.exceptions import BadRequest, NotFound
 from datetime import timedelta, date
 
 from newman_es.es_series import get_entity_histogram
-from param_utils import parseParamDatetime, parseParamEmailAddress, parseParamEntity, parseParamTextQuery, parseParamEncrypted, parseParamCommunityIds
+from param_utils import parseParamDatetime, parseParamEmailAddress, parseParamEntity, parseParamTextQuery, parseParamEncrypted, parseParamCommunityIds, parseParamHistogramMaxMinorTicks
 #
 from newman_es.es_queries import _build_email_query
 from newman_es.es_query_utils import _query_emails
@@ -78,29 +78,29 @@ def get_top_entities(top_count=20):
         # TODO qs not being evaluated in inner filter called by this method
         entities = get_entity_histogram(data_set_id, "emails", qs=qs, date_bounds=(start_datetime, end_datetime))[:top_count]
         result = {"entities" :
-                  [
-                   [
-                    str(i),
-                    entity ["type"],
-                    entity ["key"],
-                    entity ["doc_count"]
-                   ] for i,entity in enumerate(entities)
-                  ]
-                 }
-        
+                      [
+                          [
+                              str(i),
+                              entity ["type"],
+                              entity ["key"],
+                              entity ["doc_count"]
+                          ] for i,entity in enumerate(entities)
+                          ]
+                  }
+
     else:
         # TODO qs not being evaluated in inner filter called by this method
         entities = get_entity_histogram(data_set_id, "emails", email_address_list, qs=qs, date_bounds=(start_datetime, end_datetime))[:top_count]
         result = {"entities" :
-                  [
-                   [
-                    str(i),
-                    entity ["type"],
-                    entity ["key"],
-                    entity ["doc_count"]
-                   ] for i,entity in enumerate(entities)
-                  ]
-                 }
+                      [
+                          [
+                              str(i),
+                              entity ["type"],
+                              entity ["key"],
+                              entity ["doc_count"]
+                          ] for i,entity in enumerate(entities)
+                          ]
+                  }
 
     return jsonify(result)
 
@@ -118,12 +118,12 @@ def getAttachFileType():
     file_types = get_top_attachment_types(data_set_id, date_bounds=(start_datetime, end_datetime), encrypted=encrypted, num_top_attachments=top_count)[:top_count]
 
     result = {
-              "account_id" : data_set_id,
-              "data_set_id" : data_set_id,
-              "account_start_datetime" : start_datetime,
-              "account_end_datetime" : end_datetime,
-              "types" : file_types
-             }
+        "account_id" : data_set_id,
+        "data_set_id" : data_set_id,
+        "account_start_datetime" : start_datetime,
+        "account_end_datetime" : end_datetime,
+        "types" : file_types
+    }
 
     return jsonify(result)
 
@@ -143,36 +143,35 @@ def getAccountActivity():
 
     email_address_list = parseParamEmailAddress(request.args);
 
-    # TODO set from UI based on rendering area
-    max_minor_ticks=800
+    max_minor_ticks = parseParamHistogramMaxMinorTicks(request.args)
 
     interval = _interval_bounds(start_datetime, end_datetime, max_minor_ticks)
     # interval = 'week'
 
     if not email_address_list :
         result = {"account_activity_list" :
-                  [
-                   {
+            [
+                {
                     "account_id" : data_set_id,
                     "data_set_id" : data_set_id,
                     "account_start_datetime" : start_datetime,
                     "account_end_datetime" : end_datetime,
                     "activities" : get_email_activity(data_set_id, data_set_id, date_bounds=(start_datetime, end_datetime), interval=interval)
-                   }
-                  ]
-                 }
+                }
+            ]
+        }
     else:
         result = {"account_activity_list" :
-                  [
-                   {
-                    "account_id" : account_id,
-                    "data_set_id" : data_set_id,
-                    "account_start_datetime" : start_datetime,
-                    "account_end_datetime" : end_datetime,
-                    "activities" : get_email_activity(data_set_id, data_set_id, account_id, date_bounds=(start_datetime, end_datetime), interval=interval)
-                   } for account_id in email_address_list
-                  ]
-                 }
+                      [
+                          {
+                              "account_id" : account_id,
+                              "data_set_id" : data_set_id,
+                              "account_start_datetime" : start_datetime,
+                              "account_end_datetime" : end_datetime,
+                              "activities" : get_email_activity(data_set_id, data_set_id, account_id, date_bounds=(start_datetime, end_datetime), interval=interval)
+                          } for account_id in email_address_list
+                          ]
+                  }
 
 
     return jsonify(result)
@@ -189,29 +188,29 @@ def getAttachCount(*args, **kwargs):
     if not email_address_list :
         activity = get_total_attachment_activity(data_set_id, data_set_id, query_function=attachment_histogram, sender_email_addr="", start=start_datetime, end=end_datetime, interval="week")
         result = {"account_activity_list" :
-                  [
-                   {
+            [
+                {
                     "account_id" : data_set_id,
                     "data_set_id" : data_set_id,
                     "account_start_datetime" : start_datetime,
                     "account_end_datetime" : end_datetime,
                     "activities" : activity
-                   }
-                  ]
-                 }
+                }
+            ]
+        }
 
     else:
         result = {"account_activity_list" :
-                  [
-                   {
-                    "account_id" : account_id,
-                    "data_set_id" : data_set_id,
-                    "account_start_datetime" : start_datetime,
-                    "account_end_datetime" : end_datetime,
-                    "activities" : get_emailer_attachment_activity(data_set_id, account_id, (start_datetime, end_datetime), interval="week")
-                   } for account_id in email_address_list
-                  ]
-                 }
+                      [
+                          {
+                              "account_id" : account_id,
+                              "data_set_id" : data_set_id,
+                              "account_start_datetime" : start_datetime,
+                              "account_end_datetime" : end_datetime,
+                              "activities" : get_emailer_attachment_activity(data_set_id, account_id, (start_datetime, end_datetime), interval="week")
+                          } for account_id in email_address_list
+                          ]
+                  }
 
     return jsonify(result)
 
