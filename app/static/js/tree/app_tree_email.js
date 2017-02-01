@@ -135,7 +135,7 @@ var app_tree_email = (function () {
         leaf_node = newChildren(leaf_node, _artifact_list, leaf_node.link_artifact_index, leaf_node.link_artifact_datetime);
         if (leaf_node.children) {
           if (debug_enabled) {
-            console.log('leaf_node:\n' + stringifyOnce(leaf_node, null, 2));
+            //console.log('leaf_node:\n' + stringifyOnce(leaf_node, null, 2));
           }
 
         }
@@ -174,10 +174,13 @@ var app_tree_email = (function () {
         //datetime_value = datetime_in_millisecond;
 
         // convert to days
-        datetime_value = datetime_in_millisecond / (1000 * 60 * 60 * 24);
+        //datetime_value = datetime_in_millisecond / (1000 * 60 * 60 * 24);
 
         // convert to hours
         //datetime_value = datetime_in_millisecond / (1000 * 60 * 60);
+
+        // convert to minutes
+        datetime_value = datetime_in_millisecond / (60000);
 
       }
     }
@@ -185,61 +188,84 @@ var app_tree_email = (function () {
   }
 
 
-  function newDatetimeRangeFactor( root ) {
-    if (root) {
-      var root_datetime = root.link_artifact_datetime;
-      var children = root.children;
+  function newDatetimeRangeFactor( node ) {
+    if (node) {
+      //var root_datetime = node.link_artifact_datetime;
+      var children = node.children;
       if (children && children.length > 0) {
-        var child_datetime, datetime_range = 0, min_range = 0, max_range = 0, range_ratio;
-
+        var child_datetime, min_datetime = 0, max_datetime = 0;
+        var range_map = {};
         _.each(children, function (child, child_index) {
           child_datetime = child.link_artifact_datetime;
-          if (child_datetime == -1) {
-            console.warn('Missing expected "link_artifact_datetime" value in child-node!');
-          }
+          if (child_datetime > 0) {
 
-          if (root_datetime > -1) {
-            root_datetime = 0;
-          }
-          datetime_range = child_datetime - root_datetime;
-          //console.log("datetime_range : " + datetime_range);
+            if (min_datetime == 0) {
+              min_datetime = child_datetime;
+            }
 
-          if (min_range == 0 && max_range == 0) {
-            min_range = datetime_range;
-            max_range = datetime_range;
+            if (max_datetime == 0) {
+              max_datetime = child_datetime;
+            }
+
+            if (child_datetime < min_datetime) {
+              min_datetime = child_datetime;
+            }
+
+            if (child_datetime > max_datetime) {
+              max_datetime = child_datetime;
+            }
+
+
+            var range = child_datetime - min_datetime;
+
+            /*
+            if (range == 0) {
+              // special adjustment for 0 range, first child-node of root
+              range = 1;
+            }
+            */
+            range_map[child.node_uid] = range;
+
           }
           else {
-            if (datetime_range > max_range) {
-              max_range = datetime_range;
-            }
-            if (datetime_range < min_range) {
-              min_range = datetime_range;
-            }
+            console.warn('Missing valid "link_artifact_datetime" value in node ' + child.node_uid);
           }
 
         });
 
-        //range_ratio = min_range / max_range;
-        //console.log("min_range : " + min_range + " max_range : " + max_range + ' range_ratio : ' + range_ratio);
+
+        var max_range = 0;
+        if (max_datetime > min_datetime) {
+          max_range = max_datetime - min_datetime;
+        }
+
+        //console.log("range_map :\n" + stringifyOnce(range_map, null, 2));
+        console.log("min : " + min_datetime + " max : " + max_datetime + ' range : ' + max_range);
 
         _.each(children, function (child, child_index) {
           child_datetime = child.link_artifact_datetime;
-          if (child_datetime == -1) {
-            console.warn('Missing expected "link_artifact_datetime" value in child-node!');
+          if (child_datetime > 0) {
+
+            var range = range_map[child.node_uid];
+            var range_factor = 0; // default to 0; avoid dividing by 0 if max_range is 0;
+            if (max_range > 0) {
+              range_factor = range / max_range;
+            }
+
+            child['datetime_range_factor'] = range_factor;
+            console.log("datetime_range : " + range + ", max_datetime_range : " + max_range + ", datetime_range_factor : " + range_factor);
+
+          }
+          else {
+            console.warn('Missing valid "link_artifact_datetime" value in node ' + child.node_uid);
           }
 
-          if (root_datetime > -1) {
-            root_datetime = 0;
-          }
-          datetime_range = child_datetime - root_datetime;
-          var range_factor = datetime_range / max_range;
-
-          child['datetime_range_factor'] = range_factor;
-          //console.log("datetime_range_factor : " + range_factor);
         });
+
+        range_map = {};
       }
     }
-    return root;
+    return node;
   }
 
   /*
@@ -268,10 +294,7 @@ var app_tree_email = (function () {
         if (cc_recipient_text) {
           var cc_recipient_list = cc_recipient_text.split(';');
           _.each(cc_recipient_list, function (recipient) {
-            if (recipient == sender) {
-
-            }
-            else {
+            if (recipient != sender) { // skip self-CCed emails
               recipient_map[recipient] = element;
             }
           });
@@ -279,21 +302,19 @@ var app_tree_email = (function () {
       }
 
       /*
-      if (email_document.bcc) {
+      if (email_doc.bcc) {
         var bcc_recipient_text = email_document.bcc;
         if (bcc_recipient_text) {
           var bcc_recipient_list = bcc_recipient_text.split(';');
           _.each(bcc_recipient_list, function (recipient) {
-            if (recipient == sender) {
-
-            }
-            else {
+            if (recipient != sender) { // skip self-BCCed emails
               recipient_map[recipient] = element;
             }
           });
         }
       }
       */
+
 
     }
 
@@ -359,6 +380,7 @@ var app_tree_email = (function () {
         "node_uid" : node_uid,
         "node_is_selected" : is_selected,
         "node_is_expandable" : true,
+        "node_sibling_count" : 0,
         "name" : name,
         "children" : null,
         "parent_node_id" : null,
@@ -409,8 +431,10 @@ var app_tree_email = (function () {
               //console.log('element_index : ' + element_index + ', doc:\n' + JSON.stringify(element, null, 2));
 
               var recipient_map = getEmailRecipientMap(element);
+              //console.log('recipient_map:\n' + JSON.stringify(recipient_map, null, 2));
+
               _.each(recipient_map, function (element, recipient_id) {
-                var child_element = element;
+                var child_element = clone(element);
                 child_element['node_id'] = recipient_id;
                 child_element['link_artifact_index'] = element_index;
                 recipient_list.push( child_element );
@@ -425,7 +449,7 @@ var app_tree_email = (function () {
 
         var recipient_count = _.size(recipient_list), descendant_count = 0;
         console.log('recipient_list[ ' + recipient_count + ' ]');
-        //console.log(JSON.stringify(recipient_map, null, 2));
+        //console.log(JSON.stringify(recipient_list, null, 2));
 
         if (recipient_count > 0) { // node contains children
 
@@ -438,6 +462,7 @@ var app_tree_email = (function () {
             var start_datetime_value = recipient_element.doc_datetime_value;
 
             var child_node = newNode(recipient_id, link_artifact_index, start_datetime_value);
+            child_node['node_sibling_count'] = recipient_count;
 
             parent_node = attachChildNode(parent_node, child_node, link_artifact);
 
@@ -515,7 +540,7 @@ var app_tree_email = (function () {
   }
 
   function newTree( node_id_list, artifact_index, callback ) {
-    if (node_id_list && node_id_list.length > 1) {
+    if (node_id_list && node_id_list.length > 0) {
       console.log('newTree( node_id_list[' + node_id_list.length + '], ' + artifact_index + ' )');
       //console.log('node_id_list[' + node_id_list.length + ']\n' + JSON.stringify(node_id_list, null, 2));
     }
@@ -563,133 +588,6 @@ var app_tree_email = (function () {
       }
 
     //}, 1000);
-  }
-
-
-
-  function partitionByMonth( doc_list ) {
-    var partition_list;
-
-    if (doc_list && doc_list.length > 0) {
-      var element_list = clone( doc_list.sort( ascendingPredicatByProperty('datetime') ));
-      partition_list = [];
-
-      var current_year, current_month, current_partition = [];
-      _.each(element_list, function(element, index) {
-        var datetime_as_text = element.datetime;
-        var datetime = new Date(datetime_as_text);
-
-        if (datetime) {
-          var year = datetime.getFullYear();
-          var month = datetime.getMonth();
-
-          if (!current_year || !current_month) {
-            current_year = year;
-            current_month = month;
-          }
-
-          if (month == current_month) {
-            current_partition.push(clone(element));
-
-          }
-          else {
-            if (month > current_month || (month < current_month && year > current_year)) {
-              if (current_partition.length > 0) {
-                partition_list.push( current_partition );
-              }
-
-              current_year = year;
-              current_month = month;
-              current_partition = [];
-              current_partition.push(clone(element));
-            }
-          }
-
-        } // end-of if (datetime)
-      });
-      partition_list.push( current_partition ); // don't forget to append any remaining partition !!!
-
-      if (debug_enabled) {
-        if (partition_list) {
-          console.log('partition_list[' + partition_list.length + ']');
-          var partition_count = 0;
-          _.each(partition_list, function (interval, index) {
-            //console.log('partition_list[' + index + '][' + interval.length + ']');
-            partition_count = partition_count + interval.length;
-          });
-          console.log('docs_count : ' + doc_list.length + ', partition_count : ' + partition_count);
-          //console.log('partition_list:\n' + stringifyOnce(partition_list, null, 2));
-        }
-      }
-
-    }
-    return partition_list;
-  }
-
-  function partitionBySize( doc_list, size ) {
-    if (debug_enabled) {
-      console.log('partitionBySize( doc_list[' + doc_list.length + '], ' + size + ' )');
-    }
-
-    var partition_list;
-
-    if (doc_list && doc_list.length > 0) {
-      if (size < _doc_interval_min_size || size > doc_list.length) {
-        size = doc_list.length;
-      }
-
-      //var element_list = clone( doc_list.sort( ascendingPredicatByProperty('datetime') ));
-      var element_list = sortArrayAscending( doc_list, 'datetime' );
-      //console.log('element_list[ ' + element_list.length + ' ]');
-
-      partition_list = [];
-
-      var current_size_count = 0;
-      var current_partition;
-
-      _.each(element_list, function(element, index) {
-        var item = {
-          'doc' : clone(element),
-          'doc_datetime_value' : getDatetimeValue( element.datetime ),
-        }
-
-        if (current_size_count < size) {
-
-          if (!current_partition) {
-            current_partition = [];
-          }
-          current_partition.push( item );
-
-          current_size_count++;
-        }
-        else {
-
-          partition_list.push( current_partition );
-
-          current_partition = [];
-          current_partition.push( item );
-
-          current_size_count = 1;
-        }
-
-      });
-      partition_list.push( current_partition ); // don't forget to append any remaining partition !!!
-
-      if (debug_enabled) {
-        if (partition_list) {
-          console.log('partition_list[' + partition_list.length + ']');
-          var partition_count = 0;
-          _.each(partition_list, function (interval, index) {
-            console.log('partition_list[' + index + '] : ' + interval.length );
-            partition_count = partition_count + interval.length;
-          });
-          console.log('docs_count : ' + doc_list.length + ', partition_count : ' + partition_count);
-          //console.log('partition_list:\n' + stringifyOnce(partition_list, null, 2));
-        }
-      }
-
-    }
-    return partition_list;
   }
 
   function validateAllDocument( doc_list ) {
@@ -766,7 +664,7 @@ var app_tree_email = (function () {
       if (node_id_list) {
         console.log('all_node_selected_list[' + node_id_list.length + ']\n' + JSON.stringify(node_id_list, null, 2));
 
-        if (node_id_list.length > 1) {
+        if (node_id_list.length > 0) {
           var node_id = node_id_list[0];
 
           var first_doc_index = getFirstIndex( node_id );

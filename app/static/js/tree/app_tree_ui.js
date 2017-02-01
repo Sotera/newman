@@ -229,25 +229,44 @@ var app_tree_ui = (function () {
       };
       childCount(0, root);
 
-      var newHeight = d3.max(levelWidth) * 25; // 25 pixels per line
+      var newHeight = d3.max(levelWidth) * 30; // 30 pixels per line
       tree = tree.size([newHeight, width]);
+
+      console.log('tree.size( [height : ' + newHeight + ', width : ' + width + '])');
 
       // Compute the new tree layout.
       var nodes = tree.nodes(root);
       var links = tree.links(nodes);
 
-      // Set widths between levels based on maxLabelLength.
+      var link_width_base = 60, link_width_child_node = 20;
+
+      var toggled = false;
+
+      // set variable widths between levels based on range_factor.
       nodes.forEach(function(d) {
-        var depth_factor = d.datetime_range_factor;
-        if (depth_factor > 0.0 && depth_factor <= 1.0) {
-          console.log('nodes:forEach( depth_factor : ' + depth_factor + '), max_label_length : ' + maxLabelLength);
 
-          d.y = d.depth * 100 * (depth_factor);
-        }
-        else {
-          d.y = d.depth * 100;
+        var tree_level = d.depth;
+        var depth_factor = d.datetime_range_factor, sibling_count = d.node_sibling_count;
+        var depth_base = tree_level * link_width_base;
+
+        var node_depth = depth_base + link_width_child_node + link_width_base * depth_factor;
+
+        if (sibling_count > 0 && tree_level > 0) {
+          //console.log('node_sibling_count : ' + sibling_count);
+          node_depth += (sibling_count * (tree_level * tree_level / 2));
         }
 
+        d.y = node_depth;
+
+        /*
+        if (!toggled) {
+          toggled = true;
+          console.log('node :\n' + stringifyOnce(d, null, 2));
+        }
+        */
+        console.log('nodes:forEach( depth_base : ' + depth_base + ' node_depth : ' + node_depth + ' depth_factor : ' + depth_factor + ' node_uid : ' + d.node_uid + ' )');
+
+        //console.log('max_label_length : ' + maxLabelLength);
         //d.y = (d.depth * (maxLabelLength * 5)); //maxLabelLength * 5px
         // alternatively to keep a fixed scale one can set a fixed depth per level
         // Normalize for fixed-depth by commenting out below line
@@ -636,6 +655,8 @@ var app_tree_ui = (function () {
           return 'translate(5, -10)';
         })
         .text(d.name);
+
+      console.log('node : ' + d.node_uid + ', x : ' + d.x + ', y : ' + d.y );
     }
 
     function onMouseOut(d) {
