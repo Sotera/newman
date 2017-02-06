@@ -4,10 +4,10 @@
 var app_tree_process_indicator = (function () {
   var debug_enabled = false;
 
-  var status_icon_ui_id = 'tree_view_status_icon';
+  var status_icon_ui_id = 'tree_visual_status_icon';
   var status_icon_ui_jquery_id = '#' + status_icon_ui_id;
 
-  var status_text_ui_id = 'tree_view_status_text';
+  var status_text_ui_id = 'tree_visual_status_text';
   var status_text_ui_jquery_id = '#' + status_text_ui_id;
 
   var thread_count = 0, is_busy = false;

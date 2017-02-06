@@ -1126,8 +1126,8 @@
 
           <!--Start Data-Visual-Right-->
           <div class="col-sm-5 col-container modal-container" id="data_visual_container"  style= "height: 100%;">
-            <div id="graph_email"  style= "height: 100%;"></div>
-            <div id="tree_email"  style= "height: 100%;"></div>
+            <div id="graph_visual"  style= "height: 100%;"></div>
+            <div id="tree_visual"  style= "height: 100%;"></div>
 
             <!-- Start Attachment-Enlarged-View-Modal-Right -->
             <div class="modal fade" id="doc_preview_modal_right" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
@@ -1179,7 +1179,7 @@
           <!--End Data-Visual-Right-->
 
           <!--Start Visual-Filter-->
-          <div class="col-sm-offset-7" id="graph-visual-filter-email" style="position: fixed; right: 15px; background-color: rgba(210, 210, 210, 0.5); z-index: 999; font-size: 11px;
+          <div class="col-sm-offset-7" id="visual_filter_container" style="position: fixed; right: 15px; background-color: rgba(210, 210, 210, 0.5); z-index: 999; font-size: 11px;
              border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; display: none;">
 
             <div class="row row-container" >
@@ -1235,7 +1235,7 @@
                 </button>
               </div>
               <div class="col-sm-2 col-container" style="text-align: left;">
-                <input type="checkbox" class="fa_toggle" id="tree_view_checkbox" value="tree_view" style="margin-left: 5px;" />
+                <input type="checkbox" class="fa_toggle" id="tree_visual_checkbox" value="tree_visual" style="margin-left: 5px;" />
               </div>
               <div class="col-sm-2 col-container" >
                 &nbsp;
@@ -1244,19 +1244,23 @@
                 &nbsp;
               </div>
               <div class="col-sm-4 col-container" style="padding: 0 0 0 5px; text-align: left;">
-                <i id="tree_view_status_icon" class="fa" ></i>
-                <span id="tree_view_status_text" ></span>
+                <i id="tree_visual_status_icon" class="fa" ></i>
+                <span id="tree_visual_status_text" ></span>
               </div>
             </div>
 
-            <div class="row" style="border-top: 1px solid rgba(255, 255, 255, 0.5); text-align: center; margin: 0; background-color: rgba(245, 245, 245, 0.2);">
-              <div class="col-sm-12">
-                <div id="toggle_legends" class="btn btn-small outline" style="color: #525252;"><span class="glyphicon glyphicon-chevron-down">Legend</span></div>
-                <div id="legend_list" style="height: 0px; max-height:375px; overflow-y: scroll;">
-                  <table id="legend-table" class="table" style="display: table; table-layout: fixed; width: 98%;">
+            <div class="row row-container" style="border-top: 1px solid rgba(255, 255, 255, 0.5); text-align: center; margin: 0; background-color: rgba(245, 245, 245, 0.2);">
+              <div class="col-sm-12 col-container">
+                <div id="dynamic_visual_filter_button" class="btn btn-small outline" style="color: #525252;"><span class="glyphicon glyphicon-chevron-down">Legend</span></div>
+                <!--<div id="dynamic_visual_filter" style="height: 0px; max-height:375px; overflow-y: scroll;">-->
+                <div id="dynamic_visual_filter" style="overflow-y: scroll;">
+                  <table id="graph_visual_legend_table" class="table" style="display: table; table-layout: fixed; width: 98%;">
                     <thead />
                     <tbody />
                   </table>
+
+                  <div id="tree_visual_timeline" style= "width: 100%; max-width: 100%;"></div>
+
                 </div>
               </div>
             </div>
@@ -1397,6 +1401,7 @@
     <script src="plugins/d3/d3.min.js"></script>
     <!--<script src="plugins/d3/d3.js"></script>-->
     <script src="plugins/d3-context-menu/js/d3-context-menu.js"></script>
+    <script src="plugins/d3-timeline/d3-timeline.js"></script>
     <script src="plugins/c3/c3.min.js"></script>
     <script src="plugins/jq-rangeslider/jQAllRangeSliders-min.js"></script>
     <script src="plugins/jq-rangeslider/jQAllRangeSliders-withRuler-min.js"></script>

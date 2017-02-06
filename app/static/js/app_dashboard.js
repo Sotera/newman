@@ -1,26 +1,100 @@
+var visual_filter_container = (function () {
 
+  var container_ui_id = 'visual_filter_container';
+  var container_ui_jquery_id = '#' + container_ui_id;
+  var container_ui_jquery = $(container_ui_jquery_id);
 
-var toggle_legends = (function(){
-  var btn = $('#toggle_legends');
-  var panel = $('#legend_list');
+  var open = function () {
+    if (isHidden()) {
+      container_ui_jquery.fadeToggle('fast');
+
+    }
+  };
+
+  var show = function () {
+    container_ui_jquery.css("display", "block");
+  };
+
+  var close = function () {
+    if (isVisible()) {
+      container_ui_jquery.fadeToggle('fast');
+    }
+  };
+
+  var hide = function () {
+    container_ui_jquery.css("display", "none");
+  };
+
+  var isVisible = function () {
+    return (container_ui_jquery && (container_ui_jquery.is(':visible') || (container_ui_jquery.css('display') != 'none')));
+  };
+
+  var isHidden = function () {
+    return (container_ui_jquery && ( container_ui_jquery.is(':hidden') || (container_ui_jquery.css('display') == 'none')));
+  };
+
+  function init() {
+    //console.log('visual_filter_container.init()');
+
+  }
+
+  return {
+    'init' : init,
+    'open' : open,
+    'show' : show,
+    'close' : close,
+    'hide' : hide,
+    'isVisible' : isVisible,
+    'isHidden' : isHidden
+  };
+
+}());
+
+var dynamic_visual_filter = (function(){
+
+  var _filter_type = 'graph'
+  var _button_label = 'Legend';
+  var _panel_max_height = 350;
+  var _is_panel_open = false;
+
+  var base_height_tree_timeline = 65, base_height_graph_legend = 350;
+
+  var dynamic_visual_filter_button = $('#dynamic_visual_filter_button');
+  var dynamic_visual_filter_panel = $('#dynamic_visual_filter');
   var open_css = "glyphicon-chevron-down";
   var close_css = "glyphicon-chevron-up";
 
-  var open = function(){
-    btn.find("span").first().switchClass(open_css, close_css);
-    panel.css("height", "350px");
+  var open = function() {
+    var label_html = '<span class="glyphicon ' + close_css + '">&nbsp;' + _button_label + '</span>';
+    dynamic_visual_filter_button.html( label_html );
+    //dynamic_visual_filter_button.find("span").first().switchClass(open_css, close_css);
+
+    expandUI();
   };
 
-  var close = function(){
-    btn.find("span").first().switchClass(close_css, open_css);
-    panel.css("height", "0px");
+  var close = function() {
+    var label_html = '<span class="glyphicon ' + open_css + '">&nbsp;' + _button_label + '</span>';
+    dynamic_visual_filter_button.html( label_html );
+    //dynamic_visual_filter_button.find("span").first().switchClass(close_css, open_css);
+
+    collapseUI();
   };
+
+  function expandUI() {
+    dynamic_visual_filter_panel.css("height", _panel_max_height + "px");
+    _is_panel_open = true;
+  }
+
+  function collapseUI() {
+    dynamic_visual_filter_panel.css("height", "0px");
+    _is_panel_open = false;
+  }
 
   var isOpen = function(){
-    return btn.find("span").first().hasClass(close_css);
+    return (_is_panel_open || dynamic_visual_filter_button.find("span").first().hasClass(close_css));
   };
 
-  var toggle = function(){
+  var toggle = function() {
     if (isOpen()){
       close();
     }
@@ -29,13 +103,113 @@ var toggle_legends = (function(){
     }
   };
 
-  btn.on('click', toggle);
+  function initUI( config_obj ) {
+    if (!config_obj) {
+      return;
+    }
+
+    //{"filter_type" : 'graph', "filter_label" : 'Legend', "filter_max_height" : 350, "is_visible" : false}
+    var type = config_obj.filter_type;
+    var toggle_label = config_obj.filter_label;
+    var max_height = config_obj.filter_max_height;
+    var is_visible = config_obj.is_visible;
+
+    console.log('dynamic_visual_filter.initUI( ' + type + ', ' + toggle_label + ', ' + max_height + ', ' + is_visible + ' )');
+
+
+    setFilterType(type);
+
+    if (toggle_label) {
+      _button_label = toggle_label
+    }
+
+    setMaxHeight( max_height );
+
+    if (is_visible === true) {
+      open();
+    }
+    else {
+      close();
+    }
+  }
+
+  function initEvents() {
+
+
+    dynamic_visual_filter_button.on('click', function(event) {
+      //console.log('button-clicked \'' + $(this).attr('id') + '\'');
+
+      toggle();
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      event.stopPropagation();
+    });
+
+  }
+
+  function init(config_obj) {
+    if (config_obj) {
+      initUI( config_obj );
+    }
+
+    initEvents();
+  }
+
+  function isValidFilterType( new_type ) {
+    if (new_type && (new_type == 'graph' || new_type == 'tree')) {
+      return true;
+    }
+    return false;
+  }
+
+  function setFilterType( new_type ) {
+    if (isValidFilterType( new_type )) {
+      _filter_type = new_type;
+
+      if (_filter_type == 'tree') {
+        setMaxHeight( base_height_tree_timeline );
+      }
+      if (_filter_type == 'graph') {
+        setMaxHeight( base_height_graph_legend );
+      }
+    }
+  }
+
+  function setMaxHeight( new_max_height ) {
+    if (new_max_height && new_max_height > 0) {
+      _panel_max_height = new_max_height;
+    }
+  }
+
+  function getFilterType() {
+    return _filter_type;
+  }
+
+  function getUIBaseHeight( filter ) {
+    var f_type = _filter_type;
+    if (isValidFilterType( filter )) {
+      f_type = filter;
+    }
+
+    if (f_type == 'tree') {
+      return base_height_tree_timeline;
+    }
+    if (f_type == 'graph') {
+      return base_height_graph_legend;
+    }
+    return base_height_tree_timeline;
+  }
 
   return {
-    open: open,
-    close: close,
-    toggle: toggle,
-    isOpen: isOpen
+    'init' : init,
+    'initUI' : initUI,
+    'getUIBaseHeight' : getUIBaseHeight,
+    'getFilterType' : getFilterType,
+    'open' : open,
+    'close' : close,
+    'toggle' : toggle,
+    'isOpen' : isOpen
   };
 }());
 
@@ -185,11 +359,28 @@ var dashboard_content = (function () {
 
 var email_analytics_content = (function () {
 
-  var email_container_ui_id = 'content-analytics-email';
-  var email_container = $('#' + email_container_ui_id);
+  var analytics_content_ui_id = 'content-analytics-email';
+  var analytics_content_jquery = $('#' + analytics_content_ui_id);
 
   var button_ui_id = 'toggle_analytics_email';
   var button = $('#' + button_ui_id);
+
+  function getUIWidth() {
+    var ui_width = 0;
+    if (analytics_content_jquery) {
+      ui_width = analytics_content_jquery.width();
+    }
+    return ui_width;
+  }
+
+  function getUIHeight() {
+    var ui_height = 0;
+    if (analytics_content_jquery) {
+      ui_height = analytics_content_jquery.height();
+    }
+    return ui_height;
+  }
+
 
   var open = function () {
     if (isHidden()) {
@@ -198,10 +389,10 @@ var email_analytics_content = (function () {
         dashboard_content.close();
       }
 
-      //email_doc_view_panel.show();
+      visual_filter_container.init();
 
       //email_container.fadeToggle('fast');
-      email_container.show();
+      analytics_content_jquery.show();
     }
 
     email_doc_view_panel.hide();
@@ -211,18 +402,18 @@ var email_analytics_content = (function () {
     if (isVisible()) {
 
       //email_container.fadeToggle('fast');
-      email_container.hide();
+      analytics_content_jquery.hide();
     }
   };
 
   var isVisible = function () {
 
-    return (email_container && (email_container.is(':visible') || (email_container.css('display') != 'none')));
+    return (analytics_content_jquery && (analytics_content_jquery.is(':visible') || (analytics_content_jquery.css('display') != 'none')));
   };
 
   var isHidden = function () {
 
-    return (email_container && ( email_container.is(':hidden') || (email_container.css('display') == 'none')));
+    return (analytics_content_jquery && ( analytics_content_jquery.is(':hidden') || (analytics_content_jquery.css('display') == 'none')));
   };
 
   var toggle = function () {
@@ -238,9 +429,11 @@ var email_analytics_content = (function () {
 
 
   function init() {
+    visual_filter_container.init();
     initEvents();
     close();
   }
+
   function initEvents() {
     button.on('click', function(event) {
       console.log('button-clicked \'' + $(this).attr('id') + '\'');
@@ -260,7 +453,9 @@ var email_analytics_content = (function () {
     'close' : close,
     'toggle' : toggle,
     'isVisible' : isVisible,
-    'isHidden' : isHidden
+    'isHidden' : isHidden,
+    'getUIWidth' : getUIWidth,
+    'getUIHeight' : getUIHeight
   };
 
 }());

@@ -9,7 +9,7 @@ var force = d3.layout.force()
   .linkStrength(2)
   .size([width, height]);
 
-var svg = d3.select("#graph_email").append("svg")
+var svg = d3.select("#graph_visual").append("svg")
   .attr("width", "100%")
   .attr("height", height);
 
@@ -45,7 +45,7 @@ var bottom_panel= (function(){
     container.css("height", "calc(100% - 140px)").css("bottom", "0px"); // height : 100% - 140px(top-menu)
 
     // hide graph-visual-filter-panel
-    newman_graph_email_visual_filter.hide();
+    visual_filter_container.hide();
   };
 
   var close = function(){
@@ -54,7 +54,7 @@ var bottom_panel= (function(){
     container.css("bottom", "calc(160px - 100%)"); // offset : 140px(top-menu) + 20px(toggle-button)
 
     // display graph-visual-filter-panel
-    newman_graph_email_visual_filter.show();
+    visual_filter_container.show();
   };
 
   var hide = function(){
@@ -126,8 +126,8 @@ var bottom_panel= (function(){
 
 
 var toggle_legends = (function(){
-  var btn = $('#toggle_legends');
-  var panel = $('#legend_list');
+  var btn = $('#dynamic_visual_filter_button');
+  var panel = $('#dynamic_visual_filter');
   var open_css = "glyphicon-chevron-down";
   var close_css = "glyphicon-chevron-up";
 
@@ -303,7 +303,7 @@ function dragstarted(d){
   d3.select(this).classed("dragging", true);
 }
 
-function dragged(d){
+function dragged(d) {
   if (d.fixed) return; //root is fixed
   d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
   d.fixed = true;
@@ -760,7 +760,7 @@ function drawGraph( graph ) {
   app_graph_ui.open();
 
   svg.remove();
-  svg = d3.select("#graph_email").append("svg")
+  svg = d3.select("#graph_visual").append("svg")
     .attr("height", "100%")
     .attr("width", "100%")
   //  .attr("viewBox", "0 0 " + width + " " + height )
@@ -1074,7 +1074,7 @@ function getNodeIcon( node_element ) {
 function setNodeSelected( node_key, is_selected ) {
   if (node_key) {
 
-    d3.selectAll("#graph_email svg text")
+    d3.selectAll("#graph_visual svg text")
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'central')
       .attr('font-family', 'FontAwesome')
@@ -1107,7 +1107,7 @@ function setNodeSelected( node_key, is_selected ) {
 
 function clearNodeSelected() {
 
-    d3.selectAll("#graph_email svg text")
+    d3.selectAll("#graph_visual svg text")
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'central')
       .attr('font-family', 'FontAwesome')
@@ -1134,7 +1134,7 @@ function clearNodeSelected() {
 
 function onAllNodeSelected() {
 
-  d3.selectAll("#graph_email svg text")
+  d3.selectAll("#graph_visual svg text")
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'central')
     .attr('font-family', 'FontAwesome')
@@ -1159,7 +1159,7 @@ function onAllNodeSelected() {
 function allNodeLabelOff() {
   node_label_enabled = false;
 
-  d3.selectAll("#graph_email svg text")
+  d3.selectAll("#graph_visual svg text")
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'central')
     .attr('font-family', 'FontAwesome')
@@ -1209,7 +1209,7 @@ function nodeLabelOff( node ) {
 function allNodeLabelOn() {
   node_label_enabled = true;
 
-  d3.selectAll("#graph_email svg text")
+  d3.selectAll("#graph_visual svg text")
     .attr('text-anchor', 'end')
     .attr('dominant-baseline', 'central')
     .text(function(d) {
@@ -1311,17 +1311,17 @@ function setNodeHighlight( email ) {
 function drawGraphLegendTableDataset() {
 
   var lastSort = "";
-  $("#legend-table tbody").empty();
-  $("#legend-table thead").empty();
+  $("#graph_visual_legend_table tbody").empty();
+  $("#graph_visual_legend_table thead").empty();
 
-  var thead = d3.select("#legend-table").select("thead").append("tr").selectAll("tr").data(
+  var thead = d3.select("#graph_visual_legend_table").select("thead").append("tr").selectAll("tr").data(
     ['Color', 'Account', 'Dataset']).enter().append("th")
     .text(function(d){ return d; })
     .attr('class', 'clickable')
     .on('click', function(k, i){
       var direction = (lastSort == k) ? -1 : 1;
       lastSort = (direction == -1) ? "" : k; //toggle
-      d3.select("#legend-table").select("tbody").selectAll("tr").sort(function(a,b){
+      d3.select("#graph_visual_legend_table").select("tbody").selectAll("tr").sort(function(a,b){
         if (i == 1){
           return (parseInt(a[i]) - parseInt(b[i])) * direction;
         }
@@ -1435,7 +1435,7 @@ function drawGraphLegendTableDataset() {
   color_label_by_dataset = color_label_by_dataset.sort(descendingPredicatByIndex(1));
   //console.log('\tcolor_n_count_by_domain: ' + JSON.stringify(color_n_count_by_domain, null, 2));
 
-  var tr = d3.select("#legend-table").select("tbody").selectAll("tr")
+  var tr = d3.select("#graph_visual_legend_table").select("tbody").selectAll("tr")
     .data(color_label_by_dataset).enter().append("tr")
     .style( "text-align", "left" )
     .style( "text-align", "left" )
@@ -1515,17 +1515,17 @@ function drawGraphLegendTableDataset() {
 function drawGraphLegendTableDomain() {
 
   var lastSort = "";
-  $("#legend-table tbody").empty();
-  $("#legend-table thead").empty();
+  $("#graph_visual_legend_table tbody").empty();
+  $("#graph_visual_legend_table thead").empty();
 
-  var thead = d3.select("#legend-table").select("thead").append("tr").selectAll("tr").data(
+  var thead = d3.select("#graph_visual_legend_table").select("thead").append("tr").selectAll("tr").data(
     ['Color', 'Account', 'Domain']).enter().append("th")
     .text(function(d){ return d; })
     .attr('class', 'clickable')
     .on('click', function(k, i){
       var direction = (lastSort == k) ? -1 : 1;
       lastSort = (direction == -1) ? "" : k; //toggle
-      d3.select("#legend-table").select("tbody").selectAll("tr").sort(function(a,b){
+      d3.select("#graph_visual_legend_table").select("tbody").selectAll("tr").sort(function(a,b){
         if (i == 1){
           return (parseInt(a[i]) - parseInt(b[i])) * direction;
         }
@@ -1549,7 +1549,7 @@ function drawGraphLegendTableDomain() {
   color_label_by_domain = color_label_by_domain.sort(descendingPredicatByIndex(1));
   //console.log('\tcolor_n_count_by_domain: ' + JSON.stringify(color_label_by_domain, null, 2));
 
-  var tr = d3.select("#legend-table").select("tbody").selectAll("tr")
+  var tr = d3.select("#graph_visual_legend_table").select("tbody").selectAll("tr")
     .data(color_label_by_domain).enter().append("tr")
     .style( "text-align", "left" )
   //.attr('class', 'clickable')
@@ -1598,17 +1598,17 @@ function drawGraphLegendTableDomain() {
 
 function drawGraphLegendTableCommunity() {
   var lastSort = "";
-  $("#legend-table tbody").empty();
-  $("#legend-table thead").empty();
+  $("#graph_visual_legend_table tbody").empty();
+  $("#graph_visual_legend_table thead").empty();
   
-  var thead = d3.select("#legend-table").select("thead").append("tr").selectAll("tr").data(
+  var thead = d3.select("#graph_visual_legend_table").select("thead").append("tr").selectAll("tr").data(
     ['Community', 'Account']).enter().append("th")
     .text(function(d){ return d; })
     .attr('class', 'clickable')
     .on('click', function(k, i){
       var direction = (lastSort == k) ? -1 : 1;
       lastSort = (direction == -1) ? "" : k; //toggle
-      d3.select("#legend-table").select("tbody").selectAll("tr").sort(function(a,b){
+      d3.select("#graph_visual_legend_table").select("tbody").selectAll("tr").sort(function(a,b){
         if (i == 1){
           return (parseInt(a[i]) - parseInt(b[i])) * direction;
         }
@@ -1632,7 +1632,7 @@ function drawGraphLegendTableCommunity() {
   color_label_by_community = color_label_by_community.sort(descendingPredicatByIndex(1));
   //console.log('\tnode_count_by_community: ' + JSON.stringify(color_label_by_community, null, 2));
 
-  var tr = d3.select("#legend-table").select("tbody").selectAll("tr")
+  var tr = d3.select("#graph_visual_legend_table").select("tbody").selectAll("tr")
     .data(color_label_by_community).enter().append("tr")
     .style( "text-align", "left" )
     .on("mouseover", function(d, i){

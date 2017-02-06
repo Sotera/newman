@@ -8,30 +8,34 @@ var app_graph_ui = (function () {
 
   var is_graph_node_label_on = false, is_graph_highlight_by_rank_on = false;
 
-  var graph_ui_id = 'graph_email';
+  var graph_ui_id = 'graph_visual';
   var graph_ui_jquery_id = '#' + graph_ui_id;
   var graph_ui_jquery = $(graph_ui_jquery_id);
+
+  var graph_legend_ui_id = 'graph_visual_legend_table';
+  var graph_legend_ui_jquery_id = '#' + graph_legend_ui_id;
+  var graph_legend_ui_jquery = $(graph_legend_ui_jquery_id);
 
   var ui_max_width = graph_ui_jquery.width();
   var ui_max_height = graph_ui_jquery.height();
 
-  var baseSVG, svgGroup;
+  var base_svg, svg_group;
 
 
   function drawGraphLegendTableDataset() {
 
     var lastSort = "";
-    $("#legend-table tbody").empty();
-    $("#legend-table thead").empty();
+    $(graph_legend_ui_jquery_id + " tbody").empty();
+    $(graph_legend_ui_jquery_id + " thead").empty();
 
-    var thead = d3.select("#legend-table").select("thead").append("tr").selectAll("tr").data(
+    var thead = d3.select( graph_legend_ui_jquery_id ).select("thead").append("tr").selectAll("tr").data(
       ['Color', 'Account', 'Dataset']).enter().append("th")
       .text(function(d){ return d; })
       .attr('class', 'clickable')
       .on('click', function(k, i){
         var direction = (lastSort == k) ? -1 : 1;
         lastSort = (direction == -1) ? "" : k; //toggle
-        d3.select("#legend-table").select("tbody").selectAll("tr").sort(function(a,b){
+        d3.select( graph_legend_ui_jquery_id ).select("tbody").selectAll("tr").sort(function(a,b){
           if (i == 1){
             return (parseInt(a[i]) - parseInt(b[i])) * direction;
           }
@@ -145,7 +149,7 @@ var app_graph_ui = (function () {
     color_label_by_dataset = color_label_by_dataset.sort(descendingPredicatByIndex(1));
     //console.log('\tcolor_n_count_by_domain: ' + JSON.stringify(color_n_count_by_domain, null, 2));
 
-    var tr = d3.select("#legend-table").select("tbody").selectAll("tr")
+    var tr = d3.select( graph_legend_ui_jquery_id ).select("tbody").selectAll("tr")
       .data(color_label_by_dataset).enter().append("tr")
       .style( "text-align", "left" )
       .style( "text-align", "left" )
@@ -225,17 +229,17 @@ var app_graph_ui = (function () {
   function drawGraphLegendTableDomain() {
 
     var lastSort = "";
-    $("#legend-table tbody").empty();
-    $("#legend-table thead").empty();
+    $(graph_legend_ui_jquery_id + " tbody").empty();
+    $(graph_legend_ui_jquery_id + " thead").empty();
 
-    var thead = d3.select("#legend-table").select("thead").append("tr").selectAll("tr").data(
+    var thead = d3.select( graph_legend_ui_jquery_id ).select("thead").append("tr").selectAll("tr").data(
       ['Color', 'Account', 'Domain']).enter().append("th")
       .text(function(d){ return d; })
       .attr('class', 'clickable')
       .on('click', function(k, i){
         var direction = (lastSort == k) ? -1 : 1;
         lastSort = (direction == -1) ? "" : k; //toggle
-        d3.select("#legend-table").select("tbody").selectAll("tr").sort(function(a,b){
+        d3.select( graph_legend_ui_jquery_id ).select("tbody").selectAll("tr").sort(function(a,b){
           if (i == 1){
             return (parseInt(a[i]) - parseInt(b[i])) * direction;
           }
@@ -259,7 +263,7 @@ var app_graph_ui = (function () {
     color_label_by_domain = color_label_by_domain.sort(descendingPredicatByIndex(1));
     //console.log('\tcolor_n_count_by_domain: ' + JSON.stringify(color_label_by_domain, null, 2));
 
-    var tr = d3.select("#legend-table").select("tbody").selectAll("tr")
+    var tr = d3.select( graph_legend_ui_jquery_id ).select("tbody").selectAll("tr")
       .data(color_label_by_domain).enter().append("tr")
       .style( "text-align", "left" )
       //.attr('class', 'clickable')
@@ -308,17 +312,17 @@ var app_graph_ui = (function () {
 
   function drawGraphLegendTableCommunity() {
     var lastSort = "";
-    $("#legend-table tbody").empty();
-    $("#legend-table thead").empty();
+    $(graph_legend_ui_jquery_id + " tbody").empty();
+    $(graph_legend_ui_jquery_id + " thead").empty();
 
-    var thead = d3.select("#legend-table").select("thead").append("tr").selectAll("tr").data(
+    var thead = d3.select( graph_legend_ui_jquery_id ).select("thead").append("tr").selectAll("tr").data(
       ['Community', 'Account']).enter().append("th")
       .text(function(d){ return d; })
       .attr('class', 'clickable')
       .on('click', function(k, i){
         var direction = (lastSort == k) ? -1 : 1;
         lastSort = (direction == -1) ? "" : k; //toggle
-        d3.select("#legend-table").select("tbody").selectAll("tr").sort(function(a,b){
+        d3.select( graph_legend_ui_jquery_id ).select("tbody").selectAll("tr").sort(function(a,b){
           if (i == 1){
             return (parseInt(a[i]) - parseInt(b[i])) * direction;
           }
@@ -342,7 +346,7 @@ var app_graph_ui = (function () {
     color_label_by_community = color_label_by_community.sort(descendingPredicatByIndex(1));
     //console.log('\tnode_count_by_community: ' + JSON.stringify(color_label_by_community, null, 2));
 
-    var tr = d3.select("#legend-table").select("tbody").selectAll("tr")
+    var tr = d3.select( graph_legend_ui_jquery_id ).select("tbody").selectAll("tr")
       .data(color_label_by_community).enter().append("tr")
       .style( "text-align", "left" )
       .on("mouseover", function(d, i){
@@ -418,14 +422,14 @@ var app_graph_ui = (function () {
   }
 
   function tickCommunity() {
-    if (svgGroup) {
-      svgGroup.selectAll(".link").attr("d", function (d) {
+    if (svg_group) {
+      svg_group.selectAll(".link").attr("d", function (d) {
         return "M" + d[0].x + "," + d[0].y +
           "S" + d[1].x + "," + d[1].y +
           " " + d[2].x + "," + d[2].y;
       });
 
-      svgGroup.selectAll("circle").attr("cx", function (d) {
+      svg_group.selectAll("circle").attr("cx", function (d) {
           return d.x;
         })
         .attr("cy", function (d) {
@@ -437,19 +441,19 @@ var app_graph_ui = (function () {
   function switchGraphColorBy( color_category ) {
     console.log('switchGraphColorBy( ' + color_category + ' )');
 
-    if (svgGroup) {
+    if (svg_group) {
 
       if (color_category == 'dataset_color') {
         drawGraphLegendTableDataset();
 
-        svgGroup.selectAll("circle").style("fill", function (d) {
+        svg_group.selectAll("circle").style("fill", function (d) {
           return newman_graph_email.getNodeDatasetColor(d.name);
         });
       }
       else if (color_category == 'community_color') {
         drawGraphLegendTableCommunity();
 
-        svgGroup.selectAll("circle").style("fill", function (d) {
+        svg_group.selectAll("circle").style("fill", function (d) {
           //console.log('\tcolor_by_community\n' + JSON.stringify(d, null, 2));
           return newman_top_email_community.getCommunityColor(d.community);
         });
@@ -457,7 +461,7 @@ var app_graph_ui = (function () {
       else if (color_category == 'domain_color') {
         drawGraphLegendTableDomain();
 
-        svgGroup.selectAll("circle").style("fill", function (d) {
+        svg_group.selectAll("circle").style("fill", function (d) {
           if (d && d.name) {
             //console.log('\tcolor_by_domain\n' + JSON.stringify(d, null, 2));
             return getEmailDomainColor(d.name);
@@ -469,8 +473,8 @@ var app_graph_ui = (function () {
   } // end-of switchGraphColorBy( color_category )
 
   function clearAllNodeSelected() {
-    if (svgGroup) {
-      svgGroup.selectAll( graph_ui_jquery_id + " svg text" )
+    if (svg_group) {
+      svg_group.selectAll( graph_ui_jquery_id + " svg text" )
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'central')
         .attr('font-family', 'FontAwesome')
@@ -498,11 +502,11 @@ var app_graph_ui = (function () {
 
   function setNodeSelected( node_key, is_selected ) {
 
-    if (svgGroup) {
+    if (svg_group) {
 
       if (node_key) {
 
-        svgGroup.selectAll( graph_ui_jquery_id + " svg text" )
+        svg_group.selectAll( graph_ui_jquery_id + " svg text" )
           .attr('text-anchor', 'middle')
           .attr('dominant-baseline', 'central')
           .attr('font-family', 'FontAwesome')
@@ -536,10 +540,10 @@ var app_graph_ui = (function () {
 
 
   function toggleNodeHighlight( is_enabled, node_id ) {
-    if (svgGroup) {
+    if (svg_group) {
       if (is_enabled === true) {
 
-        svgGroup.selectAll("circle").filter(function (d) {
+        svg_group.selectAll("circle").filter(function (d) {
             if (node_id) {
               return (d && d.name == node_id);
             }
@@ -557,7 +561,7 @@ var app_graph_ui = (function () {
         }
         else {
 
-          svgGroup.selectAll("circle").filter(function (d) {
+          svg_group.selectAll("circle").filter(function (d) {
               if (node_id) {
                 return (d && d.name == node_id);
               }
@@ -571,19 +575,19 @@ var app_graph_ui = (function () {
   }
 
   function toggleNodeHighlightByRank( is_enabled ) {
-    if (svgGroup) {
+    if (svg_group) {
       if (is_enabled === true) {
-        svgGroup.selectAll("circle").style("opacity", function (d) {
+        svg_group.selectAll("circle").style("opacity", function (d) {
           return 0.2 + (d.rank);
         });
 
-        svgGroup.selectAll("circle").style("stroke-width", function (d) {
+        svg_group.selectAll("circle").style("stroke-width", function (d) {
           return 5 * (d.rank);
         });
       }
       else {
-        svgGroup.selectAll("circle").style("opacity", "100");
-        svgGroup.selectAll("circle").style("stroke-width", "0");
+        svg_group.selectAll("circle").style("opacity", "100");
+        svg_group.selectAll("circle").style("stroke-width", "0");
       }
     }
   }
@@ -701,10 +705,10 @@ var app_graph_ui = (function () {
   }
 
   function toggleAllNodeLabel( label_on ) {
-    if (svgGroup) {
+    if (svg_group) {
       if (label_on === true) {
 
-        svgGroup.selectAll( graph_ui_jquery_id + " svg text" )
+        svg_group.selectAll( graph_ui_jquery_id + " svg text" )
           .attr('text-anchor', 'end')
           .attr('dominant-baseline', 'central')
           .text(function (d) {
@@ -727,7 +731,7 @@ var app_graph_ui = (function () {
       }
       else {
 
-        svgGroup.selectAll( graph_ui_jquery_id + " svg text" )
+        svg_group.selectAll( graph_ui_jquery_id + " svg text" )
           .attr('text-anchor', 'middle')
           .attr('dominant-baseline', 'central')
           .attr('font-family', 'FontAwesome')
@@ -803,7 +807,7 @@ var app_graph_ui = (function () {
       .on("drag", onDragged)
       .on("dragend", onDragEnded);
 
-    baseSVG = d3.select(graph_ui_jquery_id).append("svg")
+    base_svg = d3.select(graph_ui_jquery_id).append("svg")
       .attr("height", "100%")
       .attr("width", "100%")
       //  .attr("viewBox", "0 0 " + width + " " + height )
@@ -816,7 +820,7 @@ var app_graph_ui = (function () {
     });
 
     // Append a group which holds all nodes and which the zoom Listener can act upon.
-    svgGroup = baseSVG.append('svg:g');
+    svg_group = base_svg.append('svg:g');
 
     var nodes = graph_data.nodes.slice();
     var links = [];
@@ -834,7 +838,7 @@ var app_graph_ui = (function () {
 
     force.nodes(nodes).links(links).start();
 
-    svgGroup.append("svg:defs").selectAll("marker")
+    svg_group.append("svg:defs").selectAll("marker")
       .data(["end"])
       .enter()
       .append("svg:marker")
@@ -848,7 +852,7 @@ var app_graph_ui = (function () {
       .append("svg:path")
       .attr("d", "M0,-5L10,0L0,5");
 
-    var link = svgGroup.selectAll(".link")
+    var link = svg_group.selectAll(".link")
       .data(bi_links)
       .enter().append("path")
       .attr("class", "link").attr("marker-end", "url(#end)")
@@ -862,7 +866,7 @@ var app_graph_ui = (function () {
           d[2].name.replace(/\./g,'_').replace(/@/g,'_');
       });
 
-    var node = svgGroup.selectAll(".node")
+    var node = svg_group.selectAll(".node")
       .data(graph_data.nodes)
       .enter().append("g")
       .attr("class", "node");
@@ -1032,7 +1036,7 @@ var app_graph_ui = (function () {
 
 
     function redraw() {
-      svgGroup.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
+      svg_group.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
     }
 
     /* drag-related behaviour */
@@ -1062,8 +1066,8 @@ var app_graph_ui = (function () {
     updateUIInboundCount();
     updateUIOutboundCount();
 
-    if (baseSVG) {
-      baseSVG.remove();
+    if (base_svg) {
+      base_svg.remove();
     }
   }
 
@@ -1077,6 +1081,8 @@ var app_graph_ui = (function () {
   }
 
   function open() {
+    console.log('app_graph_ui.open()');
+
     newman_graph_email.clearAllMarkedNode();
     app_tree_email.toggleTreeButtonChecked( false );
 
@@ -1085,13 +1091,25 @@ var app_graph_ui = (function () {
       //app_tree_ui_radial.close();
       app_tree_ui.close();
 
+      graph_legend_ui_jquery.show();
+
       //graph_ui_jquery_id.fadeToggle('fast');
       graph_ui_jquery.show();
     }
+
+    dynamic_visual_filter.init({
+      "filter_type" : 'graph',
+      "filter_label" : 'Legend',
+      "filter_max_height" : dynamic_visual_filter.getUIBaseHeight('graph'),
+      "is_visible" : false
+    });
+
   }
 
   function close() {
     if (isVisible()) {
+
+      graph_legend_ui_jquery.hide();
 
       //graph_ui_jquery_id.fadeToggle('fast');
       graph_ui_jquery.hide();

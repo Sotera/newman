@@ -6,13 +6,13 @@
 var app_tree_ui_radial = (function () {
   var debug_enabled = false;
 
-  var tree_ui_id = 'tree_email';
+  var tree_ui_id = 'tree_visual';
   var tree_ui_jquery_id = '#' + tree_ui_id;
   var tree_ui_jquery = $(tree_ui_jquery_id);
   var ui_max_width = tree_ui_jquery.width();
   var ui_max_height = tree_ui_jquery.height();
 
-  var baseSVG;
+  var base_svg;
 
   function initRadialTree( tree_data ) {
     clearTree();
@@ -110,16 +110,16 @@ var app_tree_ui_radial = (function () {
     zoomListener.translate([center_x, center_y]);
 
     // define the baseSvg, attaching a class for styling
-    baseSVG = d3.select( tree_ui_jquery_id ).append("svg")
+    base_svg = d3.select( tree_ui_jquery_id ).append("svg")
       .attr("width", width )
       .attr("height", height )
       //.call( zoomListener );
       .call( dragListener );
 
-    zoomListener( baseSVG );
+    zoomListener( base_svg );
 
     // Append a group which holds all nodes and which the zoom Listener can act upon.
-    var svgGroup = baseSVG.append("g").attr("transform", "translate(" + center_x + "," + center_y + ")");
+    var svgGroup = base_svg.append("g").attr("transform", "translate(" + center_x + "," + center_y + ")");
 
     // Collapse all children of root's children before rendering.
     if (root.children) {
@@ -567,8 +567,8 @@ var app_tree_ui_radial = (function () {
   } // end-of function initRadialTree()
 
   function clearTree() {
-    if (baseSVG) {
-      baseSVG.remove();
+    if (base_svg) {
+      base_svg.remove();
     }
   }
 

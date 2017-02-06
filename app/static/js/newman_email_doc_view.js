@@ -746,7 +746,7 @@ var email_doc_view_panel= (function(){
     container.css("height", "calc(100% - 140px)").css("bottom", "0px"); // height : 100% - 140px(top-menu)
 
     // hide graph-visual-filter-panel
-    newman_graph_email_visual_filter.hide();
+    visual_filter_container.hide();
   };
 
   var close = function() {
@@ -756,7 +756,7 @@ var email_doc_view_panel= (function(){
     container.css("bottom", "calc(160px - 100%)"); // offset : 140px(top-menu) + 20px(toggle-button)
 
     // display graph-visual-filter-panel
-    newman_graph_email_visual_filter.show();
+    visual_filter_container.show();
   }
 
   var hide = function(){

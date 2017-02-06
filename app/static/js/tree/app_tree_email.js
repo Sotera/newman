@@ -4,7 +4,7 @@
 var app_tree_email = (function () {
   var debug_enabled = true;
 
-  var toggle_view_ui_id = 'tree_view_checkbox';
+  var toggle_view_ui_id = 'tree_visual_checkbox';
   var toggle_view_ui_jquery_id = '#' + toggle_view_ui_id;
 
   var _artifact_list = [];
@@ -171,7 +171,7 @@ var app_tree_email = (function () {
       if (datetime) {
         var datetime_in_millisecond = datetime.getTime();
 
-        //datetime_value = datetime_in_millisecond;
+        datetime_value = datetime_in_millisecond;
 
         // convert to days
         //datetime_value = datetime_in_millisecond / (1000 * 60 * 60 * 24);
@@ -180,7 +180,7 @@ var app_tree_email = (function () {
         //datetime_value = datetime_in_millisecond / (1000 * 60 * 60);
 
         // convert to minutes
-        datetime_value = datetime_in_millisecond / (60000);
+        //datetime_value = datetime_in_millisecond / (60000);
 
       }
     }
@@ -238,6 +238,8 @@ var app_tree_email = (function () {
         if (max_datetime > min_datetime) {
           max_range = max_datetime - min_datetime;
         }
+        node['child_first_datetime'] = min_datetime;
+        node['child_last_datetime'] = max_datetime;
 
         //console.log("range_map :\n" + stringifyOnce(range_map, null, 2));
         console.log("min : " + min_datetime + " max : " + max_datetime + ' range : ' + max_range);
@@ -653,7 +655,17 @@ var app_tree_email = (function () {
 
   function onInitHistoTreeMapping(node_id_list, doc_index) {
 
-    newTree( node_id_list, doc_index, onNewTree);
+    if (doc_index >= 0) {
+      newTree(node_id_list, doc_index, onNewTree);
+    }
+    else { // no match, recipient only, return to default/graph visual
+
+      app_tree_process_indicator.setStatusProcessing(false);
+
+      app_tree_ui.close();
+
+      app_graph_ui.open();
+    }
 
   }
 
@@ -678,6 +690,10 @@ var app_tree_email = (function () {
           } // end-of if (first_doc_index)
           else {
             console.log('No artifact index found for ' + node_id);
+
+            if (callback) {
+              callback(node_id_list, first_doc_index);
+            }
           }
         }
       }
@@ -692,7 +708,7 @@ var app_tree_email = (function () {
     $(toggle_view_ui_jquery_id).change(function () {
       if (this.checked) {
         if (debug_enabled) {
-          console.log('tree_view_toggle: true');
+          console.log('tree_visual_toggle: true');
         }
 
         app_graph_ui.close();
@@ -707,7 +723,7 @@ var app_tree_email = (function () {
       }
       else {
         if (debug_enabled) {
-          console.log('tree_view_toggle: false');
+          console.log('tree_visual_toggle: false');
         }
 
         cancelNewTree();

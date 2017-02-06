@@ -6,13 +6,13 @@
 var app_tree_ui_radial_dnd = (function () {
   var debug_enabled = true;
 
-  var tree_ui_id = 'tree_email';
+  var tree_ui_id = 'tree_visual';
   var tree_ui_jquery_id = '#' + tree_ui_id;
   var tree_ui_jquery = $(tree_ui_jquery_id);
   var ui_max_width = tree_ui_jquery.width();
   var ui_max_height = tree_ui_jquery.height();
 
-  var baseSVG;
+  var base_svg;
 
   function initDnDRadialTree( tree_data ) {
     clearTree();
@@ -81,7 +81,7 @@ var app_tree_ui_radial_dnd = (function () {
     var zoomListener = d3.behavior.zoom().scaleExtent([0.1, 3]).on("zoom", zoom);
 
     // define the baseSvg, attaching a class for styling and the zoomListener
-    baseSVG = d3.select( tree_ui_jquery_id ).append("svg")
+    base_svg = d3.select( tree_ui_jquery_id ).append("svg")
       .attr("width",  width)
       .attr("height", height)
       //.attr("class", "tree-overlay")
@@ -213,7 +213,7 @@ var app_tree_ui_radial_dnd = (function () {
 
 
     // Append a group which holds all nodes and which the zoom Listener can act upon.
-    var svgGroup = baseSVG.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+    var svgGroup = base_svg.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
 
     // Collapse all children of roots children before rendering.
     root.children.forEach(function(child){
@@ -610,8 +610,8 @@ var app_tree_ui_radial_dnd = (function () {
   } // end-of initDnDRadialTree()
 
   function clearTree() {
-    if (baseSVG) {
-      baseSVG.remove();
+    if (base_svg) {
+      base_svg.remove();
     }
   }
 

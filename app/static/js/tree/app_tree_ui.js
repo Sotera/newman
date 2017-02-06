@@ -8,13 +8,24 @@ var app_tree_ui = (function () {
 
   var is_graph_node_label_on = false;
 
-  var tree_ui_id = 'tree_email';
+  var tree_ui_id = 'tree_visual';
   var tree_ui_jquery_id = '#' + tree_ui_id;
   var tree_ui_jquery = $(tree_ui_jquery_id);
+
+  var tree_timeline_ui_id = 'tree_visual_timeline';
+  var tree_timeline_ui_jquery_id = '#' + tree_timeline_ui_id;
+  var tree_timeline_ui_jquery = $(tree_timeline_ui_jquery_id);
+
+  var tree_timeline_width = tree_timeline_ui_jquery.width();
+  var tree_timeline_height = tree_timeline_ui_jquery.height();
+
+  var tree_timeline_svg;
+  var tree_timeline_colors;
+
   var ui_max_width = tree_ui_jquery.width();
   var ui_max_height = tree_ui_jquery.height();
 
-  var baseSVG, svgGroup;
+  var base_svg, svg_group;
 
   var last_known_x, last_known_y;
 
@@ -27,10 +38,10 @@ var app_tree_ui = (function () {
   }
 
   function toggleAllNodeLabel( label_on ) {
-    if (baseSVG) {
+    if (base_svg) {
       if (label_on === true) {
 
-        baseSVG.selectAll( "text" )
+        base_svg.selectAll( "text" )
           .attr("x", function(d) {
             return d.children || d._children ? -10 : 10;
           })
@@ -44,7 +55,7 @@ var app_tree_ui = (function () {
       }
       else {
 
-        baseSVG.selectAll( "text" )
+        base_svg.selectAll( "text" )
           .attr("x", function(d) {
             return d.children || d._children ? -10 : 10;
           })
@@ -52,12 +63,71 @@ var app_tree_ui = (function () {
             return d.children || d._children ? "end" : "start";
           })
           .text(function(d) {
-            return d.name;
+            return '';
           })
           .style("opacity",function() {
             return 100;
           });
 
+      }
+    }
+  }
+
+  function toggleLinkColorByTimeInterval( color_on, color, start_time, end_time ) {
+    //console.log('toggleLinkColorByTimeInterval(' + color_on + ', ' + color + ', ' + start_time + ', ' + end_time + ')' );
+
+    if (svg_group) {
+      if (color_on === true) {
+
+        if (color) {
+
+          svg_group.selectAll("path.tree-link")
+            .style("stroke", function (d) {
+
+              var source = d.source;
+              //console.log('toggleLinkColorByTimeInterval(...) : source\n' + stringifyOnce(source, null, 2) );
+
+              if (source.child_first_datetime == start_time && source.child_last_datetime == end_time) {
+                console.log('toggleLinkColorByTimeInterval(' + color_on + ', ' + color + ', ' + start_time + ', ' + end_time + ') : matched interval for source-node ' + source.node_uid );
+                return toggleLinkHighLight(d, "stroke", color);
+              }
+
+              return toggleLinkHighLight(d, "stroke");
+            });
+
+          /*
+          svg_group.selectAll("g.tree-node")
+            .filter(".tree-nodeCircle")
+            .style("stroke", function(d) {
+
+              var parent_node = d3.select(d.parentNode).datum();
+
+              if (parent_node && parent_node.child_first_datetime == start_time && parent_node.child_last_datetime == end_time) {
+                console.log('toggleLinkColorByTimeInterval(' + color_on + ', ' + color + ', ' + start_time + ', ' + end_time + ') : matched interval for parent-node ' + parent_node.node_uid );
+                return toggleNodeHighLight(d, "stroke", color);
+              }
+
+              return toggleNodeHighLight(d, "stroke");
+            });
+          */
+
+        } // end-of if (color)
+
+      }
+      else {
+
+        svg_group.selectAll("path.tree-link")
+          .style("stroke", function (d) {
+            return toggleLinkHighLight(d, "stroke");
+          });
+
+        /*
+        svg_group.selectAll("g.tree-node")
+          .filter(".tree-nodeCircle")
+          .style("stroke", function(d) {
+            return toggleNodeHighLight(d, "stroke");
+          });
+        */
       }
     }
   }
@@ -76,11 +146,13 @@ var app_tree_ui = (function () {
 
   function initTree( tree_data ) {
     open();
+    clearTreeTimeline();
     clearTree();
     initEvents();
 
     var original_tree;
     if (tree_data) {
+      initTreeTimeline( tree_data );
       original_tree = clone(tree_data);
       if (debug_enabled) {
         console.log('tree:\n' + JSON.stringify(tree_data, null, 2));
@@ -184,17 +256,17 @@ var app_tree_ui = (function () {
     zoomListener.translate([init_x, init_y]);
 
     // define the baseSvg, attaching a class for styling
-    baseSVG = d3.select( tree_ui_jquery_id ).append("svg")
+    base_svg = d3.select( tree_ui_jquery_id ).append("svg")
       .attr("width", width )
       .attr("height", height )
       //.call( zoomListener );
       .call( dragListener );
 
-    zoomListener( baseSVG );
+    zoomListener( base_svg );
 
     // Append a group which holds all nodes and which the zoom Listener can act upon.
     //svgGroup = baseSVG.append("g").attr("transform", "translate(" + center_x + "," + center_y + ")");
-    svgGroup = baseSVG.append("g").attr("transform", "translate(" + init_x + "," + init_y + ")");
+    svg_group = base_svg.append("g").attr("transform", "translate(" + init_x + "," + init_y + ")");
 
     // Collapse all children of root's children before rendering.
     /*
@@ -276,7 +348,7 @@ var app_tree_ui = (function () {
       });
 
       // Update the nodes…
-      var node = svgGroup.selectAll("g.tree-node")
+      var node = svg_group.selectAll("g.tree-node")
         .data(nodes, function(d) {
           return d.id || (d.id = ++i);
         });
@@ -489,7 +561,7 @@ var app_tree_ui = (function () {
         .style("fill-opacity", 0);
 
       // Update the links…
-      var link = svgGroup.selectAll("path.tree-link")
+      var link = svg_group.selectAll("path.tree-link")
         .data(links, function(d) {
           return d.target.id;
         });
@@ -618,7 +690,7 @@ var app_tree_ui = (function () {
       //console.log('centerNode(): x = ' + x + ' y = ' + y + ' scale = ' + scale);
 
 
-      baseSVG.select('g').transition()
+      base_svg.select('g').transition()
         .duration(duration)
         .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
 
@@ -639,7 +711,7 @@ var app_tree_ui = (function () {
 
       //console.log('leftAlignNode(): x = ' + x + ' y = ' + y + ' scale = ' + scale);
 
-      baseSVG.select('g').transition()
+      base_svg.select('g').transition()
         .duration(duration)
         .attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
 
@@ -701,48 +773,7 @@ var app_tree_ui = (function () {
       }
 
 
-    }
-
-    // handle node highlight based on style property
-    function toggleNodeHighLight(d, style_property) {
-
-      if (style_property) {
-
-        if (d.node_is_selected === true) {
-          if (style_property == 'stroke') {
-            //return "#FF0000";
-            return "#FFB100";
-          }
-
-          if (style_property == 'stroke-width') {
-            //return "1.0px";
-            return "2.0px";
-          }
-
-          if (style_property == 'stroke-opacity') {
-            return "1.0";
-            //return "0.5";
-          }
-
-        }
-        else {
-
-          if (style_property == 'stroke') {
-            return "#4682B4";
-          }
-
-          if (style_property == 'stroke-width') {
-            return "1.0px";
-          }
-
-          if (style_property == 'stroke-opacity') {
-            return "0.7";
-            //return "1.0";
-          }
-        }
-
-      }// end-of if (style_property)
-    }
+    } // end-of onClickNode(d)
 
     // handle event on click link
     function onClickLink(d) {
@@ -763,47 +794,7 @@ var app_tree_ui = (function () {
       }
       //console.log('link-clicked : ' + stringifyOnce(d, null, 2));
 
-    }
-
-    // handle link highlight based on style property
-    function toggleLinkHighLight(d, style_property) {
-
-      if (style_property) {
-
-        if (d.target.node_is_selected === true) {
-          if (style_property == 'stroke') {
-            //return "#FF0000";
-            return "#FFB100";
-          }
-
-          if (style_property == 'stroke-width') {
-            return "1.5px";
-          }
-
-          if (style_property == 'stroke-opacity') {
-            //return "0.5";
-            return "1.0"
-          }
-
-        }
-        else {
-
-          if (style_property == 'stroke') {
-            return "#4682B4";
-          }
-
-          if (style_property == 'stroke-width') {
-            return "1.0px";
-          }
-
-          if (style_property == 'stroke-opacity') {
-            return "0.7";
-            //return "1.0";
-          }
-        }
-
-      }// end-of if (style_property)
-    }
+    } // end-of onClickLink(d)
 
     // sort the tree according to the node attributes
     function sortTree() {
@@ -822,7 +813,7 @@ var app_tree_ui = (function () {
 
       if (panTimer) {
         clearTimeout(panTimer);
-        var translateCoords = d3.transform(svgGroup.attr("transform"));
+        var translateCoords = d3.transform(svg_group.attr("transform"));
         if (direction == 'left' || direction == 'right') {
           translateX = direction == 'left' ? translateCoords.translate[0] + speed : translateCoords.translate[0] - speed;
           translateY = translateCoords.translate[1];
@@ -834,7 +825,7 @@ var app_tree_ui = (function () {
         var scaleX = translateCoords.scale[0];
         var scaleY = translateCoords.scale[1];
         var scale = zoomListener.scale();
-        svgGroup.transition().attr("transform", "translate(" + translateX + "," + translateY + ")scale(" + scale + ")");
+        svg_group.transition().attr("transform", "translate(" + translateX + "," + translateY + ")scale(" + scale + ")");
         d3.select(domNode).select('g.tree-node').attr("transform", "translate(" + translateX + "," + translateY + ")");
         zoomListener.scale(zoomListener.scale());
         zoomListener.translate([translateX, translateY]);
@@ -847,7 +838,7 @@ var app_tree_ui = (function () {
     // Define the zoom function for the zoomable tree
     function zoom() {
 
-      svgGroup.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+      svg_group.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 
     }
 
@@ -872,17 +863,122 @@ var app_tree_ui = (function () {
 
   } // end-of function initTree()
 
+  // handle node highlight based on style property
+  function toggleNodeHighLight(d, style_property, new_color) {
+
+    if (style_property) {
+
+      if (d.node_is_selected === true) {
+        if (style_property == 'stroke') {
+          if (new_color) {
+            return new_color;
+          }
+          //return "#FF0000";
+          return "#FFB100";
+        }
+
+        if (style_property == 'stroke-width') {
+          //return "1.0px";
+          return "2.0px";
+        }
+
+        if (style_property == 'stroke-opacity') {
+          return "1.0";
+          //return "0.5";
+        }
+
+      }
+      else {
+
+        if (style_property == 'stroke') {
+          if (new_color) {
+            return new_color;
+          }
+          return "#4682B4";
+        }
+
+        if (style_property == 'stroke-width') {
+          return "1.0px";
+        }
+
+        if (style_property == 'stroke-opacity') {
+          return "0.7";
+          //return "1.0";
+        }
+      }
+
+    }// end-of if (style_property)
+  }// end-of toggleNodeHighLight(d, style_property, new_color)
+
+  // handle link highlight based on style property
+  function toggleLinkHighLight(d, style_property, new_color) {
+
+    if (style_property) {
+
+      if (d.target.node_is_selected === true) {
+
+        if (style_property == 'stroke') {
+          if (new_color) {
+            return new_color;
+          }
+          //return "#FF0000";
+          return "#FFB100";
+        }
+
+        if (style_property == 'stroke-width') {
+          return "1.5px";
+        }
+
+        if (style_property == 'stroke-opacity') {
+          //return "0.5";
+          return "1.0"
+        }
+
+      }
+      else {
+
+        if (style_property == 'stroke') {
+          if (new_color) {
+            return new_color;
+          }
+          return "#4682B4";
+        }
+
+        if (style_property == 'stroke-width') {
+          return "1.0px";
+        }
+
+        if (style_property == 'stroke-opacity') {
+          return "0.7";
+          //return "1.0";
+        }
+      }
+
+    }// end-of if (style_property)
+  }// end-of toggleLinkHighLight(d, style_property, new_color)
+
   function clearTree() {
-    if (baseSVG) {
-      baseSVG.remove();
+    if (base_svg) {
+      base_svg.remove();
+    }
+  }
+
+  function clearTreeTimeline() {
+    if (tree_timeline_svg) {
+      tree_timeline_svg.remove();
     }
   }
 
   function clearAll() {
+    clearTreeTimeline();
     clearTree();
 
     if (tree_ui_jquery) {
       tree_ui_jquery.empty();
+    }
+
+    if (tree_timeline_ui_jquery) {
+      tree_timeline_ui_jquery.empty();
     }
   }
 
@@ -892,14 +988,28 @@ var app_tree_ui = (function () {
 
       app_graph_ui.close();
 
+      tree_timeline_ui_jquery.show();
+
       //tree_ui_jquery.fadeToggle('fast');
       tree_ui_jquery.show();
     }
+
+    tree_timeline_colors = getTimeIntervalColors(); // initialize color scheme
+
+    dynamic_visual_filter.init({
+      "filter_type" : 'tree',
+      "filter_label" : 'Timeline',
+      "filter_max_height" : dynamic_visual_filter.getUIBaseHeight('tree'),
+      "is_visible" : true
+    });
+
   }
 
   function close() {
     if (isVisible()) {
       clearAll();
+
+      tree_timeline_ui_jquery.hide();
 
       //tree_ui_jquery.fadeToggle('fast');
       tree_ui_jquery.hide();
@@ -916,10 +1026,198 @@ var app_tree_ui = (function () {
     return (tree_ui_jquery && ( tree_ui_jquery.is(':hidden') || (tree_ui_jquery.css('display') == 'none')));
   }
 
+  function getTimeIntervalColors() {
+    var colors = [];
+
+    // first 8 colors
+    _.each(d3.scale.category20b().range(), function(element, index) {
+      if (index < 8) {
+        colors.push(element);
+      }
+    });
+
+    // last 12 colors
+    _.each(d3.scale.category20c().range(), function(element, index) {
+      if (index < 4 || (index >= 8 && index < 16) ) {
+        colors.push(element);
+      }
+    });
+
+    console.log('tree_timeline_colors[' + colors.length + ']');
+    return colors;
+  }
+
+  function getTimeIntervals(parent_node, time_interval_list) {
+    var interval;
+    if (!parent_node) {
+      return time_interval_list;
+    }
+
+    if (!time_interval_list) {
+      time_interval_list = [];
+    }
+
+    if (parent_node.children && parent_node.children.length > 0) { // has child-node
+
+      var new_start_datetime = parent_node.child_first_datetime;
+      var new_start_datetime_text = (new Date(new_start_datetime)).toISOString().slice(0,10);
+      var new_end_datetime = parent_node.child_last_datetime;
+      var new_end_datetime_text = (new Date(new_end_datetime)).toISOString().slice(0,10);
+
+      var existing_interval = _.find(time_interval_list, function(time_interval, interval_index) {
+        var start_time = time_interval.times[0].starting_time;
+        var end_time = time_interval.times[0].ending_time;
+        return ((start_time == new_start_datetime) && (end_time == new_end_datetime));
+      });
+
+      if (existing_interval) {
+        console.log('datetime interval already exists, skipping ['+new_start_datetime_text + '~' + new_end_datetime_text +']...');
+      }
+      else {
+
+        var color_index = time_interval_list.length;
+        if (color_index >= 20) {
+          color_index = (color_index % 20);
+        }
+        var color = tree_timeline_colors[color_index];
+
+        interval = {
+          "times": [{
+            //"label" : start_datetime_text + '~' + end_datetime_text,
+            "color": color,
+            "starting_time": new_start_datetime,
+            "ending_time": new_end_datetime
+          }]
+        };
+
+        time_interval_list.push(interval);
+      }
+
+      _.each(parent_node.children, function(child_node, child_index) {
+        time_interval_list = getTimeIntervals(child_node, time_interval_list);
+      });
+    }
+    else { // no child-node
+      if (parent_node.ancestors) { // leaf-node
+        // do nothing without link artifact/doc
+      }
+      else { // root-node
+        // do nothing without link artifact/doc
+      }
+    }
+
+
+    return time_interval_list;
+  }
+
+  function initTreeTimeline( tree_data ) {
+
+/*
+    var timeline_data = [
+      {times: [
+        {"starting_time": 1355752800000, "ending_time": 1355759900000},
+        {"starting_time": 1355767900000, "ending_time": 1355774400000}
+      ]},
+      {times: [
+        {"starting_time": 1355759910000, "ending_time": 1355761900000},
+      ]},
+      {times: [
+        {"starting_time": 1355761910000, "ending_time": 1355763910000}
+      ]}
+    ];
+*/
+
+    var time_intervals = getTimeIntervals( tree_data );
+    if (time_intervals.length > 20) {
+      // keep up to the most recent 20 intervals
+      var new_index = time_intervals.length - 20;
+      time_intervals = time_intervals.slice( new_index );
+    }
+
+    var timeline_display_multiplier = (time_intervals.length - 1);
+    console.log('timeline:\n' + stringifyOnce(time_intervals, null, 2));
+
+    if (timeline_display_multiplier > 0) {
+      var base_height = dynamic_visual_filter.getUIBaseHeight( 'tree' );
+      var new_max_height = base_height + timeline_display_multiplier * 18;
+      console.log('base_height: ' + base_height + ', timeline_display_multiplier: ' + timeline_display_multiplier + ', new_max_height: ' + new_max_height);
+
+      dynamic_visual_filter.initUI({
+        "filter_type" : 'tree',
+        "filter_label" : 'Timeline',
+        "filter_max_height" : new_max_height,
+        "is_visible" : dynamic_visual_filter.isOpen()
+      });
+    }
+
+
+    var timeline_data = time_intervals;
+
+
+    tree_timeline_ui_jquery.show();
+
+    var parent_container_width = email_analytics_content.getUIWidth();
+    var default_width = parent_container_width * 0.4; // 40% of overall width
+    if (default_width == 0) {
+      default_width = 582;
+    }
+    if (tree_timeline_width < default_width) {
+      tree_timeline_width = default_width;
+    }
+    tree_timeline_width -= 20; // subtract scroll-bar width 20px
+
+
+    var chart = d3.timeline()
+      .showAxisTop()
+      .stack()
+      .tickFormat({
+        format: function(d) { return d3.time.format("%Y-%m-%d")(d) },
+        tickTime: d3.time.years,
+        tickInterval: 1,
+        tickSize: 6,
+        tickValue: null,
+      })
+      .hover(function (d, i, datum) {
+        d3.event.preventDefault();
+        d3.event.stopImmediatePropagation();
+        d3.event.stopPropagation();
+
+        // d is the current rendering object
+        // i is the index during d3 rendering
+        // datum is the id object
+        //console.log('timeline mouseover:\n' + stringifyOnce(datum, null, 2));
+      })
+      .click(function (d, i, datum) {
+        d3.event.preventDefault();
+        d3.event.stopImmediatePropagation();
+        d3.event.stopPropagation();
+
+        // d is the current rendering object
+        // i is the index during d3 rendering
+        // datum is the id object
+        console.log('timeline clicked:\n' + stringifyOnce(datum, null, 2));
+
+        var color = datum.times[0].color;
+        var start_time = datum.times[0].starting_time;
+        var end_time = datum.times[0].ending_time;
+
+        toggleLinkColorByTimeInterval(true, color, start_time, end_time);
+      })
+      .scroll(function (x, scale) {
+
+        //console.log(scale.invert(x) + " to " + scale.invert(x+tree_timeline_width));
+      });
+
+    tree_timeline_svg = d3.select( tree_timeline_ui_jquery_id ).append("svg").attr("width", tree_timeline_width)
+      .datum(timeline_data).call(chart);
+
+  }
+
 
   return {
     'initTree' : initTree,
     'clearTree' : clearTree,
+    'initTreeTimeline' : initTreeTimeline,
     'open' : open,
     'close' : close,
     'clearAll' : clearAll
