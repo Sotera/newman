@@ -4,6 +4,7 @@ from flask import Flask, json
 import logging
 from logging.handlers import RotatingFileHandler
 
+UPLOAD_DIRECTORY = 'uploads'
 
 app = Flask(__name__, static_url_path='')
 
@@ -40,6 +41,11 @@ data = json.load(open(json_url))
 app.config["root_context"] = data
 app.config["site_root"] = SITE_ROOT
 
+app.config["upload_dir"] = UPLOAD_DIRECTORY
+
+# 2 GB max
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 * 1024
+
 app.logger.debug('Newman config: {}'.format(data))
 app.logger.info('Newman config loaded.')
 
@@ -56,3 +62,4 @@ from app import export_services
 from app import tag_services
 from app import aggregations
 from app import geo
+from app import file_uploader

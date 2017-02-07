@@ -137,5 +137,5 @@ def parseParamFrom( params ):
     return params.get('from', 0)
 
 def parseParamHistogramMaxMinorTicks( params ):
-    max_minor_ticks = params.get('max_minor_ticks', 400)
+    max_minor_ticks = params.get('max_minor_ticks', 812)
     return max_minor_ticks
