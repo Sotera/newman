@@ -3,9 +3,13 @@ from flask import request, jsonify, flash, redirect, url_for
 from werkzeug.exceptions import BadRequest
 from werkzeug.utils import secure_filename
 
+import datetime
 import os
 
 ALLOWED_EXTENSIONS = set(['zip', 'tgz', 'gz'])
+
+def fmtNow():
+    return datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -16,16 +20,17 @@ def upload_file():
     # if POST  multipart form with file upload
     if request.method == 'POST':
         if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
+            return jsonify({"status"  : "Failed", "Message" : "No file part."})
         file = request.files['file']
         if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
+            return jsonify({"status"  : "Failed", "Message" : "No selected file."})
+        if not allowed_file(file.filename):
+            return jsonify({"status" : "Failed", "Message" : "File type not accepted - must be of type: " + ", ".join(ALLOWED_EXTENSIONS)})
+        if file:
             filename = secure_filename(file.filename)
+            filename  = "{}_{}".format(fmtNow(), filename)
             file.save(os.path.join(app.config['upload_dir'], filename))
-            return jsonify({"status" : "upload complete"})
+            return jsonify({"status" : "Success", "Message" : "Upload complete."})
     #     if   GET   return simple html form
     return '''
     <!doctype html>
