@@ -20,6 +20,9 @@ flask/bin/pip install guess_language
 flask/bin/pip install flipflop
 flask/bin/pip install coverage
 
+#embeded wsgi server - replaces teh werkzeug server which tends to cause the "broken pipe" error
+flask/bin/pip install gevent
+
 #Dependencies for Newman  app
 flask/bin/pip install elasticsearch==2.4.0
 flask/bin/pip install beautifulsoup4
