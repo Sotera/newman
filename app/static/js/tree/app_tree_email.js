@@ -132,7 +132,15 @@ var app_tree_email = (function () {
       var leaf_node = getLeafNode(tree_root, node_path, 1);
       //console.log('leaf_node:\n' + stringifyOnce(leaf_node, null, 2));
       if (leaf_node) {
-        leaf_node = newChildren(leaf_node, _artifact_list, leaf_node.link_artifact_index, leaf_node.link_artifact_datetime);
+        var doc_start_index = leaf_node.link_artifact_index;
+        var doc_start_datetime = leaf_node.link_artifact_datetime;
+
+        if (leaf_node.node_uid == leaf_node.parent_node_uid) {
+          //special handling for self-sending emails to avoid circular linkage
+          doc_start_index += 1;
+        }
+
+        leaf_node = newChildren(leaf_node, _artifact_list, doc_start_index, doc_start_datetime);
         if (leaf_node.children) {
           if (debug_enabled) {
             //console.log('leaf_node:\n' + stringifyOnce(leaf_node, null, 2));
@@ -341,6 +349,7 @@ var app_tree_email = (function () {
     if (parent_node && child_node && link_artifact) {
 
       child_node['parent_node_id'] = parent_node.node_id;
+      child_node['parent_node_uid'] = parent_node.node_uid;
       child_node['link_artifact'] = link_artifact;
       child_node['link_artifact_datetime'] = getDatetimeValue( link_artifact.datetime );
 

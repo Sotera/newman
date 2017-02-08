@@ -79,7 +79,7 @@ var app_tree_ui = (function () {
     if (svg_group) {
       if (color_on === true) {
 
-        if (color) {
+        if (color && start_time) {
 
           svg_group.selectAll("path.tree-link")
             .style("stroke", function (d) {
@@ -87,9 +87,17 @@ var app_tree_ui = (function () {
               var source = d.source;
               //console.log('toggleLinkColorByTimeInterval(...) : source\n' + stringifyOnce(source, null, 2) );
 
-              if (source.child_first_datetime == start_time && source.child_last_datetime == end_time) {
-                console.log('toggleLinkColorByTimeInterval(' + color_on + ', ' + color + ', ' + start_time + ', ' + end_time + ') : matched interval for source-node ' + source.node_uid );
-                return toggleLinkHighLight(d, "stroke", color);
+              if (end_time) {
+                if (source.child_first_datetime == start_time && source.child_last_datetime == end_time) {
+                  console.log('toggleLinkColorByTimeInterval(' + color_on + ', ' + color + ', ' + start_time + ', ' + end_time + ') : matched interval for source-node ' + source.node_uid);
+                  return toggleLinkHighLight(d, "stroke", color);
+                }
+              }
+              else {
+                if (source.child_first_datetime == start_time && source.child_last_datetime == end_time) {
+                  console.log('toggleLinkColorByTimeInterval(' + color_on + ', ' + color + ', ' + start_time + ') : matched interval for source-node ' + source.node_uid);
+                  return toggleLinkHighLight(d, "stroke", color);
+                }
               }
 
               return toggleLinkHighLight(d, "stroke");
@@ -1047,7 +1055,104 @@ var app_tree_ui = (function () {
     return colors;
   }
 
-  function getTimeIntervals(parent_node, time_interval_list) {
+
+  function getTimeIntervalMap( timeline_start, timeline_end ) {
+
+    var MILLISECONDS_PER_SECOND = 1000;
+    var MILLISECONDS_PER_MINUTE = 1000 * 60;
+    var MILLISECONDS_PER_HOUR   = 1000 * 60 * 60;
+    var MILLISECONDS_PER_DAY    = 1000 * 60 * 60 * 24;
+    var MILLISECONDS_PER_WEEK   = 1000 * 60 * 60 * 24 * 7;
+    var MILLISECONDS_PER_MONTH  = 1000 * 60 * 60 * 24 * 7 * 4;
+    var MILLISECONDS_PER_YEAR   = 1000 * 60 * 60 * 24 * 7 * 4 * 12;
+    var MILLISECONDS_PER_DECADE = 1000 * 60 * 60 * 24 * 7 * 4 * 12 * 10;
+
+    var timeline_difference_map = {};
+    if (timeline_start && timeline_end) {
+      var start_date_obj = new Date(timeline_start);
+      var end_date_obj = new Date(timeline_end);
+      var start_date_utc = Date.UTC(
+        start_date_obj.getFullYear(),
+        start_date_obj.getMonth(),
+        start_date_obj.getDate(),
+        start_date_obj.getHours(),
+        start_date_obj.getMinutes(),
+        start_date_obj.getSeconds()
+      );
+      var end_date_utc = Date.UTC(
+        end_date_obj.getFullYear(),
+        end_date_obj.getMonth(),
+        end_date_obj.getDate(),
+        end_date_obj.getHours(),
+        end_date_obj.getMinutes(),
+        end_date_obj.getSeconds()
+      );
+
+
+      console.log('tree_timeline_UTC_range[' + start_date_utc + ', ' + end_date_utc + ']');
+      var datetime_difference_utc = end_date_utc - start_date_utc;
+
+      /*
+      if (datetime_difference_utc == 0) { // special hack for intervals with only start-time
+        datetime_difference_utc = MILLISECONDS_PER_MINUTE;
+      }
+      */
+
+      var range_in_minutes = Math.floor(datetime_difference_utc / MILLISECONDS_PER_MINUTE);
+      var range_in_hours = Math.floor(datetime_difference_utc / MILLISECONDS_PER_HOUR);
+      var range_in_days = Math.floor(datetime_difference_utc / MILLISECONDS_PER_DAY);
+      var range_in_weeks = Math.floor(datetime_difference_utc / MILLISECONDS_PER_WEEK);
+      var range_in_months = Math.floor(datetime_difference_utc / MILLISECONDS_PER_MONTH);
+      var range_in_years = Math.floor(datetime_difference_utc / MILLISECONDS_PER_YEAR);
+      var range_in_decades = Math.floor(datetime_difference_utc / MILLISECONDS_PER_DECADE);
+
+      timeline_difference_map['range_in_minutes'] = range_in_minutes;
+      timeline_difference_map['range_in_hours'] = range_in_hours;
+      timeline_difference_map['range_in_days'] = range_in_days;
+      timeline_difference_map['range_in_weeks'] = range_in_weeks;
+      timeline_difference_map['range_in_months'] = range_in_months;
+      timeline_difference_map['range_in_years'] = range_in_years;
+      timeline_difference_map['range_in_decades'] = range_in_decades;
+
+      console.log('tree_timeline_range_map :\n' + JSON.stringify(timeline_difference_map, null, 2));
+    }
+    return timeline_difference_map;
+  }
+
+  function getTimeIntervalRange( time_interval_list ) {
+    var datetime_range = [];
+    if (time_interval_list && time_interval_list.length > 0) {
+
+      var start_datetime = time_interval_list[0].times[0].starting_time;
+      datetime_range.push(start_datetime);
+
+      var length = time_interval_list.length;
+      if (length == 1) {
+        var end_datetime = time_interval_list[0].times[0].ending_time
+        if (!end_datetime) {
+          //hack to have proper interval range display
+          end_datetime = time_interval_list[0].times[1].starting_time;
+          if (!end_datetime) {
+            end_datetime = Date.now();
+          }
+        }
+      }
+      else {
+        end_datetime = time_interval_list[length - 1].times[0].ending_time;
+        if (!end_datetime) {
+          end_datetime = time_interval_list[length - 1].times[0].starting_time;
+        }
+      }
+      datetime_range.push(end_datetime);
+    }
+    console.log('tree_timeline_range :\n' + JSON.stringify(datetime_range, null, 2));
+    return datetime_range;
+  }
+
+
+  // returns time-interval of a given tree-node and its children,
+  // propagate recursively for each child and append the time-interval
+  function getTimeInterval(parent_node, time_interval_list) {
     var interval;
     if (!parent_node) {
       return time_interval_list;
@@ -1067,7 +1172,13 @@ var app_tree_ui = (function () {
       var existing_interval = _.find(time_interval_list, function(time_interval, interval_index) {
         var start_time = time_interval.times[0].starting_time;
         var end_time = time_interval.times[0].ending_time;
-        return ((start_time == new_start_datetime) && (end_time == new_end_datetime));
+
+
+        if (end_time) {
+          return ((start_time == new_start_datetime) && (end_time == new_end_datetime));
+        }
+        return (start_time == new_start_datetime);
+
       });
 
       if (existing_interval) {
@@ -1081,20 +1192,35 @@ var app_tree_ui = (function () {
         }
         var color = tree_timeline_colors[color_index];
 
-        interval = {
-          "times": [{
-            //"label" : start_datetime_text + '~' + end_datetime_text,
-            "color": color,
-            "starting_time": new_start_datetime,
-            "ending_time": new_end_datetime
-          }]
-        };
+        if (new_start_datetime == new_end_datetime) {
+          interval = {
+            "times": [{
+              //"label" : start_datetime_text + '~' + end_datetime_text,
+              "color": color,
+              "starting_time": new_start_datetime,
+              "display": "circle"
+            }]
+          };
+
+        }
+        else {
+
+          interval = {
+            "times": [{
+              //"label" : start_datetime_text + '~' + end_datetime_text,
+              "color": color,
+              "starting_time": new_start_datetime,
+              "ending_time": new_end_datetime
+            }]
+          };
+
+        }
 
         time_interval_list.push(interval);
       }
 
       _.each(parent_node.children, function(child_node, child_index) {
-        time_interval_list = getTimeIntervals(child_node, time_interval_list);
+        time_interval_list = getTimeInterval(child_node, time_interval_list);
       });
     }
     else { // no child-node
@@ -1108,6 +1234,36 @@ var app_tree_ui = (function () {
 
 
     return time_interval_list;
+  }
+
+  //start from the tree-root, initiate building time-intervals for each subtree; recursive function wrapper
+  function getTimeIntervalList(root_node) {
+
+    var time_intervals = getTimeInterval( root_node );
+    if (time_intervals.length > 20) {
+      // keep up to the most recent 20 intervals
+      var new_index = time_intervals.length - 20;
+      time_intervals = time_intervals.slice( new_index );
+    }
+    else if (time_intervals.length == 1) {
+      //hack to have proper interval range display
+      var interval = time_intervals[0];
+      var interval_end_time = interval.times[0].ending_time;
+
+      // no end-interval and the only interval has no end-time
+      if(!interval_end_time) {
+        // insert an invisible end-time of today for range display
+        var end_time = {
+          "color": "#E8E8E8", //"#FFFFFF",
+          "starting_time": Date.now(),
+          "ending_time": Date.now(),
+          "display": "circle"
+        };
+
+        interval.times.push( end_time );
+      }
+    }
+    return time_intervals;
   }
 
   function initTreeTimeline( tree_data ) {
@@ -1127,12 +1283,8 @@ var app_tree_ui = (function () {
     ];
 */
 
-    var time_intervals = getTimeIntervals( tree_data );
-    if (time_intervals.length > 20) {
-      // keep up to the most recent 20 intervals
-      var new_index = time_intervals.length - 20;
-      time_intervals = time_intervals.slice( new_index );
-    }
+    var time_intervals = getTimeIntervalList( tree_data );
+
 
     var timeline_display_multiplier = (time_intervals.length - 1);
     console.log('timeline:\n' + stringifyOnce(time_intervals, null, 2));
@@ -1166,16 +1318,59 @@ var app_tree_ui = (function () {
     }
     tree_timeline_width -= 20; // subtract scroll-bar width 20px
 
+    var timeline_range = getTimeIntervalRange( clone(timeline_data) );
+    var timeline_start_time = timeline_range[0], timeline_end_time = timeline_range[1];
+    var timeline_range_map = getTimeIntervalMap(timeline_start_time, timeline_end_time);
+
+    var timeline_format_specifier = "%Y-%m-%d";
+    var timeline_tick_time = d3.time.years;
+    var timeline_tick_interval = d3.time.year;
+    var timeline_tick_size = 4;
+
+    //var timeline_scale_width = tree_timeline_width - 60;
+    //console.log('timeline_scale_width : ' + timeline_scale_width );
+
+    if (timeline_range_map['range_in_years'] > 0) {
+      timeline_format_specifier = "%Y-%m-%d";
+      timeline_tick_time = d3.time.years;
+      timeline_tick_interval = d3.time.year;
+    }
+    else if (timeline_range_map['range_in_months'] > 0) {
+      timeline_format_specifier = "%Y-%m-%d";
+      timeline_tick_time = d3.time.months;
+      timeline_tick_interval = d3.time.month;
+    }
+    else if (timeline_range_map['range_in_weeks'] > 0) {
+      timeline_format_specifier = "%Y-%m-%d";
+      timeline_tick_time = d3.time.weeks;
+      timeline_tick_interval = d3.time.week;
+    }
+    else if (timeline_range_map['range_in_days'] > 0) {
+      timeline_format_specifier = "%m-%d %H:%M";
+      timeline_tick_time = d3.time.days;
+      timeline_tick_interval = d3.time.day;
+    }
+    else if (timeline_range_map['range_in_hours'] > 0) {
+      timeline_format_specifier = "%m-%d %H:%M";
+      timeline_tick_time = d3.time.hours;
+      timeline_tick_interval = d3.time.hour;
+    }
+    else if (timeline_range_map['range_in_minutes'] > 0) {
+      timeline_format_specifier = "%m-%d %H:%M";
+      timeline_tick_time = d3.time.minutes;
+      timeline_tick_interval = d3.time.minutes;
+    }
 
     var chart = d3.timeline()
       .showAxisTop()
       .stack()
       .tickFormat({
-        format: function(d) { return d3.time.format("%Y-%m-%d")(d) },
-        tickTime: d3.time.years,
-        tickInterval: 1,
-        tickSize: 6,
-        tickValue: null,
+        format: function(d) {
+          return d3.time.format(timeline_format_specifier)(d)
+        },
+        tickTime: timeline_tick_time,
+        tickInterval: timeline_tick_interval,
+        tickSize: timeline_tick_size
       })
       .hover(function (d, i, datum) {
         d3.event.preventDefault();
@@ -1201,7 +1396,9 @@ var app_tree_ui = (function () {
         var start_time = datum.times[0].starting_time;
         var end_time = datum.times[0].ending_time;
 
-        toggleLinkColorByTimeInterval(true, color, start_time, end_time);
+        if (color != "#E8E8E8") { // color other than hidden color
+          toggleLinkColorByTimeInterval(true, color, start_time, end_time);
+        }
       })
       .scroll(function (x, scale) {
 
