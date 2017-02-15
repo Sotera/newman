@@ -15,7 +15,11 @@ username/password combination.
 
 ## Ingest Process
 
-Before an investigation can start, the dataset(s) need to be ingested. Newman can ingest multiple pst, mbox, and eml datasets. The datasets must be placed in a specific location before the ingester will work. You must have 3 nested directories for each dataset.
+Before an investigation can start, the dataset(s) need to be ingested. Newman can ingest multiple pst, mbox, and eml datasets. There are two methods to ingest a dataset; UI and command line. Both methods require that the datasets be placed in a specific location before the ingester will work.
+
+### User Interface
+
+To use the UI, three nested directories need to be created for each dataset.
 
 1. The top level must be the case name and is user definable.  [no spaces]
 2. The second level is the eml archive type and must be one of [pst, mbox, emls]
@@ -44,6 +48,39 @@ Now that the dataset is in the correct location, select Database icon and then N
 Add a Alt Reference ID if desired and then the Confirm button. A status dialog will be presented which will disappear when the ingest is completed. In the future, the status will be displayed in a Tasks tab so the user can work on other datasets while new ones are being ingested.
 
 ![Date Filter](../img/NewDatasetStatus.JPG)
+
+### Command Line
+
+Follow the steps below to use the command line to ingest datasets. Note: you may have to create this directory structure if it does not exist.
+
+1. Copy dataset to the appropriate location.
+
+    For emls files: /srv/software/pst-extraction-master/pst-extract/emls
+    For mbox files: /srv/software/pst-extraction-master/pst-extract/mbox
+    For pst files: /srv/software/pst-extraction-master/pst-extract/pst
+
+2.	Change directory to /srv/software/pst-extraction-master/
+
+   cd /srv/software/pst-extraction-master/
+   
+3.	Execute the appropriate ingest command
+
+   For emls files: ./bin/eml_all.sh newman-<ingest_id> <case_id> <alt_ref_id> <label> language 2>&1 | tee /tmp/somelogname  
+   For mbox files: ./bin/mbox_all.sh newman-<ingest_id> <case_id> <alt_ref_id> <label> language 2>&1 | tee /tmp/somelogname  
+   For pst files: ./bin/pst_all.sh newman-<ingest_id> <case_id> <alt_ref_id> <label> language 2>&1 | tee /tmp/somelogname  
+
+Note:   
+   •	ingest_id name is limited to the file system. The ingest_id must be lowercase, not start with `_ , . ,` and not include any of these  characters `\, /, *, ?, ", <, >, |, , ,.`     
+   •	index-id must be unique and unused on the ES backend  
+   •	`2>&1`  is optional and just redirects stderr into stdout  
+   •	`| tee /tmp/file` is also optional. It pipes all results to tee logging  
+   •	label shows up on the newman main page  
+
+Below is a step by step example to ingest mypst.pst.
+
+   `cp mypst.pst /srv/software/pst-extraction-master/pst-extract/pst`  
+   `cd /srv/software/pst-extraction-master/`  
+   `./bin/pst_all.sh newman-mypst_ingest MyPST_case personal_alt_ref Mypst_label en`    
 
 ## Search
 
