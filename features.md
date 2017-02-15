@@ -55,19 +55,19 @@ Follow the steps below to use the command line to ingest datasets. Note: you may
 
 1. Copy dataset to the appropriate location.
 
-    For emls files: /srv/software/pst-extraction-master/pst-extract/emls
-    For mbox files: /srv/software/pst-extraction-master/pst-extract/mbox
-    For pst files: /srv/software/pst-extraction-master/pst-extract/pst
+    For emls files: /srv/software/pst-extraction-master/pst-extract/emls\s\s
+    For mbox files: /srv/software/pst-extraction-master/pst-extract/mbox\s\s
+    For pst files: /srv/software/pst-extraction-master/pst-extract/pst\s\s
 
 2.	Change directory to /srv/software/pst-extraction-master/
 
-   cd /srv/software/pst-extraction-master/
+    cd /srv/software/pst-extraction-master/
    
 3.	Execute the appropriate ingest command
 
-   For emls files: ./bin/eml_all.sh newman-<ingest_id> <case_id> <alt_ref_id> <label> language 2>&1 | tee /tmp/somelogname  
-   For mbox files: ./bin/mbox_all.sh newman-<ingest_id> <case_id> <alt_ref_id> <label> language 2>&1 | tee /tmp/somelogname  
-   For pst files: ./bin/pst_all.sh newman-<ingest_id> <case_id> <alt_ref_id> <label> language 2>&1 | tee /tmp/somelogname  
+    For emls files: ./bin/eml_all.sh newman-<ingest_id> <case_id> <alt_ref_id> <label> language 2>&1 | tee /tmp/somelogname\s\s
+    For mbox files: ./bin/mbox_all.sh newman-<ingest_id> <case_id> <alt_ref_id> <label> language 2>&1 | tee /tmp/somelogname\s\s
+    For pst files: ./bin/pst_all.sh newman-<ingest_id> <case_id> <alt_ref_id> <label> language 2>&1 | tee /tmp/somelogname\s\s
 
 Note:   
    •	ingest_id name is limited to the file system. The ingest_id must be lowercase, not start with `_ , . ,` and not include any of these  characters `\, /, *, ?, ", <, >, |, , ,.`     
