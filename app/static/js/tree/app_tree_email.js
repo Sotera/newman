@@ -406,6 +406,32 @@ var app_tree_email = (function () {
     return node;
   }
 
+  function hasArtifact(parent_node, doc_list, start_index) {
+    var has_artifact = false;
+
+    if (!parent_node) {
+      return has_artifact;
+    }
+
+    if (!start_index || start_index < 0) {
+      start_index = 0;
+    }
+
+    if (doc_list && doc_list.length > 0) {
+      var first_doc = _.find(doc_list, function (element, element_index) {
+        var doc = element.doc;
+        return (element_index >= start_index && doc.from == parent_node.node_id)
+      });
+
+      if (first_doc) {
+        has_artifact = true;
+      }
+    }
+    //console.log('hasChildren( ' + parent_node.node_uid + ', ' + start_index + ' ) : ' + has_children);
+
+    return has_artifact;
+  }
+
   /*
    * search artifact/doc and attach child-nodes to the parent-node based on a sender-recipient relationship
    */
@@ -474,6 +500,11 @@ var app_tree_email = (function () {
 
             var child_node = newNode(recipient_id, link_artifact_index, start_datetime_value);
             child_node['node_sibling_count'] = recipient_count;
+
+            var has_grandchild = hasArtifact( child_node, doc_list, link_artifact_index + 1 );
+            if (!has_grandchild) {
+              child_node.node_is_expandable = false;
+            }
 
             parent_node = attachChildNode(parent_node, child_node, link_artifact);
 
