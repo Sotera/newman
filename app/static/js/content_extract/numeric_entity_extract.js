@@ -86,11 +86,12 @@ var numeric_entity_extract = (function () {
 
     var service_url = getServiceURL(numeric_entity);
     $.get( service_url ).then(function (response) {
-      onServiceResponse( service_url, response, numeric_entity );
+      onRequestService( service_url, response, numeric_entity );
     });
   }
 
-  function onServiceResponse( service_url, response, numeric_entity ) {
+  function onRequestService( service_url, response, numeric_entity ) {
+    var value_obj;
     if (service_url && response && numeric_entity) {
       //console.log('\tfiltered_response: ' + JSON.stringify(response, null, 2));
 
@@ -101,7 +102,7 @@ var numeric_entity_extract = (function () {
         var search_field = 'all';
         var search_filed_icon_class = newman_search_parameter.getFilterIconClassByLabel( search_field );
 
-        var value = {
+        value_obj = {
           "search_url" : service_url,
           "search_label" : search_label,
           "search_field" : search_field,
@@ -111,19 +112,21 @@ var numeric_entity_extract = (function () {
         };
         //console.log('search_label: ' + search_label);
 
-        putSearchByNumericEntity( service_url, value );
+        putSearchByNumericEntity( service_url, value_obj );
 
         //update button label
         var label = response.graph.nodes.length;
         app_text_extract_table.setButtonLabel(numeric_entity, label);
       }
     }
+    return value_obj;
   }
 
   return {
     'getServiceURLBase' : getServiceURLBase,
     'getServiceURL' : getServiceURL,
     'requestService' : requestService,
+    'onRequestService' : onRequestService,
     'clearAllSearchByNumericEntity' : clearAllSearchByNumericEntity,
     'getAllSearchByNumericEntityKey' : getAllSearchByNumericEntityKey,
     'getSearchByNumericEntity' : getSearchByNumericEntity

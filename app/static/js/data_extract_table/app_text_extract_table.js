@@ -33,8 +33,8 @@ var app_text_extract_table = (function () {
         if (attr_id && attr_value) {
           console.log('id : "' + attr_id + '" value : "' + attr_value + '" clicked-numeric-entity-search!');
 
-          var file_hash = attr_value;
-          searchByNumericEntity( file_hash );
+          var numeric_entity = attr_value;
+          searchByNumericEntity( numeric_entity );
 
         }
 
@@ -215,7 +215,7 @@ var app_text_extract_table = (function () {
             //console.log( 'attachment under : ' + email_addr + '\n' + JSON.stringify(d, null, 2) );
 
             var button_id = text_extract_table_button_prefix_entity_search + t_column_value;
-            var button_label = '&nbsp;';
+            var button_label = '&nbsp;<i class="fa fa-question" aria-hidden="true"></i>&nbsp;';
             var button_html = "<button type='button' class='btn btn-small outline' value='" + t_column_value + "' id='" + button_id + "'>" + button_label + "</button>";
 
 
@@ -291,10 +291,28 @@ var app_text_extract_table = (function () {
         newman_graph_email.updateUIGraphView(search_response);
       }
       else {
-        console.log("search-response NOT found...\nre-requesting '" + url_key + "'");
+        console.log("search-response for '" + numeric_entity + "' NOT found...\nre-requesting '" + url_key + "'");
 
-        var keys = numeric_entity_extract.getAllSearchByNumericEntityKey();
-        console.log(JSON.stringify(keys, null, 2));
+        //var keys = numeric_entity_extract.getAllSearchByNumericEntityKey();
+        //console.log(JSON.stringify(keys, null, 2));
+
+        $.get( url_key ).then(function (response) {
+          value = numeric_entity_extract.onRequestService( url_key, response, numeric_entity );
+
+          if (value) {
+            var search_label = value.search_label;
+            var search_field = value.search_field;
+            var search_field_icon_class = value.search_filed_icon_class;
+            var search_response = value.search_response;
+
+
+            app_nav_history.appendHist(url_key, search_field, search_label);
+
+            newman_graph_email.setHeaderLabelEmailAnalytics(search_label, search_field_icon_class);
+            newman_graph_email.updateUIGraphView(search_response);
+          }
+
+        });
 
       }
 
