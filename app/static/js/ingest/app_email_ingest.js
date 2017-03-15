@@ -256,6 +256,8 @@ var app_email_ingest = (function () {
           _case_id_list.push(case_id);
         }
       });
+      //console.log( '_case_id_list :\n' + JSON.stringify(_case_id_list, null, 2));
+      _case_id_list.sort();
 
       //console.log('_case_id_list :\n' + JSON.stringify(_case_id_list, null, 2));
       //console.log('_dataset_ingest_list :\n' + JSON.stringify(_dataset_ingest_list, null, 2));
@@ -270,10 +272,6 @@ var app_email_ingest = (function () {
       });
 
       if (_dataset_ingest_list.length > 0) {
-
-        //console.log( '_case_id_list :\n' + JSON.stringify(_case_id_list, null, 2));
-        _case_id_list.sort();
-        //console.log( '_case_id_list :\n' + JSON.stringify(_case_id_list, null, 2));
 
         var default_case_id;
         _.each(_case_id_list, function( element ) {
@@ -303,25 +301,27 @@ var app_email_ingest = (function () {
         $(this).remove();
       });
 
-      //console.log( '_dataset_ingest_list :\n' + JSON.stringify(dataset_ingest_list, null, 2));
-      var _dataset_ingest_list = sortArrayDescending( dataset_ingest_list, 'data_set_label' );
-      //console.log( '_dataset_ingest_list :\n' + JSON.stringify(_dataset_ingest_list, null, 2));
+      // list case_ids with content
+      var _dataset_label_list = 0;
+      _.each(dataset_ingest_list, function( element ) {
+        if (element.case_id == case_id) {
+          _dataset_label_list.push(element.dataset_label);
+        }
+      });
+      _dataset_label_list.sort();
 
       // populate items to match case_id
-      var default_parameter;
-      _.each(_dataset_ingest_list, function( element ) {
-        if (element.case_id == case_id) {
-          var dataset_label_html = $('<li style=\"line-height: 20px; text-align: left\"/>')
-          dataset_label_html.append( element.dataset_label );
-          $('#' + ingest_dataset_list_ui_id).append(dataset_label_html);
+      var default_dataset;
+      _.each(_dataset_label_list, function( element ) {
+        var dataset_label_html = $('<li style=\"line-height: 20px; text-align: left\"/>')
+        dataset_label_html.append( element );
+        $('#' + ingest_dataset_list_ui_id).append(dataset_label_html);
 
-          if (!default_parameter) {
-            default_parameter = element;
-          }
+        if (!default_dataset) {
+          default_dataset = element;
         }
       });
 
-      var default_dataset = default_parameter.dataset_label;
       $("#"+ingest_dataset_label_ui_id).val( default_dataset );
 
       onSelectIngestDataset(case_id, default_dataset, dataset_ingest_list);
