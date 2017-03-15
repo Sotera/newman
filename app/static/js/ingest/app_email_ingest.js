@@ -302,7 +302,7 @@ var app_email_ingest = (function () {
       });
 
       // list case_ids with content
-      var _dataset_label_list = 0;
+      var _dataset_label_list = [];
       _.each(dataset_ingest_list, function( element ) {
         if (element.case_id == case_id) {
           _dataset_label_list.push(element.dataset_label);
