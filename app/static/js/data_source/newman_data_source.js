@@ -750,6 +750,9 @@ var newman_data_source = (function () {
      */
 
     if (response) {
+      //console.log( '_all_dataset_response.data_sets :\n' + JSON.stringify(response.data_sets, null, 2));
+      response.data_sets = sortArrayDescending( response.data_sets, 'data_set_label' );
+      //console.log( '_all_dataset_response.data_sets :\n' + JSON.stringify(response.data_sets, null, 2));
       _all_dataset_response = response;
     }
 

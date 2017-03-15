@@ -271,6 +271,10 @@ var app_email_ingest = (function () {
 
       if (_dataset_ingest_list.length > 0) {
 
+        //console.log( '_case_id_list :\n' + JSON.stringify(_case_id_list, null, 2));
+        _case_id_list.sort();
+        //console.log( '_case_id_list :\n' + JSON.stringify(_case_id_list, null, 2));
+
         var default_case_id;
         _.each(_case_id_list, function( element ) {
           var case_id_html = $('<li style=\"line-height: 20px; text-align: left\"/>')
@@ -299,9 +303,13 @@ var app_email_ingest = (function () {
         $(this).remove();
       });
 
+      //console.log( '_dataset_ingest_list :\n' + JSON.stringify(dataset_ingest_list, null, 2));
+      var _dataset_ingest_list = sortArrayDescending( dataset_ingest_list, 'data_set_label' );
+      //console.log( '_dataset_ingest_list :\n' + JSON.stringify(_dataset_ingest_list, null, 2));
+
       // populate items to match case_id
       var default_parameter;
-      _.each(dataset_ingest_list, function( element ) {
+      _.each(_dataset_ingest_list, function( element ) {
         if (element.case_id == case_id) {
           var dataset_label_html = $('<li style=\"line-height: 20px; text-align: left\"/>')
           dataset_label_html.append( element.dataset_label );
