@@ -17,7 +17,7 @@
     "host" : "localhost",
     "port" : 5984,
     "database" : "offline-tiles",
-    "cache_only" : false,
+    "cache_only" : true,
     "advance_mode" : false,
     "cache_override" : false 
   },
