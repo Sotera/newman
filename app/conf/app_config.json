@@ -19,7 +19,7 @@
     "database" : "offline-tiles",
     "cache_only" : true,
     "advance_mode" : false,
-    "cache_override" : false 
+    "cache_override" : true
   },
 
   "index_creator_defaults" : {
@@ -37,9 +37,9 @@
       "default_min_timeline_bound": "2001-01-01",
       "default_max_timeline_bound": "2014-01-01",
       "excluded" : true
-    },
-    "newman-test" : { "excluded" : false }
+    }
   },
+
   "validation_config" : {
     "email_search_response" : false
   },
