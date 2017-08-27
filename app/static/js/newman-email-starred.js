@@ -15,7 +15,7 @@ var newman_email_starred = (function () {
 
     initStarredDocumentList();
 
-    $('#export_option_list_all_starred').on("click", function () {
+    $('#export_option_list_all_starred').off().click( function () {
       console.log("#export_option_list_all_starred clicked");
 
       // query email documents
@@ -26,8 +26,14 @@ var newman_email_starred = (function () {
 
     });
 
-    $("#export_option_save_all_starred_as_file").on("click", function () {
-      newman_email_starred_request_export.requestService();
+    $("#export_option_save_all_starred_as_file").off().click( function () {
+      initStarredDocumentList();
+      if (getStarredDocumentCount() > 0) {
+        newman_email_starred_request_export.requestService();
+      }
+      else {
+        console.warn('No starred document found!');
+      }
     });
 
   }
@@ -40,33 +46,65 @@ var newman_email_starred = (function () {
     return clone( starred_doc_id_array );
   }
 
+  function getStarredDocumentCount() {
+    return _.size( starred_doc_id_array );
+  }
+
+  function getStarredDocumentMatched( doc_id_array ) {
+    var matched = 0;
+
+    initStarredDocumentList();
+
+    if (doc_id_array && doc_id_array.length > 0) {
+      _.each(doc_id_array, function(doc_id) {
+
+        if (_.contains( starred_doc_id_array, doc_id )) {
+          matched++;
+        }
+
+      });
+    }
+    if (debug_enabled) {
+      console.log('Starred document matched: ' + matched);
+    }
+    return matched;
+  }
+
   /**
    * update from service the UI for email response
    * @param response
    */
   function setStarredDocumentList(response) {
 
-    var starred_doc_list_copy;
+    var starred_doc_list_copy = [];
 
-    if( response.rows && response.rows.length > 0 ) {
+    if( response.rows ) {
+      if( response.rows.length > 0 ) {
 
-      starred_doc_id_array = [];
-      _.each(response.rows, function (element) {
-        var doc_id = element.num;
-        if (doc_id) {
-          starred_doc_id_array.push(doc_id);
+        starred_doc_id_array = [];
+        _.each(response.rows, function (element) {
+          var doc_id = element.email_id;
+          if (doc_id) {
+            starred_doc_id_array.push(doc_id);
+          }
+        });
+
+        if (debug_enabled) {
+          console.log('newman_email_starred.setStarredDocumentList(search_response)');
+          console.log('starred_doc_id_array:\n' + JSON.stringify(starred_doc_id_array, null, 2));
         }
-      });
-      starred_doc_list_copy = clone(starred_doc_id_array);
-
-      if (debug_enabled) {
-        console.log('newman_email_starred.setStarredDocumentList(search_response)');
-        console.log('\tstarred_doc_id_array:\n' + JSON.stringify(starred_doc_id_array, null, 2));
       }
-
+      else {
+        starred_doc_id_array = [];
+      }
     }
     else {
+      starred_doc_id_array = [];
       console.warn('No expected "response.rows" found!');
+    }
+
+    if (starred_doc_id_array.length > 0) {
+      starred_doc_list_copy = clone(starred_doc_id_array);
     }
     return starred_doc_list_copy;
   }
@@ -82,6 +120,7 @@ var newman_email_starred = (function () {
     'initStarredDocumentList' : initStarredDocumentList,
     'getStarredDocumentList' : getStarredDocumentList,
     'setStarredDocumentList' : setStarredDocumentList,
+    'getStarredDocumentMatched' : getStarredDocumentMatched,
     'displayUITab' : displayUITab
   }
 
@@ -189,6 +228,7 @@ var newman_email_starred_request_export = (function () {
 
     console.log('newman_email_starred_request_export.requestService()');
     var service_url = getServiceURL();
+    console.log('\tservice_url: ' + service_url);
 
     $.ajax({
       url: service_url,

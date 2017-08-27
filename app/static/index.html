@@ -416,12 +416,12 @@
                 <ul class="dropdown-menu" style="width: 100%; padding: 2px 8px 2px 8px; border-radius: 4px;" id="export_option_list">
                   <li style="line-height: 20px; text-align: left;">
                     <button type="button" class="button-dropdown-menu-item" id="export_option_list_all_starred">
-                      <span> List all <i class="fa fa-star-o"></i></span>
+                      <span data-toggle="tooltip" title="List all starred documents"><i class="fa fa-star-o"></i> List all starred</span>
                     </button>
                   </li>
                   <li style="line-height: 20px; text-align: left;">
                     <button type="button" class="button-dropdown-menu-item" id="export_option_save_all_starred_as_file">
-                      <span> Export all as file <i class="fa fa-file-archive-o"></i></span>
+                      <span data-toggle="tooltip" title="Export all starred documents as a file"><i class="fa fa-file-archive-o"></i> Export all starred</span>
                     </button>
                   </li>
                 </ul>
@@ -437,7 +437,7 @@
               <div class="dropdown" style="width: 100%; position:relative; display: inline-block;" id="logo_dropdown_selected">
                 <span class="dropdown-toggle btn navbar-btn button-dropdown-menu" style="padding: 0px 2px 0px 2px; margin: 0;" data-toggle="dropdown">
                   <span style="font-size: 13px; font-weight: lighter;" >
-                    Newman 3.0.1 <i class="fa fa-user-secret fa-inverse"></i>
+                    <i class="fa fa-user-secret fa-inverse"></i> Newman 3.0.1
                   </span>
                 </span>
                 <ul class="dropdown-menu" style="width: 100%; padding: 2px 0px 2px 0px; border-radius: 4px;" id="logo_dropdown_list">
@@ -1079,15 +1079,19 @@
                       <div class="col-sm-4" style="margin: 0; padding: 4px 10px 0px 0px;">
                         <span>Documents matched&nbsp;&nbsp;</span><span id="document_count"></span>
                       </div>
-                      <div class="col-sm-2" style="margin: 0; padding: 4px 5px 0px 5px;">
-                        <button type="button" class="btn btn-small outline" id="email_view_list_all_starred">
-                          <span> List all <i class="fa fa-star-o"></i></span>
-                        </button>
 
-                        <!-- <a class="clickable" id="email_group_conversation" title="Conversations"> -->
-                        <!--   <span class="glyphicon glyphicon-tasks"></span> -->
-                        <!-- </a> -->
+                      <div class="col-sm-2" style="margin: 0; padding: 4px 5px 0px 5px;">
+                        <button type="button" class="btn btn-small outline" id="email_view_mark_all_docs">
+                          <span data-toggle="tooltip" title="Mark all documents as starred"><i class="fa fa-star-o"></i> Star all </span>
+                        </button>
                       </div>
+
+                      <div class="col-sm-2" style="margin: 0; padding: 4px 5px 0px 5px;">
+                        <button type="button" class="btn btn-small outline" id="email_view_unmark_all_docs">
+                          <span data-toggle="tooltip" title="Undo all previously starred documents"><i class="fa fa-star-half-o"></i> Unstar all </span>
+                        </button>
+                      </div>
+
                     </div>
 
                     <!-- Start Data-Table-Documents -->
@@ -1308,7 +1312,7 @@
                 <!--Start Data-Panel-Tab-Content-Email-Star(Like)-Button -->
                 <div style="margin: 2px 0px 0px 10px; padding: 0; float: left;" class="col-sm-2">
                   <button id="toggle_mark_for_export" class="btn btn-xs btn-default clickable">
-                    <span><i class="fa fa-star-o fa-lg"></i></span>
+                    <span data-toggle="tooltip" title="Toggle document as marked(starred) or unmarked(unstarred)"><i class="fa fa-star-o fa-lg"></i></span>
                   </button>
                 </div>
                 <!--End Data-Panel-Tab-Content-Email-Star(Like)-Button -->
@@ -1316,7 +1320,7 @@
                 <!--Start Data-Panel-Tab-Content-Email-Mark-Read-Toggle -->
                 <div style="margin: 2px 0px 0px 2px; padding: 0;" class="col-sm-8">
                   <button id="toggle_mark_as_read" class="btn btn-xs btn-default clickable">
-                    <span><i class="fa fa-square-o fa-lg"></i> Read</span>
+                    <span data-toggle="tooltip" title="Toggle document as read or unread"><i class="fa fa-square-o fa-lg"></i> Read</span>
                   </button>
                 </div>
                 <!--End Data-Panel-Tab-Content-Email-Mark-Read-Toggle -->
@@ -1325,14 +1329,14 @@
                 <!-- Start-Content-Email-Translation-Button -->
                 <div style="margin: 2px 0px 0px 10px; padding: 0;" class="col-sm-2">
                   <button id="translate_contents_email" class="btn btn-xs btn-default clickable-disabled">
-                    <span><i class="fa fa-language fa-lg"></i></span>
+                    <span data-toggle="tooltip" title="Toggle language translation if available"><i class="fa fa-language fa-lg"></i></span>
                   </button>
                 </div>
                 <!-- End-Content-Email-Translation-Button -->
                 <!-- Start-Content-Email-Conversation-Button -->
                 <div style="margin: 2px 0px 0px 2px; padding: 0;" class="col-sm-8">
                   <button id="query_conversation_email" class="btn btn-xs btn-default clickable-disabled">
-                    <span><i class="fa fa-comments-o fa-lg"></i> Conversation</span>
+                    <span data-toggle="tooltip" title="Track all documents as conversation"><i class="fa fa-comments-o fa-lg"></i> Conversation</span>
                   </button>
                 </div>
                 <!--

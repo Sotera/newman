@@ -283,10 +283,10 @@ def export_emails_archive(data_set_id, email_id_ingest_id__tupples=[]):
 
     topics = get_categories(data_set_id)
 
-    filename= "newman-v{}-export-{}.tar.gz".format(_getVersion(), datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S'))
+    tarfilename= "newman-v{}-export-{}.tar.gz".format(_getVersion(), datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S'))
 
     string_buffer = cStringIO.StringIO()
-    tar = tarfile.open(mode='w:gz', fileobj=string_buffer)
+    tar = tarfile.open(mode='w:gz', name=tarfilename, fileobj=string_buffer)
 
     # Add each email to the tar
     for email_source in emails["docs"]:
@@ -370,4 +370,4 @@ def export_emails_archive(data_set_id, email_id_ingest_id__tupples=[]):
     tar.close()
     string_buffer.reset()
 
-    return send_file(string_buffer, mimetype="application/x-gzip", as_attachment=True, attachment_filename=filename)
+    return send_file(string_buffer, mimetype="application/x-gzip", as_attachment=True, attachment_filename=tarfilename)

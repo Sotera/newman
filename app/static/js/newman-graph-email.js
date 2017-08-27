@@ -644,12 +644,14 @@ var newman_graph_email = (function () {
     // populate data-table
     $('#document_count').text(filtered_response.query_hits);
     console.log('email_docs[ ' + filtered_response.rows.length + ' ]');
+
     newman_email_doc_table.populateDataTable( filtered_response.rows );
-    app_tree_email.loadDocument( filtered_response.rows );
 
     if (starred_email_doc_list ) {
       newman_email_doc_table.setStarredEmailDocumentList( starred_email_doc_list );
     }
+
+    app_tree_email.loadDocument( filtered_response.rows );
 
     // populate attachment-table
     console.log('attachment_docs[ ' + filtered_response.attachments.length + ' ]');

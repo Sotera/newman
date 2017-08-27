@@ -29,6 +29,7 @@ var newman_email_doc_table = (function () {
   function clearAllEmailDocumentMetadata() {
     _email_doc_metadata_map = {};
   }
+
   function getEmailDocumentMetadata( email_id ) {
     var _value;
     if (email_id) {
@@ -36,10 +37,19 @@ var newman_email_doc_table = (function () {
     }
     return _value;
   }
+
   function putEmailDocumentMetadata( email_id, email_doc ) {
     if (email_id && email_doc) {
       _email_doc_metadata_map[ email_id ] = email_doc;
     }
+  }
+
+  function getAllEmailUIDs() {
+    var _key_array = [];
+    if (_.size( _email_doc_metadata_map ) > 0) {
+      _key_array = Object.keys( _email_doc_metadata_map );
+    }
+    return _key_array;
   }
 
   var data_table_ui;
@@ -567,28 +577,75 @@ var newman_email_doc_table = (function () {
         _starred_email_doc_map[doc_id] = true;
       });
 
-      //console.log('value_map: ' + JSON.stringify(value_map, null, 2));
+      console.log('value_map: ' + JSON.stringify(_starred_email_doc_map, null, 2));
       updateDataTableColumn(data_column_export_index, _starred_email_doc_map);
     }
   }
 
   function initEvents() {
 
-    $('#email_view_list_all_starred').off().click(function () {
-      console.log("#email_view_list_all_starred clicked");
+    $('#email_view_mark_all_docs').off().click(function () {
+      console.log("#email_view_mark_all_docs clicked");
 
-      var email_id = _current_email_doc_id;
+      var id_set = getAllEmailUIDs();
+      var id_set_count = id_set.length;
 
-      // query email documents
-      if (email_id) {
-        newman_email_starred_request_all.requestService(newman_graph_email, email_id);
+      if (id_set_count > 0) {
+        console.log("Email documents found: " + id_set_count);
+
+        // check if all docs already starred
+        var starred_doc_matched = newman_email_starred.getStarredDocumentMatched( id_set );
+        if (starred_doc_matched == id_set_count) {
+          console.log("All email documents (" + starred_doc_matched + ") already starred!");
+        }
+        else {
+
+
+          setEmailDocumentStarred(true, id_set);
+
+          // service request mark each doc
+          _.each(id_set, function (email_uid) {
+            newman_email_starred_request_toggle.requestService(email_uid, true);
+
+          });
+
+        }
       }
       else {
-        newman_email_starred_request_all.requestService(newman_graph_email);
+        console.warn("Email documents found: 0");
       }
 
-      // display email-tab
-      newman_graph_email.displayUITab();
+    });
+
+    $('#email_view_unmark_all_docs').off().click(function () {
+      console.log("#email_view_unmark_all_docs clicked");
+
+      var id_set = getAllEmailUIDs();
+      var id_set_count = id_set.length;
+
+      if (id_set_count > 0) {
+        console.log("Email documents found: " + id_set_count);
+
+        // check if all docs already unstarred
+        var starred_doc_matched = newman_email_starred.getStarredDocumentMatched( id_set );
+        if (starred_doc_matched == 0) {
+          console.log("No email documents (" + starred_doc_matched + ") starred!");
+        }
+        else {
+
+          setEmailDocumentStarred(false, id_set);
+
+          // service request unmark each doc
+          _.each(id_set, function (email_uid) {
+            newman_email_starred_request_toggle.requestService(email_uid, false);
+
+          });
+
+        }
+      }
+      else {
+        console.warn("Email documents found: 0");
+      }
 
     });
 
