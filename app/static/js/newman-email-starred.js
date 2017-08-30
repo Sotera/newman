@@ -7,8 +7,8 @@
  * email-graph related container
  */
 var newman_email_starred = (function () {
-  var debug_enabled = true;
-  var starred_doc_id_array = [];
+  var debug_enabled = false;
+  var _starred_doc_id_array = [];
 
 
   function init() {
@@ -27,15 +27,56 @@ var newman_email_starred = (function () {
     });
 
     $("#export_option_save_all_starred_as_file").off().click( function () {
-      initStarredDocumentList();
-      if (getStarredDocumentCount() > 0) {
-        newman_email_starred_request_export.requestService();
-      }
-      else {
-        console.warn('No starred document found!');
-      }
+
+      // first request list all starred items before initiate  compress & download
+      newman_email_starred_request_all.requestDownloadAllStarred( newman_email_starred );
+
     });
 
+  }
+
+  function onRequestDownloadAllStarred( response ) {
+    setStarredDocumentList( response );
+
+    // only initial artifacts bulk download if available
+    if( response && response.rows && response.rows.length > 0 ) {
+      console.log('Exporting ' + response.rows.length + ' starred documents...');
+      newman_email_starred_request_export.requestService();
+    }
+    else {
+      console.warn('No starred document found!');
+    }
+
+  }
+
+  function requestDocumentStarred(doc_id_list, is_starred, callback) {
+
+    if (doc_id_list && doc_id_list.length > 0) {
+
+      var _is_enabled = false;
+      if (is_starred === true) {
+        _is_enabled = true;
+      }
+
+      // service request mark each doc
+      _.each(doc_id_list, function (doc_uid, index) {
+        newman_email_starred_request_toggle.requestService(doc_uid, _is_enabled, callback);
+      });
+
+      initStarredDocumentList();
+    }
+
+  }
+
+  function isDocumentStarred( doc_id ) {
+    var is_starred = false;
+    if (doc_id) {
+      is_starred = _.contains( _starred_doc_id_array, doc_id );
+    }
+    if (debug_enabled) {
+      console.log('isDocumentStarred(' + doc_id + ') : ' + is_starred);
+    }
+    return is_starred;
   }
 
   function initStarredDocumentList() {
@@ -43,11 +84,11 @@ var newman_email_starred = (function () {
   }
 
   function getStarredDocumentList() {
-    return clone( starred_doc_id_array );
+    return clone( _starred_doc_id_array );
   }
 
   function getStarredDocumentCount() {
-    return _.size( starred_doc_id_array );
+    return _.size( _starred_doc_id_array );
   }
 
   function getStarredDocumentMatched( doc_id_array ) {
@@ -58,7 +99,7 @@ var newman_email_starred = (function () {
     if (doc_id_array && doc_id_array.length > 0) {
       _.each(doc_id_array, function(doc_id) {
 
-        if (_.contains( starred_doc_id_array, doc_id )) {
+        if (_.contains( _starred_doc_id_array, doc_id )) {
           matched++;
         }
 
@@ -76,37 +117,37 @@ var newman_email_starred = (function () {
    */
   function setStarredDocumentList(response) {
 
-    var starred_doc_list_copy = [];
+    var new_starred_doc_list = [];
 
     if( response.rows ) {
       if( response.rows.length > 0 ) {
 
-        starred_doc_id_array = [];
         _.each(response.rows, function (element) {
           var doc_id = element.email_id;
           if (doc_id) {
-            starred_doc_id_array.push(doc_id);
+            new_starred_doc_list.push(doc_id);
           }
         });
 
         if (debug_enabled) {
           console.log('newman_email_starred.setStarredDocumentList(search_response)');
-          console.log('starred_doc_id_array:\n' + JSON.stringify(starred_doc_id_array, null, 2));
+          console.log('new_starred_doc_list:\n' + JSON.stringify(new_starred_doc_list, null, 2));
         }
       }
       else {
-        starred_doc_id_array = [];
+        _starred_doc_id_array = [];
       }
     }
     else {
-      starred_doc_id_array = [];
+      _starred_doc_id_array = [];
       console.warn('No expected "response.rows" found!');
     }
 
-    if (starred_doc_id_array.length > 0) {
-      starred_doc_list_copy = clone(starred_doc_id_array);
+    if (new_starred_doc_list.length > 0) {
+      _starred_doc_id_array = [];
+      _starred_doc_id_array = clone(new_starred_doc_list);
     }
-    return starred_doc_list_copy;
+    return new_starred_doc_list;
   }
 
   function displayUITab() {
@@ -121,6 +162,9 @@ var newman_email_starred = (function () {
     'getStarredDocumentList' : getStarredDocumentList,
     'setStarredDocumentList' : setStarredDocumentList,
     'getStarredDocumentMatched' : getStarredDocumentMatched,
+    'requestDocumentStarred' : requestDocumentStarred,
+    'isDocumentStarred' : isDocumentStarred,
+    'onRequestDownloadAllStarred' : onRequestDownloadAllStarred,
     'displayUITab' : displayUITab
   }
 
@@ -140,7 +184,7 @@ var newman_email_starred_request_toggle = (function () {
     return _service_url;
   }
 
-  function getServiceURL(email_id, enabled) {
+  function getServiceURL(email_id, enabled, callback) {
     console.log('newman_email_starred_request_toggle.getServiceURL(' + email_id + ', ' + enabled + ')');
 
     var service_url = _service_url + '/' + encodeURIComponent(email_id);
@@ -161,16 +205,22 @@ var newman_email_starred_request_toggle = (function () {
 
     service_url = newman_data_source.appendDataSource(service_url);
     service_url = newman_datetime_range.appendDatetimeRange(service_url);
-    service_url = newman_email_doc_table.appendIngestID( service_url, email_id );
+
+    if (callback) {
+      service_url = callback.urlAppendIngestID(service_url, email_id);
+    }
+    else {
+      console.warn('Missing callback object: undefined.urlAppendIngestID(...)');
+    }
 
     return service_url;
 
   }
 
-  function requestService(email_id, enabled) {
+  function requestService(email_id, enabled, callback) {
 
     console.log('newman_email_starred_request_toggle.requestService()');
-    var service_url = getServiceURL(email_id, enabled);
+    var service_url = getServiceURL(email_id, enabled, callback);
     $.get( service_url ).then(function (response) {
       setResponse( response );
       // no response handling needed
@@ -290,7 +340,7 @@ var newman_email_starred_request_all = (function () {
 
   function requestService( response_callback, auto_display_doc_uid ) {
 
-    console.log('newman_email_starred_request_all.requestService()');
+    console.log('newman_email_starred_request_all.requestService(...)');
     var service_url = getServiceURL();
     $.get( service_url ).then(function (response) {
       setResponse( response );
@@ -298,6 +348,19 @@ var newman_email_starred_request_all = (function () {
 
       if (response_callback) {
         response_callback.updateUIGraphView(response, auto_display_doc_uid, starred_doc_list);
+      }
+    });
+  }
+
+  function requestDownloadAllStarred( response_callback ) {
+
+    console.log('newman_email_starred_request_all.requestDownloadAllStarred(...)');
+    var service_url = getServiceURL();
+    $.get( service_url ).then(function (response) {
+      setResponse( response );
+
+      if (response_callback) {
+        response_callback.onRequestDownloadAllStarred( response );
       }
     });
   }
@@ -317,6 +380,7 @@ var newman_email_starred_request_all = (function () {
     'getServiceURLBase' : getServiceURLBase,
     'getServiceURL' : getServiceURL,
     'requestService' : requestService,
+    'requestDownloadAllStarred' : requestDownloadAllStarred,
     'getResponse' : getResponse,
     'setResponse' : setResponse
   }

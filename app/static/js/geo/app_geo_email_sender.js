@@ -47,6 +47,7 @@ var newman_geo_email_sender = (function () {
         var datetime = element.datetime;
         var subject = element.subject;
         var doc_id = element.id;
+        var ingest_id = element.ingest_id;
         var latitude = element.originating_locations[0].geo_coord.lat;
         var longitude = element.originating_locations[0].geo_coord.lon;
 
@@ -57,6 +58,7 @@ var newman_geo_email_sender = (function () {
           "latitude" : latitude,
           "longitude" : longitude,
           "coord_sent" : true,
+          "ingest_id" : ingest_id
         }
 
         putEmailDocGeoLoc( doc_id, geo_email_obj );

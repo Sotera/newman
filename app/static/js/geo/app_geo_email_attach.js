@@ -102,6 +102,7 @@ var newman_geo_email_attach = (function () {
         var email_datetime = document.datetime;
         var email_subject = document.subject;
         var email_id = document.id;
+        var ingest_id = document.ingest_id;
 
         if (document.originating_locations && document.originating_locations.length > 0) {
           var email_lat = document.originating_locations[0].geo_coord.lat;
@@ -109,12 +110,13 @@ var newman_geo_email_attach = (function () {
 
           if (email_datetime && email_subject && email_id && email_lat && email_lon) {
             var geo_email_obj = {
-              "email_datetime": email_datetime,
-              "email_subject": email_subject,
-              "email_id": email_id,
-              "latitude": email_lat,
-              "longitude": email_lon,
-              "coord_sent": true
+              "email_datetime" : email_datetime,
+              "email_subject" : email_subject,
+              "email_id" : email_id,
+              "latitude" : email_lat,
+              "longitude" : email_lon,
+              "coord_sent" : true,
+              "ingest_id" : ingest_id
             }
             putEmailDocGeoLoc(email_id, geo_email_obj);
           }
@@ -132,17 +134,18 @@ var newman_geo_email_attach = (function () {
             var attach_lat = attachment.exif.gps.coord.lat;
             var attach_lon = attachment.exif.gps.coord.lon;
 
-            putAttachDocMetadata(attach_id, attachment)
+            putAttachDocMetadata(attach_id, attachment);
 
             var geo_attach_object = {
-              "email_datetime": email_datetime,
-              "email_subject": email_subject,
-              "email_id": email_id,
-              "attach_id": attach_id,
+              "email_datetime" : email_datetime,
+              "email_subject" : email_subject,
+              "email_id" : email_id,
+              "attach_id" : attach_id,
               "attach_file" : attach_file,
-              "latitude": attach_lat.toFixed(5),
-              "longitude": attach_lon.toFixed(5),
-              "coord_origin": true
+              "latitude" : attach_lat.toFixed(5),
+              "longitude" : attach_lon.toFixed(5),
+              "coord_origin" : true,
+              "ingest_id" : ingest_id
             }
             putAttachDocGeoLoc(attach_id, geo_attach_object);
           }

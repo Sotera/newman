@@ -78,7 +78,11 @@ $(function () {
       else if (element_ID.endsWith('dashboard_tab_content_attach_types')) {
         newman_top_email_attach_type.revalidateUIFileTypeAttach();
       }
+      else if (element_ID.endsWith('attachment-table-tab')) {
+        //do nothing at this level
+      }
       else {
+        console.log('Tab-selected "' + element_ID + '" default event handling...');
         // default to dashboard
         app_dashboard.initDashboardCharts();
 

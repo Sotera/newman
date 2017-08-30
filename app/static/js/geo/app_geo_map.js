@@ -158,12 +158,93 @@ var app_geo_map = (function () {
     return false;
   }
 
+  var _doc_metadata_map = {};
+
+  function clearAllDocumentMetadata() {
+    _doc_metadata_map = {};
+  }
+
+  function containsDocumentMetadata( doc_id ) {
+    return (doc_id in _doc_metadata_map);
+  }
+
+  function getDocumentMetadataSize() {
+    return _.size( _doc_metadata_map );
+  }
+
+  function getDocumentMetadataKeys() {
+    var doc_uid_array = Object.keys( _doc_metadata_map );
+    return doc_uid_array;
+  }
+
+  function getDocumentMetadata( doc_id ) {
+    var _value;
+    if (doc_id) {
+      _value = clone( _doc_metadata_map[ doc_id ] );
+    }
+    return _value;
+  }
+
+  function putDocumentMetadata( doc_id, doc_element ) {
+    if (doc_id && doc_element) {
+      _doc_metadata_map[ doc_id ] = doc_element;
+    }
+  }
+
+  function isEmailDocumentStarred( doc_id ) {
+    var _is_starred = false;
+    var _meta_object = getDocumentMetadata( doc_id );
+    if (_meta_object) {
+      _is_starred = (_meta_object.is_starred === true);
+    }
+    return _is_starred;
+  }
+
+  function setDocumentStarred( is_starred, doc_id ) {
+    var _meta_object = getDocumentMetadata( doc_id );
+    if (_meta_object) {
+      _meta_object.is_starred = (is_starred === true);
+      putDocumentMetadata( doc_id, _meta_object );
+    }
+  }
+
+  function setAllEmailDocumentStarred( is_starred, doc_id_list ) {
+    if (doc_id_list) {
+      _.each(doc_id_list, function( doc_id ) {
+        setDocumentStarred(is_starred, doc_id)
+      });
+    }
+  }
+
+  function isEmailDocumentRead( doc_id ) {
+    var _is_read = false;
+    var _meta_object = getDocumentMetadata( doc_id );
+    if (_meta_object) {
+      _is_read = (_meta_object.is_read === true);
+    }
+    return _is_read;
+  }
+
+  function setDocumentRead( is_read, doc_id ) {
+    var _meta_object = getDocumentMetadata( doc_id );
+    if (_meta_object) {
+      _meta_object.is_read = (is_read === true);
+      putDocumentMetadata( doc_id, _meta_object );
+    }
+  }
+
+  function setAllEmailDocumentRead( is_read, doc_id_list ) {
+    if (doc_id_list) {
+      _.each(doc_id_list, function( doc_id ) {
+        setDocumentRead(is_read, doc_id)
+      });
+    }
+  }
+
   var marker_list = [];
   var marker_icon_map = {};
-  var marker_init_sender_button, marker_init_attach_button;
+  var map_button_mark_sender, map_button_mark_attach, map_button_star_all;
   var map_marker_layer_all_sender, map_marker_layer_all_attach;
-
-
 
 
   function markMap(new_marker_list) {
@@ -178,12 +259,60 @@ var app_geo_map = (function () {
         _.each(new_marker_list, function(item) {
           //console.log('marker:\n' + JSON.stringify(item, null, 2));
 
-          var latitude = parseFloat( item.latitude ).toFixed(3); //adjust decimal places to cluster
-          var longitude = parseFloat( item.longitude ).toFixed(3); //adjust decimal places to cluster
+          var latitude = parseFloat( item.latitude ).toFixed(5); //adjust decimal places to cluster
+          var longitude = parseFloat( item.longitude ).toFixed(5); //adjust decimal places to cluster
+          var doc_uid = item.email_id;
+          var doc_ingest_id = item.ingest_id;
+          var is_starred = newman_email_starred.isDocumentStarred( doc_uid );
 
-          if (latitude && longitude) {
-            var coord_key = latitude + ',' + longitude, coord_content_list = [];
+          if (latitude && longitude && doc_ingest_id) {
 
+            //filter by drawn areas
+            if (_isOutOfBoundaryAreaDrawn(latitude, longitude)) {
+              //console.log('Coordinate(' + latitude + ',' + longitude + ') is not within any bounds of drawn area.');
+              return;
+            }
+
+            var coord_key = latitude + ',' + longitude;
+
+            var coord_key_list, meta_object;
+            if (containsDocumentMetadata( doc_uid )) {
+
+              meta_object = getDocumentMetadata( doc_uid );
+
+              if (meta_object) {
+
+                coord_key_list = meta_object.ref_coordinate_list;
+                if (coord_key_list) {
+                  coord_key_list.push(coord_key)
+                  meta_object.ref_coordinate_list = coord_key_list;
+
+                  putDocumentMetadata(doc_uid, meta_object);
+                }
+                else {
+                  console.error("No expected coordinate list found for doc: " + doc_uid);
+                }
+              }
+              else {
+                console.error("No expected doc object found for doc: " + doc_uid);
+              }
+            }
+            else {
+              coord_key_list = [];
+              coord_key_list.push(coord_key)
+
+              meta_object = {
+                "email_id" : doc_uid,
+                "ref_coordinate_list" : coord_key_list,
+                "ingest_id" : doc_ingest_id,
+                "is_starred" : is_starred,
+                "is_read" : false
+              }
+
+              putDocumentMetadata(doc_uid, meta_object);
+            }
+
+            var coord_content_list = [];
             if (item.coord_sent === true) {
 
               if (coord_key in sender_coord_marker_map) {
@@ -211,9 +340,253 @@ var app_geo_map = (function () {
           markAllAttachment(attach_coord_marker_map);
         }
 
+        if (debug_enabled) {
+          var doc_uid_array = getDocumentMetadataKeys();
+          console.log('doc_uid_array[' + doc_uid_array.length + ']:\n' + JSON.stringify(doc_uid_array, null, 2));
+        }
+        else {
+          console.log('doc_uid_array[' + doc_uid_array.length + ']');
+        }
       }
     }
-  }
+  } // end-of MarkMap(...)
+
+  function starAllDoc( marker_list_sender, marker_list_attach ) {
+    clearAllDocumentMetadata();
+
+    if (marker_list_sender) {
+
+      _.each(marker_list_sender, function (item) {
+        //console.log('marker:\n' + JSON.stringify(item, null, 2));
+
+        var latitude = parseFloat(item.latitude).toFixed(5); //adjust decimal places to cluster
+        var longitude = parseFloat(item.longitude).toFixed(5); //adjust decimal places to cluster
+        var doc_uid = item.email_id;
+        var doc_ingest_id = item.ingest_id;
+        var is_starred = true;
+
+        if (latitude && longitude && doc_uid && doc_ingest_id) {
+
+          //filter by drawn areas
+          if (_isOutOfBoundaryAreaDrawn(latitude, longitude)) {
+            //console.log('Coordinate(' + latitude + ',' + longitude + ') is not within any bounds of drawn area.');
+            return;
+          }
+
+          var coord_key = latitude + ',' + longitude;
+
+          if (item.coord_sent === true) {
+
+            var coord_key_list, meta_object;
+            if (containsDocumentMetadata( doc_uid )) {
+
+              meta_object = getDocumentMetadata( doc_uid );
+              if (meta_object) {
+
+                coord_key_list = meta_object.ref_coordinate_list;
+                if (coord_key_list) {
+                  coord_key_list.push(coord_key)
+                  meta_object.ref_coordinate_list = coord_key_list;
+
+                  putDocumentMetadata(doc_uid, meta_object);
+                }
+                else {
+                  console.error("No expected coordinate list found for doc: " + doc_uid);
+                }
+              }
+              else {
+                console.error("No expected doc object found for doc: " + doc_uid);
+              }
+            }
+            else {
+              coord_key_list = [];
+              coord_key_list.push(coord_key)
+
+              meta_object = {
+                "email_id" : doc_uid,
+                "ref_coordinate_list" : coord_key_list,
+                "ingest_id" : doc_ingest_id,
+                "is_starred" : is_starred,
+                "is_read" : false
+              }
+
+              putDocumentMetadata(doc_uid, meta_object);
+            }
+
+          }
+        } // end-of if (latitude && longitude && doc_uid && doc_ingest_id)
+
+      });
+    } // end-of if (marker_list_sender)
+
+
+    if (marker_list_attach) {
+
+
+      _.each(marker_list_attach, function (item) {
+        //console.log('marker:\n' + JSON.stringify(item, null, 2));
+
+        var latitude = parseFloat(item.latitude).toFixed(5); //adjust decimal places to cluster
+        var longitude = parseFloat(item.longitude).toFixed(5); //adjust decimal places to cluster
+        var doc_uid = item.email_id;
+        var doc_ingest_id = item.ingest_id;
+        var is_starred = newman_email_starred.isDocumentStarred( doc_uid );
+
+        if (latitude && longitude && doc_uid) {
+
+          //filter by drawn areas
+          if (_isOutOfBoundaryAreaDrawn(latitude, longitude)) {
+            //console.log('Coordinate(' + latitude + ',' + longitude + ') is not within any bounds of drawn area.');
+            return;
+          }
+
+          var coord_key = latitude + ',' + longitude;
+
+          if (item.coord_origin === true) {
+
+            var coord_list, meta_object;
+            if (containsDocumentMetadata( doc_uid )) {
+
+              meta_object = getDocumentMetadata( doc_uid );
+
+              if (meta_object) {
+
+                coord_list = meta_object.ref_coordinate_list;
+                if (coord_list) {
+                  coord_list.push(coord_key)
+                  meta_object.ref_coordinate_list = coord_list;
+
+                  putDocumentMetadata(doc_uid, meta_object);
+                }
+                else {
+                  console.error("No expected coordinate list found for doc: " + doc_uid);
+                }
+              }
+              else {
+                console.error("No expected doc object found for doc: " + doc_uid);
+              }
+            }
+            else {
+              coord_list = [];
+              coord_list.push(coord_key)
+
+              meta_object = {
+                "email_id" : doc_uid,
+                "ref_coordinate_list" : coord_list,
+                "ingest_id" : doc_ingest_id,
+                "is_starred" : is_starred,
+                "is_read" : false
+              }
+
+              putDocumentMetadata(doc_uid, meta_object);
+            }
+
+          }
+        } // end-of if (latitude && longitude && doc_uid)
+      });
+
+    } // end-of if (marker_list_attach)
+
+    if (debug_enabled) {
+      console.log('_doc_metadata_map:\n' + JSON.stringify(_doc_metadata_map, null, 2));
+    }
+
+    if (getDocumentMetadataSize() > 0) {
+      var doc_uid_array = getDocumentMetadataKeys();
+      if (debug_enabled) {
+        console.log('doc_uid_array[' + doc_uid_array.length + ']:\n' + JSON.stringify(doc_uid_array, null, 2));
+      }
+      else {
+        console.log('doc_uid_array[' + doc_uid_array.length + ']');
+      }
+
+      // check if all docs already starred
+      var starred_doc_matched = newman_email_starred.getStarredDocumentMatched( doc_uid_array );
+      if (starred_doc_matched == doc_uid_array.length) {
+        console.log("All email documents (" + starred_doc_matched + ") already starred!");
+      }
+      else {
+
+        // request to mark all docs
+        newman_email_starred.requestDocumentStarred(doc_uid_array, true, app_geo_map);
+      }
+    }
+
+  } // end-of starAllDoc(...)
+
+  function urlAppendIngestID(url_path, email_id) {
+
+    if (url_path && email_id) {
+
+      var doc_metadata = getDocumentMetadata(email_id);
+      if (doc_metadata) {
+        if (debug_enabled) {
+          console.log('Found document metadata :\n' + JSON.stringify(doc_metadata, null, 2));
+        }
+
+        var ingest_id = doc_metadata.ingest_id;
+        if (ingest_id) {
+
+          if (url_path.endsWith('/')) {
+            url_path = url_path.substring(0, url_path.length - 1);
+          }
+
+          var param_key = 'ingest_id';
+          var ingest_id_string = encodeURIComponent(ingest_id);
+
+          if (url_path.indexOf('?') > 0) {
+            url_path += '&' + param_key + '=' + ingest_id_string;
+          }
+          else {
+            url_path += '?' + param_key + '=' + ingest_id_string;
+          }
+
+        }
+        else {
+          console.warn("No document ingest_id found for '" + email_id + "'!");
+        }
+
+      }
+      else {
+        console.warn("No document metadata found for '" + email_id + "'!");
+      }
+    } // end-of if (url_path && email_id)
+
+    if (debug_enabled) {
+      console.log("urlAppendIngestID(...): " + url_path);
+    }
+    return url_path;
+  } // end-of urlAppendIngestID(...)
+
+  function showEmailDocumentView(email_id) {
+    console.log('showEmailDocumentView( ' + email_id + ' )');
+    newman_graph_email.clearAllNodeSelected();
+
+    // make email-document-content-view visible and open
+    email_doc_view_panel.open();
+
+
+    var email_url = 'email/email/' + encodeURIComponent(email_id);
+    email_url = newman_data_source.appendDataSource(email_url);
+
+    email_url = newman_search_parameter.appendURLQuery(email_url);
+
+    email_url = urlAppendIngestID( email_url, email_id );
+
+    $.get(email_url).then( function (response) {
+
+      // set target email-document-id
+      newman_email_doc_view.setDocumentID(email_id);
+
+      // initialize email-document-view UI events
+      newman_email_doc_view.initUI( isEmailDocumentStarred( email_id ), isEmailDocumentRead( email_id ), app_geo_map );
+
+      // parse email-document-service response
+      newman_email_doc_view.setDocumentRequestResponse( response );
+
+    });
+  } // end-of showEmailDocumentView(email_id)
+
 
   function clearAllSender() {
     if (map_marker_layer_all_sender) {
@@ -306,7 +679,7 @@ var app_geo_map = (function () {
                 if (debug_enabled) {
                   console.log('selected marker-doc-id : ' + doc_id + ', [' + latitude + ', ' + longitude + ']');
                 }
-                newman_email_doc_table.showEmailDocumentView( doc_id );
+                app_geo_map.showEmailDocumentView( doc_id );
 
                 clearAllAttachment();
                 var geo_attach_obj = newman_geo_email_attach.getAttachDocGeoLocByEmail( doc_id );
@@ -331,11 +704,11 @@ var app_geo_map = (function () {
         // Delegate all event handling for the popup container itself
         /*
          popup_container.on('click', function() {
-         var doc_id = marker_content.doc_id;
-         if (debug_enabled) {
-         console.log('selected marker-doc-id : ' + doc_id);
-         }
-         newman_email_doc_table.showEmailDocumentView( doc_id );
+           var doc_id = marker_content.doc_id;
+           if (debug_enabled) {
+             console.log('selected marker-doc-id : ' + doc_id);
+           }
+           app_geo_map.showEmailDocumentView( doc_id );
          });
          */
 
@@ -352,7 +725,7 @@ var app_geo_map = (function () {
 
       map.addLayer( map_marker_layer_all_sender );
     }
-  }
+  } // end-of MarkAllSender(...)
 
   function clearAllAttachment() {
     if (map_marker_layer_all_attach) {
@@ -480,7 +853,7 @@ var app_geo_map = (function () {
                   console.log('selected marker-doc-id : ' + doc_id + ', [' + latitude + ', ' + longitude + ']');
                   //console.log('adjusted coordinate [' + adjusted_latitude + ', ' + adjusted_longitude + ']');
                 }
-                newman_email_doc_table.showEmailDocumentView( doc_id );
+                app_geo_map.showEmailDocumentView( doc_id );
 
                 clearAllSender();
                 var geo_email_obj = newman_geo_email_attach.getEmailDocGeoLoc( doc_id );
@@ -488,8 +861,8 @@ var app_geo_map = (function () {
                   if (debug_enabled) {
                     console.log('geo_email_obj : ' + doc_id + '\n' + JSON.stringify(geo_email_obj, null, 2));
                   }
-                  var marker_map = [geo_email_obj];
-                  markMap( marker_map );
+                  var marker_list = [geo_email_obj];
+                  markMap( marker_list );
                 }
               },
               mouseover: function (e) {
@@ -1510,9 +1883,9 @@ var app_geo_map = (function () {
   function initAllEmailSenderButton() {
 
     if (map) {
-      if (!marker_init_sender_button) {
+      if (!map_button_mark_sender) {
 
-        marker_init_sender_button = L.easyButton('fa-paper-plane-o', function () {
+        map_button_mark_sender = L.easyButton('fa-paper-plane-o', function () {
 
           if (isMarkedForAllSender()) {
             map.removeLayer(map_marker_layer_all_sender)
@@ -1523,7 +1896,7 @@ var app_geo_map = (function () {
 
         });
 
-        marker_init_sender_button.addTo(map);
+        map_button_mark_sender.addTo(map);
       }
     }
 
@@ -1532,9 +1905,9 @@ var app_geo_map = (function () {
   function initAllEmailAttachButton() {
 
     if (map) {
-      if (!marker_init_attach_button) {
+      if (!map_button_mark_attach) {
 
-        marker_init_attach_button = L.easyButton('fa-paperclip', function () {
+        map_button_mark_attach = L.easyButton('fa-paperclip', function () {
 
           if (isMarkedForAllAttachment()) {
             map.removeLayer(map_marker_layer_all_sender)
@@ -1545,7 +1918,7 @@ var app_geo_map = (function () {
 
         });
 
-        marker_init_attach_button.addTo(map);
+        map_button_mark_attach.addTo(map);
       }
     }
 
@@ -1556,14 +1929,14 @@ var app_geo_map = (function () {
 
       if (map) {
 
-        if (!marker_init_sender_button) {
+        if (!map_button_mark_sender) {
 
-          marker_init_sender_button = L.easyButton({
+          map_button_mark_sender = L.easyButton({
             states: [
               {
                 stateName: 'mark-all-originating-coordinates',
                 icon: 'fa-paper-plane-o',
-                title: 'Mark all originating coordinates',
+                title: 'Plot all originating coordinates',
                 onClick: function (control) {
 
                   if (isMarkedForAllSender()) {
@@ -1577,17 +1950,17 @@ var app_geo_map = (function () {
             ]
           });
 
-          marker_init_sender_button.enable();
+          map_button_mark_sender.enable();
         }
 
-        if (!marker_init_attach_button) {
+        if (!map_button_mark_attach) {
 
-          marker_init_attach_button = L.easyButton({
+          map_button_mark_attach = L.easyButton({
             states: [
               {
                 stateName: 'mark-all-attachment-coordinates',
                 icon: 'fa-paperclip',
-                title: 'Mark all attachment coordinates',
+                title: 'Plot all attachment coordinates',
                 onClick: function (control) {
 
                   if (isMarkedForAllAttachment()) {
@@ -1602,13 +1975,33 @@ var app_geo_map = (function () {
             ]
           });
 
-          marker_init_attach_button.enable();
+          map_button_mark_attach.enable();
         }
 
+        if (!map_button_star_all) {
+
+          map_button_star_all = L.easyButton({
+            states: [
+              {
+                stateName: 'star-all-docs',
+                icon: 'fa-star-o',
+                title: 'Mark all documents as starred',
+                onClick: function (control) {
+
+                  starAllDoc( newman_geo_email_sender.getAllEmailDocGeoLoc(),
+                              newman_geo_email_attach.getAllAttachDocGeoLoc() );
+                }
+              }
+            ]
+          });
+
+          map_button_star_all.enable();
+        }
 
         var button_group = [
-          marker_init_sender_button,
-          marker_init_attach_button
+          map_button_mark_sender,
+          map_button_mark_attach,
+          map_button_star_all
         ];
         // build a toolbar with them
         L.easyBar( button_group, { position: 'topleft'} ).addTo(map);
@@ -1873,6 +2266,8 @@ var app_geo_map = (function () {
       console.log('initMap()');
     }
 
+    clearAllDocumentMetadata();
+    newman_email_starred.initStarredDocumentList();
     newman_geo_email_sender.initEmailDocGeoLoc();
     newman_geo_email_attach.initAttachDocGeoLoc();
 
@@ -2126,6 +2521,7 @@ var app_geo_map = (function () {
   }
 
   function clearAll() {
+    clearAllDocumentMetadata();
     unmarkAllSender();
     unmarkAllAttachment();
     clearAllAreaDrawn();
@@ -2178,7 +2574,13 @@ var app_geo_map = (function () {
     'unmarkAllAttachment' : unmarkAllAttachment,
     'markMap' : markMap,
     'fireEvent' : fireEvent,
-    'requestNewPage' : requestNewPage
+    'requestNewPage' : requestNewPage,
+    'urlAppendIngestID' : urlAppendIngestID,
+    'showEmailDocumentView' : showEmailDocumentView,
+    'isEmailDocumentStarred' : isEmailDocumentStarred,
+    'setAllEmailDocumentStarred' : setAllEmailDocumentStarred,
+    'isEmailDocumentRead' : isEmailDocumentRead,
+    'setAllEmailDocumentRead' : setAllEmailDocumentRead
   }
 
 }());

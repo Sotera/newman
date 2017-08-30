@@ -1722,6 +1722,8 @@ var dashboard_content = (function () {
 
       reloadDashboardTopEmailAccounts();
       reloadDashboardTopAttachmentTypes();
+
+      //app_geo_map.init( true );
     }
     bottom_panel.hide();
 

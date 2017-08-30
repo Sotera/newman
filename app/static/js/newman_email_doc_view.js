@@ -4,7 +4,7 @@
 var newman_email_doc_view = (function () {
   var debug_enabled = false;
 
-  var _document_id = null, _document_datetime = null;
+  var _document_id, _document_datetime, _caller;
 
   var waiting_bar = $(
     '<img>',
@@ -220,7 +220,14 @@ var newman_email_doc_view = (function () {
 
   }
 
-  function initUI( is_exportable, is_read ) {
+  function initUI( is_exportable, is_read, caller ) {
+
+    if (caller) {
+      _caller = caller;
+    }
+    else {
+      console.warn("callback instance '_caller' not defined!");
+    }
 
     //$('#tab-list li:eq(2) a').tab('show')
     $(document).scrollTop(0);
@@ -230,33 +237,33 @@ var newman_email_doc_view = (function () {
 
     //update exportable toggle button
     var export_toggle_button = $("#toggle_mark_for_export");
-    if (is_exportable === true) {
-      //already marked as starred, mark as un-starred
-      if (export_toggle_button) {
+    if (export_toggle_button) {
+      if (is_exportable === true) {
+
+        //already marked as starred, mark as un-starred
         export_toggle_button.empty();
         export_toggle_button.removeClass('datatable_row_unmarked').addClass('datatable_row_marked');
         export_toggle_button.append('<span><i class=\"fa fa-star fa-lg\"></i></span>');
+
       }
-    }
-    else {
-      if (export_toggle_button) {
+      else {
+
         export_toggle_button.empty();
         export_toggle_button.removeClass('datatable_row_marked').addClass('datatable_row_unmarked');
         export_toggle_button.append('<span><i class=\"fa fa-star-o fa-lg\"></i></span>');
+
       }
     }
 
     //update read-unread toggle button
     var read_toggle_button = $("#toggle_mark_as_read");
-    if (is_read === true) {
-      //already marked as read, mark as unread
-      if (read_toggle_button) {
+    if (read_toggle_button) {
+      if (is_read === true) {
+        //already marked as read, mark as unread
         read_toggle_button.empty();
         read_toggle_button.append('<span><i class=\"fa fa-check-square-o fa-lg\"></i> Unread</span>');
       }
-    }
-    else {
-      if (read_toggle_button) {
+      else {
         read_toggle_button.empty();
         read_toggle_button.append('<span><i class=\"fa fa-square-o fa-lg\"></i> Read</span>');
       }
@@ -277,49 +284,53 @@ var newman_email_doc_view = (function () {
       console.log("clicked toggle_mark_for_export");
       if (!_document_id) {
         //alert("please select an email first");
-        console.log("current_email_document undefined!");
+        console.warn("current_email_document undefined!");
         return;
       }
       var email_id = _document_id;
 
-      var requestUpdate = function (email_uid, is_exportable) {
+      if (_caller) {
 
-        newman_email_starred_request_toggle.requestService(email_uid, is_exportable);
+        var is_marked = _caller.isEmailDocumentStarred( email_id );
+        console.log("is_marked " + is_marked);
 
-        //newman_email_starred.displayUITab();
+        if (is_marked) {
+          // already marked as exportable; un-mark
+          $(this).removeClass('datatable_row_marked').addClass('datatable_row_unmarked');
+          $(this).find("i").first().removeClass('fa-star').addClass('fa-star-o');
+        }
+        else {
+          // mark as exportable
+          $(this).removeClass('datatable_row_unmarked').addClass('datatable_row_marked');
+          $(this).find("i").first().removeClass('fa-star-o').addClass('fa-star');
+        }
 
-      };
+        var id_set = [email_id];
+        _caller.setAllEmailDocumentStarred(!is_marked, id_set);
 
-      var is_marked = newman_email_doc_table.isEmailDocumentStarred( email_id );
-      console.log("is_marked " + is_marked);
-
-      if (is_marked) {
-        // already marked as exportable; un-mark
-        $(this).removeClass('datatable_row_marked').addClass('datatable_row_unmarked');
-        $(this).find("i").first().removeClass('fa-star').addClass('fa-star-o');
+        newman_email_starred.requestDocumentStarred(id_set, !is_marked, _caller);
       }
       else {
-        // mark as exportable
-        $(this).removeClass('datatable_row_unmarked').addClass('datatable_row_marked');
-        $(this).find("i").first().removeClass('fa-star-o').addClass('fa-star');
+        console.warn("callback instance '_caller' undefined!");
       }
-
-      var id_set = [email_id];
-      newman_email_doc_table.setEmailDocumentStarred(!is_marked, id_set);
-
-      requestUpdate(email_id, !is_marked);
 
     });
 
     $("#toggle_mark_as_read").off().click(function () {
       console.log("clicked toggle_mark_as_read");
-      if (_document_id) {
-        var id = _document_id;
-        var id_set = [id];
-        var mark_read = newman_email_doc_table.isEmailDocumentRead( id );
+      if (!_document_id) {
+        console.warn("current_email_document undefined!");
+      }
+
+      var id = _document_id;
+      var id_set = [id];
+
+      if (_caller) {
+
+        var mark_read = _caller.isEmailDocumentRead( id );
         if (mark_read) {
           //already marked as read, mark as unread
-          newman_email_doc_table.setEmailDocumentRead(false, id_set);
+          _caller.setAllEmailDocumentRead(false, id_set);
 
           //update toggle-button
           var toggle_ui = $("#toggle_mark_as_read");
@@ -329,7 +340,7 @@ var newman_email_doc_view = (function () {
           }
         }
         else {
-          newman_email_doc_table.setEmailDocumentRead(true, id_set);
+          _caller.setAllEmailDocumentRead(true, id_set);
 
           //update toggle-button
           var toggle_ui = $("#toggle_mark_as_read");
@@ -340,9 +351,9 @@ var newman_email_doc_view = (function () {
         }
       }
       else {
-        //alert("please select an email first");
-        console.log("current_email_document undefined!");
+        console.warn("callback instance '_caller' undefined!");
       }
+
 
     });
 
@@ -532,8 +543,6 @@ var newman_email_doc_view = (function () {
                   $('#query_conversation_email').removeClass( 'clickable-disabled' );
                   console.log("enabled-query_conversation_email");
 
-                  //set current email-document uid and datetime
-                  newman_email_doc_table.setCurrentEmailDocument(_email_doc_uid, _email_doc_datetime);
                 }
                 else {
                   //console.log('disable query-buttons');
