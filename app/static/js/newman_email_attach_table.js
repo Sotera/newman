@@ -48,6 +48,9 @@ var newman_email_attach_table = (function () {
   // document metadata cache
   var _attach_doc_metadata_map = {};
 
+  // service response cache
+  var _attach_response_cache = [];
+
   function clearAllAttachDocumentMetadata() {
     _attach_doc_metadata_map = {};
   }
@@ -63,9 +66,6 @@ var newman_email_attach_table = (function () {
       _attach_doc_metadata_map[ uid ] = element;
     }
   }
-
-  // service response cache
-  var _attach_response_cache = [];
 
   function initAttachDocTable() {
 
@@ -413,6 +413,23 @@ var newman_email_attach_table = (function () {
     return _response_list;
   }
 
+  function clearAttachDocTable() {
+    if (debug_enabled) {
+      console.log('clearAttachDocTable()');
+    }
+
+    var tab_label_html = '<i class="fa fa-paperclip"></i>&nbsp;Attachments&nbsp;&nbsp;[0]';
+    var tab_label = $('#attachment_table_tab_label');
+    if (tab_label) {
+      tab_label.html(tab_label_html);
+    }
+
+    $(page_control_ui_jquery_id).empty();
+
+    $(attachment_table_ui_jquery_id).empty();
+    $(attachment_table_ui_jquery_id).append($('<thead>')).append($('<tbody>'));
+  }
+
   /**
    * update attachment UI
    * @param response
@@ -480,7 +497,6 @@ var newman_email_attach_table = (function () {
       var file_attach_hash_search_label = '<i class="fa fa-users" aria-hidden="true"></i>';
       var file_attach_encrypted_label = '<i class="fa fa-unlock" aria-hidden="true"></i>';
       var geo_coord_label = '<i class="fa fa-globe" aria-hidden="true"></i>';
-
 
 
       $(attachment_table_ui_jquery_id).empty();
@@ -802,21 +818,22 @@ var newman_email_attach_table = (function () {
       max_index = (response_list.length - 1);
 
       mapped_response_list = mapResponse( response_list, true, max_display_count, start_index );
+      onRequestPageDisplay(mapped_response_list, start_index, max_index);
     }
     else {
+      clearAttachDocTable();
       clearAllAttachDocumentMetadata();
       attach_content_extract.clearAllFileContentExtract();
       attach_content_hash.clearAllSearchByContentHash();
     }
 
-    onRequestPageDisplay(mapped_response_list, start_index, max_index);
   }
 
 
   function onRequestPageDisplay( response_list, start_index, max_index ) {
     initAttachDocTable();
 
-    if (response_list) {
+    if (response_list && response_list.length > 0) {
 
       // request attachment content only for the elements being displayed
       _.each(response_list, function(element, index) {
@@ -853,6 +870,7 @@ var newman_email_attach_table = (function () {
 
   return {
     'initAttachDocTable' : initAttachDocTable,
+    'clearAttachDocTable' : clearAttachDocTable,
     'populateAttachDocTable' : populateAttachDocTable,
     'onRequestEmailAttachList' : onRequestEmailAttachList,
     'getPerPageDisplayCount' : getPerPageDisplayCount,
