@@ -15,6 +15,7 @@ def _map_geo_response(doc):
         "tos":"; ".join(doc.get("tos",[''])),
         "subject":doc.get("subject"),
         "datetime":doc.get("datetime"),
+        "ingest_id":doc.get("ingest_id"),
         "originating_locations":doc.get("originating_locations",[])
     }
 

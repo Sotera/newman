@@ -340,8 +340,8 @@ var app_geo_map = (function () {
           markAllAttachment(attach_coord_marker_map);
         }
 
-        if (debug_enabled) {
           var doc_uid_array = getDocumentMetadataKeys();
+        if (debug_enabled) {
           console.log('doc_uid_array[' + doc_uid_array.length + ']:\n' + JSON.stringify(doc_uid_array, null, 2));
         }
         else {
