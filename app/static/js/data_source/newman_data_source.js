@@ -772,9 +772,10 @@ var newman_data_source = (function () {
         else {
 
           var is_selected_default = false;
-          if (index < _default_data_source_max_selected) {
+          //setting datasets selected by default
+          /*if (index < _default_data_source_max_selected) {
             is_selected_default = true;
-          }
+          }*/
 
           push(
             element.data_set_id,

@@ -17,21 +17,28 @@ from param_utils import parseParamDatetime, parseParamEmailAddressList, parsePar
 
 
 def _index_record(index):
+    index_name = "dataset_stats"
+    elastic_search = es()
+
+    if elastic_search.exists(index=index_name, doc_type=index_name, id=index):
+        dataset_stats = elastic_search.get(index=index_name, doc_type=index_name, id=index)
+        return dataset_stats['_source']
+
     app.logger.debug("Selected index: %s" % (str(index)))
 
-    email_docs_count = es().count(index=index, doc_type="emails", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
-    emails_addrs_count = es().count(index=index, doc_type="email_address", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
-    emails_attch_count = es().count(index=index, doc_type="attachments", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
+    email_docs_count = elastic_search.count(index=index, doc_type="emails", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
+    emails_addrs_count = elastic_search.count(index=index, doc_type="email_address", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
+    emails_attch_count = elastic_search.count(index=index, doc_type="attachments", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
 
     stats = index_client().stats(index=index, human=True, fielddata_fields="docs.*,store.*", fields="docs.*,store.*", completion_fields="docs.*,store.*")
 
     # TODO Replace with a single query
-    hits = [es().search(index=dataset, doc_type=dataset, body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["hits"]["hits"][0] for dataset in index.split(",")]
+    hits = [elastic_search.search(index=dataset, doc_type=dataset, body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["hits"]["hits"][0] for dataset in index.split(",")]
 
     #TODO: still need to re-work the absolute date-time bounds and the suggested date-time bounds
     min_window, max_window, min_abs, max_abs = get_datetime_bounds(index)
 
-    return {'data_set_id':index,
+    dataset_stats={'data_set_id':index,
             'data_set_case_id' : "; ".join(hit["_source"]["case_id"] for hit in hits),
             'data_set_ingest_id' : "; ".join(hit["_source"]["ingest_id"] for hit in hits),
             'data_set_alt_ref_id' : "; ".join(hit["_source"]["alt_ref_id"] for hit in hits),
@@ -43,6 +50,10 @@ def _index_record(index):
             'data_set_datetime_max' : max_abs,
             'data_set_size': (stats["indices"][index] if not ',' in index else stats["_all"])["total"]["store"]["size"].upper()
             }
+
+    elastic_search.index(index=index_name, doc_type=index_name, id=index, body=dataset_stats)
+
+    return dataset_stats
 
 def listAllDataSet():
     # Ignore index keys in ES that are not in the newman_app.conf
