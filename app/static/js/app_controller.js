@@ -8,7 +8,17 @@ $(function () {
 
   // initialize all data-source
 
-  newman_data_source.setSelectedDatasetsOnStartup([$.urlParam('datasets')]);//["newman-e247a8b5-add0-11e7-ba00-fa163e3eb4c3"]);
+  try{
+    var datasetsParam = decodeURIComponent($.urlParam('datasets'));
+    var datasets = JSON.parse(datasetsParam).datasets;
+    if(datasets != null)
+        newman_data_source.setSelectedDatasetsOnStartup(datasets);
+  }
+  catch(err){
+    console.log("error parsing startup datasets.");
+  }
+
+
   newman_data_source.requestDataSourceAll(function () {
 
       // initialize analytics displays
@@ -107,8 +117,11 @@ $(function () {
       newman_graph_email.initUI();
       app_tree_email.initUI();
 
-      $("#txt_search").val($.urlParam('query'));//"id:f13ad22b-add0-11e7-ae7a-fa163e3eb4c3");
-      app_graph_model.searchByField();
+      var searchVal = $.urlParam('query');
+      if(searchVal != null){
+        $("#txt_search").val(searchVal);
+        app_graph_model.searchByField();
+      }
   });
 
   setTimeout(function() {
