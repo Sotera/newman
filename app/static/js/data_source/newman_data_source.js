@@ -370,7 +370,9 @@ var newman_data_source = (function () {
   }
 
   function setSelectedDatasetsOnStartup(selectedDatasets) {
-      _selected_datasets_on_startup = selectedDatasets;
+    if(selectedDatasets == null)return;
+
+    _selected_datasets_on_startup = selectedDatasets;
   }
 
   function setDefaultSelected() {
