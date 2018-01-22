@@ -95,6 +95,7 @@ var newman_data_source = (function () {
 
   var _all_dataset_response;
   var _all_selected_response;
+  var _selected_datasets_on_startup = [];
   var _prev_all_selected;
 
   var data_ingest = function( uid, label) {
@@ -368,6 +369,10 @@ var newman_data_source = (function () {
     }
   }
 
+  function setSelectedDatasetsOnStartup(selectedDatasets) {
+      _selected_datasets_on_startup = selectedDatasets;
+  }
+
   function setDefaultSelected() {
 
     if (getAllSelectedCount() == 0) {
@@ -636,7 +641,7 @@ var newman_data_source = (function () {
     }
   }
 
-  function requestAllSelected(is_forced_override) {
+  function requestAllSelected(is_forced_override, callback) {
 
     var selected_dataset_map = getAllSelected();
     if (debug_enabled) {
@@ -649,13 +654,13 @@ var newman_data_source = (function () {
     else {
       var selected_id_set = getAllSelectedAsString();
 
-      newman_data_source_service.requestDataSourceDataset( selected_id_set, is_forced_override );
+      newman_data_source_service.requestDataSourceDataset( selected_id_set, is_forced_override, callback );
     }
 
     refreshDropdownButton();
   }
 
-  function onRequestAllSelected( response, is_forced_override ) {
+  function onRequestAllSelected( response, is_forced_override, callback ) {
     /*
      * upon receiving all data-source-select responses, request all dependent init services
      */
@@ -714,9 +719,12 @@ var newman_data_source = (function () {
 
     // initialize profiles
     app_setting_profile.init();
+
+    if(typeof(callback)==='function')
+      callback();
   }
 
-  function requestDataSourceAll() {
+  function requestDataSourceAll(callback) {
     /*
      * make the very first service calls to request configurations and all available data-sources
      */
@@ -734,17 +742,17 @@ var newman_data_source = (function () {
     //newman_data_source_service.requestDataSourceAll();
 
     // forced-loading data-source config prior to requesting all data sets
-    app_data_source_config.requestDataSetConfig( newman_data_source );
+    app_data_source_config.requestDataSetConfig( newman_data_source, callback );
   }
 
-  function onRequestDataSetConfig( response ) {
+  function onRequestDataSetConfig( response, callback ) {
     //console.log( 'onRequestDataSetConfig( response )' );
 
     // request all data sets after forced-loading data-source config
-    newman_data_source_service.requestDataSourceAll();
+    newman_data_source_service.requestDataSourceAll(callback);
   }
 
-  function onRequestDataSourceAll( response ) {
+  function onRequestDataSourceAll( response, callback) {
     /*
      * upon receiving all available data-sources, request the one-time start-up (static-data) init services
      */
@@ -776,6 +784,9 @@ var newman_data_source = (function () {
           /*if (index < _default_data_source_max_selected) {
             is_selected_default = true;
           }*/
+
+          if(_selected_datasets_on_startup.indexOf(element.data_set_id) >=0)
+            is_selected_default = true;
 
           push(
             element.data_set_id,
@@ -810,7 +821,7 @@ var newman_data_source = (function () {
       // initialize map tiles
       app_geo_map.initMapTileLayer();
 
-      requestAllSelected( true );
+      requestAllSelected( true, callback );
 
     }
     // end-of if(_all_dataset_response)
@@ -952,6 +963,7 @@ var newman_data_source = (function () {
     'containsID' : containsID,
     "getByID" : getByID,
     'getLabelByID' : getLabelByID,
+    'setSelectedDatasetsOnStartup' : setSelectedDatasetsOnStartup,
     "setSelectedByID" : setSelectedByID,
     'isSelectedByID' : isSelectedByID,
     "refreshUI" : refreshUI,
@@ -981,11 +993,11 @@ var newman_data_source_service = (function () {
   var debug_enabled = false;
   var _response = {};
 
-  function requestDataSourceAll() {
+  function requestDataSourceAll(callback) {
     console.log('newman_data_source_service.requestDataSourceAll()');
 
     $.when($.get('datasource/all')).done(function ( response ) {
-      newman_data_source.onRequestDataSourceAll( response );
+      newman_data_source.onRequestDataSourceAll( response, callback);
       setResponse( response );
     });
   }
@@ -997,7 +1009,7 @@ var newman_data_source_service = (function () {
     }
   }
 
-  function requestDataSourceDataset(dataset_id_list, is_forced_override) {
+  function requestDataSourceDataset(dataset_id_list, is_forced_override, callback) {
     console.log('newman_data_source_service.requestDataSourceDataset('+dataset_id_list+')');
 
     if (dataset_id_list) {
@@ -1005,7 +1017,7 @@ var newman_data_source_service = (function () {
       $.get('datasource/dataset/' + encodeURIComponent(dataset_id_list)).then(function ( response ) {
       //$.get('datasource/dataset/' + dataset_id_list).then(function ( response ) {
         //console.log(JSON.stringify(response, null, 2));
-        newman_data_source.onRequestAllSelected( response, is_forced_override );
+        newman_data_source.onRequestAllSelected( response, is_forced_override, callback );
       });
     }
   }
