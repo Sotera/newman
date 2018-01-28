@@ -18,6 +18,8 @@ $(function () {
         console.log("error parsing startup datasets.");
     }
 
+    // initialize status indicator
+    app_status_indicator.initStatus();
 
     newman_data_source.requestDataSourceAll(function () {
             // initialize analytics displays
@@ -34,8 +36,7 @@ $(function () {
             // initialize navigation-history
             app_nav_history.init();
 
-            // initialize status indicator
-            app_status_indicator.initStatus();
+
 
 
             $("[rel=tooltip]").tooltip();
