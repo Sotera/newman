@@ -12,7 +12,7 @@ var app_graph_model = (function () {
     return plain_text;
   }
 
-  function searchByField( search_filter ) {
+  function searchByField( search_filter, searchText = null, loadOnResponse = false) {
 
     var field = newman_search_parameter.getSelectedFilter().label;
 
@@ -22,9 +22,10 @@ var app_graph_model = (function () {
 
     app_pagination_control.hidePageControl();
 
-    var text_input = newman_search_parameter.getSearchText();
-
-    requestSearch( field, text_input, false );
+    var text_input = searchText?searchText : newman_search_parameter.getSearchText();
+    if(!text_input)
+      return;
+    requestSearch( field, text_input, loadOnResponse );
 
   }
 
