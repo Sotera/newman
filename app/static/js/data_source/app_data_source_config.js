@@ -28,14 +28,14 @@ var app_data_source_config = (function () {
 
   }
 
-  function requestDataSetConfig( callback, startup_callback ) {
+  function requestDataSetConfig( callback) {
 
     var service_url = getServiceURL();
     $.get( service_url ).then(function (response) {
       onRequestDataSetConfig( response );
 
       if (callback) {
-        callback.onRequestDataSetConfig( response, startup_callback );
+        callback.onRequestDataSetConfig( response );
       }
 
     });

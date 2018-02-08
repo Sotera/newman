@@ -19,11 +19,10 @@ $(function () {
 
     // initialize status indicator
     app_status_indicator.initStatus();
-    newman_data_source.requestDataSourceAll($.onDatasourcesRetrieved);
-
+    newman_data_source.requestDataSourceAll();
 });
 
-$.onDatasourcesRetrieved = function(){
+$(document).one('startupRequestDataSourceAllFinished',  function(){
     // initialize analytics displays
     email_analytics_content.init();
 
@@ -113,17 +112,15 @@ $.onDatasourcesRetrieved = function(){
 
     newman_graph_email.initUI();
     app_tree_email.initUI();
+});
 
-    $.runDefaultSearch();
-};
-
-$.runDefaultSearch = function(){
-    var searchVal = $.urlParam('query');
-    if (searchVal != null) {
+$(document).one('runDefaultSearch',  function(){
+    const searchVal = $.urlParam('query');
+    if (searchVal) {
         $("#txt_search").val(searchVal);
-        app_graph_model.searchByField(null, searchVal, false);
+        app_graph_model.searchByField(null, searchVal, true);
     }
-};
+});
 
 $.urlParam = function(name){
     var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);

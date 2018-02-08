@@ -643,7 +643,7 @@ var newman_data_source = (function () {
     }
   }
 
-  function requestAllSelected(is_forced_override, startup_callback) {
+  function requestAllSelected(is_forced_override) {
 
     var selected_dataset_map = getAllSelected();
     if (debug_enabled) {
@@ -652,19 +652,18 @@ var newman_data_source = (function () {
 
     if (_.isEmpty(selected_dataset_map)) {
       console.log('selected_dataset_map : empty');
-      if(startup_callback != null)
-        startup_callback();
+      jQuery.event.trigger('startupRequestDataSourceAllFinished');
     }
     else {
       var selected_id_set = getAllSelectedAsString();
 
-      newman_data_source_service.requestDataSourceDataset( selected_id_set, is_forced_override, startup_callback );
+      newman_data_source_service.requestDataSourceDataset( selected_id_set, is_forced_override );
     }
 
     refreshDropdownButton();
   }
 
-  function onRequestAllSelected( response, is_forced_override, startup_callback ) {
+  function onRequestAllSelected( response, is_forced_override ) {
     /*
      * upon receiving all data-source-select responses, request all dependent init services
      */
@@ -724,11 +723,10 @@ var newman_data_source = (function () {
     // initialize profiles
     app_setting_profile.init();
 
-    if(startup_callback != null)
-        startup_callback();
+    jQuery.event.trigger('startupRequestDataSourceAllFinished');
   }
 
-  function requestDataSourceAll(startup_callback) {
+  function requestDataSourceAll() {
     /*
      * make the very first service calls to request configurations and all available data-sources
      */
@@ -746,17 +744,17 @@ var newman_data_source = (function () {
     //newman_data_source_service.requestDataSourceAll();
 
     // forced-loading data-source config prior to requesting all data sets
-    app_data_source_config.requestDataSetConfig( newman_data_source, startup_callback );
+    app_data_source_config.requestDataSetConfig( newman_data_source );
   }
 
-  function onRequestDataSetConfig( response, startup_callback ) {
+  function onRequestDataSetConfig( response ) {
     //console.log( 'onRequestDataSetConfig( response )' );
 
     // request all data sets after forced-loading data-source config
-    newman_data_source_service.requestDataSourceAll(startup_callback);
+    newman_data_source_service.requestDataSourceAll();
   }
 
-  function onRequestDataSourceAll( response, startup_callback) {
+  function onRequestDataSourceAll( response ) {
     /*
      * upon receiving all available data-sources, request the one-time start-up (static-data) init services
      */
@@ -825,7 +823,7 @@ var newman_data_source = (function () {
       // initialize map tiles
       app_geo_map.initMapTileLayer();
 
-      requestAllSelected( true, startup_callback );
+      requestAllSelected( true );
 
     }
     // end-of if(_all_dataset_response)
@@ -997,11 +995,11 @@ var newman_data_source_service = (function () {
   var debug_enabled = false;
   var _response = {};
 
-  function requestDataSourceAll(startup_callback) {
+  function requestDataSourceAll() {
     console.log('newman_data_source_service.requestDataSourceAll()');
 
     $.when($.get('datasource/all')).done(function ( response ) {
-      newman_data_source.onRequestDataSourceAll( response, startup_callback);
+      newman_data_source.onRequestDataSourceAll( response );
       setResponse( response );
     });
   }
@@ -1013,7 +1011,7 @@ var newman_data_source_service = (function () {
     }
   }
 
-  function requestDataSourceDataset(dataset_id_list, is_forced_override, startup_callback) {
+  function requestDataSourceDataset(dataset_id_list, is_forced_override ) {
     console.log('newman_data_source_service.requestDataSourceDataset('+dataset_id_list+')');
 
     if (dataset_id_list) {
@@ -1021,12 +1019,11 @@ var newman_data_source_service = (function () {
       $.get('datasource/dataset/' + encodeURIComponent(dataset_id_list)).then(function ( response ) {
       //$.get('datasource/dataset/' + dataset_id_list).then(function ( response ) {
         //console.log(JSON.stringify(response, null, 2));
-        newman_data_source.onRequestAllSelected( response, is_forced_override, startup_callback );
+        newman_data_source.onRequestAllSelected( response, is_forced_override );
       });
     }
     else
-      if(startup_callback != null)
-        startup_callback();
+        jQuery.event.trigger('startupRequestDataSourceAllFinished');
   }
 
   function appendAllDatasetID( url_path, data_ids_as_csv ) {

@@ -23,8 +23,7 @@ var app_graph_model = (function () {
     app_pagination_control.hidePageControl();
 
     var text_input = searchText?searchText : newman_search_parameter.getSearchText();
-    if(!text_input)
-      return;
+
     requestSearch( field, text_input, loadOnResponse );
 
   }
