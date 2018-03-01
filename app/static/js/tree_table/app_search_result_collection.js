@@ -1422,7 +1422,8 @@ var newman_search_result_collection = (function () {
 
       // refresh UI
       populateTable();
-
+      //This will be unbound after one call...
+      jQuery.event.trigger('runDefaultSearch');
     } // end result-tree-table
 
   } // end onSearchResponse(...)

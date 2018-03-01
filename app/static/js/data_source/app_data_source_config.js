@@ -28,7 +28,7 @@ var app_data_source_config = (function () {
 
   }
 
-  function requestDataSetConfig( callback ) {
+  function requestDataSetConfig( callback) {
 
     var service_url = getServiceURL();
     $.get( service_url ).then(function (response) {

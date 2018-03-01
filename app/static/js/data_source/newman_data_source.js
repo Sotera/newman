@@ -95,6 +95,7 @@ var newman_data_source = (function () {
 
   var _all_dataset_response;
   var _all_selected_response;
+  var _selected_datasets_on_startup = [];
   var _prev_all_selected;
 
   var data_ingest = function( uid, label) {
@@ -366,6 +367,12 @@ var newman_data_source = (function () {
     if (debug_enabled) {
       console.log('clearAllSelected()')
     }
+  }
+
+  function setSelectedDatasetsOnStartup(selectedDatasets) {
+    if(selectedDatasets == null)return;
+
+    _selected_datasets_on_startup = selectedDatasets;
   }
 
   function setDefaultSelected() {
@@ -645,6 +652,7 @@ var newman_data_source = (function () {
 
     if (_.isEmpty(selected_dataset_map)) {
       console.log('selected_dataset_map : empty');
+      jQuery.event.trigger('startupRequestDataSourceAllFinished');
     }
     else {
       var selected_id_set = getAllSelectedAsString();
@@ -714,6 +722,8 @@ var newman_data_source = (function () {
 
     // initialize profiles
     app_setting_profile.init();
+
+    jQuery.event.trigger('startupRequestDataSourceAllFinished');
   }
 
   function requestDataSourceAll() {
@@ -776,6 +786,9 @@ var newman_data_source = (function () {
           /*if (index < _default_data_source_max_selected) {
             is_selected_default = true;
           }*/
+
+          if(_selected_datasets_on_startup.indexOf(element.data_set_id) >=0)
+            is_selected_default = true;
 
           push(
             element.data_set_id,
@@ -952,6 +965,7 @@ var newman_data_source = (function () {
     'containsID' : containsID,
     "getByID" : getByID,
     'getLabelByID' : getLabelByID,
+    'setSelectedDatasetsOnStartup' : setSelectedDatasetsOnStartup,
     "setSelectedByID" : setSelectedByID,
     'isSelectedByID' : isSelectedByID,
     "refreshUI" : refreshUI,
@@ -997,7 +1011,7 @@ var newman_data_source_service = (function () {
     }
   }
 
-  function requestDataSourceDataset(dataset_id_list, is_forced_override) {
+  function requestDataSourceDataset(dataset_id_list, is_forced_override ) {
     console.log('newman_data_source_service.requestDataSourceDataset('+dataset_id_list+')');
 
     if (dataset_id_list) {
@@ -1008,6 +1022,8 @@ var newman_data_source_service = (function () {
         newman_data_source.onRequestAllSelected( response, is_forced_override );
       });
     }
+    else
+        jQuery.event.trigger('startupRequestDataSourceAllFinished');
   }
 
   function appendAllDatasetID( url_path, data_ids_as_csv ) {
