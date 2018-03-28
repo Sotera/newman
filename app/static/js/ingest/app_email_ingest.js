@@ -107,6 +107,15 @@ var app_email_ingest = (function () {
 
       var ingest_lang_text = $("#ingest_lang_selected").val();
       if (ingest_lang_text) {
+        if (ingest_lang_text.toLowerCase() == 'auto') {
+          setIngestParameterContentLanguage('auto');
+        }
+        if (ingest_lang_text.toLowerCase() == 'arabic') {
+          setIngestParameterContentLanguage('ar');
+        }
+        if (ingest_lang_text.toLowerCase() == 'persian') {
+          setIngestParameterContentLanguage('fa');
+        }
         if (ingest_lang_text.toLowerCase() == 'english') {
           setIngestParameterContentLanguage('en');
         }
