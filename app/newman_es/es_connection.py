@@ -41,7 +41,7 @@ def getDefaultDataSetID():
     default = _getDefaultDataSetID()
 
     if default == '.newman-auto':
-        auto_indexes = [index for index in index_list() if index.startswith(index_creator_prefix()) ]
+        auto_indexes = [index for index in index_list() if index_creator_prefix() in index]
         if not auto_indexes:
             app.logger.warn("Default index was not found.")
             return []

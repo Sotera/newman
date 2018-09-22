@@ -112,7 +112,7 @@ def _query_emails(index, emails_query, size, _from=0, additional_fields=[]):
     '''
     app.logger.info(emails_query)
     start = time.time()
-    emails_resp = es().search(index=index, doc_type="emails", size=size, from_=_from, fields=get_graph_row_fields() + additional_fields, body=emails_query)
+    emails_resp = es().search(index=index, doc_type="emails", size=size, from_=_from, fielddata_fields=get_graph_row_fields() + additional_fields, body=emails_query)
     app.logger.debug("total document hits = %s, TIME_ELAPSED=%g, for index=%s" % (emails_resp["hits"]["total"], time.time()-start, index))
     app.logger.debug("DOC 0:" + str(emails_resp["hits"]["hits"][0] if emails_resp["hits"]["hits"] else None))
 
@@ -121,7 +121,7 @@ def _query_emails(index, emails_query, size, _from=0, additional_fields=[]):
         "max_score" : emails_resp["hits"],
         "from" : _from,
         "size" : len(emails_resp["hits"]["hits"]),
-        "hits" : [_map_emails(hit["fields"], hit["_score"] or i) for i, hit in enumerate(emails_resp["hits"]["hits"])]
+        "hits" : [_map_emails(hit["stored_fields"], hit["_score"] or i) for i, hit in enumerate(emails_resp["hits"]["hits"])]
     }
 
 def _count_emails(index, emails_query):

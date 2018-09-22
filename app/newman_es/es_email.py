@@ -10,32 +10,32 @@ from es_topic import get_categories
 #map the email_address for the email/rank REST service
 def map_email_addr(email_addr_resp, total_emails):
 
-    fields = email_addr_resp["fields"]
+    fields = email_addr_resp["_source"]
 
-    return [fields["addr"][0],
+    return [fields["addr"],
             fields.get("community",[''])[0],
-            str(fields.get("community_id",[''])[0]),
+            str(fields.get("community_id",'')),
             # TODO remove this
-            str(fields.get("community_id",[''])[0]),
-            (fields["sent_count"][0] + fields["received_count"][0]) / float(total_emails),
-            str(fields["received_count"][0]),
-            str(fields["sent_count"][0]),
-            str(fields["attachments_count"][0]),
+            str(fields.get("community_id",'')),
+            (fields["sent_count"] + fields["received_count"]) / float(total_emails),
+            str(fields["received_count"]),
+            str(fields["sent_count"]),
+            str(fields["attachments_count"]),
             # TODO remove this
-            fields.get("starred",[False])[0]
+            fields.get("starred",False)
             ]
 
 def map_email_filtered(fields, emailer_filtered, filtered_total):
-    return [fields["addr"][0],
-            fields["community"][0],
-            str(fields["community_id"][0]),
-            str(fields["community_id"][0]),
+    return [fields["addr"],
+            fields["community"],
+            str(fields["community_id"]),
+            str(fields["community_id"]),
             (emailer_filtered) / float(filtered_total),
-            str(fields["received_count"][0]),
-            str(fields["sent_count"][0]),
-            str(fields["attachments_count"][0]),
+            str(fields["received_count"]),
+            str(fields["sent_count"]),
+            str(fields["attachments_count"]),
             emailer_filtered,
-            fields.get("starred",[False])[0]
+            fields.get("starred",[False])
             ]
 
 def filtered_agg_query(email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, encrypted=None, aggs={}, name=""):
@@ -55,7 +55,7 @@ def get_top_communities(index, query_terms='', topic_score=None, entity={}, date
     date_bounds = None
     # TODO fix
 
-    aggs = { "community_agg" : { "terms" : { "field" : "community", "size" : num_communities }}}
+    aggs = { "community_agg" : { "terms" : { "field" : "community.keyword", "size" : num_communities }}}
     query = filtered_agg_query(topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="community", encrypted=encrypted)
     app.logger.debug("Query %s"%query)
 
@@ -91,7 +91,7 @@ def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, ent
 
 # GET top 10 Attchment types for index
 def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, encrypted=None, num_top_attachments=20):
-    aggs = { "attachment_type_agg" : { "terms" : { "field" : "extension", "size" : num_top_attachments }}}
+    aggs = { "attachment_type_agg" : { "terms" : { "field" : "extension.keyword", "size" : num_top_attachments }}}
     query = filtered_agg_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="attachment", encrypted=encrypted)
     app.logger.debug("Query %s"%query)
 

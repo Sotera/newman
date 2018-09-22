@@ -18,7 +18,7 @@ _EMAIL_ADDR_CACHE_LOCK = Lock()
 _graph_fields = ["community", "community_id", "addr", "attachments_count", "received_count", "sent_count", "recepient.email_id", "sender.email_id", "starred"]
 
 # Sort which will add sent + rcvd and sort most to top
-_sort_email_addrs_by_total={ "_script": { "script_file": "email_addr-sent-rcvd-sum", "lang": "groovy", "type": "number","order": "desc" }}
+_sort_email_addrs_by_total={ "_script":{"type": "number","order": "desc","script": { "source": "doc['sent_count'].value + doc['received_count'].value", "lang": "painless" }}}
 _query_all = {"bool":{"must":[{"match_all":{}}]}}
 
 def count(index, type="emails", start="2000-01-01", end="now"):
@@ -46,7 +46,7 @@ def _get_attachment_info_from_email_address(index, email_address, date_time=None
 
 # Get search all
 def _search_ranked_email_addrs(index, start, end, size):
-    graph_body= {"fields": _graph_fields, "sort" : _sort_email_addrs_by_total, "query" : _query_all}
+    graph_body= {"_source": _graph_fields, "sort" : _sort_email_addrs_by_total, "query" : _query_all}
     app.logger.debug("query: %s" % (graph_body))
 
     resp = es().search(index=index, doc_type="email_address", size=size, body=graph_body)

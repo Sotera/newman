@@ -253,6 +253,6 @@ def top_phone_numbers():
     data_set_id, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
 
     qs = parseParamTextQuery(request.args)
-
-    return jsonify(get_top_phone_numbers(data_set_id, email_address='', qs=qs, date_bounds=(start_datetime, end_datetime), size=size))
+    retval = jsonify(get_top_phone_numbers(data_set_id, email_address='', qs=qs, date_bounds=(start_datetime, end_datetime), size=size))
+    return retval
 

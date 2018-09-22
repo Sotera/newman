@@ -227,7 +227,7 @@ def _build_filter(ingest_ids=[], email_senders=[], email_rcvrs=[], qs='', topic=
 # address_filter_mode - see address_filter
 # sort_mode
 # attachments_only - set to true will only return emails with attachments
-def _build_email_query(ingest_ids=[], email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='', topic=None, entity={}, date_bounds=None, community=[], sort_mode="default", sort_order="acs", date_mode_inclusive=True, address_filter_mode="union", attachments_only=False, encrypted=None, starred=None, numbers=[], number_type='', phone_numbers=[], has_phone_number_filter=False, has_exif_geo_filter=False, has_geo_xoip_filter=False, attachment_hash=None):
+def _build_email_query(ingest_ids=[], email_addrs=[], sender_addrs=[], recipient_addrs=[], qs='', topic=None, entity={}, date_bounds=None, community=[], sort_mode="default", sort_order="asc", date_mode_inclusive=True, address_filter_mode="union", attachments_only=False, encrypted=None, starred=None, numbers=[], number_type='', phone_numbers=[], has_phone_number_filter=False, has_exif_geo_filter=False, has_geo_xoip_filter=False, attachment_hash=None):
 
     # This checks if the query text is a simple term or a query string and sets the correct portion
     term_query = { "match_all" : {} }
@@ -242,14 +242,16 @@ def _build_email_query(ingest_ids=[], email_addrs=[], sender_addrs=[], recipient
                 "must":[
                     {
                         "query_string" : { "query" : query_string }
-                    },
-                    {
-                        "filtered" : {
-                            "query" : term_query,
-                            "filter" : _build_filter(ingest_ids=ingest_ids, email_senders=sender_addrs, email_rcvrs=recipient_addrs, topic=topic, entity_dict=entity, date_bounds=date_bounds, community=community, date_mode_inclusive=date_mode_inclusive, address_filter_mode=address_filter_mode, encrypted=encrypted, starred=starred, numbers=numbers, number_type=number_type, phone_numbers=phone_numbers, has_phone_number_filter=has_phone_number_filter, has_exif_geo_filter=has_exif_geo_filter, has_geo_xoip_filter=has_geo_xoip_filter, attachment_hash=attachment_hash)
-                        }
                     }
-                ]
+                ],
+                "filter": _build_filter(ingest_ids=ingest_ids, email_senders=sender_addrs, email_rcvrs=recipient_addrs,
+                                        topic=topic, entity_dict=entity, date_bounds=date_bounds, community=community,
+                                        date_mode_inclusive=date_mode_inclusive,
+                                        address_filter_mode=address_filter_mode, encrypted=encrypted, starred=starred,
+                                        numbers=numbers, number_type=number_type, phone_numbers=phone_numbers,
+                                        has_phone_number_filter=has_phone_number_filter,
+                                        has_exif_geo_filter=has_exif_geo_filter,
+                                        has_geo_xoip_filter=has_geo_xoip_filter, attachment_hash=attachment_hash)
             }
         },
         "sort":  {}
@@ -261,7 +263,7 @@ def _build_email_query(ingest_ids=[], email_addrs=[], sender_addrs=[], recipient
     }
 
     if attachments_only:
-        query_email_addr ["filter"] = {"exists":{"field":"attachments"}}
+        query_email_addr ["post_filter"] = {"exists":{"field":"attachments"}}
 
     # If QS is provided dont sort by date
     if sort_mode == 'default' and not qs:

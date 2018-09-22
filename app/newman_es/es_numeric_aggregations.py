@@ -18,7 +18,7 @@ def phone_numbers_agg(email_address, qs, date_bounds=('1970-01-01', 'now'), size
         "aggs": {
             "phone_numbers_agg": {
                 "terms": {
-                    "field": "phone_numbers",
+                    "field": "phone_numbers.keyword",
                     "min_doc_count" : 0,
                     "size": size,
                     "order": {

@@ -8,7 +8,7 @@
   "default_timeline_span": 200,
 
   "elasticsearch_config": {
-    "hosts" : [{"host" : "10.1.70.164", "port" : 9200}],
+    "hosts" : [{"host" : "10.1.70.157", "port" : 9200}],
     "maxsize" : 25,
     "timeout" : 3600
   },
@@ -23,7 +23,7 @@
   },
 
   "index_creator_defaults" : {
-    "prefix" : "newman-",
+    "prefix" : "_emails_",
     "default_timeline_interval": "weeks",
     "default_timeline_span": 200,
     "default_min_timeline_bound": "2001-01-01",
