@@ -121,7 +121,7 @@ def _query_emails(index, emails_query, size, _from=0, additional_fields=[]):
         "max_score" : emails_resp["hits"],
         "from" : _from,
         "size" : len(emails_resp["hits"]["hits"]),
-        "hits" : [_map_emails(hit["stored_fields"], hit["_score"] or i) for i, hit in enumerate(emails_resp["hits"]["hits"])]
+        "hits" : [_map_emails(hit["_source"], hit["_score"] or i) for i, hit in enumerate(emails_resp["hits"]["hits"])]
     }
 
 def _count_emails(index, emails_query):

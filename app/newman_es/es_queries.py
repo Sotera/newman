@@ -8,7 +8,7 @@ STRIP_NON_DIGITS_REGEXP= re.compile(r'[^\d.]+')
 
 def ids_query(id):
     return {
-        "filter": {
+        "query": {
             "bool": {
                 "should": [{
                     "ids" : {
@@ -21,7 +21,7 @@ def ids_query(id):
 
 def email_attachment_guid(doc_id, guid):
     return {
-        "filter": {
+        "query": {
             "bool": {
                 "filter": [
                     {
@@ -283,6 +283,16 @@ def _build_email_query(ingest_ids=[], email_addrs=[], sender_addrs=[], recipient
 # When num fragments is 0 then fragment_size is ignored and whole fields are returned
 def email_highlighting_query(id, highlight_query_string='', fragment_size=200, num_fragments=0):
     return {
+        "query": {
+            "bool": {
+                "should": [{
+                    "ids" : {
+                        "type" : "emails",
+                        "values" : [id]
+                    }
+                }]
+            }
+        },
         "highlight":{
             "fields": {"*" : {}},
             "require_field_match" : False,
@@ -294,23 +304,7 @@ def email_highlighting_query(id, highlight_query_string='', fragment_size=200, n
             # These silly delimter tags get replaced later in the parsing.  Because '<' occur in the text and html viewer
             # will not play nicely we need several sets of escape tokens
             "pre_tags" : ['#_#HIGHLIGHT_START#_#'],
-            "post_tags" : ['#_#HIGHLIGHT_END#_#'],
-
-            "highlight_query": {
-                "query": {
-                    "query_string" : { "query" : highlight_query_string}
-                }
-            }
-        },
-        "filter": {
-            "bool": {
-                "should": [{
-                    "ids" : {
-                        "type" : "emails",
-                        "values" : [id]
-                    }
-                }]
-            }
+            "post_tags" : ['#_#HIGHLIGHT_END#_#']
         }
     }
 

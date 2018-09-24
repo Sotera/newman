@@ -81,6 +81,7 @@ _lda_clusters={"query": { "match_all": {}},"sort":[{"idx":{"order": "asc" }}]}
 def get_lda_clusters(index):
     resp = es().search(index=index, doc_type='lda-clustering', body=_lda_clusters)
     # return [{"index":hit["_source"]["idx"],"score":hit["sort"][0],"cluster": [term["term"] for term in hit["_source"]["topic"]]} for hit in resp["hits"]["hits"]]
+
     return [{"idx":hit["_source"]["idx"],"cluster": [term["term"] for term in hit["_source"]["topic"]]} for hit in resp["hits"]["hits"]]
 
 
@@ -99,7 +100,8 @@ def agg_cluster_counts(index):
 # Get all categories
 def get_categories(index):
     cluster_counts = agg_cluster_counts(index)
-    categories = [[cluster["idx"], " ".join(cluster["cluster"]),cluster_counts["idx_{0}_agg".format(cluster["idx"])]] for cluster in get_lda_clusters(index)]
+    lda_clusters = get_lda_clusters(index)
+    categories = [[cluster["idx"], " ".join(cluster["cluster"]),cluster_counts["idx_{0}_agg".format(cluster["idx"])]] for cluster in lda_clusters]
     total_docs = float(sum(category[2] for category in categories))
     categories = [[category[0],category[1],"{0:.2f}".format(0 if total_docs == 0 else round(100.0*category[2]/total_docs,2))] for category in categories]
     return {"categories":categories}
