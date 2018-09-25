@@ -16,16 +16,16 @@ def _map_emails(fields, score=1.0):
     :return:
     '''
     row = {}
-    row["email_id"] =  fields["id"][0]
+    row["email_id"] =  fields["id"]
     row["from"] = ";".join(fields.get("senders",[""]))
     row["to"] = fields.get("tos", [])
     row["cc"] = fields.get("ccs", [])
     row["bcc"] = fields.get("bccs", [])
-    row["datetime"] = fields.get("datetime",[""])[0]
-    row["subject"] =  fields.get("subject",[""])[0]
-    row["starred"] = fields.get("starred", [False])[0]
+    row["datetime"] = fields.get("datetime",[""])
+    row["subject"] =  fields.get("subject",[""])
+    row["starred"] = fields.get("starred", [False])
     row["attach"] =  str(len(fields.get("attachments.guid",[])))
-    row["bodysize"] = len(fields.get("body",[""])[0])
+    row["bodysize"] = len(fields.get("body",[""]))
     row["relevance_score"] = score
 
     for name, val in fields.items():
@@ -34,10 +34,10 @@ def _map_emails(fields, score=1.0):
             row["topic_score"] = val[0]
 
     # Collection meta
-    row["original_ingest_id"] = fields["ingest_id"][0]
-    row["original_case_id"] = fields["case_id"][0]
-    row["original_alt_ref_id"] = fields["alt_ref_id"][0]
-    row["original_label"] = fields["label"][0]
+    row["original_ingest_id"] = fields["ingest_id"]
+    row["original_case_id"] = fields["case_id"]
+    row["original_alt_ref_id"] = fields["alt_ref_id"]
+    row["original_label"] = fields["label"]
 
     return row
 
@@ -50,13 +50,13 @@ def _map_emails_to_row(row):
 
 def _map_node(email_addr, total_docs, ingest_set):
     node={}
-    name = email_addr["addr"][0]
-    node["community"] = email_addr.get("community", ["<address_not_specified>"])[0]
+    name = email_addr["addr"]
+    node["community"] = email_addr.get("community", ["<address_not_specified>"])
     node["name"] = name
-    node["num"] =  email_addr["sent_count"][0] + email_addr["received_count"][0]
-    node["rank"] = (email_addr["sent_count"][0] + email_addr["received_count"][0]) / float(total_docs)
-    node["email_sent"] = (email_addr["sent_count"][0])
-    node["email_received"] = (email_addr["received_count"][0])
+    node["num"] =  email_addr["sent_count"] + email_addr["received_count"]
+    node["rank"] = (email_addr["sent_count"] + email_addr["received_count"]) / float(total_docs)
+    node["email_sent"] = (email_addr["sent_count"])
+    node["email_received"] = (email_addr["received_count"])
     node["original_ingest_id"] = ingest_set
     return node
 
@@ -112,7 +112,7 @@ def _query_emails(index, emails_query, size, _from=0, additional_fields=[]):
     '''
     app.logger.info(emails_query)
     start = time.time()
-    emails_resp = es().search(index=index, doc_type="emails", size=size, from_=_from, fielddata_fields=get_graph_row_fields() + additional_fields, body=emails_query)
+    emails_resp = es().search(index=index, doc_type="emails", size=size, from_=_from, _source_include=get_graph_row_fields() + additional_fields, body=emails_query)
     app.logger.debug("total document hits = %s, TIME_ELAPSED=%g, for index=%s" % (emails_resp["hits"]["total"], time.time()-start, index))
     app.logger.debug("DOC 0:" + str(emails_resp["hits"]["hits"][0] if emails_resp["hits"]["hits"] else None))
 

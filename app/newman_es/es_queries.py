@@ -54,7 +54,7 @@ def _encrypted(value):
     return _term_filter("attachments.content_encrypted", value)
 
 def _terms_filter(field='', values=[]):
-    return [] if (not field or not values) else [{"terms" : { field : values}}]
+    return [] if (not field or not values) else [{"terms" : { field+".keyword" : map(lambda x: x.lower if type(x) is 'str' else x,values)}}]
 
 def _term_filter(field='', value=None):
     return [] if (not field or not value) else [{"term" : { field : value}}]

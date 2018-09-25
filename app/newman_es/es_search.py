@@ -77,7 +77,7 @@ def initialize_email_addr_cache(ingest_ids, update=False):
 
             num = count(ingest_id,"email_address")
             addrs = es().search(index=ingest_id, doc_type="email_address", size=num, _source_include=_email_addr_cache_fields, body=body)
-            addr_index = {f["addr"][0] : f for f in [hit["_source"] for hit in addrs["hits"]["hits"]]}
+            addr_index = {f["addr"] : f for f in [hit["_source"] for hit in addrs["hits"]["hits"]]}
             _EMAIL_ADDR_CACHE[ingest_id] = addr_index
             app.logger.debug("done: %s"% num)
         except Exception as e:
