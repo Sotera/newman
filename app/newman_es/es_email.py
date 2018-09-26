@@ -55,7 +55,7 @@ def get_top_communities(index, query_terms='', topic_score=None, entity={}, date
     date_bounds = None
     # TODO fix
 
-    aggs = { "community_agg" : { "terms" : { "field" : "community.keyword", "size" : num_communities }}}
+    aggs = { "community_agg" : { "terms" : { "field" : "community", "size" : num_communities }}}
     query = filtered_agg_query(topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="community", encrypted=encrypted)
     app.logger.debug("Query %s"%query)
 
@@ -111,7 +111,7 @@ def get_ranked_email_address(data_set_id, query_terms='', topic_score=None, enti
                 "filter" : _build_filter(qs=query_terms, topic=topic_score, entity_dict=entity, date_bounds=date_bounds),
                 "aggs": {
                     "top_addrs_agg" : {
-                        "terms" : {"field" : "addrs", "size": num_top_hits}
+                        "terms" : {"field" : "addrs.keyword", "size": num_top_hits}
                     }
                 }
             }

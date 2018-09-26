@@ -137,16 +137,16 @@ def entity_histogram_query(email_addrs=[], qs='', topic_score=None, entity_field
                 "filter" : _build_filter(email_senders=email_addrs, email_rcvrs=email_addrs, date_bounds=date_bounds),
                 "aggs": {
                     "person" : {
-                        "terms" : {"field" : "entities."+entity_field+"_entities.entity_person.keyword", "size": entity_agg_size}
+                        "terms" : {"field" : "entities."+entity_field+"_entities.entity_person", "size": entity_agg_size}
                     },
                     "organization" : {
-                        "terms" : {"field" : "entities."+entity_field+"_entities.entity_organization.keyword", "size": entity_agg_size}
+                        "terms" : {"field" : "entities."+entity_field+"_entities.entity_organization", "size": entity_agg_size}
                     },
                     "location" : {
-                        "terms" : {"field" : "entities."+entity_field+"_entities.entity_location.keyword", "size": entity_agg_size}
+                        "terms" : {"field" : "entities."+entity_field+"_entities.entity_location", "size": entity_agg_size}
                     },
                     "misc" : {
-                        "terms" : {"field" : "entities."+entity_field+"_entities.misc.keyword", "size": entity_agg_size}
+                        "terms" : {"field" : "entities."+entity_field+"_entities.misc", "size": entity_agg_size}
                     }
 
                 }
