@@ -91,7 +91,7 @@ def get_top_domains(index, email_addrs=[], query_terms='', topic_score=None, ent
 
 # GET top 10 Attchment types for index
 def get_top_attachment_types(index, email_addrs=[], query_terms='', topic_score=None, entity={}, date_bounds=None, encrypted=None, num_top_attachments=20):
-    aggs = { "attachment_type_agg" : { "terms" : { "field" : "extension.keyword", "size" : num_top_attachments }}}
+    aggs = { "attachment_type_agg" : { "terms" : { "field" : "extension", "size" : num_top_attachments }}}
     query = filtered_agg_query(email_addrs=email_addrs, query_terms=query_terms, topic_score=topic_score, date_bounds=date_bounds, entity=entity, aggs=aggs, name="attachment", encrypted=encrypted)
     app.logger.debug("Query %s"%query)
 
