@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 
-./flask/bin/pip install elasticsearch
+../flask/bin/pip install elasticsearch
