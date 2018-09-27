@@ -1,4 +1,4 @@
-#!flask/bin/python
+#!/usr/bin/python
 from app import app
 
 # The app will spawn twice because of the reloader  set this to stop the behaviour
