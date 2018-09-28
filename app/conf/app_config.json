@@ -1,5 +1,5 @@
 {
-  "version" : "3.0.1",
+  "version" : "4.0.0",
   "root_context" : "newman",
   "default_data_set_id" : ".newman-auto",
   "default_min_timeline_bound": "2001-01-01",
