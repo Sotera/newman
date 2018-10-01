@@ -32,7 +32,7 @@ class AminoElasticsearch:
     def count(self, **kwargs):
         return self.verb(kwargs, '_count')
 
-    def verb(self, kwargs, verb='_search', method='POST'):
+    def verb(self, kwargs, verb='_search', method='POST', return_result=False):
         index = ''
         merged_body = {}
         query_string = ''
@@ -57,6 +57,12 @@ class AminoElasticsearch:
                     merged_body['from'] = value
                 if key is 'request_cache':
                     query_string += '&request_cache=' + value
+                if key is 'fielddata_fields':
+                    query_string += '&fielddata_fields=' + value
+                if key is 'fields':
+                    query_string += '&fielddata_fields=' + value
+                if key is 'completion_fields':
+                    query_string += '&completion_fields=' + value
                 if key is 'size':
                     merged_body[key] = value
                 if key is 'doc_type':
@@ -65,7 +71,7 @@ class AminoElasticsearch:
                                       self.get_token(), query_string)
         if len(merged_body) == 0:
             merged_body = None
-        return AminoElasticsearch._send_request(url, merged_body, method)
+        return AminoElasticsearch._send_request(url, merged_body, method, return_result)
 
     def stats(self, **kwargs):
         index = ''
@@ -86,8 +92,21 @@ class AminoElasticsearch:
 
     def exists(self, **kwargs):
         if kwargs is not None and 'id' in kwargs and 'doc_type' in kwargs and 'index' in kwargs:
-            return self.verb(kwargs, method='GET') is not None
+            result = self.verb(kwargs, method='GET', return_result=True)
+            return result.status_code is 200
         raise Exception('kwargs insufficient, exists requires index, doc_type and id')
+
+    def index(self, **kwargs):
+        if kwargs is not None and 'id' in kwargs and 'doc_type' in kwargs and 'index' in kwargs and 'body' in kwargs:
+            result = self.verb(kwargs, method='PUT', return_result=True)
+            if result.status_code == 201:
+                return result.json()
+            else:
+                raise Exception('{} to {} failed: {}'.format(
+                    "PUT",
+                    "index",
+                    result.content))
+        raise Exception('kwargs insufficient, exists requires index, doc_type, id and body')
 
     # TODO:Get rid of this...we should already have the token!
     def get_token(self, force=False):
@@ -115,8 +134,10 @@ class AminoElasticsearch:
         return AminoElasticsearch._send_request(url, json=None, method='GET')
 
     @staticmethod
-    def _send_request(url, json, method='POST'):
+    def _send_request(url, json, method='POST', return_result=False):
         result = requests.request(method, url, json=json)
+        if return_result:
+            return result
         if result.status_code == 200:
             return result.json()
         else:

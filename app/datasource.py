@@ -15,6 +15,12 @@ from param_utils import parseParamDatetime, parseParamEmailAddressList, parsePar
 # Refactor Split this class into es_datasource and datasource
 # TODO
 
+def sizeof_fmt(num, suffix='B'):
+    for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
+        if abs(num) < 1024.0:
+            return "%3.1f%s%s" % (num, unit, suffix)
+        num /= 1024.0
+    return "%.1f%s%s" % (num, 'Yi', suffix)
 
 def _index_record(index):
     index_name = "dataset_stats"
@@ -32,7 +38,7 @@ def _index_record(index):
     emails_addrs_count = elastic_search.count(index=index, doc_type="email_address", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
     emails_attch_count = elastic_search.count(index=index, doc_type="attachments", body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["count"]
 
-    stats = index_client().stats(index=index, human=True, fielddata_fields="docs.*,store.*", fields="docs.*,store.*", completion_fields="docs.*,store.*")
+    stats = index_client().stats(index=index, fielddata_fields="docs.*,store.*", fields="docs.*,store.*", completion_fields="docs.*,store.*")
 
     # TODO Replace with a single query
     hits = [elastic_search.search(index=dataset, doc_type=dataset, body={"query" : {"bool":{"must":[{"match_all":{}}]}}})["hits"]["hits"][0] for dataset in index.split(",")]
@@ -50,7 +56,7 @@ def _index_record(index):
             'data_set_attachment_count' : emails_attch_count,
             'data_set_datetime_min' : min_abs,
             'data_set_datetime_max' : max_abs,
-            'data_set_size': (stats["indices"][index] if not ',' in index else stats["_all"])["total"]["store"]["size"].upper()
+            'data_set_size': (stats["indices"][index] if not ',' in index else sizeof_fmt(stats["_all"])["total"]["store"]["size_in_bytes"])
             }
 
     elastic_search.index(index=index_name, doc_type=index_name, id=index, body=dataset_stats)
