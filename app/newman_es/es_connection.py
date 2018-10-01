@@ -1,7 +1,6 @@
 from app import app
 from threading import Lock
-from elasticsearch import Elasticsearch
-from elasticsearch.client import IndicesClient, ClusterClient
+from app.utils.loopy import AminoElasticsearch
 
 from config.newman_config import elasticsearch_config, _getDefaultDataSetID, index_creator_prefix
 
@@ -18,7 +17,8 @@ def es():
 
     _ES_LOCK.acquire()
     try:
-        _ES = Elasticsearch(**elasticsearch_config())
+        _ES = AminoElasticsearch(elasticsearch_config)
+        #_ES = Elasticsearch(**elasticsearch_config())
     finally:
         _ES_LOCK.release()
         app.logger.info("INITIALIZED ElasticSearch connection.")
@@ -27,15 +27,18 @@ def es():
 
 
 def index_list():
-    ic = IndicesClient(es())
-    stats = ic.stats(index="_all")
+    #ic = IndicesClient(es())
+    aes = AminoElasticsearch()
+    stats = aes.stats(index="_all")
     return [index for index in stats["indices"]]
 
 def cluster_client():
-    return ClusterClient(es())
+    return AminoElasticsearch()
+    #return ClusterClient(es())
 
 def index_client():
-    return IndicesClient(es())
+    return AminoElasticsearch()
+    #return IndicesClient(es())
 
 def getDefaultDataSetID():
     default = _getDefaultDataSetID()

@@ -21,7 +21,7 @@ def _index_record(index):
     elastic_search = es()
 
     if elastic_search.exists(index=index_name, doc_type=index_name, id=index):
-        dataset_stats = elastic_search.get(index=index_name, doc_type=index_name, id=index)
+        dataset_stats = elastic_search.get_document(index=index_name, doc_type=index_name, id=index)
         return dataset_stats['_source']
 
     app.logger.debug("Selected index: %s" % (str(index)))
