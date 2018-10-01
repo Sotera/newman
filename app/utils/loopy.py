@@ -1,17 +1,20 @@
 from __future__ import print_function
 import requests
-import json
-import math
+
 
 class AminoElasticsearch:
     '''
     pronounced 'Loo Py', not loopy:
     A Python module that makes REST API calls to Loopback apps.
     '''
-    def __init__(self, elasticsearch_config = None):
+    def __init__(self, **kwargs):
         # normalize url
-        query_url = 'http://amino3.vbox.keyw/amino-api/Elasticsearches/es/'
-        self.query_url = query_url.strip().rstrip('/') + '/'
+        base_url = kwargs['hosts'][0]['host']
+        if 'port' in kwargs and kwargs['port'] is not '':
+            base_url = '{}{}{}'.format(base_url, ':',kwargs['hosts'][0]['port']).strip().rstrip('/') + '/'
+        query_url = 'amino-api/Elasticsearches/es/'
+
+        self.query_url = '{}{}{}'.format('http://', base_url.strip().rstrip('/') + '/', query_url)
 
     @staticmethod
     def merge_two_dicts(x, y):

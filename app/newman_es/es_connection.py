@@ -1,11 +1,14 @@
 from app import app
 from threading import Lock
 from app.utils.loopy import AminoElasticsearch
-
+from elasticsearch import Elasticsearch
+from elasticsearch.client import IndicesClient,ClusterClient
 from config.newman_config import elasticsearch_config, _getDefaultDataSetID, index_creator_prefix
-
+_useAES = False
 _ES = None
 _ES_LOCK = Lock()
+
+#"hosts" : [{"host" : "amino3.vbox.keyw", "port" : ""}],
 
 def es():
     global _ES
@@ -17,8 +20,10 @@ def es():
 
     _ES_LOCK.acquire()
     try:
-        _ES = AminoElasticsearch(elasticsearch_config)
-        #_ES = Elasticsearch(**elasticsearch_config())
+        if _useAES:
+            _ES = AminoElasticsearch(**elasticsearch_config())
+        else:
+            _ES = Elasticsearch(**elasticsearch_config())
     finally:
         _ES_LOCK.release()
         app.logger.info("INITIALIZED ElasticSearch connection.")
@@ -27,18 +32,25 @@ def es():
 
 
 def index_list():
-    #ic = IndicesClient(es())
-    aes = AminoElasticsearch()
-    stats = aes.stats(index="_all")
+    if _useAES:
+        ic = es()
+    else:
+        ic = IndicesClient(es())
+
+    stats = ic.stats(index="_all")
     return [index for index in stats["indices"]]
 
 def cluster_client():
-    return AminoElasticsearch()
-    #return ClusterClient(es())
+    if _useAES:
+        return es()
+    else:
+        return ClusterClient(es())
 
 def index_client():
-    return AminoElasticsearch()
-    #return IndicesClient(es())
+    if _useAES:
+        return es()
+    else:
+        return IndicesClient(es())
 
 def getDefaultDataSetID():
     default = _getDefaultDataSetID()
