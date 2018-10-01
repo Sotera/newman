@@ -11,13 +11,13 @@ class AminoElasticsearch:
     def __init__(self, **kwargs):
         # normalize url
         base_url = kwargs['hosts'][0]['host']
-        if 'port' in kwargs and kwargs['port'] is not '':
+        if 'port' in kwargs['hosts'][0] and kwargs['hosts'][0]['port'] is not '':
             base_url = '{}{}{}'.format(base_url, ':',kwargs['hosts'][0]['port']).strip().rstrip('/') + '/'
         query_url = 'amino-api/Elasticsearches/es/'
-
         self.query_url = '{}{}{}'.format('http://', base_url.strip().rstrip('/') + '/', query_url)
         self.tokenTimer = datetime.datetime.now()
-        self.myToken = self.get_token()
+        self.myToken = self.get_token(True)
+
 
     @staticmethod
     def merge_two_dicts(x, y):
@@ -90,9 +90,9 @@ class AminoElasticsearch:
         raise Exception('kwargs insufficient, exists requires index, doc_type and id')
 
     # TODO:Get rid of this...we should already have the token!
-    def get_token(self):
+    def get_token(self, force=False):
         time_delta = (datetime.datetime.now() - self.tokenTimer).total_seconds()
-        if time_delta > 3000:
+        if time_delta > 3000 or force:
             payload = {'username': 'elasticsearch', 'password': 'password'}
             self.myToken = requests.post('http://amino3.vbox.keyw/amino-api/AminoUsers/login', payload).json()['id']
             self.tokenTimer = datetime.datetime.now()
