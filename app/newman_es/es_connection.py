@@ -4,13 +4,17 @@ from app.utils.loopy import AminoElasticsearch
 from elasticsearch import Elasticsearch
 from elasticsearch.client import IndicesClient,ClusterClient
 from config.newman_config import elasticsearch_config, _getDefaultDataSetID, index_creator_prefix
-_useAES = False
+_useAES = True
 _ES = None
 _ES_LOCK = Lock()
 
+#"hosts" : [{"host" : "elasticsearch.vbox.keyw", "port" : 9200}],
 #"hosts" : [{"host" : "amino3.vbox.keyw", "port" : ""}],
 
 def es():
+    if _useAES:
+        return AminoElasticsearch(**elasticsearch_config())
+
     global _ES
 
     if _ES:
@@ -20,10 +24,7 @@ def es():
 
     _ES_LOCK.acquire()
     try:
-        if _useAES:
-            _ES = AminoElasticsearch(**elasticsearch_config())
-        else:
-            _ES = Elasticsearch(**elasticsearch_config())
+        _ES = Elasticsearch(**elasticsearch_config())
     finally:
         _ES_LOCK.release()
         app.logger.info("INITIALIZED ElasticSearch connection.")

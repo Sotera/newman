@@ -1,12 +1,13 @@
 from __future__ import print_function
 import requests
-
+import datetime
 
 class AminoElasticsearch:
     '''
     pronounced 'Loo Py', not loopy:
     A Python module that makes REST API calls to Loopback apps.
     '''
+
     def __init__(self, **kwargs):
         # normalize url
         base_url = kwargs['hosts'][0]['host']
@@ -15,6 +16,8 @@ class AminoElasticsearch:
         query_url = 'amino-api/Elasticsearches/es/'
 
         self.query_url = '{}{}{}'.format('http://', base_url.strip().rstrip('/') + '/', query_url)
+        self.tokenTimer = datetime.datetime.now()
+        self.myToken = self.get_token()
 
     @staticmethod
     def merge_two_dicts(x, y):
@@ -59,7 +62,7 @@ class AminoElasticsearch:
                 if key is 'doc_type':
                     doc_type = value + '/'
         url = '{}{}{}{}{}{}{}'.format(self.query_url, index, doc_type, verb, '?access_token=',
-                                      AminoElasticsearch.get_token(), query_string)
+                                      self.get_token(), query_string)
         if len(merged_body) == 0:
             merged_body = None
         return AminoElasticsearch._send_request(url, merged_body, method)
@@ -72,7 +75,7 @@ class AminoElasticsearch:
                 if key is 'index' and value is not '_all':
                     index = value + '/'
         method = 'GET'
-        url = '{}{}{}{}{}'.format(self.query_url, index, verb, '?access_token=', AminoElasticsearch.get_token())
+        url = '{}{}{}{}{}'.format(self.query_url, index, verb, '?access_token=', self.get_token())
 
         return AminoElasticsearch._send_request(url, None, method)
 
@@ -86,13 +89,15 @@ class AminoElasticsearch:
             return self.verb(kwargs, method='GET') is not None
         raise Exception('kwargs insufficient, exists requires index, doc_type and id')
 
-    @staticmethod
-    def get_token():
-        # TODO:Get rid of this...we should already have the token!
-        payload = {'username': 'elasticsearch', 'password': 'password'}
-        token = requests.post('http://amino3.vbox.keyw/amino-api/AminoUsers/login', payload).json()['id']
+    # TODO:Get rid of this...we should already have the token!
+    def get_token(self):
+        time_delta = (datetime.datetime.now() - self.tokenTimer).total_seconds()
+        if time_delta > 3000:
+            payload = {'username': 'elasticsearch', 'password': 'password'}
+            self.myToken = requests.post('http://amino3.vbox.keyw/amino-api/AminoUsers/login', payload).json()['id']
+            self.tokenTimer = datetime.datetime.now()
 
-        return token
+        return self.myToken
 
     @staticmethod
     def post(url, json, method='POST'):

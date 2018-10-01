@@ -8,7 +8,7 @@
   "default_timeline_span": 200,
 
   "elasticsearch_config": {
-    "hosts" : [{"host" : "elasticsearch", "port" : 9200}],
+    "hosts" : [{"host" : "amino3", "port" : "3000"}],
     "maxsize" : 25,
     "timeout" : 3600
   },
