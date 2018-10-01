@@ -10,11 +10,11 @@ class AminoElasticsearch:
 
     def __init__(self, **kwargs):
         # normalize url
-        base_url = kwargs['hosts'][0]['host']
+        self.base_url = 'http://' + kwargs['hosts'][0]['host']
         if 'port' in kwargs['hosts'][0] and kwargs['hosts'][0]['port'] is not '':
-            base_url = '{}{}{}'.format(base_url, ':',kwargs['hosts'][0]['port']).strip().rstrip('/') + '/'
+            self.base_url = '{}{}{}'.format(self.base_url, ':',kwargs['hosts'][0]['port']).strip().rstrip('/') + '/'
         query_url = 'amino-api/Elasticsearches/es/'
-        self.query_url = '{}{}{}'.format('http://', base_url.strip().rstrip('/') + '/', query_url)
+        self.query_url = '{}{}'.format(self.base_url.strip().rstrip('/') + '/', query_url)
         self.tokenTimer = datetime.datetime.now()
         self.myToken = self.get_token(True)
 
@@ -94,7 +94,8 @@ class AminoElasticsearch:
         time_delta = (datetime.datetime.now() - self.tokenTimer).total_seconds()
         if time_delta > 3000 or force:
             payload = {'username': 'elasticsearch', 'password': 'password'}
-            self.myToken = requests.post('http://amino3.vbox.keyw/amino-api/AminoUsers/login', payload).json()['id']
+            self.myToken = requests.post('{}{}'.format(self.base_url.strip().rstrip('/') +
+                                                       '/','amino-api/AminoUsers/login'), payload).json()['id']
             self.tokenTimer = datetime.datetime.now()
 
         return self.myToken
