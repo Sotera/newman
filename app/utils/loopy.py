@@ -58,7 +58,8 @@ class AminoElasticsearch:
                     merged_body[key] = value
                 if key is 'doc_type':
                     doc_type = value + '/'
-        url = self.query_url + index + doc_type + verb + '?access_token=' + AminoElasticsearch.get_token() + query_string
+        url = '{}{}{}{}{}{}{}'.format(self.query_url, index, doc_type, verb, '?access_token=',
+                                      AminoElasticsearch.get_token(), query_string)
         if len(merged_body) == 0:
             merged_body = None
         return AminoElasticsearch._send_request(url, merged_body, method)
@@ -71,7 +72,7 @@ class AminoElasticsearch:
                 if key is 'index' and value is not '_all':
                     index = value + '/'
         method = 'GET'
-        url = self.query_url + index + verb + '?access_token=' + AminoElasticsearch.get_token()
+        url = '{}{}{}{}{}'.format(self.query_url, index, verb, '?access_token=', AminoElasticsearch.get_token())
 
         return AminoElasticsearch._send_request(url, None, method)
 
@@ -87,6 +88,7 @@ class AminoElasticsearch:
 
     @staticmethod
     def get_token():
+        # TODO:Get rid of this...we should already have the token!
         payload = {'username': 'elasticsearch', 'password': 'password'}
         token = requests.post('http://amino3.vbox.keyw/amino-api/AminoUsers/login', payload).json()['id']
 
