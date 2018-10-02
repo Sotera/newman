@@ -33,7 +33,7 @@ class AminoElasticsearch:
     def verb(self, kwargs, verb='_search', method='POST', return_result=False):
         index = ''
         merged_body = {}
-        query_string = ''
+        params = {}
         doc_type = ''
 
         if kwargs is not None:
@@ -54,22 +54,24 @@ class AminoElasticsearch:
                 if key is 'from_':
                     merged_body['from'] = value
                 if key is 'request_cache':
-                    query_string += '&request_cache=' + value
+                    params['request_cache'] = value
                 if key is 'fielddata_fields':
-                    query_string += '&fielddata_fields=' + value
+                    params['fielddata_fields'] = value
                 if key is 'fields':
-                    query_string += '&fielddata_fields=' + value
+                    params['fields'] = value
                 if key is 'completion_fields':
-                    query_string += '&completion_fields=' + value
+                    params['completion_fields'] = value
                 if key is 'size':
                     merged_body[key] = value
                 if key is 'doc_type':
                     doc_type = value + '/'
-        url = '{}{}{}{}{}{}{}'.format(self.query_url, index, doc_type, verb, '?access_token=',
-                                      self.get_token(), query_string)
+
+                params['access_token'] = self.get_token()
+
+        url = '{}{}{}{}'.format(self.query_url, index, doc_type, verb)
         if len(merged_body) == 0:
             merged_body = None
-        return AminoElasticsearch._send_request(url, merged_body, method, return_result)
+        return AminoElasticsearch._send_request(url, merged_body, method, return_result, params=params)
 
     def stats(self, **kwargs):
         index = ''
@@ -79,9 +81,9 @@ class AminoElasticsearch:
                 if key is 'index' and value is not '_all':
                     index = value + '/'
         method = 'GET'
-        url = '{}{}{}{}{}'.format(self.query_url, index, verb, '?access_token=', self.get_token())
+        url = '{}{}{}'.format(self.query_url, index, verb)
 
-        return AminoElasticsearch._send_request(url, None, method)
+        return AminoElasticsearch._send_request(url, None, method, params={'access_token': self.get_token()})
 
     def get_document(self, **kwargs):
         if kwargs is not None and 'id' in kwargs and 'doc_type' in kwargs and 'index' in kwargs:
@@ -106,7 +108,6 @@ class AminoElasticsearch:
                     result.content))
         raise Exception('kwargs insufficient, exists requires index, doc_type, id and body')
 
-    # TODO:Get rid of this...we should already have the token!
     def get_token(self, force=False):
         if force or 'aminoToken' not in session:
             payload = {'username': session['aminoUser'], 'password': 'password'}
@@ -130,8 +131,9 @@ class AminoElasticsearch:
         return AminoElasticsearch._send_request(url, json=None, method='GET')
 
     @staticmethod
-    def _send_request(url, json, method='POST', return_result=False):
-        result = requests.request(method, url, json=json)
+    def _send_request(url, json, method='POST', return_result=False, params=None):
+        result = requests.request(method, url, json=json, params=params)
+        # TODO: check for auth failure here and retry with new token?
         if return_result:
             return result
         if result.status_code == 200:
