@@ -1,6 +1,5 @@
 from __future__ import print_function
 import requests
-import datetime
 from flask import session
 
 class AminoElasticsearch:
@@ -71,7 +70,18 @@ class AminoElasticsearch:
         url = '{}{}{}{}'.format(self.query_url, index, doc_type, verb)
         if len(merged_body) == 0:
             merged_body = None
-        return AminoElasticsearch._send_request(url, merged_body, method, return_result, params=params)
+
+        result = requests.request(method, url, json=merged_body, params=params)
+        if result.status_code == 200 or result.status_code == 201:
+            return result if return_result else result.json()
+        if result.status_code == 401:
+            params['access_token'] = self.get_token(True)
+            print("Access token error, attempting to refresh auth token and try again.")
+            result = requests.request(method, url, json=merged_body, params=params)
+        if not return_result and (result.status_code != 200 or result.status_code == 201):
+            print(result.content)
+            raise Exception('{} to {} failed: {}'.format(method.upper(), url, result.content))
+        return result if return_result else result.json()
 
     def stats(self, **kwargs):
         index = ''
@@ -83,7 +93,16 @@ class AminoElasticsearch:
         method = 'GET'
         url = '{}{}{}'.format(self.query_url, index, verb)
 
-        return AminoElasticsearch._send_request(url, None, method, params={'access_token': self.get_token()})
+        result = requests.request(method, url, params={'access_token': self.get_token()})
+        if result.status_code == 200:
+            return result.json()
+        if result.status_code == 401:
+            print("Access token error, attempting to refresh auth token and try again.")
+            result = requests.request(method, url, params={'access_token': self.get_token(True)})
+        if result.status_code != 200:
+            print(result.content)
+            raise Exception('{} to {} failed: {}'.format(method.upper(), url, result.content))
+        return result.json()
 
     def get_document(self, **kwargs):
         if kwargs is not None and 'id' in kwargs and 'doc_type' in kwargs and 'index' in kwargs:
@@ -98,50 +117,13 @@ class AminoElasticsearch:
 
     def index(self, **kwargs):
         if kwargs is not None and 'id' in kwargs and 'doc_type' in kwargs and 'index' in kwargs and 'body' in kwargs:
-            result = self.verb(kwargs, method='PUT', return_result=True)
-            if result.status_code == 201:
-                return result.json()
-            else:
-                raise Exception('{} to {} failed: {}'.format(
-                    "PUT",
-                    "index",
-                    result.content))
+            return self.verb(kwargs, method='PUT')
         raise Exception('kwargs insufficient, exists requires index, doc_type, id and body')
 
     def get_token(self, force=False):
-        if force or 'aminoToken' not in session:
-            payload = {'username': session['aminoUser'], 'password': 'password'}
-            session['aminoToken'] = requests.post('{}{}'.format(self.base_url.strip().rstrip('/') +
-                                                       '/','amino-api/AminoUsers/login'), payload).json()['id']
-        return session['aminoToken']
-
-
-    @staticmethod
-    def post(url, json, method='POST'):
-        '''
-        (static) Send JSON data using specified http method (not just a POST).
-        '''
-        return AminoElasticsearch._send_request(url, json, method)
-
-    @staticmethod
-    def get(url):
-        '''
-        (static) GET json data.
-        '''
-        return AminoElasticsearch._send_request(url, json=None, method='GET')
-
-    @staticmethod
-    def _send_request(url, json, method='POST', return_result=False, params=None):
-        result = requests.request(method, url, json=json, params=params)
-        # TODO: check for auth failure here and retry with new token?
-        if return_result:
-            return result
-        if result.status_code == 200:
-            return result.json()
-        else:
-            print(result.content)
-            raise Exception('{} to {} failed: {}'.format(
-                method.upper(),
-                url,
-                result.content))
+        if force or 'amino_token' not in session:
+            payload = {'username': session['amino_user'], 'password': 'password'}
+            session['amino_token'] = requests.post('{}{}'.format(self.base_url.strip().rstrip('/') +
+                                                  '/', 'amino-api/AminoUsers/login'), payload).json()['id']
+        return session['amino_token']
 
