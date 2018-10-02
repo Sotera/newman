@@ -1,22 +1,16 @@
 from app import app
 from flask import send_from_directory
-from flask import request, redirect
+from flask import session
 import requests
+
+app.secret_key = app.config["root_context"].get('newman_secret_key')
 
 @app.route('/')
 def root():
-    # payload = {'username': 'elasticsearch', 'password': 'password'}
-    # token = requests.post('http://amino3.vbox.keyw/amino-api/AminoUsers/login',payload).json()['id']
-    # redirect_to_index = redirect('/index')
-    # response = app.make_response(redirect_to_index)
-    # response.set_cookie('aminoToken', value=token)
-    # return response
+    # TODO: get this information from the Headers
+    session['aminoUser'] = 'elasticsearch'
     return app.send_static_file('index.html')
 
-@app.route('/index')
-def index():
-    headers = request.headers
-    return app.send_static_file('index.html')
 
 @app.route('/static/<path:path>')
 def send_static(path):

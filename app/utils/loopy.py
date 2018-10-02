@@ -1,6 +1,7 @@
 from __future__ import print_function
 import requests
 import datetime
+from flask import session
 
 class AminoElasticsearch:
     '''
@@ -15,9 +16,6 @@ class AminoElasticsearch:
             self.base_url = '{}{}{}'.format(self.base_url, ':',kwargs['hosts'][0]['port']).strip().rstrip('/') + '/'
         query_url = 'amino-api/Elasticsearches/es/'
         self.query_url = '{}{}'.format(self.base_url.strip().rstrip('/') + '/', query_url)
-        self.tokenTimer = datetime.datetime.now()
-        self.myToken = self.get_token(True)
-
 
     @staticmethod
     def merge_two_dicts(x, y):
@@ -110,14 +108,12 @@ class AminoElasticsearch:
 
     # TODO:Get rid of this...we should already have the token!
     def get_token(self, force=False):
-        time_delta = (datetime.datetime.now() - self.tokenTimer).total_seconds()
-        if time_delta > 3000 or force:
-            payload = {'username': 'elasticsearch', 'password': 'password'}
-            self.myToken = requests.post('{}{}'.format(self.base_url.strip().rstrip('/') +
+        if force or 'aminoToken' not in session:
+            payload = {'username': session['aminoUser'], 'password': 'password'}
+            session['aminoToken'] = requests.post('{}{}'.format(self.base_url.strip().rstrip('/') +
                                                        '/','amino-api/AminoUsers/login'), payload).json()['id']
-            self.tokenTimer = datetime.datetime.now()
+        return session['aminoToken']
 
-        return self.myToken
 
     @staticmethod
     def post(url, json, method='POST'):
