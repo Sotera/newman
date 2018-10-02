@@ -162,8 +162,8 @@ var newman_data_source = (function () {
       _data_source_list.length = 0;
     }
 
-    var new_data_ingest = data_ingest( _data_ingest_id, _data_ingest_label );
-    _data_source_list.push( new_data_ingest );
+    /*var new_data_ingest = data_ingest( _data_ingest_id, _data_ingest_label );
+    _data_source_list.push( new_data_ingest );*/
 
     $(_dropdown_ui_jquery_id).on('shown.bs.dropdown', function (event) {
       var attr_id = $(this).attr('id');
@@ -269,7 +269,7 @@ var newman_data_source = (function () {
 
     if (!contains(new_data_source)) {
 
-      _data_source_list.splice(1, 0, new_data_source);
+      _data_source_list.splice(0, 0, new_data_source);
 
       /*
       if (_data_source_list.length == _data_source_max) {
@@ -487,6 +487,7 @@ var newman_data_source = (function () {
     return label_text;
   }
 
+  function formatBytes(a,b){if(0==a)return"0 Bytes";var c=1024,d=b||2,e=["Bytes","KB","MB","GB","TB","PB","EB","ZB","YB"],f=Math.floor(Math.log(a)/Math.log(c));return parseFloat((a/Math.pow(c,f)).toFixed(d))+" "+e[f]}
 
   function refreshUI() {
     if(debug_enabled) {
@@ -591,7 +592,7 @@ var newman_data_source = (function () {
         data_source_item_html.append(checkbox_label_html);
 
         var dataset_size_label_html = $('<label class=\"checkbox-small-clear-label width-75px\" />');
-        dataset_size_label_html.html( '&nbsp;' + element.size + '&nbsp;' );
+        dataset_size_label_html.html( '&nbsp;' + formatBytes(element.size.total.store.size_in_bytes) + '&nbsp;' );
 
         data_source_item_html.append(dataset_size_label_html);
 
@@ -628,7 +629,7 @@ var newman_data_source = (function () {
   }
 
   function getDatasetCount() {
-    return _data_source_list.length - 1;
+    return _data_source_list.length;
   }
 
   function refreshDropdownButton() {
@@ -868,7 +869,7 @@ var newman_data_source = (function () {
   function getAllSelected() {
     var selected_map = {};
 
-    if (_data_source_list && _data_source_list.length > 1) {
+    if (_data_source_list && _data_source_list.length > 0) {
       _.each(_data_source_list, function (element) {
         if (element.is_data_source === true) {
           if (element.is_selected === true) {
