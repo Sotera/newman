@@ -56,7 +56,7 @@ def _index_record(index):
             'data_set_attachment_count' : emails_attch_count,
             'data_set_datetime_min' : min_abs,
             'data_set_datetime_max' : max_abs,
-            'data_set_size': (stats["indices"][index] if not ',' in index else sizeof_fmt(stats["_all"])["total"]["store"]["size_in_bytes"])
+            'data_set_size': (sizeof_fmt(stats["indices"][index]["total"]["store"]["size_in_bytes"]) if not ',' in index else sizeof_fmt(stats["_all"]["total"]["store"]["size_in_bytes"]))
             }
 
     elastic_search.index(index=index_name, doc_type=index_name, id=index, body=dataset_stats)

@@ -487,8 +487,6 @@ var newman_data_source = (function () {
     return label_text;
   }
 
-  function formatBytes(a,b){if(0==a)return"0 Bytes";var c=1024,d=b||2,e=["Bytes","KB","MB","GB","TB","PB","EB","ZB","YB"],f=Math.floor(Math.log(a)/Math.log(c));return parseFloat((a/Math.pow(c,f)).toFixed(d))+" "+e[f]}
-
   function refreshUI() {
     if(debug_enabled) {
       //console.log('data_source_list[' + _data_source_list.length + ']');
@@ -592,7 +590,7 @@ var newman_data_source = (function () {
         data_source_item_html.append(checkbox_label_html);
 
         var dataset_size_label_html = $('<label class=\"checkbox-small-clear-label width-75px\" />');
-        dataset_size_label_html.html( '&nbsp;' + formatBytes(element.size.total.store.size_in_bytes) + '&nbsp;' );
+        dataset_size_label_html.html( '&nbsp;' + element.size + '&nbsp;' );
 
         data_source_item_html.append(dataset_size_label_html);
 
