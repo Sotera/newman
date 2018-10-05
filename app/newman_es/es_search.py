@@ -312,7 +312,7 @@ def es_get_conversation(data_set_id, sender, recipients, start_datetime, end_dat
     #start_datetime = default_min_timeline_bound()
     
     # apply query with address intersection behavior
-    query  = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, qs='', date_bounds=(current_datetime, end_datetime), sort_order='acs', date_mode_inclusive=True, address_filter_mode="conversation")
+    query  = _build_email_query(sender_addrs=[sender], recipient_addrs=recipients, qs='', date_bounds=(current_datetime, end_datetime), sort_order='asc', date_mode_inclusive=True, address_filter_mode="conversation")
     app.logger.debug("query-after: %s" % (query))
     emails_asc = _query_emails(data_set_id, query, size)
 
