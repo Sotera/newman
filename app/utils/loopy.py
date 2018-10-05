@@ -123,7 +123,12 @@ class AminoElasticsearch:
     def get_token(self, force=False):
         if force or 'amino_token' not in session:
             payload = {'username': session['amino_user'], 'password': 'password'}
-            session['amino_token'] = requests.post('{}{}'.format(self.base_url.strip().rstrip('/') +
-                                                  '/', 'amino-api/AminoUsers/login'), payload).json()['id']
+            url = '{}{}'.format(self.base_url.strip().rstrip('/') + '/', 'amino-api/AminoUsers/login')
+            response = requests.post(url, payload)
+            if response.status_code is not 200:
+                raise Exception('{} to {} failed: {}'.format('POST', url, response.content))
+            session['amino_token'] = response.json()['id']
+
         return session['amino_token']
+
 

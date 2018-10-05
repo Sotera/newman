@@ -1,13 +1,14 @@
 from app import app
 from flask import send_from_directory
 from flask import session, request
+import os
 
-
+DEFAULT_USER = os.getenv("DEFAULT_USER")
 app.secret_key = app.config["root_context"].get('secret_key')
 
 
 def validate_user():
-    username = app.config["root_context"].get('default_user') if 'username' not in request.headers else request.headers['username']
+    username = DEFAULT_USER if 'username' not in request.headers else request.headers['username']
     amino_user = None if 'aminoUser' not in session else session['aminoUser']
 
     if username is not amino_user or amino_user is None:
