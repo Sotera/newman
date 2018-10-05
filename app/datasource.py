@@ -15,12 +15,14 @@ from param_utils import parseParamDatetime, parseParamEmailAddressList, parsePar
 # Refactor Split this class into es_datasource and datasource
 # TODO
 
+
 def sizeof_fmt(num, suffix='B'):
     for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
         if abs(num) < 1024.0:
             return "%3.1f%s%s" % (num, unit, suffix)
         num /= 1024.0
     return "%.1f%s%s" % (num, 'Yi', suffix)
+
 
 def _index_record(index):
     index_name = "dataset_stats"
@@ -29,7 +31,7 @@ def _index_record(index):
     # if using AES swap the comments below
     if elastic_search.exists(index=index_name, doc_type=index_name, id=index):
         dataset_stats = elastic_search.get_document(index=index_name, doc_type=index_name, id=index)
-        #dataset_stats = elastic_search.get(index=index_name, doc_type=index_name, id=index)
+        # dataset_stats = elastic_search.get(index=index_name, doc_type=index_name, id=index)
         return dataset_stats['_source']
 
     app.logger.debug("Selected index: %s" % (str(index)))
@@ -56,7 +58,7 @@ def _index_record(index):
             'data_set_attachment_count' : emails_attch_count,
             'data_set_datetime_min' : min_abs,
             'data_set_datetime_max' : max_abs,
-            'data_set_size': (sizeof_fmt(stats["indices"][index]["total"]["store"]["size_in_bytes"]) if not ',' in index else sizeof_fmt(stats["_all"]["total"]["store"]["size_in_bytes"]))
+            'data_set_size': sizeof_fmt(stats["indices"][index]["total"]["store"]["size_in_bytes"] if not ',' in index else stats["_all"]["total"]["store"]["size_in_bytes"])
             }
 
     elastic_search.index(index=index_name, doc_type=index_name, id=index, body=dataset_stats)
@@ -67,7 +69,7 @@ def listAllDataSet():
     # Ignore index keys in ES that are not in the newman_app.conf
     # Find all the indexes that begin with the index loader prefix
 
-    indexes = [ _index_record(index) for index in index_list() if active_dataset(index) ]
+    indexes = [_index_record(index) for index in index_list() if active_dataset(index)]
 
     # email_addrs = get_ranked_email_address_from_email_addrs_index(data_set_id, start_datetime, end_datetime, size)["emails"]
     # email_addrs = {email_addr[0]:email_addr for email_addr in email_addrs}
@@ -82,11 +84,13 @@ def listAllDataSet():
         # }
     }
 
+
 #GET /all
 @app.route('/datasource/all')
 def getAll():
     app.logger.info("Request headers: {}".format(request.headers.environ))
     return jsonify(listAllDataSet())
+
 
 #GET /dataset/<id>
 @app.route('/datasource/dataset/<string:datasetname>')
@@ -95,9 +99,10 @@ def setSelectedDataSet(datasetname):
     if not data_set_id:
         raise BadRequest("Request is missing data_set_id param.")
 
-    resp = initialize_email_addr_cache(data_set_id)
+    initialize_email_addr_cache(data_set_id)
 
     return jsonify(_index_record(data_set_id))
+
 
 #GET /summary?data_set_id<ds list>&email_address=<email_address_list>&qs=qs
 @app.route('/datasource/summary')
@@ -115,11 +120,9 @@ def summary():
     '''
     data_set_ids, start_datetime, end_datetime, size, _from = parseParamDatetime(request.args)
 
-
     qs = parseParamTextQuery(request.args)
     email_address_list = parseParamEmailAddressList(request.args)
     encrypted = parseParamEncrypted(request.args)
-
 
     def _ds_stat(data_set_id):
         data_set_summary = {}
