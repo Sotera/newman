@@ -14,15 +14,6 @@
     "timeout" : 3600
   },
 
-  "tile_cache_config": {
-    "host" : "localhost",
-    "port" : 5984,
-    "database" : "offline-tiles",
-    "cache_only" : false,
-    "advance_mode" : false,
-    "cache_override" : true
-  },
-
   "index_creator_defaults" : {
     "prefix" : "_emails_",
     "default_timeline_interval": "weeks",
