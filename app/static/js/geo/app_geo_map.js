@@ -1410,8 +1410,8 @@ var app_geo_map = (function () {
     // create the tile layer with attribution
     if (!map_tile_layer) {
 
-      map_tile_layer_url = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-      map_tile_layer_attribute = 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+      map_tile_layer_url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+      map_tile_layer_attribute = 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors';
 
       map_tile_layer = new L.TileLayer(
         map_tile_layer_url,
