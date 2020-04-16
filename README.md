@@ -1,7 +1,8 @@
 # Newman
 
-A tool to quickly analyze and explore email using advanced
-analytics and visulaization techniques - things not possible with
+Email is a challenge to visualize. The Newman tool and accompanying analytics contain a processing component, email analytics, visualization and discovery tools.
+
+Newman can quickly analyze and explore email using analytics and visulaization techniques - things not possible with
 traditional email applications.
 
 Checkout the **Quick Start** at [http://sotera.github.io/newman/](http://sotera.github.io/newman/)
