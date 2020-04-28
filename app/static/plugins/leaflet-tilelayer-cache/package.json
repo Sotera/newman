@@ -23,6 +23,6 @@
   "devDependencies": {},
   "dependencies": {
     "leaflet": "^0.7.3",
-    "pouchdb": "^5.2.1"
+    "pouchdb": "^6.0.5"
   }
 }
