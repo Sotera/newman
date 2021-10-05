@@ -16,3 +16,5 @@ repository_url: https://github.com/Sotera/newman
 show_downloads: true
 zip_url: https://github.com/Sotera/newman/zipball/master
 tar_url: https://github.com/Sotera/newman/tarball/master
+
+theme: jekyll-theme-hacker
